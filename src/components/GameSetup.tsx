@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, Users, TrendingUp, TrendingDown } from "lucide-react";
 import { Player, Game } from "@/types/poker";
+import { useGameData } from "@/hooks/useGameData";
+import { useToast } from "@/hooks/use-toast";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -12,45 +15,52 @@ interface GameSetupProps {
 
 const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const [buyInAmount, setBuyInAmount] = useState<number>(100);
-  const [players, setPlayers] = useState<Omit<Player, 'buyIns' | 'finalStack' | 'netAmount'>[]>([
-    { id: '1', name: '', phone: '' }
-  ]);
+  const [newPlayerName, setNewPlayerName] = useState<string>('');
+  const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
+  const { players, loading, createOrFindPlayer, createGame } = useGameData();
+  const { toast } = useToast();
 
-  const addPlayer = () => {
-    setPlayers([...players, { 
-      id: Date.now().toString(), 
-      name: '', 
-      phone: '' 
-    }]);
+  const addNewPlayer = async () => {
+    if (!newPlayerName.trim()) return;
+    
+    try {
+      const player = await createOrFindPlayer(newPlayerName.trim());
+      
+      if (!selectedPlayers.find(p => p.id === player.id)) {
+        setSelectedPlayers([...selectedPlayers, player]);
+      }
+      setNewPlayerName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add player",
+        variant: "destructive"
+      });
+    }
   };
 
-  const removePlayer = (id: string) => {
-    setPlayers(players.filter(p => p.id !== id));
+  const selectExistingPlayer = (player: Player) => {
+    if (!selectedPlayers.find(p => p.id === player.id)) {
+      setSelectedPlayers([...selectedPlayers, player]);
+    }
   };
 
-  const updatePlayer = (id: string, field: string, value: string) => {
-    setPlayers(players.map(p => 
-      p.id === id ? { ...p, [field]: value } : p
-    ));
+  const removeSelectedPlayer = (playerId: string) => {
+    setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
   };
 
-  const startGame = () => {
-    const validPlayers = players.filter(p => p.name.trim());
-    if (validPlayers.length >= 2 && buyInAmount > 0) {
-      const gameId = Date.now().toString();
-      const game: Game = {
-        id: gameId,
-        date: new Date().toISOString(),
-        buyInAmount,
-        players: validPlayers.map(p => ({
-          ...p,
-          buyIns: 1,
-          finalStack: 0,
-          netAmount: 0
-        })),
-        isComplete: false
-      };
-      onGameStart(game);
+  const startGame = async () => {
+    if (selectedPlayers.length >= 2 && buyInAmount > 0) {
+      try {
+        const game = await createGame(buyInAmount, selectedPlayers);
+        onGameStart(game);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create game",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -85,58 +95,115 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
         </Card>
 
         <Card className="bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-poker-gold">Players</CardTitle>
-            <Button 
-              onClick={addPlayer}
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Player
-            </Button>
+          <CardHeader>
+            <CardTitle className="text-poker-gold">Add New Player</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {players.map((player, index) => (
-              <div key={player.id} className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <Label>Name</Label>
-                  <Input
-                    value={player.name}
-                    onChange={(e) => updatePlayer(player.id, 'name', e.target.value)}
-                    placeholder={`Player ${index + 1}`}
-                    className="bg-input border-border"
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label>Phone (optional)</Label>
-                  <Input
-                    value={player.phone}
-                    onChange={(e) => updatePlayer(player.id, 'phone', e.target.value)}
-                    placeholder="Phone number"
-                    className="bg-input border-border"
-                  />
-                </div>
-                {players.length > 1 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => removePlayer(player.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+          <CardContent>
+            <div className="flex gap-4">
+              <Input
+                value={newPlayerName}
+                onChange={(e) => setNewPlayerName(e.target.value)}
+                placeholder="Enter player name"
+                className="bg-input border-border"
+                onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
+              />
+              <Button 
+                onClick={addNewPlayer}
+                disabled={!newPlayerName.trim()}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
+        {!loading && players.length > 0 && (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Select from Previous Players
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {players
+                  .filter(p => !selectedPlayers.find(sp => sp.id === p.id))
+                  .map((player) => (
+                  <div 
+                    key={player.id} 
+                    className="p-3 bg-secondary rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors"
+                    onClick={() => selectExistingPlayer(player)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {player.total_games} games
+                        </Badge>
+                        <Badge 
+                          variant={player.total_profit >= 0 ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {player.total_profit >= 0 ? (
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3 mr-1" />
+                          )}
+                          ${Math.abs(player.total_profit).toFixed(0)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {selectedPlayers.length > 0 && (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-poker-gold">Selected Players ({selectedPlayers.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {selectedPlayers.map((player) => (
+                  <div key={player.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold">{player.name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {player.total_games} games
+                      </Badge>
+                      <Badge 
+                        variant={player.total_profit >= 0 ? "default" : "destructive"}
+                        className="text-xs"
+                      >
+                        {player.total_profit >= 0 ? '+' : ''}${player.total_profit.toFixed(0)}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeSelectedPlayer(player.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Button 
           onClick={startGame}
-          disabled={players.filter(p => p.name.trim()).length < 2 || buyInAmount <= 0}
+          disabled={selectedPlayers.length < 2 || buyInAmount <= 0}
           className="w-full bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3"
         >
-          Start Game
+          Start Game ({selectedPlayers.length} players)
         </Button>
       </div>
     </div>

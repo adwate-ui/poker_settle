@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Game, Player, Settlement } from "@/types/poker";
+import { Game, GamePlayer, Settlement } from "@/types/poker";
 import PlayerCard from "./PlayerCard";
 import { ArrowLeft, Calculator, DollarSign } from "lucide-react";
+import { useGameData } from "@/hooks/useGameData";
 
 interface GameDashboardProps {
   game: Game;
@@ -13,24 +14,31 @@ interface GameDashboardProps {
 const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps) => {
   const [game, setGame] = useState(initialGame);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
+  const { updateGamePlayer } = useGameData();
 
-  const updatePlayer = (playerId: string, updates: Partial<Player>) => {
-    setGame(prev => ({
-      ...prev,
-      players: prev.players.map(p => 
-        p.id === playerId ? { ...p, ...updates } : p
-      )
-    }));
+  const updatePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
+    try {
+      await updateGamePlayer(gamePlayerId, updates);
+      
+      setGame(prev => ({
+        ...prev,
+        game_players: prev.game_players.map(gp => 
+          gp.id === gamePlayerId ? { ...gp, ...updates } : gp
+        )
+      }));
+    } catch (error) {
+      console.error('Error updating player:', error);
+    }
   };
 
   const calculateSettlements = () => {
-    const players = game.players.map(p => ({
-      ...p,
-      netAmount: p.finalStack - (p.buyIns * game.buyInAmount)
+    const players = game.game_players.map(gp => ({
+      ...gp,
+      net_amount: gp.final_stack - (gp.buy_ins * game.buy_in_amount)
     }));
 
-    const winners = players.filter(p => p.netAmount > 0).sort((a, b) => b.netAmount - a.netAmount);
-    const losers = players.filter(p => p.netAmount < 0).sort((a, b) => a.netAmount - b.netAmount);
+    const winners = players.filter(p => p.net_amount > 0).sort((a, b) => b.net_amount - a.net_amount);
+    const losers = players.filter(p => p.net_amount < 0).sort((a, b) => a.net_amount - b.net_amount);
 
     const newSettlements: Settlement[] = [];
     let winnerIndex = 0;
@@ -39,20 +47,20 @@ const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps)
     while (winnerIndex < winners.length && loserIndex < losers.length) {
       const winner = winners[winnerIndex];
       const loser = losers[loserIndex];
-      const amount = Math.min(winner.netAmount, Math.abs(loser.netAmount));
+      const amount = Math.min(winner.net_amount, Math.abs(loser.net_amount));
 
       if (amount > 0) {
         newSettlements.push({
-          from: loser.name,
-          to: winner.name,
+          from: loser.player.name,
+          to: winner.player.name,
           amount: amount
         });
 
-        winner.netAmount -= amount;
-        loser.netAmount += amount;
+        winner.net_amount -= amount;
+        loser.net_amount += amount;
 
-        if (winner.netAmount <= 0.01) winnerIndex++;
-        if (Math.abs(loser.netAmount) <= 0.01) loserIndex++;
+        if (winner.net_amount <= 0.01) winnerIndex++;
+        if (Math.abs(loser.net_amount) <= 0.01) loserIndex++;
       }
     }
 
@@ -61,12 +69,12 @@ const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps)
 
   useEffect(() => {
     calculateSettlements();
-  }, [game.players]);
+  }, [game.game_players]);
 
-  const totalPot = game.players.reduce((sum, p) => sum + (p.buyIns * game.buyInAmount), 0);
-  const totalStacks = game.players.reduce((sum, p) => sum + p.finalStack, 0);
-  const totalProfit = game.players.reduce((sum, p) => sum + Math.max(0, p.finalStack - (p.buyIns * game.buyInAmount)), 0);
-  const totalLoss = game.players.reduce((sum, p) => sum + Math.min(0, p.finalStack - (p.buyIns * game.buyInAmount)), 0);
+  const totalPot = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
+  const totalStacks = game.game_players.reduce((sum, gp) => sum + gp.final_stack, 0);
+  const totalProfit = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.final_stack - (gp.buy_ins * game.buy_in_amount)), 0);
+  const totalLoss = game.game_players.reduce((sum, gp) => sum + Math.min(0, gp.final_stack - (gp.buy_ins * game.buy_in_amount)), 0);
 
   return (
     <div className="min-h-screen bg-gradient-dark p-4">
@@ -85,7 +93,7 @@ const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps)
               Poker Game Tracker
             </h1>
             <p className="text-muted-foreground">
-              {new Date(game.date).toLocaleDateString()} • Buy-in: ${game.buyInAmount}
+              {new Date(game.date).toLocaleDateString()} • Buy-in: ${game.buy_in_amount}
             </p>
           </div>
           <div className="w-24" /> {/* Spacer for centering */}
@@ -123,11 +131,11 @@ const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps)
 
         {/* Players */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {game.players.map(player => (
+          {game.game_players.map(gamePlayer => (
             <PlayerCard
-              key={player.id}
-              player={player}
-              buyInAmount={game.buyInAmount}
+              key={gamePlayer.id}
+              gamePlayer={gamePlayer}
+              buyInAmount={game.buy_in_amount}
               onUpdatePlayer={updatePlayer}
             />
           ))}
