@@ -8,33 +8,49 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Poker-themed color palette */
+    --background: 220 26% 8%;
+    --foreground: 60 30% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 22% 12%;
+    --card-foreground: 60 30% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 22% 12%;
+    --popover-foreground: 60 30% 96%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Poker table green as primary */
+    --primary: 142 76% 36%;
+    --primary-foreground: 220 26% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 60 30% 96%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 20% 18%;
+    --accent-foreground: 60 30% 96%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 20% 20%;
+    --input: 220 20% 16%;
+    --ring: 142 76% 36%;
+
+    /* Custom poker theme tokens */
+    --poker-green: 142 76% 36%;
+    --poker-gold: 45 86% 58%;
+    --poker-felt: 142 40% 25%;
+    --chip-red: 0 84% 60%;
+    --chip-blue: 220 91% 56%;
+    --money-green: 142 71% 45%;
+    --money-red: 0 84% 60%;
+
+    /* Gradients */
+    --gradient-poker: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 40% 25%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 86% 58%), hsl(38 92% 50%));
+    --gradient-dark: linear-gradient(180deg, hsl(220 26% 8%), hsl(220 22% 12%));
 
     --radius: 0.5rem;
 

@@ -57,6 +57,25 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom poker theme colors
+        poker: {
+          green: "hsl(var(--poker-green))",
+          gold: "hsl(var(--poker-gold))",
+          felt: "hsl(var(--poker-felt))",
+        },
+        chip: {
+          red: "hsl(var(--chip-red))",
+          blue: "hsl(var(--chip-blue))",
+        },
+        money: {
+          green: "hsl(var(--money-green))",
+          red: "hsl(var(--money-red))",
+        },
+      },
+      backgroundImage: {
+        'gradient-poker': 'var(--gradient-poker)',
+        'gradient-gold': 'var(--gradient-gold)',
+        'gradient-dark': 'var(--gradient-dark)',
       },
       borderRadius: {
         lg: "var(--radius)",
