@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Users, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Trash2, Users, TrendingUp, TrendingDown, History, Calendar } from "lucide-react";
 import { Player, Game } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
 import { useToast } from "@/hooks/use-toast";
@@ -17,15 +17,31 @@ const GameSetup = ({
   const [buyInAmount, setBuyInAmount] = useState<number>(100);
   const [newPlayerName, setNewPlayerName] = useState<string>('');
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
+  const [canCreateGame, setCanCreateGame] = useState<boolean>(true);
   const {
     players,
+    games,
     loading,
     createOrFindPlayer,
-    createGame
+    createGame,
+    deletePlayer,
+    hasIncompleteGame
   } = useGameData();
   const {
     toast
   } = useToast();
+
+  useEffect(() => {
+    const checkIncompleteGame = async () => {
+      try {
+        const hasIncomplete = await hasIncompleteGame();
+        setCanCreateGame(!hasIncomplete);
+      } catch (error) {
+        console.error('Error checking incomplete games:', error);
+      }
+    };
+    checkIncompleteGame();
+  }, [hasIncompleteGame]);
   const addNewPlayer = async () => {
     if (!newPlayerName.trim()) return;
     try {
@@ -50,8 +66,21 @@ const GameSetup = ({
   const removeSelectedPlayer = (playerId: string) => {
     setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
   };
+  const handleDeletePlayer = async (playerId: string) => {
+    try {
+      await deletePlayer(playerId);
+      setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete player",
+        variant: "destructive"
+      });
+    }
+  };
+
   const startGame = async () => {
-    if (selectedPlayers.length >= 2 && buyInAmount > 0) {
+    if (selectedPlayers.length >= 2 && buyInAmount > 0 && canCreateGame) {
       try {
         const game = await createGame(buyInAmount, selectedPlayers);
         onGameStart(game);
@@ -111,18 +140,23 @@ const GameSetup = ({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {players.filter(p => !selectedPlayers.find(sp => sp.id === p.id)).map(player => <div key={player.id} className="p-3 bg-secondary rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => selectExistingPlayer(player)}>
+                {players.filter(p => !selectedPlayers.find(sp => sp.id === p.id)).map(player => <div key={player.id} className="p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">{player.name}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {player.total_games} games
-                        </Badge>
-                        <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
-                          {player.total_profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                          ${Math.abs(player.total_profit).toFixed(0)}
-                        </Badge>
+                      <div className="flex items-center gap-3 cursor-pointer" onClick={() => selectExistingPlayer(player)}>
+                        <span className="font-semibold">{player.name}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {player.total_games} games
+                          </Badge>
+                          <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
+                            {player.total_profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                            ${Math.abs(player.total_profit).toFixed(0)}
+                          </Badge>
+                        </div>
                       </div>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeletePlayer(player.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>)}
               </div>
@@ -153,7 +187,60 @@ const GameSetup = ({
             </CardContent>
           </Card>}
 
-        <Button onClick={startGame} disabled={selectedPlayers.length < 2 || buyInAmount <= 0} className="w-full bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
+        {!canCreateGame && (
+          <Card className="bg-destructive/10 border-destructive/20">
+            <CardContent className="pt-6">
+              <p className="text-destructive text-center">
+                You have an incomplete game. Please complete it before starting a new game.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {games.length > 0 && (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Game History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {games.map(game => (
+                  <div key={game.id} className="p-4 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-semibold">
+                        {new Date(game.date).toLocaleDateString()}
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        Buy-in: Rs.{game.buy_in_amount}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {game.game_players.map(gp => (
+                        <div key={gp.id} className="flex items-center justify-between p-2 bg-background rounded">
+                          <span className="font-medium">{gp.player.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
+                            </Badge>
+                            <Badge variant={gp.net_amount >= 0 ? "default" : "destructive"} className="text-xs">
+                              {gp.net_amount >= 0 ? '+' : ''}Rs.{gp.net_amount.toFixed(0)}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Button onClick={startGame} disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} className="w-full bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
           Start Game ({selectedPlayers.length} players)
         </Button>
       </div>

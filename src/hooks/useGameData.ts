@@ -4,6 +4,7 @@ import { Player, Game, GamePlayer } from '@/types/poker';
 
 export const useGameData = () => {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPlayers = async () => {
@@ -92,16 +93,102 @@ export const useGameData = () => {
     if (error) throw error;
   };
 
+  const deletePlayer = async (playerId: string) => {
+    const { error } = await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId);
+
+    if (error) throw error;
+    await fetchPlayers();
+  };
+
+  const fetchGames = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('games')
+        .select(`
+          *,
+          game_players(
+            *,
+            player:players(*)
+          )
+        `)
+        .eq('is_complete', true)
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      setGames(data || []);
+    } catch (error) {
+      console.error('Error fetching games:', error);
+    }
+  };
+
+  const addPlayerToGame = async (gameId: string, player: Player): Promise<GamePlayer> => {
+    const gamePlayerData = {
+      game_id: gameId,
+      player_id: player.id,
+      buy_ins: 1,
+      final_stack: 0,
+      net_amount: 0
+    };
+
+    const { data: gamePlayer, error } = await supabase
+      .from('game_players')
+      .insert(gamePlayerData)
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .single();
+
+    if (error) throw error;
+    return gamePlayer as GamePlayer;
+  };
+
+  const completeGame = async (gameId: string, gamePlayers: GamePlayer[]) => {
+    // Check if total net amounts sum to zero
+    const totalNet = gamePlayers.reduce((sum, gp) => sum + (gp.net_amount || 0), 0);
+    if (Math.abs(totalNet) > 0.01) { // Allow for small floating point errors
+      throw new Error('Total winnings and losses must sum to zero before completing the game');
+    }
+
+    const { error } = await supabase
+      .from('games')
+      .update({ is_complete: true })
+      .eq('id', gameId);
+
+    if (error) throw error;
+  };
+
+  const hasIncompleteGame = async (): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('games')
+      .select('id')
+      .eq('is_complete', false)
+      .limit(1);
+
+    if (error) throw error;
+    return (data?.length || 0) > 0;
+  };
+
   useEffect(() => {
     fetchPlayers();
+    fetchGames();
   }, []);
 
   return {
     players,
+    games,
     loading,
     fetchPlayers,
+    fetchGames,
     createOrFindPlayer,
     createGame,
-    updateGamePlayer
+    updateGamePlayer,
+    deletePlayer,
+    addPlayerToGame,
+    completeGame,
+    hasIncompleteGame
   };
 };

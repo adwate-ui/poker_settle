@@ -1,168 +1,255 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Game, GamePlayer, Settlement } from "@/types/poker";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Calculator, Trophy, DollarSign, Plus, UserPlus } from "lucide-react";
+import { Game, GamePlayer, Settlement, Player } from "@/types/poker";
 import PlayerCard from "./PlayerCard";
-import { ArrowLeft, Calculator, DollarSign } from "lucide-react";
 import { useGameData } from "@/hooks/useGameData";
+import { useToast } from "@/hooks/use-toast";
 
 interface GameDashboardProps {
   game: Game;
   onBackToSetup: () => void;
 }
 
-const GameDashboard = ({ game: initialGame, onBackToSetup }: GameDashboardProps) => {
-  const [game, setGame] = useState(initialGame);
+const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
+  const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>(game.game_players);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
-  const { updateGamePlayer } = useGameData();
+  const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame } = useGameData();
+  const { toast } = useToast();
 
-  const updatePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
+  const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
     try {
       await updateGamePlayer(gamePlayerId, updates);
-      
-      setGame(prev => ({
-        ...prev,
-        game_players: prev.game_players.map(gp => 
-          gp.id === gamePlayerId ? { ...gp, ...updates } : gp
-        )
-      }));
+      setGamePlayers(prev => prev.map(gp => 
+        gp.id === gamePlayerId ? { ...gp, ...updates } : gp
+      ));
     } catch (error) {
       console.error('Error updating player:', error);
     }
   };
 
+  const addNewPlayer = async () => {
+    if (!newPlayerName.trim()) return;
+    
+    try {
+      const player = await createOrFindPlayer(newPlayerName.trim());
+      const gamePlayer = await addPlayerToGame(game.id, player);
+      setGamePlayers([...gamePlayers, gamePlayer]);
+      setNewPlayerName('');
+      setShowAddPlayer(false);
+      toast({
+        title: "Success",
+        description: "Player added to game",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add player",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const addExistingPlayer = async (player: Player) => {
+    try {
+      const gamePlayer = await addPlayerToGame(game.id, player);
+      setGamePlayers([...gamePlayers, gamePlayer]);
+      setShowAddPlayer(false);
+      toast({
+        title: "Success",
+        description: "Player added to game",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add player",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateSettlements = () => {
-    const players = game.game_players.map(gp => ({
-      ...gp,
-      net_amount: gp.final_stack - (gp.buy_ins * game.buy_in_amount)
+    const playerBalances = gamePlayers.map(gp => ({
+      name: gp.player.name,
+      balance: gp.net_amount
     }));
 
-    const winners = players.filter(p => p.net_amount > 0).sort((a, b) => b.net_amount - a.net_amount);
-    const losers = players.filter(p => p.net_amount < 0).sort((a, b) => a.net_amount - b.net_amount);
-
+    const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
+    const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
+    
     const newSettlements: Settlement[] = [];
-    let winnerIndex = 0;
-    let loserIndex = 0;
-
-    while (winnerIndex < winners.length && loserIndex < losers.length) {
-      const winner = winners[winnerIndex];
-      const loser = losers[loserIndex];
-      const amount = Math.min(winner.net_amount, Math.abs(loser.net_amount));
-
+    let creditorIndex = 0;
+    let debtorIndex = 0;
+    
+    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
+      const creditor = creditors[creditorIndex];
+      const debtor = debtors[debtorIndex];
+      
+      const amount = Math.min(creditor.balance, -debtor.balance);
+      
       if (amount > 0) {
         newSettlements.push({
-          from: loser.player.name,
-          to: winner.player.name,
+          from: debtor.name,
+          to: creditor.name,
           amount: amount
         });
-
-        winner.net_amount -= amount;
-        loser.net_amount += amount;
-
-        if (winner.net_amount <= 0.01) winnerIndex++;
-        if (Math.abs(loser.net_amount) <= 0.01) loserIndex++;
       }
+      
+      creditor.balance -= amount;
+      debtor.balance += amount;
+      
+      if (creditor.balance === 0) creditorIndex++;
+      if (debtor.balance === 0) debtorIndex++;
     }
-
+    
     setSettlements(newSettlements);
   };
 
-  useEffect(() => {
-    calculateSettlements();
-  }, [game.game_players]);
+  const handleCompleteGame = async () => {
+    try {
+      await completeGame(game.id, gamePlayers);
+      toast({
+        title: "Success",
+        description: "Game completed successfully",
+      });
+      onBackToSetup();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to complete game",
+        variant: "destructive"
+      });
+    }
+  };
 
-  const totalPot = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
-  const totalStacks = game.game_players.reduce((sum, gp) => sum + gp.final_stack, 0);
-  const totalProfit = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.final_stack - (gp.buy_ins * game.buy_in_amount)), 0);
-  const totalLoss = game.game_players.reduce((sum, gp) => sum + Math.min(0, gp.final_stack - (gp.buy_ins * game.buy_in_amount)), 0);
+  const totalPot = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
+  const totalWinnings = gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
+  const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
+  const isBalanced = Math.abs(totalWinnings + totalLosses) < 0.01;
 
   return (
     <div className="min-h-screen bg-gradient-dark p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={onBackToSetup}
-            className="bg-card border-border"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            New Game
+          <Button variant="outline" onClick={onBackToSetup} className="flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Setup
           </Button>
-          <div className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-gold bg-clip-text text-transparent">
-              Poker Game Tracker
-            </h1>
-            <p className="text-muted-foreground">
-              {new Date(game.date).toLocaleDateString()} • Buy-in: ${game.buy_in_amount}
-            </p>
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="text-sm">
+              Buy-in: Rs.{game.buy_in_amount}
+            </Badge>
+            <Badge variant="outline" className="text-sm">
+              Total Pot: Rs.{totalPot}
+            </Badge>
+            <Button variant="outline" onClick={() => setShowAddPlayer(true)} className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4" />
+              Add Player
+            </Button>
           </div>
-          <div className="w-24" /> {/* Spacer for centering */}
         </div>
 
-        {/* Game Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {showAddPlayer && (
           <Card className="bg-card border-border">
-            <CardContent className="p-4 text-center">
-              <DollarSign className="w-8 h-8 mx-auto text-poker-gold mb-2" />
-              <div className="text-2xl font-bold text-poker-gold">${totalPot}</div>
-              <div className="text-sm text-muted-foreground">Total Pot</div>
+            <CardHeader>
+              <CardTitle className="text-poker-gold">Add Player to Game</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <Input 
+                    value={newPlayerName} 
+                    onChange={(e) => setNewPlayerName(e.target.value)}
+                    placeholder="Enter player name"
+                    className="bg-input border-border"
+                    onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
+                  />
+                  <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add New
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowAddPlayer(false)}>
+                    Cancel
+                  </Button>
+                </div>
+                
+                {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Or select existing player:</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).map(player => (
+                        <Button
+                          key={player.id}
+                          variant="outline"
+                          onClick={() => addExistingPlayer(player)}
+                          className="justify-start"
+                        >
+                          {player.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="p-4 text-center">
-              <Calculator className="w-8 h-8 mx-auto text-primary mb-2" />
-              <div className="text-2xl font-bold">${totalStacks.toFixed(2)}</div>
-              <div className="text-sm text-muted-foreground">Total Stacks</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-money-green">+${totalProfit.toFixed(2)}</div>
-              <div className="text-sm text-muted-foreground">Total Winnings</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-money-red">${totalLoss.toFixed(2)}</div>
-              <div className="text-sm text-muted-foreground">Total Losses</div>
-            </CardContent>
-          </Card>
-        </div>
+        )}
 
-        {/* Players */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {game.game_players.map(gamePlayer => (
+          {gamePlayers.map((gamePlayer) => (
             <PlayerCard
               key={gamePlayer.id}
               gamePlayer={gamePlayer}
               buyInAmount={game.buy_in_amount}
-              onUpdatePlayer={updatePlayer}
+              onUpdatePlayer={handlePlayerUpdate}
             />
           ))}
         </div>
 
-        {/* Settlements */}
+        <div className="flex gap-4">
+          <Button onClick={calculateSettlements} className="bg-primary hover:bg-primary/90">
+            <Calculator className="w-4 h-4 mr-2" />
+            Calculate Settlements
+          </Button>
+          
+          {!isBalanced && (
+            <div className="flex items-center gap-2 text-destructive">
+              <span className="text-sm font-medium">
+                Total must balance to zero (Current: Rs.{(totalWinnings + totalLosses).toFixed(2)})
+              </span>
+            </div>
+          )}
+          
+          <Button 
+            onClick={handleCompleteGame} 
+            disabled={!isBalanced}
+            className="bg-gradient-poker hover:opacity-90 text-primary-foreground"
+          >
+            <Trophy className="w-4 h-4 mr-2" />
+            Complete Game
+          </Button>
+        </div>
+
         {settlements.length > 0 && (
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-poker-gold flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                Settlement Transfers
-              </CardTitle>
+              <CardTitle className="text-poker-gold">Settlement Transfers</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {settlements.map((settlement, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-secondary rounded-lg"
-                  >
-                    <span className="text-foreground">
+                  <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                    <span>
                       <span className="font-semibold">{settlement.from}</span> pays{' '}
                       <span className="font-semibold">{settlement.to}</span>
                     </span>
-                    <span className="text-lg font-bold text-poker-gold">
-                      ${settlement.amount.toFixed(2)}
+                    <span className="font-bold text-poker-gold">
+                      Rs.{settlement.amount.toFixed(2)}
                     </span>
                   </div>
                 ))}
