@@ -172,6 +172,27 @@ export const useGameData = () => {
     return (data?.length || 0) > 0;
   };
 
+  const getIncompleteGame = async (): Promise<Game | null> => {
+    const { data, error } = await supabase
+      .from('games')
+      .select(`
+        *,
+        game_players(
+          *,
+          player:players(*)
+        )
+      `)
+      .eq('is_complete', false)
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows found
+      throw error;
+    }
+    return data as Game;
+  };
+
   useEffect(() => {
     fetchPlayers();
     fetchGames();
@@ -189,6 +210,7 @@ export const useGameData = () => {
     deletePlayer,
     addPlayerToGame,
     completeGame,
-    hasIncompleteGame
+    hasIncompleteGame,
+    getIncompleteGame
   };
 };

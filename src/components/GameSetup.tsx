@@ -25,7 +25,8 @@ const GameSetup = ({
     createOrFindPlayer,
     createGame,
     deletePlayer,
-    hasIncompleteGame
+    hasIncompleteGame,
+    getIncompleteGame
   } = useGameData();
   const {
     toast
@@ -91,6 +92,27 @@ const GameSetup = ({
           variant: "destructive"
         });
       }
+    }
+  };
+
+  const continueGame = async () => {
+    try {
+      const game = await getIncompleteGame();
+      if (game) {
+        onGameStart(game);
+      } else {
+        toast({
+          title: "Error",
+          description: "No incomplete game found",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load incomplete game",
+        variant: "destructive"
+      });
     }
   };
   return <div className="min-h-screen bg-gradient-dark p-4">
@@ -240,9 +262,20 @@ const GameSetup = ({
           </Card>
         )}
 
-        <Button onClick={startGame} disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} className="w-full bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
-          Start Game ({selectedPlayers.length} players)
-        </Button>
+        <div className="flex gap-4">
+          {!canCreateGame && (
+            <Button onClick={continueGame} className="flex-1 bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
+              Continue Current Game
+            </Button>
+          )}
+          <Button 
+            onClick={startGame} 
+            disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} 
+            className={`${!canCreateGame ? 'flex-1' : 'w-full'} bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3`}
+          >
+            Start New Game ({selectedPlayers.length} players)
+          </Button>
+        </div>
       </div>
     </div>;
 };
