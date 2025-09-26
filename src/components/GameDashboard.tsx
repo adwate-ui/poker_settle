@@ -112,7 +112,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const handleCompleteGame = async () => {
     try {
-      await completeGame(game.id, gamePlayers);
+      await completeGame(game.id);
       toast({
         title: "Success",
         description: "Game completed successfully",

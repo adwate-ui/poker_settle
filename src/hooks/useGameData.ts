@@ -146,9 +146,26 @@ export const useGameData = () => {
     return gamePlayer as GamePlayer;
   };
 
-  const completeGame = async (gameId: string, gamePlayers: GamePlayer[]) => {
-    // Check if total net amounts sum to zero
-    const totalNet = gamePlayers.reduce((sum, gp) => sum + (gp.net_amount || 0), 0);
+  const completeGame = async (gameId: string) => {
+    // Fetch the latest game data to ensure we have all players including those added later
+    const { data: gameData, error: gameError } = await supabase
+      .from('games')
+      .select(`
+        *,
+        game_players(
+          *,
+          player:players(*)
+        )
+      `)
+      .eq('id', gameId)
+      .single();
+
+    if (gameError) throw gameError;
+
+    const allGamePlayers = gameData.game_players;
+    
+    // Check if total net amounts of ALL players (including those added later) sum to zero
+    const totalNet = allGamePlayers.reduce((sum: number, gp: GamePlayer) => sum + (gp.net_amount || 0), 0);
     if (Math.abs(totalNet) > 0.01) { // Allow for small floating point errors
       throw new Error('Total winnings and losses must sum to zero before completing the game');
     }
