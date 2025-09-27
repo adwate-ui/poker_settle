@@ -111,8 +111,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   };
 
   const handleCompleteGame = async () => {
+    calculateSettlements(); // Calculate settlements first
     try {
-      await completeGame(game.id);
+      await completeGame(game.id, settlements);
       toast({
         title: "Success",
         description: "Game completed successfully",
@@ -127,9 +128,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     }
   };
 
-  const totalPot = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const totalBuyIns = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
   const totalWinnings = gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
   const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
+  const totalFinalStack = gamePlayers.reduce((sum, gp) => sum + gp.final_stack, 0);
   const isBalanced = Math.abs(totalWinnings + totalLosses) < 0.01;
 
   return (
@@ -142,11 +153,26 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </Button>
           <div className="flex items-center gap-4">
             <Badge variant="outline" className="text-sm">
-              Buy-in: Rs.{game.buy_in_amount}
+              Buy-in: {formatCurrency(game.buy_in_amount)}
             </Badge>
-            <Badge variant="outline" className="text-sm">
-              Total Pot: Rs.{totalPot}
-            </Badge>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-background rounded">
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">Total Buy-ins</div>
+                <div className="font-semibold text-primary">{formatCurrency(totalBuyIns)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">Total Wins</div>
+                <div className="font-semibold text-green-400">{formatCurrency(totalWinnings)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">Total Losses</div>
+                <div className="font-semibold text-red-400">{formatCurrency(Math.abs(totalLosses))}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">Total Final Stack</div>
+                <div className="font-semibold text-poker-gold">{formatCurrency(totalFinalStack)}</div>
+              </div>
+            </div>
             <Button variant="outline" onClick={() => setShowAddPlayer(true)} className="flex items-center gap-2">
               <UserPlus className="w-4 h-4" />
               Add Player
@@ -220,7 +246,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           {!isBalanced && (
             <div className="flex items-center gap-2 text-destructive">
               <span className="text-sm font-medium">
-                Total must balance to zero (Current: Rs.{(totalWinnings + totalLosses).toFixed(2)})
+                Total must balance to zero (Current: {formatCurrency(totalWinnings + totalLosses)})
               </span>
             </div>
           )}
@@ -249,7 +275,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <span className="font-semibold">{settlement.to}</span>
                     </span>
                     <span className="font-bold text-poker-gold">
-                      Rs.{settlement.amount.toFixed(2)}
+                      {formatCurrency(settlement.amount)}
                     </span>
                   </div>
                 ))}

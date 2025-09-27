@@ -146,7 +146,7 @@ export const useGameData = () => {
     return gamePlayer as GamePlayer;
   };
 
-  const completeGame = async (gameId: string) => {
+  const completeGame = async (gameId: string, settlements: any[] = []) => {
     // Fetch the latest game data to ensure we have all players including those added later
     const { data: gameData, error: gameError } = await supabase
       .from('games')
@@ -172,10 +172,33 @@ export const useGameData = () => {
 
     const { error } = await supabase
       .from('games')
-      .update({ is_complete: true })
+      .update({ 
+        is_complete: true,
+        settlements: settlements 
+      })
       .eq('id', gameId);
 
     if (error) throw error;
+  };
+
+  const deleteGame = async (gameId: string) => {
+    // First delete all game_players entries
+    const { error: gamePlayersError } = await supabase
+      .from('game_players')
+      .delete()
+      .eq('game_id', gameId);
+
+    if (gamePlayersError) throw gamePlayersError;
+
+    // Then delete the game
+    const { error: gameError } = await supabase
+      .from('games')
+      .delete()
+      .eq('id', gameId);
+
+    if (gameError) throw gameError;
+    
+    await fetchGames();
   };
 
   const hasIncompleteGame = async (): Promise<boolean> => {
@@ -227,6 +250,7 @@ export const useGameData = () => {
     deletePlayer,
     addPlayerToGame,
     completeGame,
+    deleteGame,
     hasIncompleteGame,
     getIncompleteGame
   };
