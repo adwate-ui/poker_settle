@@ -142,6 +142,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
   const totalFinalStack = gamePlayers.reduce((sum, gp) => sum + gp.final_stack, 0);
   const isBalanced = Math.abs(totalWinnings + totalLosses) < 0.01;
+  const isStackBalanced = Math.abs(totalFinalStack - totalBuyIns) < 0.01;
+  const canCompleteGame = isBalanced && isStackBalanced;
 
   return (
     <div className="min-h-screen bg-gradient-dark p-4">
@@ -243,17 +245,24 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             Calculate Settlements
           </Button>
           
-          {!isBalanced && (
-            <div className="flex items-center gap-2 text-destructive">
-              <span className="text-sm font-medium">
-                Total must balance to zero (Current: {formatCurrency(totalWinnings + totalLosses)})
-              </span>
+          {(!isBalanced || !isStackBalanced) && (
+            <div className="flex flex-col gap-1 text-destructive">
+              {!isBalanced && (
+                <span className="text-sm font-medium">
+                  Net amounts must balance to zero (Current: {formatCurrency(totalWinnings + totalLosses)})
+                </span>
+              )}
+              {!isStackBalanced && (
+                <span className="text-sm font-medium">
+                  Total final stack must equal total buy-ins (Final: {formatCurrency(totalFinalStack)}, Buy-ins: {formatCurrency(totalBuyIns)})
+                </span>
+              )}
             </div>
           )}
           
           <Button 
             onClick={handleCompleteGame} 
-            disabled={!isBalanced}
+            disabled={!canCompleteGame}
             className="bg-gradient-poker hover:opacity-90 text-primary-foreground"
           >
             <Trophy className="w-4 h-4 mr-2" />
