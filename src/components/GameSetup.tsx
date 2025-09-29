@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Plus, Trash2, Users, TrendingUp, TrendingDown, History, Calendar, ChevronDown, ChevronUp, Search } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Users, Search, Trash2, Play, UserPlus, X, Plus, TrendingUp, TrendingDown, History, Calendar } from "lucide-react";
 import { Player, Game } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { UserProfile } from "@/components/UserProfile";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -36,7 +39,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     getIncompleteGame
   } = useGameData();
   
-  const { toast } = useToast();
+  
 
   useEffect(() => {
     const checkIncompleteGame = async () => {
@@ -78,11 +81,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
       }
       setNewPlayerName('');
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add player",
-        variant: "destructive"
-      });
+      toast.error("Failed to add player");
     }
   };
 
@@ -100,32 +99,18 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     try {
       await deletePlayer(playerId);
       setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
-      toast({
-        title: "Success",
-        description: "Player deleted successfully",
-      });
+      toast.success("Player deleted successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete player",
-        variant: "destructive"
-      });
+      toast.error("Failed to delete player");
     }
   };
 
   const handleDeleteGame = async (gameId: string) => {
     try {
       await deleteGame(gameId);
-      toast({
-        title: "Success",
-        description: "Game deleted successfully",
-      });
+      toast.success("Game deleted successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete game",
-        variant: "destructive"
-      });
+      toast.error("Failed to delete game");
     }
   };
 
@@ -135,11 +120,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
         const game = await createGame(buyInAmount, selectedPlayers);
         onGameStart(game);
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create game",
-          variant: "destructive"
-        });
+        toast.error("Failed to create game");
       }
     }
   };
@@ -150,29 +131,22 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
       if (game) {
         onGameStart(game);
       } else {
-        toast({
-          title: "Error",
-          description: "No incomplete game found",
-          variant: "destructive"
-        });
+        toast.error("No incomplete game found");
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load incomplete game",
-        variant: "destructive"
-      });
+      toast.error("Failed to load incomplete game");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-dark p-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-gold bg-clip-text text-transparent">
-            Poker Game Setup
-          </h1>
-          <p className="text-muted-foreground">Set up your poker game and add players</p>
+        <div className="flex justify-between items-center">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold text-white mb-2">Poker Game Setup</h1>
+            <p className="text-muted-foreground">Configure your game settings and select players</p>
+          </div>
+          <UserProfile />
         </div>
 
         <Card className="bg-card border-border">

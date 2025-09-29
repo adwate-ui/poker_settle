@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Calculator, Trophy, DollarSign, Plus, UserPlus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player } from "@/types/poker";
-import PlayerCard from "./PlayerCard";
+import PlayerCard from "@/components/PlayerCard";
 import { useGameData } from "@/hooks/useGameData";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { UserProfile } from "@/components/UserProfile";
 
 interface GameDashboardProps {
   game: Game;
@@ -20,7 +21,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame } = useGameData();
-  const { toast } = useToast();
+  
 
   const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
     try {
@@ -42,16 +43,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setGamePlayers([...gamePlayers, gamePlayer]);
       setNewPlayerName('');
       setShowAddPlayer(false);
-      toast({
-        title: "Success",
-        description: "Player added to game",
-      });
+      toast.success("Player added to game");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add player",
-        variant: "destructive"
-      });
+      toast.error("Failed to add player");
     }
   };
 
@@ -60,16 +54,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       const gamePlayer = await addPlayerToGame(game.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
-      toast({
-        title: "Success",
-        description: "Player added to game",
-      });
+      toast.success("Player added to game");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add player",
-        variant: "destructive"
-      });
+      toast.error("Failed to add player");
     }
   };
 
@@ -114,17 +101,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     calculateSettlements(); // Calculate settlements first
     try {
       await completeGame(game.id, settlements);
-      toast({
-        title: "Success",
-        description: "Game completed successfully",
-      });
+      toast.success("Game completed successfully");
       onBackToSetup();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to complete game",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to complete game");
     }
   };
 
@@ -147,39 +127,25 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-dark p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={onBackToSetup} className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Setup
-          </Button>
           <div className="flex items-center gap-4">
-            <Badge variant="outline" className="text-sm">
-              Buy-in: {formatCurrency(game.buy_in_amount)}
-            </Badge>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-background rounded">
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Total Buy-ins</div>
-                <div className="font-semibold text-primary">{formatCurrency(totalBuyIns)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Total Wins</div>
-                <div className="font-semibold text-green-400">{formatCurrency(totalWinnings)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Total Losses</div>
-                <div className="font-semibold text-red-400">{formatCurrency(Math.abs(totalLosses))}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Total Final Stack</div>
-                <div className="font-semibold text-poker-gold">{formatCurrency(totalFinalStack)}</div>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => setShowAddPlayer(true)} className="flex items-center gap-2">
-              <UserPlus className="w-4 h-4" />
-              Add Player
+            <Button 
+              variant="outline" 
+              onClick={onBackToSetup}
+              className="bg-background/10 border-white/20 hover:bg-background/20"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Setup
             </Button>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-white">Game Dashboard</h1>
+              <p className="text-muted-foreground">
+                Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
+              </p>
+            </div>
           </div>
+          <UserProfile />
         </div>
 
         {showAddPlayer && (

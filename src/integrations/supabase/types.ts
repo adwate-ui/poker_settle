@@ -71,6 +71,7 @@ export type Database = {
           is_complete: boolean | null
           settlements: Json | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           buy_in_amount: number
@@ -80,6 +81,7 @@ export type Database = {
           is_complete?: boolean | null
           settlements?: Json | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           buy_in_amount?: number
@@ -89,6 +91,7 @@ export type Database = {
           is_complete?: boolean | null
           settlements?: Json | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -100,6 +103,7 @@ export type Database = {
           total_games: number | null
           total_profit: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -108,6 +112,7 @@ export type Database = {
           total_games?: number | null
           total_profit?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -115,6 +120,34 @@ export type Database = {
           name?: string
           total_games?: number | null
           total_profit?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
           updated_at?: string
         }
         Relationships: []
