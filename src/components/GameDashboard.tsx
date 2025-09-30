@@ -194,6 +194,49 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </Card>
         )}
 
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-poker-gold flex items-center gap-2">
+              <DollarSign className="w-5 h-5" />
+              Game Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Buy-ins</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Final Stack</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+                {!isStackBalanced && (
+                  <p className="text-xs text-destructive">Must equal buy-ins</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Winnings</p>
+                <p className="text-2xl font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Losses</p>
+                <p className="text-2xl font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">Players</h2>
+          <Button 
+            onClick={() => setShowAddPlayer(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add Player
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {gamePlayers.map((gamePlayer) => (
             <PlayerCard
@@ -205,7 +248,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           ))}
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <Button onClick={calculateSettlements} className="bg-primary hover:bg-primary/90">
             <Calculator className="w-4 h-4 mr-2" />
             Calculate Settlements
