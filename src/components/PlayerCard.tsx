@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
-import { Plus, Minus, DollarSign, TrendingUp, TrendingDown, Trophy, Target } from "lucide-react";
+import { Plus, Minus, DollarSign, TrendingUp, TrendingDown, Trophy, Target, Check } from "lucide-react";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
@@ -12,6 +13,9 @@ interface PlayerCardProps {
 }
 
 const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps) => {
+  const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack);
+  const [hasChanges, setHasChanges] = useState(false);
+  
   const netAmount = gamePlayer.final_stack - (gamePlayer.buy_ins * buyInAmount);
   const isProfit = netAmount > 0;
 
@@ -23,11 +27,17 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
     });
   };
 
-  const updateFinalStack = (value: number) => {
+  const handleFinalStackChange = (value: number) => {
+    setLocalFinalStack(value);
+    setHasChanges(value !== gamePlayer.final_stack);
+  };
+
+  const confirmFinalStack = () => {
     onUpdatePlayer(gamePlayer.id, { 
-      final_stack: value,
-      net_amount: value - (gamePlayer.buy_ins * buyInAmount)
+      final_stack: localFinalStack,
+      net_amount: localFinalStack - (gamePlayer.buy_ins * buyInAmount)
     });
+    setHasChanges(false);
   };
 
   return (
@@ -87,13 +97,25 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
 
           <div className="space-y-2">
             <span className="text-sm text-muted-foreground">Final Stack ($)</span>
-            <Input
-              type="number"
-              value={gamePlayer.final_stack}
-              onChange={(e) => updateFinalStack(Number(e.target.value) || 0)}
-              className="bg-input border-border text-center font-mono"
-              placeholder="0.00"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={localFinalStack}
+                onChange={(e) => handleFinalStackChange(Number(e.target.value) || 0)}
+                className="bg-input border-border text-center font-mono"
+                placeholder="0.00"
+              />
+              {hasChanges && (
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={confirmFinalStack}
+                  className="shrink-0"
+                >
+                  <Check className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
