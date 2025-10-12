@@ -176,7 +176,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   <div>
                     <h4 className="font-semibold mb-2">Or select existing player:</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).map(player => (
+                      {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).sort((a, b) => a.name.localeCompare(b.name)).map(player => (
                         <Button
                           key={player.id}
                           variant="outline"
@@ -238,7 +238,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {gamePlayers.map((gamePlayer) => (
+          {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
             <PlayerCard
               key={gamePlayer.id}
               gamePlayer={gamePlayer}

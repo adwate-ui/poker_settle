@@ -62,10 +62,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     }).format(amount);
   };
 
-  const filteredPlayers = players.filter(player => 
-    !selectedPlayers.find(sp => sp.id === player.id) &&
-    player.name.toLowerCase().includes(playerSearchQuery.toLowerCase())
-  );
+  const filteredPlayers = players
+    .filter(player => 
+      !selectedPlayers.find(sp => sp.id === player.id) &&
+      player.name.toLowerCase().includes(playerSearchQuery.toLowerCase())
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const filteredGames = games.filter(game => {
     const gameDate = new Date(game.date).toLocaleDateString();
@@ -266,7 +268,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {selectedPlayers.map(player => (
+                {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
                   <div key={player.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="font-semibold">{player.name}</span>
@@ -372,7 +374,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {game.game_players.map(gp => (
+                                {game.game_players.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
                                   <div key={gp.id} className="flex items-center justify-between p-2 bg-background rounded">
                                     <span className="font-medium">{gp.player.name}</span>
                                     <div className="flex items-center gap-2">
