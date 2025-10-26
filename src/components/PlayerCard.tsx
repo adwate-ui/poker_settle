@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
-import { Plus, Minus, DollarSign, TrendingUp, TrendingDown, Trophy, Target, Check } from "lucide-react";
+import { Plus, Minus, TrendingUp, TrendingDown, Trophy, Target, Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 
 interface PlayerCardProps {
@@ -111,7 +111,6 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
             <div className={`flex items-center gap-1 font-bold ${
               isProfit ? 'text-money-green' : 'text-money-red'
             }`}>
-              <DollarSign className="w-4 h-4" />
               <span>
                 {isProfit ? '+' : ''}Rs. {formatIndianNumber(Math.abs(netAmount))}
               </span>

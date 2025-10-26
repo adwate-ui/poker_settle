@@ -226,25 +226,25 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       />
                     </div>
                     {filteredPlayers.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                      <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
                         {filteredPlayers.map(player => (
                           <div key={player.id} className="p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => selectExistingPlayer(player)}>
+                              <div className="flex items-center gap-3 cursor-pointer" onClick={() => selectExistingPlayer(player)}>
                                 <span className="font-semibold">{player.name}</span>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {player.total_games} games
-                                  </Badge>
-                                  <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
-                                    {player.total_profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                    {formatCurrency(Math.abs(player.total_profit))}
-                                  </Badge>
-                                </div>
                               </div>
-                              <Button variant="destructive" size="sm" onClick={() => handleDeletePlayer(player.id)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {player.total_games} games
+                                </Badge>
+                                <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
+                                  {player.total_profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                  {formatCurrency(Math.abs(player.total_profit))}
+                                </Badge>
+                                <Button variant="destructive" size="sm" onClick={() => handleDeletePlayer(player.id)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         ))}

@@ -86,7 +86,7 @@ export const useGameData = () => {
         game_id: gameData.id,
         player_id: player.id,
         buy_ins: 1,
-        final_stack: buyInAmount, // Default to buy-in amount
+        final_stack: 0,
         net_amount: 0 // Will be calculated later
       }));
 
