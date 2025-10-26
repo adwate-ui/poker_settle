@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
 import { Plus, Minus, DollarSign, TrendingUp, TrendingDown, Trophy, Target, Check } from "lucide-react";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
@@ -63,7 +64,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
                 className="text-xs flex items-center gap-1"
               >
                 <Target className="w-3 h-3" />
-                {gamePlayer.player.total_profit >= 0 ? '+' : ''}${gamePlayer.player.total_profit.toFixed(0)}
+                {gamePlayer.player.total_profit >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(gamePlayer.player.total_profit))}
               </Badge>
             </div>
           </div>
@@ -73,37 +74,18 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Buy-ins</span>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => updateBuyIns(-1)}
-                disabled={gamePlayer.buy_ins <= 1}
-                className="w-8 h-8 p-0"
-              >
-                <Minus className="w-3 h-3" />
-              </Button>
-              <span className="font-semibold w-8 text-center">{gamePlayer.buy_ins}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => updateBuyIns(1)}
-                className="w-8 h-8 p-0"
-              >
-                <Plus className="w-3 h-3" />
-              </Button>
-            </div>
+            <span className="font-semibold text-lg">{gamePlayer.buy_ins}</span>
           </div>
 
           <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">Final Stack ($)</span>
+            <span className="text-sm text-muted-foreground">Final Stack (Rs.)</span>
             <div className="flex items-center gap-2">
               <Input
-                type="number"
-                value={localFinalStack}
-                onChange={(e) => handleFinalStackChange(Number(e.target.value) || 0)}
+                type="text"
+                value={formatInputDisplay(localFinalStack)}
+                onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
                 className="bg-input border-border text-center font-mono"
-                placeholder="0.00"
+                placeholder="Enter amount"
               />
               {hasChanges && (
                 <Button 
@@ -122,7 +104,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
         <div className="pt-3 border-t border-border">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Total Invested:</span>
-            <span className="font-semibold">${(gamePlayer.buy_ins * buyInAmount).toFixed(2)}</span>
+            <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm font-medium">Net P&L:</span>
@@ -131,7 +113,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
             }`}>
               <DollarSign className="w-4 h-4" />
               <span>
-                {isProfit ? '+' : ''}${netAmount.toFixed(2)}
+                {isProfit ? '+' : ''}Rs. {formatIndianNumber(Math.abs(netAmount))}
               </span>
             </div>
           </div>

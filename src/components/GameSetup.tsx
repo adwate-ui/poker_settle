@@ -12,6 +12,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfile } from "@/components/UserProfile";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -54,12 +55,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   }, [hasIncompleteGame]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return `Rs. ${formatIndianNumber(amount)}`;
   };
 
   const filteredPlayers = players
@@ -161,10 +157,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                 <Label htmlFor="buyIn">Buy-in Amount</Label>
                 <Input 
                   id="buyIn" 
-                  type="number" 
-                  value={buyInAmount} 
-                  onChange={e => setBuyInAmount(Number(e.target.value))} 
+                  type="text" 
+                  value={formatInputDisplay(buyInAmount)} 
+                  onChange={e => {
+                    const parsed = parseIndianNumber(e.target.value);
+                    setBuyInAmount(parsed);
+                  }}
                   className="bg-input border-border"
+                  placeholder="Enter amount"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Formatted: {formatCurrency(buyInAmount)}

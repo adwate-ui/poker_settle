@@ -4,3 +4,26 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Format number with Indian numbering style (commas at lakhs/crores)
+export function formatIndianNumber(num: number): string {
+  const numStr = Math.abs(num).toString();
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return (num < 0 ? '-' : '') + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return (num < 0 ? '-' : '') + lastThree;
+}
+
+// Parse Indian formatted number string back to number
+export function parseIndianNumber(str: string): number {
+  const cleaned = str.replace(/,/g, '');
+  return parseFloat(cleaned) || 0;
+}
+
+// Format display value for input (blank if zero, formatted if non-zero)
+export function formatInputDisplay(value: number): string {
+  return value === 0 ? '' : formatIndianNumber(value);
+}

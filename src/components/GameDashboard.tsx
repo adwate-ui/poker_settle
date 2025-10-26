@@ -10,6 +10,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 
 interface GameDashboardProps {
   game: Game;
@@ -156,12 +157,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return `Rs. ${formatIndianNumber(amount)}`;
   };
 
   const totalBuyIns = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
@@ -361,7 +357,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </Select>
 
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="Amount"
                   value={newTransferAmount}
                   onChange={(e) => setNewTransferAmount(e.target.value)}
