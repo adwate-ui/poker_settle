@@ -203,7 +203,7 @@ const PlayersHistory = () => {
               onClick={() => handleSort("total_profit")}
               className="flex items-center gap-2 justify-center font-bold"
             >
-              Total P&L
+              Net P&L
               {getSortIcon("total_profit")}
             </Button>
             <Button
@@ -271,7 +271,7 @@ const PlayersHistory = () => {
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-4">
                     {isProfit ? (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                         <TrendingUp className="h-4 w-4" />
