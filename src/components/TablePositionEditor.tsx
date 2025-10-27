@@ -78,7 +78,14 @@ const TablePositionEditor = ({
       {/* Table Preview */}
       {positions.length > 0 && (
         <div className="py-4">
-          <PokerTableView positions={positions} />
+          <p className="text-sm text-muted-foreground mb-3 text-center">
+            Drag and drop players to rearrange their positions
+          </p>
+          <PokerTableView 
+            positions={positions} 
+            enableDragDrop={true}
+            onPositionsChange={setPositions}
+          />
         </div>
       )}
 

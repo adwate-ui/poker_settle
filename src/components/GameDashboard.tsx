@@ -284,7 +284,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <PokerTableView positions={currentTablePosition.positions} />
+              <p className="text-sm text-muted-foreground mb-3 text-center">
+                Click "Change Positions" to edit the table layout
+              </p>
+              <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
             </CardContent>
           </Card>
         ) : (
