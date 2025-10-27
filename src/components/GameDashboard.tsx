@@ -62,12 +62,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setNewPlayerName('');
       setShowAddPlayer(false);
       toast.success("Player added to game");
-      
-      // Prompt to update table positions
-      const shouldUpdate = confirm("Would you like to update the table positions?");
-      if (shouldUpdate) {
-        setShowPositionEditor(true);
-      }
     } catch (error) {
       toast.error("Failed to add player");
     }
@@ -79,12 +73,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
       toast.success("Player added to game");
-      
-      // Prompt to update table positions
-      const shouldUpdate = confirm("Would you like to update the table positions?");
-      if (shouldUpdate) {
-        setShowPositionEditor(true);
-      }
     } catch (error) {
       toast.error("Failed to add player");
     }
