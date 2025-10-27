@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
+import { UserProfile } from "./UserProfile";
 
 interface TabLayoutProps {
   children: React.ReactNode;
@@ -26,8 +27,11 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
     <div className="min-h-screen bg-gradient-dark">
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">Poker Tracker</h1>
-          <ThemeToggle />
+          <h1 className="text-3xl font-bold text-foreground">Poker Tracker</h1>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <UserProfile />
+          </div>
         </div>
         
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">

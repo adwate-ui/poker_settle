@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Game, Player } from "@/types/poker";
@@ -22,6 +25,7 @@ const NewGame = () => {
   const [loading, setLoading] = useState(false);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [showActiveGame, setShowActiveGame] = useState(false);
+  const [openCombobox, setOpenCombobox] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -92,8 +96,8 @@ const NewGame = () => {
     }
   };
 
-  const addExistingPlayer = () => {
-    const player = players.find(p => p.id === selectedPlayerId);
+  const addExistingPlayer = (playerId?: string) => {
+    const player = players.find(p => p.id === (playerId || selectedPlayerId));
     if (!player) return;
 
     if (gamePlayers.find(p => p.id === player.id)) {
@@ -103,6 +107,7 @@ const NewGame = () => {
 
     setGamePlayers([...gamePlayers, player]);
     setSelectedPlayerId("");
+    setOpenCombobox(false);
     toast.success("Player added to game");
   };
 
@@ -245,7 +250,7 @@ const NewGame = () => {
           {/* Current Players List */}
           {gamePlayers.length > 0 && (
             <div className="grid gap-2">
-              {gamePlayers.map((player) => (
+              {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
                 <Card key={player.id}>
                   <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-2">
@@ -293,38 +298,65 @@ const NewGame = () => {
           </div>
 
           {/* Add Existing Player */}
-          <div className="flex gap-2">
-            <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId} disabled={hasActiveGame}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select existing player" />
-              </SelectTrigger>
-              <SelectContent>
-                {players.filter(p => !gamePlayers.find(gp => gp.id === p.id)).map((player) => (
-                  <SelectItem key={player.id} value={player.id} className="cursor-pointer">
-                    <div className="flex items-center gap-2 w-full">
-                      <span className="font-medium">{player.name}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
-                          {player.total_games} games
-                        </span>
-                        <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
-                          player.total_profit >= 0 
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}>
-                          Rs. {formatIndianNumber(player.total_profit)}
-                        </span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId || hasActiveGame} className="w-[140px]">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Existing
-            </Button>
-          </div>
+          <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openCombobox}
+                className="w-full justify-between"
+                disabled={hasActiveGame}
+              >
+                {selectedPlayerId
+                  ? players.find((player) => player.id === selectedPlayerId)?.name
+                  : "Select existing player..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search players..." />
+                <CommandList>
+                  <CommandEmpty>No player found.</CommandEmpty>
+                  <CommandGroup>
+                    {players
+                      .filter(p => !gamePlayers.find(gp => gp.id === p.id))
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((player) => (
+                        <CommandItem
+                          key={player.id}
+                          value={player.name}
+                          onSelect={() => {
+                            addExistingPlayer(player.id);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              selectedPlayerId === player.id ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          <div className="flex items-center gap-2 w-full">
+                            <span className="font-medium">{player.name}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
+                                {player.total_games} games
+                              </span>
+                              <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
+                                player.total_profit >= 0 
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              }`}>
+                                Rs. {formatIndianNumber(player.total_profit)}
+                              </span>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Start Game Button */}
