@@ -154,6 +154,30 @@ const PlayersHistory = () => {
         </CardHeader>
       </Card>
 
+      {/* Summary Stats - Moved to top */}
+      <Card className="border-primary/20 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+              <p className="text-sm text-muted-foreground">Total Players</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{players.length}</p>
+            </div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+              <p className="text-sm text-muted-foreground">Total Games</p>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+              <p className="text-sm text-muted-foreground">Winning Players</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {players.filter(p => (p.total_profit || 0) >= 0).length}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 gap-4">
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-lg p-4">
           <div className="grid grid-cols-5 gap-4 font-bold text-sm">
@@ -198,6 +222,7 @@ const PlayersHistory = () => {
             ? (player.total_profit || 0) / player.total_games 
             : 0;
           const isProfit = (player.total_profit || 0) >= 0;
+          const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`;
 
           return (
             <Card
@@ -214,8 +239,12 @@ const PlayersHistory = () => {
                     className="flex items-center gap-3"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <div className="p-2 rounded-full bg-primary/20">
-                      <User className="h-5 w-5 text-primary" />
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                      <img 
+                        src={avatarUrl} 
+                        alt={player.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <span className="font-bold text-primary">{player.name}</span>
                   </div>
@@ -285,30 +314,6 @@ const PlayersHistory = () => {
           );
         })}
       </div>
-
-      {/* Summary Stats */}
-      <Card className="border-primary/20 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
-              <p className="text-sm text-muted-foreground">Total Players</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{players.length}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
-              <p className="text-sm text-muted-foreground">Total Games</p>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
-              <p className="text-sm text-muted-foreground">Winning Players</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {players.filter(p => (p.total_profit || 0) >= 0).length}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <AlertDialog open={!!deletePlayerId} onOpenChange={() => setDeletePlayerId(null)}>
         <AlertDialogContent>

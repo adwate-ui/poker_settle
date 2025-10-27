@@ -188,8 +188,12 @@ const PlayerDetail = () => {
       <Card className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 border-primary/20">
         <CardHeader>
           <CardTitle className="text-primary text-2xl flex items-center gap-3">
-            <div className="p-3 rounded-full bg-primary/20">
-              <TrendingUp className="h-6 w-6 text-primary" />
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+              <img 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
+                alt={player.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             {player.name}
           </CardTitle>
