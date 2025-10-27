@@ -76,6 +76,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
+  const [lastAggressorIndex, setLastAggressorIndex] = useState<number | null>(null);
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -196,6 +197,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setCurrentBet(bbAmount);
       setPotSize(sbAmount + bbAmount);
       setActionSequence(2);
+      // BB is initial aggressor preflop
+      const bbIndex = active.findIndex(p => p.player_id === bbPlayer.player_id);
+      setLastAggressorIndex(bbIndex);
     }
   };
 
@@ -290,7 +294,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         streetPlayerBets,
         totalPlayerBets: playerBets,
         streetActions,
-        actionSequence
+        actionSequence,
+        lastAggressorIndex
       },
       actionType,
       betSize
@@ -302,6 +307,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (stateUpdates.totalPlayerBets) setPlayerBets(stateUpdates.totalPlayerBets);
     if (stateUpdates.actionSequence !== undefined) setActionSequence(stateUpdates.actionSequence);
     if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
+    if (stateUpdates.lastAggressorIndex !== undefined) setLastAggressorIndex(stateUpdates.lastAggressorIndex);
     
     // Handle fold - update active players and check for winner
     if (actionType === 'Fold') {
@@ -362,7 +368,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         streetPlayerBets,
         totalPlayerBets: playerBets,
         streetActions,
-        actionSequence
+        actionSequence,
+        lastAggressorIndex
       },
       game.game_players,
       currentHand.button_player_id
@@ -374,6 +381,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
     if (stateUpdates.streetPlayerBets) setStreetPlayerBets(stateUpdates.streetPlayerBets);
     if (stateUpdates.streetActions) setStreetActions(stateUpdates.streetActions);
+    if (stateUpdates.lastAggressorIndex !== undefined) setLastAggressorIndex(stateUpdates.lastAggressorIndex);
   };
 
   const moveToPreviousStreet = () => {
@@ -453,6 +461,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setPlayerHoleCards({});
     setPlayerBets({});
     setStreetPlayerBets({});
+    setLastAggressorIndex(null);
   };
 
   const handleHoleCardSubmit = (cards: string) => {
@@ -564,7 +573,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       playersInHand,
       streetPlayerBets,
       streetActions,
-      currentHand.button_player_id
+      currentHand.button_player_id,
+      lastAggressorIndex
     );
   };
 

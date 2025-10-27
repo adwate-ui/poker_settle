@@ -16,6 +16,7 @@ export interface HandState {
   totalPlayerBets: Record<string, number>;
   streetActions: PlayerAction[];
   actionSequence: number;
+  lastAggressorIndex: number | null; // Tracks last player who raised/bet
 }
 
 /**
@@ -92,6 +93,7 @@ export const getStartingPlayerIndex = (
 
 /**
  * Check if betting round is complete
+ * CRITICAL: Round reopens when any player raises - all players must respond
  */
 export const isBettingRoundComplete = (
   stage: HandStage,
@@ -99,7 +101,8 @@ export const isBettingRoundComplete = (
   playersInHand: string[],
   streetPlayerBets: Record<string, number>,
   streetActions: PlayerAction[],
-  buttonPlayerId: string
+  buttonPlayerId: string,
+  lastAggressorIndex: number | null
 ): boolean => {
   // Check if only one player remains
   const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
@@ -117,6 +120,41 @@ export const isBettingRoundComplete = (
   const allBetsEqual = activeBets.every(bet => bet === maxBet);
   
   if (!allBetsEqual) return false;
+  
+  // CRITICAL: If there was a raise, all players after the raiser must have acted
+  if (lastAggressorIndex !== null) {
+    const aggressorPlayer = activePlayers[lastAggressorIndex];
+    if (!aggressorPlayer) return false;
+    
+    // Find all actions after the last raise/bet (search backwards)
+    let lastAggressiveActionIndex = -1;
+    for (let i = streetActions.length - 1; i >= 0; i--) {
+      const action = streetActions[i];
+      if (action.player_id === aggressorPlayer.player_id && 
+          (action.action_type === 'Raise' || action.action_type === 'All-In' || 
+           (action.action_type === 'Big Blind' && stage === 'preflop'))) {
+        lastAggressiveActionIndex = i;
+        break;
+      }
+    }
+    
+    if (lastAggressiveActionIndex === -1) return false;
+    
+    const actionsAfterRaise = streetActions.slice(lastAggressiveActionIndex + 1);
+    
+    // All remaining players (except raiser) must have acted after the raise
+    for (const player of remainingPlayers) {
+      if (player.player_id === aggressorPlayer.player_id) continue;
+      
+      const hasActedAfterRaise = actionsAfterRaise.some(
+        a => a.player_id === player.player_id
+      );
+      
+      if (!hasActedAfterRaise) {
+        return false;
+      }
+    }
+  }
   
   // Special preflop rule: SB and BB must have chance to act
   if (stage === 'preflop') {
@@ -218,6 +256,7 @@ export const getCallAmount = (
 
 /**
  * Process a player action and update state
+ * CRITICAL: Track last aggressor to enforce raise response logic
  */
 export const processAction = (
   state: HandState,
@@ -252,9 +291,15 @@ export const processAction = (
     actionSequence: state.actionSequence + 1
   };
 
-  // Update current bet if raised
+  // Update current bet and track aggressor if raised
   if (actionType === 'Raise' || actionType === 'All-In') {
     updates.currentBet = betSize;
+    updates.lastAggressorIndex = state.currentPlayerIndex;
+  }
+  
+  // BB is the initial aggressor preflop
+  if (actionType === 'Big Blind' && state.stage === 'preflop') {
+    updates.lastAggressorIndex = state.currentPlayerIndex;
   }
 
   // Handle fold
@@ -277,7 +322,7 @@ export const resetForNewStreet = (
   const newStage = getNextStage(state.stage);
   const startingIndex = getStartingPlayerIndex(newStage, allPlayers, state.activePlayers, buttonPlayerId);
 
-  // Reset street-specific bets
+  // Reset street-specific bets and aggressor tracking
   const resetBets: Record<string, number> = {};
   state.activePlayers.forEach(p => resetBets[p.player_id] = 0);
 
@@ -286,6 +331,7 @@ export const resetForNewStreet = (
     currentPlayerIndex: startingIndex,
     currentBet: 0,
     streetPlayerBets: resetBets,
-    streetActions: []
+    streetActions: [],
+    lastAggressorIndex: null // Reset aggressor for new street
   };
 };
