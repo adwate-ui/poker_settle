@@ -113,7 +113,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     // Start with player balances
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
-      balance: gp.net_amount
+      balance: gp.net_amount || 0
     }));
 
     // Apply manual transfers to adjust balances
@@ -162,7 +162,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     // Calculate remaining settlements
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
-      balance: gp.net_amount
+      balance: gp.net_amount || 0
     }));
 
     // Apply manual transfers to adjust balances
@@ -236,9 +236,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   };
 
   const totalBuyIns = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
-  const totalWinnings = gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
-  const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
-  const totalFinalStack = gamePlayers.reduce((sum, gp) => sum + gp.final_stack, 0);
+  const totalWinnings = gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount || 0), 0);
+  const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount || 0), 0);
+  const totalFinalStack = gamePlayers.reduce((sum, gp) => sum + (gp.final_stack || 0), 0);
   const isBalanced = Math.abs(totalWinnings + totalLosses) < 0.01;
   const isStackBalanced = Math.abs(totalFinalStack - totalBuyIns) < 0.01;
   const canCompleteGame = isBalanced && isStackBalanced;

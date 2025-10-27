@@ -14,23 +14,23 @@ interface PlayerCardProps {
 }
 
 const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps) => {
-  const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack);
+  const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
   const [hasChanges, setHasChanges] = useState(false);
   
-  const netAmount = gamePlayer.final_stack - (gamePlayer.buy_ins * buyInAmount);
+  const netAmount = (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount);
   const isProfit = netAmount > 0;
 
   const updateBuyIns = (change: number) => {
     const newBuyIns = Math.max(1, gamePlayer.buy_ins + change);
     onUpdatePlayer(gamePlayer.id, { 
       buy_ins: newBuyIns,
-      net_amount: gamePlayer.final_stack - (newBuyIns * buyInAmount)
+      net_amount: (gamePlayer.final_stack || 0) - (newBuyIns * buyInAmount)
     });
   };
 
   const handleFinalStackChange = (value: number) => {
     setLocalFinalStack(value);
-    setHasChanges(value !== gamePlayer.final_stack);
+    setHasChanges(value !== (gamePlayer.final_stack || 0));
   };
 
   const confirmFinalStack = () => {
