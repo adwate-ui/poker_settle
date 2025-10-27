@@ -10,14 +10,6 @@ import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -299,106 +291,103 @@ const GamesHistory = () => {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("date")}
-                    className="flex items-center gap-2 font-bold"
-                  >
-                    Date
-                    {getSortIcon("date")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("buy_in")}
-                    className="flex items-center gap-2 font-bold"
-                  >
-                    Buy-in
-                    {getSortIcon("buy_in")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("players")}
-                    className="flex items-center gap-2 font-bold"
-                  >
-                    Players
-                    {getSortIcon("players")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("chips")}
-                    className="flex items-center gap-2 font-bold"
-                  >
-                    Chips in play
-                    {getSortIcon("chips")}
-                  </Button>
-                </TableHead>
-                {selectedPlayer !== "all" && (
-                  <TableHead className="font-bold text-center">
+          <div className="grid grid-cols-1 gap-4 p-4">
+            <div className="rounded-lg p-4 border">
+              <div className="grid grid-cols-5 gap-4 font-bold text-sm">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("date")}
+                  className="flex items-center gap-2 justify-start font-bold"
+                >
+                  Date
+                  {getSortIcon("date")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("buy_in")}
+                  className="flex items-center gap-2 justify-center font-bold"
+                >
+                  Buy-in
+                  {getSortIcon("buy_in")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("players")}
+                  className="flex items-center gap-2 justify-center font-bold"
+                >
+                  Players
+                  {getSortIcon("players")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("chips")}
+                  className="flex items-center gap-2 justify-center font-bold"
+                >
+                  Chips in play
+                  {getSortIcon("chips")}
+                </Button>
+                {selectedPlayer !== "all" ? (
+                  <div className="flex items-center justify-center h-10 px-4 font-bold">
                     Player P&L
-                  </TableHead>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-10 px-4 font-bold">Actions</div>
                 )}
-                <TableHead className="text-right font-bold">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAndSortedGames.map((game, index) => {
-                const playerData = game.game_players.find(
-                  (gp) => gp.player_name === selectedPlayer
-                );
-                
-                return (
-                  <TableRow
-                    key={game.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => navigate(`/games/${game.id}`)}
-                  >
-                    <TableCell className="font-medium">
-                      {format(new Date(game.date), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      Rs. {formatIndianNumber(game.buy_in_amount)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="info">{game.player_count}</Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      Rs. {formatIndianNumber(game.total_pot)}
-                    </TableCell>
-                    {selectedPlayer !== "all" && playerData && (
-                      <TableCell className="text-center">
-                        <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
-                          {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
-                        </Badge>
-                      </TableCell>
-                    )}
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteGameId(game.id);
-                        }}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/20"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+              </div>
+            </div>
+
+            {filteredAndSortedGames.map((game, index) => {
+              const playerData = game.game_players.find(
+                (gp) => gp.player_name === selectedPlayer
+              );
+              
+              return (
+                <Card
+                  key={game.id}
+                  className="cursor-pointer transition-colors hover:bg-muted/50"
+                  onClick={() => navigate(`/games/${game.id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-5 gap-4 items-center">
+                      <div className="font-medium">
+                        {format(new Date(game.date), "MMM d, yyyy")}
+                      </div>
+                      <div className="text-center font-semibold">
+                        Rs. {formatIndianNumber(game.buy_in_amount)}
+                      </div>
+                      <div className="text-center">
+                        <Badge variant="info">{game.player_count}</Badge>
+                      </div>
+                      <div className="text-center font-semibold">
+                        Rs. {formatIndianNumber(game.total_pot)}
+                      </div>
+                      {selectedPlayer !== "all" && playerData ? (
+                        <div className="text-center">
+                          <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
+                            {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
+                          </Badge>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteGameId(game.id);
+                            }}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/20"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 
