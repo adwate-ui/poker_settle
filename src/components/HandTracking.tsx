@@ -5,10 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
-import { Play, CheckCircle } from 'lucide-react';
+import { Play, CheckCircle, TrendingUp, Trophy } from 'lucide-react';
+import CardNotationInput from './CardNotationInput';
+import PokerCard from './PokerCard';
 
 interface HandTrackingProps {
   game: Game;
@@ -39,7 +42,12 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [currentBet, setCurrentBet] = useState(0);
   const [betAmount, setBetAmount] = useState('');
   const [streetCards, setStreetCards] = useState('');
+  const [flopCards, setFlopCards] = useState('');
+  const [turnCard, setTurnCard] = useState('');
+  const [riverCard, setRiverCard] = useState('');
   const [potSize, setPotSize] = useState(0);
+  const [streetActions, setStreetActions] = useState<PlayerAction[]>([]);
+  const [playersInHand, setPlayersInHand] = useState<string[]>([]);
 
   // Find hero player (current user)
   const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
@@ -65,13 +73,41 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       // Filter out dealt-out players
       const active = game.game_players.filter(gp => !dealtOutPlayers.includes(gp.player_id));
       setActivePlayers(active);
+      setPlayersInHand(active.map(p => p.player_id));
       
-      // Start with small blind (player after button)
+      // Post blinds automatically
       const sbIndex = (buttonIndex + 1) % active.length;
-      setCurrentPlayerIndex(sbIndex);
+      const bbIndex = (buttonIndex + 2) % active.length;
+      
+      // Record small blind
+      await recordPlayerAction(
+        hand.id,
+        active[sbIndex].player_id,
+        'Preflop',
+        'Small Blind',
+        game.small_blind || 50,
+        0,
+        active[sbIndex].player_id === heroPlayer?.player_id
+      );
+      
+      // Record big blind
+      await recordPlayerAction(
+        hand.id,
+        active[bbIndex].player_id,
+        'Preflop',
+        'Big Blind',
+        game.big_blind || 100,
+        1,
+        active[bbIndex].player_id === heroPlayer?.player_id
+      );
+      
+      // Start with player after big blind (UTG)
+      const utgIndex = (buttonIndex + 3) % active.length;
+      setCurrentPlayerIndex(utgIndex);
       setStage('preflop');
       setCurrentBet(game.big_blind || 100);
-      setPotSize(0);
+      setPotSize((game.small_blind || 50) + (game.big_blind || 100));
+      setActionSequence(2);
     }
   };
 
@@ -90,7 +126,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       betSize = parseFloat(betAmount) || currentBet;
     }
 
-    await recordPlayerAction(
+    const action = await recordPlayerAction(
       currentHand.id,
       currentPlayer.player_id,
       stage === 'preflop' ? 'Preflop' : stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River',
@@ -100,14 +136,31 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       isHero
     );
 
+    if (action) {
+      setStreetActions(prev => [...prev, action]);
+    }
+
     // Update pot
     setPotSize(prev => prev + betSize);
     setActionSequence(prev => prev + 1);
 
-    // If fold, remove player from active players
+    // If fold, remove player from players in hand
     if (actionType === 'Fold') {
-      setActivePlayers(prev => prev.filter((_, idx) => idx !== currentPlayerIndex));
+      setPlayersInHand(prev => prev.filter(id => id !== currentPlayer.player_id));
+      const remainingActive = activePlayers.filter(p => p.player_id !== currentPlayer.player_id);
+      setActivePlayers(remainingActive);
+      
+      // If only one player left, they win
+      if (remainingActive.length === 1) {
+        await finishHand(remainingActive[0].player_id);
+        return;
+      }
       return;
+    }
+
+    // Update current bet if raised
+    if (actionType === 'Raise') {
+      setCurrentBet(betSize);
     }
 
     // Move to next player
@@ -134,14 +187,22 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     
     setCurrentPlayerIndex(0);
     setCurrentBet(0);
+    setStreetActions([]);
   };
 
-  const saveStreetCards = async () => {
-    if (!currentHand || !streetCards) return;
+  const saveStreetCards = async (cards: string) => {
+    if (!currentHand) return;
 
     const streetType = stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River';
-    await recordStreetCards(currentHand.id, streetType, streetCards);
-    setStreetCards('');
+    await recordStreetCards(currentHand.id, streetType, cards);
+    
+    if (stage === 'flop') {
+      setFlopCards(cards);
+    } else if (stage === 'turn') {
+      setTurnCard(cards);
+    } else if (stage === 'river') {
+      setRiverCard(cards);
+    }
   };
 
   const finishHand = async (winnerId: string) => {
@@ -158,6 +219,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setActivePlayers([]);
     setActionSequence(0);
     setPotSize(0);
+    setFlopCards('');
+    setTurnCard('');
+    setRiverCard('');
+    setStreetActions([]);
+    setPlayersInHand([]);
   };
 
   if (stage === 'setup') {
@@ -217,21 +283,46 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
   if (stage === 'showdown') {
     return (
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Showdown - Select Winner</CardTitle>
+      <Card className="mt-6 border-poker-gold/50">
+        <CardHeader className="bg-gradient-to-r from-poker-gold/20 to-transparent">
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-poker-gold" />
+            Showdown - Select Winner
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-lg font-semibold">Pot Size: ₹{potSize}</div>
+        <CardContent className="space-y-4 pt-6">
+          {/* Show all community cards */}
+          {(flopCards || turnCard || riverCard) && (
+            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
+              <div className="text-sm font-semibold text-white mb-2">Board:</div>
+              <div className="flex gap-2 justify-center flex-wrap">
+                {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                  <PokerCard key={`flop-${idx}`} card={card} size="md" />
+                ))}
+                {turnCard && <PokerCard card={turnCard} size="md" />}
+                {riverCard && <PokerCard card={riverCard} size="md" />}
+              </div>
+            </div>
+          )}
+
+          <div className="text-xl font-bold text-center text-poker-gold">
+            Pot: ₹{potSize.toLocaleString('en-IN')}
+          </div>
+
           <div className="space-y-2">
             {activePlayers.map((gp) => (
               <Button
                 key={gp.player_id}
                 onClick={() => finishHand(gp.player_id)}
                 variant="outline"
-                className="w-full"
+                className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
               >
-                {gp.player.name} Wins
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-semibold">{gp.player.name}</span>
+                  {gp.player_id === heroPlayer?.player_id && (
+                    <Badge variant="secondary">Hero</Badge>
+                  )}
+                </div>
               </Button>
             ))}
           </div>
@@ -243,62 +334,159 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const currentPlayer = activePlayers[currentPlayerIndex];
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Hand #{currentHand?.hand_number} - {stage.toUpperCase()}</span>
-          <span className="text-sm font-normal">Pot: ₹{potSize}</span>
+    <Card className="mt-6 border-primary/50">
+      <CardHeader className="bg-gradient-to-r from-primary/20 to-transparent">
+        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            <span>Hand #{currentHand?.hand_number} - {stage.toUpperCase()}</span>
+          </div>
+          <Badge variant="secondary" className="text-lg">
+            Pot: ₹{potSize.toLocaleString('en-IN')}
+          </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {(stage === 'flop' || stage === 'turn' || stage === 'river') && !streetCards && (
-          <div>
-            <Label>Enter {stage} Cards (e.g., AhKd2c)</Label>
-            <div className="flex gap-2">
-              <Input
-                value={streetCards}
-                onChange={(e) => setStreetCards(e.target.value)}
-                placeholder="AhKd2c"
-              />
-              <Button onClick={saveStreetCards}>Save Cards</Button>
+      <CardContent className="space-y-4 pt-6">
+        {/* Show existing community cards */}
+        {(flopCards || turnCard || riverCard) && (
+          <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
+            <div className="text-sm font-semibold text-white mb-2">Board:</div>
+            <div className="flex gap-2 justify-center flex-wrap">
+              {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                <PokerCard key={`flop-${idx}`} card={card} size="md" />
+              ))}
+              {turnCard && <PokerCard card={turnCard} size="md" />}
+              {riverCard && <PokerCard card={riverCard} size="md" />}
             </div>
           </div>
         )}
 
-        {streetCards && (stage === 'flop' || stage === 'turn' || stage === 'river') && (
-          <div className="bg-muted p-4 rounded-lg">
-            <div className="font-semibold mb-2">{stage} Cards:</div>
-            <div className="text-lg">{streetCards}</div>
+        {/* Card input for current street */}
+        {stage === 'flop' && !flopCards && (
+          <CardNotationInput
+            label="Flop Cards"
+            expectedCards={3}
+            onSubmit={saveStreetCards}
+            placeholder="AhKd2c"
+          />
+        )}
+
+        {stage === 'turn' && !turnCard && flopCards && (
+          <CardNotationInput
+            label="Turn Card"
+            expectedCards={1}
+            onSubmit={saveStreetCards}
+            placeholder="Js"
+          />
+        )}
+
+        {stage === 'river' && !riverCard && turnCard && (
+          <CardNotationInput
+            label="River Card"
+            expectedCards={1}
+            onSubmit={saveStreetCards}
+            placeholder="9h"
+          />
+        )}
+
+        {/* Action history for current street */}
+        {streetActions.length > 0 && (
+          <div className="bg-muted/50 rounded-lg p-3">
+            <div className="text-sm font-semibold mb-2">Street Actions:</div>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {streetActions.map((action, idx) => {
+                const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                return (
+                  <div key={idx} className="text-xs flex justify-between">
+                    <span className="font-medium">{player?.player.name}</span>
+                    <span>
+                      {action.action_type}
+                      {action.bet_size > 0 && ` ₹${action.bet_size}`}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        <div className="bg-primary/10 p-4 rounded-lg">
-          <div className="font-semibold mb-2">Current Turn:</div>
-          <div className="text-lg">{currentPlayer?.player.name}</div>
+        {/* Current player indicator */}
+        <div className="bg-gradient-to-r from-poker-gold/20 to-transparent p-4 rounded-lg border border-poker-gold/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">Action on:</div>
+              <div className="text-xl font-bold">{currentPlayer?.player.name}</div>
+            </div>
+            {currentPlayer?.player_id === heroPlayer?.player_id && (
+              <Badge className="bg-poker-gold text-black">YOU</Badge>
+            )}
+          </div>
+          {currentBet > 0 && (
+            <div className="mt-2 text-sm">
+              Current Bet: <span className="font-bold">₹{currentBet}</span>
+            </div>
+          )}
         </div>
 
+        {/* Action buttons */}
         <div className="grid grid-cols-2 gap-2">
-          <Button onClick={() => recordAction('Check')} variant="outline">Check</Button>
-          <Button onClick={() => recordAction('Call')} variant="outline">Call</Button>
-          <Button onClick={() => recordAction('Fold')} variant="outline">Fold</Button>
-          <Button onClick={() => recordAction('All-In')} variant="outline">All-In</Button>
+          <Button 
+            onClick={() => recordAction('Check')} 
+            variant="outline"
+            disabled={currentBet > 0}
+          >
+            Check
+          </Button>
+          <Button 
+            onClick={() => recordAction('Call')} 
+            variant="outline"
+            disabled={currentBet === 0}
+          >
+            Call {currentBet > 0 && `₹${currentBet}`}
+          </Button>
+          <Button 
+            onClick={() => recordAction('Fold')} 
+            variant="destructive"
+          >
+            Fold
+          </Button>
+          <Button 
+            onClick={() => recordAction('All-In')} 
+            variant="secondary"
+          >
+            All-In
+          </Button>
         </div>
 
+        {/* Raise input */}
         <div>
-          <Label>Raise Amount</Label>
+          <Label>Raise To</Label>
           <div className="flex gap-2">
             <Input
               type="number"
               value={betAmount}
               onChange={(e) => setBetAmount(e.target.value)}
-              placeholder="Enter amount"
+              placeholder={`Min: ${currentBet * 2}`}
+              min={currentBet * 2}
             />
-            <Button onClick={() => recordAction('Raise')}>Raise</Button>
+            <Button onClick={() => recordAction('Raise')} disabled={!betAmount}>
+              Raise
+            </Button>
           </div>
         </div>
 
-        <Button onClick={moveToNextStreet} className="w-full" variant="secondary">
-          Move to Next Street
+        {/* Move to next street button */}
+        <Button 
+          onClick={moveToNextStreet} 
+          className="w-full" 
+          variant="default"
+          disabled={
+            (stage === 'flop' && !flopCards) ||
+            (stage === 'turn' && !turnCard) ||
+            (stage === 'river' && !riverCard)
+          }
+        >
+          {stage === 'river' ? 'Go to Showdown' : 'Next Street'} →
         </Button>
       </CardContent>
     </Card>
