@@ -69,17 +69,42 @@ export const getPlayerPosition = (
 };
 
 /**
- * Get position assignments for all active players
+ * Sort active players by their seat positions (clockwise order)
+ * 
+ * @param activePlayers - Array of active players
+ * @param seatPositions - Map of player_id to seat number
+ * @returns Sorted array of active players in seat order
+ */
+export const sortPlayersBySeat = (
+  activePlayers: GamePlayer[],
+  seatPositions: Record<string, number>
+): GamePlayer[] => {
+  return [...activePlayers].sort((a, b) => {
+    const seatA = seatPositions[a.player_id] ?? 999;
+    const seatB = seatPositions[b.player_id] ?? 999;
+    return seatA - seatB;
+  });
+};
+
+/**
+ * Get position assignments for all active players based on their seat positions
  * 
  * @param activePlayers - Array of active (non-dealt-out) players
  * @param buttonPlayerId - ID of the button player
+ * @param seatPositions - Optional map of player_id to seat number for proper ordering
  * @returns Map of player_id to position name
  */
 export const getPositionAssignments = (
   activePlayers: GamePlayer[],
-  buttonPlayerId: string
+  buttonPlayerId: string,
+  seatPositions?: Record<string, number>
 ): Record<string, PokerPosition> => {
-  const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
+  // Sort players by seat position if available
+  const sortedPlayers = seatPositions 
+    ? sortPlayersBySeat(activePlayers, seatPositions)
+    : activePlayers;
+  
+  const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
   
   if (buttonIndex === -1) {
     throw new Error('Button player not found in active players');
@@ -87,51 +112,64 @@ export const getPositionAssignments = (
   
   const assignments: Record<string, PokerPosition> = {};
   
-  activePlayers.forEach((player, index) => {
-    assignments[player.player_id] = getPlayerPosition(buttonIndex, index, activePlayers.length);
+  sortedPlayers.forEach((player, index) => {
+    assignments[player.player_id] = getPlayerPosition(buttonIndex, index, sortedPlayers.length);
   });
   
   return assignments;
 };
 
 /**
- * Get the Small Blind player from active players
+ * Get the Small Blind player from active players (seat-ordered)
  */
 export const getSmallBlindPlayer = (
   activePlayers: GamePlayer[],
-  buttonPlayerId: string
+  buttonPlayerId: string,
+  seatPositions?: Record<string, number>
 ): GamePlayer => {
-  const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
-  const sbIndex = (buttonIndex + 1) % activePlayers.length;
-  return activePlayers[sbIndex];
+  const sortedPlayers = seatPositions 
+    ? sortPlayersBySeat(activePlayers, seatPositions)
+    : activePlayers;
+  const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
+  const sbIndex = (buttonIndex + 1) % sortedPlayers.length;
+  return sortedPlayers[sbIndex];
 };
 
 /**
- * Get the Big Blind player from active players
+ * Get the Big Blind player from active players (seat-ordered)
  */
 export const getBigBlindPlayer = (
   activePlayers: GamePlayer[],
-  buttonPlayerId: string
+  buttonPlayerId: string,
+  seatPositions?: Record<string, number>
 ): GamePlayer => {
-  const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
-  const bbIndex = (buttonIndex + 2) % activePlayers.length;
-  return activePlayers[bbIndex];
+  const sortedPlayers = seatPositions 
+    ? sortPlayersBySeat(activePlayers, seatPositions)
+    : activePlayers;
+  const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
+  const bbIndex = (buttonIndex + 2) % sortedPlayers.length;
+  return sortedPlayers[bbIndex];
 };
 
 /**
- * Get position for a specific player
+ * Get position for a specific player (seat-ordered)
  */
 export const getPositionForPlayer = (
   activePlayers: GamePlayer[],
   buttonPlayerId: string,
-  targetPlayerId: string
+  targetPlayerId: string,
+  seatPositions?: Record<string, number>
 ): PokerPosition => {
-  const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
-  const playerIndex = activePlayers.findIndex(p => p.player_id === targetPlayerId);
+  const sortedPlayers = seatPositions 
+    ? sortPlayersBySeat(activePlayers, seatPositions)
+    : activePlayers;
+  
+  const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
+  const playerIndex = sortedPlayers.findIndex(p => p.player_id === targetPlayerId);
   
   if (buttonIndex === -1 || playerIndex === -1) {
     throw new Error('Player not found in active players');
   }
   
-  return getPlayerPosition(buttonIndex, playerIndex, activePlayers.length);
+  return getPlayerPosition(buttonIndex, playerIndex, sortedPlayers.length);
 };

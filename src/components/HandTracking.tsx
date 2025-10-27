@@ -75,12 +75,42 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<string>('');
   const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
+  const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
     gp.player.name.toLowerCase() === 'adwate' || 
     gp.player.name === user?.email?.split('@')[0]
   );
+
+  // Load table positions on mount
+  useEffect(() => {
+    const loadTablePositions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('table_positions')
+          .select('*')
+          .eq('game_id', game.id)
+          .order('snapshot_timestamp', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data && data.positions) {
+          const positions: Record<string, number> = {};
+          (data.positions as any[]).forEach((pos: any) => {
+            positions[pos.player_id] = pos.seat;
+          });
+          setSeatPositions(positions);
+        }
+      } catch (error) {
+        console.error('Error loading table positions:', error);
+      }
+    };
+    
+    loadTablePositions();
+  }, [game.id]);
 
   // Format amount with BB multiple
   const formatWithBB = (amount: number): string => {
@@ -94,12 +124,18 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
     const nextHandNumber = await getNextHandNumber(game.id);
     
-    // CRITICAL: Filter out dealt-out players to get active players for position assignment
-    const active = game.game_players.filter(gp => !dealtOutPlayers.includes(gp.player_id));
+    // CRITICAL: Filter out dealt-out players and sort by seat position for consistent ordering
+    const active = game.game_players
+      .filter(gp => !dealtOutPlayers.includes(gp.player_id))
+      .sort((a, b) => {
+        const seatA = seatPositions[a.player_id] ?? 999;
+        const seatB = seatPositions[b.player_id] ?? 999;
+        return seatA - seatB;
+      });
     
-    // Calculate hero position using new utility
+    // Calculate hero position using new utility with seat positions
     const heroPosition = heroPlayer?.player_id 
-      ? getPositionForPlayer(active, buttonPlayerId, heroPlayer.player_id)
+      ? getPositionForPlayer(active, buttonPlayerId, heroPlayer.player_id, seatPositions)
       : 'UTG';
 
     const hand = await createNewHand(game.id, buttonPlayerId, nextHandNumber, heroPosition);
@@ -108,9 +144,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setActivePlayers(active);
       setPlayersInHand(active.map(p => p.player_id));
       
-      // Get SB and BB players using utility functions
-      const sbPlayer = getSmallBlindPlayer(active, buttonPlayerId);
-      const bbPlayer = getBigBlindPlayer(active, buttonPlayerId);
+      // Get SB and BB players using utility functions with seat positions
+      const sbPlayer = getSmallBlindPlayer(active, buttonPlayerId, seatPositions);
+      const bbPlayer = getBigBlindPlayer(active, buttonPlayerId, seatPositions);
       
       const sbAmount = game.small_blind || 50;
       const bbAmount = game.big_blind || 100;
@@ -205,10 +241,10 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
-    // Calculate position using utility (button-based, active players only)
+    // Calculate button index from seat-ordered activePlayers
     const buttonPlayerId = currentHand.button_player_id;
     const buttonIndex = activePlayers.findIndex(gp => gp.player_id === buttonPlayerId);
-    const playerPosition = getPositionForPlayer(activePlayers, buttonPlayerId, currentPlayer.player_id);
+    const playerPosition = getPositionForPlayer(activePlayers, buttonPlayerId, currentPlayer.player_id, seatPositions);
     
     let betSize = 0;
     
@@ -872,7 +908,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               {activePlayers
                 .filter(p => playersInHand.includes(p.player_id))
                 .map((gp) => {
-                  const position = getPositionForPlayer(activePlayers, currentHand.button_player_id, gp.player_id);
+                  const position = getPositionForPlayer(activePlayers, currentHand.button_player_id, gp.player_id, seatPositions);
                   
                   return (
                     <div key={gp.player_id} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
