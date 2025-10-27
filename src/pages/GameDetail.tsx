@@ -466,143 +466,59 @@ const GameDetail = () => {
 
       {/* Settlements */}
       {settlementsWithType.length > 0 && (
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
-                <span className="text-2xl">💰</span>
-                Settlements
-              </CardTitle>
-            </CardHeader>
-          </Card>
-
-          <Card>
-            <CardContent className="p-0">
-              <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
-                {/* Headers - hidden on mobile */}
-                <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-                  <div className="grid grid-cols-3 gap-4 font-bold text-sm">
-                    <div className="flex items-center h-10 px-4">From</div>
-                    <div className="flex items-center justify-center h-10 px-4">To</div>
-                    <div className="flex items-center justify-center h-10 px-4">Amount</div>
-                  </div>
-                </div>
-
-                {/* Manual Settlements */}
-                {manualSettlements.length > 0 && (
-                  <>
-                    <div className="flex items-center gap-2 px-2">
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        Manual Settlements
-                      </Badge>
-                    </div>
-                    {manualSettlements.map((settlement, index) => (
-                      <Card key={`manual-${index}`} className="transition-colors hover:bg-muted/50">
-                        <CardContent className="p-4">
-                          {/* Mobile Layout */}
-                          <div className="md:hidden space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">From</p>
-                                <Badge variant="destructive" className="font-bold">
-                                  {settlement.from}
-                                </Badge>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">To</p>
-                                <Badge variant="success" className="font-bold">
-                                  {settlement.to}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-1">Amount</p>
-                              <p className="font-bold text-lg">Rs. {formatIndianNumber(settlement.amount)}</p>
-                            </div>
-                          </div>
-
-                          {/* Desktop Layout */}
-                          <div className="hidden md:grid grid-cols-3 gap-4 items-center text-sm">
-                            <div className="font-medium">
-                              <Badge variant="destructive" className="font-bold">
-                                {settlement.from}
-                              </Badge>
-                            </div>
-                            <div className="text-center">
-                              <Badge variant="success" className="font-bold">
-                                {settlement.to}
-                              </Badge>
-                            </div>
-                            <div className="text-center font-bold text-lg">
-                              Rs. {formatIndianNumber(settlement.amount)}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </>
-                )}
-
-                {/* Calculated Settlements */}
-                {calculatedSettlements.length > 0 && (
-                  <>
-                    {manualSettlements.length > 0 && (
-                      <div className="flex items-center gap-2 px-2 pt-2">
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                          Calculated Settlements
+        <Card className="border-primary/20">
+          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+            <CardTitle className="text-primary flex items-center gap-2">
+              <span className="text-2xl">💰</span>
+              Settlements
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                  <TableHead className="font-bold">From</TableHead>
+                  <TableHead className="font-bold">To</TableHead>
+                  <TableHead className="font-bold">Amount</TableHead>
+                  <TableHead className="font-bold">Type</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {settlementsWithType.map((settlement, index) => (
+                  <TableRow
+                    key={`settlement-${index}`}
+                    className={`transition-colors ${
+                      index % 2 === 0 
+                        ? "bg-secondary/5 hover:bg-secondary/20" 
+                        : "hover:bg-primary/10"
+                    }`}
+                  >
+                    <TableCell className="font-medium text-primary">
+                      {settlement.from}
+                    </TableCell>
+                    <TableCell className="font-medium text-primary">
+                      {settlement.to}
+                    </TableCell>
+                    <TableCell className="font-semibold text-accent-foreground">
+                      Rs. {formatIndianNumber(settlement.amount)}
+                    </TableCell>
+                    <TableCell>
+                      {settlement.isManual ? (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          Manual
                         </Badge>
-                      </div>
-                    )}
-                    {calculatedSettlements.map((settlement, index) => (
-                      <Card key={`calc-${index}`} className="transition-colors hover:bg-muted/50">
-                        <CardContent className="p-4">
-                          {/* Mobile Layout */}
-                          <div className="md:hidden space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">From</p>
-                                <Badge variant="destructive" className="font-bold">
-                                  {settlement.from}
-                                </Badge>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">To</p>
-                                <Badge variant="success" className="font-bold">
-                                  {settlement.to}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-1">Amount</p>
-                              <p className="font-bold text-lg">Rs. {formatIndianNumber(settlement.amount)}</p>
-                            </div>
-                          </div>
-
-                          {/* Desktop Layout */}
-                          <div className="hidden md:grid grid-cols-3 gap-4 items-center text-sm">
-                            <div className="font-medium">
-                              <Badge variant="destructive" className="font-bold">
-                                {settlement.from}
-                              </Badge>
-                            </div>
-                            <div className="text-center">
-                              <Badge variant="success" className="font-bold">
-                                {settlement.to}
-                              </Badge>
-                            </div>
-                            <div className="text-center font-bold text-lg">
-                              Rs. {formatIndianNumber(settlement.amount)}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                      ) : (
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          Calculated
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
