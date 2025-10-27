@@ -12,6 +12,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfile } from "@/components/UserProfile";
+import PlayerPerformance from "@/components/PlayerPerformance";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 
 interface GameSetupProps {
@@ -399,6 +400,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
               </CollapsibleContent>
             </Card>
           </Collapsible>
+        )}
+
+        {!loading && players.length > 0 && games.length > 0 && (
+          <PlayerPerformance players={players} games={games} />
         )}
 
         <div className="flex gap-4">

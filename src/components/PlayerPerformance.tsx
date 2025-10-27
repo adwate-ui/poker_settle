@@ -1,0 +1,155 @@
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, User } from "lucide-react";
+import { Player, Game } from "@/types/poker";
+import { formatIndianNumber } from "@/lib/utils";
+
+interface PlayerPerformanceProps {
+  players: Player[];
+  games: Game[];
+}
+
+const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+
+  const formatCurrency = (amount: number) => {
+    return `Rs. ${formatIndianNumber(amount)}`;
+  };
+
+  const playerGames = useMemo(() => {
+    if (!selectedPlayerId) return [];
+    
+    return games
+      .filter(game => game.game_players.some(gp => gp.player_id === selectedPlayerId))
+      .map(game => {
+        const gamePlayer = game.game_players.find(gp => gp.player_id === selectedPlayerId);
+        return {
+          gameId: game.id,
+          date: game.date,
+          buyInAmount: game.buy_in_amount,
+          buyIns: gamePlayer?.buy_ins || 0,
+          netAmount: gamePlayer?.net_amount || 0,
+        };
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [selectedPlayerId, games]);
+
+  const selectedPlayer = players.find(p => p.id === selectedPlayerId);
+
+  const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name));
+
+  if (players.length === 0) return null;
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-card border-border">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <CardTitle className="text-poker-gold flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Player Performance
+              </div>
+              {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            <div className="space-y-6">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Select Player</label>
+                <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
+                  <SelectTrigger className="bg-input border-border">
+                    <SelectValue placeholder="Choose a player..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortedPlayers.map(player => (
+                      <SelectItem key={player.id} value={player.id}>
+                        {player.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedPlayer && (
+                <>
+                  <div className="p-4 bg-secondary rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3">{selectedPlayer.name} - Overall Stats</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-background rounded">
+                        <div className="text-sm text-muted-foreground">Total Games</div>
+                        <div className="text-2xl font-bold text-primary">{selectedPlayer.total_games}</div>
+                      </div>
+                      <div className="text-center p-3 bg-background rounded">
+                        <div className="text-sm text-muted-foreground">Total P&L</div>
+                        <div className={`text-2xl font-bold flex items-center justify-center gap-2 ${selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                          {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {playerGames.length > 0 ? (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Game History</h3>
+                      <div className="rounded-lg border border-border overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Buy-in Amount</TableHead>
+                              <TableHead className="text-center">Buy-ins</TableHead>
+                              <TableHead className="text-right">P&L</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {playerGames.map((game) => (
+                              <TableRow key={game.gameId}>
+                                <TableCell className="font-medium">
+                                  {new Date(game.date).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>{formatCurrency(game.buyInAmount)}</TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant="outline">{game.buyIns}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Badge variant={game.netAmount >= 0 ? "default" : "destructive"}>
+                                    {game.netAmount >= 0 ? '+' : ''}{formatCurrency(game.netAmount)}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">
+                      No games found for this player.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {!selectedPlayerId && (
+                <p className="text-muted-foreground text-center py-8">
+                  Select a player to view their performance.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+};
+
+export default PlayerPerformance;
