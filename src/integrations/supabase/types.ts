@@ -64,36 +64,96 @@ export type Database = {
       }
       games: {
         Row: {
+          big_blind: number | null
           buy_in_amount: number
           created_at: string
           date: string
           id: string
           is_complete: boolean | null
           settlements: Json | null
+          small_blind: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          big_blind?: number | null
           buy_in_amount: number
           created_at?: string
           date?: string
           id?: string
           is_complete?: boolean | null
           settlements?: Json | null
+          small_blind?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          big_blind?: number | null
           buy_in_amount?: number
           created_at?: string
           date?: string
           id?: string
           is_complete?: boolean | null
           settlements?: Json | null
+          small_blind?: number | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      player_actions: {
+        Row: {
+          action_sequence: number
+          action_type: string
+          bet_size: number | null
+          created_at: string
+          hand_id: string
+          hole_cards: string | null
+          id: string
+          is_hero: boolean | null
+          player_id: string
+          street_type: string
+        }
+        Insert: {
+          action_sequence: number
+          action_type: string
+          bet_size?: number | null
+          created_at?: string
+          hand_id: string
+          hole_cards?: string | null
+          id?: string
+          is_hero?: boolean | null
+          player_id: string
+          street_type: string
+        }
+        Update: {
+          action_sequence?: number
+          action_type?: string
+          bet_size?: number | null
+          created_at?: string
+          hand_id?: string
+          hole_cards?: string | null
+          id?: string
+          is_hero?: boolean | null
+          player_id?: string
+          street_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_actions_hand_id_fkey"
+            columns: ["hand_id"]
+            isOneToOne: false
+            referencedRelation: "poker_hands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_actions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       players: {
         Row: {
@@ -125,6 +185,70 @@ export type Database = {
         }
         Relationships: []
       }
+      poker_hands: {
+        Row: {
+          button_player_id: string
+          created_at: string
+          final_stage: string | null
+          game_id: string
+          hand_number: number
+          hero_position: string | null
+          id: string
+          is_hero_win: boolean | null
+          pot_size: number | null
+          updated_at: string
+          winner_player_id: string | null
+        }
+        Insert: {
+          button_player_id: string
+          created_at?: string
+          final_stage?: string | null
+          game_id: string
+          hand_number: number
+          hero_position?: string | null
+          id?: string
+          is_hero_win?: boolean | null
+          pot_size?: number | null
+          updated_at?: string
+          winner_player_id?: string | null
+        }
+        Update: {
+          button_player_id?: string
+          created_at?: string
+          final_stage?: string | null
+          game_id?: string
+          hand_number?: number
+          hero_position?: string | null
+          id?: string
+          is_hero_win?: boolean | null
+          pot_size?: number | null
+          updated_at?: string
+          winner_player_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poker_hands_button_player_id_fkey"
+            columns: ["button_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poker_hands_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poker_hands_winner_player_id_fkey"
+            columns: ["winner_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -151,6 +275,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      street_cards: {
+        Row: {
+          cards_notation: string
+          created_at: string
+          hand_id: string
+          id: string
+          street_type: string
+        }
+        Insert: {
+          cards_notation: string
+          created_at?: string
+          hand_id: string
+          id?: string
+          street_type: string
+        }
+        Update: {
+          cards_notation?: string
+          created_at?: string
+          hand_id?: string
+          id?: string
+          street_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "street_cards_hand_id_fkey"
+            columns: ["hand_id"]
+            isOneToOne: false
+            referencedRelation: "poker_hands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       table_positions: {
         Row: {
