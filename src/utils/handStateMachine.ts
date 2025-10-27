@@ -1,0 +1,291 @@
+import { GamePlayer, PlayerAction } from '@/types/poker';
+
+export type HandStage = 'setup' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'complete';
+export type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Check' | 'Call' | 'Raise' | 'Fold' | 'All-In';
+
+export interface HandState {
+  stage: HandStage;
+  activePlayers: GamePlayer[];
+  currentPlayerIndex: number;
+  playersInHand: string[]; // Players who haven't folded
+  dealtOutPlayers: string[]; // Players who weren't dealt in
+  buttonPlayerIndex: number;
+  currentBet: number;
+  potSize: number;
+  streetPlayerBets: Record<string, number>;
+  totalPlayerBets: Record<string, number>;
+  streetActions: PlayerAction[];
+  actionSequence: number;
+}
+
+/**
+ * Get the next active player index following poker rotation rules
+ */
+export const getNextPlayerIndex = (
+  currentIndex: number,
+  stage: HandStage,
+  activePlayers: GamePlayer[],
+  buttonPlayerIndex: number,
+  playersInHand: string[]
+): number => {
+  if (activePlayers.length === 0) return 0;
+
+  let nextIndex = (currentIndex + 1) % activePlayers.length;
+  let attempts = 0;
+  
+  // Keep rotating until we find an active player
+  while (attempts < activePlayers.length) {
+    const player = activePlayers[nextIndex];
+    
+    // Skip players who have folded or were dealt out
+    if (playersInHand.includes(player.player_id)) {
+      return nextIndex;
+    }
+    
+    nextIndex = (nextIndex + 1) % activePlayers.length;
+    attempts++;
+  }
+  
+  return currentIndex; // Fallback to current if no valid player found
+};
+
+/**
+ * Get the starting player index for a betting round
+ */
+export const getStartingPlayerIndex = (
+  stage: HandStage,
+  allPlayers: GamePlayer[],
+  activePlayers: GamePlayer[],
+  buttonPlayerId: string
+): number => {
+  const buttonIndex = allPlayers.findIndex(p => p.player_id === buttonPlayerId);
+  
+  if (stage === 'preflop') {
+    // Preflop: First to act is player immediately left of Big Blind (UTG)
+    // Button +1 = SB, +2 = BB, +3 = UTG
+    const utgIndexInAll = (buttonIndex + 3) % allPlayers.length;
+    const utgPlayer = allPlayers[utgIndexInAll];
+    
+    // Find this player in activePlayers array
+    const activeIndex = activePlayers.findIndex(p => p.player_id === utgPlayer.player_id);
+    return activeIndex !== -1 ? activeIndex : 0;
+  } else {
+    // Postflop: First to act is first active player left of button
+    let checkIndex = (buttonIndex + 1) % allPlayers.length;
+    let attempts = 0;
+    
+    while (attempts < allPlayers.length) {
+      const player = allPlayers[checkIndex];
+      const activeIndex = activePlayers.findIndex(p => p.player_id === player.player_id);
+      
+      if (activeIndex !== -1) {
+        return activeIndex;
+      }
+      
+      checkIndex = (checkIndex + 1) % allPlayers.length;
+      attempts++;
+    }
+    
+    return 0; // Fallback
+  }
+};
+
+/**
+ * Check if betting round is complete
+ */
+export const isBettingRoundComplete = (
+  stage: HandStage,
+  activePlayers: GamePlayer[],
+  playersInHand: string[],
+  streetPlayerBets: Record<string, number>,
+  streetActions: PlayerAction[],
+  buttonPlayerId: string
+): boolean => {
+  // Check if only one player remains
+  const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
+  if (remainingPlayers.length <= 1) {
+    return true;
+  }
+
+  // Get all bets from remaining active players
+  const activeBets = remainingPlayers.map(p => streetPlayerBets[p.player_id] || 0);
+  
+  if (activeBets.length === 0) return false;
+  
+  // Check if all bets are equal
+  const maxBet = Math.max(...activeBets);
+  const allBetsEqual = activeBets.every(bet => bet === maxBet);
+  
+  if (!allBetsEqual) return false;
+  
+  // Special preflop rule: SB and BB must have chance to act
+  if (stage === 'preflop') {
+    const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
+    if (buttonIndex === -1) return false;
+    
+    const sbIndex = (buttonIndex + 1) % activePlayers.length;
+    const bbIndex = (buttonIndex + 2) % activePlayers.length;
+    const sbPlayerId = activePlayers[sbIndex]?.player_id;
+    const bbPlayerId = activePlayers[bbIndex]?.player_id;
+    
+    if (!sbPlayerId || !bbPlayerId) return false;
+    
+    // Count non-blind actions for SB and BB
+    const sbNonBlindActions = streetActions.filter(
+      a => a.player_id === sbPlayerId && a.action_type !== 'Small Blind'
+    ).length;
+    const bbNonBlindActions = streetActions.filter(
+      a => a.player_id === bbPlayerId && a.action_type !== 'Big Blind'
+    ).length;
+    
+    // Both must act at least once after posting blinds
+    if (sbNonBlindActions < 1 || bbNonBlindActions < 1) {
+      return false;
+    }
+  } else {
+    // Postflop: All remaining players must have acted at least once
+    const playersWhoActed = new Set(streetActions.map(a => a.player_id));
+    
+    for (const player of remainingPlayers) {
+      if (!playersWhoActed.has(player.player_id)) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+};
+
+/**
+ * Check if only one player remains (hand ends immediately)
+ */
+export const shouldEndHandEarly = (
+  activePlayers: GamePlayer[],
+  playersInHand: string[]
+): { shouldEnd: boolean; winnerId: string | null } => {
+  const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
+  
+  if (remainingPlayers.length === 1) {
+    return {
+      shouldEnd: true,
+      winnerId: remainingPlayers[0].player_id
+    };
+  }
+  
+  return { shouldEnd: false, winnerId: null };
+};
+
+/**
+ * Get the next stage in the hand
+ */
+export const getNextStage = (currentStage: HandStage): HandStage => {
+  const stageProgression: Record<HandStage, HandStage> = {
+    setup: 'preflop',
+    preflop: 'flop',
+    flop: 'turn',
+    turn: 'river',
+    river: 'showdown',
+    showdown: 'complete',
+    complete: 'complete'
+  };
+  
+  return stageProgression[currentStage] || currentStage;
+};
+
+/**
+ * Check if a player can check
+ */
+export const canPlayerCheck = (
+  playerId: string,
+  currentBet: number,
+  streetPlayerBets: Record<string, number>
+): boolean => {
+  const playerBet = streetPlayerBets[playerId] || 0;
+  return currentBet === 0 || playerBet === currentBet;
+};
+
+/**
+ * Calculate call amount for a player
+ */
+export const getCallAmount = (
+  playerId: string,
+  currentBet: number,
+  streetPlayerBets: Record<string, number>
+): number => {
+  const playerBet = streetPlayerBets[playerId] || 0;
+  return Math.max(0, currentBet - playerBet);
+};
+
+/**
+ * Process a player action and update state
+ */
+export const processAction = (
+  state: HandState,
+  actionType: ActionType,
+  betSize: number
+): Partial<HandState> => {
+  const currentPlayer = state.activePlayers[state.currentPlayerIndex];
+  if (!currentPlayer) return {};
+
+  const playerStreetBet = state.streetPlayerBets[currentPlayer.player_id] || 0;
+  let additionalAmount = 0;
+
+  // Calculate additional amount added to pot
+  if (actionType === 'Call') {
+    additionalAmount = state.currentBet - playerStreetBet;
+  } else if (actionType === 'Raise' || actionType === 'All-In') {
+    additionalAmount = betSize - playerStreetBet;
+  } else if (actionType === 'Small Blind' || actionType === 'Big Blind') {
+    additionalAmount = betSize;
+  }
+
+  const updates: Partial<HandState> = {
+    potSize: state.potSize + additionalAmount,
+    streetPlayerBets: {
+      ...state.streetPlayerBets,
+      [currentPlayer.player_id]: betSize
+    },
+    totalPlayerBets: {
+      ...state.totalPlayerBets,
+      [currentPlayer.player_id]: (state.totalPlayerBets[currentPlayer.player_id] || 0) + additionalAmount
+    },
+    actionSequence: state.actionSequence + 1
+  };
+
+  // Update current bet if raised
+  if (actionType === 'Raise' || actionType === 'All-In') {
+    updates.currentBet = betSize;
+  }
+
+  // Handle fold
+  if (actionType === 'Fold') {
+    updates.playersInHand = state.playersInHand.filter(id => id !== currentPlayer.player_id);
+    updates.activePlayers = state.activePlayers.filter(p => p.player_id !== currentPlayer.player_id);
+  }
+
+  return updates;
+};
+
+/**
+ * Reset state for a new street
+ */
+export const resetForNewStreet = (
+  state: HandState,
+  allPlayers: GamePlayer[],
+  buttonPlayerId: string
+): Partial<HandState> => {
+  const newStage = getNextStage(state.stage);
+  const startingIndex = getStartingPlayerIndex(newStage, allPlayers, state.activePlayers, buttonPlayerId);
+
+  // Reset street-specific bets
+  const resetBets: Record<string, number> = {};
+  state.activePlayers.forEach(p => resetBets[p.player_id] = 0);
+
+  return {
+    stage: newStage,
+    currentPlayerIndex: startingIndex,
+    currentBet: 0,
+    streetPlayerBets: resetBets,
+    streetActions: []
+  };
+};

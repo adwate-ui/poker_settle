@@ -16,13 +16,23 @@ import PokerCard from './PokerCard';
 import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  HandStage,
+  ActionType,
+  getNextPlayerIndex,
+  getStartingPlayerIndex,
+  isBettingRoundComplete,
+  shouldEndHandEarly,
+  getNextStage,
+  canPlayerCheck,
+  getCallAmount,
+  processAction,
+  resetForNewStreet
+} from '@/utils/handStateMachine';
 
 interface HandTrackingProps {
   game: Game;
 }
-
-type HandStage = 'setup' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'complete';
-type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Check' | 'Call' | 'Raise' | 'Fold' | 'All-In';
 
 const HandTracking = ({ game }: HandTrackingProps) => {
   const { user } = useAuth();
@@ -59,8 +69,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
 
-  // Find hero player (current user)
-  const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
+  // Find hero player - ALWAYS tag "Adwate" as the hero
+  const heroPlayer = game.game_players.find(gp => 
+    gp.player.name.toLowerCase() === 'adwate' || 
+    gp.player.name === user?.email?.split('@')[0]
+  );
 
   // Format amount with BB multiple
   const formatWithBB = (amount: number): string => {
@@ -167,12 +180,12 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       );
       
       if (sbAction && bbAction) {
-        setStreetActions([sbAction, bbAction]);
+      setStreetActions([sbAction, bbAction]);
       }
       
-      // Start with player after big blind (UTG)
-      const utgIndex = (buttonIndex + 3) % active.length;
-      setCurrentPlayerIndex(utgIndex);
+      // Use state machine to get starting player (UTG for preflop)
+      const startingIndex = getStartingPlayerIndex('preflop', game.game_players, active, buttonPlayerId);
+      setCurrentPlayerIndex(startingIndex);
       setStage('preflop');
       setCurrentBet(bbAmount);
       setPotSize(sbAmount + bbAmount);
@@ -228,29 +241,20 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const playerPosition = getPlayerPosition(buttonIndex, currentPlayerIndex, activePlayers.length);
     
     let betSize = 0;
-    let additionalAmount = 0;
     
     if (actionType === 'Small Blind') {
       betSize = (game.small_blind || 50);
-      additionalAmount = betSize;
     } else if (actionType === 'Big Blind') {
       betSize = (game.big_blind || 100);
-      additionalAmount = betSize;
     } else if (actionType === 'Call') {
-      // Call amount = max bet on this street - player's bet on this street
       betSize = currentBet;
-      additionalAmount = currentBet - playerStreetBet;
-    } else if (actionType === 'Raise') {
+    } else if (actionType === 'Raise' || actionType === 'All-In') {
       betSize = parseFloat(betAmount) || currentBet;
-      additionalAmount = betSize - playerStreetBet;
     } else if (actionType === 'Check') {
       betSize = 0;
-      additionalAmount = 0;
-    } else if (actionType === 'All-In') {
-      betSize = parseFloat(betAmount) || currentBet;
-      additionalAmount = betSize - playerStreetBet;
     }
 
+    // Record action in database
     const action = await recordPlayerAction(
       currentHand.id,
       currentPlayer.player_id,
@@ -266,80 +270,104 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setStreetActions(prev => [...prev, action]);
     }
 
-    // Update player bets for this street
-    setStreetPlayerBets(prev => ({
-      ...prev,
-      [currentPlayer.player_id]: betSize
-    }));
+    // Process action using state machine
+    const stateUpdates = processAction(
+      {
+        stage,
+        activePlayers,
+        currentPlayerIndex,
+        playersInHand,
+        dealtOutPlayers,
+        buttonPlayerIndex: buttonIndex,
+        currentBet,
+        potSize,
+        streetPlayerBets,
+        totalPlayerBets: playerBets,
+        streetActions,
+        actionSequence
+      },
+      actionType,
+      betSize
+    );
+
+    // Apply state updates
+    if (stateUpdates.potSize !== undefined) setPotSize(stateUpdates.potSize);
+    if (stateUpdates.streetPlayerBets) setStreetPlayerBets(stateUpdates.streetPlayerBets);
+    if (stateUpdates.totalPlayerBets) setPlayerBets(stateUpdates.totalPlayerBets);
+    if (stateUpdates.actionSequence !== undefined) setActionSequence(stateUpdates.actionSequence);
+    if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
     
-    // Update total player bets across all streets
-    setPlayerBets(prev => ({
-      ...prev,
-      [currentPlayer.player_id]: (prev[currentPlayer.player_id] || 0) + additionalAmount
-    }));
-
-    // Update pot with additional amount
-    setPotSize(prev => prev + additionalAmount);
-    setActionSequence(prev => prev + 1);
-
-    // If fold, remove player from players in hand
+    // Handle fold - update active players and check for winner
     if (actionType === 'Fold') {
-      setPlayersInHand(prev => prev.filter(id => id !== currentPlayer.player_id));
-      const remainingActive = activePlayers.filter(p => p.player_id !== currentPlayer.player_id);
-      setActivePlayers(remainingActive);
-      
-      // If only one player left, they win
-      if (remainingActive.length === 1) {
-        await finishHand([remainingActive[0].player_id]);
-        return;
+      if (stateUpdates.playersInHand) setPlayersInHand(stateUpdates.playersInHand);
+      if (stateUpdates.activePlayers) {
+        setActivePlayers(stateUpdates.activePlayers);
+        
+        // Check if only one player remains
+        const endCheck = shouldEndHandEarly(stateUpdates.activePlayers, stateUpdates.playersInHand || []);
+        if (endCheck.shouldEnd && endCheck.winnerId) {
+          await finishHand([endCheck.winnerId]);
+          return;
+        }
       }
-      return;
     }
 
-    // Update current bet if raised
-    if (actionType === 'Raise') {
-      setCurrentBet(betSize);
-    }
-
-    // Move to next player
-    setCurrentPlayerIndex((prev) => (prev + 1) % activePlayers.length);
+    // Move to next player using state machine logic
+    const nextIndex = getNextPlayerIndex(
+      currentPlayerIndex,
+      stage,
+      stateUpdates.activePlayers || activePlayers,
+      buttonIndex,
+      stateUpdates.playersInHand || playersInHand
+    );
+    setCurrentPlayerIndex(nextIndex);
     setBetAmount('');
   };
 
   const moveToNextStreet = async () => {
     if (!currentHand) return;
 
-    if (stage === 'preflop') {
-      setStage('flop');
-      await updateHandStage(currentHand.id, 'Flop');
-    } else if (stage === 'flop') {
-      setStage('turn');
-      await updateHandStage(currentHand.id, 'Turn');
-    } else if (stage === 'turn') {
-      setStage('river');
-      await updateHandStage(currentHand.id, 'River');
-    } else if (stage === 'river') {
-      setStage('showdown');
-      await updateHandStage(currentHand.id, 'Showdown');
-    }
+    const nextStage = getNextStage(stage);
     
-    // Reset for next street - post-flop action starts from small blind
-    if (stage !== 'preflop') {
-      // Find small blind position (1 seat after button)
-      const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand.button_player_id);
-      const sbIndex = (buttonIndex + 1) % activePlayers.length;
-      setCurrentPlayerIndex(sbIndex);
-    } else {
-      setCurrentPlayerIndex(0);
-    }
+    // Update database with new stage
+    const stageMap: Record<HandStage, 'Preflop' | 'Flop' | 'Turn' | 'River' | 'Showdown'> = {
+      setup: 'Preflop',
+      preflop: 'Flop',
+      flop: 'Turn',
+      turn: 'River',
+      river: 'Showdown',
+      showdown: 'Showdown',
+      complete: 'Showdown'
+    };
+    await updateHandStage(currentHand.id, stageMap[nextStage]);
     
-    setCurrentBet(0);
-    setStreetActions([]);
+    // Use state machine to reset for new street
+    const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand.button_player_id);
+    const stateUpdates = resetForNewStreet(
+      {
+        stage,
+        activePlayers,
+        currentPlayerIndex,
+        playersInHand,
+        dealtOutPlayers,
+        buttonPlayerIndex: buttonIndex,
+        currentBet,
+        potSize,
+        streetPlayerBets,
+        totalPlayerBets: playerBets,
+        streetActions,
+        actionSequence
+      },
+      game.game_players,
+      currentHand.button_player_id
+    );
     
-    // Reset player bets for new street
-    const resetBets: Record<string, number> = {};
-    activePlayers.forEach(p => resetBets[p.player_id] = 0);
-    setStreetPlayerBets(resetBets);
+    // Apply updates
+    if (stateUpdates.stage) setStage(stateUpdates.stage);
+    if (stateUpdates.currentPlayerIndex !== undefined) setCurrentPlayerIndex(stateUpdates.currentPlayerIndex);
+    if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
+    if (stateUpdates.streetPlayerBets) setStreetPlayerBets(stateUpdates.streetPlayerBets);
+    if (stateUpdates.streetActions) setStreetActions(stateUpdates.streetActions);
   };
 
   const moveToPreviousStreet = () => {
@@ -516,61 +544,27 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   };
 
   const canMoveToNextStreet = (): boolean => {
+    if (!currentHand) return false;
+    
     // Check if cards are dealt for this street
     if (stage === 'flop' && !flopCards) return false;
     if (stage === 'turn' && !turnCard) return false;
     if (stage === 'river' && !riverCard) return false;
     
-    // Check if all remaining players have equal bets
-    const activeBets = activePlayers
-      .filter(p => playersInHand.includes(p.player_id))
-      .map(p => streetPlayerBets[p.player_id] || 0);
-    
-    if (activeBets.length === 0) return false;
-    
-    const maxBet = Math.max(...activeBets);
-    const allBetsEqual = activeBets.every(bet => bet === maxBet);
-    
-    if (!allBetsEqual) return false;
-    
-    // Pre-flop: SB and BB must act at least twice
-    if (stage === 'preflop') {
-      const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand?.button_player_id);
-      const sbIndex = (buttonIndex + 1) % activePlayers.length;
-      const bbIndex = (buttonIndex + 2) % activePlayers.length;
-      const sbPlayerId = activePlayers[sbIndex]?.player_id;
-      const bbPlayerId = activePlayers[bbIndex]?.player_id;
-      
-      // Count actions for SB and BB (excluding blind posting)
-      const sbActionCount = streetActions.filter(
-        a => a.player_id === sbPlayerId && a.action_type !== 'Small Blind'
-      ).length;
-      const bbActionCount = streetActions.filter(
-        a => a.player_id === bbPlayerId && a.action_type !== 'Big Blind'
-      ).length;
-      
-      // Both must have acted at least twice (not including initial blinds)
-      if (sbActionCount < 2 || bbActionCount < 2) {
-        return false;
-      }
-    } else {
-      // Post-flop: All players must act at least once
-      const playersStillIn = activePlayers.filter(p => playersInHand.includes(p.player_id));
-      const playersWhoActed = new Set(streetActions.map(a => a.player_id));
-      
-      for (const player of playersStillIn) {
-        if (!playersWhoActed.has(player.player_id)) {
-          return false;
-        }
-      }
-    }
-    
-    return true;
+    // Use state machine to check if betting round is complete
+    return isBettingRoundComplete(
+      stage,
+      activePlayers,
+      playersInHand,
+      streetPlayerBets,
+      streetActions,
+      currentHand.button_player_id
+    );
   };
 
   const canCheck = (): boolean => {
-    const playerCurrentBet = playerBets[currentPlayer?.player_id] || 0;
-    return currentBet === 0 || currentBet === playerCurrentBet;
+    if (!currentPlayer) return false;
+    return canPlayerCheck(currentPlayer.player_id, currentBet, streetPlayerBets);
   };
 
   if (stage === 'setup') {
@@ -999,7 +993,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               variant="outline"
               disabled={currentBet === 0}
             >
-              Call {currentBet > 0 && formatWithBB(currentBet - (streetPlayerBets[currentPlayer?.player_id] || 0))}
+              Call {currentBet > 0 && currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}
             </Button>
             <Button 
               onClick={() => recordAction('Fold')} 
