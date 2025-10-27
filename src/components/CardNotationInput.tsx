@@ -76,8 +76,8 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: Card
   const cleaned = input.replace(/\s+/g, '').toUpperCase();
   const cards = cleaned.length >= 2 && cleaned.length % 2 === 0 ? parseCards(input) : [];
   
-  // Only validate when we have the expected number of cards
-  const isValid = cleaned.length === expectedCards * 2 && validateCards(input);
+  // Check if input is complete without triggering validation errors
+  const isComplete = cleaned.length === expectedCards * 2;
 
   return (
     <div className="space-y-3">
@@ -90,7 +90,7 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: Card
           className="uppercase"
           maxLength={expectedCards * 3} // Allow for spaces
         />
-        <Button onClick={handleSubmit} disabled={!isValid}>
+        <Button onClick={handleSubmit} disabled={!isComplete}>
           Show Cards
         </Button>
       </div>

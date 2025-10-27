@@ -240,6 +240,19 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setPlayerBets(resetBets);
   };
 
+  const moveToPreviousStreet = () => {
+    if (stage === 'river') {
+      setStage('turn');
+      setRiverCard('');
+    } else if (stage === 'turn') {
+      setStage('flop');
+      setTurnCard('');
+    } else if (stage === 'flop') {
+      setStage('preflop');
+      setFlopCards('');
+    }
+  };
+
   const saveStreetCards = async (cards: string) => {
     if (!currentHand) return;
 
@@ -389,6 +402,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     
     const maxBet = Math.max(...activeBets);
     return activeBets.every(bet => bet === maxBet);
+  };
+
+  const canCheck = (): boolean => {
+    const playerCurrentBet = playerBets[currentPlayer?.player_id] || 0;
+    return currentBet === 0 || currentBet === playerCurrentBet;
   };
 
   if (stage === 'setup') {
@@ -745,61 +763,82 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button 
-            onClick={() => recordAction('Check')} 
-            variant="outline"
-            disabled={currentBet > 0}
-          >
-            Check
-          </Button>
-          <Button 
-            onClick={() => recordAction('Call')} 
-            variant="outline"
-            disabled={currentBet === 0}
-          >
-            Call {currentBet > 0 && `₹${currentBet - (playerBets[currentPlayer?.player_id] || 0)}`}
-          </Button>
-          <Button 
-            onClick={() => recordAction('Fold')} 
-            variant="destructive"
-          >
-            Fold
-          </Button>
-          <Button 
-            onClick={() => recordAction('All-In')} 
-            variant="secondary"
-          >
-            All-In
-          </Button>
-        </div>
-
-        {/* Raise input */}
-        <div>
-          <Label>Raise To</Label>
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              placeholder={`Min: ${currentBet * 2}`}
-              min={currentBet * 2}
-            />
-            <Button onClick={() => recordAction('Raise')} disabled={!betAmount}>
-              Raise
+        {!canMoveToNextStreet() ? (
+          <div className="grid grid-cols-2 gap-2">
+            <Button 
+              onClick={() => recordAction('Check')} 
+              variant="outline"
+              disabled={!canCheck()}
+            >
+              Check
+            </Button>
+            <Button 
+              onClick={() => recordAction('Call')} 
+              variant="outline"
+              disabled={currentBet === 0}
+            >
+              Call {currentBet > 0 && `₹${currentBet - (playerBets[currentPlayer?.player_id] || 0)}`}
+            </Button>
+            <Button 
+              onClick={() => recordAction('Fold')} 
+              variant="destructive"
+            >
+              Fold
+            </Button>
+            <Button 
+              onClick={() => recordAction('All-In')} 
+              variant="secondary"
+            >
+              All-In
             </Button>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-r from-poker-gold/20 to-transparent p-4 rounded-lg border-2 border-poker-gold">
+            <p className="text-center font-semibold text-poker-gold mb-2">
+              All bets are matched! Ready to move to next street.
+            </p>
+          </div>
+        )}
 
-        {/* Move to next street button */}
-        <Button 
-          onClick={moveToNextStreet} 
-          className="w-full" 
-          variant="default"
-          disabled={!canMoveToNextStreet()}
-        >
-          {stage === 'river' ? 'Go to Showdown' : 'Next Street'} →
-        </Button>
+        {/* Raise input */}
+        {!canMoveToNextStreet() && (
+          <div>
+            <Label>Raise To</Label>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                placeholder={`Min: ${currentBet * 2}`}
+                min={currentBet * 2}
+              />
+              <Button onClick={() => recordAction('Raise')} disabled={!betAmount}>
+                Raise
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation buttons */}
+        <div className="flex gap-2">
+          {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
+            <Button 
+              onClick={moveToPreviousStreet} 
+              className="flex-1" 
+              variant="outline"
+            >
+              ← Previous Street
+            </Button>
+          )}
+          <Button 
+            onClick={moveToNextStreet} 
+            className="flex-1" 
+            variant="default"
+            disabled={!canMoveToNextStreet()}
+          >
+            {stage === 'river' ? 'Go to Showdown' : 'Next Street'} →
+          </Button>
+        </div>
         
         {!canMoveToNextStreet() && (
           <p className="text-xs text-muted-foreground text-center">
