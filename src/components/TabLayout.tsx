@@ -15,12 +15,14 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
   const currentTab = location.pathname === "/" ? "new-game" 
     : location.pathname.startsWith("/games") ? "games-history"
     : location.pathname.startsWith("/players") ? "players-history"
+    : location.pathname.startsWith("/hands") ? "hands-history"
     : defaultTab;
 
   const handleTabChange = (value: string) => {
     if (value === "new-game") navigate("/");
     else if (value === "games-history") navigate("/games");
     else if (value === "players-history") navigate("/players");
+    else if (value === "hands-history") navigate("/hands");
   };
 
   return (
@@ -35,18 +37,22 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         </div>
         
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-auto">
+          <TabsList className="grid w-full grid-cols-4 mb-4 sm:mb-6 h-auto">
             <TabsTrigger value="new-game" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <span className="hidden xs:inline">New Game</span>
               <span className="xs:hidden">New</span>
             </TabsTrigger>
             <TabsTrigger value="games-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
-              <span className="hidden xs:inline">Games History</span>
+              <span className="hidden xs:inline">Games</span>
               <span className="xs:hidden">Games</span>
             </TabsTrigger>
             <TabsTrigger value="players-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
-              <span className="hidden xs:inline">Players History</span>
+              <span className="hidden xs:inline">Players</span>
               <span className="xs:hidden">Players</span>
+            </TabsTrigger>
+            <TabsTrigger value="hands-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <span className="hidden xs:inline">Hands</span>
+              <span className="xs:hidden">Hands</span>
             </TabsTrigger>
           </TabsList>
           

@@ -35,6 +35,7 @@ const AppContent = () => {
         <Route path="/games/:gameId" element={user ? <Index /> : <Auth />} />
         <Route path="/players" element={user ? <Index /> : <Auth />} />
         <Route path="/players/:playerId" element={user ? <Index /> : <Auth />} />
+        <Route path="/hands" element={user ? <Index /> : <Auth />} />
         <Route path="/auth" element={<Auth />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

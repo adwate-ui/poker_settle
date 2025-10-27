@@ -5,6 +5,7 @@ import GamesHistory from "./GamesHistory";
 import GameDetail from "./GameDetail";
 import PlayersHistory from "./PlayersHistory";
 import PlayerDetail from "./PlayerDetail";
+import HandsHistory from "./HandsHistory";
 import ChatBot from "@/components/ChatBot";
 import { TabsContent } from "@/components/ui/tabs";
 
@@ -23,6 +24,9 @@ const Index = () => {
       </TabsContent>
       <TabsContent value="players-history">
         {isPlayerDetail ? <PlayerDetail /> : <PlayersHistory />}
+      </TabsContent>
+      <TabsContent value="hands-history">
+        <HandsHistory />
       </TabsContent>
       <ChatBot />
     </TabLayout>

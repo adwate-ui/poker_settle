@@ -1,0 +1,202 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { PokerHand, PlayerAction, StreetCard } from '@/types/poker';
+import { useToast } from '@/hooks/use-toast';
+
+export interface HandWithDetails extends PokerHand {
+  button_player_name: string;
+  winner_player_name: string | null;
+  game_date: string;
+  game_buy_in: number;
+  actions: PlayerAction[];
+  street_cards: StreetCard[];
+}
+
+export interface HandFilters {
+  heroPosition?: string;
+  gameId?: string;
+  result?: 'win' | 'loss' | 'all';
+  showdown?: 'yes' | 'no' | 'all';
+  finalStage?: string;
+}
+
+export const useHandsHistory = () => {
+  const [hands, setHands] = useState<HandWithDetails[]>([]);
+  const [filteredHands, setFilteredHands] = useState<HandWithDetails[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<HandFilters>({});
+  const { toast } = useToast();
+
+  const fetchHands = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch poker hands with related data
+      const { data: handsData, error: handsError } = await supabase
+        .from('poker_hands')
+        .select(`
+          *,
+          button_player:players!poker_hands_button_player_id_fkey(name),
+          winner_player:players!poker_hands_winner_player_id_fkey(name),
+          game:games(date, buy_in_amount)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (handsError) throw handsError;
+
+      // Fetch actions for all hands
+      const handIds = handsData?.map(h => h.id) || [];
+      const { data: actionsData, error: actionsError } = await supabase
+        .from('player_actions')
+        .select('*')
+        .in('hand_id', handIds);
+
+      if (actionsError) throw actionsError;
+
+      // Fetch street cards for all hands
+      const { data: cardsData, error: cardsError } = await supabase
+        .from('street_cards')
+        .select('*')
+        .in('hand_id', handIds);
+
+      if (cardsError) throw cardsError;
+
+      // Combine data
+      const enrichedHands: HandWithDetails[] = (handsData || []).map(hand => ({
+        id: hand.id,
+        game_id: hand.game_id,
+        hand_number: hand.hand_number,
+        button_player_id: hand.button_player_id,
+        pot_size: hand.pot_size || 0,
+        final_stage: hand.final_stage as PokerHand['final_stage'],
+        winner_player_id: hand.winner_player_id,
+        hero_position: hand.hero_position,
+        is_hero_win: hand.is_hero_win,
+        created_at: hand.created_at,
+        updated_at: hand.updated_at,
+        button_player_name: hand.button_player?.name || 'Unknown',
+        winner_player_name: hand.winner_player?.name || null,
+        game_date: hand.game?.date || '',
+        game_buy_in: hand.game?.buy_in_amount || 0,
+        actions: (actionsData?.filter(a => a.hand_id === hand.id) || []) as PlayerAction[],
+        street_cards: (cardsData?.filter(c => c.hand_id === hand.id) || []) as StreetCard[],
+      }));
+
+      setHands(enrichedHands);
+      setFilteredHands(enrichedHands);
+    } catch (error: any) {
+      toast({
+        title: 'Error Loading Hands',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHands();
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, hands]);
+
+  const applyFilters = () => {
+    let filtered = [...hands];
+
+    if (filters.heroPosition) {
+      filtered = filtered.filter(h => h.hero_position === filters.heroPosition);
+    }
+
+    if (filters.gameId) {
+      filtered = filtered.filter(h => h.game_id === filters.gameId);
+    }
+
+    if (filters.result && filters.result !== 'all') {
+      if (filters.result === 'win') {
+        filtered = filtered.filter(h => h.is_hero_win === true);
+      } else if (filters.result === 'loss') {
+        filtered = filtered.filter(h => h.is_hero_win === false);
+      }
+    }
+
+    if (filters.showdown && filters.showdown !== 'all') {
+      if (filters.showdown === 'yes') {
+        filtered = filtered.filter(h => h.final_stage === 'Showdown');
+      } else {
+        filtered = filtered.filter(h => h.final_stage !== 'Showdown');
+      }
+    }
+
+    if (filters.finalStage) {
+      filtered = filtered.filter(h => h.final_stage === filters.finalStage);
+    }
+
+    setFilteredHands(filtered);
+  };
+
+  const updateFilters = (newFilters: Partial<HandFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+  };
+
+  const getUniqueGames = () => {
+    const gameMap = new Map();
+    hands.forEach(hand => {
+      if (!gameMap.has(hand.game_id)) {
+        gameMap.set(hand.game_id, {
+          id: hand.game_id,
+          date: hand.game_date,
+          buy_in: hand.game_buy_in,
+        });
+      }
+    });
+    return Array.from(gameMap.values());
+  };
+
+  const getUniqueHeroPositions = () => {
+    const positions = new Set<string>();
+    hands.forEach(hand => {
+      if (hand.hero_position) positions.add(hand.hero_position);
+    });
+    return Array.from(positions).sort();
+  };
+
+  const getStatistics = () => {
+    const totalHands = filteredHands.length;
+    const handsWon = filteredHands.filter(h => h.is_hero_win === true).length;
+    const handsLost = filteredHands.filter(h => h.is_hero_win === false).length;
+    const totalPotWon = filteredHands
+      .filter(h => h.is_hero_win === true)
+      .reduce((sum, h) => sum + (h.pot_size || 0), 0);
+    const showdownHands = filteredHands.filter(h => h.final_stage === 'Showdown').length;
+
+    return {
+      totalHands,
+      handsWon,
+      handsLost,
+      winRate: totalHands > 0 ? ((handsWon / totalHands) * 100).toFixed(1) : '0.0',
+      totalPotWon,
+      showdownHands,
+      showdownRate: totalHands > 0 ? ((showdownHands / totalHands) * 100).toFixed(1) : '0.0',
+    };
+  };
+
+  return {
+    hands: filteredHands,
+    allHands: hands,
+    loading,
+    filters,
+    updateFilters,
+    clearFilters,
+    getUniqueGames,
+    getUniqueHeroPositions,
+    getStatistics,
+    refetch: fetchHands,
+  };
+};
