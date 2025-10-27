@@ -21,6 +21,7 @@ const NewGame = () => {
   const [gamePlayers, setGamePlayers] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const [showActiveGame, setShowActiveGame] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -179,19 +180,39 @@ const NewGame = () => {
   };
 
   const handleBackFromGame = () => {
-    setActiveGame(null);
+    setShowActiveGame(false);
   };
 
   const continueGame = () => {
-    checkActiveGame();
+    setShowActiveGame(true);
   };
 
-  if (activeGame) {
+  if (activeGame && showActiveGame) {
     return <GameDashboard game={activeGame} onBackToSetup={handleBackFromGame} />;
   }
 
+  const hasActiveGame = activeGame !== null;
+
   return (
     <Card className="max-w-4xl mx-auto relative">
+      {hasActiveGame && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Active Game in Progress</CardTitle>
+              <CardDescription>
+                You have an ongoing game. Complete it before starting a new one.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={continueGame} className="w-full" size="lg">
+                <Play className="mr-2 h-5 w-5" />
+                Continue Game
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <CardHeader>
         <CardTitle>Start New Game</CardTitle>
         <CardDescription>Set up your poker game with buy-in and players</CardDescription>
@@ -212,6 +233,7 @@ const NewGame = () => {
                 setBuyInAmount(formatted);
               }
             }}
+            disabled={hasActiveGame}
           />
         </div>
 
@@ -247,8 +269,9 @@ const NewGame = () => {
               onChange={(e) => setNewPlayerName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
               className="flex-1"
+              disabled={hasActiveGame}
             />
-            <Button onClick={addNewPlayer} disabled={loading} className="w-[140px]">
+            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} className="w-[140px]">
               <Plus className="h-4 w-4 mr-2" />
               Add New
             </Button>
@@ -256,7 +279,7 @@ const NewGame = () => {
 
           {/* Add Existing Player */}
           <div className="flex gap-2">
-            <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
+            <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId} disabled={hasActiveGame}>
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Select existing player" />
               </SelectTrigger>
@@ -273,7 +296,7 @@ const NewGame = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId} className="w-[140px]">
+            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId || hasActiveGame} className="w-[140px]">
               <Plus className="h-4 w-4 mr-2" />
               Add Existing
             </Button>
@@ -283,7 +306,7 @@ const NewGame = () => {
         {/* Start Game Button */}
         <Button 
           onClick={startGame} 
-          disabled={loading || gamePlayers.length < 2 || !buyInAmount}
+          disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
           className="w-full"
           size="lg"
         >
