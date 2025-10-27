@@ -257,9 +257,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
-    // Get button index to calculate position
+    // Get button index to calculate position (index within activePlayers)
     const buttonPlayerId = currentHand.button_player_id;
-    const buttonIndex = game.game_players.findIndex(gp => gp.player_id === buttonPlayerId);
+    const buttonIndex = activePlayers.findIndex(gp => gp.player_id === buttonPlayerId);
     const playerPosition = getPlayerPosition(buttonIndex, currentPlayerIndex, activePlayers.length);
     
     let betSize = 0;
@@ -924,7 +924,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               {activePlayers
                 .filter(p => playersInHand.includes(p.player_id))
                 .map((gp) => {
-                  const buttonIndex = game.game_players.findIndex(player => player.player_id === currentHand?.button_player_id);
+                  const buttonIndex = activePlayers.findIndex(player => player.player_id === currentHand?.button_player_id);
                   const playerIndex = activePlayers.findIndex(p => p.player_id === gp.player_id);
                   const position = getPlayerPosition(buttonIndex, playerIndex, activePlayers.length);
                   
