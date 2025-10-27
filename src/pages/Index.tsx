@@ -3,6 +3,7 @@ import { Game } from "@/types/poker";
 import GameSetup from "@/components/GameSetup";
 import GameDashboard from "@/components/GameDashboard";
 import ThemeToggle from "@/components/ThemeToggle";
+import ChatBot from "@/components/ChatBot";
 
 const Index = () => {
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
@@ -23,6 +24,7 @@ const Index = () => {
           game={currentGame} 
           onBackToSetup={handleBackToSetup}
         />
+        <ChatBot />
       </>
     );
   }
@@ -31,6 +33,7 @@ const Index = () => {
     <>
       <ThemeToggle />
       <GameSetup onGameStart={handleGameStart} />
+      <ChatBot />
     </>
   );
 };
