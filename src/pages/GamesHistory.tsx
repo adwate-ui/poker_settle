@@ -291,9 +291,9 @@ const GamesHistory = () => {
 
       <Card>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 gap-3 sm:gap-4 p-3 sm:p-4">
-            <div className="rounded-lg p-3 sm:p-4 border overflow-x-auto">
-              <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm min-w-[500px]">
+          <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
+            <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
+              <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("date")}
@@ -344,11 +344,57 @@ const GamesHistory = () => {
               return (
                 <Card
                   key={game.id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50 min-w-[500px]"
+                  className="cursor-pointer transition-colors hover:bg-muted/50"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="grid grid-cols-5 gap-2 sm:gap-4 items-center text-xs sm:text-sm">
+                  <CardContent className="p-4">
+                    {/* Mobile Layout */}
+                    <div className="md:hidden space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Date</p>
+                          <p className="font-medium">{format(new Date(game.date), "MMM d, yyyy")}</p>
+                        </div>
+                        {selectedPlayer === "all" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteGameId(game.id);
+                            }}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/20"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Buy-in</p>
+                          <p className="font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Players</p>
+                          <Badge variant="info">{game.player_count}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Chips in play</p>
+                          <p className="font-semibold">Rs. {formatIndianNumber(game.total_pot)}</p>
+                        </div>
+                        {selectedPlayer !== "all" && playerData && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Player P&L</p>
+                            <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
+                              {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
                       <div className="font-medium">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </div>

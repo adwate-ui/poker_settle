@@ -179,9 +179,9 @@ const PlayersHistory = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-3 sm:gap-4">
-        <div className="rounded-lg p-3 sm:p-4 border overflow-x-auto">
-          <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm min-w-[500px]">
+      <div className="space-y-2 sm:space-y-3">
+        <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
+          <div className="grid grid-cols-5 gap-4 font-bold text-sm">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
@@ -228,15 +228,78 @@ const PlayersHistory = () => {
           return (
             <Card
               key={player.id}
-              className="cursor-pointer transition-colors hover:bg-muted/50 min-w-[500px]"
+              className="cursor-pointer transition-colors hover:bg-muted/50"
             >
-              <CardContent className="p-3 sm:p-4">
-                <div className="grid grid-cols-5 gap-2 sm:gap-4 items-center text-xs sm:text-sm">
+              <CardContent className="p-4">
+                {/* Mobile Layout */}
+                <div className="md:hidden space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div 
+                      className="flex items-center gap-3"
+                      onClick={() => navigate(`/players/${player.id}`)}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                        <img 
+                          src={avatarUrl} 
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="font-bold">{player.name}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletePlayerId(player.id);
+                      }}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/20"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Games</p>
+                      <Badge variant="info">{player.total_games || 0}</Badge>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Net P&L</p>
+                      <Badge variant={isProfit ? "success" : "destructive"}>
+                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Avg Per Game</p>
+                      <Badge variant={avgPerGame >= 0 ? "success" : "destructive"}>
+                        {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(Math.round(avgPerGame)))}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      {isProfit ? (
+                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <TrendingUp className="h-4 w-4" />
+                          <span className="text-sm font-medium">Winning</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                          <TrendingDown className="h-4 w-4" />
+                          <span className="text-sm font-medium">Losing</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
                   <div 
-                    className="flex items-center gap-2 sm:gap-3"
+                    className="flex items-center gap-3"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                       <img 
                         src={avatarUrl} 
                         alt={player.name}
