@@ -160,7 +160,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setActivePlayers(active);
       setPlayersInHand(active.map(p => p.player_id));
       
-      // Post blinds automatically - SB is immediately to the left of button
+      // Post blinds automatically - SB is immediate clockwise position from button
       const sbIndex = (buttonIndex + 1) % active.length;
       const bbIndex = (buttonIndex + 2) % active.length;
       
