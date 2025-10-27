@@ -85,39 +85,57 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const getPlayerPosition = (buttonIndex: number, playerIndex: number, totalPlayers: number): string => {
     const relativePosition = (playerIndex - buttonIndex + totalPlayers) % totalPlayers;
     
+    // Standard poker position assignments based on table size
+    // Source: https://www.mypokercoaching.com/poker-positions-strategy-charts/
+    
     if (totalPlayers === 2) {
-      return relativePosition === 0 ? 'Button/SB' : 'BB';
+      return relativePosition === 0 ? 'BTN/SB' : 'BB';
     }
     
-    const positionMap: { [key: number]: string } = {
-      0: 'Button',
-      1: 'Small Blind',
-      2: 'Big Blind',
-    };
-    
-    if (relativePosition in positionMap) {
-      return positionMap[relativePosition];
+    if (totalPlayers === 3) {
+      const positions = ['BTN', 'SB', 'BB'];
+      return positions[relativePosition];
     }
     
-    // For seats after BB
-    const seatsAfterBB = relativePosition - 2;
-    if (totalPlayers <= 6) {
-      // 6-max positions
-      if (seatsAfterBB === 1) return 'UTG';
-      if (seatsAfterBB === 2) return 'HJ';
-      if (seatsAfterBB === 3) return 'CO';
-    } else {
-      // Full ring positions
-      if (seatsAfterBB === 1) return 'UTG';
-      if (seatsAfterBB === 2) return 'UTG+1';
-      if (seatsAfterBB === 3) return 'UTG+2';
-      if (totalPlayers === 9 && seatsAfterBB === 4) return 'LJ';
-      if (totalPlayers === 9 && seatsAfterBB === 5) return 'HJ';
-      if (totalPlayers === 9 && seatsAfterBB === 6) return 'CO';
-      if (totalPlayers === 8 && seatsAfterBB === 4) return 'HJ';
-      if (totalPlayers === 8 && seatsAfterBB === 5) return 'CO';
+    if (totalPlayers === 4) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG'];
+      return positions[relativePosition];
     }
     
+    if (totalPlayers === 5) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    if (totalPlayers === 6) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'HJ', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    if (totalPlayers === 7) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'HJ', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    if (totalPlayers === 8) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'HJ', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    if (totalPlayers === 9) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    if (totalPlayers === 10) {
+      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'MP1', 'MP2', 'HJ', 'CO'];
+      return positions[relativePosition];
+    }
+    
+    // Fallback for unusual table sizes
+    if (relativePosition === 0) return 'BTN';
+    if (relativePosition === 1) return 'SB';
+    if (relativePosition === 2) return 'BB';
     return `Seat ${relativePosition + 1}`;
   };
 
