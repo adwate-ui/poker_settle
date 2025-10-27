@@ -181,6 +181,7 @@ const NewGame = () => {
 
   const handleBackFromGame = () => {
     setShowActiveGame(false);
+    checkActiveGame();
   };
 
   const continueGame = () => {
