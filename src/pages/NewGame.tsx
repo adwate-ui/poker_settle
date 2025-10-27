@@ -46,7 +46,13 @@ const NewGame = () => {
   const checkActiveGame = async () => {
     const { data, error } = await supabase
       .from("games")
-      .select("*")
+      .select(`
+        *,
+        game_players (
+          *,
+          player:players (*)
+        )
+      `)
       .eq("user_id", user?.id)
       .eq("is_complete", false)
       .order("created_at", { ascending: false })
@@ -54,11 +60,7 @@ const NewGame = () => {
       .single();
 
     if (!error && data) {
-      const gameWithPlayers: Game = {
-        ...data,
-        game_players: []
-      };
-      setActiveGame(gameWithPlayers);
+      setActiveGame(data as Game);
     }
   };
 
@@ -152,8 +154,23 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
+      // Fetch the complete game with players
+      const { data: completeGame, error: fetchError } = await supabase
+        .from("games")
+        .select(`
+          *,
+          game_players (
+            *,
+            player:players (*)
+          )
+        `)
+        .eq("id", game.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       toast.success("Game started!");
-      setActiveGame(gameWithPlayers);
+      setActiveGame(completeGame as Game);
     } catch (error) {
       toast.error("Failed to start game");
     } finally {
@@ -163,6 +180,9 @@ const NewGame = () => {
 
   const handleBackFromGame = () => {
     setActiveGame(null);
+  };
+
+  const continueGame = () => {
     checkActiveGame();
   };
 
@@ -171,7 +191,7 @@ const NewGame = () => {
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-4xl mx-auto relative">
       <CardHeader>
         <CardTitle>Start New Game</CardTitle>
         <CardDescription>Set up your poker game with buy-in and players</CardDescription>
