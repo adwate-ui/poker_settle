@@ -238,12 +238,12 @@ const GamesHistory = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Games History</CardTitle>
-          <CardDescription>View all your completed poker games</CardDescription>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl sm:text-2xl">Games History</CardTitle>
+          <CardDescription className="text-sm">View all your completed poker games</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <Select value={selectedDate} onValueChange={setSelectedDate}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by date" />
@@ -291,9 +291,9 @@ const GamesHistory = () => {
 
       <Card>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 gap-4 p-4">
-            <div className="rounded-lg p-4 border">
-              <div className="grid grid-cols-5 gap-4 font-bold text-sm">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 p-3 sm:p-4">
+            <div className="rounded-lg p-3 sm:p-4 border overflow-x-auto">
+              <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm min-w-[500px]">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("date")}
@@ -344,11 +344,11 @@ const GamesHistory = () => {
               return (
                 <Card
                   key={game.id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50"
+                  className="cursor-pointer transition-colors hover:bg-muted/50 min-w-[500px]"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-5 gap-4 items-center">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="grid grid-cols-5 gap-2 sm:gap-4 items-center text-xs sm:text-sm">
                       <div className="font-medium">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </div>

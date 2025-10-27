@@ -204,17 +204,17 @@ const NewGame = () => {
   return (
     <Card className="max-w-4xl mx-auto relative">
       {hasActiveGame && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-          <Card className="w-full max-w-md mx-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg p-4">
+          <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>Active Game in Progress</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Active Game in Progress</CardTitle>
+              <CardDescription className="text-sm">
                 You have an ongoing game. Complete it before starting a new one.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button onClick={continueGame} className="w-full" size="lg">
-                <Play className="mr-2 h-5 w-5" />
+                <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Continue Game
               </Button>
             </CardContent>
@@ -222,8 +222,8 @@ const NewGame = () => {
         </div>
       )}
       <CardHeader>
-        <CardTitle className="text-2xl">Start New Game</CardTitle>
-        <CardDescription>Set up your poker game with buy-in and players</CardDescription>
+        <CardTitle className="text-xl sm:text-2xl">Start New Game</CardTitle>
+        <CardDescription className="text-sm">Set up your poker game with buy-in and players</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Buy-in Section */}
@@ -247,7 +247,7 @@ const NewGame = () => {
 
         {/* Add Players Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Players ({gamePlayers.length})</h3>
+          <h3 className="text-base sm:text-lg font-semibold">Players ({gamePlayers.length})</h3>
           
           {/* Current Players List */}
           {gamePlayers.length > 0 && (

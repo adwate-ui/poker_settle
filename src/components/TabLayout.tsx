@@ -25,20 +25,29 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Poker Tracker</h1>
-          <div className="flex items-center gap-4">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Poker Tracker</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
             <UserProfile />
           </div>
         </div>
         
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="new-game">New Game</TabsTrigger>
-            <TabsTrigger value="games-history">Games History</TabsTrigger>
-            <TabsTrigger value="players-history">Players History</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-auto">
+            <TabsTrigger value="new-game" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <span className="hidden xs:inline">New Game</span>
+              <span className="xs:hidden">New</span>
+            </TabsTrigger>
+            <TabsTrigger value="games-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <span className="hidden xs:inline">Games History</span>
+              <span className="xs:hidden">Games</span>
+            </TabsTrigger>
+            <TabsTrigger value="players-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <span className="hidden xs:inline">Players History</span>
+              <span className="xs:hidden">Players</span>
+            </TabsTrigger>
           </TabsList>
           
           {children}

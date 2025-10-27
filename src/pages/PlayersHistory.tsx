@@ -149,29 +149,29 @@ const PlayersHistory = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Players Performance</CardTitle>
-          <CardDescription>Overall statistics for all players</CardDescription>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl sm:text-2xl">Players Performance</CardTitle>
+          <CardDescription className="text-sm">Overall statistics for all players</CardDescription>
         </CardHeader>
       </Card>
 
       {/* Summary Stats - Moved to top */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Total Players</p>
-              <p className="text-2xl font-bold">{players.length}</p>
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="p-3 sm:p-4 rounded-lg border">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Players</p>
+              <p className="text-xl sm:text-2xl font-bold">{players.length}</p>
             </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Total Games</p>
-              <p className="text-2xl font-bold">
+            <div className="p-3 sm:p-4 rounded-lg border">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Games</p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
               </p>
             </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Winning Players</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="p-3 sm:p-4 rounded-lg border">
+              <p className="text-xs sm:text-sm text-muted-foreground">Winning Players</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                 {players.filter(p => (p.total_profit || 0) >= 0).length}
               </p>
             </div>
@@ -179,9 +179,9 @@ const PlayersHistory = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4">
-        <div className="rounded-lg p-4 border">
-          <div className="grid grid-cols-5 gap-4 font-bold text-sm">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
+        <div className="rounded-lg p-3 sm:p-4 border overflow-x-auto">
+          <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm min-w-[500px]">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
@@ -228,22 +228,22 @@ const PlayersHistory = () => {
           return (
             <Card
               key={player.id}
-              className="cursor-pointer transition-colors hover:bg-muted/50"
+              className="cursor-pointer transition-colors hover:bg-muted/50 min-w-[500px]"
             >
-              <CardContent className="p-4">
-                <div className="grid grid-cols-5 gap-4 items-center">
+              <CardContent className="p-3 sm:p-4">
+                <div className="grid grid-cols-5 gap-2 sm:gap-4 items-center text-xs sm:text-sm">
                   <div 
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2 sm:gap-3"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                       <img 
                         src={avatarUrl} 
                         alt={player.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="font-bold">{player.name}</span>
+                    <span className="font-bold truncate">{player.name}</span>
                   </div>
                   
                   <div 
