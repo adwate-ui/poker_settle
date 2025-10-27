@@ -15,7 +15,6 @@ interface PlayerCardProps {
 
 const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps) => {
   const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
-  const [displayValue, setDisplayValue] = useState(formatInputDisplay(gamePlayer.final_stack || 0));
   const [hasChanges, setHasChanges] = useState(false);
   
   const netAmount = (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount);
@@ -29,9 +28,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
     });
   };
 
-  const handleFinalStackChange = (inputValue: string) => {
-    setDisplayValue(inputValue);
-    const value = parseIndianNumber(inputValue);
+  const handleFinalStackChange = (value: number) => {
     setLocalFinalStack(value);
     setHasChanges(value !== (gamePlayer.final_stack || 0));
   };
@@ -41,7 +38,6 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
       final_stack: localFinalStack,
       net_amount: localFinalStack - (gamePlayer.buy_ins * buyInAmount)
     });
-    setDisplayValue(formatInputDisplay(localFinalStack));
     setHasChanges(false);
   };
 
@@ -108,10 +104,10 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
             <div className="flex items-center gap-2">
               <Input
                 type="text"
-                value={displayValue}
-                onChange={(e) => handleFinalStackChange(e.target.value)}
+                value={formatInputDisplay(localFinalStack)}
+                onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
                 className="text-center font-mono text-sm sm:text-base"
-                placeholder="0"
+                placeholder="Enter amount"
               />
               {hasChanges && (
                 <Button 
