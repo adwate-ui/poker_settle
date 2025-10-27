@@ -466,77 +466,143 @@ const GameDetail = () => {
 
       {/* Settlements */}
       {settlementsWithType.length > 0 && (
-        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
-          <CardHeader className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-600/20">
-            <CardTitle className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
-              <span className="text-2xl">💰</span>
-              Settlements
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-6">
-              {manualSettlements.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                      Manual Settlements
-                    </Badge>
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
+                <span className="text-2xl">💰</span>
+                Settlements
+              </CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardContent className="p-0">
+              <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
+                {/* Headers - hidden on mobile */}
+                <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
+                  <div className="grid grid-cols-3 gap-4 font-bold text-sm">
+                    <div className="flex items-center h-10 px-4">From</div>
+                    <div className="flex items-center justify-center h-10 px-4">To</div>
+                    <div className="flex items-center justify-center h-10 px-4">Amount</div>
                   </div>
-                  {manualSettlements.map((settlement, index) => (
-                    <div 
-                      key={`manual-${index}`} 
-                      className="flex items-center justify-between p-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-500/10 via-background to-blue-600/5 hover:from-blue-500/15 hover:to-blue-600/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          {settlement.from}
-                        </span>
-                        <span className="text-muted-foreground font-medium">pays</span>
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {settlement.to}
-                        </span>
-                      </div>
-                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-2 border-blue-500/30">
-                        Rs. {formatIndianNumber(settlement.amount)}
-                      </span>
-                    </div>
-                  ))}
                 </div>
-              )}
-              
-              {calculatedSettlements.length > 0 && (
-                <div className="space-y-3">
-                  {manualSettlements.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        Calculated Settlements
+
+                {/* Manual Settlements */}
+                {manualSettlements.length > 0 && (
+                  <>
+                    <div className="flex items-center gap-2 px-2">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        Manual Settlements
                       </Badge>
                     </div>
-                  )}
-                  {calculatedSettlements.map((settlement, index) => (
-                    <div 
-                      key={`calc-${index}`} 
-                      className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          {settlement.from}
-                        </span>
-                        <span className="text-muted-foreground font-medium">pays</span>
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {settlement.to}
-                        </span>
+                    {manualSettlements.map((settlement, index) => (
+                      <Card key={`manual-${index}`} className="transition-colors hover:bg-muted/50">
+                        <CardContent className="p-4">
+                          {/* Mobile Layout */}
+                          <div className="md:hidden space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">From</p>
+                                <Badge variant="destructive" className="font-bold">
+                                  {settlement.from}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">To</p>
+                                <Badge variant="success" className="font-bold">
+                                  {settlement.to}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Amount</p>
+                              <p className="font-bold text-lg">Rs. {formatIndianNumber(settlement.amount)}</p>
+                            </div>
+                          </div>
+
+                          {/* Desktop Layout */}
+                          <div className="hidden md:grid grid-cols-3 gap-4 items-center text-sm">
+                            <div className="font-medium">
+                              <Badge variant="destructive" className="font-bold">
+                                {settlement.from}
+                              </Badge>
+                            </div>
+                            <div className="text-center">
+                              <Badge variant="success" className="font-bold">
+                                {settlement.to}
+                              </Badge>
+                            </div>
+                            <div className="text-center font-bold text-lg">
+                              Rs. {formatIndianNumber(settlement.amount)}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                )}
+
+                {/* Calculated Settlements */}
+                {calculatedSettlements.length > 0 && (
+                  <>
+                    {manualSettlements.length > 0 && (
+                      <div className="flex items-center gap-2 px-2 pt-2">
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          Calculated Settlements
+                        </Badge>
                       </div>
-                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
-                        Rs. {formatIndianNumber(settlement.amount)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                    )}
+                    {calculatedSettlements.map((settlement, index) => (
+                      <Card key={`calc-${index}`} className="transition-colors hover:bg-muted/50">
+                        <CardContent className="p-4">
+                          {/* Mobile Layout */}
+                          <div className="md:hidden space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">From</p>
+                                <Badge variant="destructive" className="font-bold">
+                                  {settlement.from}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">To</p>
+                                <Badge variant="success" className="font-bold">
+                                  {settlement.to}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Amount</p>
+                              <p className="font-bold text-lg">Rs. {formatIndianNumber(settlement.amount)}</p>
+                            </div>
+                          </div>
+
+                          {/* Desktop Layout */}
+                          <div className="hidden md:grid grid-cols-3 gap-4 items-center text-sm">
+                            <div className="font-medium">
+                              <Badge variant="destructive" className="font-bold">
+                                {settlement.from}
+                              </Badge>
+                            </div>
+                            <div className="text-center">
+                              <Badge variant="success" className="font-bold">
+                                {settlement.to}
+                              </Badge>
+                            </div>
+                            <div className="text-center font-bold text-lg">
+                              Rs. {formatIndianNumber(settlement.amount)}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
