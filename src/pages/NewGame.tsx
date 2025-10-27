@@ -10,10 +10,11 @@ import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Plus, Trash2, Play, ArrowLeft } from "lucide-react";
 import GameDashboard from "@/components/GameDashboard";
+import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
 
 const NewGame = () => {
   const { user } = useAuth();
-  const [buyInAmount, setBuyInAmount] = useState("");
+  const [buyInAmount, setBuyInAmount] = useState("2,000");
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
@@ -107,7 +108,8 @@ const NewGame = () => {
   };
 
   const startGame = async () => {
-    if (!buyInAmount || parseFloat(buyInAmount) <= 0) {
+    const parsedAmount = parseIndianNumber(buyInAmount);
+    if (!buyInAmount || parsedAmount <= 0) {
       toast.error("Please enter a valid buy-in amount");
       return;
     }
@@ -122,7 +124,7 @@ const NewGame = () => {
       const { data: game, error: gameError } = await supabase
         .from("games")
         .insert({
-          buy_in_amount: parseFloat(buyInAmount),
+          buy_in_amount: parsedAmount,
           user_id: user?.id,
           is_complete: false,
         })
@@ -177,15 +179,19 @@ const NewGame = () => {
       <CardContent className="space-y-6">
         {/* Buy-in Section */}
         <div className="space-y-2">
-          <Label htmlFor="buyin">Buy-in Amount</Label>
+          <Label htmlFor="buyin">Buy-in Amount (Rs.)</Label>
           <Input
             id="buyin"
-            type="number"
+            type="text"
             placeholder="Enter buy-in amount"
             value={buyInAmount}
-            onChange={(e) => setBuyInAmount(e.target.value)}
-            min="0"
-            step="0.01"
+            onChange={(e) => {
+              const value = e.target.value.replace(/,/g, '');
+              if (value === '' || !isNaN(Number(value))) {
+                const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                setBuyInAmount(formatted);
+              }
+            }}
           />
         </div>
 
@@ -195,18 +201,20 @@ const NewGame = () => {
           
           {/* Current Players List */}
           {gamePlayers.length > 0 && (
-            <div className="space-y-2 p-4 bg-muted rounded-lg">
+            <div className="grid gap-2">
               {gamePlayers.map((player) => (
-                <div key={player.id} className="flex items-center justify-between">
-                  <span>{player.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removePlayer(player.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Card key={player.id}>
+                  <CardContent className="flex items-center justify-between p-4">
+                    <span className="font-medium">{player.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removePlayer(player.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
@@ -218,8 +226,9 @@ const NewGame = () => {
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
+              className="flex-1"
             />
-            <Button onClick={addNewPlayer} disabled={loading}>
+            <Button onClick={addNewPlayer} disabled={loading} className="w-[140px]">
               <Plus className="h-4 w-4 mr-2" />
               Add New
             </Button>
@@ -228,18 +237,23 @@ const NewGame = () => {
           {/* Add Existing Player */}
           <div className="flex gap-2">
             <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
-              <SelectTrigger>
+              <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Select existing player" />
               </SelectTrigger>
               <SelectContent>
                 {players.filter(p => !gamePlayers.find(gp => gp.id === p.id)).map((player) => (
                   <SelectItem key={player.id} value={player.id}>
-                    {player.name}
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{player.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        P&L: Rs. {formatIndianNumber(player.total_profit)} | Games: {player.total_games}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId}>
+            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId} className="w-[140px]">
               <Plus className="h-4 w-4 mr-2" />
               Add Existing
             </Button>
