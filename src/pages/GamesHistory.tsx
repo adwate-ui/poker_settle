@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,8 +7,14 @@ import { Loader2, Calendar, Users, Coins, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +40,9 @@ const GamesHistory = () => {
   const navigate = useNavigate();
   const [games, setGames] = useState<GameWithStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>("all");
+  const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
+  const [selectedPlayer, setSelectedPlayer] = useState<string>("all");
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -111,15 +119,30 @@ const GamesHistory = () => {
     }
   };
 
+  const uniqueDates = useMemo(() => {
+    const dates = games.map((game) => format(new Date(game.date), "MMM d, yyyy"));
+    return Array.from(new Set(dates)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  }, [games]);
+
+  const uniqueMonthYears = useMemo(() => {
+    const monthYears = games.map((game) => format(new Date(game.date), "MMM yyyy"));
+    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  }, [games]);
+
+  const uniquePlayers = useMemo(() => {
+    const players = games.flatMap((game) => game.player_names);
+    return Array.from(new Set(players)).sort();
+  }, [games]);
+
   const filteredGames = games.filter((game) => {
-    if (!searchQuery.trim()) return true;
+    const gameDate = format(new Date(game.date), "MMM d, yyyy");
+    const monthYear = format(new Date(game.date), "MMM yyyy");
     
-    const query = searchQuery.toLowerCase();
-    const gameDate = format(new Date(game.date), "MMM d, yyyy").toLowerCase();
-    const monthYear = format(new Date(game.date), "MMM yyyy").toLowerCase();
-    const players = game.player_names.join(" ").toLowerCase();
+    if (selectedDate !== "all" && gameDate !== selectedDate) return false;
+    if (selectedMonthYear !== "all" && monthYear !== selectedMonthYear) return false;
+    if (selectedPlayer !== "all" && !game.player_names.includes(selectedPlayer)) return false;
     
-    return gameDate.includes(query) || monthYear.includes(query) || players.includes(query);
+    return true;
   });
 
   if (loading) {
@@ -154,12 +177,49 @@ const GamesHistory = () => {
           <CardDescription>View all your completed poker games</CardDescription>
         </CardHeader>
         <CardContent>
-          <Input
-            placeholder="Search by date, month-year, or player names..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Select value={selectedDate} onValueChange={setSelectedDate}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filter by date" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Dates</SelectItem>
+                {uniqueDates.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {date}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filter by month-year" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Months</SelectItem>
+                {uniqueMonthYears.map((monthYear) => (
+                  <SelectItem key={monthYear} value={monthYear}>
+                    {monthYear}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filter by player" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Players</SelectItem>
+                {uniquePlayers.map((player) => (
+                  <SelectItem key={player} value={player}>
+                    {player}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
@@ -167,12 +227,12 @@ const GamesHistory = () => {
         {filteredGames.map((game) => (
           <Card key={game.id} className="hover:bg-muted/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
                 <div 
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Date</p>
                     <p className="text-sm text-muted-foreground">
@@ -182,10 +242,10 @@ const GamesHistory = () => {
                 </div>
 
                 <div 
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <Coins className="h-4 w-4 text-muted-foreground" />
+                  <Coins className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Buy-in</p>
                     <p className="text-sm text-muted-foreground">
@@ -195,10 +255,10 @@ const GamesHistory = () => {
                 </div>
 
                 <div 
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Players</p>
                     <p className="text-sm text-muted-foreground">
@@ -208,10 +268,10 @@ const GamesHistory = () => {
                 </div>
 
                 <div 
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <Coins className="h-4 w-4 text-muted-foreground" />
+                  <Coins className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Chips in play</p>
                     <p className="text-sm text-muted-foreground">
@@ -220,7 +280,7 @@ const GamesHistory = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-center md:justify-end">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -230,7 +290,7 @@ const GamesHistory = () => {
                     }}
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
