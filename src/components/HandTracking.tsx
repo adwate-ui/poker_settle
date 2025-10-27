@@ -143,20 +143,24 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (!buttonPlayerId) return;
 
     const nextHandNumber = await getNextHandNumber(game.id);
-    const buttonIndex = game.game_players.findIndex(gp => gp.player_id === buttonPlayerId);
-    const heroIndex = game.game_players.findIndex(gp => gp.player_id === heroPlayer?.player_id);
-    const heroPosition = getPlayerPosition(buttonIndex, heroIndex, game.game_players.length);
+    
+    // Filter out dealt-out players FIRST
+    const active = game.game_players.filter(gp => !dealtOutPlayers.includes(gp.player_id));
+    
+    // Find button and hero indices in the ACTIVE players array
+    const buttonIndex = active.findIndex(gp => gp.player_id === buttonPlayerId);
+    const heroIndex = active.findIndex(gp => gp.player_id === heroPlayer?.player_id);
+    
+    // Calculate positions based on active players only
+    const heroPosition = getPlayerPosition(buttonIndex, heroIndex, active.length);
 
     const hand = await createNewHand(game.id, buttonPlayerId, nextHandNumber, heroPosition);
     if (hand) {
       setCurrentHand(hand);
-      
-      // Filter out dealt-out players
-      const active = game.game_players.filter(gp => !dealtOutPlayers.includes(gp.player_id));
       setActivePlayers(active);
       setPlayersInHand(active.map(p => p.player_id));
       
-      // Post blinds automatically
+      // Post blinds automatically - SB is immediately to the left of button
       const sbIndex = (buttonIndex + 1) % active.length;
       const bbIndex = (buttonIndex + 2) % active.length;
       
