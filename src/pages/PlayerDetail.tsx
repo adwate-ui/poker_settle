@@ -9,6 +9,13 @@ import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -40,6 +47,7 @@ const PlayerDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
 
   useEffect(() => {
     if (playerId) {
@@ -100,8 +108,21 @@ const PlayerDetail = () => {
     return <ArrowDown className="h-4 w-4" />;
   };
 
+  const uniqueMonthYears = useMemo(() => {
+    const monthYears = gameHistory.map((game) => format(new Date(game.games.date), "MMM yyyy"));
+    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  }, [gameHistory]);
+
+  const filteredGameHistory = useMemo(() => {
+    return gameHistory.filter((game) => {
+      if (selectedMonthYear === "all") return true;
+      const monthYear = format(new Date(game.games.date), "MMM yyyy");
+      return monthYear === selectedMonthYear;
+    });
+  }, [gameHistory, selectedMonthYear]);
+
   const sortedGameHistory = useMemo(() => {
-    return [...gameHistory].sort((a, b) => {
+    return [...filteredGameHistory].sort((a, b) => {
       let aVal: any, bVal: any;
       
       switch (sortField) {
@@ -125,7 +146,7 @@ const PlayerDetail = () => {
       
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
     });
-  }, [gameHistory, sortField, sortOrder]);
+  }, [filteredGameHistory, sortField, sortOrder]);
 
   if (loading) {
     return (
@@ -149,8 +170,8 @@ const PlayerDetail = () => {
     ? (player.total_profit || 0) / player.total_games 
     : 0;
   const isProfit = (player.total_profit || 0) >= 0;
-  const winRate = gameHistory.length > 0
-    ? (gameHistory.filter(gh => gh.net_amount > 0).length / gameHistory.length) * 100
+  const winRate = filteredGameHistory.length > 0
+    ? (filteredGameHistory.filter(gh => gh.net_amount > 0).length / filteredGameHistory.length) * 100
     : 0;
 
   return (
@@ -226,7 +247,22 @@ const PlayerDetail = () => {
       {/* Game History */}
       <Card className="border-primary/20">
         <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-          <CardTitle className="text-primary">Game History</CardTitle>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <CardTitle className="text-primary">Game History</CardTitle>
+            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+              <SelectTrigger className="bg-background border-primary/20 w-full md:w-64">
+                <SelectValue placeholder="Filter by month-year" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Months</SelectItem>
+                {uniqueMonthYears.map((monthYear) => (
+                  <SelectItem key={monthYear} value={monthYear}>
+                    {monthYear}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
