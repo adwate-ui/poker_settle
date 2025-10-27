@@ -1,12 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, User } from "lucide-react";
-import { Player, Game } from "@/types/poker";
+import { Player, Game, TablePosition } from "@/types/poker";
 import { formatIndianNumber } from "@/lib/utils";
+import { useGameData } from "@/hooks/useGameData";
+import PokerTableView from "@/components/PokerTableView";
 
 interface PlayerPerformanceProps {
   players: Player[];
@@ -16,6 +18,8 @@ interface PlayerPerformanceProps {
 const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const [gameTablePositions, setGameTablePositions] = useState<Record<string, TablePosition | null>>({});
+  const { getTablePositionWithMostPlayers } = useGameData();
 
   const formatCurrency = (amount: number) => {
     return `Rs. ${formatIndianNumber(amount)}`;
@@ -38,6 +42,21 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [selectedPlayerId, games]);
+
+  useEffect(() => {
+    const loadTablePositions = async () => {
+      const positions: Record<string, TablePosition | null> = {};
+      for (const game of playerGames) {
+        const position = await getTablePositionWithMostPlayers(game.gameId);
+        positions[game.gameId] = position;
+      }
+      setGameTablePositions(positions);
+    };
+    
+    if (playerGames.length > 0) {
+      loadTablePositions();
+    }
+  }, [playerGames, getTablePositionWithMostPlayers]);
 
   const selectedPlayer = players.find(p => p.id === selectedPlayerId);
 
@@ -100,38 +119,35 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                   </div>
 
                   {playerGames.length > 0 ? (
-                    <div>
+                    <div className="space-y-4">
                       <h3 className="text-lg font-semibold mb-3">Game History</h3>
-                      <div className="rounded-lg border border-border overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="whitespace-nowrap">Date</TableHead>
-                              <TableHead className="whitespace-nowrap">Buy-in</TableHead>
-                              <TableHead className="text-center whitespace-nowrap">Buy-ins</TableHead>
-                              <TableHead className="text-right whitespace-nowrap">P&L</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {playerGames.map((game) => (
-                              <TableRow key={game.gameId}>
-                                <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">
+                      {playerGames.map((game) => (
+                        <div key={game.gameId} className="space-y-3">
+                          <div className="rounded-lg border border-border overflow-hidden">
+                            <div className="bg-secondary p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold">
                                   {new Date(game.date).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatCurrency(game.buyInAmount)}</TableCell>
-                                <TableCell className="text-center">
-                                  <Badge variant="outline" className="text-xs">{game.buyIns}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
+                                </span>
+                                <div className="flex gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {game.buyIns} buy-in{game.buyIns > 1 ? 's' : ''}
+                                  </Badge>
                                   <Badge variant={game.netAmount >= 0 ? "default" : "destructive"} className="text-xs whitespace-nowrap">
                                     {game.netAmount >= 0 ? '+' : ''}{formatCurrency(game.netAmount)}
                                   </Badge>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                                </div>
+                              </div>
+                            </div>
+                            {gameTablePositions[game.gameId] && gameTablePositions[game.gameId]!.positions.length > 0 && (
+                              <div className="p-4 bg-card">
+                                <h4 className="text-sm font-medium mb-2">Table Position (Peak)</h4>
+                                <PokerTableView positions={gameTablePositions[game.gameId]!.positions} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-center py-8">

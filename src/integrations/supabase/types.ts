@@ -152,6 +152,38 @@ export type Database = {
         }
         Relationships: []
       }
+      table_positions: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          positions: Json
+          snapshot_timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          positions?: Json
+          snapshot_timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          positions?: Json
+          snapshot_timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_positions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

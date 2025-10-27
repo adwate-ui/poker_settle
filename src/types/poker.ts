@@ -28,3 +28,17 @@ export interface Settlement {
   to: string;
   amount: number;
 }
+
+export interface SeatPosition {
+  seat: number;
+  player_id: string;
+  player_name: string;
+}
+
+export interface TablePosition {
+  id: string;
+  game_id: string;
+  snapshot_timestamp: string;
+  positions: SeatPosition[];
+  created_at: string;
+}

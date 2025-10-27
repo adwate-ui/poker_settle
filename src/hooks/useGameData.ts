@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Player, Game, GamePlayer } from "@/types/poker";
+import { Player, Game, GamePlayer, SeatPosition, TablePosition } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
@@ -341,6 +341,91 @@ export const useGameData = () => {
     }
   };
 
+  const saveTablePosition = async (gameId: string, positions: SeatPosition[]): Promise<TablePosition> => {
+    try {
+      const { data, error} = await supabase
+        .from("table_positions")
+        .insert([{
+          game_id: gameId,
+          positions: positions as any,
+          snapshot_timestamp: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      return {
+        ...data,
+        positions: data.positions as any as SeatPosition[]
+      };
+    } catch (error) {
+      console.error("Error saving table position:", error);
+      throw error;
+    }
+  };
+
+  const fetchTablePositions = async (gameId: string): Promise<TablePosition[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("table_positions")
+        .select("*")
+        .eq("game_id", gameId)
+        .order("snapshot_timestamp", { ascending: false });
+
+      if (error) throw error;
+      
+      return (data || []).map(row => ({
+        ...row,
+        positions: row.positions as any as SeatPosition[]
+      }));
+    } catch (error) {
+      console.error("Error fetching table positions:", error);
+      return [];
+    }
+  };
+
+  const getCurrentTablePosition = async (gameId: string): Promise<TablePosition | null> => {
+    try {
+      const { data, error } = await supabase
+        .from("table_positions")
+        .select("*")
+        .eq("game_id", gameId)
+        .order("snapshot_timestamp", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (!data) return null;
+      
+      return {
+        ...data,
+        positions: data.positions as any as SeatPosition[]
+      };
+    } catch (error) {
+      console.error("Error fetching current table position:", error);
+      return null;
+    }
+  };
+
+  const getTablePositionWithMostPlayers = async (gameId: string): Promise<TablePosition | null> => {
+    try {
+      const positions = await fetchTablePositions(gameId);
+      if (positions.length === 0) return null;
+
+      // Find the position with the most players
+      return positions.reduce((max, current) => {
+        const maxPlayers = Array.isArray(max.positions) ? max.positions.length : 0;
+        const currentPlayers = Array.isArray(current.positions) ? current.positions.length : 0;
+        return currentPlayers > maxPlayers ? current : max;
+      });
+    } catch (error) {
+      console.error("Error finding table position with most players:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchPlayers();
@@ -362,6 +447,10 @@ export const useGameData = () => {
     completeGame,
     deleteGame,
     hasIncompleteGame,
-    getIncompleteGame
+    getIncompleteGame,
+    saveTablePosition,
+    fetchTablePositions,
+    getCurrentTablePosition,
+    getTablePositionWithMostPlayers
   };
 };

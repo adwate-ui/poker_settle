@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AlertTriangle, ChevronDown, ChevronUp, Users, Search, Trash2, Play, UserPlus, X, Plus, TrendingUp, TrendingDown, History, Calendar } from "lucide-react";
-import { Player, Game } from "@/types/poker";
+import { Player, Game, SeatPosition } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
+import TablePositionEditor from "@/components/TablePositionEditor";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -28,6 +29,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const [gameSearchQuery, setGameSearchQuery] = useState('');
   const [isPreviousPlayersOpen, setIsPreviousPlayersOpen] = useState(false);
   const [isGameHistoryOpen, setIsGameHistoryOpen] = useState(false);
+  const [showPositionSetup, setShowPositionSetup] = useState(false);
+  const [pendingGame, setPendingGame] = useState<Game | null>(null);
   
   const {
     players,
@@ -38,7 +41,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     deletePlayer,
     deleteGame,
     hasIncompleteGame,
-    getIncompleteGame
+    getIncompleteGame,
+    saveTablePosition
   } = useGameData();
   
   
@@ -117,10 +121,29 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     if (selectedPlayers.length >= 2 && buyInAmount > 0 && canCreateGame) {
       try {
         const game = await createGame(buyInAmount, selectedPlayers);
-        onGameStart(game);
+        setPendingGame(game);
+        setShowPositionSetup(true);
       } catch (error) {
         toast.error("Failed to create game");
       }
+    }
+  };
+
+  const handleSaveInitialPosition = async (positions: SeatPosition[]) => {
+    if (!pendingGame) return;
+    
+    try {
+      await saveTablePosition(pendingGame.id, positions);
+      toast.success("Table position set");
+      onGameStart(pendingGame);
+    } catch (error) {
+      toast.error("Failed to save table position");
+    }
+  };
+
+  const handleSkipPositionSetup = () => {
+    if (pendingGame) {
+      onGameStart(pendingGame);
     }
   };
 
@@ -140,13 +163,34 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   return (
     <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">
       <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="text-center sm:text-left flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Configure your game settings and select players</p>
+        {showPositionSetup && pendingGame ? (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Set Initial Table Positions</h1>
+              <Button
+                variant="ghost"
+                onClick={handleSkipPositionSetup}
+                className="text-sm"
+              >
+                Skip for now
+              </Button>
+            </div>
+            <TablePositionEditor
+              players={selectedPlayers}
+              currentPositions={[]}
+              onSave={handleSaveInitialPosition}
+              onCancel={handleSkipPositionSetup}
+            />
           </div>
-          <UserProfile />
-        </div>
+        ) : (
+          <>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="text-center sm:text-left flex-1">
+                <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Configure your game settings and select players</p>
+              </div>
+              <UserProfile />
+            </div>
 
         <Card className="bg-card border-border">
           <CardHeader>
@@ -423,6 +467,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             Start New Game ({selectedPlayers.length} players)
           </Button>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

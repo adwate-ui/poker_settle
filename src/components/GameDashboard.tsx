@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2 } from "lucide-react";
-import { Game, GamePlayer, Settlement, Player } from "@/types/poker";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon } from "lucide-react";
+import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
+import PokerTableView from "@/components/PokerTableView";
+import TablePositionEditor from "@/components/TablePositionEditor";
 
 interface GameDashboardProps {
   game: Game;
@@ -27,8 +29,17 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [newTransferFrom, setNewTransferFrom] = useState('');
   const [newTransferTo, setNewTransferTo] = useState('');
   const [newTransferAmount, setNewTransferAmount] = useState('');
-  const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame } = useGameData();
+  const [showPositionEditor, setShowPositionEditor] = useState(false);
+  const [currentTablePosition, setCurrentTablePosition] = useState<TablePosition | null>(null);
+  const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition } = useGameData();
   
+  useEffect(() => {
+    const loadTablePosition = async () => {
+      const position = await getCurrentTablePosition(game.id);
+      setCurrentTablePosition(position);
+    };
+    loadTablePosition();
+  }, [game.id, getCurrentTablePosition]);
 
   const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
     try {
@@ -51,6 +62,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setNewPlayerName('');
       setShowAddPlayer(false);
       toast.success("Player added to game");
+      
+      // Prompt to update table positions
+      const shouldUpdate = confirm("Would you like to update the table positions?");
+      if (shouldUpdate) {
+        setShowPositionEditor(true);
+      }
     } catch (error) {
       toast.error("Failed to add player");
     }
@@ -62,6 +79,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
       toast.success("Player added to game");
+      
+      // Prompt to update table positions
+      const shouldUpdate = confirm("Would you like to update the table positions?");
+      if (shouldUpdate) {
+        setShowPositionEditor(true);
+      }
     } catch (error) {
       toast.error("Failed to add player");
     }
@@ -153,6 +176,17 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       onBackToSetup();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
+    }
+  };
+
+  const handleSaveTablePosition = async (positions: SeatPosition[]) => {
+    try {
+      const savedPosition = await saveTablePosition(game.id, positions);
+      setCurrentTablePosition(savedPosition);
+      setShowPositionEditor(false);
+      toast.success("Table position saved");
+    } catch (error) {
+      toast.error("Failed to save table position");
     }
   };
 
@@ -268,6 +302,52 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Table Position Section */}
+        {showPositionEditor ? (
+          <TablePositionEditor
+            players={gamePlayers.map(gp => gp.player)}
+            currentPositions={currentTablePosition?.positions || []}
+            onSave={handleSaveTablePosition}
+            onCancel={() => setShowPositionEditor(false)}
+          />
+        ) : currentTablePosition && currentTablePosition.positions.length > 0 ? (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-poker-gold flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UsersIcon className="w-5 h-5" />
+                  Current Table Positions
+                </div>
+                <Button
+                  onClick={() => setShowPositionEditor(true)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Change Positions
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PokerTableView positions={currentTablePosition.positions} />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card border-border">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <p className="text-muted-foreground">No table positions set yet</p>
+                <Button
+                  onClick={() => setShowPositionEditor(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <UsersIcon className="w-4 h-4 mr-2" />
+                  Set Table Positions
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground">Players</h2>
