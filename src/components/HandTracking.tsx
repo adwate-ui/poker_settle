@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Play, CheckCircle, TrendingUp, Trophy } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import PokerCard from './PokerCard';
@@ -25,6 +26,7 @@ type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Ch
 
 const HandTracking = ({ game }: HandTrackingProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const {
     loading,
     createNewHand,
@@ -54,6 +56,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [playerHoleCards, setPlayerHoleCards] = useState<Record<string, string>>({});
   const [showHoleCardInput, setShowHoleCardInput] = useState(false);
   const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<string>('');
+  const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
 
   // Find hero player (current user)
   const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
@@ -85,34 +88,48 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       const sbIndex = (buttonIndex + 1) % active.length;
       const bbIndex = (buttonIndex + 2) % active.length;
       
+      const sbAmount = game.small_blind || 50;
+      const bbAmount = game.big_blind || 100;
+      
+      // Initialize player bets
+      const initialBets: Record<string, number> = {};
+      active.forEach(p => initialBets[p.player_id] = 0);
+      initialBets[active[sbIndex].player_id] = sbAmount;
+      initialBets[active[bbIndex].player_id] = bbAmount;
+      setPlayerBets(initialBets);
+      
       // Record small blind
-      await recordPlayerAction(
+      const sbAction = await recordPlayerAction(
         hand.id,
         active[sbIndex].player_id,
         'Preflop',
         'Small Blind',
-        game.small_blind || 50,
+        sbAmount,
         0,
         active[sbIndex].player_id === heroPlayer?.player_id
       );
       
       // Record big blind
-      await recordPlayerAction(
+      const bbAction = await recordPlayerAction(
         hand.id,
         active[bbIndex].player_id,
         'Preflop',
         'Big Blind',
-        game.big_blind || 100,
+        bbAmount,
         1,
         active[bbIndex].player_id === heroPlayer?.player_id
       );
+      
+      if (sbAction && bbAction) {
+        setStreetActions([sbAction, bbAction]);
+      }
       
       // Start with player after big blind (UTG)
       const utgIndex = (buttonIndex + 3) % active.length;
       setCurrentPlayerIndex(utgIndex);
       setStage('preflop');
-      setCurrentBet(game.big_blind || 100);
-      setPotSize((game.small_blind || 50) + (game.big_blind || 100));
+      setCurrentBet(bbAmount);
+      setPotSize(sbAmount + bbAmount);
       setActionSequence(2);
     }
   };
@@ -122,14 +139,29 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
     const currentPlayer = activePlayers[currentPlayerIndex];
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
+    const playerCurrentBet = playerBets[currentPlayer.player_id] || 0;
     
     let betSize = 0;
+    let additionalAmount = 0;
+    
     if (actionType === 'Small Blind') {
       betSize = (game.small_blind || 50);
+      additionalAmount = betSize;
     } else if (actionType === 'Big Blind') {
       betSize = (game.big_blind || 100);
-    } else if (actionType === 'Raise' || actionType === 'Call') {
+      additionalAmount = betSize;
+    } else if (actionType === 'Call') {
+      betSize = currentBet;
+      additionalAmount = currentBet - playerCurrentBet;
+    } else if (actionType === 'Raise') {
       betSize = parseFloat(betAmount) || currentBet;
+      additionalAmount = betSize - playerCurrentBet;
+    } else if (actionType === 'Check') {
+      betSize = 0;
+      additionalAmount = 0;
+    } else if (actionType === 'All-In') {
+      betSize = parseFloat(betAmount) || currentBet;
+      additionalAmount = betSize - playerCurrentBet;
     }
 
     const action = await recordPlayerAction(
@@ -146,8 +178,14 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setStreetActions(prev => [...prev, action]);
     }
 
-    // Update pot
-    setPotSize(prev => prev + betSize);
+    // Update player bets
+    setPlayerBets(prev => ({
+      ...prev,
+      [currentPlayer.player_id]: betSize
+    }));
+
+    // Update pot with additional amount
+    setPotSize(prev => prev + additionalAmount);
     setActionSequence(prev => prev + 1);
 
     // If fold, remove player from players in hand
@@ -191,9 +229,15 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       await updateHandStage(currentHand.id, 'Showdown');
     }
     
+    // Reset for next street - action starts from small blind (position 0)
     setCurrentPlayerIndex(0);
     setCurrentBet(0);
     setStreetActions([]);
+    
+    // Reset player bets for new street
+    const resetBets: Record<string, number> = {};
+    activePlayers.forEach(p => resetBets[p.player_id] = 0);
+    setPlayerBets(resetBets);
   };
 
   const saveStreetCards = async (cards: string) => {
@@ -254,6 +298,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setStreetActions([]);
     setPlayersInHand([]);
     setPlayerHoleCards({});
+    setPlayerBets({});
   };
 
   const handleHoleCardSubmit = (cards: string) => {
@@ -289,6 +334,61 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }));
 
     return determineWinner(playersWithHoles, allCommunityCards);
+  };
+
+  const deleteAction = async (actionId: string) => {
+    if (!currentHand) return;
+
+    try {
+      const { error } = await supabase
+        .from('player_actions')
+        .delete()
+        .eq('id', actionId);
+
+      if (error) throw error;
+
+      // Refresh street actions
+      setStreetActions(prev => prev.filter(a => a.id !== actionId));
+      
+      // Recalculate pot and player bets
+      const remainingActions = streetActions.filter(a => a.id !== actionId);
+      let newPot = (game.small_blind || 50) + (game.big_blind || 100);
+      const newPlayerBets: Record<string, number> = {};
+      
+      activePlayers.forEach(p => newPlayerBets[p.player_id] = 0);
+      
+      remainingActions.forEach(action => {
+        newPlayerBets[action.player_id] = action.bet_size;
+      });
+      
+      Object.values(newPlayerBets).forEach(bet => newPot += bet);
+      
+      setPotSize(newPot);
+      setPlayerBets(newPlayerBets);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete action',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const canMoveToNextStreet = (): boolean => {
+    // Check if cards are dealt for this street
+    if (stage === 'flop' && !flopCards) return false;
+    if (stage === 'turn' && !turnCard) return false;
+    if (stage === 'river' && !riverCard) return false;
+    
+    // Check if all remaining players have equal bets
+    const activeBets = activePlayers
+      .filter(p => playersInHand.includes(p.player_id))
+      .map(p => playerBets[p.player_id] || 0);
+    
+    if (activeBets.length === 0) return false;
+    
+    const maxBet = Math.max(...activeBets);
+    return activeBets.every(bet => bet === maxBet);
   };
 
   if (stage === 'setup') {
@@ -601,12 +701,24 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               {streetActions.map((action, idx) => {
                 const player = game.game_players.find(gp => gp.player_id === action.player_id);
                 return (
-                  <div key={idx} className="text-xs flex justify-between">
+                  <div key={idx} className="text-xs flex justify-between items-center gap-2">
                     <span className="font-medium">{player?.player.name}</span>
-                    <span>
-                      {action.action_type}
-                      {action.bet_size > 0 && ` ₹${action.bet_size}`}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {action.action_type}
+                        {action.bet_size > 0 && ` ₹${action.bet_size}`}
+                      </span>
+                      {idx >= 2 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => deleteAction(action.id)}
+                        >
+                          ✕
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -646,7 +758,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             variant="outline"
             disabled={currentBet === 0}
           >
-            Call {currentBet > 0 && `₹${currentBet}`}
+            Call {currentBet > 0 && `₹${currentBet - (playerBets[currentPlayer?.player_id] || 0)}`}
           </Button>
           <Button 
             onClick={() => recordAction('Fold')} 
@@ -684,14 +796,18 @@ const HandTracking = ({ game }: HandTrackingProps) => {
           onClick={moveToNextStreet} 
           className="w-full" 
           variant="default"
-          disabled={
-            (stage === 'flop' && !flopCards) ||
-            (stage === 'turn' && !turnCard) ||
-            (stage === 'river' && !riverCard)
-          }
+          disabled={!canMoveToNextStreet()}
         >
           {stage === 'river' ? 'Go to Showdown' : 'Next Street'} →
         </Button>
+        
+        {!canMoveToNextStreet() && (
+          <p className="text-xs text-muted-foreground text-center">
+            {(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)
+              ? 'Deal cards to continue'
+              : 'All players must have equal bets to continue'}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

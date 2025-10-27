@@ -19,6 +19,8 @@ import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
 const NewGame = () => {
   const { user } = useAuth();
   const [buyInAmount, setBuyInAmount] = useState("2,000");
+  const [smallBlind, setSmallBlind] = useState("20");
+  const [bigBlind, setBigBlind] = useState("40");
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
@@ -134,6 +136,8 @@ const NewGame = () => {
         .from("games")
         .insert({
           buy_in_amount: parsedAmount,
+          small_blind: parseIndianNumber(smallBlind),
+          big_blind: parseIndianNumber(bigBlind),
           user_id: user?.id,
           is_complete: false,
         })
@@ -243,6 +247,44 @@ const NewGame = () => {
             }}
             disabled={hasActiveGame}
           />
+        </div>
+
+        {/* Blinds Section */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="smallblind">Small Blind (Rs.)</Label>
+            <Input
+              id="smallblind"
+              type="text"
+              placeholder="Small blind"
+              value={smallBlind}
+              onChange={(e) => {
+                const value = e.target.value.replace(/,/g, '');
+                if (value === '' || !isNaN(Number(value))) {
+                  const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                  setSmallBlind(formatted);
+                }
+              }}
+              disabled={hasActiveGame}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bigblind">Big Blind (Rs.)</Label>
+            <Input
+              id="bigblind"
+              type="text"
+              placeholder="Big blind"
+              value={bigBlind}
+              onChange={(e) => {
+                const value = e.target.value.replace(/,/g, '');
+                if (value === '' || !isNaN(Number(value))) {
+                  const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                  setBigBlind(formatted);
+                }
+              }}
+              disabled={hasActiveGame}
+            />
+          </div>
         </div>
 
         {/* Add Players Section */}

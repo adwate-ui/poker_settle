@@ -72,8 +72,12 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: Card
     }
   };
 
-  const cards = input.length >= 2 ? parseCards(input) : [];
-  const isValid = input.length > 0 && validateCards(input);
+  // Only parse cards if input is complete enough
+  const cleaned = input.replace(/\s+/g, '').toUpperCase();
+  const cards = cleaned.length >= 2 && cleaned.length % 2 === 0 ? parseCards(input) : [];
+  
+  // Only validate when we have the expected number of cards
+  const isValid = cleaned.length === expectedCards * 2 && validateCards(input);
 
   return (
     <div className="space-y-3">
