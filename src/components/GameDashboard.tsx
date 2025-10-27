@@ -174,8 +174,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button 
-              variant="outline" 
               onClick={onBackToSetup}
+              className="bg-primary hover:bg-primary/90"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Setup
@@ -381,7 +381,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           {!showManualTransfer && (
             <Button 
               onClick={() => setShowManualTransfer(true)}
-              variant="outline"
+              className="bg-primary hover:bg-primary/90"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Manual Transfer
