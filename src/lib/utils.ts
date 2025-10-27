@@ -24,6 +24,6 @@ export function parseIndianNumber(str: string): number {
 }
 
 // Format display value for input (blank if zero, formatted if non-zero)
-export function formatInputDisplay(value: number): string {
-  return value === 0 ? '' : formatIndianNumber(value);
+export function formatInputDisplay(value: number | null | undefined): string {
+  return (value === 0 || value === null || value === undefined) ? '' : formatIndianNumber(value);
 }
