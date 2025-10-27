@@ -41,6 +41,10 @@ interface GameWithStats {
   player_count: number;
   total_pot: number;
   player_names: string[];
+  game_players: Array<{
+    player_name: string;
+    net_amount: number;
+  }>;
 }
 
 type SortField = "date" | "buy_in" | "players" | "chips";
@@ -77,6 +81,7 @@ const GamesHistory = () => {
           game_players (
             id,
             buy_ins,
+            net_amount,
             player:players (
               name
             )
@@ -93,6 +98,10 @@ const GamesHistory = () => {
         const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
         const totalPot = totalBuyIns * game.buy_in_amount;
         const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
+        const gamePlayers = game.game_players?.map((gp: any) => ({
+          player_name: gp.player?.name || "",
+          net_amount: gp.net_amount || 0,
+        })) || [];
 
         return {
           id: game.id,
@@ -101,6 +110,7 @@ const GamesHistory = () => {
           player_count: playerCount,
           total_pot: totalPot,
           player_names: playerNames,
+          game_players: gamePlayers,
         };
       });
 
@@ -331,49 +341,72 @@ const GamesHistory = () => {
                     {getSortIcon("chips")}
                   </Button>
                 </TableHead>
+                {selectedPlayer !== "all" && (
+                  <TableHead className="font-bold text-center">
+                    Player P&L
+                  </TableHead>
+                )}
                 <TableHead className="text-right font-bold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedGames.map((game, index) => (
-                <TableRow
-                  key={game.id}
-                  className={`cursor-pointer transition-colors ${
-                    index % 2 === 0 
-                      ? "bg-secondary/5 hover:bg-secondary/20" 
-                      : "hover:bg-primary/10"
-                  }`}
-                  onClick={() => navigate(`/games/${game.id}`)}
-                >
-                  <TableCell className="font-medium text-primary">
-                    {format(new Date(game.date), "MMM d, yyyy")}
-                  </TableCell>
-                  <TableCell className="text-secondary-foreground font-semibold">
-                    Rs. {formatIndianNumber(game.buy_in_amount)}
-                  </TableCell>
-                  <TableCell>
-                    <span className="px-3 py-1 rounded-full bg-primary/20 text-primary font-medium">
-                      {game.player_count}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-accent-foreground font-semibold">
-                    Rs. {formatIndianNumber(game.total_pot)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteGameId(game.id);
-                      }}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/20"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredAndSortedGames.map((game, index) => {
+                const playerData = game.game_players.find(
+                  (gp) => gp.player_name === selectedPlayer
+                );
+                
+                return (
+                  <TableRow
+                    key={game.id}
+                    className={`cursor-pointer transition-colors ${
+                      index % 2 === 0 
+                        ? "bg-secondary/5 hover:bg-secondary/20" 
+                        : "hover:bg-primary/10"
+                    }`}
+                    onClick={() => navigate(`/games/${game.id}`)}
+                  >
+                    <TableCell className="font-medium text-primary">
+                      {format(new Date(game.date), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-secondary-foreground font-semibold">
+                      Rs. {formatIndianNumber(game.buy_in_amount)}
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-3 py-1 rounded-full bg-primary/20 text-primary font-medium">
+                        {game.player_count}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-accent-foreground font-semibold">
+                      Rs. {formatIndianNumber(game.total_pot)}
+                    </TableCell>
+                    {selectedPlayer !== "all" && playerData && (
+                      <TableCell className="text-center">
+                        <span className={`px-3 py-1 rounded-full font-bold ${
+                          playerData.net_amount >= 0
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}>
+                          {playerData.net_amount >= 0 ? "+" : ""}
+                          Rs. {formatIndianNumber(playerData.net_amount)}
+                        </span>
+                      </TableCell>
+                    )}
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteGameId(game.id);
+                        }}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/20"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
