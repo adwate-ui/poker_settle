@@ -201,6 +201,7 @@ export type Database = {
           pot_size: number | null
           updated_at: string
           winner_player_id: string | null
+          winner_player_ids: string[] | null
         }
         Insert: {
           button_player_id: string
@@ -214,6 +215,7 @@ export type Database = {
           pot_size?: number | null
           updated_at?: string
           winner_player_id?: string | null
+          winner_player_ids?: string[] | null
         }
         Update: {
           button_player_id?: string
@@ -227,6 +229,7 @@ export type Database = {
           pot_size?: number | null
           updated_at?: string
           winner_player_id?: string | null
+          winner_player_ids?: string[] | null
         }
         Relationships: [
           {

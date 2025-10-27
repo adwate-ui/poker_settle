@@ -170,7 +170,7 @@ export const useHandTracking = () => {
 
   const completeHand = async (
     handId: string,
-    winnerPlayerId: string,
+    winnerPlayerIds: string[],
     potSize: number,
     isHeroWin: boolean
   ): Promise<void> => {
@@ -178,7 +178,8 @@ export const useHandTracking = () => {
       const { error } = await supabase
         .from('poker_hands')
         .update({
-          winner_player_id: winnerPlayerId,
+          winner_player_id: winnerPlayerIds[0] || null,
+          winner_player_ids: winnerPlayerIds,
           pot_size: potSize,
           is_hero_win: isHeroWin,
           final_stage: 'Showdown',
@@ -189,7 +190,9 @@ export const useHandTracking = () => {
 
       toast({
         title: 'Hand Complete',
-        description: 'Hand has been recorded successfully',
+        description: winnerPlayerIds.length > 1 
+          ? `Chopped pot between ${winnerPlayerIds.length} players`
+          : 'Hand has been recorded successfully',
       });
     } catch (error: any) {
       toast({

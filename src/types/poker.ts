@@ -53,6 +53,7 @@ export interface PokerHand {
   pot_size: number;
   final_stage: 'Preflop' | 'Flop' | 'Turn' | 'River' | 'Showdown';
   winner_player_id: string | null;
+  winner_player_ids: string[];
   hero_position: string | null;
   is_hero_win: boolean | null;
   created_at: string;

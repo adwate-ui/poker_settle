@@ -19,7 +19,9 @@ interface HandDetail {
   game_id: string;
   button_player_name: string;
   winner_player_name: string | null;
+  winner_player_names: string[];
   game_date: string;
+  big_blind: number;
   actions: Array<{
     id: string;
     action_type: string;
@@ -57,7 +59,8 @@ const HandDetail = () => {
         .select(`
           *,
           games!inner (
-            date
+            date,
+            big_blind
           )
         `)
         .eq('id', handId)
@@ -119,7 +122,9 @@ const HandDetail = () => {
         ...handData,
         button_player_name: buttonPlayer?.name || 'Unknown',
         winner_player_name: winnerPlayerName,
+        winner_player_names: [],
         game_date: handData.games.date,
+        big_blind: handData.games.big_blind || 100,
         actions: actionsData,
         street_cards: streetCardsData || [],
         player_names: playerNamesMap,
@@ -219,7 +224,7 @@ const HandDetail = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Pot Size:</span>
                 <span className="font-bold text-poker-gold">
-                  ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
+                  ₹{hand.pot_size?.toLocaleString('en-IN') || 0} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
               {hand.winner_player_name && (
@@ -289,7 +294,7 @@ const HandDetail = () => {
                               </span>
                               {action.bet_size > 0 && (
                                 <span className="font-semibold text-poker-gold">
-                                  ₹{action.bet_size.toLocaleString('en-IN')}
+                                  ₹{action.bet_size.toLocaleString('en-IN')} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
                                 </span>
                               )}
                             </div>

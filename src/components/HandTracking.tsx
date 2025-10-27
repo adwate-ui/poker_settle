@@ -57,9 +57,17 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [showHoleCardInput, setShowHoleCardInput] = useState(false);
   const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<string>('');
   const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
+  const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
 
   // Find hero player (current user)
   const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
+
+  // Format amount with BB multiple
+  const formatWithBB = (amount: number): string => {
+    const bb = game.big_blind || 100;
+    const bbMultiple = (amount / bb).toFixed(1);
+    return `₹${amount.toLocaleString('en-IN')} (${bbMultiple} BB)`;
+  };
 
   const getPlayerPosition = (buttonIndex: number, playerIndex: number, totalPlayers: number): string => {
     const relativePosition = (playerIndex - buttonIndex + totalPlayers) % totalPlayers;
@@ -130,6 +138,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       initialBets[active[sbIndex].player_id] = sbAmount;
       initialBets[active[bbIndex].player_id] = bbAmount;
       setPlayerBets(initialBets);
+      setStreetPlayerBets(initialBets);
       
       // Record small blind
       const sbPosition = getPlayerPosition(buttonIndex, sbIndex, active.length);
@@ -211,7 +220,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
     const currentPlayer = activePlayers[currentPlayerIndex];
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
-    const playerCurrentBet = playerBets[currentPlayer.player_id] || 0;
+    const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
     // Get button index to calculate position
     const buttonPlayerId = currentHand.button_player_id;
@@ -228,17 +237,18 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       betSize = (game.big_blind || 100);
       additionalAmount = betSize;
     } else if (actionType === 'Call') {
+      // Call amount = max bet on this street - player's bet on this street
       betSize = currentBet;
-      additionalAmount = currentBet - playerCurrentBet;
+      additionalAmount = currentBet - playerStreetBet;
     } else if (actionType === 'Raise') {
       betSize = parseFloat(betAmount) || currentBet;
-      additionalAmount = betSize - playerCurrentBet;
+      additionalAmount = betSize - playerStreetBet;
     } else if (actionType === 'Check') {
       betSize = 0;
       additionalAmount = 0;
     } else if (actionType === 'All-In') {
       betSize = parseFloat(betAmount) || currentBet;
-      additionalAmount = betSize - playerCurrentBet;
+      additionalAmount = betSize - playerStreetBet;
     }
 
     const action = await recordPlayerAction(
@@ -256,10 +266,16 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setStreetActions(prev => [...prev, action]);
     }
 
-    // Update player bets
-    setPlayerBets(prev => ({
+    // Update player bets for this street
+    setStreetPlayerBets(prev => ({
       ...prev,
       [currentPlayer.player_id]: betSize
+    }));
+    
+    // Update total player bets across all streets
+    setPlayerBets(prev => ({
+      ...prev,
+      [currentPlayer.player_id]: (prev[currentPlayer.player_id] || 0) + additionalAmount
     }));
 
     // Update pot with additional amount
@@ -274,7 +290,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       
       // If only one player left, they win
       if (remainingActive.length === 1) {
-        await finishHand(remainingActive[0].player_id);
+        await finishHand([remainingActive[0].player_id]);
         return;
       }
       return;
@@ -323,7 +339,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     // Reset player bets for new street
     const resetBets: Record<string, number> = {};
     activePlayers.forEach(p => resetBets[p.player_id] = 0);
-    setPlayerBets(resetBets);
+    setStreetPlayerBets(resetBets);
   };
 
   const moveToPreviousStreet = () => {
@@ -358,11 +374,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }
   };
 
-  const finishHand = async (winnerId: string) => {
+  const finishHand = async (winnerIds: string[]) => {
     if (!currentHand) return;
 
-    const isHeroWin = winnerId === heroPlayer?.player_id;
-    await completeHand(currentHand.id, winnerId, potSize, isHeroWin);
+    const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
+    await completeHand(currentHand.id, winnerIds, potSize, isHeroWin);
     
     // Save hole cards to player_actions if entered
     if (Object.keys(playerHoleCards).length > 0) {
@@ -402,6 +418,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setPlayersInHand([]);
     setPlayerHoleCards({});
     setPlayerBets({});
+    setStreetPlayerBets({});
   };
 
   const handleHoleCardSubmit = (cards: string) => {
@@ -507,7 +524,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     // Check if all remaining players have equal bets
     const activeBets = activePlayers
       .filter(p => playersInHand.includes(p.player_id))
-      .map(p => playerBets[p.player_id] || 0);
+      .map(p => streetPlayerBets[p.player_id] || 0);
     
     if (activeBets.length === 0) return false;
     
@@ -642,7 +659,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             )}
 
             <div className="text-xl font-bold text-center text-poker-gold">
-              Pot: ₹{potSize.toLocaleString('en-IN')}
+              Pot: {formatWithBB(potSize)}
             </div>
 
             {/* Hole Cards Entry Section */}
@@ -706,17 +723,42 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             {winnerResult && (
               <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
                 <div className="text-center space-y-3">
-                  <div className="text-2xl font-bold text-green-400">
-                    🏆 {winnerResult.winner.playerName} Wins!
-                  </div>
-                  <div className="text-lg font-semibold text-poker-gold">
-                    {winnerResult.winner.handName}
-                  </div>
-                  <div className="flex gap-1 justify-center">
-                    {winnerResult.winner.bestHand.map((card, idx) => (
-                      <PokerCard key={idx} card={card} size="sm" />
-                    ))}
-                  </div>
+                  {winnerResult.winners.length === 1 ? (
+                    <>
+                      <div className="text-2xl font-bold text-green-400">
+                        🏆 {winnerResult.winners[0].playerName} Wins!
+                      </div>
+                      <div className="text-lg font-semibold text-poker-gold">
+                        {winnerResult.winners[0].handName}
+                      </div>
+                      <div className="flex gap-1 justify-center">
+                        {winnerResult.winners[0].bestHand.map((card, idx) => (
+                          <PokerCard key={idx} card={card} size="sm" />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold text-green-400">
+                        🏆 Chopped Pot!
+                      </div>
+                      <div className="text-lg font-semibold text-poker-gold">
+                        {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
+                      </div>
+                      <div className="space-y-2">
+                        {winnerResult.winners.map((winner) => (
+                          <div key={winner.playerId} className="flex items-center justify-center gap-2">
+                            <span className="font-medium">{winner.playerName}</span>
+                            <div className="flex gap-1">
+                              {winner.bestHand.map((card, idx) => (
+                                <PokerCard key={idx} card={card} size="sm" />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   
                   {winnerResult.allHands.length > 1 && (
                     <details className="text-sm text-left">
@@ -741,7 +783,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                   )}
                   
                   <Button
-                    onClick={() => finishHand(winnerResult.winner.playerId)}
+                    onClick={() => finishHand(winnerResult.winners.map(w => w.playerId))}
                     className="w-full bg-green-600 hover:bg-green-700"
                     size="lg"
                   >
@@ -762,7 +804,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                 {activePlayers.map((gp) => (
                   <Button
                     key={gp.player_id}
-                    onClick={() => finishHand(gp.player_id)}
+                    onClick={() => finishHand([gp.player_id])}
                     variant="outline"
                     className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
                   >
@@ -811,7 +853,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             <span>Hand #{currentHand?.hand_number} - {stage.toUpperCase()}</span>
           </div>
           <Badge variant="secondary" className="text-lg">
-            Pot: ₹{potSize.toLocaleString('en-IN')}
+            Pot: {formatWithBB(potSize)}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -904,7 +946,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                     <div className="flex items-center gap-2">
                       <span>
                         {action.action_type}
-                        {action.bet_size > 0 && ` ₹${action.bet_size}`}
+                        {action.bet_size > 0 && ` ${formatWithBB(action.bet_size)}`}
                       </span>
                       {canDelete && (
                         <Button
@@ -937,7 +979,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
           </div>
           {currentBet > 0 && (
             <div className="mt-2 text-sm">
-              Current Bet: <span className="font-bold">₹{currentBet}</span>
+              Current Bet: <span className="font-bold">{formatWithBB(currentBet)}</span>
             </div>
           )}
         </div>
@@ -957,7 +999,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               variant="outline"
               disabled={currentBet === 0}
             >
-              Call {currentBet > 0 && `₹${currentBet - (playerBets[currentPlayer?.player_id] || 0)}`}
+              Call {currentBet > 0 && formatWithBB(currentBet - (streetPlayerBets[currentPlayer?.player_id] || 0))}
             </Button>
             <Button 
               onClick={() => recordAction('Fold')} 

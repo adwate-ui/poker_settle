@@ -181,7 +181,7 @@ const evaluateHand = (cards: Card[]): { rank: number; name: string; bestCards: C
 export const determineWinner = (
   players: Array<{ playerId: string; playerName: string; holeCards: string }>,
   communityCards: string
-): { winner: HandResult; allHands: HandResult[] } | null => {
+): { winners: HandResult[]; allHands: HandResult[] } | null => {
   if (players.length === 0) return null;
 
   const community = communityCards.match(/.{1,2}/g)?.map(parseCard) || [];
@@ -235,8 +235,28 @@ export const determineWinner = (
     return 0;
   });
 
+  // Find all winners (players with same hand as top player)
+  const topHandRank = results[0].handRank;
+  const topBestHand = results[0].bestHand;
+  
+  const winners = results.filter(result => {
+    if (result.handRank !== topHandRank) return false;
+    
+    // Compare all cards to detect exact tie
+    for (let i = 0; i < 5; i++) {
+      const resultCard = result.bestHand[i] ? parseCard(result.bestHand[i]) : null;
+      const topCard = topBestHand[i] ? parseCard(topBestHand[i]) : null;
+      
+      if (!resultCard || !topCard) return false;
+      
+      if (parseInt(resultCard.rank) !== parseInt(topCard.rank)) return false;
+    }
+    
+    return true;
+  });
+
   return {
-    winner: results[0],
+    winners: winners,
     allHands: results
   };
 };

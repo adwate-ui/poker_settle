@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface HandWithDetails extends PokerHand {
   button_player_name: string;
   winner_player_name: string | null;
+  winner_player_names: string[];
   game_date: string;
   game_buy_in: number;
   actions: PlayerAction[];
@@ -70,12 +71,14 @@ export const useHandsHistory = () => {
         pot_size: hand.pot_size || 0,
         final_stage: hand.final_stage as PokerHand['final_stage'],
         winner_player_id: hand.winner_player_id,
+        winner_player_ids: hand.winner_player_ids || [],
         hero_position: hand.hero_position,
         is_hero_win: hand.is_hero_win,
         created_at: hand.created_at,
         updated_at: hand.updated_at,
         button_player_name: hand.button_player?.name || 'Unknown',
         winner_player_name: hand.winner_player?.name || null,
+        winner_player_names: [],
         game_date: hand.game?.date || '',
         game_buy_in: hand.game?.buy_in_amount || 0,
         actions: (actionsData?.filter(a => a.hand_id === hand.id) || []) as PlayerAction[],
