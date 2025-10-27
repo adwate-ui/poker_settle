@@ -43,10 +43,6 @@ interface Settlement {
   amount: number;
 }
 
-interface CalculatedSettlement extends Settlement {
-  isManual: boolean;
-}
-
 type SortField = "name" | "buy_ins" | "final_stack" | "net_amount";
 type SortOrder = "asc" | "desc" | null;
 
@@ -202,11 +198,11 @@ const GameDetail = () => {
   const settlements: Settlement[] = (game as any)?.settlements || [];
 
   // Calculate optimal settlements from net amounts
-  const calculateSettlements = (): CalculatedSettlement[] => {
+  const calculateSettlements = (): Settlement[] => {
     const winners = sortedGamePlayers.filter(gp => gp.net_amount > 0);
     const losers = sortedGamePlayers.filter(gp => gp.net_amount < 0);
     
-    const calculatedSettlements: CalculatedSettlement[] = [];
+    const calculatedSettlements: Settlement[] = [];
     
     // Create copies to work with
     const winnersQueue = winners.map(w => ({ name: w.players.name, amount: w.net_amount }));
@@ -225,8 +221,7 @@ const GameDetail = () => {
         calculatedSettlements.push({
           from: loser.name,
           to: winner.name,
-          amount: Math.round(settlementAmount),
-          isManual: false
+          amount: Math.round(settlementAmount)
         });
       }
       
@@ -240,9 +235,8 @@ const GameDetail = () => {
     return calculatedSettlements;
   };
 
-  const calculatedSettlements = calculateSettlements();
-  const manualSettlements: CalculatedSettlement[] = settlements.map(s => ({ ...s, isManual: true }));
-  const allSettlements = [...calculatedSettlements, ...manualSettlements];
+  // Use manual settlements if they exist, otherwise use calculated settlements
+  const finalSettlements = settlements.length > 0 ? settlements : calculateSettlements();
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -422,7 +416,7 @@ const GameDetail = () => {
       </Card>
 
       {/* Settlements */}
-      {allSettlements.length > 0 && (
+      {finalSettlements.length > 0 && (
         <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
           <CardHeader className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-600/20">
             <CardTitle className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
@@ -431,62 +425,27 @@ const GameDetail = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            {calculatedSettlements.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 text-foreground">Calculated Settlements</h3>
-                <div className="space-y-3">
-                  {calculatedSettlements.map((settlement, index) => (
-                    <div 
-                      key={`calc-${index}`} 
-                      className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          {settlement.from}
-                        </span>
-                        <span className="text-muted-foreground font-medium">pays</span>
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {settlement.to}
-                        </span>
-                      </div>
-                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
-                        Rs. {formatIndianNumber(settlement.amount)}
-                      </span>
-                    </div>
-                  ))}
+            <div className="space-y-3">
+              {finalSettlements.map((settlement, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      {settlement.from}
+                    </span>
+                    <span className="text-muted-foreground font-medium">pays</span>
+                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      {settlement.to}
+                    </span>
+                  </div>
+                  <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
+                    Rs. {formatIndianNumber(settlement.amount)}
+                  </span>
                 </div>
-              </div>
-            )}
-            
-            {manualSettlements.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-                  Manual Settlements
-                  <Badge variant="outline" className="text-xs">Custom</Badge>
-                </h3>
-                <div className="space-y-3">
-                  {manualSettlements.map((settlement, index) => (
-                    <div 
-                      key={`manual-${index}`} 
-                      className="flex items-center justify-between p-4 border border-purple-500/30 rounded-lg bg-gradient-to-r from-purple-500/10 via-background to-purple-600/5 hover:from-purple-500/15 hover:to-purple-600/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          {settlement.from}
-                        </span>
-                        <span className="text-muted-foreground font-medium">pays</span>
-                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {settlement.to}
-                        </span>
-                      </div>
-                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-2 border-purple-500/30">
-                        Rs. {formatIndianNumber(settlement.amount)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
