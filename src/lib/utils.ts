@@ -23,7 +23,8 @@ export function parseIndianNumber(str: string): number {
   return parseFloat(cleaned) || 0;
 }
 
-// Format display value for input (blank if zero, formatted if non-zero)
+// Format display value for input (shows 0 explicitly instead of blank)
 export function formatInputDisplay(value: number): string {
-  return value === 0 ? '' : formatIndianNumber(value);
+  if (value === 0) return '0';
+  return formatIndianNumber(value);
 }
