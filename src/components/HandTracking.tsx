@@ -314,30 +314,27 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
       if (stateUpdates.lastAggressorIndex !== undefined) setLastAggressorIndex(stateUpdates.lastAggressorIndex);
       
-      // Handle fold - update active players and check for winner
+      // Handle fold - update playersInHand and check for winner; keep activePlayers unchanged
       if (actionType === 'Fold') {
         if (stateUpdates.playersInHand) setPlayersInHand(stateUpdates.playersInHand);
-        if (stateUpdates.activePlayers) {
-          const updatedActivePlayers = stateUpdates.activePlayers;
-          setActivePlayers(updatedActivePlayers);
-          
-          // Check if only one player remains - hand ends immediately
-          const endCheck = shouldEndHandEarly(updatedActivePlayers, stateUpdates.playersInHand || []);
-          if (endCheck.shouldEnd && endCheck.winnerId) {
-            await finishHand([endCheck.winnerId]);
-            return; // CRITICAL: Don't try to move to next player
-          }
-          
-          // CRITICAL: Move to next player with updated activePlayers list
-          const nextIndex = getNextPlayerIndex(
-            currentPlayerIndex,
-            stage,
-            updatedActivePlayers,
-            buttonIndex,
-            stateUpdates.playersInHand || playersInHand
-          );
-          setCurrentPlayerIndex(nextIndex);
+        const updatedPlayersInHand = stateUpdates.playersInHand || playersInHand;
+
+        // Check if only one player remains - hand ends immediately
+        const endCheck = shouldEndHandEarly(activePlayers, updatedPlayersInHand);
+        if (endCheck.shouldEnd && endCheck.winnerId) {
+          await finishHand([endCheck.winnerId]);
+          return; // Don't move to next player after finishing hand
         }
+
+        // Move to next player with unchanged activePlayers and updated playersInHand
+        const nextIndex = getNextPlayerIndex(
+          currentPlayerIndex,
+          stage,
+          activePlayers,
+          buttonIndex,
+          updatedPlayersInHand
+        );
+        setCurrentPlayerIndex(nextIndex);
       } else {
         // Non-fold actions: move to next player normally
         const nextIndex = getNextPlayerIndex(

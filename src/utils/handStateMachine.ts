@@ -279,7 +279,7 @@ export const processAction = (
   // Handle fold
   if (actionType === 'Fold') {
     updates.playersInHand = state.playersInHand.filter(id => id !== currentPlayer.player_id);
-    updates.activePlayers = state.activePlayers.filter(p => p.player_id !== currentPlayer.player_id);
+    // Keep activePlayers unchanged to maintain seat order; skipping handled via playersInHand
   }
 
   return updates;
