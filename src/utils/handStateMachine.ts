@@ -52,42 +52,28 @@ export const getNextPlayerIndex = (
 
 /**
  * Get the starting player index for a betting round
+ * CRITICAL: Must respect seat-based positions and skip dealt-out players
  */
 export const getStartingPlayerIndex = (
   stage: HandStage,
-  allPlayers: GamePlayer[],
   activePlayers: GamePlayer[],
   buttonPlayerId: string
 ): number => {
-  const buttonIndex = allPlayers.findIndex(p => p.player_id === buttonPlayerId);
+  if (activePlayers.length === 0) return 0;
+  
+  // activePlayers should already be sorted by seat position
+  const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
+  if (buttonIndex === -1) return 0;
   
   if (stage === 'preflop') {
-    // Preflop: First to act is player immediately left of Big Blind (UTG)
-    // Button +1 = SB, +2 = BB, +3 = UTG
-    const utgIndexInAll = (buttonIndex + 3) % allPlayers.length;
-    const utgPlayer = allPlayers[utgIndexInAll];
-    
-    // Find this player in activePlayers array
-    const activeIndex = activePlayers.findIndex(p => p.player_id === utgPlayer.player_id);
-    return activeIndex !== -1 ? activeIndex : 0;
+    // Preflop: UTG is the first active player left of Big Blind
+    // Button +1 = SB, +2 = BB, +3 = UTG (first active player after BB)
+    const utgIndex = (buttonIndex + 3) % activePlayers.length;
+    return utgIndex;
   } else {
-    // Postflop: First to act is first active player left of button
-    let checkIndex = (buttonIndex + 1) % allPlayers.length;
-    let attempts = 0;
-    
-    while (attempts < allPlayers.length) {
-      const player = allPlayers[checkIndex];
-      const activeIndex = activePlayers.findIndex(p => p.player_id === player.player_id);
-      
-      if (activeIndex !== -1) {
-        return activeIndex;
-      }
-      
-      checkIndex = (checkIndex + 1) % allPlayers.length;
-      attempts++;
-    }
-    
-    return 0; // Fallback
+    // Postflop: First active player immediately left of button
+    const firstPlayerIndex = (buttonIndex + 1) % activePlayers.length;
+    return firstPlayerIndex;
   }
 };
 
@@ -316,11 +302,10 @@ export const processAction = (
  */
 export const resetForNewStreet = (
   state: HandState,
-  allPlayers: GamePlayer[],
   buttonPlayerId: string
 ): Partial<HandState> => {
   const newStage = getNextStage(state.stage);
-  const startingIndex = getStartingPlayerIndex(newStage, allPlayers, state.activePlayers, buttonPlayerId);
+  const startingIndex = getStartingPlayerIndex(newStage, state.activePlayers, buttonPlayerId);
 
   // Reset street-specific bets and aggressor tracking
   const resetBets: Record<string, number> = {};

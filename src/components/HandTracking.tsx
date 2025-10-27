@@ -191,7 +191,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       }
       
       // Use state machine to get starting player (UTG for preflop)
-      const startingIndex = getStartingPlayerIndex('preflop', game.game_players, active, buttonPlayerId);
+      const startingIndex = getStartingPlayerIndex('preflop', active, buttonPlayerId);
       setCurrentPlayerIndex(startingIndex);
       setStage('preflop');
       setCurrentBet(bbAmount);
@@ -371,7 +371,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         actionSequence,
         lastAggressorIndex
       },
-      game.game_players,
       currentHand.button_player_id
     );
     
