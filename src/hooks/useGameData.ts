@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Player, Game, GamePlayer } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { z } from "zod";
+
+// Input validation schemas
+const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
+const buyInAmountSchema = z.number().min(1, "Buy-in must be at least ₹1").max(1000000, "Buy-in cannot exceed ₹10,00,000");
+const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed ₹1,00,00,000");
+const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(100, "Buy-ins cannot exceed 100");
 
 export const useGameData = () => {
   const { user } = useAuth();
@@ -30,6 +37,16 @@ export const useGameData = () => {
 
   const createOrFindPlayer = async (name: string): Promise<Player> => {
     if (!user) throw new Error("User not authenticated");
+    
+    // Validate player name
+    try {
+      playerNameSchema.parse(name);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(error.errors[0].message);
+      }
+      throw error;
+    }
     
     try {
       // First check if player already exists for this user
@@ -65,6 +82,16 @@ export const useGameData = () => {
 
   const createGame = async (buyInAmount: number, selectedPlayers: Player[]): Promise<Game> => {
     if (!user) throw new Error("User not authenticated");
+    
+    // Validate buy-in amount
+    try {
+      buyInAmountSchema.parse(buyInAmount);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(error.errors[0].message);
+      }
+      throw error;
+    }
     
     try {
       // Create the game
@@ -119,6 +146,29 @@ export const useGameData = () => {
   };
 
   const updateGamePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
+    // Validate updates
+    if (updates.final_stack !== undefined) {
+      try {
+        finalStackSchema.parse(updates.final_stack);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          throw new Error(error.errors[0].message);
+        }
+        throw error;
+      }
+    }
+
+    if (updates.buy_ins !== undefined) {
+      try {
+        buyInsSchema.parse(updates.buy_ins);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          throw new Error(error.errors[0].message);
+        }
+        throw error;
+      }
+    }
+
     const { error } = await supabase
       .from("game_players")
       .update(updates)
