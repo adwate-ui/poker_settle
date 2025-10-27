@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Game } from "@/types/poker";
 import GameSetup from "@/components/GameSetup";
 import GameDashboard from "@/components/GameDashboard";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Index = () => {
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
@@ -16,15 +17,21 @@ const Index = () => {
 
   if (currentGame) {
     return (
-      <GameDashboard 
-        game={currentGame} 
-        onBackToSetup={handleBackToSetup}
-      />
+      <>
+        <ThemeToggle />
+        <GameDashboard 
+          game={currentGame} 
+          onBackToSetup={handleBackToSetup}
+        />
+      </>
     );
   }
 
   return (
-    <GameSetup onGameStart={handleGameStart} />
+    <>
+      <ThemeToggle />
+      <GameSetup onGameStart={handleGameStart} />
+    </>
   );
 };
 

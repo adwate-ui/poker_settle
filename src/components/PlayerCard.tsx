@@ -74,7 +74,25 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Buy-ins</span>
-            <span className="font-semibold text-lg">{gamePlayer.buy_ins}</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => updateBuyIns(-1)}
+                className="h-8 w-8"
+              >
+                <Minus className="w-4 h-4" />
+              </Button>
+              <span className="font-semibold text-lg w-8 text-center">{gamePlayer.buy_ins}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => updateBuyIns(1)}
+                className="h-8 w-8"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
