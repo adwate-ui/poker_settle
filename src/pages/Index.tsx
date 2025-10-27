@@ -6,6 +6,7 @@ import GameDetail from "./GameDetail";
 import PlayersHistory from "./PlayersHistory";
 import PlayerDetail from "./PlayerDetail";
 import HandsHistory from "./HandsHistory";
+import HandDetail from "./HandDetail";
 import ChatBot from "@/components/ChatBot";
 import { TabsContent } from "@/components/ui/tabs";
 
@@ -13,6 +14,7 @@ const Index = () => {
   const location = useLocation();
   const isGameDetail = location.pathname.startsWith("/games/") && location.pathname !== "/games";
   const isPlayerDetail = location.pathname.startsWith("/players/") && location.pathname !== "/players";
+  const isHandDetail = location.pathname.startsWith("/hands/") && location.pathname !== "/hands";
 
   return (
     <TabLayout>
@@ -26,7 +28,7 @@ const Index = () => {
         {isPlayerDetail ? <PlayerDetail /> : <PlayersHistory />}
       </TabsContent>
       <TabsContent value="hands-history">
-        <HandsHistory />
+        {isHandDetail ? <HandDetail /> : <HandsHistory />}
       </TabsContent>
       <ChatBot />
     </TabLayout>

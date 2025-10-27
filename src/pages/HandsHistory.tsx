@@ -1,16 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import PokerCard from '@/components/PokerCard';
 
 const HandsHistory = () => {
+  const navigate = useNavigate();
   const {
     hands,
     loading,
@@ -22,7 +21,6 @@ const HandsHistory = () => {
     getStatistics,
   } = useHandsHistory();
 
-  const [selectedHand, setSelectedHand] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const handsPerPage = 20;
 
@@ -271,161 +269,58 @@ const HandsHistory = () => {
                   .join('');
 
                 return (
-                  <Sheet key={hand.id}>
-                    <SheetTrigger asChild>
-                      <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-semibold">Hand #{hand.hand_number}</span>
-                                <Badge variant="outline" className="text-xs">
-                                  {hand.hero_position}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {hand.final_stage}
-                                </Badge>
-                                {hand.is_hero_win === true && (
-                                  <Badge className="bg-green-600 text-xs">
-                                    <Trophy className="h-3 w-3 mr-1" />
-                                    Won
-                                  </Badge>
-                                )}
-                                {hand.is_hero_win === false && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    Lost
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {formatDate(hand.game_date)} • Button: {hand.button_player_name}
-                                {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                              {communityCards && (
-                                <div className="hidden md:flex gap-1">
-                                  {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                                    <PokerCard key={idx} card={card} size="sm" />
-                                  ))}
-                                </div>
-                              )}
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-poker-gold">
-                                  ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
-                                </div>
-                                <div className="text-xs text-muted-foreground">Pot</div>
-                              </div>
-                            </div>
+                  <Card 
+                    key={hand.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => navigate(`/hands/${hand.id}`)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold">Hand #{hand.hand_number}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {hand.hero_position}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {hand.final_stage}
+                            </Badge>
+                            {hand.is_hero_win === true && (
+                              <Badge className="bg-green-600 text-xs">
+                                <Trophy className="h-3 w-3 mr-1" />
+                                Won
+                              </Badge>
+                            )}
+                            {hand.is_hero_win === false && (
+                              <Badge variant="destructive" className="text-xs">
+                                Lost
+                              </Badge>
+                            )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    </SheetTrigger>
-
-                    <SheetContent className="w-full sm:max-w-2xl">
-                      <SheetHeader>
-                        <SheetTitle>Hand #{hand.hand_number} Details</SheetTitle>
-                      </SheetHeader>
-                      <ScrollArea className="h-[calc(100vh-100px)] mt-6">
-                        <div className="space-y-6 pr-4">
-                          {/* Hand Info */}
-                          <div>
-                            <h3 className="font-semibold mb-2">Hand Information</h3>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Game Date:</span>
-                                <span>{formatDate(hand.game_date)}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Hero Position:</span>
-                                <Badge variant="outline">{hand.hero_position}</Badge>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Button:</span>
-                                <span>{hand.button_player_name}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Final Stage:</span>
-                                <Badge>{hand.final_stage}</Badge>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Pot Size:</span>
-                                <span className="font-bold text-poker-gold">
-                                  ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
-                                </span>
-                              </div>
-                              {hand.winner_player_name && (
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Winner:</span>
-                                  <span className="font-semibold">{hand.winner_player_name}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <Separator />
-
-                          {/* Community Cards */}
-                          {communityCards && (
-                            <>
-                              <div>
-                                <h3 className="font-semibold mb-3">Community Cards</h3>
-                                <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
-                                  <div className="flex gap-2 justify-center flex-wrap">
-                                    {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                                      <PokerCard key={idx} card={card} size="md" />
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <Separator />
-                            </>
-                          )}
-
-                          {/* Action History */}
-                          <div>
-                            <h3 className="font-semibold mb-3">Action History</h3>
-                            <div className="space-y-2">
-                              {['Preflop', 'Flop', 'Turn', 'River'].map(street => {
-                                const streetActions = hand.actions.filter(a => a.street_type === street);
-                                if (streetActions.length === 0) return null;
-
-                                return (
-                                  <div key={street}>
-                                    <div className="text-sm font-semibold text-muted-foreground mb-1">
-                                      {street}:
-                                    </div>
-                                    <div className="space-y-1 pl-4">
-                                      {streetActions
-                                        .sort((a, b) => a.action_sequence - b.action_sequence)
-                                        .map((action, idx) => (
-                                          <div key={idx} className="text-sm flex justify-between">
-                                            <span>
-                                              {action.is_hero && (
-                                                <Badge variant="secondary" className="mr-2 text-xs">
-                                                  Hero
-                                                </Badge>
-                                              )}
-                                              {action.action_type}
-                                            </span>
-                                            {action.bet_size > 0 && (
-                                              <span className="font-medium">
-                                                ₹{action.bet_size.toLocaleString('en-IN')}
-                                              </span>
-                                            )}
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(hand.game_date)} • Button: {hand.button_player_name}
+                            {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
                           </div>
                         </div>
-                      </ScrollArea>
-                    </SheetContent>
-                  </Sheet>
+
+                        <div className="flex items-center gap-4">
+                          {communityCards && (
+                            <div className="hidden md:flex gap-1">
+                              {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                                <PokerCard key={idx} card={card} size="sm" />
+                              ))}
+                            </div>
+                          )}
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-poker-gold">
+                              ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Pot</div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>

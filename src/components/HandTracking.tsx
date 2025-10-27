@@ -307,8 +307,16 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       await updateHandStage(currentHand.id, 'Showdown');
     }
     
-    // Reset for next street - action starts from small blind (position 0)
-    setCurrentPlayerIndex(0);
+    // Reset for next street - post-flop action starts from small blind
+    if (stage !== 'preflop') {
+      // Find small blind position (1 seat after button)
+      const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand.button_player_id);
+      const sbIndex = (buttonIndex + 1) % activePlayers.length;
+      setCurrentPlayerIndex(sbIndex);
+    } else {
+      setCurrentPlayerIndex(0);
+    }
+    
     setCurrentBet(0);
     setStreetActions([]);
     
@@ -438,6 +446,10 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (!currentHand) return;
 
     try {
+      // Find the action being deleted
+      const actionToDelete = streetActions.find(a => a.id === actionId);
+      if (!actionToDelete) return;
+
       const { error } = await supabase
         .from('player_actions')
         .delete()
@@ -446,23 +458,37 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       if (error) throw error;
 
       // Refresh street actions
-      setStreetActions(prev => prev.filter(a => a.id !== actionId));
-      
-      // Recalculate pot and player bets
       const remainingActions = streetActions.filter(a => a.id !== actionId);
-      let newPot = (game.small_blind || 50) + (game.big_blind || 100);
-      const newPlayerBets: Record<string, number> = {};
+      setStreetActions(remainingActions);
       
+      // Recalculate pot - subtract the deleted action's contribution
+      const deletedBetContribution = actionToDelete.bet_size - (playerBets[actionToDelete.player_id] || 0);
+      setPotSize(prev => Math.max(0, prev - deletedBetContribution));
+      
+      // Recalculate player bets for current street
+      const newPlayerBets: Record<string, number> = {};
       activePlayers.forEach(p => newPlayerBets[p.player_id] = 0);
       
       remainingActions.forEach(action => {
-        newPlayerBets[action.player_id] = action.bet_size;
+        newPlayerBets[action.player_id] = Math.max(
+          newPlayerBets[action.player_id],
+          action.bet_size
+        );
       });
       
-      Object.values(newPlayerBets).forEach(bet => newPot += bet);
-      
-      setPotSize(newPot);
       setPlayerBets(newPlayerBets);
+      
+      // Recalculate current bet
+      const maxBet = Math.max(0, ...Object.values(newPlayerBets));
+      setCurrentBet(maxBet);
+      
+      // Decrement action sequence
+      setActionSequence(prev => Math.max(0, prev - 1));
+
+      toast({
+        title: 'Action Deleted',
+        description: 'The action has been removed',
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -832,6 +858,32 @@ const HandTracking = ({ game }: HandTrackingProps) => {
           />
         )}
 
+        {/* Remaining Players */}
+        {playersInHand.length > 0 && (
+          <div className="bg-gradient-to-br from-primary/10 to-transparent rounded-lg p-3 border border-primary/20">
+            <div className="text-sm font-semibold mb-2">Remaining Players ({playersInHand.length}):</div>
+            <div className="flex flex-wrap gap-2">
+              {activePlayers
+                .filter(p => playersInHand.includes(p.player_id))
+                .map((gp) => {
+                  const buttonIndex = game.game_players.findIndex(player => player.player_id === currentHand?.button_player_id);
+                  const playerIndex = activePlayers.findIndex(p => p.player_id === gp.player_id);
+                  const position = getPlayerPosition(buttonIndex, playerIndex, activePlayers.length);
+                  
+                  return (
+                    <div key={gp.player_id} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
+                      <span className="font-medium">{gp.player.name}</span>
+                      <span className="text-muted-foreground">({position})</span>
+                      {gp.player_id === heroPlayer?.player_id && (
+                        <Badge variant="secondary" className="ml-1 text-[10px] px-1 py-0">Hero</Badge>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {/* Action history for current street */}
         {streetActions.length > 0 && (
           <div className="bg-muted/50 rounded-lg p-3">
@@ -839,6 +891,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {streetActions.map((action, idx) => {
                 const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                const canDelete = stage !== 'preflop' || idx >= 2; // Can't delete blinds
+                
                 return (
                   <div key={idx} className="text-xs flex justify-between items-center gap-2">
                     <div className="flex items-center gap-1">
@@ -852,11 +906,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                         {action.action_type}
                         {action.bet_size > 0 && ` ₹${action.bet_size}`}
                       </span>
-                      {idx >= 2 && (
+                      {canDelete && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 hover:bg-destructive/20"
                           onClick={() => deleteAction(action.id)}
                         >
                           ✕
