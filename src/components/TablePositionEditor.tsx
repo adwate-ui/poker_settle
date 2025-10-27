@@ -33,8 +33,8 @@ const TablePositionEditor = ({
   const seatedPlayerIds = positions.map(p => p.player_id);
   const availablePlayers = players.filter(p => !seatedPlayerIds.includes(p.id));
 
-  // Generate seat numbers (1-10)
-  const allSeats = Array.from({ length: 10 }, (_, i) => i + 1);
+  // Generate seat numbers based on total players in game
+  const allSeats = Array.from({ length: players.length }, (_, i) => i + 1);
   const occupiedSeats = positions.map(p => p.seat);
   const availableSeats = allSeats.filter(s => !occupiedSeats.includes(s));
 
@@ -71,7 +71,7 @@ const TablePositionEditor = ({
       <div>
         <h3 className="text-lg sm:text-xl font-semibold mb-2">Set Table Positions</h3>
         <p className="text-sm text-muted-foreground">
-          Assign players to seat numbers (1-10). The table will display {positions.length} seated players.
+          Assign players to seat numbers (1-{players.length}). The table will display {positions.length} seated players.
         </p>
       </div>
 

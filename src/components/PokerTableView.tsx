@@ -6,13 +6,13 @@ interface PokerTableViewProps {
 }
 
 const PokerTableView = ({ positions, totalSeats }: PokerTableViewProps) => {
-  // Calculate number of seats based on max position or provided total
-  const maxSeat = Math.max(...positions.map(p => p.seat), totalSeats || 0);
-  const numSeats = Math.max(4, Math.min(10, maxSeat)); // Between 4-10 seats
+  // Always spread players evenly around the table regardless of seat numbers
+  const numPlayers = positions.length;
+  const numSeats = Math.max(4, totalSeats || numPlayers); // Use totalSeats if provided, otherwise numPlayers
 
-  // Calculate position for each seat around the table
-  const getSeatPosition = (seatNumber: number) => {
-    const angle = (seatNumber - 1) * (360 / numSeats) - 90; // Start from top
+  // Calculate position for each player, spreading them evenly
+  const getPlayerPosition = (index: number) => {
+    const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
     const radians = (angle * Math.PI) / 180;
     const radius = 40; // Percentage from center
     
@@ -48,8 +48,8 @@ const PokerTableView = ({ positions, totalSeats }: PokerTableViewProps) => {
           </svg>
 
           {/* Player positions */}
-          {positions.map((position) => {
-            const pos = getSeatPosition(position.seat);
+          {positions.map((position, index) => {
+            const pos = getPlayerPosition(index);
             return (
               <div
                 key={position.seat}

@@ -225,51 +225,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           <UserProfile />
         </div>
 
-        {showAddPlayer && (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-poker-gold">Add Player to Game</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                  <Input 
-                    value={newPlayerName} 
-                    onChange={(e) => setNewPlayerName(e.target.value)}
-                    placeholder="Enter player name"
-                    className="bg-input border-border"
-                    onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
-                  />
-                  <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()} className="w-full sm:w-auto">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddPlayer(false)} className="w-full sm:w-auto">
-                    Cancel
-                  </Button>
-                </div>
-                
-                {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2 text-sm sm:text-base">Or select existing player:</h4>
-                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-                      {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                        <Button
-                          key={player.id}
-                          variant="outline"
-                          onClick={() => addExistingPlayer(player)}
-                          className="justify-start"
-                        >
-                          {player.name}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <Card className="bg-card border-border">
           <CardHeader>
@@ -349,15 +304,57 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </Card>
         )}
 
-        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Players</h2>
-          <Button 
-            onClick={() => setShowAddPlayer(true)}
-            className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add Player
-          </Button>
+        <div className="space-y-4">
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Players</h2>
+            <Button 
+              onClick={() => setShowAddPlayer(!showAddPlayer)}
+              className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              {showAddPlayer ? 'Cancel' : 'Add Player'}
+            </Button>
+          </div>
+
+          {showAddPlayer && (
+            <Card className="bg-card border-border">
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                    <Input 
+                      value={newPlayerName} 
+                      onChange={(e) => setNewPlayerName(e.target.value)}
+                      placeholder="Enter player name"
+                      className="bg-input border-border"
+                      onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
+                    />
+                    <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()} className="w-full sm:w-auto">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add New
+                    </Button>
+                  </div>
+                  
+                  {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm sm:text-base">Or select existing player:</h4>
+                      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
+                        {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).sort((a, b) => a.name.localeCompare(b.name)).map(player => (
+                          <Button
+                            key={player.id}
+                            variant="outline"
+                            onClick={() => addExistingPlayer(player)}
+                            className="justify-start"
+                          >
+                            {player.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
