@@ -43,6 +43,10 @@ interface Settlement {
   amount: number;
 }
 
+interface SettlementWithType extends Settlement {
+  isManual: boolean;
+}
+
 type SortField = "name" | "buy_ins" | "final_stack" | "net_amount";
 type SortOrder = "asc" | "desc" | null;
 
@@ -195,7 +199,7 @@ const GameDetail = () => {
         player_name: gp.players.name,
       }));
 
-  const settlements: Settlement[] = (game as any)?.settlements || [];
+  const savedSettlements: Settlement[] = (game as any)?.settlements || [];
 
   // Calculate optimal settlements from net amounts
   const calculateSettlements = (): Settlement[] => {
@@ -235,8 +239,53 @@ const GameDetail = () => {
     return calculatedSettlements;
   };
 
-  // Use manual settlements if they exist, otherwise use calculated settlements
-  const finalSettlements = settlements.length > 0 ? settlements : calculateSettlements();
+  // Determine manual and calculated settlements
+  const allCalculatedSettlements = calculateSettlements();
+  
+  const getSettlementsWithType = (): SettlementWithType[] => {
+    if (savedSettlements.length === 0) {
+      // No manual settlements, show only calculated
+      return allCalculatedSettlements.map(s => ({ ...s, isManual: false }));
+    }
+    
+    // There are saved settlements (from completed game with manual transfers)
+    // Show all saved settlements with type identification
+    const manualSettlements: SettlementWithType[] = [];
+    const calculatedSettlements: SettlementWithType[] = [];
+    
+    // Get player balances to determine what's manual vs calculated
+    const playerBalances = sortedGamePlayers.reduce((acc, gp) => {
+      acc[gp.players.name] = gp.net_amount;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    savedSettlements.forEach(settlement => {
+      // Check if this settlement was likely manual by seeing if it partially settles a debt
+      // For simplicity, we'll mark early settlements as manual if there are multiple settlements
+      // from/to the same players, which is more common with manual entries
+      const isLikelyManual = savedSettlements.filter(s => 
+        s.from === settlement.from || s.to === settlement.to
+      ).length > 1;
+      
+      if (savedSettlements.indexOf(settlement) < savedSettlements.length - allCalculatedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
+        manualSettlements.push({ ...settlement, isManual: true });
+      } else {
+        calculatedSettlements.push({ ...settlement, isManual: false });
+      }
+    });
+    
+    // If we couldn't differentiate, mark first ones as manual
+    if (manualSettlements.length === 0 && calculatedSettlements.length === savedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
+      const numManual = savedSettlements.length - allCalculatedSettlements.length;
+      return savedSettlements.map((s, i) => ({ ...s, isManual: i < numManual }));
+    }
+    
+    return [...manualSettlements, ...calculatedSettlements];
+  };
+
+  const settlementsWithType = getSettlementsWithType();
+  const manualSettlements = settlementsWithType.filter(s => s.isManual);
+  const calculatedSettlements = settlementsWithType.filter(s => !s.isManual);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -416,7 +465,7 @@ const GameDetail = () => {
       </Card>
 
       {/* Settlements */}
-      {finalSettlements.length > 0 && (
+      {settlementsWithType.length > 0 && (
         <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
           <CardHeader className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-600/20">
             <CardTitle className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
@@ -425,26 +474,66 @@ const GameDetail = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="space-y-3">
-              {finalSettlements.map((settlement, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                      {settlement.from}
-                    </span>
-                    <span className="text-muted-foreground font-medium">pays</span>
-                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                      {settlement.to}
-                    </span>
+            <div className="space-y-6">
+              {manualSettlements.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      Manual Settlements
+                    </Badge>
                   </div>
-                  <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
-                    Rs. {formatIndianNumber(settlement.amount)}
-                  </span>
+                  {manualSettlements.map((settlement, index) => (
+                    <div 
+                      key={`manual-${index}`} 
+                      className="flex items-center justify-between p-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-500/10 via-background to-blue-600/5 hover:from-blue-500/15 hover:to-blue-600/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          {settlement.from}
+                        </span>
+                        <span className="text-muted-foreground font-medium">pays</span>
+                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          {settlement.to}
+                        </span>
+                      </div>
+                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-2 border-blue-500/30">
+                        Rs. {formatIndianNumber(settlement.amount)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              
+              {calculatedSettlements.length > 0 && (
+                <div className="space-y-3">
+                  {manualSettlements.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        Calculated Settlements
+                      </Badge>
+                    </div>
+                  )}
+                  {calculatedSettlements.map((settlement, index) => (
+                    <div 
+                      key={`calc-${index}`} 
+                      className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          {settlement.from}
+                        </span>
+                        <span className="text-muted-foreground font-medium">pays</span>
+                        <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          {settlement.to}
+                        </span>
+                      </div>
+                      <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
+                        Rs. {formatIndianNumber(settlement.amount)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

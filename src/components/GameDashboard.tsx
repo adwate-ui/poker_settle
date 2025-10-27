@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ interface GameDashboardProps {
 }
 
 const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
+  const navigate = useNavigate();
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>(game.game_players);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
@@ -157,11 +159,62 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   };
 
   const handleCompleteGame = async () => {
-    calculateSettlements(); // Calculate settlements first
+    // Calculate remaining settlements
+    const playerBalances = gamePlayers.map(gp => ({
+      name: gp.player.name,
+      balance: gp.net_amount
+    }));
+
+    // Apply manual transfers to adjust balances
+    manualTransfers.forEach(transfer => {
+      const fromPlayer = playerBalances.find(p => p.name === transfer.from);
+      const toPlayer = playerBalances.find(p => p.name === transfer.to);
+      
+      if (fromPlayer && toPlayer) {
+        fromPlayer.balance += transfer.amount;
+        toPlayer.balance -= transfer.amount;
+      }
+    });
+
+    const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
+    const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
+    
+    const calculatedSettlements: Settlement[] = [];
+    let creditorIndex = 0;
+    let debtorIndex = 0;
+    
+    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
+      const creditor = creditors[creditorIndex];
+      const debtor = debtors[debtorIndex];
+      
+      const amount = Math.min(creditor.balance, -debtor.balance);
+      
+      if (amount > 0.01) {
+        calculatedSettlements.push({
+          from: debtor.name,
+          to: creditor.name,
+          amount: amount
+        });
+      }
+      
+      creditor.balance -= amount;
+      debtor.balance += amount;
+      
+      if (Math.abs(creditor.balance) < 0.01) creditorIndex++;
+      if (Math.abs(debtor.balance) < 0.01) debtorIndex++;
+    }
+
+    // Combine manual and calculated settlements
+    const allSettlements = [...manualTransfers, ...calculatedSettlements];
+    
     try {
-      await completeGame(game.id, settlements);
+      await completeGame(game.id, allSettlements);
       toast.success("Game completed successfully");
-      onBackToSetup();
+      
+      // Wait 2 seconds then navigate to game details
+      setTimeout(() => {
+        navigate(`/games/${game.id}`);
+      }, 2000);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
     }
