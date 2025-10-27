@@ -42,11 +42,11 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
   };
 
   return (
-    <Card className="bg-card border-border hover:border-poker-gold/50 transition-colors">
-      <CardHeader className="pb-3">
+    <Card variant="poker" className="hover:border-poker-gold/70 transition-all hover:shadow-lg hover:scale-[1.02]">
+      <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 via-poker-gold/5 to-primary/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary/30 to-poker-gold/30 flex-shrink-0">
               <img 
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(gamePlayer.player.name)}`}
                 alt={gamePlayer.player.name}
@@ -54,21 +54,21 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
               />
             </div>
             <div>
-              <CardTitle className="text-poker-gold flex items-center gap-2">
+              <CardTitle className="text-poker-gold flex items-center gap-2 text-xl">
                 <span>{gamePlayer.player.name}</span>
                 {isProfit ? (
-                  <TrendingUp className="w-4 h-4 text-money-green" />
+                  <TrendingUp className="w-5 h-5 text-money-green" />
                 ) : (
-                  <TrendingDown className="w-4 h-4 text-money-red" />
+                  <TrendingDown className="w-5 h-5 text-money-red" />
                 )}
               </CardTitle>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                <Badge variant="info" className="text-xs flex items-center gap-1">
                   <Trophy className="w-3 h-3" />
                   {gamePlayer.player.total_games} games
                 </Badge>
                 <Badge 
-                  variant={gamePlayer.player.total_profit >= 0 ? "default" : "destructive"}
+                  variant={gamePlayer.player.total_profit >= 0 ? "success" : "destructive"}
                   className="text-xs flex items-center gap-1"
                 >
                   <Target className="w-3 h-3" />
@@ -88,16 +88,16 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
                 variant="outline"
                 size="icon"
                 onClick={() => updateBuyIns(-1)}
-                className="h-8 w-8"
+                className="h-8 w-8 border-primary/30 hover:bg-primary/10"
               >
                 <Minus className="w-4 h-4" />
               </Button>
-              <span className="font-semibold text-lg w-8 text-center">{gamePlayer.buy_ins}</span>
+              <span className="font-semibold text-lg w-8 text-center text-primary">{gamePlayer.buy_ins}</span>
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => updateBuyIns(1)}
-                className="h-8 w-8"
+                className="h-8 w-8 border-primary/30 hover:bg-primary/10"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -105,18 +105,18 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
           </div>
 
           <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">Final Stack (Rs.)</span>
+            <span className="text-sm text-muted-foreground font-semibold">Final Stack (Rs.)</span>
             <div className="flex items-center gap-2">
               <Input
                 type="text"
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
-                className="bg-input border-border text-center font-mono"
+                className="bg-input border-poker-gold/30 text-center font-mono font-semibold focus:border-poker-gold"
                 placeholder="Enter amount"
               />
               {hasChanges && (
                 <Button 
-                  variant="default" 
+                  variant="poker" 
                   size="sm" 
                   onClick={confirmFinalStack}
                   className="shrink-0"
@@ -128,14 +128,14 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
           </div>
         </div>
 
-        <div className="pt-3 border-t border-border">
-          <div className="flex items-center justify-between">
+        <div className="pt-3 border-t border-poker-gold/30 bg-gradient-to-r from-primary/5 to-poker-gold/5 -mx-6 px-6 pb-0 rounded-b-lg">
+          <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">Total Buyin:</span>
-            <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+            <span className="font-semibold text-accent-foreground">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
-          <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center justify-between pb-3">
             <span className="text-sm font-medium">Net P&L:</span>
-            <div className={`flex items-center gap-1 font-bold ${
+            <div className={`flex items-center gap-1 font-bold text-lg ${
               isProfit ? 'text-money-green' : 'text-money-red'
             }`}>
               <span>
