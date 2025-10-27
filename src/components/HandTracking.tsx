@@ -138,68 +138,84 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       ? getPositionForPlayer(active, buttonPlayerId, heroPlayer.player_id, seatPositions)
       : 'UTG';
 
-    const hand = await createNewHand(game.id, buttonPlayerId, nextHandNumber, heroPosition);
-    if (hand) {
-      setCurrentHand(hand);
-      setActivePlayers(active);
-      setPlayersInHand(active.map(p => p.player_id));
-      
-      // Get SB and BB players using utility functions with seat positions
-      const sbPlayer = getSmallBlindPlayer(active, buttonPlayerId, seatPositions);
-      const bbPlayer = getBigBlindPlayer(active, buttonPlayerId, seatPositions);
-      
-      const sbAmount = game.small_blind || 50;
-      const bbAmount = game.big_blind || 100;
-      
-      // Initialize player bets
-      const initialBets: Record<string, number> = {};
-      active.forEach(p => initialBets[p.player_id] = 0);
-      initialBets[sbPlayer.player_id] = sbAmount;
-      initialBets[bbPlayer.player_id] = bbAmount;
-      setPlayerBets(initialBets);
-      setStreetPlayerBets(initialBets);
-      
-      // Record small blind with position
-      const sbPosition = getPositionForPlayer(active, buttonPlayerId, sbPlayer.player_id);
-      const sbAction = await recordPlayerAction(
-        hand.id,
-        sbPlayer.player_id,
-        'Preflop',
-        'Small Blind',
-        sbAmount,
-        0,
-        sbPlayer.player_id === heroPlayer?.player_id,
-        sbPosition
-      );
-      
-      // Record big blind with position
-      const bbPosition = getPositionForPlayer(active, buttonPlayerId, bbPlayer.player_id);
-      const bbAction = await recordPlayerAction(
-        hand.id,
-        bbPlayer.player_id,
-        'Preflop',
-        'Big Blind',
-        bbAmount,
-        1,
-        bbPlayer.player_id === heroPlayer?.player_id,
-        bbPosition
-      );
-      
-      if (sbAction && bbAction) {
-      setStreetActions([sbAction, bbAction]);
-      }
-      
-      // Use state machine to get starting player (UTG for preflop)
-      const startingIndex = getStartingPlayerIndex('preflop', active, buttonPlayerId);
-      setCurrentPlayerIndex(startingIndex);
-      setStage('preflop');
-      setCurrentBet(bbAmount);
-      setPotSize(sbAmount + bbAmount);
-      setActionSequence(2);
-      // BB is initial aggressor preflop
-      const bbIndex = active.findIndex(p => p.player_id === bbPlayer.player_id);
-      setLastAggressorIndex(bbIndex);
-    }
+    // Create hand object in memory without saving to DB yet
+    const handObject: PokerHand = {
+      id: `temp-hand-${Date.now()}`, // Temporary ID
+      game_id: game.id,
+      hand_number: nextHandNumber,
+      button_player_id: buttonPlayerId,
+      hero_position: heroPosition,
+      final_stage: 'Preflop',
+      pot_size: 0,
+      winner_player_id: null,
+      winner_player_ids: null,
+      is_hero_win: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    setCurrentHand(handObject);
+    setActivePlayers(active);
+    setPlayersInHand(active.map(p => p.player_id));
+    
+    // Get SB and BB players using utility functions with seat positions
+    const sbPlayer = getSmallBlindPlayer(active, buttonPlayerId, seatPositions);
+    const bbPlayer = getBigBlindPlayer(active, buttonPlayerId, seatPositions);
+    
+    const sbAmount = game.small_blind || 50;
+    const bbAmount = game.big_blind || 100;
+    
+    // Initialize player bets
+    const initialBets: Record<string, number> = {};
+    active.forEach(p => initialBets[p.player_id] = 0);
+    initialBets[sbPlayer.player_id] = sbAmount;
+    initialBets[bbPlayer.player_id] = bbAmount;
+    setPlayerBets(initialBets);
+    setStreetPlayerBets(initialBets);
+    
+    // Create blind actions in memory (will be saved when hand is saved)
+    const sbPosition = getPositionForPlayer(active, buttonPlayerId, sbPlayer.player_id);
+    const sbAction: PlayerAction = {
+      id: `temp-sb-${Date.now()}`,
+      hand_id: handObject.id,
+      player_id: sbPlayer.player_id,
+      street_type: 'Preflop',
+      action_type: 'Small Blind',
+      bet_size: sbAmount,
+      action_sequence: 0,
+      is_hero: sbPlayer.player_id === heroPlayer?.player_id,
+      position: sbPosition,
+      hole_cards: null,
+      created_at: new Date().toISOString()
+    };
+    
+    const bbPosition = getPositionForPlayer(active, buttonPlayerId, bbPlayer.player_id);
+    const bbAction: PlayerAction = {
+      id: `temp-bb-${Date.now()}`,
+      hand_id: handObject.id,
+      player_id: bbPlayer.player_id,
+      street_type: 'Preflop',
+      action_type: 'Big Blind',
+      bet_size: bbAmount,
+      action_sequence: 1,
+      is_hero: bbPlayer.player_id === heroPlayer?.player_id,
+      position: bbPosition,
+      hole_cards: null,
+      created_at: new Date().toISOString()
+    };
+    
+    setStreetActions([sbAction, bbAction]);
+    
+    // Use state machine to get starting player (UTG for preflop)
+    const startingIndex = getStartingPlayerIndex('preflop', active, buttonPlayerId);
+    setCurrentPlayerIndex(startingIndex);
+    setStage('preflop');
+    setCurrentBet(bbAmount);
+    setPotSize(sbAmount + bbAmount);
+    setActionSequence(2);
+    // BB is initial aggressor preflop
+    const bbIndex = active.findIndex(p => p.player_id === bbPlayer.player_id);
+    setLastAggressorIndex(bbIndex);
   };
 
   const validateCardUniqueness = (newCards: string): boolean => {
@@ -248,6 +264,16 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       return;
     }
 
+    // Only allow actions from players still in the hand
+    if (!playersInHand.includes(currentPlayer.player_id)) {
+      toast({
+        title: 'Invalid Action',
+        description: 'This player has folded and cannot act',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
@@ -269,21 +295,22 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }
 
     try {
-      // Record action in database
-      const action = await recordPlayerAction(
-        currentHand.id,
-        currentPlayer.player_id,
-        stage === 'preflop' ? 'Preflop' : stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River',
-        actionType,
-        betSize,
-        actionSequence,
-        isHero,
-        playerPosition
-      );
+      // Create action in memory (will be saved when hand is saved)
+      const action: PlayerAction = {
+        id: `temp-action-${Date.now()}-${Math.random()}`,
+        hand_id: currentHand.id,
+        player_id: currentPlayer.player_id,
+        street_type: stage === 'preflop' ? 'Preflop' : stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River',
+        action_type: actionType,
+        bet_size: betSize,
+        action_sequence: actionSequence,
+        is_hero: isHero,
+        position: playerPosition,
+        hole_cards: null,
+        created_at: new Date().toISOString()
+      };
 
-      if (action) {
-        setStreetActions(prev => [...prev, action]);
-      }
+      setStreetActions(prev => [...prev, action]);
 
       // Process action using state machine
       const stateUpdates = processAction(
@@ -359,18 +386,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
     const nextStage = getNextStage(stage);
     
-    // Update database with new stage
-    const stageMap: Record<HandStage, 'Preflop' | 'Flop' | 'Turn' | 'River' | 'Showdown'> = {
-      setup: 'Preflop',
-      preflop: 'Flop',
-      flop: 'Turn',
-      turn: 'River',
-      river: 'Showdown',
-      showdown: 'Showdown',
-      complete: 'Showdown'
-    };
-    await updateHandStage(currentHand.id, stageMap[nextStage]);
-    
     // Use state machine to reset for new street (using active players only)
     const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
     const stateUpdates = resetForNewStreet(
@@ -421,9 +436,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       return;
     }
 
-    const streetType = stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River';
-    await recordStreetCards(currentHand.id, streetType, cards);
-    
+    // Store cards in memory (will be saved when hand is saved)
     if (stage === 'flop') {
       setFlopCards(cards);
     } else if (stage === 'turn') {
@@ -437,30 +450,74 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (!currentHand) return;
 
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
-    await completeHand(currentHand.id, winnerIds, potSize, isHeroWin);
     
-    // Save hole cards to player_actions if entered
+    // NOW save the hand to the database with all data
+    const heroPosition = heroPlayer?.player_id 
+      ? getPositionForPlayer(activePlayers, currentHand.button_player_id, heroPlayer.player_id, seatPositions)
+      : 'UTG';
+
+    const savedHand = await createNewHand(
+      game.id, 
+      currentHand.button_player_id, 
+      currentHand.hand_number, 
+      heroPosition
+    );
+    
+    if (!savedHand) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save hand',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Save all actions to database
+    for (const action of streetActions) {
+      await recordPlayerAction(
+        savedHand.id,
+        action.player_id,
+        action.street_type,
+        action.action_type,
+        action.bet_size,
+        action.action_sequence,
+        action.is_hero,
+        action.position
+      );
+    }
+
+    // Save street cards
+    if (flopCards) {
+      await recordStreetCards(savedHand.id, 'Flop', flopCards);
+    }
+    if (turnCard) {
+      await recordStreetCards(savedHand.id, 'Turn', turnCard);
+    }
+    if (riverCard) {
+      await recordStreetCards(savedHand.id, 'River', riverCard);
+    }
+
+    // Save hole cards if entered
     if (Object.keys(playerHoleCards).length > 0) {
       for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
-        const lastAction = await recordPlayerAction(
-          currentHand.id,
-          playerId,
-          'River',
-          'Check',
-          0,
-          actionSequence,
-          playerId === heroPlayer?.player_id
-        );
-        
-        if (lastAction) {
-          // Update with hole cards
+        // Find the last action for this player
+        const playerActions = streetActions.filter(a => a.player_id === playerId);
+        if (playerActions.length > 0) {
+          const lastAction = playerActions[playerActions.length - 1];
+          
+          // Update the action in database with hole cards
           await supabase
             .from('player_actions')
             .update({ hole_cards: holeCards })
-            .eq('id', lastAction.id);
+            .eq('hand_id', savedHand.id)
+            .eq('player_id', playerId)
+            .eq('action_sequence', lastAction.action_sequence);
         }
       }
     }
+
+    // Complete the hand with winner info
+    await completeHand(savedHand.id, winnerIds, potSize, isHeroWin);
     
     // Reset everything
     setCurrentHand(null);
@@ -1005,21 +1062,30 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         </div>
 
         {/* Action buttons */}
-        {!canMoveToNextStreet() ? (
+        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="grid grid-cols-2 gap-2">
             <Button 
               onClick={() => recordAction('Call')} 
               variant="outline"
-              disabled={currentBet === 0}
             >
-              Call {currentBet > 0 && currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}
+              {currentBet === 0 
+                ? 'Check' 
+                : `Call ${currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}`
+              }
             </Button>
             <Button 
               onClick={() => recordAction('Fold')} 
               variant="destructive"
+              disabled={currentBet === 0 && stage !== 'preflop'}
             >
               Fold
             </Button>
+          </div>
+        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+          <div className="bg-muted p-4 rounded-lg text-center">
+            <p className="text-sm text-muted-foreground">
+              This player has folded
+            </p>
           </div>
         ) : (
           <div className="bg-gradient-to-r from-poker-gold/20 to-transparent p-4 rounded-lg border-2 border-poker-gold">
@@ -1030,7 +1096,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         )}
 
         {/* Raise input */}
-        {!canMoveToNextStreet() && (
+        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') && (
           <div>
             <Label>Raise To</Label>
             <div className="flex gap-2">
@@ -1038,11 +1104,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                 type="number"
                 value={betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}
-                placeholder={`Min: ${currentBet * 2}`}
-                min={currentBet * 2}
+                placeholder={currentBet === 0 ? 'Bet amount' : `Min: ${currentBet * 2}`}
+                min={currentBet === 0 ? game.big_blind : currentBet * 2}
               />
               <Button onClick={() => recordAction('Raise')} disabled={!betAmount}>
-                Raise
+                {currentBet === 0 ? 'Bet' : 'Raise'}
               </Button>
             </div>
           </div>
