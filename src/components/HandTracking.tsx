@@ -29,6 +29,13 @@ import {
   processAction,
   resetForNewStreet
 } from '@/utils/handStateMachine';
+import {
+  getPlayerPosition,
+  getPositionAssignments,
+  getSmallBlindPlayer,
+  getBigBlindPlayer,
+  getPositionForPlayer
+} from '@/utils/pokerPositions';
 
 interface HandTrackingProps {
   game: Game;
@@ -82,77 +89,18 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     return `₹${amount.toLocaleString('en-IN')} (${bbMultiple} BB)`;
   };
 
-  const getPlayerPosition = (buttonIndex: number, playerIndex: number, totalPlayers: number): string => {
-    const relativePosition = (playerIndex - buttonIndex + totalPlayers) % totalPlayers;
-    
-    // Standard poker position assignments based on table size
-    // Source: https://www.mypokercoaching.com/poker-positions-strategy-charts/
-    
-    if (totalPlayers === 2) {
-      return relativePosition === 0 ? 'BTN/SB' : 'BB';
-    }
-    
-    if (totalPlayers === 3) {
-      const positions = ['BTN', 'SB', 'BB'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 4) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 5) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 6) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'HJ', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 7) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'HJ', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 8) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'HJ', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 9) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    if (totalPlayers === 10) {
-      const positions = ['BTN', 'SB', 'BB', 'UTG', 'UTG+1', 'UTG+2', 'MP1', 'MP2', 'HJ', 'CO'];
-      return positions[relativePosition];
-    }
-    
-    // Fallback for unusual table sizes
-    if (relativePosition === 0) return 'BTN';
-    if (relativePosition === 1) return 'SB';
-    if (relativePosition === 2) return 'BB';
-    return `Seat ${relativePosition + 1}`;
-  };
-
   const startNewHand = async () => {
     if (!buttonPlayerId) return;
 
     const nextHandNumber = await getNextHandNumber(game.id);
     
-    // Filter out dealt-out players FIRST
+    // CRITICAL: Filter out dealt-out players to get active players for position assignment
     const active = game.game_players.filter(gp => !dealtOutPlayers.includes(gp.player_id));
     
-    // Find button and hero indices in the ACTIVE players array
-    const buttonIndex = active.findIndex(gp => gp.player_id === buttonPlayerId);
-    const heroIndex = active.findIndex(gp => gp.player_id === heroPlayer?.player_id);
-    
-    // Calculate positions based on active players only
-    const heroPosition = getPlayerPosition(buttonIndex, heroIndex, active.length);
+    // Calculate hero position using new utility
+    const heroPosition = heroPlayer?.player_id 
+      ? getPositionForPlayer(active, buttonPlayerId, heroPlayer.player_id)
+      : 'UTG';
 
     const hand = await createNewHand(game.id, buttonPlayerId, nextHandNumber, heroPosition);
     if (hand) {
@@ -160,9 +108,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setActivePlayers(active);
       setPlayersInHand(active.map(p => p.player_id));
       
-      // Post blinds automatically - SB is immediate clockwise position from button
-      const sbIndex = (buttonIndex + 1) % active.length;
-      const bbIndex = (buttonIndex + 2) % active.length;
+      // Get SB and BB players using utility functions
+      const sbPlayer = getSmallBlindPlayer(active, buttonPlayerId);
+      const bbPlayer = getBigBlindPlayer(active, buttonPlayerId);
       
       const sbAmount = game.small_blind || 50;
       const bbAmount = game.big_blind || 100;
@@ -170,34 +118,34 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       // Initialize player bets
       const initialBets: Record<string, number> = {};
       active.forEach(p => initialBets[p.player_id] = 0);
-      initialBets[active[sbIndex].player_id] = sbAmount;
-      initialBets[active[bbIndex].player_id] = bbAmount;
+      initialBets[sbPlayer.player_id] = sbAmount;
+      initialBets[bbPlayer.player_id] = bbAmount;
       setPlayerBets(initialBets);
       setStreetPlayerBets(initialBets);
       
-      // Record small blind
-      const sbPosition = getPlayerPosition(buttonIndex, sbIndex, active.length);
+      // Record small blind with position
+      const sbPosition = getPositionForPlayer(active, buttonPlayerId, sbPlayer.player_id);
       const sbAction = await recordPlayerAction(
         hand.id,
-        active[sbIndex].player_id,
+        sbPlayer.player_id,
         'Preflop',
         'Small Blind',
         sbAmount,
         0,
-        active[sbIndex].player_id === heroPlayer?.player_id,
+        sbPlayer.player_id === heroPlayer?.player_id,
         sbPosition
       );
       
-      // Record big blind
-      const bbPosition = getPlayerPosition(buttonIndex, bbIndex, active.length);
+      // Record big blind with position
+      const bbPosition = getPositionForPlayer(active, buttonPlayerId, bbPlayer.player_id);
       const bbAction = await recordPlayerAction(
         hand.id,
-        active[bbIndex].player_id,
+        bbPlayer.player_id,
         'Preflop',
         'Big Blind',
         bbAmount,
         1,
-        active[bbIndex].player_id === heroPlayer?.player_id,
+        bbPlayer.player_id === heroPlayer?.player_id,
         bbPosition
       );
       
@@ -257,10 +205,10 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
-    // Get button index to calculate position (index within activePlayers)
+    // Calculate position using utility (button-based, active players only)
     const buttonPlayerId = currentHand.button_player_id;
     const buttonIndex = activePlayers.findIndex(gp => gp.player_id === buttonPlayerId);
-    const playerPosition = getPlayerPosition(buttonIndex, currentPlayerIndex, activePlayers.length);
+    const playerPosition = getPositionForPlayer(activePlayers, buttonPlayerId, currentPlayer.player_id);
     
     let betSize = 0;
     
@@ -363,8 +311,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     };
     await updateHandStage(currentHand.id, stageMap[nextStage]);
     
-    // Use state machine to reset for new street
-    const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand.button_player_id);
+    // Use state machine to reset for new street (using active players only)
+    const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
     const stateUpdates = resetForNewStreet(
       {
         stage,
@@ -924,9 +872,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               {activePlayers
                 .filter(p => playersInHand.includes(p.player_id))
                 .map((gp) => {
-                  const buttonIndex = activePlayers.findIndex(player => player.player_id === currentHand?.button_player_id);
-                  const playerIndex = activePlayers.findIndex(p => p.player_id === gp.player_id);
-                  const position = getPlayerPosition(buttonIndex, playerIndex, activePlayers.length);
+                  const position = getPositionForPlayer(activePlayers, currentHand.button_player_id, gp.player_id);
                   
                   return (
                     <div key={gp.player_id} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
