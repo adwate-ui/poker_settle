@@ -141,7 +141,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-white mb-2">Poker Game Setup</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
             <p className="text-muted-foreground">Configure your game settings and select players</p>
           </div>
           <UserProfile />
@@ -166,9 +166,6 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   className="bg-input border-border"
                   placeholder="Enter amount"
                 />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Formatted: {formatCurrency(buyInAmount)}
-                </p>
               </div>
             </div>
           </CardContent>

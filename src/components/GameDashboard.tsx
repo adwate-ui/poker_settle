@@ -176,13 +176,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <Button 
               variant="outline" 
               onClick={onBackToSetup}
-              className="bg-background/10 border-white/20 hover:bg-background/20"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Setup
             </Button>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white">Game Dashboard</h1>
+              <h1 className="text-3xl font-bold text-foreground">Game Dashboard</h1>
               <p className="text-muted-foreground">
                 Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
               </p>
@@ -270,7 +269,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </Card>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Players</h2>
+          <h2 className="text-2xl font-bold text-foreground">Players</h2>
           <Button 
             onClick={() => setShowAddPlayer(true)}
             className="bg-primary hover:bg-primary/90"
@@ -383,7 +382,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <Button 
               onClick={() => setShowManualTransfer(true)}
               variant="outline"
-              className="bg-background/10 border-white/20 hover:bg-background/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Manual Transfer
