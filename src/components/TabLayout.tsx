@@ -14,7 +14,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
 
   const currentTab = location.pathname === "/" ? "new-game" 
     : location.pathname.startsWith("/games") ? "games-history"
-    : location.pathname === "/players" ? "players-history"
+    : location.pathname.startsWith("/players") ? "players-history"
     : defaultTab;
 
   const handleTabChange = (value: string) => {
