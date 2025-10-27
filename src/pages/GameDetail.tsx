@@ -201,37 +201,37 @@ const GameDetail = () => {
       <Button
         variant="ghost"
         onClick={() => navigate("/games")}
-        className="mb-4"
+        className="mb-4 hover:text-primary"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Games History
       </Button>
 
-      <Card>
+      <Card className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 border-primary/20">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-primary text-2xl">
             Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
               <p className="text-sm text-muted-foreground">Buy-in</p>
-              <p className="text-lg font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+              <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
               <p className="text-sm text-muted-foreground">Players</p>
-              <p className="text-lg font-semibold">{gamePlayers.length}</p>
+              <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">{gamePlayers.length}</p>
             </div>
-            <div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
               <p className="text-sm text-muted-foreground">Chips in play</p>
-              <p className="text-lg font-semibold">
+              <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
               <p className="text-sm text-muted-foreground">Status</p>
-              <p className="text-lg font-semibold">
+              <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                 {game.is_complete ? "Completed" : "Active"}
               </p>
             </div>
@@ -240,12 +240,12 @@ const GameDetail = () => {
       </Card>
 
       {/* Poker Table View */}
-      <Card>
+      <Card className="border-primary/20 bg-gradient-to-br from-secondary/5 via-background to-primary/5">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Table Positions</CardTitle>
+          <CardTitle className="text-primary">Table Positions</CardTitle>
           {tablePositions.length > 1 && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
                 {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
               </span>
               <div className="flex items-center gap-2">
@@ -254,10 +254,11 @@ const GameDetail = () => {
                   size="icon"
                   onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
                   disabled={currentPositionIndex === 0}
+                  className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground">
                   {currentPositionIndex + 1} / {tablePositions.length}
                 </span>
                 <Button
@@ -265,6 +266,7 @@ const GameDetail = () => {
                   size="icon"
                   onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
                   disabled={currentPositionIndex === tablePositions.length - 1}
+                  className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -282,14 +284,14 @@ const GameDetail = () => {
       </Card>
 
       {/* Player Results */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Player Results</CardTitle>
+      <Card className="border-primary/20">
+        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+          <CardTitle className="text-primary">Player Results</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
                 <TableHead className="font-bold">
                   <Button
                     variant="ghost"
@@ -339,15 +341,29 @@ const GameDetail = () => {
                 return (
                   <TableRow
                     key={gamePlayer.id}
-                    className={index % 2 === 0 ? "bg-secondary/5" : ""}
+                    className={`transition-colors ${
+                      index % 2 === 0 
+                        ? "bg-secondary/5 hover:bg-secondary/20" 
+                        : "hover:bg-primary/10"
+                    }`}
                   >
-                    <TableCell className="font-medium">{gamePlayer.players.name}</TableCell>
-                    <TableCell>{gamePlayer.buy_ins}</TableCell>
-                    <TableCell className="font-semibold">
+                    <TableCell className="font-medium text-primary">{gamePlayer.players.name}</TableCell>
+                    <TableCell>
+                      <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
+                        {gamePlayer.buy_ins}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-semibold text-accent-foreground">
                       Rs. {formatIndianNumber(gamePlayer.final_stack)}
                     </TableCell>
-                    <TableCell className={`font-bold ${isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {isProfit ? "+" : ""}Rs. {formatIndianNumber(gamePlayer.net_amount)}
+                    <TableCell>
+                      <span className={`px-3 py-1 rounded-full font-bold ${
+                        isProfit 
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      }`}>
+                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(gamePlayer.net_amount)}
+                      </span>
                     </TableCell>
                   </TableRow>
                 );
@@ -359,23 +375,30 @@ const GameDetail = () => {
 
       {/* Settlements */}
       {settlements.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Settlements</CardTitle>
+        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
+          <CardHeader className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-600/20">
+            <CardTitle className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
+              <span className="text-2xl">💰</span>
+              Settlements
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="space-y-3">
               {settlements.map((settlement, index) => (
                 <div 
                   key={index} 
-                  className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5"
+                  className="flex items-center justify-between p-4 border border-primary/20 rounded-lg bg-gradient-to-r from-primary/5 via-background to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="font-semibold text-red-600 dark:text-red-400">{settlement.from}</span>
-                    <span className="text-muted-foreground">pays</span>
-                    <span className="font-semibold text-green-600 dark:text-green-400">{settlement.to}</span>
+                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      {settlement.from}
+                    </span>
+                    <span className="text-muted-foreground font-medium">pays</span>
+                    <span className="font-bold text-lg px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      {settlement.to}
+                    </span>
                   </div>
-                  <span className="font-bold text-lg text-primary">
+                  <span className="font-bold text-2xl px-6 py-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-2 border-amber-500/30">
                     Rs. {formatIndianNumber(settlement.amount)}
                   </span>
                 </div>
