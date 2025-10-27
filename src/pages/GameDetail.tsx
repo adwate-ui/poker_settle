@@ -380,51 +380,51 @@ const GameDetail = () => {
           <CardTitle className="text-primary">Player Results</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("name")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
-                  >
-                    Player
-                    {getSortIcon("name")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
-                  >
-                    Buy-ins
-                    {getSortIcon("buy_ins")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
-                  >
-                    Final Stack
-                    {getSortIcon("final_stack")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
-                  >
-                    Net P&L
-                    {getSortIcon("net_amount")}
-                  </Button>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                  <TableHead className="font-bold text-left">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("name")}
+                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    >
+                      Player
+                      {getSortIcon("name")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="font-bold text-left">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("buy_ins")}
+                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    >
+                      Buy-ins
+                      {getSortIcon("buy_ins")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="font-bold text-left">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("final_stack")}
+                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    >
+                      Final Stack
+                      {getSortIcon("final_stack")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="font-bold text-left">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("net_amount")}
+                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    >
+                      Net P&L
+                      {getSortIcon("net_amount")}
+                    </Button>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {sortedGamePlayers.map((gamePlayer, index) => {
                 const isProfit = gamePlayer.net_amount >= 0;
@@ -438,16 +438,16 @@ const GameDetail = () => {
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary">{gamePlayer.players.name}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-primary text-left">{gamePlayer.players.name}</TableCell>
+                    <TableCell className="text-left">
                       <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
                         {gamePlayer.buy_ins}
                       </span>
                     </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground">
+                    <TableCell className="font-semibold text-accent-foreground text-left">
                       Rs. {formatIndianNumber(gamePlayer.final_stack)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-left">
                       <span className={`px-3 py-1 rounded-full font-bold ${
                         isProfit 
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
@@ -477,10 +477,10 @@ const GameDetail = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                  <TableHead className="font-bold">From</TableHead>
-                  <TableHead className="font-bold">To</TableHead>
-                  <TableHead className="font-bold">Amount</TableHead>
-                  <TableHead className="font-bold">Type</TableHead>
+                  <TableHead className="font-bold text-left">From</TableHead>
+                  <TableHead className="font-bold text-left">To</TableHead>
+                  <TableHead className="font-bold text-left">Amount</TableHead>
+                  <TableHead className="font-bold text-left">Type</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -493,16 +493,16 @@ const GameDetail = () => {
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary">
+                    <TableCell className="font-medium text-primary text-left">
                       {settlement.from}
                     </TableCell>
-                    <TableCell className="font-medium text-primary">
+                    <TableCell className="font-medium text-primary text-left">
                       {settlement.to}
                     </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground">
+                    <TableCell className="font-semibold text-accent-foreground text-left">
                       Rs. {formatIndianNumber(settlement.amount)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-left">
                       {settlement.isManual ? (
                         <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                           Manual

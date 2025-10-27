@@ -305,7 +305,7 @@ const GamesHistory = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("buy_in")}
-                  className="flex items-center gap-2 justify-center font-bold"
+                  className="flex items-center gap-2 justify-start font-bold"
                 >
                   Buy-in
                   {getSortIcon("buy_in")}
@@ -313,7 +313,7 @@ const GamesHistory = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("players")}
-                  className="flex items-center gap-2 justify-center font-bold"
+                  className="flex items-center gap-2 justify-start font-bold"
                 >
                   Players
                   {getSortIcon("players")}
@@ -321,17 +321,17 @@ const GamesHistory = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("chips")}
-                  className="flex items-center gap-2 justify-center font-bold"
+                  className="flex items-center gap-2 justify-start font-bold"
                 >
                   Chips in play
                   {getSortIcon("chips")}
                 </Button>
                 {selectedPlayer !== "all" ? (
-                  <div className="flex items-center justify-center h-10 px-4 font-bold">
+                  <div className="flex items-center justify-start h-10 px-4 font-bold">
                     Player P&L
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-10 px-4 font-bold">Actions</div>
+                  <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
                 )}
               </div>
             </div>
@@ -398,23 +398,23 @@ const GamesHistory = () => {
                       <div className="font-medium">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </div>
-                      <div className="text-center font-semibold">
+                      <div className="font-semibold">
                         Rs. {formatIndianNumber(game.buy_in_amount)}
                       </div>
-                      <div className="text-center">
+                      <div>
                         <Badge variant="info">{game.player_count}</Badge>
                       </div>
-                      <div className="text-center font-semibold">
+                      <div className="font-semibold">
                         Rs. {formatIndianNumber(game.total_pot)}
                       </div>
                       {selectedPlayer !== "all" && playerData ? (
-                        <div className="text-center">
+                        <div>
                           <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
                             {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
                           </Badge>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-start">
                           <Button
                             variant="ghost"
                             size="icon"

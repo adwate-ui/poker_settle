@@ -193,7 +193,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-2 justify-center font-bold"
+              className="flex items-center gap-2 justify-start font-bold"
             >
               Games
               {getSortIcon("total_games")}
@@ -201,7 +201,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_profit")}
-              className="flex items-center gap-2 justify-center font-bold"
+              className="flex items-center gap-2 justify-start font-bold"
             >
               Net P&L
               {getSortIcon("total_profit")}
@@ -209,12 +209,12 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("avg_per_game")}
-              className="flex items-center gap-2 justify-center font-bold"
+              className="flex items-center gap-2 justify-start font-bold"
             >
               Avg Per Game
               {getSortIcon("avg_per_game")}
             </Button>
-            <div className="flex items-center justify-center h-10 px-4 font-bold">Actions</div>
+            <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
           </div>
         </div>
 
@@ -310,14 +310,12 @@ const PlayersHistory = () => {
                   </div>
                   
                   <div 
-                    className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
                     <Badge variant="info">{player.total_games || 0}</Badge>
                   </div>
                   
                   <div 
-                    className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
                     <Badge variant={isProfit ? "success" : "destructive"}>
@@ -326,7 +324,6 @@ const PlayersHistory = () => {
                   </div>
                   
                   <div 
-                    className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
                     <Badge variant={avgPerGame >= 0 ? "success" : "destructive"}>
@@ -334,7 +331,7 @@ const PlayersHistory = () => {
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center justify-end gap-6">
+                  <div className="flex items-center justify-start gap-6">
                     {isProfit ? (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400 mr-2">
                         <TrendingUp className="h-4 w-4" />
