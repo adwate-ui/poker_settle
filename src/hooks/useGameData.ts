@@ -114,7 +114,7 @@ export const useGameData = () => {
         player_id: player.id,
         buy_ins: 1,
         final_stack: 0,
-        net_amount: 0 // Will be calculated later
+        net_amount: -buyInAmount // Loss of initial buy-in since final_stack is 0
       }));
 
       const { error: gamePlayersError } = await supabase
@@ -213,12 +213,24 @@ export const useGameData = () => {
   };
 
   const addPlayerToGame = async (gameId: string, player: Player): Promise<GamePlayer> => {
+    // Fetch game to get buy_in_amount
+    const { data: gameData } = await supabase
+      .from("games")
+      .select("buy_in_amount")
+      .eq("id", gameId)
+      .single();
+
+    const buyInAmount = gameData?.buy_in_amount || 0;
+    const initialBuyIns = 1;
+    const initialFinalStack = 0;
+    const initialNetAmount = initialFinalStack - (initialBuyIns * buyInAmount);
+
     const gamePlayerData = {
       game_id: gameId,
       player_id: player.id,
-      buy_ins: 1,
-      final_stack: 0,
-      net_amount: 0
+      buy_ins: initialBuyIns,
+      final_stack: initialFinalStack,
+      net_amount: initialNetAmount
     };
 
     const { data: gamePlayer, error } = await supabase
