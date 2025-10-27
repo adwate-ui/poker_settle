@@ -241,6 +241,13 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (!currentHand || activePlayers.length === 0) return;
 
     const currentPlayer = activePlayers[currentPlayerIndex];
+    if (!currentPlayer) {
+      // Guard against out-of-bounds index after folds
+      const safeIndex = Math.max(0, Math.min(currentPlayerIndex, activePlayers.length - 1));
+      setCurrentPlayerIndex(safeIndex);
+      return;
+    }
+
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
@@ -261,88 +268,93 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       betSize = parseFloat(betAmount) || currentBet;
     }
 
-    // Record action in database
-    const action = await recordPlayerAction(
-      currentHand.id,
-      currentPlayer.player_id,
-      stage === 'preflop' ? 'Preflop' : stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River',
-      actionType,
-      betSize,
-      actionSequence,
-      isHero,
-      playerPosition
-    );
-
-    if (action) {
-      setStreetActions(prev => [...prev, action]);
-    }
-
-    // Process action using state machine
-    const stateUpdates = processAction(
-      {
-        stage,
-        activePlayers,
-        currentPlayerIndex,
-        playersInHand,
-        dealtOutPlayers,
-        buttonPlayerIndex: buttonIndex,
-        currentBet,
-        potSize,
-        streetPlayerBets,
-        totalPlayerBets: playerBets,
-        streetActions,
+    try {
+      // Record action in database
+      const action = await recordPlayerAction(
+        currentHand.id,
+        currentPlayer.player_id,
+        stage === 'preflop' ? 'Preflop' : stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River',
+        actionType,
+        betSize,
         actionSequence,
-        lastAggressorIndex
-      },
-      actionType,
-      betSize
-    );
+        isHero,
+        playerPosition
+      );
 
-    // Apply state updates
-    if (stateUpdates.potSize !== undefined) setPotSize(stateUpdates.potSize);
-    if (stateUpdates.streetPlayerBets) setStreetPlayerBets(stateUpdates.streetPlayerBets);
-    if (stateUpdates.totalPlayerBets) setPlayerBets(stateUpdates.totalPlayerBets);
-    if (stateUpdates.actionSequence !== undefined) setActionSequence(stateUpdates.actionSequence);
-    if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
-    if (stateUpdates.lastAggressorIndex !== undefined) setLastAggressorIndex(stateUpdates.lastAggressorIndex);
-    
-    // Handle fold - update active players and check for winner
-    if (actionType === 'Fold') {
-      if (stateUpdates.playersInHand) setPlayersInHand(stateUpdates.playersInHand);
-      if (stateUpdates.activePlayers) {
-        const updatedActivePlayers = stateUpdates.activePlayers;
-        setActivePlayers(updatedActivePlayers);
-        
-        // Check if only one player remains - hand ends immediately
-        const endCheck = shouldEndHandEarly(updatedActivePlayers, stateUpdates.playersInHand || []);
-        if (endCheck.shouldEnd && endCheck.winnerId) {
-          await finishHand([endCheck.winnerId]);
-          return; // CRITICAL: Don't try to move to next player
+      if (action) {
+        setStreetActions(prev => [...prev, action]);
+      }
+
+      // Process action using state machine
+      const stateUpdates = processAction(
+        {
+          stage,
+          activePlayers,
+          currentPlayerIndex,
+          playersInHand,
+          dealtOutPlayers,
+          buttonPlayerIndex: buttonIndex,
+          currentBet,
+          potSize,
+          streetPlayerBets,
+          totalPlayerBets: playerBets,
+          streetActions,
+          actionSequence,
+          lastAggressorIndex
+        },
+        actionType,
+        betSize
+      );
+
+      // Apply state updates
+      if (stateUpdates.potSize !== undefined) setPotSize(stateUpdates.potSize);
+      if (stateUpdates.streetPlayerBets) setStreetPlayerBets(stateUpdates.streetPlayerBets);
+      if (stateUpdates.totalPlayerBets) setPlayerBets(stateUpdates.totalPlayerBets);
+      if (stateUpdates.actionSequence !== undefined) setActionSequence(stateUpdates.actionSequence);
+      if (stateUpdates.currentBet !== undefined) setCurrentBet(stateUpdates.currentBet);
+      if (stateUpdates.lastAggressorIndex !== undefined) setLastAggressorIndex(stateUpdates.lastAggressorIndex);
+      
+      // Handle fold - update active players and check for winner
+      if (actionType === 'Fold') {
+        if (stateUpdates.playersInHand) setPlayersInHand(stateUpdates.playersInHand);
+        if (stateUpdates.activePlayers) {
+          const updatedActivePlayers = stateUpdates.activePlayers;
+          setActivePlayers(updatedActivePlayers);
+          
+          // Check if only one player remains - hand ends immediately
+          const endCheck = shouldEndHandEarly(updatedActivePlayers, stateUpdates.playersInHand || []);
+          if (endCheck.shouldEnd && endCheck.winnerId) {
+            await finishHand([endCheck.winnerId]);
+            return; // CRITICAL: Don't try to move to next player
+          }
+          
+          // CRITICAL: Move to next player with updated activePlayers list
+          const nextIndex = getNextPlayerIndex(
+            currentPlayerIndex,
+            stage,
+            updatedActivePlayers,
+            buttonIndex,
+            stateUpdates.playersInHand || playersInHand
+          );
+          setCurrentPlayerIndex(nextIndex);
         }
-        
-        // CRITICAL: Move to next player with updated activePlayers list
+      } else {
+        // Non-fold actions: move to next player normally
         const nextIndex = getNextPlayerIndex(
           currentPlayerIndex,
           stage,
-          updatedActivePlayers,
+          activePlayers,
           buttonIndex,
-          stateUpdates.playersInHand || playersInHand
+          playersInHand
         );
         setCurrentPlayerIndex(nextIndex);
       }
-    } else {
-      // Non-fold actions: move to next player normally
-      const nextIndex = getNextPlayerIndex(
-        currentPlayerIndex,
-        stage,
-        activePlayers,
-        buttonIndex,
-        playersInHand
-      );
-      setCurrentPlayerIndex(nextIndex);
+    } catch (err) {
+      console.error('recordAction error', err);
+      toast({ title: 'Error', description: 'Something went wrong processing the action', variant: 'destructive' });
+    } finally {
+      setBetAmount('');
     }
-    
-    setBetAmount('');
   };
 
   const moveToNextStreet = async () => {
