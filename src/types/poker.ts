@@ -77,5 +77,6 @@ export interface PlayerAction {
   bet_size: number;
   is_hero: boolean;
   hole_cards: string | null;
+  position: string | null;
   created_at: string;
 }

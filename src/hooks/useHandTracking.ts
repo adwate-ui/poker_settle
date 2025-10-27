@@ -72,7 +72,8 @@ export const useHandTracking = () => {
     actionType: PlayerAction['action_type'],
     betSize: number,
     actionSequence: number,
-    isHero: boolean
+    isHero: boolean,
+    position?: string
   ): Promise<PlayerAction | null> => {
     try {
       const { data, error } = await supabase
@@ -85,6 +86,7 @@ export const useHandTracking = () => {
           bet_size: betSize,
           action_sequence: actionSequence,
           is_hero: isHero,
+          position: position || null,
         })
         .select()
         .single();

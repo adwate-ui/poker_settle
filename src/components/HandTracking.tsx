@@ -61,10 +61,43 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   // Find hero player (current user)
   const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
 
-  const getHeroPosition = (buttonIndex: number, playerIndex: number, totalPlayers: number): string => {
-    const positions = ['Button', 'Small Blind', 'Big Blind', 'UTG', 'UTG+1', 'Middle', 'Cutoff'];
+  const getPlayerPosition = (buttonIndex: number, playerIndex: number, totalPlayers: number): string => {
     const relativePosition = (playerIndex - buttonIndex + totalPlayers) % totalPlayers;
-    return positions[Math.min(relativePosition, positions.length - 1)];
+    
+    if (totalPlayers === 2) {
+      return relativePosition === 0 ? 'Button/SB' : 'BB';
+    }
+    
+    const positionMap: { [key: number]: string } = {
+      0: 'Button',
+      1: 'Small Blind',
+      2: 'Big Blind',
+    };
+    
+    if (relativePosition in positionMap) {
+      return positionMap[relativePosition];
+    }
+    
+    // For seats after BB
+    const seatsAfterBB = relativePosition - 2;
+    if (totalPlayers <= 6) {
+      // 6-max positions
+      if (seatsAfterBB === 1) return 'UTG';
+      if (seatsAfterBB === 2) return 'HJ';
+      if (seatsAfterBB === 3) return 'CO';
+    } else {
+      // Full ring positions
+      if (seatsAfterBB === 1) return 'UTG';
+      if (seatsAfterBB === 2) return 'UTG+1';
+      if (seatsAfterBB === 3) return 'UTG+2';
+      if (totalPlayers === 9 && seatsAfterBB === 4) return 'LJ';
+      if (totalPlayers === 9 && seatsAfterBB === 5) return 'HJ';
+      if (totalPlayers === 9 && seatsAfterBB === 6) return 'CO';
+      if (totalPlayers === 8 && seatsAfterBB === 4) return 'HJ';
+      if (totalPlayers === 8 && seatsAfterBB === 5) return 'CO';
+    }
+    
+    return `Seat ${relativePosition + 1}`;
   };
 
   const startNewHand = async () => {
@@ -73,7 +106,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const nextHandNumber = await getNextHandNumber(game.id);
     const buttonIndex = game.game_players.findIndex(gp => gp.player_id === buttonPlayerId);
     const heroIndex = game.game_players.findIndex(gp => gp.player_id === heroPlayer?.player_id);
-    const heroPosition = getHeroPosition(buttonIndex, heroIndex, game.game_players.length);
+    const heroPosition = getPlayerPosition(buttonIndex, heroIndex, game.game_players.length);
 
     const hand = await createNewHand(game.id, buttonPlayerId, nextHandNumber, heroPosition);
     if (hand) {
@@ -99,6 +132,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       setPlayerBets(initialBets);
       
       // Record small blind
+      const sbPosition = getPlayerPosition(buttonIndex, sbIndex, active.length);
       const sbAction = await recordPlayerAction(
         hand.id,
         active[sbIndex].player_id,
@@ -106,10 +140,12 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         'Small Blind',
         sbAmount,
         0,
-        active[sbIndex].player_id === heroPlayer?.player_id
+        active[sbIndex].player_id === heroPlayer?.player_id,
+        sbPosition
       );
       
       // Record big blind
+      const bbPosition = getPlayerPosition(buttonIndex, bbIndex, active.length);
       const bbAction = await recordPlayerAction(
         hand.id,
         active[bbIndex].player_id,
@@ -117,7 +153,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         'Big Blind',
         bbAmount,
         1,
-        active[bbIndex].player_id === heroPlayer?.player_id
+        active[bbIndex].player_id === heroPlayer?.player_id,
+        bbPosition
       );
       
       if (sbAction && bbAction) {
@@ -134,12 +171,52 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }
   };
 
+  const validateCardUniqueness = (newCards: string): boolean => {
+    const allUsedCards: string[] = [];
+    
+    // Collect all hole cards
+    Object.values(playerHoleCards).forEach(holeCards => {
+      if (holeCards) {
+        const cards = holeCards.match(/.{1,2}/g) || [];
+        allUsedCards.push(...cards);
+      }
+    });
+    
+    // Collect community cards
+    if (flopCards) {
+      const cards = flopCards.match(/.{1,2}/g) || [];
+      allUsedCards.push(...cards);
+    }
+    if (turnCard) allUsedCards.push(turnCard);
+    if (riverCard) allUsedCards.push(riverCard);
+    
+    // Check new cards against used cards
+    const newCardsList = newCards.match(/.{1,2}/g) || [];
+    for (const card of newCardsList) {
+      if (allUsedCards.includes(card)) {
+        toast({
+          title: 'Duplicate Card',
+          description: `Card ${card} has already been used in this hand`,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const recordAction = async (actionType: ActionType) => {
     if (!currentHand || activePlayers.length === 0) return;
 
     const currentPlayer = activePlayers[currentPlayerIndex];
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerCurrentBet = playerBets[currentPlayer.player_id] || 0;
+    
+    // Get button index to calculate position
+    const buttonPlayerId = currentHand.button_player_id;
+    const buttonIndex = game.game_players.findIndex(gp => gp.player_id === buttonPlayerId);
+    const playerPosition = getPlayerPosition(buttonIndex, currentPlayerIndex, activePlayers.length);
     
     let betSize = 0;
     let additionalAmount = 0;
@@ -171,7 +248,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       actionType,
       betSize,
       actionSequence,
-      isHero
+      isHero,
+      playerPosition
     );
 
     if (action) {
@@ -256,6 +334,10 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const saveStreetCards = async (cards: string) => {
     if (!currentHand) return;
 
+    if (!validateCardUniqueness(cards)) {
+      return;
+    }
+
     const streetType = stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River';
     await recordStreetCards(currentHand.id, streetType, cards);
     
@@ -316,6 +398,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
   const handleHoleCardSubmit = (cards: string) => {
     if (selectedPlayerForHole) {
+      if (!validateCardUniqueness(cards)) {
+        return;
+      }
       setPlayerHoleCards(prev => ({
         ...prev,
         [selectedPlayerForHole]: cards
@@ -401,7 +486,43 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (activeBets.length === 0) return false;
     
     const maxBet = Math.max(...activeBets);
-    return activeBets.every(bet => bet === maxBet);
+    const allBetsEqual = activeBets.every(bet => bet === maxBet);
+    
+    if (!allBetsEqual) return false;
+    
+    // Pre-flop: SB and BB must act at least twice
+    if (stage === 'preflop') {
+      const buttonIndex = game.game_players.findIndex(gp => gp.player_id === currentHand?.button_player_id);
+      const sbIndex = (buttonIndex + 1) % activePlayers.length;
+      const bbIndex = (buttonIndex + 2) % activePlayers.length;
+      const sbPlayerId = activePlayers[sbIndex]?.player_id;
+      const bbPlayerId = activePlayers[bbIndex]?.player_id;
+      
+      // Count actions for SB and BB (excluding blind posting)
+      const sbActionCount = streetActions.filter(
+        a => a.player_id === sbPlayerId && a.action_type !== 'Small Blind'
+      ).length;
+      const bbActionCount = streetActions.filter(
+        a => a.player_id === bbPlayerId && a.action_type !== 'Big Blind'
+      ).length;
+      
+      // Both must have acted at least twice (not including initial blinds)
+      if (sbActionCount < 2 || bbActionCount < 2) {
+        return false;
+      }
+    } else {
+      // Post-flop: All players must act at least once
+      const playersStillIn = activePlayers.filter(p => playersInHand.includes(p.player_id));
+      const playersWhoActed = new Set(streetActions.map(a => a.player_id));
+      
+      for (const player of playersStillIn) {
+        if (!playersWhoActed.has(player.player_id)) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
   };
 
   const canCheck = (): boolean => {
@@ -720,7 +841,12 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                 const player = game.game_players.find(gp => gp.player_id === action.player_id);
                 return (
                   <div key={idx} className="text-xs flex justify-between items-center gap-2">
-                    <span className="font-medium">{player?.player.name}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{player?.player.name}</span>
+                      {action.position && (
+                        <span className="text-muted-foreground">({action.position})</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2">
                       <span>
                         {action.action_type}
@@ -844,7 +970,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
           <p className="text-xs text-muted-foreground text-center">
             {(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)
               ? 'Deal cards to continue'
-              : 'All players must have equal bets to continue'}
+              : stage === 'preflop'
+              ? 'All bets must be equal and SB/BB must act at least twice'
+              : 'All bets must be equal and all players must act at least once'}
           </p>
         )}
       </CardContent>

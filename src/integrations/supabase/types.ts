@@ -112,6 +112,7 @@ export type Database = {
           id: string
           is_hero: boolean | null
           player_id: string
+          position: string | null
           street_type: string
         }
         Insert: {
@@ -124,6 +125,7 @@ export type Database = {
           id?: string
           is_hero?: boolean | null
           player_id: string
+          position?: string | null
           street_type: string
         }
         Update: {
@@ -136,6 +138,7 @@ export type Database = {
           id?: string
           is_hero?: boolean | null
           player_id?: string
+          position?: string | null
           street_type?: string
         }
         Relationships: [
