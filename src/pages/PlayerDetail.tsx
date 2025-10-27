@@ -185,9 +185,9 @@ const PlayerDetail = () => {
         Back to Players History
       </Button>
 
-      <Card className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 border-primary/20">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-primary text-2xl flex items-center gap-3">
+          <CardTitle className="text-2xl flex items-center gap-3">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
               <img 
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
@@ -200,50 +200,36 @@ const PlayerDetail = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Total Games</p>
-              <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">{player.total_games || 0}</p>
+              <p className="text-lg font-semibold">{player.total_games || 0}</p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Total P&L</p>
               <p className={`text-lg font-semibold ${
                 isProfit 
                   ? "text-green-600 dark:text-green-400" 
                   : "text-red-600 dark:text-red-400"
               }`}>
-                {isProfit ? "+" : ""}Rs. {formatIndianNumber(player.total_profit || 0)}
+                {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Avg Per Game</p>
               <p className={`text-lg font-semibold ${
                 avgPerGame >= 0 
                   ? "text-green-600 dark:text-green-400" 
                   : "text-red-600 dark:text-red-400"
               }`}>
-                {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.round(avgPerGame))}
+                {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(Math.round(avgPerGame)))}
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Win Rate</p>
               <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                 {winRate.toFixed(1)}%
               </p>
             </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10">
-            {isProfit ? (
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                <TrendingUp className="h-5 w-5" />
-                <span className="text-lg font-bold">Winning Player</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                <TrendingDown className="h-5 w-5" />
-                <span className="text-lg font-bold">Losing Player</span>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

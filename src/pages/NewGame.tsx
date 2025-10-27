@@ -202,18 +202,18 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card variant="gradient" className="max-w-4xl mx-auto relative">
+    <Card className="max-w-4xl mx-auto relative">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-          <Card variant="poker" className="w-full max-w-md mx-4">
+          <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle className="text-primary">Active Game in Progress</CardTitle>
+              <CardTitle>Active Game in Progress</CardTitle>
               <CardDescription>
                 You have an ongoing game. Complete it before starting a new one.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={continueGame} variant="poker" className="w-full" size="lg">
+              <Button onClick={continueGame} className="w-full" size="lg">
                 <Play className="mr-2 h-5 w-5" />
                 Continue Game
               </Button>
@@ -221,14 +221,14 @@ const NewGame = () => {
           </Card>
         </div>
       )}
-      <CardHeader className="bg-gradient-to-r from-primary/10 via-poker-gold/10 to-primary/10">
-        <CardTitle className="text-primary text-2xl">Start New Game</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-2xl">Start New Game</CardTitle>
         <CardDescription>Set up your poker game with buy-in and players</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Buy-in Section */}
-        <div className="space-y-2 p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
-          <Label htmlFor="buyin" className="text-blue-600 dark:text-blue-400 font-semibold">Buy-in Amount (Rs.)</Label>
+        <div className="space-y-2">
+          <Label htmlFor="buyin">Buy-in Amount (Rs.)</Label>
           <Input
             id="buyin"
             type="text"
@@ -242,19 +242,18 @@ const NewGame = () => {
               }
             }}
             disabled={hasActiveGame}
-            className="border-blue-500/30 focus:border-blue-500"
           />
         </div>
 
         {/* Add Players Section */}
-        <div className="space-y-4 p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
-          <h3 className="text-lg font-semibold text-purple-600 dark:text-purple-400">Players ({gamePlayers.length})</h3>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Players ({gamePlayers.length})</h3>
           
           {/* Current Players List */}
           {gamePlayers.length > 0 && (
             <div className="grid gap-2">
               {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
-                <Card key={player.id} variant="default" className="hover:border-primary/50 transition-colors">
+                <Card key={player.id}>
                   <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
@@ -265,13 +264,13 @@ const NewGame = () => {
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="font-medium text-primary">{player.name}</span>
+                        <span className="font-medium">{player.name}</span>
                         <div className="flex items-center gap-1">
                           <Badge variant="info" className="text-xs">
                             {player.total_games} games
                           </Badge>
                           <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-xs">
-                            Rs. {formatIndianNumber(player.total_profit)}
+                            {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
                           </Badge>
                         </div>
                       </div>
@@ -296,10 +295,10 @@ const NewGame = () => {
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
-              className="flex-1 border-purple-500/30"
+              className="flex-1"
               disabled={hasActiveGame}
             />
-            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} variant="poker" className="w-[140px]">
+            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} className="w-[140px]">
               <Plus className="h-4 w-4 mr-2" />
               Add New
             </Button>
@@ -312,7 +311,7 @@ const NewGame = () => {
                 variant="outline"
                 role="combobox"
                 aria-expanded={openCombobox}
-                className="w-full justify-between border-purple-500/30 hover:border-purple-500/50"
+                className="w-full justify-between"
                 disabled={hasActiveGame}
               >
                 {selectedPlayerId
@@ -352,13 +351,13 @@ const NewGame = () => {
                               />
                             </div>
                             <div className="flex flex-col gap-1 flex-1">
-                              <span className="font-medium text-primary">{player.name}</span>
+                              <span className="font-medium">{player.name}</span>
                               <div className="flex items-center gap-1">
                                 <Badge variant="info" className="text-xs">
                                   {player.total_games} games
                                 </Badge>
                                 <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-xs">
-                                  Rs. {formatIndianNumber(player.total_profit)}
+                                  {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
                                 </Badge>
                               </div>
                             </div>
@@ -376,7 +375,6 @@ const NewGame = () => {
         <Button 
           onClick={startGame} 
           disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-          variant="gold"
           className="w-full"
           size="lg"
         >

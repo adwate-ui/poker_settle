@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -228,9 +229,9 @@ const GamesHistory = () => {
 
   if (games.length === 0) {
     return (
-      <Card className="max-w-6xl mx-auto bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+      <Card className="max-w-6xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-primary">Games History</CardTitle>
+          <CardTitle className="text-2xl">Games History</CardTitle>
           <CardDescription>No completed games yet</CardDescription>
         </CardHeader>
         <CardContent>
@@ -244,18 +245,18 @@ const GamesHistory = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
-      <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 border-primary/20">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-primary">Games History</CardTitle>
+          <CardTitle className="text-2xl">Games History</CardTitle>
           <CardDescription>View all your completed poker games</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select value={selectedDate} onValueChange={setSelectedDate}>
-              <SelectTrigger className="bg-background border-primary/20">
+              <SelectTrigger>
                 <SelectValue placeholder="Filter by date" />
               </SelectTrigger>
-              <SelectContent className="bg-background z-50">
+              <SelectContent className="z-50">
                 <SelectItem value="all">All Dates</SelectItem>
                 {uniqueDates.map((date) => (
                   <SelectItem key={date} value={date}>
@@ -266,10 +267,10 @@ const GamesHistory = () => {
             </Select>
 
             <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="bg-background border-primary/20">
+              <SelectTrigger>
                 <SelectValue placeholder="Filter by month-year" />
               </SelectTrigger>
-              <SelectContent className="bg-background z-50">
+              <SelectContent className="z-50">
                 <SelectItem value="all">All Months</SelectItem>
                 {uniqueMonthYears.map((monthYear) => (
                   <SelectItem key={monthYear} value={monthYear}>
@@ -280,10 +281,10 @@ const GamesHistory = () => {
             </Select>
 
             <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-              <SelectTrigger className="bg-background border-primary/20">
+              <SelectTrigger>
                 <SelectValue placeholder="Filter by player" />
               </SelectTrigger>
-              <SelectContent className="bg-background z-50">
+              <SelectContent className="z-50">
                 <SelectItem value="all">All Players</SelectItem>
                 {uniquePlayers.map((player) => (
                   <SelectItem key={player} value={player}>
@@ -296,16 +297,16 @@ const GamesHistory = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-primary/20">
+      <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+              <TableRow>
                 <TableHead className="font-bold">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("date")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-2 font-bold"
                   >
                     Date
                     {getSortIcon("date")}
@@ -315,7 +316,7 @@ const GamesHistory = () => {
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("buy_in")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-2 font-bold"
                   >
                     Buy-in
                     {getSortIcon("buy_in")}
@@ -325,7 +326,7 @@ const GamesHistory = () => {
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("players")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-2 font-bold"
                   >
                     Players
                     {getSortIcon("players")}
@@ -335,7 +336,7 @@ const GamesHistory = () => {
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("chips")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-2 font-bold"
                   >
                     Chips in play
                     {getSortIcon("chips")}
@@ -358,37 +359,26 @@ const GamesHistory = () => {
                 return (
                   <TableRow
                     key={game.id}
-                    className={`cursor-pointer transition-colors ${
-                      index % 2 === 0 
-                        ? "bg-secondary/5 hover:bg-secondary/20" 
-                        : "hover:bg-primary/10"
-                    }`}
+                    className="cursor-pointer hover:bg-muted/50"
                     onClick={() => navigate(`/games/${game.id}`)}
                   >
-                    <TableCell className="font-medium text-primary">
+                    <TableCell className="font-medium">
                       {format(new Date(game.date), "MMM d, yyyy")}
                     </TableCell>
-                    <TableCell className="text-secondary-foreground font-semibold">
+                    <TableCell className="font-semibold">
                       Rs. {formatIndianNumber(game.buy_in_amount)}
                     </TableCell>
                     <TableCell>
-                      <span className="px-3 py-1 rounded-full bg-primary/20 text-primary font-medium">
-                        {game.player_count}
-                      </span>
+                      <Badge variant="info">{game.player_count}</Badge>
                     </TableCell>
-                    <TableCell className="text-accent-foreground font-semibold">
+                    <TableCell className="font-semibold">
                       Rs. {formatIndianNumber(game.total_pot)}
                     </TableCell>
                     {selectedPlayer !== "all" && playerData && (
                       <TableCell className="text-center">
-                        <span className={`px-3 py-1 rounded-full font-bold ${
-                          playerData.net_amount >= 0
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}>
-                          {playerData.net_amount >= 0 ? "+" : ""}
-                          Rs. {formatIndianNumber(playerData.net_amount)}
-                        </span>
+                        <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
+                          {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
+                        </Badge>
                       </TableCell>
                     )}
                     <TableCell className="text-right">

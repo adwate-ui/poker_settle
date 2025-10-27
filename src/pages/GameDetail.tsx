@@ -298,31 +298,31 @@ const GameDetail = () => {
         Back to Games History
       </Button>
 
-      <Card className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 border-primary/20">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-primary text-2xl">
+          <CardTitle className="text-2xl">
             Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Buy-in</p>
-              <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+              <p className="text-lg font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Players</p>
-              <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">{gamePlayers.length}</p>
+              <p className="text-lg font-semibold">{gamePlayers.length}</p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Chips in play</p>
-              <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">
+              <p className="text-lg font-semibold">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Status</p>
-              <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+              <p className="text-lg font-semibold">
                 {game.is_complete ? "Completed" : "Active"}
               </p>
             </div>
@@ -331,7 +331,7 @@ const GameDetail = () => {
       </Card>
 
       {/* Poker Table View */}
-      <Card className="border-primary/20 bg-gradient-to-br from-secondary/5 via-background to-primary/5">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-primary">Table Positions</CardTitle>
           {tablePositions.length > 1 && (

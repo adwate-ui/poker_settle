@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -131,9 +132,9 @@ const PlayersHistory = () => {
 
   if (players.length === 0) {
     return (
-      <Card className="max-w-6xl mx-auto bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+      <Card className="max-w-6xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-primary">Players History</CardTitle>
+          <CardTitle className="text-2xl">Players History</CardTitle>
           <CardDescription>No players yet</CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,28 +148,28 @@ const PlayersHistory = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
-      <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 border-primary/20">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-primary">Players Performance</CardTitle>
+          <CardTitle className="text-2xl">Players Performance</CardTitle>
           <CardDescription>Overall statistics for all players</CardDescription>
         </CardHeader>
       </Card>
 
       {/* Summary Stats - Moved to top */}
-      <Card className="border-primary/20 bg-gradient-to-br from-amber-500/10 via-background to-amber-600/5">
+      <Card>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Total Players</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{players.length}</p>
+              <p className="text-2xl font-bold">{players.length}</p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Total Games</p>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              <p className="text-2xl font-bold">
                 {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+            <div className="p-4 rounded-lg border">
               <p className="text-sm text-muted-foreground">Winning Players</p>
               <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {players.filter(p => (p.total_profit || 0) >= 0).length}
@@ -179,12 +180,12 @@ const PlayersHistory = () => {
       </Card>
 
       <div className="grid grid-cols-1 gap-4">
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-lg p-4">
+        <div className="rounded-lg p-4 border">
           <div className="grid grid-cols-5 gap-4 font-bold text-sm">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
-              className="flex items-center gap-2 justify-start hover:text-primary font-bold"
+              className="flex items-center gap-2 justify-start font-bold"
             >
               Player Name
               {getSortIcon("name")}
@@ -192,7 +193,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-2 justify-center hover:text-primary font-bold"
+              className="flex items-center gap-2 justify-center font-bold"
             >
               Games
               {getSortIcon("total_games")}
@@ -200,7 +201,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_profit")}
-              className="flex items-center gap-2 justify-center hover:text-primary font-bold"
+              className="flex items-center gap-2 justify-center font-bold"
             >
               Total P&L
               {getSortIcon("total_profit")}
@@ -208,7 +209,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("avg_per_game")}
-              className="flex items-center gap-2 justify-center hover:text-primary font-bold"
+              className="flex items-center gap-2 justify-center font-bold"
             >
               Avg Per Game
               {getSortIcon("avg_per_game")}
@@ -227,11 +228,7 @@ const PlayersHistory = () => {
           return (
             <Card
               key={player.id}
-              className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
-                index % 2 === 0 
-                  ? "bg-secondary/5 hover:bg-secondary/20" 
-                  : "hover:bg-primary/10"
-              }`}
+              className="cursor-pointer transition-colors hover:bg-muted/50"
             >
               <CardContent className="p-4">
                 <div className="grid grid-cols-5 gap-4 items-center">
@@ -246,42 +243,32 @@ const PlayersHistory = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="font-bold text-primary">{player.name}</span>
+                    <span className="font-bold">{player.name}</span>
                   </div>
                   
                   <div 
                     className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
-                      {player.total_games || 0}
-                    </span>
+                    <Badge variant="info">{player.total_games || 0}</Badge>
                   </div>
                   
                   <div 
                     className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <span className={`px-3 py-1 rounded-full font-bold ${
-                      isProfit 
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    }`}>
-                      {isProfit ? "+" : ""}Rs. {formatIndianNumber(player.total_profit || 0)}
-                    </span>
+                    <Badge variant={isProfit ? "success" : "destructive"}>
+                      {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                    </Badge>
                   </div>
                   
                   <div 
                     className="text-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <span className={`px-3 py-1 rounded-full font-semibold ${
-                      avgPerGame >= 0 
-                        ? "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400" 
-                        : "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-                    }`}>
-                      {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.round(avgPerGame))}
-                    </span>
+                    <Badge variant={avgPerGame >= 0 ? "success" : "destructive"}>
+                      {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(Math.round(avgPerGame)))}
+                    </Badge>
                   </div>
                   
                   <div className="flex items-center justify-center gap-2">
