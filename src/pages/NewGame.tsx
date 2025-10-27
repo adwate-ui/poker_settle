@@ -248,11 +248,17 @@ const NewGame = () => {
               {gamePlayers.map((player) => (
                 <Card key={player.id}>
                   <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <span className="font-medium">{player.name}</span>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">{player.total_games} games</span>
-                        <span className={player.total_profit >= 0 ? "text-green-600" : "text-red-600"}>
+                      <div className="flex items-center gap-1">
+                        <span className="px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground">
+                          {player.total_games} games
+                        </span>
+                        <span className={`px-2 py-1 text-xs rounded-md font-medium ${
+                          player.total_profit >= 0 
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}>
                           Rs. {formatIndianNumber(player.total_profit)}
                         </span>
                       </div>
@@ -295,11 +301,17 @@ const NewGame = () => {
               <SelectContent>
                 {players.filter(p => !gamePlayers.find(gp => gp.id === p.id)).map((player) => (
                   <SelectItem key={player.id} value={player.id} className="cursor-pointer">
-                    <div className="flex items-center justify-between w-full gap-4">
+                    <div className="flex items-center gap-2 w-full">
                       <span className="font-medium">{player.name}</span>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">{player.total_games} games</span>
-                        <span className={player.total_profit >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                      <div className="flex items-center gap-1">
+                        <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
+                          {player.total_games} games
+                        </span>
+                        <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
+                          player.total_profit >= 0 
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}>
                           Rs. {formatIndianNumber(player.total_profit)}
                         </span>
                       </div>
