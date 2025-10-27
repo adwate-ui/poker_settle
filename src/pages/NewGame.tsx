@@ -18,7 +18,7 @@ const NewGame = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
-  const [gamePlayers, setGamePlayers] = useState<{ id: string; name: string }[]>([]);
+  const [gamePlayers, setGamePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [showActiveGame, setShowActiveGame] = useState(false);
@@ -82,7 +82,7 @@ const NewGame = () => {
       if (error) throw error;
 
       setPlayers([...players, data]);
-      setGamePlayers([...gamePlayers, { id: data.id, name: data.name }]);
+      setGamePlayers([...gamePlayers, data]);
       setNewPlayerName("");
       toast.success("Player added");
     } catch (error) {
@@ -101,7 +101,7 @@ const NewGame = () => {
       return;
     }
 
-    setGamePlayers([...gamePlayers, { id: player.id, name: player.name }]);
+    setGamePlayers([...gamePlayers, player]);
     setSelectedPlayerId("");
     toast.success("Player added to game");
   };
@@ -248,7 +248,15 @@ const NewGame = () => {
               {gamePlayers.map((player) => (
                 <Card key={player.id}>
                   <CardContent className="flex items-center justify-between p-4">
-                    <span className="font-medium">{player.name}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{player.name}</span>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">{player.total_games} games</span>
+                        <span className={player.total_profit >= 0 ? "text-green-600" : "text-red-600"}>
+                          Rs. {formatIndianNumber(player.total_profit)}
+                        </span>
+                      </div>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -286,12 +294,15 @@ const NewGame = () => {
               </SelectTrigger>
               <SelectContent>
                 {players.filter(p => !gamePlayers.find(gp => gp.id === p.id)).map((player) => (
-                  <SelectItem key={player.id} value={player.id}>
-                    <div className="flex flex-col items-start">
+                  <SelectItem key={player.id} value={player.id} className="cursor-pointer">
+                    <div className="flex items-center justify-between w-full gap-4">
                       <span className="font-medium">{player.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        P&L: Rs. {formatIndianNumber(player.total_profit)} | Games: {player.total_games}
-                      </span>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">{player.total_games} games</span>
+                        <span className={player.total_profit >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                          Rs. {formatIndianNumber(player.total_profit)}
+                        </span>
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
