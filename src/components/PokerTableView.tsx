@@ -113,12 +113,14 @@ const PokerTableView = ({ positions, totalSeats, onPositionsChange, enableDragDr
                 }}
               >
                 <div className="flex flex-col items-center gap-1">
-                  <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all ${
+                  <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                     isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
                   }`}>
-                    <span className="text-lg xs:text-xl sm:text-2xl font-bold text-primary">
-                      {position.seat}
-                    </span>
+                    <img 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(position.player_name)}`}
+                      alt={position.player_name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="bg-card/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-md border border-border">
                     <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap">

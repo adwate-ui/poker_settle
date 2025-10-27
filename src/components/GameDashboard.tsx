@@ -337,6 +337,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             className="justify-start flex-col items-start h-auto py-2"
                           >
                             <div className="flex items-center gap-2 w-full">
+                              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                                <img 
+                                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
+                                  alt={player.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
                               <span className="font-medium">{player.name}</span>
                             </div>
                             <div className="flex items-center gap-1 mt-1">

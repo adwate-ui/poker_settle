@@ -45,27 +45,36 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
     <Card className="bg-card border-border hover:border-poker-gold/50 transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-poker-gold flex items-center gap-2">
-              <span>{gamePlayer.player.name}</span>
-              {isProfit ? (
-                <TrendingUp className="w-4 h-4 text-money-green" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-money-red" />
-              )}
-            </CardTitle>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                <Trophy className="w-3 h-3" />
-                {gamePlayer.player.total_games} games
-              </Badge>
-              <Badge 
-                variant={gamePlayer.player.total_profit >= 0 ? "default" : "destructive"}
-                className="text-xs flex items-center gap-1"
-              >
-                <Target className="w-3 h-3" />
-                {gamePlayer.player.total_profit >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(gamePlayer.player.total_profit))}
-              </Badge>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+              <img 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(gamePlayer.player.name)}`}
+                alt={gamePlayer.player.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <span>{gamePlayer.player.name}</span>
+                {isProfit ? (
+                  <TrendingUp className="w-4 h-4 text-money-green" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-money-red" />
+                )}
+              </CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                  <Trophy className="w-3 h-3" />
+                  {gamePlayer.player.total_games} games
+                </Badge>
+                <Badge 
+                  variant={gamePlayer.player.total_profit >= 0 ? "default" : "destructive"}
+                  className="text-xs flex items-center gap-1"
+                >
+                  <Target className="w-3 h-3" />
+                  {gamePlayer.player.total_profit >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(gamePlayer.player.total_profit))}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>

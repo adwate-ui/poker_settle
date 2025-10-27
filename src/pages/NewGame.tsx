@@ -254,19 +254,28 @@ const NewGame = () => {
               {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
                 <Card key={player.id}>
                   <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{player.name}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground">
-                          {player.total_games} games
-                        </span>
-                        <span className={`px-2 py-1 text-xs rounded-md font-medium ${
-                          player.total_profit >= 0 
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}>
-                          Rs. {formatIndianNumber(player.total_profit)}
-                        </span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                        <img 
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium">{player.name}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground">
+                            {player.total_games} games
+                          </span>
+                          <span className={`px-2 py-1 text-xs rounded-md font-medium ${
+                            player.total_profit >= 0 
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          }`}>
+                            Rs. {formatIndianNumber(player.total_profit)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <Button
@@ -337,18 +346,27 @@ const NewGame = () => {
                             }`}
                           />
                           <div className="flex items-center gap-2 w-full">
-                            <span className="font-medium">{player.name}</span>
-                            <div className="flex items-center gap-1">
-                              <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
-                                {player.total_games} games
-                              </span>
-                              <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
-                                player.total_profit >= 0 
-                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              }`}>
-                                Rs. {formatIndianNumber(player.total_profit)}
-                              </span>
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                              <img 
+                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
+                                alt={player.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1 flex-1">
+                              <span className="font-medium">{player.name}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
+                                  {player.total_games} games
+                                </span>
+                                <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
+                                  player.total_profit >= 0 
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                 }`}>
+                                   Rs. {formatIndianNumber(player.total_profit)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </CommandItem>
