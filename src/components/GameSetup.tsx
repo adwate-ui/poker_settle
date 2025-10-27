@@ -138,12 +138,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-dark p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
-            <p className="text-muted-foreground">Configure your game settings and select players</p>
+    <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">
+      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="text-center sm:text-left flex-1">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Configure your game settings and select players</p>
           </div>
           <UserProfile />
         </div>
@@ -177,7 +177,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <CardTitle className="text-poker-gold">Add New Player</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <Input 
                 value={newPlayerName} 
                 onChange={e => setNewPlayerName(e.target.value)} 
@@ -188,7 +188,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
               <Button 
                 onClick={addNewPlayer} 
                 disabled={!newPlayerName.trim()} 
-                className="bg-primary hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add
@@ -227,11 +227,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
                         {filteredPlayers.map(player => (
                           <div key={player.id} className="p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3 cursor-pointer" onClick={() => selectExistingPlayer(player)}>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                              <div className="flex items-center gap-3 cursor-pointer w-full sm:w-auto" onClick={() => selectExistingPlayer(player)}>
                                 <span className="font-semibold">{player.name}</span>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-end">
                                 <Badge variant="outline" className="text-xs">
                                   {player.total_games} games
                                 </Badge>
@@ -267,8 +267,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <CardContent>
               <div className="space-y-2">
                 {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                  <div key={player.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-                    <div className="flex items-center gap-3">
+                  <div key={player.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-secondary rounded-lg gap-2">
+                    <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
                       <span className="font-semibold">{player.name}</span>
                       <Badge variant="outline" className="text-xs">
                         {player.total_games} games
@@ -277,7 +277,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         {player.total_profit >= 0 ? '+' : ''}{formatCurrency(player.total_profit)}
                       </Badge>
                     </div>
-                    <Button variant="destructive" size="sm" onClick={() => removeSelectedPlayer(player.id)}>
+                    <Button variant="destructive" size="sm" onClick={() => removeSelectedPlayer(player.id)} className="self-end sm:self-auto">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -352,30 +352,30 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                 </Button>
                               </div>
                               
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3 p-3 bg-background rounded">
+                              <div className="grid grid-cols-2 gap-3 mb-3 p-3 bg-background rounded">
                                 <div className="text-center">
-                                  <div className="text-sm text-muted-foreground">Total Buy-ins</div>
-                                  <div className="font-semibold text-primary">{formatCurrency(totalBuyIns)}</div>
+                                  <div className="text-xs sm:text-sm text-muted-foreground">Buy-ins</div>
+                                  <div className="text-sm sm:text-base font-semibold text-primary">{formatCurrency(totalBuyIns)}</div>
                                 </div>
                                 <div className="text-center">
-                                  <div className="text-sm text-muted-foreground">Total Wins</div>
-                                  <div className="font-semibold text-green-400">{formatCurrency(totalWins)}</div>
+                                  <div className="text-xs sm:text-sm text-muted-foreground">Wins</div>
+                                  <div className="text-sm sm:text-base font-semibold text-green-400">{formatCurrency(totalWins)}</div>
                                 </div>
                                 <div className="text-center">
-                                  <div className="text-sm text-muted-foreground">Total Losses</div>
-                                  <div className="font-semibold text-red-400">{formatCurrency(Math.abs(totalLosses))}</div>
+                                  <div className="text-xs sm:text-sm text-muted-foreground">Losses</div>
+                                  <div className="text-sm sm:text-base font-semibold text-red-400">{formatCurrency(Math.abs(totalLosses))}</div>
                                 </div>
                                 <div className="text-center">
-                                  <div className="text-sm text-muted-foreground">Total Final Stack</div>
-                                  <div className="font-semibold text-poker-gold">{formatCurrency(totalFinalStack)}</div>
+                                  <div className="text-xs sm:text-sm text-muted-foreground">Final Stack</div>
+                                  <div className="text-sm sm:text-base font-semibold text-poker-gold">{formatCurrency(totalFinalStack)}</div>
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="grid grid-cols-1 gap-2">
                                 {game.game_players.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
-                                  <div key={gp.id} className="flex items-center justify-between p-2 bg-background rounded">
-                                    <span className="font-medium">{gp.player.name}</span>
-                                    <div className="flex items-center gap-2">
+                                  <div key={gp.id} className="flex flex-col xs:flex-row items-start xs:items-center justify-between p-2 bg-background rounded gap-1">
+                                    <span className="font-medium text-sm sm:text-base">{gp.player.name}</span>
+                                    <div className="flex items-center gap-2 flex-wrap">
                                       <Badge variant="outline" className="text-xs">
                                         {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
                                       </Badge>
@@ -406,10 +406,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <PlayerPerformance players={players} games={games} />
         )}
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           {!canCreateGame && (
             <Button onClick={continueGame} className="flex-1 bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
-              Continue Current Game
+              <Play className="w-5 h-5 mr-2" />
+              <span className="hidden xs:inline">Continue Current Game</span>
+              <span className="xs:hidden">Continue Game</span>
             </Button>
           )}
           <Button 
@@ -417,6 +419,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} 
             className={`${!canCreateGame ? 'flex-1' : 'w-full'} bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3`}
           >
+            <Play className="w-5 h-5 mr-2" />
             Start New Game ({selectedPlayers.length} players)
           </Button>
         </div>

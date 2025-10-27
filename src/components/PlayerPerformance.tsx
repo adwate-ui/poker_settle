@@ -81,17 +81,19 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
               {selectedPlayer && (
                 <>
                   <div className="p-4 bg-secondary rounded-lg">
-                    <h3 className="text-lg font-semibold mb-3">{selectedPlayer.name} - Overall Stats</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-3">{selectedPlayer.name} - Overall Stats</h3>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <div className="text-center p-3 bg-background rounded">
-                        <div className="text-sm text-muted-foreground">Total Games</div>
-                        <div className="text-2xl font-bold text-primary">{selectedPlayer.total_games}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Total Games</div>
+                        <div className="text-xl sm:text-2xl font-bold text-primary">{selectedPlayer.total_games}</div>
                       </div>
                       <div className="text-center p-3 bg-background rounded">
-                        <div className="text-sm text-muted-foreground">Total P&L</div>
-                        <div className={`text-2xl font-bold flex items-center justify-center gap-2 ${selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                          {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
+                        <div className="text-xs sm:text-sm text-muted-foreground">Total P&L</div>
+                        <div className={`text-lg sm:text-2xl font-bold flex items-center justify-center gap-1 sm:gap-2 ${selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> : <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
+                          <span className="text-sm sm:text-2xl">
+                            {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -100,28 +102,28 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                   {playerGames.length > 0 ? (
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Game History</h3>
-                      <div className="rounded-lg border border-border overflow-hidden">
+                      <div className="rounded-lg border border-border overflow-x-auto">
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Buy-in Amount</TableHead>
-                              <TableHead className="text-center">Buy-ins</TableHead>
-                              <TableHead className="text-right">P&L</TableHead>
+                              <TableHead className="whitespace-nowrap">Date</TableHead>
+                              <TableHead className="whitespace-nowrap">Buy-in</TableHead>
+                              <TableHead className="text-center whitespace-nowrap">Buy-ins</TableHead>
+                              <TableHead className="text-right whitespace-nowrap">P&L</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {playerGames.map((game) => (
                               <TableRow key={game.gameId}>
-                                <TableCell className="font-medium">
+                                <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">
                                   {new Date(game.date).toLocaleDateString()}
                                 </TableCell>
-                                <TableCell>{formatCurrency(game.buyInAmount)}</TableCell>
+                                <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatCurrency(game.buyInAmount)}</TableCell>
                                 <TableCell className="text-center">
-                                  <Badge variant="outline">{game.buyIns}</Badge>
+                                  <Badge variant="outline" className="text-xs">{game.buyIns}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Badge variant={game.netAmount >= 0 ? "default" : "destructive"}>
+                                  <Badge variant={game.netAmount >= 0 ? "default" : "destructive"} className="text-xs whitespace-nowrap">
                                     {game.netAmount >= 0 ? '+' : ''}{formatCurrency(game.netAmount)}
                                   </Badge>
                                 </TableCell>

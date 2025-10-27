@@ -169,20 +169,21 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const canCompleteGame = isBalanced && isStackBalanced;
 
   return (
-    <div className="min-h-screen bg-gradient-dark p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <Button 
               onClick={onBackToSetup}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Setup
+              <span className="hidden xs:inline">Back to Setup</span>
+              <span className="xs:hidden">Back</span>
             </Button>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground">Game Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Game Dashboard</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
               </p>
             </div>
@@ -197,7 +198,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   <Input 
                     value={newPlayerName} 
                     onChange={(e) => setNewPlayerName(e.target.value)}
@@ -205,19 +206,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     className="bg-input border-border"
                     onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
                   />
-                  <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()}>
+                  <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()} className="w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
                     Add New
                   </Button>
-                  <Button variant="outline" onClick={() => setShowAddPlayer(false)}>
+                  <Button variant="outline" onClick={() => setShowAddPlayer(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
                 </div>
                 
                 {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).length > 0 && (
                   <div>
-                    <h4 className="font-semibold mb-2">Or select existing player:</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <h4 className="font-semibold mb-2 text-sm sm:text-base">Or select existing player:</h4>
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                       {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).sort((a, b) => a.name.localeCompare(b.name)).map(player => (
                         <Button
                           key={player.id}
@@ -244,42 +245,42 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Buy-ins</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Buy-ins</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Final Stack</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Final Stack</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
                 {!isStackBalanced && (
                   <p className="text-xs text-destructive">Must equal buy-ins</p>
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Winnings</p>
-                <p className="text-2xl font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Winnings</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Losses</p>
-                <p className="text-2xl font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Losses</p>
+                <p className="text-lg sm:text-2xl font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">Players</h2>
+        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Players</h2>
           <Button 
             onClick={() => setShowAddPlayer(true)}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
           >
             <UserPlus className="w-4 h-4 mr-2" />
             Add Player
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
             <PlayerCard
               key={gamePlayer.id}
@@ -328,7 +329,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <CardTitle className="text-poker-gold">Add Manual Transfer</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
                   <SelectTrigger className="bg-input border-border">
                     <SelectValue placeholder="From Player" />
@@ -368,7 +369,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <Plus className="w-4 h-4 mr-2" />
                     Add
                   </Button>
-                  <Button variant="outline" onClick={() => setShowManualTransfer(false)}>
+                  <Button variant="outline" onClick={() => setShowManualTransfer(false)} className="flex-1">
                     Cancel
                   </Button>
                 </div>
@@ -377,45 +378,49 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </Card>
         )}
 
-        <div className="flex gap-4 flex-wrap">
-          {!showManualTransfer && (
-            <Button 
-              onClick={() => setShowManualTransfer(true)}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Manual Transfer
-            </Button>
-          )}
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            {!showManualTransfer && (
+              <Button 
+                onClick={() => setShowManualTransfer(true)}
+                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="hidden xs:inline">Add Manual Transfer</span>
+                <span className="xs:hidden">Manual Transfer</span>
+              </Button>
+            )}
 
-          <Button onClick={calculateSettlements} className="bg-primary hover:bg-primary/90">
-            <Calculator className="w-4 h-4 mr-2" />
-            {settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}
-          </Button>
+            <Button onClick={calculateSettlements} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+              <Calculator className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">{settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}</span>
+              <span className="sm:hidden">Settlements</span>
+            </Button>
+            
+            <Button 
+              onClick={handleCompleteGame} 
+              disabled={!canCompleteGame}
+              className="bg-gradient-poker hover:opacity-90 text-primary-foreground w-full sm:w-auto"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Complete Game
+            </Button>
+          </div>
           
           {(!isBalanced || !isStackBalanced) && (
             <div className="flex flex-col gap-1 text-destructive">
               {!isBalanced && (
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium">
                   Net amounts must balance to zero (Current: {formatCurrency(totalWinnings + totalLosses)})
                 </span>
               )}
               {!isStackBalanced && (
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium">
                   Total final stack must equal total buy-ins (Final: {formatCurrency(totalFinalStack)}, Buy-ins: {formatCurrency(totalBuyIns)})
                 </span>
               )}
             </div>
           )}
-          
-          <Button 
-            onClick={handleCompleteGame} 
-            disabled={!canCompleteGame}
-            className="bg-gradient-poker hover:opacity-90 text-primary-foreground"
-          >
-            <Trophy className="w-4 h-4 mr-2" />
-            Complete Game
-          </Button>
         </div>
 
         {settlements.length > 0 && (
