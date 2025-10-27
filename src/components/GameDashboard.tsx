@@ -217,7 +217,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-poker-gold flex items-center gap-2">
-              <DollarSign className="w-5 h-5" />
+              <Calculator className="w-5 h-5" />
               Game Summary
             </CardTitle>
           </CardHeader>
@@ -334,9 +334,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             key={player.id}
                             variant="outline"
                             onClick={() => addExistingPlayer(player)}
-                            className="justify-start"
+                            className="justify-start flex-col items-start h-auto py-2"
                           >
-                            {player.name}
+                            <div className="flex items-center gap-2 w-full">
+                              <span className="font-medium">{player.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
+                                {player.total_games} games
+                              </span>
+                              <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
+                                player.total_profit >= 0 
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              }`}>
+                                Rs. {formatIndianNumber(player.total_profit)}
+                              </span>
+                            </div>
                           </Button>
                         ))}
                       </div>

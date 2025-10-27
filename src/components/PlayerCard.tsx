@@ -121,7 +121,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
 
         <div className="pt-3 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Total Invested:</span>
+            <span className="text-sm text-muted-foreground">Total Buyin:</span>
             <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex items-center justify-between mt-1">

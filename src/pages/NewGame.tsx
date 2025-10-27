@@ -177,6 +177,7 @@ const NewGame = () => {
 
       toast.success("Game started!");
       setActiveGame(completeGame as Game);
+      setShowActiveGame(true);
     } catch (error) {
       toast.error("Failed to start game");
     } finally {
