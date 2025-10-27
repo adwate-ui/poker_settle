@@ -214,7 +214,7 @@ const PlayersHistory = () => {
               Avg Per Game
               {getSortIcon("avg_per_game")}
             </Button>
-            <div className="text-center font-bold">Actions</div>
+            <div className="flex items-center justify-center h-10 px-4 font-bold">Actions</div>
           </div>
         </div>
 
@@ -271,14 +271,14 @@ const PlayersHistory = () => {
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex items-center justify-end gap-6">
                     {isProfit ? (
-                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400 mr-2">
                         <TrendingUp className="h-4 w-4" />
                         <span className="text-sm font-medium">Winning</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                      <div className="flex items-center gap-1 text-red-600 dark:text-red-400 mr-2">
                         <TrendingDown className="h-4 w-4" />
                         <span className="text-sm font-medium">Losing</span>
                       </div>
