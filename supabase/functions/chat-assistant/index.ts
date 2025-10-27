@@ -33,6 +33,30 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
+    // Determine which API key to use
+    let apiKey: string | null = null;
+    
+    // For adwate@gmail.com, use the global key
+    if (user.email === 'adwate@gmail.com') {
+      apiKey = Deno.env.get('GEMINI_API_KEY') || null;
+    } else {
+      // For other users, check if they have their own key
+      const { data: userKey } = await supabaseClient
+        .from('user_api_keys')
+        .select('gemini_api_key')
+        .eq('user_id', user.id)
+        .single();
+      
+      apiKey = userKey?.gemini_api_key || null;
+    }
+
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'NO_API_KEY', message: 'Please add your Gemini API key to use the chatbot' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Fetch user's data from Supabase
     const [gamesResult, playersResult, gamePlayersResult] = await Promise.all([
       supabaseClient.from('games').select('*').eq('user_id', user.id),
@@ -47,14 +71,9 @@ serve(async (req) => {
       game_players: gamePlayersResult.data || []
     };
 
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
-    }
-
     // Call Gemini API
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
