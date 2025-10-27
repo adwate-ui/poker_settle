@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
+import HandTracking from "@/components/HandTracking";
 
 interface GameDashboardProps {
   game: Game;
@@ -347,6 +348,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CardContent>
           </Card>
         )}
+
+        {/* Hand Tracking Section */}
+        <HandTracking game={game} />
 
         <div className="space-y-4">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
