@@ -12,6 +12,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Play, CheckCircle, TrendingUp, Trophy } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import PokerCard from './PokerCard';
+import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
+import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface HandTrackingProps {
   game: Game;
@@ -48,6 +51,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [potSize, setPotSize] = useState(0);
   const [streetActions, setStreetActions] = useState<PlayerAction[]>([]);
   const [playersInHand, setPlayersInHand] = useState<string[]>([]);
+  const [playerHoleCards, setPlayerHoleCards] = useState<Record<string, string>>({});
+  const [showHoleCardInput, setShowHoleCardInput] = useState(false);
+  const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<string>('');
 
   // Find hero player (current user)
   const heroPlayer = game.game_players.find(gp => gp.player.name === user?.email?.split('@')[0] || 'Adwate');
@@ -211,6 +217,29 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     const isHeroWin = winnerId === heroPlayer?.player_id;
     await completeHand(currentHand.id, winnerId, potSize, isHeroWin);
     
+    // Save hole cards to player_actions if entered
+    if (Object.keys(playerHoleCards).length > 0) {
+      for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
+        const lastAction = await recordPlayerAction(
+          currentHand.id,
+          playerId,
+          'River',
+          'Check',
+          0,
+          actionSequence,
+          playerId === heroPlayer?.player_id
+        );
+        
+        if (lastAction) {
+          // Update with hole cards
+          await supabase
+            .from('player_actions')
+            .update({ hole_cards: holeCards })
+            .eq('id', lastAction.id);
+        }
+      }
+    }
+    
     // Reset everything
     setCurrentHand(null);
     setStage('setup');
@@ -224,6 +253,42 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setRiverCard('');
     setStreetActions([]);
     setPlayersInHand([]);
+    setPlayerHoleCards({});
+  };
+
+  const handleHoleCardSubmit = (cards: string) => {
+    if (selectedPlayerForHole) {
+      setPlayerHoleCards(prev => ({
+        ...prev,
+        [selectedPlayerForHole]: cards
+      }));
+      setShowHoleCardInput(false);
+      setSelectedPlayerForHole('');
+    }
+  };
+
+  const autoSelectWinner = () => {
+    // Check if all active players have hole cards
+    const allHaveHoleCards = activePlayers.every(p => playerHoleCards[p.player_id]);
+    
+    if (!allHaveHoleCards) {
+      return null;
+    }
+
+    // Get all community cards
+    const allCommunityCards = (flopCards || '') + (turnCard || '') + (riverCard || '');
+    
+    if (allCommunityCards.length < 10) { // Need at least 5 cards (10 chars)
+      return null;
+    }
+
+    const playersWithHoles = activePlayers.map(p => ({
+      playerId: p.player_id,
+      playerName: p.player.name,
+      holeCards: playerHoleCards[p.player_id]
+    }));
+
+    return determineWinner(playersWithHoles, allCommunityCards);
   };
 
   if (stage === 'setup') {
@@ -282,52 +347,191 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   }
 
   if (stage === 'showdown') {
+    const winnerResult = autoSelectWinner();
+    
     return (
-      <Card className="mt-6 border-poker-gold/50">
-        <CardHeader className="bg-gradient-to-r from-poker-gold/20 to-transparent">
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-poker-gold" />
-            Showdown - Select Winner
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-6">
-          {/* Show all community cards */}
-          {(flopCards || turnCard || riverCard) && (
-            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
-              <div className="text-sm font-semibold text-white mb-2">Board:</div>
-              <div className="flex gap-2 justify-center flex-wrap">
-                {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                  <PokerCard key={`flop-${idx}`} card={card} size="md" />
+      <>
+        <Card className="mt-6 border-poker-gold/50">
+          <CardHeader className="bg-gradient-to-r from-poker-gold/20 to-transparent">
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-poker-gold" />
+              Showdown
+              {winnerResult && (
+                <Badge className="ml-auto bg-green-600">Winner Detected!</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            {/* Show all community cards */}
+            {(flopCards || turnCard || riverCard) && (
+              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
+                <div className="text-sm font-semibold text-white mb-2">Board:</div>
+                <div className="flex gap-2 justify-center flex-wrap">
+                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={`flop-${idx}`} card={card} size="md" />
+                  ))}
+                  {turnCard && <PokerCard card={turnCard} size="md" />}
+                  {riverCard && <PokerCard card={riverCard} size="md" />}
+                </div>
+              </div>
+            )}
+
+            <div className="text-xl font-bold text-center text-poker-gold">
+              Pot: ₹{potSize.toLocaleString('en-IN')}
+            </div>
+
+            {/* Hole Cards Entry Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Player Hole Cards</h3>
+                <p className="text-xs text-muted-foreground">
+                  {Object.keys(playerHoleCards).length}/{activePlayers.length} entered
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                {activePlayers.map((gp) => (
+                  <div
+                    key={gp.player_id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{gp.player.name}</span>
+                      {gp.player_id === heroPlayer?.player_id && (
+                        <Badge variant="secondary" className="text-xs">Hero</Badge>
+                      )}
+                    </div>
+                    
+                    {playerHoleCards[gp.player_id] ? (
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard key={idx} card={card} size="sm" />
+                          ))}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPlayerForHole(gp.player_id);
+                            setShowHoleCardInput(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlayerForHole(gp.player_id);
+                          setShowHoleCardInput(true);
+                        }}
+                      >
+                        Add Hole Cards
+                      </Button>
+                    )}
+                  </div>
                 ))}
-                {turnCard && <PokerCard card={turnCard} size="md" />}
-                {riverCard && <PokerCard card={riverCard} size="md" />}
               </div>
             </div>
-          )}
 
-          <div className="text-xl font-bold text-center text-poker-gold">
-            Pot: ₹{potSize.toLocaleString('en-IN')}
-          </div>
-
-          <div className="space-y-2">
-            {activePlayers.map((gp) => (
-              <Button
-                key={gp.player_id}
-                onClick={() => finishHand(gp.player_id)}
-                variant="outline"
-                className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-semibold">{gp.player.name}</span>
-                  {gp.player_id === heroPlayer?.player_id && (
-                    <Badge variant="secondary">Hero</Badge>
+            {/* Winner Display */}
+            {winnerResult && (
+              <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
+                <div className="text-center space-y-3">
+                  <div className="text-2xl font-bold text-green-400">
+                    🏆 {winnerResult.winner.playerName} Wins!
+                  </div>
+                  <div className="text-lg font-semibold text-poker-gold">
+                    {winnerResult.winner.handName}
+                  </div>
+                  <div className="flex gap-1 justify-center">
+                    {winnerResult.winner.bestHand.map((card, idx) => (
+                      <PokerCard key={idx} card={card} size="sm" />
+                    ))}
+                  </div>
+                  
+                  {winnerResult.allHands.length > 1 && (
+                    <details className="text-sm text-left">
+                      <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                        View All Hands
+                      </summary>
+                      <div className="mt-2 space-y-2">
+                        {winnerResult.allHands.map((hand, idx) => (
+                          <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">
+                                {idx + 1}. {hand.playerName}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {hand.handName}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   )}
+                  
+                  <Button
+                    onClick={() => finishHand(winnerResult.winner.playerId)}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    size="lg"
+                  >
+                    Confirm & Complete Hand
+                  </Button>
                 </div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            )}
+
+            {/* Manual Winner Selection (if auto-detection not possible) */}
+            {!winnerResult && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground text-center">
+                  {Object.keys(playerHoleCards).length === 0
+                    ? 'Add hole cards for automatic winner detection, or select winner manually:'
+                    : 'Add all hole cards for automatic detection, or select winner manually:'}
+                </p>
+                {activePlayers.map((gp) => (
+                  <Button
+                    key={gp.player_id}
+                    onClick={() => finishHand(gp.player_id)}
+                    variant="outline"
+                    className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-semibold">{gp.player.name}</span>
+                      {gp.player_id === heroPlayer?.player_id && (
+                        <Badge variant="secondary">Hero</Badge>
+                      )}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Hole Card Input Dialog */}
+        <Dialog open={showHoleCardInput} onOpenChange={setShowHoleCardInput}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Enter Hole Cards for{' '}
+                {activePlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name}
+              </DialogTitle>
+            </DialogHeader>
+            <CardNotationInput
+              label="Hole Cards"
+              expectedCards={2}
+              onSubmit={handleHoleCardSubmit}
+              placeholder="AhKd"
+            />
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
