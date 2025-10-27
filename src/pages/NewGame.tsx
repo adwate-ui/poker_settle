@@ -1,0 +1,273 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Game, Player } from "@/types/poker";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2, Plus, Trash2, Play, ArrowLeft } from "lucide-react";
+import GameDashboard from "@/components/GameDashboard";
+
+const NewGame = () => {
+  const { user } = useAuth();
+  const [buyInAmount, setBuyInAmount] = useState("");
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const [gamePlayers, setGamePlayers] = useState<{ id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeGame, setActiveGame] = useState<Game | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchPlayers();
+      checkActiveGame();
+    }
+  }, [user]);
+
+  const fetchPlayers = async () => {
+    const { data, error } = await supabase
+      .from("players")
+      .select("*")
+      .eq("user_id", user?.id)
+      .order("name");
+
+    if (error) {
+      toast.error("Failed to load players");
+      return;
+    }
+    setPlayers(data || []);
+  };
+
+  const checkActiveGame = async () => {
+    const { data, error } = await supabase
+      .from("games")
+      .select("*")
+      .eq("user_id", user?.id)
+      .eq("is_complete", false)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!error && data) {
+      const gameWithPlayers: Game = {
+        ...data,
+        game_players: []
+      };
+      setActiveGame(gameWithPlayers);
+    }
+  };
+
+  const addNewPlayer = async () => {
+    if (!newPlayerName.trim()) {
+      toast.error("Please enter a player name");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("players")
+        .insert({ name: newPlayerName, user_id: user?.id })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPlayers([...players, data]);
+      setGamePlayers([...gamePlayers, { id: data.id, name: data.name }]);
+      setNewPlayerName("");
+      toast.success("Player added");
+    } catch (error) {
+      toast.error("Failed to add player");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addExistingPlayer = () => {
+    const player = players.find(p => p.id === selectedPlayerId);
+    if (!player) return;
+
+    if (gamePlayers.find(p => p.id === player.id)) {
+      toast.error("Player already added");
+      return;
+    }
+
+    setGamePlayers([...gamePlayers, { id: player.id, name: player.name }]);
+    setSelectedPlayerId("");
+    toast.success("Player added to game");
+  };
+
+  const removePlayer = (playerId: string) => {
+    setGamePlayers(gamePlayers.filter(p => p.id !== playerId));
+  };
+
+  const startGame = async () => {
+    if (!buyInAmount || parseFloat(buyInAmount) <= 0) {
+      toast.error("Please enter a valid buy-in amount");
+      return;
+    }
+
+    if (gamePlayers.length < 2) {
+      toast.error("Please add at least 2 players");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: game, error: gameError } = await supabase
+        .from("games")
+        .insert({
+          buy_in_amount: parseFloat(buyInAmount),
+          user_id: user?.id,
+          is_complete: false,
+        })
+        .select()
+        .single();
+
+      if (gameError) throw gameError;
+
+      const gameWithPlayers: Game = {
+        ...game,
+        game_players: []
+      };
+
+      const gamePlayersData = gamePlayers.map((player, index) => ({
+        game_id: game.id,
+        player_id: player.id,
+        buy_ins: 1,
+        final_stack: 0,
+        net_amount: 0,
+      }));
+
+      const { error: playersError } = await supabase
+        .from("game_players")
+        .insert(gamePlayersData);
+
+      if (playersError) throw playersError;
+
+      toast.success("Game started!");
+      setActiveGame(gameWithPlayers);
+    } catch (error) {
+      toast.error("Failed to start game");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackFromGame = () => {
+    setActiveGame(null);
+    checkActiveGame();
+  };
+
+  if (activeGame) {
+    return <GameDashboard game={activeGame} onBackToSetup={handleBackFromGame} />;
+  }
+
+  return (
+    <Card className="max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle>Start New Game</CardTitle>
+        <CardDescription>Set up your poker game with buy-in and players</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Buy-in Section */}
+        <div className="space-y-2">
+          <Label htmlFor="buyin">Buy-in Amount</Label>
+          <Input
+            id="buyin"
+            type="number"
+            placeholder="Enter buy-in amount"
+            value={buyInAmount}
+            onChange={(e) => setBuyInAmount(e.target.value)}
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Add Players Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Players ({gamePlayers.length})</h3>
+          
+          {/* Current Players List */}
+          {gamePlayers.length > 0 && (
+            <div className="space-y-2 p-4 bg-muted rounded-lg">
+              {gamePlayers.map((player) => (
+                <div key={player.id} className="flex items-center justify-between">
+                  <span>{player.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removePlayer(player.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Player */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="New player name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
+            />
+            <Button onClick={addNewPlayer} disabled={loading}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add New
+            </Button>
+          </div>
+
+          {/* Add Existing Player */}
+          <div className="flex gap-2">
+            <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select existing player" />
+              </SelectTrigger>
+              <SelectContent>
+                {players.filter(p => !gamePlayers.find(gp => gp.id === p.id)).map((player) => (
+                  <SelectItem key={player.id} value={player.id}>
+                    {player.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={addExistingPlayer} disabled={!selectedPlayerId}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Existing
+            </Button>
+          </div>
+        </div>
+
+        {/* Start Game Button */}
+        <Button 
+          onClick={startGame} 
+          disabled={loading || gamePlayers.length < 2 || !buyInAmount}
+          className="w-full"
+          size="lg"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Starting Game...
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-5 w-5" />
+              Start Game
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default NewGame;
