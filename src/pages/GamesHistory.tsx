@@ -3,9 +3,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Loader2, Calendar, Users, DollarSign } from "lucide-react";
+import { Loader2, Calendar, Users, Coins, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { formatIndianNumber } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface GameWithStats {
   id: string;
@@ -13,6 +26,7 @@ interface GameWithStats {
   buy_in_amount: number;
   player_count: number;
   total_pot: number;
+  player_names: string[];
 }
 
 const GamesHistory = () => {
@@ -20,6 +34,8 @@ const GamesHistory = () => {
   const navigate = useNavigate();
   const [games, setGames] = useState<GameWithStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -39,7 +55,10 @@ const GamesHistory = () => {
           is_complete,
           game_players (
             id,
-            buy_ins
+            buy_ins,
+            player:players (
+              name
+            )
           )
         `)
         .eq("user_id", user?.id)
@@ -52,6 +71,7 @@ const GamesHistory = () => {
         const playerCount = game.game_players?.length || 0;
         const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
         const totalPot = totalBuyIns * game.buy_in_amount;
+        const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
 
         return {
           id: game.id,
@@ -59,6 +79,7 @@ const GamesHistory = () => {
           buy_in_amount: game.buy_in_amount,
           player_count: playerCount,
           total_pot: totalPot,
+          player_names: playerNames,
         };
       });
 
@@ -71,6 +92,36 @@ const GamesHistory = () => {
     }
   };
 
+  const handleDeleteGame = async (gameId: string) => {
+    try {
+      const { error } = await supabase
+        .from("games")
+        .delete()
+        .eq("id", gameId);
+
+      if (error) throw error;
+
+      toast.success("Game deleted successfully");
+      fetchGames();
+    } catch (error) {
+      console.error("Error deleting game:", error);
+      toast.error("Failed to delete game");
+    } finally {
+      setDeleteGameId(null);
+    }
+  };
+
+  const filteredGames = games.filter((game) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const gameDate = format(new Date(game.date), "MMM d, yyyy").toLowerCase();
+    const monthYear = format(new Date(game.date), "MMM yyyy").toLowerCase();
+    const players = game.player_names.join(" ").toLowerCase();
+    
+    return gameDate.includes(query) || monthYear.includes(query) || players.includes(query);
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -81,7 +132,7 @@ const GamesHistory = () => {
 
   if (games.length === 0) {
     return (
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-6xl mx-auto">
         <CardHeader>
           <CardTitle>Games History</CardTitle>
           <CardDescription>No completed games yet</CardDescription>
@@ -102,18 +153,25 @@ const GamesHistory = () => {
           <CardTitle>Games History</CardTitle>
           <CardDescription>View all your completed poker games</CardDescription>
         </CardHeader>
+        <CardContent>
+          <Input
+            placeholder="Search by date, month-year, or player names..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </CardContent>
       </Card>
 
       <div className="grid gap-4">
-        {games.map((game) => (
-          <Card 
-            key={game.id} 
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate(`/games/${game.id}`)}
-          >
+        {filteredGames.map((game) => (
+          <Card key={game.id} className="hover:bg-muted/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => navigate(`/games/${game.id}`)}
+                >
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Date</p>
@@ -123,17 +181,23 @@ const GamesHistory = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => navigate(`/games/${game.id}`)}
+                >
+                  <Coins className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Buy-in</p>
                     <p className="text-sm text-muted-foreground">
-                      ${game.buy_in_amount.toFixed(2)}
+                      Rs. {formatIndianNumber(game.buy_in_amount)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => navigate(`/games/${game.id}`)}
+                >
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Players</p>
@@ -143,20 +207,57 @@ const GamesHistory = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => navigate(`/games/${game.id}`)}
+                >
+                  <Coins className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Total Pot</p>
+                    <p className="text-sm font-medium">Chips in play</p>
                     <p className="text-sm text-muted-foreground">
-                      ${game.total_pot.toFixed(2)}
+                      Rs. {formatIndianNumber(game.total_pot)}
                     </p>
                   </div>
+                </div>
+
+                <div className="flex items-center justify-end">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteGameId(game.id);
+                    }}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={!!deleteGameId} onOpenChange={() => setDeleteGameId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Game</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this game? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteGameId && handleDeleteGame(deleteGameId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
