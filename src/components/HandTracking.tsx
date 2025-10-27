@@ -24,7 +24,6 @@ import {
   isBettingRoundComplete,
   shouldEndHandEarly,
   getNextStage,
-  canPlayerCheck,
   getCallAmount,
   processAction,
   resetForNewStreet
@@ -258,10 +257,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       betSize = (game.big_blind || 100);
     } else if (actionType === 'Call') {
       betSize = currentBet;
-    } else if (actionType === 'Raise' || actionType === 'All-In') {
+    } else if (actionType === 'Raise') {
       betSize = parseFloat(betAmount) || currentBet;
-    } else if (actionType === 'Check') {
-      betSize = 0;
     }
 
     // Record action in database
@@ -313,26 +310,38 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (actionType === 'Fold') {
       if (stateUpdates.playersInHand) setPlayersInHand(stateUpdates.playersInHand);
       if (stateUpdates.activePlayers) {
-        setActivePlayers(stateUpdates.activePlayers);
+        const updatedActivePlayers = stateUpdates.activePlayers;
+        setActivePlayers(updatedActivePlayers);
         
-        // Check if only one player remains
-        const endCheck = shouldEndHandEarly(stateUpdates.activePlayers, stateUpdates.playersInHand || []);
+        // Check if only one player remains - hand ends immediately
+        const endCheck = shouldEndHandEarly(updatedActivePlayers, stateUpdates.playersInHand || []);
         if (endCheck.shouldEnd && endCheck.winnerId) {
           await finishHand([endCheck.winnerId]);
-          return;
+          return; // CRITICAL: Don't try to move to next player
         }
+        
+        // CRITICAL: Move to next player with updated activePlayers list
+        const nextIndex = getNextPlayerIndex(
+          currentPlayerIndex,
+          stage,
+          updatedActivePlayers,
+          buttonIndex,
+          stateUpdates.playersInHand || playersInHand
+        );
+        setCurrentPlayerIndex(nextIndex);
       }
+    } else {
+      // Non-fold actions: move to next player normally
+      const nextIndex = getNextPlayerIndex(
+        currentPlayerIndex,
+        stage,
+        activePlayers,
+        buttonIndex,
+        playersInHand
+      );
+      setCurrentPlayerIndex(nextIndex);
     }
-
-    // Move to next player using state machine logic
-    const nextIndex = getNextPlayerIndex(
-      currentPlayerIndex,
-      stage,
-      stateUpdates.activePlayers || activePlayers,
-      buttonIndex,
-      stateUpdates.playersInHand || playersInHand
-    );
-    setCurrentPlayerIndex(nextIndex);
+    
     setBetAmount('');
   };
 
@@ -575,11 +584,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       currentHand.button_player_id,
       lastAggressorIndex
     );
-  };
-
-  const canCheck = (): boolean => {
-    if (!currentPlayer) return false;
-    return canPlayerCheck(currentPlayer.player_id, currentBet, streetPlayerBets);
   };
 
   if (stage === 'setup') {
@@ -995,13 +999,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         {!canMoveToNextStreet() ? (
           <div className="grid grid-cols-2 gap-2">
             <Button 
-              onClick={() => recordAction('Check')} 
-              variant="outline"
-              disabled={!canCheck()}
-            >
-              Check
-            </Button>
-            <Button 
               onClick={() => recordAction('Call')} 
               variant="outline"
               disabled={currentBet === 0}
@@ -1013,12 +1010,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               variant="destructive"
             >
               Fold
-            </Button>
-            <Button 
-              onClick={() => recordAction('All-In')} 
-              variant="secondary"
-            >
-              All-In
             </Button>
           </div>
         ) : (

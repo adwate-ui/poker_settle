@@ -1,7 +1,7 @@
 import { GamePlayer, PlayerAction } from '@/types/poker';
 
 export type HandStage = 'setup' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'complete';
-export type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Check' | 'Call' | 'Raise' | 'Fold' | 'All-In';
+export type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Call' | 'Raise' | 'Fold';
 
 export interface HandState {
   stage: HandStage;
@@ -117,7 +117,7 @@ export const isBettingRoundComplete = (
     for (let i = streetActions.length - 1; i >= 0; i--) {
       const action = streetActions[i];
       if (action.player_id === aggressorPlayer.player_id && 
-          (action.action_type === 'Raise' || action.action_type === 'All-In' || 
+          (action.action_type === 'Raise' || 
            (action.action_type === 'Big Blind' && stage === 'preflop'))) {
         lastAggressiveActionIndex = i;
         break;
@@ -217,18 +217,6 @@ export const getNextStage = (currentStage: HandStage): HandStage => {
 };
 
 /**
- * Check if a player can check
- */
-export const canPlayerCheck = (
-  playerId: string,
-  currentBet: number,
-  streetPlayerBets: Record<string, number>
-): boolean => {
-  const playerBet = streetPlayerBets[playerId] || 0;
-  return currentBet === 0 || playerBet === currentBet;
-};
-
-/**
  * Calculate call amount for a player
  */
 export const getCallAmount = (
@@ -258,7 +246,7 @@ export const processAction = (
   // Calculate additional amount added to pot
   if (actionType === 'Call') {
     additionalAmount = state.currentBet - playerStreetBet;
-  } else if (actionType === 'Raise' || actionType === 'All-In') {
+  } else if (actionType === 'Raise') {
     additionalAmount = betSize - playerStreetBet;
   } else if (actionType === 'Small Blind' || actionType === 'Big Blind') {
     additionalAmount = betSize;
@@ -278,7 +266,7 @@ export const processAction = (
   };
 
   // Update current bet and track aggressor if raised
-  if (actionType === 'Raise' || actionType === 'All-In') {
+  if (actionType === 'Raise') {
     updates.currentBet = betSize;
     updates.lastAggressorIndex = state.currentPlayerIndex;
   }
