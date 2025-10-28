@@ -266,13 +266,17 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       return;
     }
 
-    // Only allow actions from players still in the hand
+    // If action is on a folded player, automatically advance to next remaining player
     if (!playersInHand.includes(currentPlayer.player_id)) {
-      toast({
-        title: 'Invalid Action',
-        description: 'This player has folded and cannot act',
-        variant: 'destructive',
-      });
+      const buttonIndex = activePlayers.findIndex(gp => gp.player_id === buttonPlayerId);
+      const nextIndex = getNextPlayerIndex(
+        currentPlayerIndex,
+        stage,
+        activePlayers,
+        buttonIndex,
+        playersInHand
+      );
+      setCurrentPlayerIndex(nextIndex);
       return;
     }
 
@@ -578,8 +582,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   };
 
   const autoSelectWinner = () => {
-    // Only check remaining players (activePlayers already filtered to exclude folded players)
-    const allRemainingPlayersHaveCards = activePlayers.every(p => playerHoleCards[p.player_id]);
+    // Filter to only remaining players (those who haven't folded)
+    const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
+    
+    // Check if all remaining players have hole cards entered
+    const allRemainingPlayersHaveCards = remainingPlayers.every(p => playerHoleCards[p.player_id]);
     
     if (!allRemainingPlayersHaveCards) {
       return null;
@@ -593,7 +600,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }
 
     // Only include remaining players (not folded)
-    const playersWithHoles = activePlayers.map(p => ({
+    const playersWithHoles = remainingPlayers.map(p => ({
       playerId: p.player_id,
       playerName: p.player.name,
       holeCards: playerHoleCards[p.player_id]
@@ -734,6 +741,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   }
 
   if (stage === 'showdown') {
+    // Filter to only remaining players (those who haven't folded)
+    const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
     const winnerResult = autoSelectWinner();
     
     return (
@@ -767,17 +776,17 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               Pot: {formatWithBB(potSize)}
             </div>
 
-            {/* Hole Cards Entry Section */}
+            {/* Hole Cards Entry Section - Only Remaining Players */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Player Hole Cards</h3>
+                <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
                 <p className="text-xs text-muted-foreground">
-                  {Object.keys(playerHoleCards).length}/{activePlayers.length} entered
+                  {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
                 </p>
               </div>
               
               <div className="space-y-2">
-                {activePlayers.map((gp) => (
+                {remainingPlayers.map((gp) => (
                   <div
                     key={gp.player_id}
                     className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -898,15 +907,15 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               </div>
             )}
 
-            {/* Manual Winner Selection (if auto-detection not possible) */}
+            {/* Manual Winner Selection (if auto-detection not possible) - Only Remaining Players */}
             {!winnerResult && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground text-center">
-                  {Object.keys(playerHoleCards).length === 0
+                  {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length === 0
                     ? 'Add hole cards for automatic winner detection, or select winner manually:'
-                    : 'Add all hole cards for automatic detection, or select winner manually:'}
+                    : 'Add all remaining players\' hole cards for automatic detection, or select winner manually:'}
                 </p>
-                {activePlayers.map((gp) => (
+                {remainingPlayers.map((gp) => (
                   <Button
                     key={gp.player_id}
                     onClick={() => finishHand([gp.player_id], 'showdown')}
@@ -932,7 +941,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             <DialogHeader>
               <DialogTitle>
                 Enter Hole Cards for{' '}
-                {activePlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name}
+                {remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name}
               </DialogTitle>
             </DialogHeader>
             <CardNotationInput
