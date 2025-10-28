@@ -113,6 +113,30 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     loadTablePositions();
   }, [game.id]);
 
+  // Auto-advance to next remaining player if current player has folded
+  useEffect(() => {
+    if (stage !== 'setup' && stage !== 'showdown' && activePlayers.length > 0 && currentHand) {
+      const currentPlayer = activePlayers[currentPlayerIndex];
+      
+      // If current player has folded, automatically advance to next remaining player
+      if (currentPlayer && !playersInHand.includes(currentPlayer.player_id)) {
+        const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
+        const nextIndex = getNextPlayerIndex(
+          currentPlayerIndex,
+          stage,
+          activePlayers,
+          buttonIndex,
+          playersInHand
+        );
+        
+        // Only update if we found a different player
+        if (nextIndex !== currentPlayerIndex) {
+          setCurrentPlayerIndex(nextIndex);
+        }
+      }
+    }
+  }, [currentPlayerIndex, activePlayers, playersInHand, stage, currentHand]);
+
   // Format amount with BB multiple
   const formatWithBB = (amount: number): string => {
     const bb = game.big_blind || 100;
@@ -263,20 +287,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       // Guard against out-of-bounds index after folds
       const safeIndex = Math.max(0, Math.min(currentPlayerIndex, activePlayers.length - 1));
       setCurrentPlayerIndex(safeIndex);
-      return;
-    }
-
-    // If action is on a folded player, automatically advance to next remaining player
-    if (!playersInHand.includes(currentPlayer.player_id)) {
-      const buttonIndex = activePlayers.findIndex(gp => gp.player_id === buttonPlayerId);
-      const nextIndex = getNextPlayerIndex(
-        currentPlayerIndex,
-        stage,
-        activePlayers,
-        buttonIndex,
-        playersInHand
-      );
-      setCurrentPlayerIndex(nextIndex);
       return;
     }
 
