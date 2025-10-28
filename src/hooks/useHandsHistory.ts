@@ -19,6 +19,8 @@ export interface HandFilters {
   result?: 'win' | 'loss' | 'all';
   showdown?: 'yes' | 'no' | 'all';
   finalStage?: string;
+  villainName?: string;
+  villainPosition?: string;
 }
 
 export const useHandsHistory = () => {
@@ -45,11 +47,14 @@ export const useHandsHistory = () => {
 
       if (handsError) throw handsError;
 
-      // Fetch actions for all hands
+      // Fetch actions for all hands with player names
       const handIds = handsData?.map(h => h.id) || [];
       const { data: actionsData, error: actionsError } = await supabase
         .from('player_actions')
-        .select('*')
+        .select(`
+          *,
+          player:players(name)
+        `)
         .in('hand_id', handIds);
 
       if (actionsError) throw actionsError;
@@ -137,6 +142,23 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => h.final_stage === filters.finalStage);
     }
 
+    if (filters.villainName) {
+      filtered = filtered.filter(h => {
+        // Check if any action in the hand is from the villain
+        return h.actions.some(action => {
+          const playerData = (action as any).player;
+          return playerData?.name === filters.villainName;
+        });
+      });
+    }
+
+    if (filters.villainPosition) {
+      filtered = filtered.filter(h => {
+        // Check if any action in the hand is from a player in the villain position
+        return h.actions.some(action => action.position === filters.villainPosition);
+      });
+    }
+
     setFilteredHands(filtered);
   };
 
@@ -170,6 +192,27 @@ export const useHandsHistory = () => {
     return Array.from(positions).sort();
   };
 
+  const getUniqueVillainNames = () => {
+    const names = new Set<string>();
+    hands.forEach(hand => {
+      hand.actions.forEach(action => {
+        const playerData = (action as any).player;
+        if (playerData?.name) names.add(playerData.name);
+      });
+    });
+    return Array.from(names).sort();
+  };
+
+  const getUniqueVillainPositions = () => {
+    const positions = new Set<string>();
+    hands.forEach(hand => {
+      hand.actions.forEach(action => {
+        if (action.position) positions.add(action.position);
+      });
+    });
+    return Array.from(positions).sort();
+  };
+
   const getStatistics = () => {
     const totalHands = filteredHands.length;
     const handsWon = filteredHands.filter(h => h.is_hero_win === true).length;
@@ -199,6 +242,8 @@ export const useHandsHistory = () => {
     clearFilters,
     getUniqueGames,
     getUniqueHeroPositions,
+    getUniqueVillainNames,
+    getUniqueVillainPositions,
     getStatistics,
     refetch: fetchHands,
   };

@@ -18,6 +18,8 @@ const HandsHistory = () => {
     clearFilters,
     getUniqueGames,
     getUniqueHeroPositions,
+    getUniqueVillainNames,
+    getUniqueVillainPositions,
     getStatistics,
   } = useHandsHistory();
 
@@ -27,6 +29,8 @@ const HandsHistory = () => {
   const stats = getStatistics();
   const uniqueGames = getUniqueGames();
   const uniquePositions = getUniqueHeroPositions();
+  const uniqueVillainNames = getUniqueVillainNames();
+  const uniqueVillainPositions = getUniqueVillainPositions();
 
   // Pagination
   const totalPages = Math.ceil(hands.length / handsPerPage);
@@ -134,7 +138,7 @@ const HandsHistory = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Hero Position</label>
               <Select
@@ -233,6 +237,46 @@ const HandsHistory = () => {
                   <SelectItem value="Turn">Turn</SelectItem>
                   <SelectItem value="River">River</SelectItem>
                   <SelectItem value="Showdown">Showdown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Villain Name</label>
+              <Select
+                value={filters.villainName || 'all'}
+                onValueChange={(value) =>
+                  updateFilters({ villainName: value === 'all' ? undefined : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Villains" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Villains</SelectItem>
+                  {uniqueVillainNames.map(name => (
+                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Villain Position</label>
+              <Select
+                value={filters.villainPosition || 'all'}
+                onValueChange={(value) =>
+                  updateFilters({ villainPosition: value === 'all' ? undefined : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Positions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Positions</SelectItem>
+                  {uniqueVillainPositions.map(pos => (
+                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

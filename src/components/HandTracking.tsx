@@ -68,6 +68,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [riverCard, setRiverCard] = useState('');
   const [potSize, setPotSize] = useState(0);
   const [streetActions, setStreetActions] = useState<PlayerAction[]>([]);
+  const [allHandActions, setAllHandActions] = useState<PlayerAction[]>([]); // Track all actions across all streets
   const [playersInHand, setPlayersInHand] = useState<string[]>([]);
   const [playerHoleCards, setPlayerHoleCards] = useState<Record<string, string>>({});
   const [showHoleCardInput, setShowHoleCardInput] = useState(false);
@@ -205,6 +206,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     };
     
     setStreetActions([sbAction, bbAction]);
+    setAllHandActions([sbAction, bbAction]); // Initialize all actions with blinds
     
     // Use state machine to get starting player (UTG for preflop)
     const startingIndex = getStartingPlayerIndex('preflop', active, buttonPlayerId);
@@ -311,6 +313,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       };
 
       setStreetActions(prev => [...prev, action]);
+      setAllHandActions(prev => [...prev, action]); // Add to all actions
 
       // Process action using state machine
       const stateUpdates = processAction(
@@ -349,7 +352,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         // Check if only one player remains - hand ends immediately
         const endCheck = shouldEndHandEarly(activePlayers, updatedPlayersInHand);
         if (endCheck.shouldEnd && endCheck.winnerId) {
-          await finishHand([endCheck.winnerId]);
+          await finishHand([endCheck.winnerId], stage); // Pass current stage for final_stage
           return; // Don't move to next player after finishing hand
         }
 
@@ -446,10 +449,16 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     }
   };
 
-  const finishHand = async (winnerIds: string[]) => {
+  const finishHand = async (winnerIds: string[], finalStageOverride?: HandStage) => {
     if (!currentHand) return;
 
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
+    
+    // Determine final stage: 
+    // - If finalStageOverride is provided (fold situation), use current stage
+    // - If multiple winners or stage is showdown, use 'Showdown'
+    // - Otherwise use current stage
+    const determinedFinalStage = finalStageOverride || (stage === 'showdown' || winnerIds.length > 1 ? 'showdown' : stage);
     
     // NOW save the hand to the database with all data
     const heroPosition = heroPlayer?.player_id 
@@ -472,8 +481,8 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       return;
     }
 
-    // Save all actions to database
-    for (const action of streetActions) {
+    // Save all actions to database (use allHandActions instead of streetActions)
+    for (const action of allHandActions) {
       await recordPlayerAction(
         savedHand.id,
         action.player_id,
@@ -501,7 +510,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     if (Object.keys(playerHoleCards).length > 0) {
       for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
         // Find the last action for this player
-        const playerActions = streetActions.filter(a => a.player_id === playerId);
+        const playerActions = allHandActions.filter(a => a.player_id === playerId);
         if (playerActions.length > 0) {
           const lastAction = playerActions[playerActions.length - 1];
           
@@ -515,6 +524,12 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         }
       }
     }
+
+    // Update final stage in database
+    await supabase
+      .from('poker_hands')
+      .update({ final_stage: determinedFinalStage === 'showdown' ? 'Showdown' : determinedFinalStage.charAt(0).toUpperCase() + determinedFinalStage.slice(1) })
+      .eq('id', savedHand.id);
 
     // Complete the hand with winner info
     await completeHand(savedHand.id, winnerIds, potSize, isHeroWin);
@@ -531,6 +546,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     setTurnCard('');
     setRiverCard('');
     setStreetActions([]);
+    setAllHandActions([]); // Reset all actions
     setPlayersInHand([]);
     setPlayerHoleCards({});
     setPlayerBets({});
@@ -862,7 +878,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                   )}
                   
                   <Button
-                    onClick={() => finishHand(winnerResult.winners.map(w => w.playerId))}
+                    onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
                     className="w-full bg-green-600 hover:bg-green-700"
                     size="lg"
                   >
@@ -883,7 +899,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                 {activePlayers.map((gp) => (
                   <Button
                     key={gp.player_id}
-                    onClick={() => finishHand([gp.player_id])}
+                    onClick={() => finishHand([gp.player_id], 'showdown')}
                     variant="outline"
                     className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
                   >
@@ -1003,18 +1019,19 @@ const HandTracking = ({ game }: HandTrackingProps) => {
           </div>
         )}
 
-        {/* Action history for current street */}
-        {streetActions.length > 0 && (
+        {/* Action history - ALL actions from all streets */}
+        {allHandActions.length > 0 && (
           <div className="bg-muted/50 rounded-lg p-3">
-            <div className="text-sm font-semibold mb-2">Street Actions:</div>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {streetActions.map((action, idx) => {
+            <div className="text-sm font-semibold mb-2">Action History:</div>
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              {allHandActions.map((action, idx) => {
                 const player = game.game_players.find(gp => gp.player_id === action.player_id);
                 const canDelete = stage !== 'preflop' || idx >= 2; // Can't delete blinds
                 
                 return (
                   <div key={idx} className="text-xs flex justify-between items-center gap-2">
                     <div className="flex items-center gap-1">
+                      <Badge variant="outline" className="text-[10px] px-1">{action.street_type}</Badge>
                       <span className="font-medium">{player?.player.name}</span>
                       {action.position && (
                         <span className="text-muted-foreground">({action.position})</span>
@@ -1025,7 +1042,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
                         {action.action_type}
                         {action.bet_size > 0 && ` ${formatWithBB(action.bet_size)}`}
                       </span>
-                      {canDelete && (
+                      {canDelete && action.id.startsWith('temp-action-') && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1076,7 +1093,6 @@ const HandTracking = ({ game }: HandTrackingProps) => {
             <Button 
               onClick={() => recordAction('Fold')} 
               variant="destructive"
-              disabled={currentBet === 0 && stage !== 'preflop'}
             >
               Fold
             </Button>
