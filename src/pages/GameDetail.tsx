@@ -406,21 +406,21 @@ const GameDetail = () => {
                   <TableHead className="font-bold text-left">
                     <Button
                       variant="ghost"
-                      onClick={() => handleSort("final_stack")}
-                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
-                    >
-                      Final Stack
-                      {getSortIcon("final_stack")}
-                    </Button>
-                  </TableHead>
-                  <TableHead className="font-bold text-left">
-                    <Button
-                      variant="ghost"
                       onClick={() => handleSort("net_amount")}
                       className="flex items-center gap-2 hover:text-primary font-bold justify-start"
                     >
                       Net P&L
                       {getSortIcon("net_amount")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="font-bold text-left">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("final_stack")}
+                      className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    >
+                      Final Stack
+                      {getSortIcon("final_stack")}
                     </Button>
                   </TableHead>
                 </TableRow>
@@ -444,9 +444,6 @@ const GameDetail = () => {
                         {gamePlayer.buy_ins}
                       </span>
                     </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground text-left">
-                      Rs. {formatIndianNumber(gamePlayer.final_stack)}
-                    </TableCell>
                     <TableCell className="text-left">
                       <span className={`px-3 py-1 rounded-full font-bold ${
                         isProfit 
@@ -455,6 +452,9 @@ const GameDetail = () => {
                       }`}>
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(gamePlayer.net_amount)}
                       </span>
+                    </TableCell>
+                    <TableCell className="font-semibold text-accent-foreground text-left">
+                      Rs. {formatIndianNumber(gamePlayer.final_stack)}
                     </TableCell>
                   </TableRow>
                 );

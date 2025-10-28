@@ -141,7 +141,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const formatWithBB = (amount: number): string => {
     const bb = game.big_blind || 100;
     const bbMultiple = (amount / bb).toFixed(1);
-    return `₹${amount.toLocaleString('en-IN')} (${bbMultiple} BB)`;
+    return `Rs. ${amount.toLocaleString('en-IN')} (${bbMultiple} BB)`;
   };
 
   const startNewHand = async () => {

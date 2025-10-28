@@ -98,7 +98,7 @@ const HandsHistory = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-poker-gold">
-              ₹{stats.totalPotWon.toLocaleString('en-IN')}
+              Rs. {stats.totalPotWon.toLocaleString('en-IN')}
             </div>
           </CardContent>
         </Card>
@@ -174,7 +174,7 @@ const HandsHistory = () => {
                   <SelectItem value="all">All Games</SelectItem>
                   {uniqueGames.map(game => (
                     <SelectItem key={game.id} value={game.id}>
-                      {formatDate(game.date)} - ₹{game.buy_in}
+                      {formatDate(game.date)} - Rs. {game.buy_in}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -358,7 +358,7 @@ const HandsHistory = () => {
                             )}
                             <div className="text-right">
                               <div className="text-lg font-bold text-poker-gold">
-                                ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
+                                Rs. {hand.pot_size?.toLocaleString('en-IN') || 0}
                               </div>
                               <div className="text-xs text-muted-foreground">Pot</div>
                             </div>
