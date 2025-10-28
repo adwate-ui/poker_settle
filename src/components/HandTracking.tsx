@@ -454,11 +454,19 @@ const HandTracking = ({ game }: HandTrackingProps) => {
 
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
     
-    // Determine final stage: 
-    // - If finalStageOverride is provided (fold situation), use current stage
-    // - If multiple winners or stage is showdown, use 'Showdown'
-    // - Otherwise use current stage
-    const determinedFinalStage = finalStageOverride || (stage === 'showdown' || winnerIds.length > 1 ? 'showdown' : stage);
+    // Determine final stage based on when winner was decided:
+    // - If winner decided at Preflop/Flop/Turn/River (fold), use that street
+    // - If winner decided at Showdown, use 'Showdown'
+    let finalStageValue: string;
+    if (finalStageOverride === 'showdown') {
+      finalStageValue = 'Showdown';
+    } else if (finalStageOverride) {
+      // Winner decided at a specific street (fold scenario)
+      finalStageValue = finalStageOverride.charAt(0).toUpperCase() + finalStageOverride.slice(1);
+    } else {
+      // Fallback (shouldn't happen, but handle it)
+      finalStageValue = stage === 'showdown' ? 'Showdown' : stage.charAt(0).toUpperCase() + stage.slice(1);
+    }
     
     // NOW save the hand to the database with all data
     const heroPosition = heroPlayer?.player_id 
@@ -528,7 +536,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     // Update final stage in database
     await supabase
       .from('poker_hands')
-      .update({ final_stage: determinedFinalStage === 'showdown' ? 'Showdown' : determinedFinalStage.charAt(0).toUpperCase() + determinedFinalStage.slice(1) })
+      .update({ final_stage: finalStageValue })
       .eq('id', savedHand.id);
 
     // Complete the hand with winner info
