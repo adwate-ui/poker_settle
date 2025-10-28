@@ -142,19 +142,26 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => h.final_stage === filters.finalStage);
     }
 
-    if (filters.villainName) {
+    // Handle villain filters - if both name and position are set, check for both together
+    if (filters.villainName && filters.villainPosition) {
       filtered = filtered.filter(h => {
-        // Check if any action in the hand is from the villain
+        // Check if any action has both the villain name AND position
+        return h.actions.some(action => {
+          const playerData = (action as any).player;
+          return playerData?.name === filters.villainName && action.position === filters.villainPosition;
+        });
+      });
+    } else if (filters.villainName) {
+      filtered = filtered.filter(h => {
+        // Check if any action in the hand is from the villain (any position)
         return h.actions.some(action => {
           const playerData = (action as any).player;
           return playerData?.name === filters.villainName;
         });
       });
-    }
-
-    if (filters.villainPosition) {
+    } else if (filters.villainPosition) {
       filtered = filtered.filter(h => {
-        // Check if any action in the hand is from a player in the villain position
+        // Check if any action in the hand is from a player in the villain position (any player)
         return h.actions.some(action => action.position === filters.villainPosition);
       });
     }

@@ -319,47 +319,68 @@ const HandsHistory = () => {
                     onClick={() => navigate(`/hands/${hand.id}`)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold">Hand #{hand.hand_number}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {hand.hero_position}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {hand.final_stage}
-                            </Badge>
-                            {hand.is_hero_win === true && (
-                              <Badge className="bg-green-600 text-xs">
-                                <Trophy className="h-3 w-3 mr-1" />
-                                Won
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold">Hand #{hand.hand_number}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {hand.hero_position}
                               </Badge>
-                            )}
-                            {hand.is_hero_win === false && (
-                              <Badge variant="destructive" className="text-xs">
-                                Lost
+                              <Badge variant="outline" className="text-xs">
+                                {hand.final_stage}
                               </Badge>
-                            )}
+                              {hand.is_hero_win === true && (
+                                <Badge className="bg-green-600 text-xs">
+                                  <Trophy className="h-3 w-3 mr-1" />
+                                  Won
+                                </Badge>
+                              )}
+                              {hand.is_hero_win === false && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Lost
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatDate(hand.game_date)} • Button: {hand.button_player_name}
+                              {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatDate(hand.game_date)} • Button: {hand.button_player_name}
-                            {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
+
+                          <div className="flex items-center gap-4">
+                            {communityCards && (
+                              <div className="hidden md:flex gap-1">
+                                {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                                  <PokerCard key={idx} card={card} size="sm" />
+                                ))}
+                              </div>
+                            )}
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-poker-gold">
+                                ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Pot</div>
+                            </div>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-4">
-                          {communityCards && (
-                            <div className="hidden md:flex gap-1">
-                              {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="sm" />
-                              ))}
-                            </div>
-                          )}
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-poker-gold">
-                              ₹{hand.pot_size?.toLocaleString('en-IN') || 0}
-                            </div>
-                            <div className="text-xs text-muted-foreground">Pot</div>
+                        
+                        {/* Players in Hand */}
+                        <div className="pt-2 border-t">
+                          <p className="text-xs text-muted-foreground mb-2">Players in Hand:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {Array.from(new Map(
+                              hand.actions
+                                .filter(a => (a as any).player?.name && a.position)
+                                .map(a => [
+                                  (a as any).player.name,
+                                  { name: (a as any).player.name, position: a.position }
+                                ])
+                            ).values()).map((player, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {player.name} ({player.position})
+                              </Badge>
+                            ))}
                           </div>
                         </div>
                       </div>
