@@ -7,6 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2, ArrowLeft, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PokerCard from '@/components/PokerCard';
+import CardNotationInput from '@/components/CardNotationInput';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useHandTracking } from '@/hooks/useHandTracking';
 
 interface HandDetail {
   id: string;
@@ -31,6 +34,7 @@ interface HandDetail {
     is_hero: boolean;
     position: string | null;
     player_id: string;
+    hole_cards: string | null;
   }>;
   street_cards: Array<{
     street_type: string;
@@ -44,6 +48,9 @@ const HandDetail = () => {
   const navigate = useNavigate();
   const [hand, setHand] = useState<HandDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showHoleCardInput, setShowHoleCardInput] = useState(false);
+  const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<{ playerId: string; actionId: string } | null>(null);
+  const { updateHoleCards } = useHandTracking();
 
   useEffect(() => {
     fetchHandDetail();
@@ -142,6 +149,50 @@ const HandDetail = () => {
       month: 'short',
       year: 'numeric',
     });
+  };
+
+  const handleHoleCardSubmit = async (cards: string) => {
+    if (!selectedPlayerForHole) return;
+    
+    const success = await updateHoleCards(selectedPlayerForHole.actionId, cards);
+    if (success) {
+      setShowHoleCardInput(false);
+      setSelectedPlayerForHole(null);
+      // Refresh hand data
+      fetchHandDetail();
+    }
+  };
+
+  // Get unique players who participated in the hand
+  const getPlayersInHand = () => {
+    const playerMap = new Map<string, { 
+      playerId: string; 
+      playerName: string; 
+      isHero: boolean; 
+      holeCards: string | null;
+      actionId: string;
+    }>();
+    
+    hand?.actions.forEach(action => {
+      if (!playerMap.has(action.player_id)) {
+        playerMap.set(action.player_id, {
+          playerId: action.player_id,
+          playerName: hand.player_names[action.player_id] || 'Unknown',
+          isHero: action.is_hero,
+          holeCards: action.hole_cards,
+          actionId: action.id,
+        });
+      } else {
+        // Update if this action has hole cards and current doesn't
+        const current = playerMap.get(action.player_id)!;
+        if (action.hole_cards && !current.holeCards) {
+          current.holeCards = action.hole_cards;
+          current.actionId = action.id;
+        }
+      }
+    });
+    
+    return Array.from(playerMap.values());
   };
 
   if (loading) {
@@ -255,6 +306,59 @@ const HandDetail = () => {
             </>
           )}
 
+          {/* Hole Cards Section */}
+          <div>
+            <h3 className="font-semibold mb-3">Hole Cards</h3>
+            <div className="space-y-2">
+              {getPlayersInHand().map((player) => (
+                <div
+                  key={player.playerId}
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{player.playerName}</span>
+                    {player.isHero && (
+                      <Badge variant="secondary" className="text-xs">Hero</Badge>
+                    )}
+                  </div>
+                  
+                  {player.holeCards ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
+                          <PokerCard key={idx} card={card} size="sm" />
+                        ))}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
+                          setShowHoleCardInput(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
+                        setShowHoleCardInput(true);
+                      }}
+                    >
+                      Add Hole Cards
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Action History */}
           <div>
             <h3 className="font-semibold mb-3">Action History</h3>
@@ -308,6 +412,24 @@ const HandDetail = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Hole Card Input Dialog */}
+      <Dialog open={showHoleCardInput} onOpenChange={setShowHoleCardInput}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Enter Hole Cards for{' '}
+              {selectedPlayerForHole && hand?.player_names[selectedPlayerForHole.playerId]}
+            </DialogTitle>
+          </DialogHeader>
+          <CardNotationInput
+            label="Hole Cards"
+            expectedCards={2}
+            onSubmit={handleHoleCardSubmit}
+            placeholder="AhKd"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

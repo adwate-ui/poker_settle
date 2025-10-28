@@ -218,6 +218,34 @@ export const useHandTracking = () => {
     }
   };
 
+  const updateHoleCards = async (
+    actionId: string,
+    holeCards: string
+  ): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('player_actions')
+        .update({ hole_cards: holeCards })
+        .eq('id', actionId);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Hole Cards Updated',
+        description: 'Player hole cards have been saved',
+      });
+      
+      return true;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   return {
     loading,
     createNewHand,
@@ -228,5 +256,6 @@ export const useHandTracking = () => {
     updateHandStage,
     completeHand,
     getHandActions,
+    updateHoleCards,
   };
 };

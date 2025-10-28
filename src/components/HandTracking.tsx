@@ -567,6 +567,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       if (!validateCardUniqueness(cards)) {
         return;
       }
+      // Update hole cards - this will trigger auto-calculation on re-render if in showdown
       setPlayerHoleCards(prev => ({
         ...prev,
         [selectedPlayerForHole]: cards
@@ -577,10 +578,10 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   };
 
   const autoSelectWinner = () => {
-    // Check if all active players have hole cards
-    const allHaveHoleCards = activePlayers.every(p => playerHoleCards[p.player_id]);
+    // Only check remaining players (activePlayers already filtered to exclude folded players)
+    const allRemainingPlayersHaveCards = activePlayers.every(p => playerHoleCards[p.player_id]);
     
-    if (!allHaveHoleCards) {
+    if (!allRemainingPlayersHaveCards) {
       return null;
     }
 
@@ -591,6 +592,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
       return null;
     }
 
+    // Only include remaining players (not folded)
     const playersWithHoles = activePlayers.map(p => ({
       playerId: p.player_id,
       playerName: p.player.name,
