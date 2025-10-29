@@ -24,6 +24,7 @@ interface HandDetail {
   game_id: string;
   button_player_id: string;
   button_player_name: string;
+  winner_player_id: string | null;
   winner_player_name: string | null;
   winner_player_names: string[];
   game_date: string;
@@ -170,6 +171,7 @@ const HandDetail = () => {
         ...handData,
         button_player_id: handData.button_player_id,
         button_player_name: buttonPlayer?.name || 'Unknown',
+        winner_player_id: handData.winner_player_id,
         winner_player_name: winnerPlayerName,
         winner_player_names: [],
         game_date: handData.games.date,
@@ -346,6 +348,8 @@ const HandDetail = () => {
                 buttonPlayerId={hand.button_player_id}
                 seatPositions={seatPositions}
                 initialPot={hand.big_blind + (hand.big_blind / 2)}
+                winnerPlayerId={hand.winner_player_id || undefined}
+                winnerPlayerName={hand.winner_player_name || undefined}
               />
             </TabsContent>
             

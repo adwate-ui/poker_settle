@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, RotateCcw, Trophy } from 'lucide-react';
 import PokerTableView from './PokerTableView';
 import { SeatPosition } from '@/types/poker';
 import PokerCard from './PokerCard';
@@ -14,6 +14,7 @@ interface HandAction {
   action_sequence: number;
   player_id: string;
   position: string | null;
+  hole_cards?: string | null;
 }
 
 interface StreetCard {
@@ -28,6 +29,8 @@ interface HandReplayProps {
   buttonPlayerId: string;
   seatPositions: Record<string, number>;
   initialPot: number;
+  winnerPlayerId?: string;
+  winnerPlayerName?: string;
 }
 
 const HandReplay = ({
@@ -37,6 +40,8 @@ const HandReplay = ({
   buttonPlayerId,
   seatPositions,
   initialPot,
+  winnerPlayerId,
+  winnerPlayerName,
 }: HandReplayProps) => {
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -46,6 +51,16 @@ const HandReplay = ({
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
   const [animateChipsToPot, setAnimateChipsToPot] = useState(false);
+  const [showHoleCards, setShowHoleCards] = useState(false);
+  const [showWinner, setShowWinner] = useState(false);
+  
+  // Extract hole cards from actions
+  const playerHoleCards: Record<string, string> = {};
+  actions.forEach(action => {
+    if (action.hole_cards && !playerHoleCards[action.player_id]) {
+      playerHoleCards[action.player_id] = action.hole_cards;
+    }
+  });
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -65,9 +80,7 @@ const HandReplay = ({
       const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
       
       if (skipAnimation) {
-        // Move all street bets to pot immediately
-        const streetTotal = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
-        setPotSize(prev => prev + streetTotal);
+        // Clear street bets display when moving to new street (already added to pot during actions)
         setStreetPlayerBets({});
         setCurrentStreet(action.street_type as any);
         
@@ -89,8 +102,7 @@ const HandReplay = ({
         // Animate chips moving to pot
         setAnimateChipsToPot(true);
         setTimeout(() => {
-          const streetTotal = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
-          setPotSize(prev => prev + streetTotal);
+          // Clear street bets display (already added to pot during actions)
           setStreetPlayerBets({});
           setCurrentStreet(action.street_type as any);
           
@@ -114,12 +126,19 @@ const HandReplay = ({
       }
     }
 
-    // Update player bet for current street
+    // Update player bet for current street and pot size
     if (action.bet_size > 0) {
+      const currentPlayerBet = streetPlayerBets[action.player_id] || 0;
+      const additionalBet = action.bet_size - currentPlayerBet;
+      
+      // Update street player bets for display
       setStreetPlayerBets(prev => ({
         ...prev,
         [action.player_id]: action.bet_size,
       }));
+      
+      // Add only the additional bet to pot (not the full bet_size if player already has chips on table)
+      setPotSize(prev => prev + additionalBet);
     }
 
     // Handle fold - remove player's chips and add to folded list
@@ -137,12 +156,24 @@ const HandReplay = ({
   useEffect(() => {
     if (!isPlaying || currentActionIndex >= actions.length) {
       setIsPlaying(false);
+      // Check if we should show winner at the end
+      if (currentActionIndex >= actions.length && winnerPlayerId && !showWinner) {
+        setShowHoleCards(true);
+        setTimeout(() => setShowWinner(true), 1000);
+      }
       return;
     }
 
     const timer = setTimeout(() => {
       processAction(currentActionIndex);
-      setCurrentActionIndex(prev => prev + 1);
+      setCurrentActionIndex(prev => {
+        const nextIndex = prev + 1;
+        // Show hole cards when reaching showdown (river completed)
+        if (nextIndex >= actions.length - 1) {
+          setShowHoleCards(true);
+        }
+        return nextIndex;
+      });
     }, 1500); // 1.5 seconds between actions
 
     return () => clearTimeout(timer);
@@ -159,7 +190,18 @@ const HandReplay = ({
   const handleStepForward = () => {
     if (currentActionIndex < actions.length) {
       processAction(currentActionIndex);
-      setCurrentActionIndex(prev => prev + 1);
+      setCurrentActionIndex(prev => {
+        const nextIndex = prev + 1;
+        // Show hole cards when reaching showdown (river completed)
+        if (nextIndex >= actions.length - 1) {
+          setShowHoleCards(true);
+        }
+        // Show winner at the very end
+        if (nextIndex >= actions.length && winnerPlayerId) {
+          setTimeout(() => setShowWinner(true), 500);
+        }
+        return nextIndex;
+      });
     }
   };
 
@@ -193,6 +235,8 @@ const HandReplay = ({
     setCommunityCards('');
     setFoldedPlayers([]);
     setAnimateChipsToPot(false);
+    setShowHoleCards(false);
+    setShowWinner(false);
   };
 
   const getCurrentAction = () => {
@@ -225,6 +269,8 @@ const HandReplay = ({
         showPositionLabels={true}
         foldedPlayers={foldedPlayers}
         animateChipsToPot={animateChipsToPot}
+        playerHoleCards={showHoleCards ? playerHoleCards : undefined}
+        animateChipsToWinner={showWinner ? winnerPlayerId : null}
       />
 
       {/* Current Action Display */}
@@ -289,6 +335,25 @@ const HandReplay = ({
           <SkipForward className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Winner Declaration */}
+      {showWinner && winnerPlayerName && (
+        <Card className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-500 animate-fade-in">
+          <CardContent className="p-6 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <Trophy className="h-8 w-8 text-amber-500" />
+              <div>
+                <div className="text-2xl font-bold text-amber-500">Winner!</div>
+                <div className="text-lg">{winnerPlayerName}</div>
+                <div className="text-sm text-muted-foreground">
+                  Pot: Rs. {potSize.toLocaleString('en-IN')}
+                </div>
+              </div>
+              <Trophy className="h-8 w-8 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Progress Indicator */}
       <div className="text-center text-sm text-muted-foreground">

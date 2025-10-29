@@ -15,6 +15,7 @@ interface PokerTableViewProps {
   foldedPlayers?: string[];
   animateChipsToPot?: boolean;
   animateChipsToWinner?: string | null;
+  playerHoleCards?: Record<string, string>;
 }
 
 const PokerTableView = ({ 
@@ -29,7 +30,8 @@ const PokerTableView = ({
   showPositionLabels = false,
   foldedPlayers = [],
   animateChipsToPot = false,
-  animateChipsToWinner = null
+  animateChipsToWinner = null,
+  playerHoleCards = {}
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -229,6 +231,43 @@ const PokerTableView = ({
                       {position.player_name}
                     </span>
                   </div>
+                  
+                  {/* Hole cards during showdown */}
+                  {playerHoleCards[position.player_id] && (
+                    <div className="flex gap-0.5 mt-1 animate-fade-in">
+                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                        <div key={idx} className="w-8 h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
+                          <span className={`font-bold ${card[1] === 'h' || card[1] === 'd' ? 'text-red-600' : 'text-black'}`}>
+                            {card[0]}
+                          </span>
+                          <span className={card[1] === 'h' || card[1] === 'd' ? 'text-red-600' : 'text-black'}>
+                            {card[1] === 'h' ? '♥' : card[1] === 'd' ? '♦' : card[1] === 's' ? '♠' : '♣'}
+                          </span>
+                        </div>
+                      )) || (
+                        // Show card backs if hole cards not known
+                        <>
+                          <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                            <div className="text-white text-xs">🂠</div>
+                          </div>
+                          <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                            <div className="text-white text-xs">🂠</div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {/* Show card backs for players without known hole cards during showdown */}
+                  {Object.keys(playerHoleCards).length > 0 && !playerHoleCards[position.player_id] && !isFolded && (
+                    <div className="flex gap-0.5 mt-1 animate-fade-in">
+                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                        <div className="text-white text-xs font-bold">?</div>
+                      </div>
+                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                        <div className="text-white text-xs font-bold">?</div>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Chips display */}
                   {playerBet > 0 && !isFolded && (
