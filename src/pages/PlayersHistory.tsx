@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type SortField = "name" | "total_games" | "total_profit" | "avg_per_game";
+type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
 
 const PlayersHistory = () => {
@@ -112,10 +112,6 @@ const PlayersHistory = () => {
           aVal = a.total_profit || 0;
           bVal = b.total_profit || 0;
           break;
-        case "avg_per_game":
-          aVal = a.total_games > 0 ? (a.total_profit || 0) / a.total_games : 0;
-          bVal = b.total_games > 0 ? (b.total_profit || 0) / b.total_games : 0;
-          break;
       }
       
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
@@ -181,7 +177,7 @@ const PlayersHistory = () => {
 
       <div className="space-y-2 sm:space-y-3">
         <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-          <div className="grid grid-cols-5 gap-4 font-bold text-sm">
+          <div className="grid grid-cols-4 gap-4 font-bold text-sm">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
@@ -206,22 +202,11 @@ const PlayersHistory = () => {
               Net P&L
               {getSortIcon("total_profit")}
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => handleSort("avg_per_game")}
-              className="flex items-center gap-2 justify-start font-bold"
-            >
-              Avg Per Game
-              {getSortIcon("avg_per_game")}
-            </Button>
             <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
           </div>
         </div>
 
         {sortedPlayers.map((player, index) => {
-          const avgPerGame = player.total_games > 0 
-            ? (player.total_profit || 0) / player.total_games 
-            : 0;
           const isProfit = (player.total_profit || 0) >= 0;
           const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`;
 
@@ -270,13 +255,7 @@ const PlayersHistory = () => {
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Avg Per Game</p>
-                      <Badge variant={avgPerGame >= 0 ? "success" : "destructive"}>
-                        {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(Math.round(avgPerGame)))}
-                      </Badge>
-                    </div>
-                    <div>
+                    <div className="col-span-2">
                       <p className="text-xs text-muted-foreground">Status</p>
                       {isProfit ? (
                         <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
@@ -294,7 +273,7 @@ const PlayersHistory = () => {
                 </div>
 
                 {/* Desktop Layout */}
-                <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
+                <div className="hidden md:grid grid-cols-4 gap-4 items-center text-sm">
                   <div 
                     className="flex items-center gap-3"
                     onClick={() => navigate(`/players/${player.id}`)}
@@ -320,14 +299,6 @@ const PlayersHistory = () => {
                   >
                     <Badge variant={isProfit ? "success" : "destructive"}>
                       {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
-                    </Badge>
-                  </div>
-                  
-                  <div 
-                    onClick={() => navigate(`/players/${player.id}`)}
-                  >
-                    <Badge variant={avgPerGame >= 0 ? "success" : "destructive"}>
-                      {avgPerGame >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(Math.round(avgPerGame)))}
                     </Badge>
                   </div>
                   
