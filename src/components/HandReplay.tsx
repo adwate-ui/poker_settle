@@ -55,44 +55,71 @@ const HandReplay = ({
   })).sort((a, b) => a.seat - b.seat);
 
   // Process action and update state
-  const processAction = (actionIndex: number) => {
+  const processAction = (actionIndex: number, skipAnimation: boolean = false) => {
     if (actionIndex >= actions.length) return;
 
     const action = actions[actionIndex];
     
     // Check if street changed
     if (action.street_type !== currentStreet) {
-      // Animate chips moving to pot
-      setAnimateChipsToPot(true);
-      setTimeout(() => {
-        // Reset street bets when moving to new street
+      const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
+      
+      if (skipAnimation) {
+        // Move all street bets to pot immediately
+        const streetTotal = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
+        setPotSize(prev => prev + streetTotal);
         setStreetPlayerBets({});
         setCurrentStreet(action.street_type as any);
         
-        // Add community cards for the new street (only if not already added)
-        const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
-        if (streetCard && !communityCards.includes(streetCard.cards_notation)) {
-          setCommunityCards(prev => prev + streetCard.cards_notation);
+        // Add community cards for the new street (check if cards from this street are already shown)
+        if (streetCard) {
+          const streetCardsList: string[] = streetCard.cards_notation.match(/.{1,2}/g) || [];
+          const existingCardsList: string[] = communityCards.match(/.{1,2}/g) || [];
+          const hasAllCards = streetCardsList.every(card => existingCardsList.includes(card));
+          
+          if (!hasAllCards) {
+            setCommunityCards(prev => {
+              const prevCards: string[] = prev.match(/.{1,2}/g) || [];
+              const newCards = streetCardsList.filter(card => !prevCards.includes(card));
+              return prev + newCards.join('');
+            });
+          }
         }
-        setAnimateChipsToPot(false);
-      }, 500);
-      return; // Wait for animation to complete
+      } else {
+        // Animate chips moving to pot
+        setAnimateChipsToPot(true);
+        setTimeout(() => {
+          const streetTotal = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
+          setPotSize(prev => prev + streetTotal);
+          setStreetPlayerBets({});
+          setCurrentStreet(action.street_type as any);
+          
+          // Add community cards for the new street
+          if (streetCard) {
+            const streetCardsList: string[] = streetCard.cards_notation.match(/.{1,2}/g) || [];
+            const existingCardsList: string[] = communityCards.match(/.{1,2}/g) || [];
+            const hasAllCards = streetCardsList.every(card => existingCardsList.includes(card));
+            
+            if (!hasAllCards) {
+              setCommunityCards(prev => {
+                const prevCards: string[] = prev.match(/.{1,2}/g) || [];
+                const newCards = streetCardsList.filter(card => !prevCards.includes(card));
+                return prev + newCards.join('');
+              });
+            }
+          }
+          setAnimateChipsToPot(false);
+        }, 500);
+        return; // Wait for animation to complete
+      }
     }
 
     // Update player bet for current street
-    if (action.bet_size > 0 && !['Small Blind', 'Big Blind'].includes(action.action_type)) {
+    if (action.bet_size > 0) {
       setStreetPlayerBets(prev => ({
         ...prev,
         [action.player_id]: action.bet_size,
       }));
-    }
-
-    // Update pot (bet_size already includes the full bet amount)
-    if (action.bet_size > 0) {
-      setPotSize(prev => {
-        const currentPlayerBet = streetPlayerBets[action.player_id] || 0;
-        return prev + (action.bet_size - currentPlayerBet);
-      });
     }
 
     // Handle fold - remove player's chips and add to folded list
@@ -139,11 +166,21 @@ const HandReplay = ({
   const handleStepBack = () => {
     if (currentActionIndex > 0) {
       // Reset and replay up to previous action
-      handleReset();
-      for (let i = 0; i < currentActionIndex - 1; i++) {
-        processAction(i);
+      const targetIndex = currentActionIndex - 1;
+      setCurrentActionIndex(0);
+      setIsPlaying(false);
+      setCurrentStreet('Preflop');
+      setPotSize(initialPot);
+      setStreetPlayerBets({});
+      setCommunityCards('');
+      setFoldedPlayers([]);
+      setAnimateChipsToPot(false);
+      
+      // Replay actions without animation
+      for (let i = 0; i < targetIndex; i++) {
+        processAction(i, true);
       }
-      setCurrentActionIndex(currentActionIndex - 1);
+      setCurrentActionIndex(targetIndex);
     }
   };
 
