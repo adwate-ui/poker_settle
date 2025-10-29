@@ -11,7 +11,8 @@ export const useHandTracking = () => {
     gameId: string,
     buttonPlayerId: string,
     handNumber: number,
-    heroPosition: string
+    heroPosition: string,
+    positions?: any
   ): Promise<PokerHand | null> => {
     try {
       setLoading(true);
@@ -24,6 +25,7 @@ export const useHandTracking = () => {
           hero_position: heroPosition,
           final_stage: 'Preflop',
           pot_size: 0,
+          positions: positions || [],
         })
         .select()
         .single();

@@ -128,17 +128,19 @@ const HandReplay = ({
     }
 
     // Update player bet for current street and pot size
+    const currentPlayerBet = streetPlayerBets[action.player_id] || 0;
+    const additionalBet = action.bet_size - currentPlayerBet;
+    
+    // Update street player bets for display
     if (action.bet_size > 0) {
-      const currentPlayerBet = streetPlayerBets[action.player_id] || 0;
-      const additionalBet = action.bet_size - currentPlayerBet;
-      
-      // Update street player bets for display
       setStreetPlayerBets(prev => ({
         ...prev,
         [action.player_id]: action.bet_size,
       }));
-      
-      // Add only the additional bet to pot (not the full bet_size if player already has chips on table)
+    }
+    
+    // Add the additional bet to pot (even for river)
+    if (additionalBet > 0) {
       setPotSize(prev => prev + additionalBet);
     }
 

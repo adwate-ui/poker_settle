@@ -109,7 +109,7 @@ const PokerTableView = ({
   };
 
   return (
-    <div className="relative w-full aspect-square max-w-md mx-auto">
+    <div className="relative w-full aspect-square max-w-2xl mx-auto scale-[2]">
       {/* Poker Table */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full h-full">
@@ -304,11 +304,17 @@ const PokerTableView = ({
                     </div>
                   )}
                   
-                  {/* Chips display */}
+                  {/* Chips display - positioned towards table center */}
                   {playerBet > 0 && !isFolded && (
-                    <div className={`relative transition-all duration-500 ${
-                      animateChipsToPot ? 'opacity-0 scale-50 translate-y-[-100px]' : 'opacity-100 scale-100'
-                    }`}>
+                    <div 
+                      className={`absolute transition-all duration-500 ${
+                        animateChipsToPot ? 'opacity-0 scale-50 translate-y-[-100px]' : 'opacity-100 scale-100'
+                      }`}
+                      style={{
+                        top: pos.y > 50 ? '-60px' : '80px',
+                        left: pos.x > 50 ? '-60px' : '60px',
+                      }}
+                    >
                       {/* Poker chip stack */}
                       <div className="relative flex flex-col items-center">
                         {/* Chip SVG */}

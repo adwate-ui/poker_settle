@@ -498,11 +498,19 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
       ? getPositionForPlayer(activePlayers, currentHand.button_player_id, heroPlayer.player_id, seatPositions)
       : 'UTG';
 
+    // Prepare positions data
+    const positionsData = activePlayers.map(gp => ({
+      seat: seatPositions[gp.player_id] ?? 0,
+      player_id: gp.player_id,
+      player_name: gp.player.name,
+    }));
+
     const savedHand = await createNewHand(
       game.id, 
       currentHand.button_player_id, 
       currentHand.hand_number, 
-      heroPosition
+      heroPosition,
+      positionsData
     );
     
     if (!savedHand) {
@@ -734,11 +742,12 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
     
     return (
       <>
+        {/* Merged: Table positions with Start Hand in same card */}
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Play className="h-5 w-5" />
-              Start New Hand
+              Current Table Positions - Start Hand
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -1078,22 +1087,8 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
               potSize={potSize}
               showPositionLabels={true}
               foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
-              communityCards=""
+              communityCards={(flopCards || '') + (turnCard || '') + (riverCard || '')}
             />
-          </div>
-        )}
-
-        {/* Show existing community cards */}
-        {(flopCards || turnCard || riverCard) && (
-          <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
-            <div className="text-sm font-semibold text-white mb-2">Board:</div>
-            <div className="flex gap-2 justify-center flex-wrap">
-              {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                <PokerCard key={`flop-${idx}`} card={card} size="md" />
-              ))}
-              {turnCard && <PokerCard card={turnCard} size="md" />}
-              {riverCard && <PokerCard card={riverCard} size="md" />}
-            </div>
           </div>
         )}
 

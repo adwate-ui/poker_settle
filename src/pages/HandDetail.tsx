@@ -66,29 +66,18 @@ const HandDetail = () => {
     if (!handId) return;
     
     try {
-      // First get the game_id from the hand
+      // Get positions directly from the hand record
       const { data: handData, error: handError } = await supabase
         .from('poker_hands')
-        .select('game_id')
+        .select('positions')
         .eq('id', handId)
         .single();
       
       if (handError) throw handError;
       
-      // Then get table positions for this game
-      const { data, error } = await supabase
-        .from('table_positions')
-        .select('*')
-        .eq('game_id', handData.game_id)
-        .order('snapshot_timestamp', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (error) throw error;
-      
-      if (data && data.positions) {
+      if (handData && handData.positions) {
         const positions: Record<string, number> = {};
-        (data.positions as any[]).forEach((pos: any) => {
+        (handData.positions as any[]).forEach((pos: any) => {
           positions[pos.player_id] = pos.seat;
         });
         setSeatPositions(positions);
@@ -322,12 +311,13 @@ const HandDetail = () => {
                   Rs. {hand.pot_size?.toLocaleString('en-IN') || 0} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
-              {hand.winner_player_name && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Winner:</span>
-                  <span className="font-semibold">{hand.winner_player_name}</span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Winner:</span>
+                <span className="font-semibold flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  {hand.winner_player_name}
+                </span>
+              </div>
             </div>
           </div>
 
