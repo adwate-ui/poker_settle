@@ -50,7 +50,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       }
     };
     loadTablePosition();
-  }, [game.id, getCurrentTablePosition]);
+  }, [game.id]);
 
   const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
     try {
@@ -331,7 +331,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
           <Card className="bg-card border-border">
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <UsersIcon className="w-5 h-5" />
+                Current Table Positions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
               <div className="flex gap-2 mt-4">
                 <Button

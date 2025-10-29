@@ -746,7 +746,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     return (
       <>
         <Card className="mt-6">
-          <CardContent className="pt-6 space-y-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              Start Hand
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-4">
             {/* Interactive Poker Table */}
             <PokerTableView
               positions={game.game_players.map(gp => ({
