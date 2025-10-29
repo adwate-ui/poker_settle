@@ -41,9 +41,10 @@ import {
 interface HandTrackingProps {
   game: Game;
   positionsJustChanged?: boolean;
+  onHandComplete?: () => void;
 }
 
-const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps) => {
+const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const {
@@ -590,6 +591,11 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
     setPlayerBets({});
     setStreetPlayerBets({});
     setLastAggressorIndex(null);
+
+    // Call the onHandComplete callback if provided
+    if (onHandComplete) {
+      onHandComplete();
+    }
   };
 
   const handleHoleCardSubmit = (cards: string) => {

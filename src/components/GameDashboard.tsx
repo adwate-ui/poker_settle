@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon } from "lucide-react";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
 import { useGameData } from "@/hooks/useGameData";
@@ -35,12 +35,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [showPositionEditor, setShowPositionEditor] = useState(false);
   const [currentTablePosition, setCurrentTablePosition] = useState<TablePosition | null>(null);
   const [positionsJustChanged, setPositionsJustChanged] = useState(false);
+  const [handTrackingStage, setHandTrackingStage] = useState<'setup' | 'ready' | 'recording'>('setup');
   const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition } = useGameData();
   
   useEffect(() => {
     const loadTablePosition = async () => {
       const position = await getCurrentTablePosition(game.id);
       setCurrentTablePosition(position);
+      // Set initial stage based on whether table is set
+      if (position && position.positions.length > 0) {
+        setHandTrackingStage('ready');
+      } else {
+        setHandTrackingStage('setup');
+      }
     };
     loadTablePosition();
   }, [game.id, getCurrentTablePosition]);
@@ -228,6 +235,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setCurrentTablePosition(savedPosition);
       setShowPositionEditor(false);
       setPositionsJustChanged(true);
+      setHandTrackingStage('ready'); // Move to ready state after table is set
       toast.success("Table position saved");
       
       // Reset flag after 2 seconds
@@ -235,6 +243,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to save table position");
     }
+  };
+
+  const handleStartHandTracking = () => {
+    setHandTrackingStage('recording');
+  };
+
+  const handleHandComplete = () => {
+    setHandTrackingStage('ready');
   };
 
   const formatCurrency = (amount: number) => {
@@ -305,7 +321,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </CardContent>
         </Card>
 
-        {/* Table Position Section */}
+        {/* Unified Table Position & Hand Tracking Section */}
         {showPositionEditor ? (
           <TablePositionEditor
             players={gamePlayers.map(gp => gp.player)}
@@ -313,7 +329,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             onSave={handleSaveTablePosition}
             onCancel={() => setShowPositionEditor(false)}
           />
-        ) : currentTablePosition && currentTablePosition.positions.length > 0 ? (
+        ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-poker-gold flex items-center justify-between">
@@ -321,22 +337,35 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   <UsersIcon className="w-5 h-5" />
                   Current Table Positions
                 </div>
-                <Button
-                  onClick={() => setShowPositionEditor(true)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Change Positions
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowPositionEditor(true)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Change Positions
+                  </Button>
+                  <Button
+                    onClick={handleStartHandTracking}
+                    className="bg-primary hover:bg-primary/90"
+                    size="sm"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Start Hand
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3 text-center">
-                Click "Change Positions" to edit the table layout
-              </p>
               <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
             </CardContent>
           </Card>
+        ) : handTrackingStage === 'recording' ? (
+          <HandTracking 
+            game={game} 
+            positionsJustChanged={positionsJustChanged}
+            onHandComplete={handleHandComplete}
+          />
         ) : (
           <Card className="bg-card border-border">
             <CardContent className="pt-6">
@@ -353,9 +382,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CardContent>
           </Card>
         )}
-
-        {/* Hand Tracking Section */}
-        <HandTracking game={game} positionsJustChanged={positionsJustChanged} />
 
         <div className="space-y-4">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
