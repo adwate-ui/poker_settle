@@ -34,6 +34,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [newTransferAmount, setNewTransferAmount] = useState('');
   const [showPositionEditor, setShowPositionEditor] = useState(false);
   const [currentTablePosition, setCurrentTablePosition] = useState<TablePosition | null>(null);
+  const [positionsJustChanged, setPositionsJustChanged] = useState(false);
   const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition } = useGameData();
   
   useEffect(() => {
@@ -226,7 +227,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       const savedPosition = await saveTablePosition(game.id, positions);
       setCurrentTablePosition(savedPosition);
       setShowPositionEditor(false);
+      setPositionsJustChanged(true);
       toast.success("Table position saved");
+      
+      // Reset flag after 2 seconds
+      setTimeout(() => setPositionsJustChanged(false), 2000);
     } catch (error) {
       toast.error("Failed to save table position");
     }
@@ -350,7 +355,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         )}
 
         {/* Hand Tracking Section */}
-        <HandTracking game={game} />
+        <HandTracking game={game} positionsJustChanged={positionsJustChanged} />
 
         <div className="space-y-4">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">

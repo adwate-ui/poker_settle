@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PokerHand, PlayerAction, StreetCard } from '@/types/poker';
 import { useToast } from '@/hooks/use-toast';
+import { HoleCardFilterType, matchesHoleCardFilter } from '@/utils/holeCardFilter';
 
 export interface HandWithDetails extends PokerHand {
   button_player_name: string;
@@ -21,6 +22,8 @@ export interface HandFilters {
   finalStage?: string;
   villainName?: string;
   villainPosition?: string;
+  heroHoleCards?: HoleCardFilterType;
+  villainHoleCards?: HoleCardFilterType;
 }
 
 export const useHandsHistory = () => {
@@ -163,6 +166,39 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => {
         // Check if any action in the hand is from a player in the villain position (any player)
         return h.actions.some(action => action.position === filters.villainPosition);
+      });
+    }
+
+    // Filter by hero hole cards (Hero = Adwate)
+    if (filters.heroHoleCards && filters.heroHoleCards !== 'all') {
+      filtered = filtered.filter(h => {
+        // Find hero's hole cards (player named Adwate)
+        const heroAction = h.actions.find(action => {
+          const playerData = (action as any).player;
+          return playerData?.name?.toLowerCase() === 'adwate' && action.hole_cards;
+        });
+        return heroAction?.hole_cards && matchesHoleCardFilter(heroAction.hole_cards, filters.heroHoleCards!);
+      });
+    }
+
+    // Filter by villain hole cards (anyone except Adwate, optionally filtered by villain name)
+    if (filters.villainHoleCards && filters.villainHoleCards !== 'all') {
+      filtered = filtered.filter(h => {
+        // If villain name is specified, check only that villain's hole cards
+        if (filters.villainName) {
+          const villainAction = h.actions.find(action => {
+            const playerData = (action as any).player;
+            return playerData?.name === filters.villainName && action.hole_cards;
+          });
+          return villainAction?.hole_cards && matchesHoleCardFilter(villainAction.hole_cards, filters.villainHoleCards!);
+        } else {
+          // Check if any non-Adwate player matches the filter
+          return h.actions.some(action => {
+            const playerData = (action as any).player;
+            const isNotHero = playerData?.name?.toLowerCase() !== 'adwate';
+            return isNotHero && action.hole_cards && matchesHoleCardFilter(action.hole_cards, filters.villainHoleCards!);
+          });
+        }
       });
     }
 

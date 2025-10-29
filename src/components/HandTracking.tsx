@@ -40,9 +40,10 @@ import {
 
 interface HandTrackingProps {
   game: Game;
+  positionsJustChanged?: boolean;
 }
 
-const HandTracking = ({ game }: HandTrackingProps) => {
+const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const {
@@ -79,6 +80,9 @@ const HandTracking = ({ game }: HandTrackingProps) => {
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
   const [lastAggressorIndex, setLastAggressorIndex] = useState<number | null>(null);
+  const [positionsChanged, setPositionsChanged] = useState(false);
+  const [showPlayerActionDialog, setShowPlayerActionDialog] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -114,6 +118,11 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     
     loadTablePositions();
   }, [game.id]);
+
+  // Track if positions just changed
+  useEffect(() => {
+    setPositionsChanged(positionsJustChanged);
+  }, [positionsJustChanged]);
 
   // Auto-advance to next remaining player if current player has folded
   useEffect(() => {
@@ -697,58 +706,128 @@ const HandTracking = ({ game }: HandTrackingProps) => {
     );
   };
 
+  const handlePlayerClick = (playerId: string) => {
+    if (stage === 'setup') {
+      setSelectedPlayerId(playerId);
+      setShowPlayerActionDialog(true);
+    }
+  };
+
+  const handleSetAsButton = () => {
+    setButtonPlayerId(selectedPlayerId);
+    setShowPlayerActionDialog(false);
+    setSelectedPlayerId('');
+  };
+
+  const handleToggleDealtOut = () => {
+    if (dealtOutPlayers.includes(selectedPlayerId)) {
+      setDealtOutPlayers(dealtOutPlayers.filter(id => id !== selectedPlayerId));
+    } else {
+      setDealtOutPlayers([...dealtOutPlayers, selectedPlayerId]);
+    }
+    setShowPlayerActionDialog(false);
+    setSelectedPlayerId('');
+  };
+
   if (stage === 'setup') {
+    const selectedPlayer = selectedPlayerId ? game.game_players.find(gp => gp.player_id === selectedPlayerId) : null;
+    
     return (
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5" />
-            Start New Hand
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Player on Button</Label>
-            <Select value={buttonPlayerId} onValueChange={setButtonPlayerId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select button player" />
-              </SelectTrigger>
-              <SelectContent>
-                {game.game_players.map((gp) => (
-                  <SelectItem key={gp.player_id} value={gp.player_id}>
-                    {gp.player.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label>Dealt Out Players</Label>
-            <div className="space-y-2 mt-2">
-              {game.game_players.map((gp) => (
-                <div key={gp.player_id} className="flex items-center gap-2">
-                  <Checkbox
-                    checked={dealtOutPlayers.includes(gp.player_id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setDealtOutPlayers([...dealtOutPlayers, gp.player_id]);
-                      } else {
-                        setDealtOutPlayers(dealtOutPlayers.filter(id => id !== gp.player_id));
-                      }
-                    }}
-                  />
-                  <span>{gp.player.name}</span>
-                </div>
-              ))}
+      <>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              Start New Hand
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center text-sm text-muted-foreground mb-2">
+              Click on a player to set them as button or mark as dealt out
             </div>
-          </div>
+            
+            {/* Interactive Poker Table */}
+            <PokerTableView
+              positions={game.game_players.map(gp => ({
+                seat: seatPositions[gp.player_id] ?? 0,
+                player_id: gp.player_id,
+                player_name: gp.player.name,
+              }))}
+              buttonPlayerId={buttonPlayerId}
+              seatPositions={seatPositions}
+              foldedPlayers={dealtOutPlayers}
+              onPlayerClick={handlePlayerClick}
+              communityCards=""
+            />
 
-          <Button onClick={startNewHand} disabled={!buttonPlayerId || loading} className="w-full">
-            Start Hand
-          </Button>
-        </CardContent>
-      </Card>
+            {/* Status Display */}
+            <div className="space-y-2">
+              {buttonPlayerId && (
+                <div className="flex items-center justify-between p-2 bg-primary/10 rounded">
+                  <span className="text-sm font-medium">Button:</span>
+                  <span className="text-sm">{game.game_players.find(gp => gp.player_id === buttonPlayerId)?.player.name}</span>
+                </div>
+              )}
+              {dealtOutPlayers.length > 0 && (
+                <div className="p-2 bg-muted rounded">
+                  <span className="text-sm font-medium">Dealt Out: </span>
+                  <span className="text-sm">
+                    {dealtOutPlayers.map(pid => 
+                      game.game_players.find(gp => gp.player_id === pid)?.player.name
+                    ).join(', ')}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <Button 
+              onClick={startNewHand} 
+              disabled={!buttonPlayerId || loading || positionsChanged} 
+              className="w-full"
+            >
+              {positionsChanged 
+                ? 'Positions changed - record a hand with new positions to enable' 
+                : buttonPlayerId 
+                  ? 'Start Hand' 
+                  : 'Select button player first'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Player Action Dialog */}
+        <Dialog open={showPlayerActionDialog} onOpenChange={setShowPlayerActionDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {selectedPlayer?.player.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 pt-4">
+              <Button 
+                onClick={handleSetAsButton} 
+                className="w-full"
+                variant={buttonPlayerId === selectedPlayerId ? "default" : "outline"}
+              >
+                {buttonPlayerId === selectedPlayerId ? '✓ Is Button' : 'Set as Button'}
+              </Button>
+              <Button 
+                onClick={handleToggleDealtOut} 
+                className="w-full"
+                variant={dealtOutPlayers.includes(selectedPlayerId) ? "default" : "outline"}
+              >
+                {dealtOutPlayers.includes(selectedPlayerId) ? '✓ Dealt Out' : 'Mark as Dealt Out'}
+              </Button>
+              <Button 
+                onClick={() => setShowPlayerActionDialog(false)} 
+                className="w-full"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
 import PokerCard from '@/components/PokerCard';
+import { HOLE_CARD_FILTER_OPTIONS } from '@/utils/holeCardFilter';
 
 const HandsHistory = () => {
   const navigate = useNavigate();
@@ -138,7 +139,7 @@ const HandsHistory = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Hero Position</label>
               <Select
@@ -276,6 +277,48 @@ const HandsHistory = () => {
                   <SelectItem value="all">All Positions</SelectItem>
                   {uniqueVillainPositions.map(pos => (
                     <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Hero's Hole Cards (Adwate)</label>
+              <Select
+                value={filters.heroHoleCards || 'all'}
+                onValueChange={(value) =>
+                  updateFilters({ heroHoleCards: value === 'all' ? undefined : value as any })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Cards" />
+                </SelectTrigger>
+                <SelectContent>
+                  {HOLE_CARD_FILTER_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Villain's Hole Cards</label>
+              <Select
+                value={filters.villainHoleCards || 'all'}
+                onValueChange={(value) =>
+                  updateFilters({ villainHoleCards: value === 'all' ? undefined : value as any })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Cards" />
+                </SelectTrigger>
+                <SelectContent>
+                  {HOLE_CARD_FILTER_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
