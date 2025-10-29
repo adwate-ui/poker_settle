@@ -198,6 +198,7 @@ export type Database = {
           hero_position: string | null
           id: string
           is_hero_win: boolean | null
+          is_split: boolean | null
           positions: Json | null
           pot_size: number | null
           updated_at: string
@@ -213,6 +214,7 @@ export type Database = {
           hero_position?: string | null
           id?: string
           is_hero_win?: boolean | null
+          is_split?: boolean | null
           positions?: Json | null
           pot_size?: number | null
           updated_at?: string
@@ -228,6 +230,7 @@ export type Database = {
           hero_position?: string | null
           id?: string
           is_hero_win?: boolean | null
+          is_split?: boolean | null
           positions?: Json | null
           pot_size?: number | null
           updated_at?: string

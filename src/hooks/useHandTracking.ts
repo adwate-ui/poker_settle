@@ -178,11 +178,14 @@ export const useHandTracking = () => {
     finalStage?: string
   ): Promise<void> => {
     try {
+      const isSplit = winnerPlayerIds.length > 1;
+      
       const updateData: any = {
         winner_player_id: winnerPlayerIds[0] || null,
         winner_player_ids: winnerPlayerIds,
         pot_size: potSize,
         is_hero_win: isHeroWin,
+        is_split: isSplit,
       };
       
       // Only update final_stage if provided

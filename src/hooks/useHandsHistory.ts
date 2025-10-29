@@ -12,12 +12,13 @@ export interface HandWithDetails extends PokerHand {
   game_buy_in: number;
   actions: PlayerAction[];
   street_cards: StreetCard[];
+  is_split?: boolean;
 }
 
 export interface HandFilters {
   heroPosition?: string;
   gameId?: string;
-  result?: 'win' | 'loss' | 'all';
+  result?: 'win' | 'loss' | 'split' | 'all';
   showdown?: 'yes' | 'no' | 'all';
   finalStage?: string;
   villainName?: string;
@@ -82,6 +83,7 @@ export const useHandsHistory = () => {
         winner_player_ids: hand.winner_player_ids || [],
         hero_position: hand.hero_position,
         is_hero_win: hand.is_hero_win,
+        is_split: hand.is_split || false,
         created_at: hand.created_at,
         updated_at: hand.updated_at,
         button_player_name: hand.button_player?.name || 'Unknown',
@@ -127,9 +129,11 @@ export const useHandsHistory = () => {
 
     if (filters.result && filters.result !== 'all') {
       if (filters.result === 'win') {
-        filtered = filtered.filter(h => h.is_hero_win === true);
+        filtered = filtered.filter(h => h.is_hero_win === true && !h.is_split);
       } else if (filters.result === 'loss') {
-        filtered = filtered.filter(h => h.is_hero_win === false);
+        filtered = filtered.filter(h => h.is_hero_win === false && !h.is_split);
+      } else if (filters.result === 'split') {
+        filtered = filtered.filter(h => h.is_split === true);
       }
     }
 

@@ -197,6 +197,7 @@ const HandsHistory = () => {
                   <SelectItem value="all">All Results</SelectItem>
                   <SelectItem value="win">Wins</SelectItem>
                   <SelectItem value="loss">Losses</SelectItem>
+                  <SelectItem value="split">Split Pots</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -373,17 +374,20 @@ const HandsHistory = () => {
                               <Badge variant="outline" className="text-xs">
                                 {hand.final_stage}
                               </Badge>
-                              {hand.is_hero_win === true && (
+                              {hand.is_split ? (
+                                <Badge className="bg-yellow-600 text-xs">
+                                  Split
+                                </Badge>
+                              ) : hand.is_hero_win === true ? (
                                 <Badge className="bg-green-600 text-xs">
                                   <Trophy className="h-3 w-3 mr-1" />
                                   Won
                                 </Badge>
-                              )}
-                              {hand.is_hero_win === false && (
+                              ) : hand.is_hero_win === false ? (
                                 <Badge variant="destructive" className="text-xs">
                                   Lost
                                 </Badge>
-                              )}
+                              ) : null}
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {formatDate(hand.game_date)} • Button: {hand.button_player_name}
