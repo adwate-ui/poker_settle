@@ -42,8 +42,8 @@ const PokerTableView = ({
   const getPlayerPosition = (index: number) => {
     const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
     const radians = (angle * Math.PI) / 180;
-    const radiusX = 42; // Horizontal radius
-    const radiusY = 35; // Vertical radius (smaller for more rectangular)
+    const radiusX = 44; // Horizontal radius
+    const radiusY = 32; // Vertical radius (smaller for more rectangular, like real poker table)
     
     return {
       x: 50 + radiusX * Math.cos(radians),
@@ -113,8 +113,8 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="47"
-              ry="30"
+              rx="48"
+              ry="28"
               className="fill-[#2C1810] stroke-[#8B4513]"
               strokeWidth="1"
             />
@@ -122,8 +122,8 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="44"
-              ry="27"
+              rx="46"
+              ry="26"
               className="fill-[#4A2511] stroke-[#654321]"
               strokeWidth="0.5"
             />
@@ -131,7 +131,7 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="40"
+              rx="43"
               ry="23"
               className="fill-[#0D5D2A] stroke-[#0A4821]"
               strokeWidth="1.5"
@@ -140,7 +140,7 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="37"
+              rx="40"
               ry="20"
               className="fill-[#0F6B32]/30"
             />
@@ -148,7 +148,7 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="35"
+              rx="38"
               ry="18"
               className="stroke-[#0A4821]/20 fill-none"
               strokeWidth="0.3"
@@ -233,23 +233,51 @@ const PokerTableView = ({
                   {/* Chips display */}
                   {playerBet > 0 && !isFolded && (
                     <div className={`relative transition-all duration-500 ${
-                      animateChipsToPot ? 'opacity-0 scale-50' : 'opacity-100 scale-100'
+                      animateChipsToPot ? 'opacity-0 scale-50 translate-y-[-100px]' : 'opacity-100 scale-100'
                     }`}>
-                      {/* Chip stack visualization */}
-                      <div className="relative">
-                        {/* Stacked chips effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-full blur-sm opacity-50 transform translate-y-0.5" />
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-full blur-sm opacity-50 transform translate-y-1" />
-                        <div className="relative bg-gradient-to-br from-red-600 to-red-800 text-white px-3 py-1.5 rounded-full shadow-xl border-2 border-red-400">
-                          <div className="flex items-center gap-1.5">
-                            {/* Chip icon */}
-                            <div className="w-4 h-4 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
-                              <div className="w-2 h-2 rounded-full bg-red-400" />
-                            </div>
-                            <span className="text-xs font-bold whitespace-nowrap">
-                              Rs. {playerBet.toLocaleString('en-IN')}
-                            </span>
-                          </div>
+                      {/* Poker chip stack */}
+                      <div className="relative flex flex-col items-center">
+                        {/* Chip SVG */}
+                        <svg width="48" height="48" viewBox="0 0 48 48" className="drop-shadow-lg">
+                          {/* Shadow chips for stack effect */}
+                          <circle cx="24" cy="26" r="18" fill="#C41E3A" opacity="0.5"/>
+                          <circle cx="24" cy="25" r="18" fill="#C41E3A" opacity="0.7"/>
+                          
+                          {/* Main chip */}
+                          <circle cx="24" cy="24" r="20" fill="#E63946"/>
+                          <circle cx="24" cy="24" r="20" fill="url(#chipGradient)" opacity="0.6"/>
+                          <circle cx="24" cy="24" r="18" fill="none" stroke="white" strokeWidth="1.5"/>
+                          <circle cx="24" cy="24" r="15" fill="none" stroke="white" strokeWidth="0.5" opacity="0.5"/>
+                          
+                          {/* Chip segments */}
+                          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+                            <rect
+                              key={angle}
+                              x="22"
+                              y="5"
+                              width="4"
+                              height="6"
+                              fill="white"
+                              transform={`rotate(${angle} 24 24)`}
+                              rx="1"
+                            />
+                          ))}
+                          
+                          {/* Center circle */}
+                          <circle cx="24" cy="24" r="8" fill="#FFF" opacity="0.3"/>
+                          
+                          <defs>
+                            <radialGradient id="chipGradient">
+                              <stop offset="0%" stopColor="white" stopOpacity="0.4"/>
+                              <stop offset="70%" stopColor="white" stopOpacity="0"/>
+                              <stop offset="100%" stopColor="black" stopOpacity="0.3"/>
+                            </radialGradient>
+                          </defs>
+                        </svg>
+                        
+                        {/* Bet amount */}
+                        <div className="absolute -bottom-5 bg-black/80 text-white px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap shadow-lg">
+                          Rs. {playerBet.toLocaleString('en-IN')}
                         </div>
                       </div>
                     </div>

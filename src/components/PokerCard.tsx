@@ -26,35 +26,53 @@ const PokerCard = ({ card, size = 'md' }: PokerCardProps) => {
   };
 
   const sizes = {
-    sm: 'w-12 h-16 text-sm',
-    md: 'w-16 h-24 text-base',
-    lg: 'w-20 h-28 text-lg',
+    sm: 'w-14 h-20 text-sm',
+    md: 'w-20 h-28 text-base',
+    lg: 'w-24 h-36 text-lg',
   };
 
   const rankSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-3xl',
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-2xl',
   };
 
   const suitSizes = {
-    sm: 'text-xl',
-    md: 'text-3xl',
-    lg: 'text-4xl',
+    sm: 'text-2xl',
+    md: 'text-4xl',
+    lg: 'text-5xl',
   };
 
   return (
     <div
-      className={`${sizes[size]} bg-white dark:bg-gray-100 rounded-lg shadow-lg border-2 border-gray-300 flex flex-col items-center justify-between p-2 relative`}
+      className={`${sizes[size]} bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col p-1.5 relative overflow-hidden`}
+      style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+      }}
     >
-      <div className={`${rankSizes[size]} font-bold ${suitColors[suit]} leading-none`}>
-        {rank}
+      {/* Corner rank and suit (top-left) */}
+      <div className="absolute top-1 left-1 flex flex-col items-center leading-none">
+        <div className={`${rankSizes[size]} font-bold ${suitColors[suit]}`}>
+          {rank}
+        </div>
+        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '0.8rem' : size === 'md' ? '1rem' : '1.2rem' }}>
+          {suitSymbols[suit]}
+        </div>
       </div>
-      <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none`}>
+      
+      {/* Center suit symbol */}
+      <div className={`flex-1 flex items-center justify-center ${suitSizes[size]} ${suitColors[suit]} leading-none`}>
         {suitSymbols[suit]}
       </div>
-      <div className={`${rankSizes[size]} font-bold ${suitColors[suit]} leading-none`}>
-        {rank}
+      
+      {/* Corner rank and suit (bottom-right, rotated) */}
+      <div className="absolute bottom-1 right-1 flex flex-col items-center leading-none rotate-180">
+        <div className={`${rankSizes[size]} font-bold ${suitColors[suit]}`}>
+          {rank}
+        </div>
+        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '0.8rem' : size === 'md' ? '1rem' : '1.2rem' }}>
+          {suitSymbols[suit]}
+        </div>
       </div>
     </div>
   );

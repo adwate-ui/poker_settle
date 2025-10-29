@@ -69,9 +69,9 @@ const HandReplay = ({
         setStreetPlayerBets({});
         setCurrentStreet(action.street_type as any);
         
-        // Add community cards for the new street
+        // Add community cards for the new street (only if not already added)
         const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
-        if (streetCard) {
+        if (streetCard && !communityCards.includes(streetCard.cards_notation)) {
           setCommunityCards(prev => prev + streetCard.cards_notation);
         }
         setAnimateChipsToPot(false);
@@ -172,7 +172,7 @@ const HandReplay = ({
         <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6">
           <div className="flex gap-2 justify-center flex-wrap">
             {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-              <PokerCard key={idx} card={card} size="lg" />
+              <PokerCard key={`${card}-${idx}`} card={card} size="md" />
             ))}
           </div>
         </div>
