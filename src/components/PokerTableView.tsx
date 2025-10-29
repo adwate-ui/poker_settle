@@ -12,6 +12,9 @@ interface PokerTableViewProps {
   playerBets?: Record<string, number>;
   potSize?: number;
   showPositionLabels?: boolean;
+  foldedPlayers?: string[];
+  animateChipsToPot?: boolean;
+  animateChipsToWinner?: string | null;
 }
 
 const PokerTableView = ({ 
@@ -23,7 +26,10 @@ const PokerTableView = ({
   seatPositions = {},
   playerBets = {},
   potSize = 0,
-  showPositionLabels = false
+  showPositionLabels = false,
+  foldedPlayers = [],
+  animateChipsToPot = false,
+  animateChipsToWinner = null
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -36,11 +42,12 @@ const PokerTableView = ({
   const getPlayerPosition = (index: number) => {
     const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
     const radians = (angle * Math.PI) / 180;
-    const radius = 40; // Percentage from center
+    const radiusX = 42; // Horizontal radius
+    const radiusY = 35; // Vertical radius (smaller for more rectangular)
     
     return {
-      x: 50 + radius * Math.cos(radians),
-      y: 50 + radius * Math.sin(radians),
+      x: 50 + radiusX * Math.cos(radians),
+      y: 50 + radiusY * Math.sin(radians),
     };
   };
 
@@ -106,8 +113,8 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="45"
-              ry="35"
+              rx="47"
+              ry="30"
               className="fill-[#2C1810] stroke-[#8B4513]"
               strokeWidth="1"
             />
@@ -115,8 +122,8 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="42"
-              ry="32"
+              rx="44"
+              ry="27"
               className="fill-[#4A2511] stroke-[#654321]"
               strokeWidth="0.5"
             />
@@ -124,8 +131,8 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="38"
-              ry="28"
+              rx="40"
+              ry="23"
               className="fill-[#0D5D2A] stroke-[#0A4821]"
               strokeWidth="1.5"
             />
@@ -133,16 +140,16 @@ const PokerTableView = ({
             <ellipse
               cx="50"
               cy="50"
-              rx="35"
-              ry="25"
+              rx="37"
+              ry="20"
               className="fill-[#0F6B32]/30"
             />
             {/* Table texture lines */}
             <ellipse
               cx="50"
               cy="50"
-              rx="33"
-              ry="23"
+              rx="35"
+              ry="18"
               className="stroke-[#0A4821]/20 fill-none"
               strokeWidth="0.3"
             />
@@ -150,7 +157,9 @@ const PokerTableView = ({
 
           {/* Pot display in center */}
           {potSize > 0 && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ${
+              animateChipsToPot ? 'scale-110' : 'scale-100'
+            }`}>
               <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-4 py-2 rounded-lg shadow-xl border-2 border-amber-400">
                 <div className="text-xs font-semibold text-amber-100">POT</div>
                 <div className="text-sm font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
@@ -166,6 +175,8 @@ const PokerTableView = ({
             const positionLabel = getPositionLabel(position.player_id);
             const playerBet = playerBets[position.player_id] || 0;
             const isButton = buttonPlayerId === position.player_id;
+            const isFolded = foldedPlayers.includes(position.player_id);
+            const isWinner = animateChipsToWinner === position.player_id;
             
             return (
               <div
@@ -175,9 +186,11 @@ const PokerTableView = ({
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all ${
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
                   enableDragDrop ? 'cursor-move' : ''
-                } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''}`}
+                } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
+                  isFolded ? 'opacity-40 grayscale' : ''
+                } ${isWinner ? 'animate-pulse' : ''}`}
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
@@ -218,9 +231,27 @@ const PokerTableView = ({
                   </div>
                   
                   {/* Chips display */}
-                  {playerBet > 0 && (
-                    <div className="bg-gradient-to-br from-red-600 to-red-800 text-white px-2 py-1 rounded-full shadow-lg border-2 border-red-400 animate-scale-in">
-                      <span className="text-xs font-bold">Rs. {playerBet.toLocaleString('en-IN')}</span>
+                  {playerBet > 0 && !isFolded && (
+                    <div className={`relative transition-all duration-500 ${
+                      animateChipsToPot ? 'opacity-0 scale-50' : 'opacity-100 scale-100'
+                    }`}>
+                      {/* Chip stack visualization */}
+                      <div className="relative">
+                        {/* Stacked chips effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-full blur-sm opacity-50 transform translate-y-0.5" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-full blur-sm opacity-50 transform translate-y-1" />
+                        <div className="relative bg-gradient-to-br from-red-600 to-red-800 text-white px-3 py-1.5 rounded-full shadow-xl border-2 border-red-400">
+                          <div className="flex items-center gap-1.5">
+                            {/* Chip icon */}
+                            <div className="w-4 h-4 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-red-400" />
+                            </div>
+                            <span className="text-xs font-bold whitespace-nowrap">
+                              Rs. {playerBet.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

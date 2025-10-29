@@ -998,6 +998,7 @@ const HandTracking = ({ game }: HandTrackingProps) => {
               playerBets={streetPlayerBets}
               potSize={potSize}
               showPositionLabels={true}
+              foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
             />
           </div>
         )}

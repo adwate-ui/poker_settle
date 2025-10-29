@@ -44,6 +44,8 @@ const HandReplay = ({
   const [potSize, setPotSize] = useState(initialPot);
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [communityCards, setCommunityCards] = useState<string>('');
+  const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
+  const [animateChipsToPot, setAnimateChipsToPot] = useState(false);
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -60,15 +62,21 @@ const HandReplay = ({
     
     // Check if street changed
     if (action.street_type !== currentStreet) {
-      // Reset street bets when moving to new street
-      setStreetPlayerBets({});
-      setCurrentStreet(action.street_type as any);
-      
-      // Add community cards for the new street
-      const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
-      if (streetCard) {
-        setCommunityCards(prev => prev + streetCard.cards_notation);
-      }
+      // Animate chips moving to pot
+      setAnimateChipsToPot(true);
+      setTimeout(() => {
+        // Reset street bets when moving to new street
+        setStreetPlayerBets({});
+        setCurrentStreet(action.street_type as any);
+        
+        // Add community cards for the new street
+        const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
+        if (streetCard) {
+          setCommunityCards(prev => prev + streetCard.cards_notation);
+        }
+        setAnimateChipsToPot(false);
+      }, 500);
+      return; // Wait for animation to complete
     }
 
     // Update player bet for current street
@@ -87,8 +95,9 @@ const HandReplay = ({
       });
     }
 
-    // Handle fold - remove player's chips
+    // Handle fold - remove player's chips and add to folded list
     if (action.action_type === 'Fold') {
+      setFoldedPlayers(prev => [...prev, action.player_id]);
       setStreetPlayerBets(prev => {
         const newBets = { ...prev };
         delete newBets[action.player_id];
@@ -145,6 +154,8 @@ const HandReplay = ({
     setPotSize(initialPot);
     setStreetPlayerBets({});
     setCommunityCards('');
+    setFoldedPlayers([]);
+    setAnimateChipsToPot(false);
   };
 
   const getCurrentAction = () => {
@@ -175,6 +186,8 @@ const HandReplay = ({
         playerBets={streetPlayerBets}
         potSize={potSize}
         showPositionLabels={true}
+        foldedPlayers={foldedPlayers}
+        animateChipsToPot={animateChipsToPot}
       />
 
       {/* Current Action Display */}
