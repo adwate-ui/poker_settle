@@ -16,6 +16,8 @@ interface PokerTableViewProps {
   animateChipsToPot?: boolean;
   animateChipsToWinner?: string | null;
   playerHoleCards?: Record<string, string>;
+  communityCards?: string;
+  onPlayerClick?: (playerId: string) => void;
 }
 
 const PokerTableView = ({ 
@@ -31,7 +33,9 @@ const PokerTableView = ({
   foldedPlayers = [],
   animateChipsToPot = false,
   animateChipsToWinner = null,
-  playerHoleCards = {}
+  playerHoleCards = {},
+  communityCards = '',
+  onPlayerClick
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -109,65 +113,98 @@ const PokerTableView = ({
       {/* Poker Table */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full h-full">
-          {/* Table felt with enhanced styling */}
+          {/* Stadium-shaped table */}
           <svg viewBox="0 0 100 100" className="w-full h-full">
             {/* Outer rail */}
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="48"
-              ry="28"
+            <rect
+              x="5"
+              y="28"
+              width="90"
+              height="44"
+              rx="22"
               className="fill-[#2C1810] stroke-[#8B4513]"
               strokeWidth="1"
             />
             {/* Padded rail */}
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="46"
-              ry="26"
+            <rect
+              x="7"
+              y="30"
+              width="86"
+              height="40"
+              rx="20"
               className="fill-[#4A2511] stroke-[#654321]"
               strokeWidth="0.5"
             />
             {/* Main felt */}
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="43"
-              ry="23"
+            <rect
+              x="10"
+              y="33"
+              width="80"
+              height="34"
+              rx="17"
               className="fill-[#0D5D2A] stroke-[#0A4821]"
               strokeWidth="1.5"
             />
             {/* Inner felt highlight */}
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="40"
-              ry="20"
+            <rect
+              x="13"
+              y="36"
+              width="74"
+              height="28"
+              rx="14"
               className="fill-[#0F6B32]/30"
             />
             {/* Table texture lines */}
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="38"
-              ry="18"
+            <rect
+              x="15"
+              y="38"
+              width="70"
+              height="24"
+              rx="12"
               className="stroke-[#0A4821]/20 fill-none"
               strokeWidth="0.3"
             />
           </svg>
 
-          {/* Pot display in center */}
-          {potSize > 0 && (
-            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ${
-              animateChipsToPot ? 'scale-110' : 'scale-100'
-            }`}>
-              <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-4 py-2 rounded-lg shadow-xl border-2 border-amber-400">
-                <div className="text-xs font-semibold text-amber-100">POT</div>
-                <div className="text-sm font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
-              </div>
+          {/* Center area - Community Cards and Pot */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex flex-col items-center gap-2">
+              {/* Community Cards */}
+              {communityCards && (
+                <div className="flex gap-1">
+                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => {
+                    const rank = card[0];
+                    const suit = card[1];
+                    const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
+                    const isRed = suit === 'h' || suit === 'd';
+                    
+                    return (
+                      <div key={idx} className="w-6 h-8 sm:w-8 sm:h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
+                        <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
+                          {rank}
+                        </span>
+                        <span className={isRed ? 'text-red-600' : 'text-black'}>
+                          {suitSymbol}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Pot display */}
+              {potSize > 0 && (
+                <div className={`transition-all duration-500 ${
+                  animateChipsToPot ? 'scale-110' : 'scale-100'
+                }`}>
+                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1.5 rounded-lg shadow-xl border-2 border-amber-400">
+                    <div className="text-xs font-semibold text-amber-100">POT</div>
+                    <div className="text-sm font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Player positions */}
           {positions.map((position, index) => {
@@ -188,8 +225,9 @@ const PokerTableView = ({
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
+                onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
-                  enableDragDrop ? 'cursor-move' : ''
+                  enableDragDrop ? 'cursor-move' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
                   isFolded ? 'opacity-40 grayscale' : ''
                 } ${isWinner ? 'animate-pulse' : ''}`}
@@ -233,28 +271,25 @@ const PokerTableView = ({
                   </div>
                   
                   {/* Hole cards during showdown */}
-                  {playerHoleCards[position.player_id] && (
+                  {playerHoleCards && playerHoleCards[position.player_id] && (
                     <div className="flex gap-0.5 mt-1 animate-fade-in">
-                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                        <div key={idx} className="w-8 h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
-                          <span className={`font-bold ${card[1] === 'h' || card[1] === 'd' ? 'text-red-600' : 'text-black'}`}>
-                            {card[0]}
-                          </span>
-                          <span className={card[1] === 'h' || card[1] === 'd' ? 'text-red-600' : 'text-black'}>
-                            {card[1] === 'h' ? '♥' : card[1] === 'd' ? '♦' : card[1] === 's' ? '♠' : '♣'}
-                          </span>
-                        </div>
-                      )) || (
-                        // Show card backs if hole cards not known
-                        <>
-                          <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
-                            <div className="text-white text-xs">🂠</div>
+                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => {
+                        const rank = card[0];
+                        const suit = card[1].toLowerCase();
+                        const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
+                        const isRed = suit === 'h' || suit === 'd';
+                        
+                        return (
+                          <div key={idx} className="w-8 h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
+                            <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
+                              {rank}
+                            </span>
+                            <span className={isRed ? 'text-red-600' : 'text-black'}>
+                              {suitSymbol}
+                            </span>
                           </div>
-                          <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
-                            <div className="text-white text-xs">🂠</div>
-                          </div>
-                        </>
-                      )}
+                        );
+                      })}
                     </div>
                   )}
                   {/* Show card backs for players without known hole cards during showdown */}

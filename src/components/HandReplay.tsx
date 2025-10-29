@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, SkipForward, SkipBack, RotateCcw, Trophy } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
 import PokerTableView from './PokerTableView';
 import { SeatPosition } from '@/types/poker';
 import PokerCard from './PokerCard';
+import confetti from 'canvas-confetti';
 
 interface HandAction {
   id: string;
@@ -46,7 +47,7 @@ const HandReplay = ({
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStreet, setCurrentStreet] = useState<'Preflop' | 'Flop' | 'Turn' | 'River'>('Preflop');
-  const [potSize, setPotSize] = useState(initialPot);
+  const [potSize, setPotSize] = useState(0); // Start from 0
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
@@ -152,14 +153,22 @@ const HandReplay = ({
     }
   };
 
-  // Auto-play effect
+  // Auto-play effect with confetti
   useEffect(() => {
     if (!isPlaying || currentActionIndex >= actions.length) {
       setIsPlaying(false);
       // Check if we should show winner at the end
       if (currentActionIndex >= actions.length && winnerPlayerId && !showWinner) {
         setShowHoleCards(true);
-        setTimeout(() => setShowWinner(true), 1000);
+        setTimeout(() => {
+          setShowWinner(true);
+          // Trigger confetti
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }, 1000);
       }
       return;
     }
@@ -198,7 +207,14 @@ const HandReplay = ({
         }
         // Show winner at the very end
         if (nextIndex >= actions.length && winnerPlayerId) {
-          setTimeout(() => setShowWinner(true), 500);
+          setTimeout(() => {
+            setShowWinner(true);
+            confetti({
+              particleCount: 150,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+          }, 500);
         }
         return nextIndex;
       });
@@ -212,11 +228,13 @@ const HandReplay = ({
       setCurrentActionIndex(0);
       setIsPlaying(false);
       setCurrentStreet('Preflop');
-      setPotSize(initialPot);
+      setPotSize(0); // Reset to 0
       setStreetPlayerBets({});
       setCommunityCards('');
       setFoldedPlayers([]);
       setAnimateChipsToPot(false);
+      setShowHoleCards(false);
+      setShowWinner(false);
       
       // Replay actions without animation
       for (let i = 0; i < targetIndex; i++) {
@@ -230,7 +248,7 @@ const HandReplay = ({
     setCurrentActionIndex(0);
     setIsPlaying(false);
     setCurrentStreet('Preflop');
-    setPotSize(initialPot);
+    setPotSize(0); // Reset to 0
     setStreetPlayerBets({});
     setCommunityCards('');
     setFoldedPlayers([]);
@@ -248,18 +266,7 @@ const HandReplay = ({
 
   return (
     <div className="space-y-4">
-      {/* Community Cards */}
-      {communityCards && (
-        <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6">
-          <div className="flex gap-2 justify-center flex-wrap">
-            {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-              <PokerCard key={`${card}-${idx}`} card={card} size="md" />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Poker Table */}
+      {/* Poker Table with community cards inside */}
       <PokerTableView
         positions={positions}
         buttonPlayerId={buttonPlayerId}
@@ -271,6 +278,7 @@ const HandReplay = ({
         animateChipsToPot={animateChipsToPot}
         playerHoleCards={showHoleCards ? playerHoleCards : undefined}
         animateChipsToWinner={showWinner ? winnerPlayerId : null}
+        communityCards={communityCards}
       />
 
       {/* Current Action Display */}
@@ -340,16 +348,10 @@ const HandReplay = ({
       {showWinner && winnerPlayerName && (
         <Card className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-500 animate-fade-in">
           <CardContent className="p-6 text-center">
-            <div className="flex items-center justify-center gap-3">
-              <Trophy className="h-8 w-8 text-amber-500" />
-              <div>
-                <div className="text-2xl font-bold text-amber-500">Winner!</div>
-                <div className="text-lg">{winnerPlayerName}</div>
-                <div className="text-sm text-muted-foreground">
-                  Pot: Rs. {potSize.toLocaleString('en-IN')}
-                </div>
-              </div>
-              <Trophy className="h-8 w-8 text-amber-500" />
+            <div className="text-2xl font-bold text-amber-500 mb-2">🎉 Winner! 🎉</div>
+            <div className="text-xl font-semibold">{winnerPlayerName}</div>
+            <div className="text-lg text-poker-gold mt-2">
+              Pot: Rs. {potSize.toLocaleString('en-IN')}
             </div>
           </CardContent>
         </Card>
