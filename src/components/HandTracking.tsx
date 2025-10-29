@@ -377,7 +377,7 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
         // Check if only one player remains - hand ends immediately
         const endCheck = shouldEndHandEarly(activePlayers, updatedPlayersInHand);
         if (endCheck.shouldEnd && endCheck.winnerId) {
-          await finishHand([endCheck.winnerId], stage); // Pass current stage for final_stage
+          await finishHand([endCheck.winnerId], stage, action); // Pass current stage and last action
           return; // Don't move to next player after finishing hand
         }
 
@@ -474,7 +474,7 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
     }
   };
 
-  const finishHand = async (winnerIds: string[], finalStageOverride?: HandStage) => {
+  const finishHand = async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
     if (!currentHand) return;
 
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
@@ -492,6 +492,9 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
       // Fallback (shouldn't happen, but handle it)
       finalStageValue = stage === 'showdown' ? 'Showdown' : stage.charAt(0).toUpperCase() + stage.slice(1);
     }
+    
+    // Build complete list of actions including the last one if provided
+    const actionsToSave = lastAction ? [...allHandActions, lastAction] : allHandActions;
     
     // NOW save the hand to the database with all data
     const heroPosition = heroPlayer?.player_id 
@@ -522,8 +525,8 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
       return;
     }
 
-    // Save all actions to database (use allHandActions instead of streetActions)
-    for (const action of allHandActions) {
+    // Save all actions to database including the last action
+    for (const action of actionsToSave) {
       await recordPlayerAction(
         savedHand.id,
         action.player_id,
@@ -550,10 +553,10 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
     // Save hole cards if entered
     if (Object.keys(playerHoleCards).length > 0) {
       for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
-        // Find the last action for this player
-        const playerActions = allHandActions.filter(a => a.player_id === playerId);
+        // Find the last action for this player in the complete actions list
+        const playerActions = actionsToSave.filter(a => a.player_id === playerId);
         if (playerActions.length > 0) {
-          const lastAction = playerActions[playerActions.length - 1];
+          const lastPlayerAction = playerActions[playerActions.length - 1];
           
           // Update the action in database with hole cards
           await supabase
@@ -561,19 +564,13 @@ const HandTracking = ({ game, positionsJustChanged = false }: HandTrackingProps)
             .update({ hole_cards: holeCards })
             .eq('hand_id', savedHand.id)
             .eq('player_id', playerId)
-            .eq('action_sequence', lastAction.action_sequence);
+            .eq('action_sequence', lastPlayerAction.action_sequence);
         }
       }
     }
 
-    // Update final stage in database
-    await supabase
-      .from('poker_hands')
-      .update({ final_stage: finalStageValue })
-      .eq('id', savedHand.id);
-
-    // Complete the hand with winner info
-    await completeHand(savedHand.id, winnerIds, potSize, isHeroWin);
+    // Complete the hand with winner info and final stage
+    await completeHand(savedHand.id, winnerIds, potSize, isHeroWin, finalStageValue);
     
     // Reset everything
     setCurrentHand(null);

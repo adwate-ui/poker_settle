@@ -174,18 +174,25 @@ export const useHandTracking = () => {
     handId: string,
     winnerPlayerIds: string[],
     potSize: number,
-    isHeroWin: boolean
+    isHeroWin: boolean,
+    finalStage?: string
   ): Promise<void> => {
     try {
+      const updateData: any = {
+        winner_player_id: winnerPlayerIds[0] || null,
+        winner_player_ids: winnerPlayerIds,
+        pot_size: potSize,
+        is_hero_win: isHeroWin,
+      };
+      
+      // Only update final_stage if provided
+      if (finalStage) {
+        updateData.final_stage = finalStage;
+      }
+      
       const { error } = await supabase
         .from('poker_hands')
-        .update({
-          winner_player_id: winnerPlayerIds[0] || null,
-          winner_player_ids: winnerPlayerIds,
-          pot_size: potSize,
-          is_hero_win: isHeroWin,
-          final_stage: 'Showdown',
-        })
+        .update(updateData)
         .eq('id', handId);
 
       if (error) throw error;
