@@ -18,6 +18,7 @@ interface PokerTableViewProps {
   playerHoleCards?: Record<string, string>;
   communityCards?: string;
   onPlayerClick?: (playerId: string) => void;
+  activePlayerId?: string;
 }
 
 const PokerTableView = ({ 
@@ -35,7 +36,8 @@ const PokerTableView = ({
   animateChipsToWinner = null,
   playerHoleCards = {},
   communityCards = '',
-  onPlayerClick
+  onPlayerClick,
+  activePlayerId
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -216,6 +218,7 @@ const PokerTableView = ({
             const isButton = buttonPlayerId === position.player_id;
             const isFolded = foldedPlayers.includes(position.player_id);
             const isWinner = animateChipsToWinner === position.player_id;
+            const isActive = activePlayerId === position.player_id;
             
             return (
               <div
@@ -247,6 +250,7 @@ const PokerTableView = ({
                   {/* Player avatar */}
                   <div className="relative">
                     <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
+                      isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                       isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
                     }`}>
                       <img 

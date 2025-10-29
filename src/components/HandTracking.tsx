@@ -1086,6 +1086,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               showPositionLabels={true}
               foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
               communityCards={(flopCards || '') + (turnCard || '') + (riverCard || '')}
+              activePlayerId={currentPlayer?.player_id}
             />
           </div>
         )}
@@ -1118,29 +1119,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           />
         )}
 
-        {/* Remaining Players */}
-        {playersInHand.length > 0 && (
-          <div className="bg-gradient-to-br from-primary/10 to-transparent rounded-lg p-3 border border-primary/20">
-            <div className="text-sm font-semibold mb-2">Remaining Players ({playersInHand.length}):</div>
-            <div className="flex flex-wrap gap-2">
-              {activePlayers
-                .filter(p => playersInHand.includes(p.player_id))
-                .map((gp) => {
-                  const position = getPositionForPlayer(activePlayers, currentHand.button_player_id, gp.player_id, seatPositions);
-                  
-                  return (
-                    <div key={gp.player_id} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
-                      <span className="font-medium">{gp.player.name}</span>
-                      <span className="text-muted-foreground">({position})</span>
-                      {gp.player_id === heroPlayer?.player_id && (
-                        <Badge variant="secondary" className="ml-1 text-[10px] px-1 py-0">Hero</Badge>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        )}
 
         {/* Action history - ALL actions from all streets */}
         {allHandActions.length > 0 && (
@@ -1183,23 +1161,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </div>
         )}
 
-        {/* Current player indicator */}
-        <div className="bg-gradient-to-r from-poker-gold/20 to-transparent p-4 rounded-lg border border-poker-gold/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-muted-foreground">Action on:</div>
-              <div className="text-xl font-bold">{currentPlayer?.player.name}</div>
-            </div>
-            {currentPlayer?.player_id === heroPlayer?.player_id && (
-              <Badge className="bg-poker-gold text-black">YOU</Badge>
-            )}
-          </div>
-          {currentBet > 0 && (
-            <div className="mt-2 text-sm">
-              Current Bet: <span className="font-bold">{formatWithBB(currentBet)}</span>
-            </div>
-          )}
-        </div>
 
         {/* Action buttons */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
@@ -1207,6 +1168,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             <Button 
               onClick={() => recordAction('Call')} 
               variant="outline"
+              disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
             >
               {currentBet === 0 
                 ? 'Check' 
@@ -1216,6 +1178,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             <Button 
               onClick={() => recordAction('Fold')} 
               variant="destructive"
+              disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
             >
               Fold
             </Button>
@@ -1226,13 +1189,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               This player has folded
             </p>
           </div>
-        ) : (
-          <div className="bg-gradient-to-r from-poker-gold/20 to-transparent p-4 rounded-lg border-2 border-poker-gold">
-            <p className="text-center font-semibold text-poker-gold mb-2">
-              All bets are matched! Ready to move to next street.
-            </p>
-          </div>
-        )}
+        ) : null}
 
         {/* Raise input */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') && (
@@ -1245,8 +1202,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 onChange={(e) => setBetAmount(e.target.value)}
                 placeholder={currentBet === 0 ? 'Bet amount' : `Min: ${currentBet * 2}`}
                 min={currentBet === 0 ? game.big_blind : currentBet * 2}
+                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
               />
-              <Button onClick={() => recordAction('Raise')} disabled={!betAmount}>
+              <Button 
+                onClick={() => recordAction('Raise')} 
+                disabled={!betAmount || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+              >
                 {currentBet === 0 ? 'Bet' : 'Raise'}
               </Button>
             </div>
@@ -1273,16 +1234,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             {stage === 'river' ? 'Go to Showdown' : 'Next Street'} →
           </Button>
         </div>
-        
-        {!canMoveToNextStreet() && (
-          <p className="text-xs text-muted-foreground text-center">
-            {(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)
-              ? 'Deal cards to continue'
-              : stage === 'preflop'
-              ? 'All bets must be equal and SB/BB must act at least twice'
-              : 'All bets must be equal and all players must act at least once'}
-          </p>
-        )}
       </CardContent>
     </Card>
   );
