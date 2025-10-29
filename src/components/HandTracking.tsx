@@ -13,9 +13,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Play, CheckCircle, TrendingUp, Trophy } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import PokerCard from './PokerCard';
+import PokerTableView from './PokerTableView';
 import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SeatPosition } from '@/types/poker';
 import {
   HandStage,
   ActionType,
@@ -982,6 +984,24 @@ const HandTracking = ({ game }: HandTrackingProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
+        {/* Poker Table Visualization */}
+        {activePlayers.length > 0 && (
+          <div className="mb-6">
+            <PokerTableView
+              positions={activePlayers.map(gp => ({
+                seat: seatPositions[gp.player_id] ?? 0,
+                player_id: gp.player_id,
+                player_name: gp.player.name,
+              }))}
+              buttonPlayerId={currentHand?.button_player_id}
+              seatPositions={seatPositions}
+              playerBets={streetPlayerBets}
+              potSize={potSize}
+              showPositionLabels={true}
+            />
+          </div>
+        )}
+
         {/* Show existing community cards */}
         {(flopCards || turnCard || riverCard) && (
           <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">

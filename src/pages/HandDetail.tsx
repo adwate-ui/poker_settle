@@ -8,8 +8,10 @@ import { Loader2, ArrowLeft, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PokerCard from '@/components/PokerCard';
 import CardNotationInput from '@/components/CardNotationInput';
+import HandReplay from '@/components/HandReplay';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useHandTracking } from '@/hooks/useHandTracking';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface HandDetail {
   id: string;
@@ -20,6 +22,7 @@ interface HandDetail {
   is_hero_win: boolean | null;
   created_at: string;
   game_id: string;
+  button_player_id: string;
   button_player_name: string;
   winner_player_name: string | null;
   winner_player_names: string[];
@@ -51,10 +54,48 @@ const HandDetail = () => {
   const [showHoleCardInput, setShowHoleCardInput] = useState(false);
   const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<{ playerId: string; actionId: string } | null>(null);
   const { updateHoleCards } = useHandTracking();
+  const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchHandDetail();
+    loadTablePositions();
   }, [handId]);
+
+  const loadTablePositions = async () => {
+    if (!handId) return;
+    
+    try {
+      // First get the game_id from the hand
+      const { data: handData, error: handError } = await supabase
+        .from('poker_hands')
+        .select('game_id')
+        .eq('id', handId)
+        .single();
+      
+      if (handError) throw handError;
+      
+      // Then get table positions for this game
+      const { data, error } = await supabase
+        .from('table_positions')
+        .select('*')
+        .eq('game_id', handData.game_id)
+        .order('snapshot_timestamp', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data && data.positions) {
+        const positions: Record<string, number> = {};
+        (data.positions as any[]).forEach((pos: any) => {
+          positions[pos.player_id] = pos.seat;
+        });
+        setSeatPositions(positions);
+      }
+    } catch (error) {
+      console.error('Error loading table positions:', error);
+    }
+  };
 
   const fetchHandDetail = async () => {
     try {
@@ -127,6 +168,7 @@ const HandDetail = () => {
 
       setHand({
         ...handData,
+        button_player_id: handData.button_player_id,
         button_player_name: buttonPlayer?.name || 'Unknown',
         winner_player_name: winnerPlayerName,
         winner_player_names: [],
@@ -289,127 +331,148 @@ const HandDetail = () => {
 
           <Separator />
 
-          {/* Community Cards */}
-          {communityCards && (
-            <>
-              <div>
-                <h3 className="font-semibold mb-3">Community Cards</h3>
-                <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6">
-                  <div className="flex gap-2 justify-center flex-wrap">
-                    {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={idx} card={card} size="lg" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
-
-          {/* Hole Cards Section */}
-          <div>
-            <h3 className="font-semibold mb-3">Hole Cards</h3>
-            <div className="space-y-2">
-              {getPlayersInHand().map((player) => (
-                <div
-                  key={player.playerId}
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{player.playerName}</span>
-                    {player.isHero && (
-                      <Badge variant="secondary" className="text-xs">Hero</Badge>
-                    )}
-                  </div>
-                  
-                  {player.holeCards ? (
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard key={idx} card={card} size="sm" />
+          {/* Hand Replay and Details Tabs */}
+          <Tabs defaultValue="replay" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="replay">Hand Replay</TabsTrigger>
+              <TabsTrigger value="details">Hand Details</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="replay" className="space-y-4">
+              <HandReplay
+                actions={hand.actions}
+                streetCards={hand.street_cards}
+                playerNames={hand.player_names}
+                buttonPlayerId={hand.button_player_id}
+                seatPositions={seatPositions}
+                initialPot={hand.big_blind + (hand.big_blind / 2)}
+              />
+            </TabsContent>
+            
+            <TabsContent value="details" className="space-y-6">
+              {/* Community Cards */}
+              {communityCards && (
+                <>
+                  <div>
+                    <h3 className="font-semibold mb-3">Community Cards</h3>
+                    <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6">
+                      <div className="flex gap-2 justify-center flex-wrap">
+                        {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
+                          <PokerCard key={idx} card={card} size="lg" />
                         ))}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
-                          setShowHoleCardInput(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
-                        setShowHoleCardInput(true);
-                      }}
-                    >
-                      Add Hole Cards
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Action History */}
-          <div>
-            <h3 className="font-semibold mb-3">Action History</h3>
-            <div className="space-y-3">
-              {['Preflop', 'Flop', 'Turn', 'River'].map(street => {
-                const streetActions = hand.actions.filter(a => a.street_type === street);
-                if (streetActions.length === 0) return null;
-
-                return (
-                  <div key={street}>
-                    <div className="font-semibold text-sm text-muted-foreground mb-2">
-                      {street}:
-                    </div>
-                    <div className="space-y-1 pl-4 border-l-2 border-muted">
-                      {streetActions
-                        .sort((a, b) => a.action_sequence - b.action_sequence)
-                        .map((action, idx) => (
-                          <div key={idx} className="text-sm flex justify-between items-center py-1">
-                            <div className="flex items-center gap-2">
-                              {action.is_hero && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Hero
-                                </Badge>
-                              )}
-                              <span className="font-medium">
-                                {hand.player_names[action.player_id] || 'Unknown'}
-                              </span>
-                              {action.position && (
-                                <span className="text-xs text-muted-foreground">
-                                  ({action.position})
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">
-                                {action.action_type}
-                              </span>
-                              {action.bet_size > 0 && (
-                                <span className="font-semibold text-poker-gold">
-                                  Rs. {action.bet_size.toLocaleString('en-IN')} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                  <Separator />
+                </>
+              )}
+
+              {/* Hole Cards Section */}
+              <div>
+                <h3 className="font-semibold mb-3">Hole Cards</h3>
+                <div className="space-y-2">
+                  {getPlayersInHand().map((player) => (
+                    <div
+                      key={player.playerId}
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{player.playerName}</span>
+                        {player.isHero && (
+                          <Badge variant="secondary" className="text-xs">Hero</Badge>
+                        )}
+                      </div>
+                      
+                      {player.holeCards ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
+                              <PokerCard key={idx} card={card} size="sm" />
+                            ))}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
+                              setShowHoleCardInput(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPlayerForHole({ playerId: player.playerId, actionId: player.actionId });
+                            setShowHoleCardInput(true);
+                          }}
+                        >
+                          Add Hole Cards
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Action History */}
+              <div>
+                <h3 className="font-semibold mb-3">Action History</h3>
+                <div className="space-y-3">
+                  {['Preflop', 'Flop', 'Turn', 'River'].map(street => {
+                    const streetActions = hand.actions.filter(a => a.street_type === street);
+                    if (streetActions.length === 0) return null;
+
+                    return (
+                      <div key={street}>
+                        <div className="font-semibold text-sm text-muted-foreground mb-2">
+                          {street}:
+                        </div>
+                        <div className="space-y-1 pl-4 border-l-2 border-muted">
+                          {streetActions
+                            .sort((a, b) => a.action_sequence - b.action_sequence)
+                            .map((action, idx) => (
+                              <div key={idx} className="text-sm flex justify-between items-center py-1">
+                                <div className="flex items-center gap-2">
+                                  {action.is_hero && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Hero
+                                    </Badge>
+                                  )}
+                                  <span className="font-medium">
+                                    {hand.player_names[action.player_id] || 'Unknown'}
+                                  </span>
+                                  {action.position && (
+                                    <span className="text-xs text-muted-foreground">
+                                      ({action.position})
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">
+                                    {action.action_type}
+                                  </span>
+                                  {action.bet_size > 0 && (
+                                    <span className="font-semibold text-poker-gold">
+                                      Rs. {action.bet_size.toLocaleString('en-IN')} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
