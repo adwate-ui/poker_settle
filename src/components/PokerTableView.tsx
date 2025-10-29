@@ -174,7 +174,7 @@ const PokerTableView = ({
                 <div className="flex gap-1">
                   {communityCards.match(/.{1,2}/g)?.map((card, idx) => {
                     const rank = card[0];
-                    const suit = card[1];
+                    const suit = card[1].toLowerCase();
                     const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
                     const isRed = suit === 'h' || suit === 'd';
                     
@@ -230,7 +230,7 @@ const PokerTableView = ({
                   enableDragDrop ? 'cursor-move' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
                   isFolded ? 'opacity-40 grayscale' : ''
-                } ${isWinner ? 'animate-pulse' : ''}`}
+                }`}
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,

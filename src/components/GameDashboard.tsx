@@ -529,6 +529,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             {!showManualTransfer && (
               <Button 
                 onClick={() => setShowManualTransfer(true)}
+                disabled={!canCompleteGame}
                 className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -537,7 +538,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </Button>
             )}
 
-            <Button onClick={calculateSettlements} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+            <Button 
+              onClick={calculateSettlements} 
+              disabled={!canCompleteGame}
+              className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+            >
               <Calculator className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">{settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}</span>
               <span className="sm:hidden">Settlements</span>
