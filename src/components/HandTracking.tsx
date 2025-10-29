@@ -745,19 +745,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     
     return (
       <>
-        {/* Merged: Table positions with Start Hand in same card */}
         <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Play className="h-5 w-5" />
-              Current Table Positions - Start Hand
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center text-sm text-muted-foreground mb-2">
-              Click on a player to set them as button or mark as dealt out
-            </div>
-            
+          <CardContent className="pt-6 space-y-4">
             {/* Interactive Poker Table */}
             <PokerTableView
               positions={game.game_players.map(gp => ({

@@ -331,33 +331,24 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
           <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-poker-gold flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UsersIcon className="w-5 h-5" />
-                  Current Table Positions
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setShowPositionEditor(true)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Change Positions
-                  </Button>
-                  <Button
-                    onClick={handleStartHandTracking}
-                    className="bg-primary hover:bg-primary/90"
-                    size="sm"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Hand
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
+              <div className="flex gap-2 mt-4">
+                <Button
+                  onClick={() => setShowPositionEditor(true)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Change Positions
+                </Button>
+                <Button
+                  onClick={handleStartHandTracking}
+                  className="bg-primary hover:bg-primary/90 flex-1"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Hand
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : handTrackingStage === 'recording' ? (
