@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,7 @@ const PlayersHistory = () => {
     }
   }, [user]);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -54,9 +54,9 @@ const PlayersHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const handleDeletePlayer = async (playerId: string) => {
+  const handleDeletePlayer = useCallback(async (playerId: string) => {
     try {
       const { error } = await supabase
         .from("players")
@@ -73,9 +73,9 @@ const PlayersHistory = () => {
     } finally {
       setDeletePlayerId(null);
     }
-  };
+  }, [fetchPlayers]);
 
-  const handleSort = (field: SortField) => {
+  const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       if (sortOrder === "asc") setSortOrder("desc");
       else if (sortOrder === "desc") {
@@ -86,13 +86,13 @@ const PlayersHistory = () => {
       setSortField(field);
       setSortOrder("asc");
     }
-  };
+  }, [sortField, sortOrder]);
 
-  const getSortIcon = (field: SortField) => {
+  const getSortIcon = useCallback((field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
     if (sortOrder === "asc") return <ArrowUp className="h-4 w-4" />;
     return <ArrowDown className="h-4 w-4" />;
-  };
+  }, [sortField, sortOrder]);
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {

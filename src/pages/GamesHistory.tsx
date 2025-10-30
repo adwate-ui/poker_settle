@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +61,7 @@ const GamesHistory = () => {
     }
   }, [user]);
 
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     setLoading(true);
     try {
       const { data: gamesData, error } = await supabase
@@ -114,9 +114,9 @@ const GamesHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const handleDeleteGame = async (gameId: string) => {
+  const handleDeleteGame = useCallback(async (gameId: string) => {
     try {
       const { error } = await supabase
         .from("games")
@@ -133,7 +133,7 @@ const GamesHistory = () => {
     } finally {
       setDeleteGameId(null);
     }
-  };
+  }, [fetchGames]);
 
   const uniqueDates = useMemo(() => {
     const dates = games.map((game) => format(new Date(game.date), "MMM d, yyyy"));

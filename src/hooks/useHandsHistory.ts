@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PokerHand, PlayerAction, StreetCard } from '@/types/poker';
 import { useToast } from '@/hooks/use-toast';
 import { HoleCardFilterType, matchesHoleCardFilter } from '@/utils/holeCardFilter';
+import { debounce } from '@/utils/performance';
 
 export interface HandWithDetails extends PokerHand {
   button_player_name: string;
@@ -27,17 +28,24 @@ export interface HandFilters {
   villainHoleCards?: HoleCardFilterType;
 }
 
+const HANDS_PER_PAGE = 50;
+
 export const useHandsHistory = () => {
   const [hands, setHands] = useState<HandWithDetails[]>([]);
-  const [filteredHands, setFilteredHands] = useState<HandWithDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<HandFilters>({});
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const { toast } = useToast();
 
-  const fetchHands = async () => {
+  // Fetch hands with pagination
+  const fetchHands = useCallback(async (pageNum: number = 1, shouldAppend: boolean = false) => {
     try {
       setLoading(true);
       
+      const from = (pageNum - 1) * HANDS_PER_PAGE;
+      const to = from + HANDS_PER_PAGE - 1;
+
       // Fetch poker hands with related data
       const { data: handsData, error: handsError } = await supabase
         .from('poker_hands')
@@ -47,12 +55,18 @@ export const useHandsHistory = () => {
           winner_player:players!poker_hands_winner_player_id_fkey(name),
           game:games(date, buy_in_amount)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (handsError) throw handsError;
 
-      // Fetch actions for all hands with player names
       const handIds = handsData?.map(h => h.id) || [];
+      
+      if (handIds.length < HANDS_PER_PAGE) {
+        setHasMore(false);
+      }
+
+      // Fetch actions for these hands with player names
       const { data: actionsData, error: actionsError } = await supabase
         .from('player_actions')
         .select(`
@@ -63,7 +77,7 @@ export const useHandsHistory = () => {
 
       if (actionsError) throw actionsError;
 
-      // Fetch street cards for all hands
+      // Fetch street cards for these hands
       const { data: cardsData, error: cardsError } = await supabase
         .from('street_cards')
         .select('*')
@@ -95,8 +109,8 @@ export const useHandsHistory = () => {
         street_cards: (cardsData?.filter(c => c.hand_id === hand.id) || []) as StreetCard[],
       }));
 
-      setHands(enrichedHands);
-      setFilteredHands(enrichedHands);
+      setHands(prev => shouldAppend ? [...prev, ...enrichedHands] : enrichedHands);
+      setPage(pageNum);
     } catch (error: any) {
       toast({
         title: 'Error Loading Hands',
@@ -106,17 +120,22 @@ export const useHandsHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
+  // Load more hands
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      fetchHands(page + 1, true);
+    }
+  }, [loading, hasMore, page, fetchHands]);
+
+  // Initial fetch
   useEffect(() => {
-    fetchHands();
+    fetchHands(1, false);
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [filters, hands]);
-
-  const applyFilters = () => {
+  // Apply filters with memoization
+  const filteredHands = useMemo(() => {
     let filtered = [...hands];
 
     if (filters.heroPosition) {
@@ -206,18 +225,27 @@ export const useHandsHistory = () => {
       });
     }
 
-    setFilteredHands(filtered);
-  };
+    return filtered;
+  }, [hands, filters]);
 
-  const updateFilters = (newFilters: Partial<HandFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
+  // Debounced filter update
+  const debouncedUpdateFilters = useMemo(
+    () => debounce((newFilters: Partial<HandFilters>) => {
+      setFilters(prev => ({ ...prev, ...newFilters }));
+    }, 300),
+    []
+  );
 
-  const clearFilters = () => {
+  const updateFilters = useCallback((newFilters: Partial<HandFilters>) => {
+    debouncedUpdateFilters(newFilters);
+  }, [debouncedUpdateFilters]);
+
+  const clearFilters = useCallback(() => {
     setFilters({});
-  };
+  }, []);
 
-  const getUniqueGames = () => {
+  // Memoized unique values
+  const getUniqueGames = useMemo(() => {
     const gameMap = new Map();
     hands.forEach(hand => {
       if (!gameMap.has(hand.game_id)) {
@@ -229,17 +257,17 @@ export const useHandsHistory = () => {
       }
     });
     return Array.from(gameMap.values());
-  };
+  }, [hands]);
 
-  const getUniqueHeroPositions = () => {
+  const getUniqueHeroPositions = useMemo(() => {
     const positions = new Set<string>();
     hands.forEach(hand => {
       if (hand.hero_position) positions.add(hand.hero_position);
     });
     return Array.from(positions).sort();
-  };
+  }, [hands]);
 
-  const getUniqueVillainNames = () => {
+  const getUniqueVillainNames = useMemo(() => {
     const names = new Set<string>();
     hands.forEach(hand => {
       hand.actions.forEach(action => {
@@ -248,9 +276,9 @@ export const useHandsHistory = () => {
       });
     });
     return Array.from(names).sort();
-  };
+  }, [hands]);
 
-  const getUniqueVillainPositions = () => {
+  const getUniqueVillainPositions = useMemo(() => {
     const positions = new Set<string>();
     hands.forEach(hand => {
       hand.actions.forEach(action => {
@@ -258,9 +286,9 @@ export const useHandsHistory = () => {
       });
     });
     return Array.from(positions).sort();
-  };
+  }, [hands]);
 
-  const getStatistics = () => {
+  const getStatistics = useMemo(() => {
     const totalHands = filteredHands.length;
     const handsWon = filteredHands.filter(h => h.is_hero_win === true).length;
     const handsLost = filteredHands.filter(h => h.is_hero_win === false).length;
@@ -278,7 +306,7 @@ export const useHandsHistory = () => {
       showdownHands,
       showdownRate: totalHands > 0 ? ((showdownHands / totalHands) * 100).toFixed(1) : '0.0',
     };
-  };
+  }, [filteredHands]);
 
   return {
     hands: filteredHands,
@@ -292,6 +320,8 @@ export const useHandsHistory = () => {
     getUniqueVillainNames,
     getUniqueVillainPositions,
     getStatistics,
-    refetch: fetchHands,
+    refetch: () => fetchHands(1, false),
+    loadMore,
+    hasMore,
   };
 };

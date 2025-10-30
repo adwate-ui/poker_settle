@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
-import PokerCard from '@/components/PokerCard';
+import MemoizedHandCard from '@/components/MemoizedHandCard';
 import { HOLE_CARD_FILTER_OPTIONS } from '@/utils/holeCardFilter';
 
 const HandsHistory = () => {
@@ -22,35 +22,41 @@ const HandsHistory = () => {
     getUniqueVillainNames,
     getUniqueVillainPositions,
     getStatistics,
+    loadMore,
+    hasMore,
   } = useHandsHistory();
 
   const [currentPage, setCurrentPage] = useState(1);
   const handsPerPage = 20;
 
-  const stats = getStatistics();
-  const uniqueGames = getUniqueGames();
-  const uniquePositions = getUniqueHeroPositions();
-  const uniqueVillainNames = getUniqueVillainNames();
-  const uniqueVillainPositions = getUniqueVillainPositions();
+  // Get memoized values from hook
+  const stats = getStatistics;
+  const uniqueGames = getUniqueGames;
+  const uniquePositions = getUniqueHeroPositions;
+  const uniqueVillainNames = getUniqueVillainNames;
+  const uniqueVillainPositions = getUniqueVillainPositions;
 
   // Pagination
   const totalPages = Math.ceil(hands.length / handsPerPage);
   const startIndex = (currentPage - 1) * handsPerPage;
   const endIndex = startIndex + handsPerPage;
-  const currentHands = hands.slice(startIndex, endIndex);
+  const currentHands = useMemo(() => hands.slice(startIndex, endIndex), [hands, startIndex, endIndex]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-  };
+  }, []);
 
-  const hasActiveFilters = Object.keys(filters).some(key => {
-    const value = filters[key as keyof typeof filters];
-    return value && value !== 'all';
-  });
+  const hasActiveFilters = useMemo(() => 
+    Object.keys(filters).some(key => {
+      const value = filters[key as keyof typeof filters];
+      return value && value !== 'all';
+    }),
+    [filters]
+  );
 
   if (loading) {
     return (
@@ -347,94 +353,13 @@ const HandsHistory = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {currentHands.map((hand) => {
-                const communityCards = hand.street_cards
-                  .sort((a, b) => {
-                    const order = { Flop: 1, Turn: 2, River: 3 };
-                    return order[a.street_type as keyof typeof order] - order[b.street_type as keyof typeof order];
-                  })
-                  .map(c => c.cards_notation)
-                  .join('');
-
-                return (
-                  <Card 
-                    key={hand.id}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate(`/hands/${hand.id}`)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold">Hand #{hand.hand_number}</span>
-                              <Badge variant="outline" className="text-xs">
-                                {hand.hero_position}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {hand.final_stage}
-                              </Badge>
-                              {hand.is_split ? (
-                                <Badge className="bg-yellow-600 text-xs">
-                                  Split
-                                </Badge>
-                              ) : hand.is_hero_win === true ? (
-                                <Badge className="bg-green-600 text-xs">
-                                  <Trophy className="h-3 w-3 mr-1" />
-                                  Won
-                                </Badge>
-                              ) : hand.is_hero_win === false ? (
-                                <Badge variant="destructive" className="text-xs">
-                                  Lost
-                                </Badge>
-                              ) : null}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {formatDate(hand.game_date)} • Button: {hand.button_player_name}
-                              {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4">
-                            {communityCards && (
-                              <div className="hidden md:flex gap-1">
-                                {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="sm" />
-                                ))}
-                              </div>
-                            )}
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-poker-gold">
-                                Rs. {hand.pot_size?.toLocaleString('en-IN') || 0}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Pot</div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Players in Hand */}
-                        <div className="pt-2 border-t">
-                          <p className="text-xs text-muted-foreground mb-2">Players in Hand:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {Array.from(new Map(
-                              hand.actions
-                                .filter(a => (a as any).player?.name && a.position)
-                                .map(a => [
-                                  (a as any).player.name,
-                                  { name: (a as any).player.name, position: a.position }
-                                ])
-                            ).values()).map((player, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {player.name} ({player.position})
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {currentHands.map((hand) => (
+                <MemoizedHandCard 
+                  key={hand.id}
+                  hand={hand}
+                  formatDate={formatDate}
+                />
+              ))}
             </div>
           )}
 
