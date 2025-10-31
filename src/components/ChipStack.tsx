@@ -11,17 +11,18 @@ interface ChipStackProps {
 }
 
 const CHIP_DENOMINATIONS = [
-  { value: 5000, image: chipGreen5000 },
-  { value: 1000, image: chipYellow1000 },
-  { value: 500, image: chipBlue500 },
-  { value: 100, image: chipBlack100 },
-  { value: 20, image: chipRed20 },
+  { value: 5000, image: chipGreen5000, color: '#10b981' },
+  { value: 1000, image: chipYellow1000, color: '#eab308' },
+  { value: 500, image: chipBlue500, color: '#3b82f6' },
+  { value: 100, image: chipBlack100, color: '#111827' },
+  { value: 20, image: chipRed20, color: '#ef4444' },
 ];
 
 const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
+  console.log('ChipStack received amount:', amount, 'showLabel:', showLabel);
   // Calculate which chips to use (greedy algorithm)
   const calculateChips = (total: number) => {
-    const chips: { value: number; image: string; count: number }[] = [];
+    const chips: { value: number; image: string; color: string; count: number }[] = [];
     let remaining = total;
 
     for (const denom of CHIP_DENOMINATIONS) {
@@ -32,10 +33,17 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
       }
     }
 
+    // Always show at least one chip if amount > 0 (for values below the smallest denom)
+    if (chips.length === 0 && total > 0) {
+      const smallest = CHIP_DENOMINATIONS[CHIP_DENOMINATIONS.length - 1];
+      chips.push({ ...smallest, count: 1 });
+    }
+
     return chips;
   };
 
   const chips = calculateChips(amount);
+  console.log('Calculated chips:', chips);
 
   const sizeClasses = {
     sm: 'w-7 h-7',
@@ -46,7 +54,7 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
   const chipSize = sizeClasses[size];
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center gap-1" style={{ border: '1px solid red' }}>
       {/* Chip stacks */}
       <div className="relative flex items-end gap-0.5">
         {chips.map((chip, idx) => (
@@ -54,16 +62,31 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
             {/* Stack of chips (show up to 5 chips in stack visually) */}
             <div className="relative" style={{ height: `${Math.min(chip.count, 5) * 2 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
               {Array.from({ length: Math.min(chip.count, 5) }).map((_, stackIdx) => (
-                <img
-                  key={stackIdx}
-                  src={chip.image}
-                  alt={`${chip.value} chip`}
-                  className={`${chipSize} absolute left-0 drop-shadow-md rounded-full`}
-                  style={{
-                    bottom: `${stackIdx * 2}px`,
-                    zIndex: stackIdx,
-                  }}
-                />
+                <div key={stackIdx}>
+                  {/* Fallback circle (behind the image) */}
+                  <div
+                    className={`${chipSize} absolute left-0 rounded-full border-2 border-white shadow-md`}
+                    style={{
+                      bottom: `${stackIdx * 2}px`,
+                      zIndex: stackIdx,
+                      backgroundColor: chip.color,
+                    }}
+                  />
+                  {/* Image chip */}
+                  <img
+                    src={chip.image}
+                    alt={`${chip.value} chip`}
+                    className={`${chipSize} absolute left-0 rounded-full`}
+                    style={{
+                      bottom: `${stackIdx * 2}px`,
+                      zIndex: stackIdx + 1,
+                    }}
+                    onError={(e) => {
+                      // hide the image to reveal the fallback circle
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
               ))}
             </div>
             {/* Count indicator for more than 5 chips */}
