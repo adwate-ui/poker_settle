@@ -1,4 +1,4 @@
-import chipRed20 from "@/assets/chip-red-20.jpg";
+import chipRed20 from "@/assets/chip-red-20.png";
 import chipBlack100 from "@/assets/chip-black-100.png";
 import chipBlue500 from "@/assets/chip-blue-500.png";
 import chipYellow1000 from "@/assets/chip-yellow-1000.png";
