@@ -215,22 +215,22 @@ const PlayersHistory = () => {
               key={player.id}
               className="cursor-pointer transition-colors hover:bg-muted/50"
             >
-              <CardContent className="p-4">
+              <CardContent className="p-5 sm:p-6">
                 {/* Mobile Layout */}
-                <div className="md:hidden space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="md:hidden space-y-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div 
-                      className="flex items-center gap-3"
+                      className="flex items-center gap-3 flex-1 min-w-0"
                       onClick={() => navigate(`/players/${player.id}`)}
                     >
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                         <img 
                           src={avatarUrl} 
                           alt={player.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="font-bold">{player.name}</span>
+                      <span className="font-bold text-base truncate">{player.name}</span>
                     </div>
                     <Button
                       variant="ghost"
@@ -239,17 +239,17 @@ const PlayersHistory = () => {
                         e.stopPropagation();
                         setDeletePlayerId(player.id);
                       }}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/20"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/20 flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">Games</p>
                       <Badge variant="info">{player.total_games || 0}</Badge>
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">Net P&L</p>
                       <Badge variant={isProfit ? "success" : "destructive"}>
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
@@ -259,19 +259,19 @@ const PlayersHistory = () => {
                 </div>
 
                 {/* Desktop Layout */}
-                <div className="hidden md:grid grid-cols-4 gap-4 items-center text-sm">
+                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm">
                   <div 
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-4"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                       <img 
                         src={avatarUrl} 
                         alt={player.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="font-bold truncate">{player.name}</span>
+                    <span className="font-bold text-base truncate">{player.name}</span>
                   </div>
                   
                   <div 
