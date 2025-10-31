@@ -11,7 +11,7 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
   // Handle card back
   if (!card || card === 'back' || card === '??') {
     const sizes = {
-      xs: 'w-[44px] h-[64px]',
+      xs: 'w-[32px] h-[46px]',
       sm: 'w-[58px] h-[84px]',
       md: 'w-[78px] h-[112px]',
       lg: 'w-[94px] h-[136px]',
@@ -49,21 +49,21 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
 
   // Increased by 30%: sm: 14*1.3=18.2, 20*1.3=26; md: 20*1.3=26, 28*1.3=36.4; lg: 24*1.3=31.2, 36*1.3=46.8
   const sizes = {
-    xs: 'w-[44px] h-[64px]',
+    xs: 'w-[32px] h-[46px]',
     sm: 'w-[58px] h-[84px]',
     md: 'w-[78px] h-[112px]',
     lg: 'w-[94px] h-[136px]',
   };
 
   const rankSizes = {
-    xs: 'text-base',
+    xs: 'text-xs',
     sm: 'text-lg',
     md: 'text-2xl',
     lg: 'text-3xl',
   };
 
   const suitSizes = {
-    xs: 'text-2xl',
+    xs: 'text-lg',
     sm: 'text-3xl',
     md: 'text-5xl',
     lg: 'text-6xl',

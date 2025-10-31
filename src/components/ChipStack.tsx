@@ -57,15 +57,15 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
       <div className="relative flex items-end gap-0.5">
         {chips.map((chip, idx) => (
           <div key={idx} className="relative flex flex-col items-center">
-            {/* Stack of chips (show up to 5 chips in stack visually) */}
-            <div className="relative" style={{ height: `${Math.min(chip.count, 5) * 2 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
-              {Array.from({ length: Math.min(chip.count, 5) }).map((_, stackIdx) => (
+            {/* Stack of chips (show more chips vertically for better visualization) */}
+            <div className="relative" style={{ height: `${Math.min(chip.count, 10) * 3 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
+              {Array.from({ length: Math.min(chip.count, 10) }).map((_, stackIdx) => (
                 <div key={stackIdx}>
                   {/* Fallback circle (behind the image) */}
                   <div
                     className={`${chipSize} absolute left-0 rounded-full border-2 border-white shadow-md`}
                     style={{
-                      bottom: `${stackIdx * 2}px`,
+                      bottom: `${stackIdx * 3}px`,
                       zIndex: stackIdx,
                       backgroundColor: chip.color,
                     }}
@@ -76,7 +76,7 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
                     alt={`${chip.value} chip`}
                     className={`${chipSize} absolute left-0 rounded-full`}
                     style={{
-                      bottom: `${stackIdx * 2}px`,
+                      bottom: `${stackIdx * 3}px`,
                       zIndex: stackIdx + 1,
                     }}
                     onError={(e) => {
@@ -87,8 +87,8 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
                 </div>
               ))}
             </div>
-            {/* Count indicator for more than 5 chips */}
-            {chip.count > 5 && (
+            {/* Count indicator for more than 10 chips */}
+            {chip.count > 10 && (
               <div 
                 className="absolute bg-black/90 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white/70 z-20"
                 style={{

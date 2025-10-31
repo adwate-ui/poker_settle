@@ -251,27 +251,29 @@ const PokerTableView = ({
                   
                   {/* Player avatar with hole cards positioned above */}
                   <div className="relative">
-                    {/* Player hole cards - positioned above avatar, overlapping it */}
-                    <div className={`absolute -top-6 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-all duration-300 ${
-                      isFolded || isMucked ? 'opacity-40 grayscale' : 'opacity-100'
-                    }`}>
-                      {hasKnownCards ? (
-                        // Show known cards face-up
-                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard 
-                            key={idx} 
-                            card={card} 
-                            size="xs"
-                          />
-                        ))
-                      ) : !isMucked ? (
-                        // Always show card backs for unknown cards (unless mucked)
-                        <>
-                          <PokerCard card="back" size="xs" />
-                          <PokerCard card="back" size="xs" />
-                        </>
-                      ) : null}
-                    </div>
+                    {/* Player hole cards - positioned to overlap with player name below */}
+                    {!isMucked && (
+                      <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-all duration-300 ${
+                        isFolded ? 'opacity-40 grayscale' : 'opacity-100'
+                      }`}>
+                        {hasKnownCards ? (
+                          // Show known cards face-up
+                          playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard 
+                              key={idx} 
+                              card={card} 
+                              size="xs"
+                            />
+                          ))
+                        ) : (
+                          // Always show card backs for unknown cards
+                          <>
+                            <PokerCard card="back" size="xs" />
+                            <PokerCard card="back" size="xs" />
+                          </>
+                        )}
+                      </div>
+                    )}
                     
                     <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                       isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
