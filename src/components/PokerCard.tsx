@@ -1,6 +1,5 @@
 import React from 'react';
 import monarchCardBack from '@/assets/monarch-card-back.png';
-import monarchCardFace from '@/assets/monarch-card-face.png';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -67,15 +66,8 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
   };
 
   return (
-    <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative`}>
-      {/* Monarch card face background */}
-      <img 
-        src={monarchCardFace} 
-        alt="" 
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      
-      {/* Card content overlay */}
+    <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative bg-white border-2 border-gray-200`}>
+      {/* Card content */}
       <div className="relative w-full h-full flex flex-col p-1.5">
         {/* Corner rank and suit (top-left) */}
         <div className="absolute top-1 left-1 flex flex-col items-center leading-none z-10">
