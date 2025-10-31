@@ -21,7 +21,7 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
         <img 
           src={monarchCardBack} 
           alt="Card back" 
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
     );
