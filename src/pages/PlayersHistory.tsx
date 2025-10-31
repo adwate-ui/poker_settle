@@ -255,20 +255,6 @@ const PlayersHistory = () => {
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                       </Badge>
                     </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted-foreground">Status</p>
-                      {isProfit ? (
-                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                          <TrendingUp className="h-4 w-4" />
-                          <span className="text-sm font-medium">Winning</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                          <TrendingDown className="h-4 w-4" />
-                          <span className="text-sm font-medium">Losing</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -302,18 +288,7 @@ const PlayersHistory = () => {
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center justify-start gap-6">
-                    {isProfit ? (
-                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400 mr-2">
-                        <TrendingUp className="h-4 w-4" />
-                        <span className="text-sm font-medium">Winning</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-red-600 dark:text-red-400 mr-2">
-                        <TrendingDown className="h-4 w-4" />
-                        <span className="text-sm font-medium">Losing</span>
-                      </div>
-                    )}
+                  <div className="flex items-center justify-start">
                     <Button
                       variant="ghost"
                       size="icon"
