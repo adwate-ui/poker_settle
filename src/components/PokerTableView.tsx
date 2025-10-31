@@ -2,7 +2,7 @@ import { SeatPosition } from "@/types/poker";
 import { useState } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
 import PokerCard from "./PokerCard";
-import pokerChipRed from "@/assets/poker-chip-red.png";
+import ChipStack from "./ChipStack";
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -192,21 +192,15 @@ const PokerTableView = ({
               
               {/* Pot display with chip visualization */}
               {potSize > 0 && (
-                <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${
+                <div className={`flex flex-col items-center gap-1 transition-all duration-500 ${
                   animateChipsToPot ? 'scale-110' : 'scale-100'
                 }`}>
-                  {/* Chip stack */}
-                  <div className="relative w-16 h-16">
-                    <img 
-                      src={pokerChipRed} 
-                      alt="Poker chips"
-                      className="w-full h-full object-contain drop-shadow-2xl"
-                    />
+                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold">
+                    POT
                   </div>
-                  {/* Pot amount */}
-                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-4 py-2 rounded-lg shadow-xl border-2 border-amber-400">
-                    <div className="text-xs font-semibold text-amber-100">POT</div>
-                    <div className="text-base font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
+                  <ChipStack amount={potSize} size="md" showLabel={false} />
+                  <div className="text-sm font-bold text-foreground">
+                    Rs. {potSize.toLocaleString('en-IN')}
                   </div>
                 </div>
               )}
@@ -315,27 +309,11 @@ const PokerTableView = ({
                           : 'opacity-100 scale-100'
                       }`}
                       style={{
-                        top: pos.y > 50 ? '-80px' : '100px',
-                        left: pos.x > 50 ? '-70px' : '70px',
+                        top: pos.y > 50 ? '-60px' : '80px',
+                        left: pos.x > 50 ? '-50px' : '50px',
                       }}
                     >
-                      <div className="relative flex flex-col items-center gap-1">
-                        {/* Chip stack image */}
-                        <div className="relative w-14 h-14">
-                          <img 
-                            src={pokerChipRed} 
-                            alt="Chips"
-                            className="w-full h-full object-contain drop-shadow-2xl"
-                          />
-                        </div>
-                        
-                        {/* Bet amount label */}
-                        <div className="bg-gradient-to-br from-gray-900 to-black text-white px-3 py-1.5 rounded-lg shadow-xl border border-poker-gold/50">
-                          <div className="text-sm font-bold whitespace-nowrap text-poker-gold">
-                            Rs. {playerBet.toLocaleString('en-IN')}
-                          </div>
-                        </div>
-                      </div>
+                      <ChipStack amount={playerBet} size="sm" showLabel={true} />
                     </div>
                   )}
                 </div>
