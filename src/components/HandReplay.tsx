@@ -52,29 +52,16 @@ const HandReplay = ({
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
   const [animateChipsToPot, setAnimateChipsToPot] = useState(false);
-  const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
+  const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   
-  // Extract hole cards and identify hero from actions
+  // Extract hole cards from actions
   const playerHoleCards: Record<string, string> = {};
-  let heroPlayerId: string | null = null;
-  
   actions.forEach(action => {
     if (action.hole_cards && !playerHoleCards[action.player_id]) {
       playerHoleCards[action.player_id] = action.hole_cards;
     }
-    // Find hero from actions (assuming hero has is_hero field set to true)
-    if ((action as any).is_hero && !heroPlayerId) {
-      heroPlayerId = action.player_id;
-    }
   });
-  
-  // Show hero's cards from the start
-  useEffect(() => {
-    if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-      setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
-    }
-  }, []);
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -174,8 +161,7 @@ const HandReplay = ({
       setIsPlaying(false);
       // Check if we should show winner at the end
       if (currentActionIndex >= actions.length && winnerPlayerId && !showWinner) {
-        // Show all players' hole cards when winner is decided
-        setVisibleHoleCards(playerHoleCards);
+        setShowHoleCards(true);
         setTimeout(() => {
           setShowWinner(true);
           // Trigger confetti
@@ -193,9 +179,9 @@ const HandReplay = ({
       processAction(currentActionIndex);
       setCurrentActionIndex(prev => {
         const nextIndex = prev + 1;
-        // Show all players' hole cards when winner is decided (at the end)
-        if (nextIndex >= actions.length && winnerPlayerId) {
-          setVisibleHoleCards(playerHoleCards);
+        // Show hole cards when reaching showdown (river completed)
+        if (nextIndex >= actions.length - 1) {
+          setShowHoleCards(true);
         }
         return nextIndex;
       });
@@ -217,9 +203,12 @@ const HandReplay = ({
       processAction(currentActionIndex);
       setCurrentActionIndex(prev => {
         const nextIndex = prev + 1;
-        // Show all players' hole cards when winner is decided
+        // Show hole cards when reaching showdown (river completed)
+        if (nextIndex >= actions.length - 1) {
+          setShowHoleCards(true);
+        }
+        // Show winner at the very end
         if (nextIndex >= actions.length && winnerPlayerId) {
-          setVisibleHoleCards(playerHoleCards);
           setTimeout(() => {
             setShowWinner(true);
             confetti({
@@ -246,12 +235,7 @@ const HandReplay = ({
       setCommunityCards('');
       setFoldedPlayers([]);
       setAnimateChipsToPot(false);
-      // Reset to show only hero's cards
-      if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-        setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
-      } else {
-        setVisibleHoleCards({});
-      }
+      setShowHoleCards(false);
       setShowWinner(false);
       
       // Replay actions without animation
@@ -271,12 +255,7 @@ const HandReplay = ({
     setCommunityCards('');
     setFoldedPlayers([]);
     setAnimateChipsToPot(false);
-    // Reset to show only hero's cards
-    if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-      setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
-    } else {
-      setVisibleHoleCards({});
-    }
+    setShowHoleCards(false);
     setShowWinner(false);
   };
 
@@ -299,7 +278,7 @@ const HandReplay = ({
         showPositionLabels={true}
         foldedPlayers={foldedPlayers}
         animateChipsToPot={animateChipsToPot}
-        playerHoleCards={visibleHoleCards}
+        playerHoleCards={showHoleCards ? playerHoleCards : undefined}
         animateChipsToWinner={showWinner ? winnerPlayerId : null}
         communityCards={communityCards}
       />

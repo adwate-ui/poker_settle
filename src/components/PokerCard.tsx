@@ -1,33 +1,12 @@
 import React from 'react';
-import cardBackImage from '@/assets/card-back.png';
-import cardFaceTemplate from '@/assets/card-face-template.png';
 
 interface PokerCardProps {
-  card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), etc., or 'back' for card back
+  card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), etc.
   size?: 'sm' | 'md' | 'lg';
 }
 
 const PokerCard = ({ card, size = 'md' }: PokerCardProps) => {
-  if (!card) return null;
-
-  // Show card back if card is 'back' or '??'
-  if (card === 'back' || card === '??' || card.length !== 2) {
-    const sizes = {
-      sm: 'w-18 h-26',
-      md: 'w-26 h-36',
-      lg: 'w-31 h-47',
-    };
-
-    return (
-      <div className={`${sizes[size]} rounded-lg shadow-xl overflow-hidden`}>
-        <img 
-          src={cardBackImage} 
-          alt="Card back"
-          className="w-full h-full object-cover"
-        />
-      </div>
-    );
-  }
+  if (!card || card.length !== 2) return null;
 
   const rank = card[0].toUpperCase();
   const suit = card[1].toLowerCase();
@@ -47,38 +26,36 @@ const PokerCard = ({ card, size = 'md' }: PokerCardProps) => {
   };
 
   const sizes = {
-    sm: 'w-18 h-26 text-sm',
-    md: 'w-26 h-36 text-base',
-    lg: 'w-31 h-47 text-lg',
+    sm: 'w-14 h-20 text-sm',
+    md: 'w-20 h-28 text-base',
+    lg: 'w-24 h-36 text-lg',
   };
 
   const rankSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-3xl',
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-2xl',
   };
 
   const suitSizes = {
-    sm: 'text-3xl',
-    md: 'text-5xl',
-    lg: 'text-6xl',
+    sm: 'text-2xl',
+    md: 'text-4xl',
+    lg: 'text-5xl',
   };
 
   return (
     <div
-      className={`${sizes[size]} rounded-lg shadow-xl relative overflow-hidden`}
+      className={`${sizes[size]} bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col p-1.5 relative overflow-hidden`}
       style={{
-        backgroundImage: `url(${cardFaceTemplate})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
       }}
     >
       {/* Corner rank and suit (top-left) */}
-      <div className="absolute top-1.5 left-1.5 flex flex-col items-center leading-none">
+      <div className="absolute top-1 left-1 flex flex-col items-center leading-none">
         <div className={`${rankSizes[size]} font-bold ${suitColors[suit]}`}>
           {rank}
         </div>
-        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '1rem' : size === 'md' ? '1.3rem' : '1.6rem' }}>
+        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '0.8rem' : size === 'md' ? '1rem' : '1.2rem' }}>
           {suitSymbols[suit]}
         </div>
       </div>
@@ -89,11 +66,11 @@ const PokerCard = ({ card, size = 'md' }: PokerCardProps) => {
       </div>
       
       {/* Corner rank and suit (bottom-right, rotated) */}
-      <div className="absolute bottom-1.5 right-1.5 flex flex-col items-center leading-none rotate-180">
+      <div className="absolute bottom-1 right-1 flex flex-col items-center leading-none rotate-180">
         <div className={`${rankSizes[size]} font-bold ${suitColors[suit]}`}>
           {rank}
         </div>
-        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '1rem' : size === 'md' ? '1.3rem' : '1.6rem' }}>
+        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none -mt-1`} style={{ fontSize: size === 'sm' ? '0.8rem' : size === 'md' ? '1rem' : '1.2rem' }}>
           {suitSymbols[suit]}
         </div>
       </div>

@@ -1,7 +1,6 @@
 import { SeatPosition } from "@/types/poker";
 import { useState } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
-import PokerCard from "./PokerCard";
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -175,9 +174,23 @@ const PokerTableView = ({
               {/* Community Cards */}
               {communityCards && (
                 <div className="flex gap-1">
-                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                    <PokerCard key={idx} card={card} size="sm" />
-                  ))}
+                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => {
+                    const rank = card[0];
+                    const suit = card[1].toLowerCase();
+                    const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
+                    const isRed = suit === 'h' || suit === 'd';
+                    
+                    return (
+                      <div key={idx} className="w-6 h-8 sm:w-8 sm:h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
+                        <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
+                          {rank}
+                        </span>
+                        <span className={isRed ? 'text-red-600' : 'text-black'}>
+                          {suitSymbol}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               
@@ -263,17 +276,35 @@ const PokerTableView = ({
                   
                   {/* Hole cards during showdown */}
                   {playerHoleCards && playerHoleCards[position.player_id] && (
-                    <div className="flex gap-1 mt-1 animate-fade-in">
-                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                        <PokerCard key={idx} card={card} size="sm" />
-                      ))}
+                    <div className="flex gap-0.5 mt-1 animate-fade-in">
+                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => {
+                        const rank = card[0];
+                        const suit = card[1].toLowerCase();
+                        const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
+                        const isRed = suit === 'h' || suit === 'd';
+                        
+                        return (
+                          <div key={idx} className="w-8 h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
+                            <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
+                              {rank}
+                            </span>
+                            <span className={isRed ? 'text-red-600' : 'text-black'}>
+                              {suitSymbol}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   {/* Show card backs for players without known hole cards during showdown */}
                   {Object.keys(playerHoleCards).length > 0 && !playerHoleCards[position.player_id] && !isFolded && (
-                    <div className="flex gap-1 mt-1 animate-fade-in">
-                      <PokerCard card="back" size="sm" />
-                      <PokerCard card="back" size="sm" />
+                    <div className="flex gap-0.5 mt-1 animate-fade-in">
+                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                        <div className="text-white text-xs font-bold">?</div>
+                      </div>
+                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
+                        <div className="text-white text-xs font-bold">?</div>
+                      </div>
                     </div>
                   )}
                   
