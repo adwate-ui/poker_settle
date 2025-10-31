@@ -249,8 +249,30 @@ const PokerTableView = ({
                     </div>
                   )}
                   
-                  {/* Player avatar */}
+                  {/* Player avatar with hole cards positioned above */}
                   <div className="relative">
+                    {/* Player hole cards - positioned above avatar, overlapping it */}
+                    <div className={`absolute -top-6 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-all duration-300 ${
+                      isFolded || isMucked ? 'opacity-40 grayscale' : 'opacity-100'
+                    }`}>
+                      {hasKnownCards ? (
+                        // Show known cards face-up
+                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                          <PokerCard 
+                            key={idx} 
+                            card={card} 
+                            size="xs"
+                          />
+                        ))
+                      ) : !isMucked ? (
+                        // Always show card backs for unknown cards (unless mucked)
+                        <>
+                          <PokerCard card="back" size="xs" />
+                          <PokerCard card="back" size="xs" />
+                        </>
+                      ) : null}
+                    </div>
+                    
                     <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                       isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                       isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
@@ -275,30 +297,6 @@ const PokerTableView = ({
                       {position.player_name}
                     </span>
                   </div>
-                  
-                  {/* Player hole cards - Monarch design with muck animation */}
-                  {shouldShowCards && !isMucked && (
-                    <div className={`flex gap-1 mt-1 transition-all duration-300 ${
-                      isFolded ? 'opacity-0 scale-50' : 'opacity-100 scale-100 animate-fade-in'
-                    }`}>
-                      {hasKnownCards ? (
-                        // Show known cards face-up
-                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard 
-                            key={idx} 
-                            card={card} 
-                            size="sm"
-                          />
-                        ))
-                      ) : (
-                        // Show card backs for unknown cards
-                        <>
-                          <PokerCard card="back" size="sm" />
-                          <PokerCard card="back" size="sm" />
-                        </>
-                      )}
-                    </div>
-                  )}
                   
                   {/* Enhanced chip stack display */}
                   {playerBet > 0 && !isFolded && (
