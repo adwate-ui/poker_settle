@@ -19,29 +19,34 @@ const CHIP_DENOMINATIONS = [
 ];
 
 const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
-  // Calculate which chips to use (greedy algorithm)
-  const calculateChips = (total: number) => {
-    const chips: { value: number; image: string; color: string; count: number }[] = [];
-    let remaining = total;
-
+  // Select the best single chip denomination to display (simplified approach)
+  const selectBestChip = (total: number) => {
+    if (total === 0) return null;
+    
+    // Find the best denomination that represents the amount most efficiently
+    // We want to show 1-4 chips ideally
     for (const denom of CHIP_DENOMINATIONS) {
-      if (remaining >= denom.value) {
-        const count = Math.floor(remaining / denom.value);
-        chips.push({ ...denom, count });
-        remaining = remaining % denom.value;
+      const count = total / denom.value;
+      if (count >= 1 && count <= 10) {
+        return { 
+          ...denom, 
+          count: Math.ceil(count * 10) / 10, // Round to 1 decimal
+          visualCount: Math.min(Math.ceil(count), 4) // Show max 4 chips visually
+        };
       }
     }
-
-    // Always show at least one chip if amount > 0 (for values below the smallest denom)
-    if (chips.length === 0 && total > 0) {
-      const smallest = CHIP_DENOMINATIONS[CHIP_DENOMINATIONS.length - 1];
-      chips.push({ ...smallest, count: 1 });
-    }
-
-    return chips;
+    
+    // Fallback: use the highest denomination
+    const highest = CHIP_DENOMINATIONS[0];
+    const count = total / highest.value;
+    return {
+      ...highest,
+      count: Math.ceil(count * 10) / 10,
+      visualCount: Math.min(Math.ceil(count), 4)
+    };
   };
 
-  const chips = calculateChips(amount);
+  const chip = selectBestChip(amount);
 
   const sizeClasses = {
     sm: 'w-7 h-7',
@@ -51,64 +56,67 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
 
   const chipSize = sizeClasses[size];
 
+  if (!chip) {
+    return showLabel ? (
+      <div className="text-xs text-muted-foreground">Rs. 0</div>
+    ) : null;
+  }
+
   return (
-    <div className="flex flex-col items-center gap-1">
-      {/* Chip stacks */}
-      <div className="relative flex items-end gap-0.5">
-        {chips.map((chip, idx) => (
-          <div key={idx} className="relative flex flex-col items-center">
-            {/* Stack of chips (show more chips vertically for better visualization) */}
-            <div className="relative" style={{ height: `${Math.min(chip.count, 10) * 3 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
-              {Array.from({ length: Math.min(chip.count, 10) }).map((_, stackIdx) => (
-                <div key={stackIdx}>
-                  {/* Fallback circle (behind the image) */}
-                  <div
-                    className={`${chipSize} absolute left-0 rounded-full border-2 border-white shadow-md`}
-                    style={{
-                      bottom: `${stackIdx * 3}px`,
-                      zIndex: stackIdx,
-                      backgroundColor: chip.color,
-                    }}
-                  />
-                  {/* Image chip */}
-                  <img
-                    src={chip.image}
-                    alt={`${chip.value} chip`}
-                    className={`${chipSize} absolute left-0 rounded-full`}
-                    style={{
-                      bottom: `${stackIdx * 3}px`,
-                      zIndex: stackIdx + 1,
-                    }}
-                    onError={(e) => {
-                      // hide the image to reveal the fallback circle
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-            {/* Count indicator for more than 10 chips */}
-            {chip.count > 10 && (
-              <div 
-                className="absolute bg-black/90 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white/70 z-20"
+    <div className="flex flex-col items-center gap-0.5">
+      {/* Single chip stack */}
+      <div className="relative flex flex-col items-center">
+        {/* Stack of chips (show 1-4 chips max) */}
+        <div className="relative" style={{ height: `${chip.visualCount * 2 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
+          {Array.from({ length: chip.visualCount }).map((_, stackIdx) => (
+            <div key={stackIdx}>
+              {/* Fallback circle (behind the image) */}
+              <div
+                className={`${chipSize} absolute left-0 rounded-full border-2 border-white shadow-md`}
                 style={{
-                  width: size === 'sm' ? 14 : size === 'md' ? 16 : 18,
-                  height: size === 'sm' ? 14 : size === 'md' ? 16 : 18,
-                  top: -2,
-                  right: -2,
+                  bottom: `${stackIdx * 2}px`,
+                  zIndex: stackIdx,
+                  backgroundColor: chip.color,
                 }}
-              >
-                {chip.count}
-              </div>
-            )}
+              />
+              {/* Image chip */}
+              <img
+                src={chip.image}
+                alt={`${chip.value} chip`}
+                className={`${chipSize} absolute left-0 rounded-full`}
+                style={{
+                  bottom: `${stackIdx * 2}px`,
+                  zIndex: stackIdx + 1,
+                }}
+                onError={(e) => {
+                  // hide the image to reveal the fallback circle
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        
+        {/* Multiplier badge for fractional/large counts */}
+        {chip.count > 1 && chip.count !== chip.visualCount && (
+          <div 
+            className="absolute bg-black/90 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white/70 z-20 px-1"
+            style={{
+              minWidth: size === 'sm' ? 16 : size === 'md' ? 18 : 20,
+              height: size === 'sm' ? 14 : size === 'md' ? 16 : 18,
+              top: -4,
+              right: -4,
+            }}
+          >
+            ×{chip.count}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Amount label */}
+      {/* Amount label - more prominent */}
       {showLabel && (
         <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2 py-0.5 rounded shadow-lg border border-poker-gold/50">
-          <div className="text-xs font-bold whitespace-nowrap text-poker-gold">
+          <div className="text-sm font-bold whitespace-nowrap text-poker-gold">
             Rs. {amount.toLocaleString('en-IN')}
           </div>
         </div>
