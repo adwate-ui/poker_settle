@@ -19,7 +19,6 @@ const CHIP_DENOMINATIONS = [
 ];
 
 const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
-  console.log('ChipStack received amount:', amount, 'showLabel:', showLabel);
   // Calculate which chips to use (greedy algorithm)
   const calculateChips = (total: number) => {
     const chips: { value: number; image: string; color: string; count: number }[] = [];
@@ -43,7 +42,6 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
   };
 
   const chips = calculateChips(amount);
-  console.log('Calculated chips:', chips);
 
   const sizeClasses = {
     sm: 'w-7 h-7',
@@ -54,7 +52,7 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
   const chipSize = sizeClasses[size];
 
   return (
-    <div className="flex flex-col items-center gap-1" style={{ border: '1px solid red' }}>
+    <div className="flex flex-col items-center gap-1">
       {/* Chip stacks */}
       <div className="relative flex items-end gap-0.5">
         {chips.map((chip, idx) => (
