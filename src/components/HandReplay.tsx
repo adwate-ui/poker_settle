@@ -51,17 +51,32 @@ const HandReplay = ({
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
+  const [muckedPlayers, setMuckedPlayers] = useState<string[]>([]);
   const [animateChipsToPot, setAnimateChipsToPot] = useState(false);
   const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
+  const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
   
-  // Extract hole cards from actions
+  // Extract hole cards from actions and identify hero
   const playerHoleCards: Record<string, string> = {};
+  let heroPlayerId: string | null = null;
+  
   actions.forEach(action => {
     if (action.hole_cards && !playerHoleCards[action.player_id]) {
       playerHoleCards[action.player_id] = action.hole_cards;
     }
+    // Identify hero from is_hero field in actions
+    if ((action as any).is_hero && !heroPlayerId) {
+      heroPlayerId = action.player_id;
+    }
   });
+
+  // Initialize visible hole cards with hero's cards if available
+  useEffect(() => {
+    if (heroPlayerId && playerHoleCards[heroPlayerId]) {
+      setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
+    }
+  }, [heroPlayerId]);
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -144,9 +159,13 @@ const HandReplay = ({
       setPotSize(prev => prev + additionalBet);
     }
 
-    // Handle fold - remove player's chips and add to folded list
+    // Handle fold - muck cards and add to folded list
     if (action.action_type === 'Fold') {
       setFoldedPlayers(prev => [...prev, action.player_id]);
+      // Add small delay before mucking to show fold action
+      setTimeout(() => {
+        setMuckedPlayers(prev => [...prev, action.player_id]);
+      }, 200);
       setStreetPlayerBets(prev => {
         const newBets = { ...prev };
         delete newBets[action.player_id];
@@ -162,6 +181,8 @@ const HandReplay = ({
       // Check if we should show winner at the end
       if (currentActionIndex >= actions.length && winnerPlayerId && !showWinner) {
         setShowHoleCards(true);
+        // Show all players' hole cards when winner is decided
+        setVisibleHoleCards(playerHoleCards);
         setTimeout(() => {
           setShowWinner(true);
           // Trigger confetti
@@ -182,6 +203,7 @@ const HandReplay = ({
         // Show hole cards when reaching showdown (river completed)
         if (nextIndex >= actions.length - 1) {
           setShowHoleCards(true);
+          setVisibleHoleCards(playerHoleCards);
         }
         return nextIndex;
       });
@@ -206,9 +228,11 @@ const HandReplay = ({
         // Show hole cards when reaching showdown (river completed)
         if (nextIndex >= actions.length - 1) {
           setShowHoleCards(true);
+          setVisibleHoleCards(playerHoleCards);
         }
         // Show winner at the very end
         if (nextIndex >= actions.length && winnerPlayerId) {
+          setVisibleHoleCards(playerHoleCards); // Show all cards when winner declared
           setTimeout(() => {
             setShowWinner(true);
             confetti({
@@ -234,9 +258,16 @@ const HandReplay = ({
       setStreetPlayerBets({});
       setCommunityCards('');
       setFoldedPlayers([]);
+      setMuckedPlayers([]);
       setAnimateChipsToPot(false);
       setShowHoleCards(false);
       setShowWinner(false);
+      // Reset to show only hero's cards
+      if (heroPlayerId && playerHoleCards[heroPlayerId]) {
+        setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
+      } else {
+        setVisibleHoleCards({});
+      }
       
       // Replay actions without animation
       for (let i = 0; i < targetIndex; i++) {
@@ -254,9 +285,16 @@ const HandReplay = ({
     setStreetPlayerBets({});
     setCommunityCards('');
     setFoldedPlayers([]);
+    setMuckedPlayers([]);
     setAnimateChipsToPot(false);
     setShowHoleCards(false);
     setShowWinner(false);
+    // Reset to show only hero's cards
+    if (heroPlayerId && playerHoleCards[heroPlayerId]) {
+      setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
+    } else {
+      setVisibleHoleCards({});
+    }
   };
 
   const getCurrentAction = () => {
@@ -277,10 +315,12 @@ const HandReplay = ({
         potSize={potSize}
         showPositionLabels={true}
         foldedPlayers={foldedPlayers}
+        muckedPlayers={muckedPlayers}
         animateChipsToPot={animateChipsToPot}
-        playerHoleCards={showHoleCards ? playerHoleCards : undefined}
+        playerHoleCards={visibleHoleCards}
         animateChipsToWinner={showWinner ? winnerPlayerId : null}
         communityCards={communityCards}
+        showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
       />
 
       {/* Current Action Display */}

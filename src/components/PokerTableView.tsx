@@ -1,6 +1,8 @@
 import { SeatPosition } from "@/types/poker";
 import { useState } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
+import PokerCard from "./PokerCard";
+import pokerChipRed from "@/assets/poker-chip-red.png";
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -19,6 +21,8 @@ interface PokerTableViewProps {
   communityCards?: string;
   onPlayerClick?: (playerId: string) => void;
   activePlayerId?: string;
+  showAllPlayerCards?: boolean; // Show cards for all players (before any action)
+  muckedPlayers?: string[]; // Players who have mucked their cards
 }
 
 const PokerTableView = ({ 
@@ -37,7 +41,9 @@ const PokerTableView = ({
   playerHoleCards = {},
   communityCards = '',
   onPlayerClick,
-  activePlayerId
+  activePlayerId,
+  showAllPlayerCards = false,
+  muckedPlayers = []
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -171,37 +177,36 @@ const PokerTableView = ({
           {/* Center area - Community Cards and Pot */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex flex-col items-center gap-2">
-              {/* Community Cards */}
+              {/* Community Cards - using Monarch design */}
               {communityCards && (
-                <div className="flex gap-1">
-                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => {
-                    const rank = card[0];
-                    const suit = card[1].toLowerCase();
-                    const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
-                    const isRed = suit === 'h' || suit === 'd';
-                    
-                    return (
-                      <div key={idx} className="w-6 h-8 sm:w-8 sm:h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
-                        <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
-                          {rank}
-                        </span>
-                        <span className={isRed ? 'text-red-600' : 'text-black'}>
-                          {suitSymbol}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div className="flex gap-1.5 animate-fade-in">
+                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard 
+                      key={idx} 
+                      card={card} 
+                      size="sm"
+                    />
+                  ))}
                 </div>
               )}
               
-              {/* Pot display */}
+              {/* Pot display with chip visualization */}
               {potSize > 0 && (
-                <div className={`transition-all duration-500 ${
+                <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${
                   animateChipsToPot ? 'scale-110' : 'scale-100'
                 }`}>
-                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1.5 rounded-lg shadow-xl border-2 border-amber-400">
+                  {/* Chip stack */}
+                  <div className="relative w-16 h-16">
+                    <img 
+                      src={pokerChipRed} 
+                      alt="Poker chips"
+                      className="w-full h-full object-contain drop-shadow-2xl"
+                    />
+                  </div>
+                  {/* Pot amount */}
+                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-4 py-2 rounded-lg shadow-xl border-2 border-amber-400">
                     <div className="text-xs font-semibold text-amber-100">POT</div>
-                    <div className="text-sm font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
+                    <div className="text-base font-bold">Rs. {potSize.toLocaleString('en-IN')}</div>
                   </div>
                 </div>
               )}
@@ -217,8 +222,11 @@ const PokerTableView = ({
             const playerBet = playerBets[position.player_id] || 0;
             const isButton = buttonPlayerId === position.player_id;
             const isFolded = foldedPlayers.includes(position.player_id);
+            const isMucked = muckedPlayers.includes(position.player_id);
             const isWinner = animateChipsToWinner === position.player_id;
             const isActive = activePlayerId === position.player_id;
+            const hasKnownCards = playerHoleCards && playerHoleCards[position.player_id];
+            const shouldShowCards = hasKnownCards || (showAllPlayerCards && !isMucked);
             
             return (
               <div
@@ -274,94 +282,58 @@ const PokerTableView = ({
                     </span>
                   </div>
                   
-                  {/* Hole cards during showdown */}
-                  {playerHoleCards && playerHoleCards[position.player_id] && (
-                    <div className="flex gap-0.5 mt-1 animate-fade-in">
-                      {playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => {
-                        const rank = card[0];
-                        const suit = card[1].toLowerCase();
-                        const suitSymbol = suit === 'h' ? '♥' : suit === 'd' ? '♦' : suit === 's' ? '♠' : '♣';
-                        const isRed = suit === 'h' || suit === 'd';
-                        
-                        return (
-                          <div key={idx} className="w-8 h-11 bg-white rounded border border-gray-300 shadow-md flex flex-col items-center justify-center text-xs">
-                            <span className={`font-bold ${isRed ? 'text-red-600' : 'text-black'}`}>
-                              {rank}
-                            </span>
-                            <span className={isRed ? 'text-red-600' : 'text-black'}>
-                              {suitSymbol}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {/* Show card backs for players without known hole cards during showdown */}
-                  {Object.keys(playerHoleCards).length > 0 && !playerHoleCards[position.player_id] && !isFolded && (
-                    <div className="flex gap-0.5 mt-1 animate-fade-in">
-                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
-                        <div className="text-white text-xs font-bold">?</div>
-                      </div>
-                      <div className="w-8 h-11 bg-gradient-to-br from-blue-600 to-blue-800 rounded border border-blue-400 shadow-md flex items-center justify-center">
-                        <div className="text-white text-xs font-bold">?</div>
-                      </div>
+                  {/* Player hole cards - Monarch design with muck animation */}
+                  {shouldShowCards && !isMucked && (
+                    <div className={`flex gap-1 mt-1 transition-all duration-300 ${
+                      isFolded ? 'opacity-0 scale-50' : 'opacity-100 scale-100 animate-fade-in'
+                    }`}>
+                      {hasKnownCards ? (
+                        // Show known cards face-up
+                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                          <PokerCard 
+                            key={idx} 
+                            card={card} 
+                            size="sm"
+                          />
+                        ))
+                      ) : (
+                        // Show card backs for unknown cards
+                        <>
+                          <PokerCard card="back" size="sm" />
+                          <PokerCard card="back" size="sm" />
+                        </>
+                      )}
                     </div>
                   )}
                   
-                  {/* Chips display - positioned towards table center */}
+                  {/* Enhanced chip stack display */}
                   {playerBet > 0 && !isFolded && (
                     <div 
-                      className={`absolute transition-all duration-500 ${
-                        animateChipsToPot ? 'opacity-0 scale-50 translate-y-[-100px]' : 'opacity-100 scale-100'
+                      className={`absolute z-20 transition-all duration-500 ease-in-out ${
+                        animateChipsToPot 
+                          ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
+                          : 'opacity-100 scale-100'
                       }`}
                       style={{
-                        top: pos.y > 50 ? '-60px' : '80px',
-                        left: pos.x > 50 ? '-60px' : '60px',
+                        top: pos.y > 50 ? '-80px' : '100px',
+                        left: pos.x > 50 ? '-70px' : '70px',
                       }}
                     >
-                      {/* Poker chip stack */}
-                      <div className="relative flex flex-col items-center">
-                        {/* Chip SVG */}
-                        <svg width="48" height="48" viewBox="0 0 48 48" className="drop-shadow-lg">
-                          {/* Shadow chips for stack effect */}
-                          <circle cx="24" cy="26" r="18" fill="#C41E3A" opacity="0.5"/>
-                          <circle cx="24" cy="25" r="18" fill="#C41E3A" opacity="0.7"/>
-                          
-                          {/* Main chip */}
-                          <circle cx="24" cy="24" r="20" fill="#E63946"/>
-                          <circle cx="24" cy="24" r="20" fill="url(#chipGradient)" opacity="0.6"/>
-                          <circle cx="24" cy="24" r="18" fill="none" stroke="white" strokeWidth="1.5"/>
-                          <circle cx="24" cy="24" r="15" fill="none" stroke="white" strokeWidth="0.5" opacity="0.5"/>
-                          
-                          {/* Chip segments */}
-                          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-                            <rect
-                              key={angle}
-                              x="22"
-                              y="5"
-                              width="4"
-                              height="6"
-                              fill="white"
-                              transform={`rotate(${angle} 24 24)`}
-                              rx="1"
-                            />
-                          ))}
-                          
-                          {/* Center circle */}
-                          <circle cx="24" cy="24" r="8" fill="#FFF" opacity="0.3"/>
-                          
-                          <defs>
-                            <radialGradient id="chipGradient">
-                              <stop offset="0%" stopColor="white" stopOpacity="0.4"/>
-                              <stop offset="70%" stopColor="white" stopOpacity="0"/>
-                              <stop offset="100%" stopColor="black" stopOpacity="0.3"/>
-                            </radialGradient>
-                          </defs>
-                        </svg>
+                      <div className="relative flex flex-col items-center gap-1">
+                        {/* Chip stack image */}
+                        <div className="relative w-14 h-14">
+                          <img 
+                            src={pokerChipRed} 
+                            alt="Chips"
+                            className="w-full h-full object-contain drop-shadow-2xl"
+                          />
+                        </div>
                         
-                        {/* Bet amount */}
-                        <div className="absolute -bottom-5 bg-black/80 text-white px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap shadow-lg">
-                          Rs. {playerBet.toLocaleString('en-IN')}
+                        {/* Bet amount label */}
+                        <div className="bg-gradient-to-br from-gray-900 to-black text-white px-3 py-1.5 rounded-lg shadow-xl border border-poker-gold/50">
+                          <div className="text-sm font-bold whitespace-nowrap text-poker-gold">
+                            Rs. {playerBet.toLocaleString('en-IN')}
+                          </div>
                         </div>
                       </div>
                     </div>
