@@ -56,6 +56,7 @@ const HandReplay = ({
   const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
+  const [playerStacks] = useState<Record<string, number>>({});
   
   // Extract hole cards from actions and identify hero
   const playerHoleCards: Record<string, string> = {};
@@ -321,6 +322,7 @@ const HandReplay = ({
         animateChipsToWinner={showWinner ? winnerPlayerId : null}
         communityCards={communityCards}
         showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
+        playerStacks={playerStacks}
       />
 
       {/* Current Action Display */}

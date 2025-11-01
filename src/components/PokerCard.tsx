@@ -1,5 +1,4 @@
 import React from 'react';
-import monarchCardBack from '@/assets/monarch-card-back.png';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -8,22 +7,18 @@ interface PokerCardProps {
 }
 
 const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
-  // Handle card back
+  // Handle card back - solid green design
   if (!card || card === 'back' || card === '??') {
     const sizes = {
-      xs: 'w-[32px] h-[46px]',
+      xs: 'w-[40px] h-[58px]',
       sm: 'w-[58px] h-[84px]',
       md: 'w-[78px] h-[112px]',
       lg: 'w-[94px] h-[136px]',
     };
     
     return (
-      <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative bg-gray-900`}>
-        <img 
-          src={monarchCardBack} 
-          alt="Card back" 
-          className="w-full h-full object-cover"
-        />
+      <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative bg-green-700 border-2 border-green-800`}>
+        {/* Solid green card back */}
       </div>
     );
   }
@@ -47,9 +42,8 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
     's': 'text-gray-900',
   };
 
-  // Increased by 30%: sm: 14*1.3=18.2, 20*1.3=26; md: 20*1.3=26, 28*1.3=36.4; lg: 24*1.3=31.2, 36*1.3=46.8
   const sizes = {
-    xs: 'w-[32px] h-[46px]',
+    xs: 'w-[40px] h-[58px]',
     sm: 'w-[58px] h-[84px]',
     md: 'w-[78px] h-[112px]',
     lg: 'w-[94px] h-[136px]',

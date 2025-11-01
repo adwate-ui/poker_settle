@@ -84,6 +84,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [positionsChanged, setPositionsChanged] = useState(false);
   const [showPlayerActionDialog, setShowPlayerActionDialog] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
+  const [playerStacks, setPlayerStacks] = useState<Record<string, number>>({});
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -766,12 +767,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   player_id: gp.player_id,
                   player_name: gp.player.name,
                 }))}
-              buttonPlayerId={buttonPlayerId}
-              seatPositions={seatPositions}
-              foldedPlayers={dealtOutPlayers}
-              onPlayerClick={handlePlayerClick}
-              communityCards=""
-            />
+            buttonPlayerId={buttonPlayerId}
+            seatPositions={seatPositions}
+            foldedPlayers={dealtOutPlayers}
+            onPlayerClick={handlePlayerClick}
+            communityCards=""
+            playerStacks={playerStacks}
+          />
 
             {/* Status Display */}
             <div className="space-y-2">

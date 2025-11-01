@@ -24,14 +24,14 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
     if (total === 0) return null;
     
     // Find the best denomination that represents the amount most efficiently
-    // We want to show 1-4 chips ideally
+    // We want to show 1-3 chips ideally (Full Tilt style)
     for (const denom of CHIP_DENOMINATIONS) {
       const count = total / denom.value;
       if (count >= 1 && count <= 10) {
         return { 
           ...denom, 
           count: Math.ceil(count * 10) / 10, // Round to 1 decimal
-          visualCount: Math.min(Math.ceil(count), 4) // Show max 4 chips visually
+          visualCount: Math.min(Math.ceil(count), 3) // Show max 3 chips visually
         };
       }
     }
@@ -42,7 +42,7 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
     return {
       ...highest,
       count: Math.ceil(count * 10) / 10,
-      visualCount: Math.min(Math.ceil(count), 4)
+      visualCount: Math.min(Math.ceil(count), 3)
     };
   };
 
@@ -66,8 +66,8 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
     <div className="flex flex-col items-center gap-0.5">
       {/* Single chip stack */}
       <div className="relative flex flex-col items-center">
-        {/* Stack of chips (show 1-4 chips max) */}
-        <div className="relative" style={{ height: `${chip.visualCount * 2 + (size === 'sm' ? 28 : size === 'md' ? 36 : 44)}px` }}>
+        {/* Stack of chips (show 1-3 chips max) */}
+        <div className="relative" style={{ height: `${chip.visualCount * 2 + (size === 'sm' ? 24 : size === 'md' ? 30 : 38)}px` }}>
           {Array.from({ length: chip.visualCount }).map((_, stackIdx) => (
             <div key={stackIdx}>
               {/* Fallback circle (behind the image) */}
@@ -97,15 +97,15 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
           ))}
         </div>
         
-        {/* Multiplier badge for fractional/large counts */}
-        {chip.count > 1 && chip.count !== chip.visualCount && (
+        {/* Multiplier badge - more prominent */}
+        {chip.count > 1 && (
           <div 
-            className="absolute bg-black/90 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white/70 z-20 px-1"
+            className="absolute bg-black text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white z-20 px-1.5 shadow-lg"
             style={{
-              minWidth: size === 'sm' ? 16 : size === 'md' ? 18 : 20,
-              height: size === 'sm' ? 14 : size === 'md' ? 16 : 18,
+              minWidth: size === 'sm' ? 18 : size === 'md' ? 20 : 22,
+              height: size === 'sm' ? 16 : size === 'md' ? 18 : 20,
               top: -4,
-              right: -4,
+              right: -6,
             }}
           >
             ×{chip.count}
@@ -113,10 +113,10 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
         )}
       </div>
 
-      {/* Amount label - more prominent */}
+      {/* Amount label - more prominent Full Tilt style */}
       {showLabel && (
-        <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2 py-0.5 rounded shadow-lg border border-poker-gold/50">
-          <div className="text-sm font-bold whitespace-nowrap text-poker-gold">
+        <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2.5 py-1 rounded shadow-xl border border-poker-gold/60">
+          <div className="text-base font-bold whitespace-nowrap text-poker-gold drop-shadow-md">
             Rs. {amount.toLocaleString('en-IN')}
           </div>
         </div>

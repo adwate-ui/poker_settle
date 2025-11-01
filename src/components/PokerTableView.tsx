@@ -23,6 +23,7 @@ interface PokerTableViewProps {
   activePlayerId?: string;
   showAllPlayerCards?: boolean; // Show cards for all players (before any action)
   muckedPlayers?: string[]; // Players who have mucked their cards
+  playerStacks?: Record<string, number>; // Player chip stacks
 }
 
 const PokerTableView = ({ 
@@ -43,7 +44,8 @@ const PokerTableView = ({
   onPlayerClick,
   activePlayerId,
   showAllPlayerCards = false,
-  muckedPlayers = []
+  muckedPlayers = [],
+  playerStacks = {}
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -252,28 +254,26 @@ const PokerTableView = ({
                   {/* Player avatar with hole cards positioned above */}
                   <div className="relative">
                     {/* Player hole cards - positioned to overlap with player name below */}
-                    {!isMucked && (
-                      <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-all duration-300 ${
-                        isFolded ? 'opacity-40 grayscale' : 'opacity-100'
-                      }`}>
-                        {hasKnownCards ? (
-                          // Show known cards face-up
-                          playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                            <PokerCard 
-                              key={idx} 
-                              card={card} 
-                              size="xs"
-                            />
-                          ))
-                        ) : (
-                          // Always show card backs for unknown cards
-                          <>
-                            <PokerCard card="back" size="xs" />
-                            <PokerCard card="back" size="xs" />
-                          </>
-                        )}
-                      </div>
-                    )}
+                    <div className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1 z-10 transition-all duration-300 ease-in-out ${
+                      isFolded ? 'opacity-30 grayscale' : 'opacity-100'
+                    }`}>
+                      {hasKnownCards ? (
+                        // Show known cards face-up
+                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                          <PokerCard 
+                            key={idx} 
+                            card={card} 
+                            size="xs"
+                          />
+                        ))
+                      ) : shouldShowCards ? (
+                        // Show card backs for unknown cards (not mucked)
+                        <>
+                          <PokerCard card="back" size="xs" />
+                          <PokerCard card="back" size="xs" />
+                        </>
+                      ) : null}
+                    </div>
                     
                     <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                       isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
@@ -293,11 +293,16 @@ const PokerTableView = ({
                     )}
                   </div>
                   
-                  {/* Player name */}
-                  <div className="bg-card/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-md border border-border">
+                  {/* Player name and stack */}
+                  <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0">
                     <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap">
                       {position.player_name}
                     </span>
+                    {playerStacks[position.player_id] !== undefined && (
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                      </span>
+                    )}
                   </div>
                   
                   {/* Enhanced chip stack display */}
