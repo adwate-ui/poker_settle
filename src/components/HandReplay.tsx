@@ -86,18 +86,89 @@ const HandReplay = ({
     player_name: playerName,
   })).sort((a, b) => a.seat - b.seat);
 
+  // Validate if betting round is complete before street transition
+  const isBettingComplete = (
+    streetBets: Record<string, number>,
+    folded: string[],
+    currentStreetType: string,
+    upToActionIndex: number
+  ): boolean => {
+    // Get all actions up to current index for this street
+    const streetActions = actions.slice(0, upToActionIndex).filter(
+      a => a.street_type === currentStreetType
+    );
+    
+    // Get players still in hand (not folded)
+    const activePlayers = Object.keys(streetBets).filter(
+      pid => !folded.includes(pid)
+    );
+    
+    if (activePlayers.length <= 1) return true; // Only one or zero players left
+    
+    // All active players must have equal bets (or 0 if no betting occurred)
+    const bets = activePlayers.map(pid => streetBets[pid] || 0);
+    const maxBet = Math.max(...bets);
+    const allEqual = bets.every(bet => bet === maxBet);
+    
+    if (!allEqual) return false;
+    
+    // Ensure all active players have acted at least once on this street
+    const playersWhoActed = new Set(streetActions.map(a => a.player_id));
+    const allActed = activePlayers.every(pid => playersWhoActed.has(pid));
+    
+    return allActed;
+  };
+
   // Process action and update state
-  const processAction = (actionIndex: number, skipAnimation: boolean = false) => {
+  const processAction = (
+    actionIndex: number, 
+    skipAnimation: boolean = false,
+    localStreetBets?: Record<string, number>,
+    localPot?: { value: number },
+    localFolded?: string[],
+    localCurrentStreet?: { value: string }
+  ) => {
     if (actionIndex >= actions.length) return;
 
     const action = actions[actionIndex];
     
+    // Use local tracking if provided, otherwise use React state
+    const currentBets = localStreetBets || streetPlayerBets;
+    const currentPotValue = localPot ? localPot.value : potSize;
+    const currentFoldedList = localFolded || foldedPlayers;
+    const trackingStreet = localCurrentStreet ? localCurrentStreet.value : currentStreet;
+    
     // Check if street changed
-    if (action.street_type !== currentStreet) {
+    if (action.street_type !== trackingStreet) {
+      // BUG B FIX: Validate betting round completion before transitioning
+      const wasComplete = isBettingComplete(
+        currentBets,
+        currentFoldedList,
+        trackingStreet,
+        actionIndex
+      );
+      
+      if (!wasComplete && actionIndex > 0) {
+        console.warn(
+          `⚠️ Street transition at action ${actionIndex} but betting may not be complete!`,
+          { 
+            currentStreet: trackingStreet, 
+            nextStreet: action.street_type,
+            streetBets: currentBets,
+            folded: currentFoldedList
+          }
+        );
+      }
       const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
       
       if (skipAnimation) {
-        // Clear street bets display when moving to new street (already added to pot during actions)
+        // Clear street bets when moving to new street
+        if (localStreetBets) {
+          Object.keys(localStreetBets).forEach(key => localStreetBets[key] = 0);
+        }
+        if (localCurrentStreet) {
+          localCurrentStreet.value = action.street_type;
+        }
         setStreetPlayerBets({});
         setCurrentStreet(action.street_type as any);
         
@@ -143,11 +214,19 @@ const HandReplay = ({
       }
     }
 
-    // Update player bet for current street and pot size
-    const currentPlayerBet = streetPlayerBets[action.player_id] || 0;
+    // BUG A FIX: Use local tracking to avoid stale state during rapid replay
+    const currentPlayerBet = currentBets[action.player_id] || 0;
     const additionalBet = action.bet_size - currentPlayerBet;
     
-    // Update street player bets for display
+    // Update local tracking if provided
+    if (localStreetBets && action.bet_size > 0) {
+      localStreetBets[action.player_id] = action.bet_size;
+    }
+    if (localPot && additionalBet > 0) {
+      localPot.value += additionalBet;
+    }
+    
+    // Update React state for UI display
     if (action.bet_size > 0) {
       setStreetPlayerBets(prev => ({
         ...prev,
@@ -155,18 +234,28 @@ const HandReplay = ({
       }));
     }
     
-    // Add the additional bet to pot (even for river)
+    // Add the additional bet to pot
     if (additionalBet > 0) {
       setPotSize(prev => prev + additionalBet);
     }
 
     // Handle fold - muck cards and add to folded list
     if (action.action_type === 'Fold') {
+      if (localFolded) {
+        localFolded.push(action.player_id);
+      }
       setFoldedPlayers(prev => [...prev, action.player_id]);
-      // Add small delay before mucking to show fold action
-      setTimeout(() => {
+      // Add small delay before mucking to show fold action (only if not skipping animation)
+      if (!skipAnimation) {
+        setTimeout(() => {
+          setMuckedPlayers(prev => [...prev, action.player_id]);
+        }, 200);
+      } else {
         setMuckedPlayers(prev => [...prev, action.player_id]);
-      }, 200);
+      }
+      if (localStreetBets) {
+        delete localStreetBets[action.player_id];
+      }
       setStreetPlayerBets(prev => {
         const newBets = { ...prev };
         delete newBets[action.player_id];
@@ -255,7 +344,7 @@ const HandReplay = ({
       setCurrentActionIndex(0);
       setIsPlaying(false);
       setCurrentStreet('Preflop');
-      setPotSize(0); // Reset to 0
+      setPotSize(0);
       setStreetPlayerBets({});
       setCommunityCards('');
       setFoldedPlayers([]);
@@ -270,9 +359,15 @@ const HandReplay = ({
         setVisibleHoleCards({});
       }
       
-      // Replay actions without animation
+      // BUG A FIX: Use local tracking during rapid replay to avoid stale state
+      const localBets: Record<string, number> = {};
+      const localPot = { value: 0 };
+      const localFolded: string[] = [];
+      const localStreet = { value: 'Preflop' };
+      
+      // Replay actions without animation using local state tracking
       for (let i = 0; i < targetIndex; i++) {
-        processAction(i, true);
+        processAction(i, true, localBets, localPot, localFolded, localStreet);
       }
       setCurrentActionIndex(targetIndex);
     }
