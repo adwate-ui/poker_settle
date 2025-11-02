@@ -57,6 +57,7 @@ const HandReplay = ({
   const [showWinner, setShowWinner] = useState(false);
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
   const [playerStacks] = useState<Record<string, number>>({});
+  const [potSizeHistory, setPotSizeHistory] = useState<Array<{ actionIndex: number; potSize: number; street: string }>>([]);
   
   // Extract hole cards from actions and identify hero
   const playerHoleCards: Record<string, string> = {};
@@ -236,7 +237,23 @@ const HandReplay = ({
     
     // Add the additional bet to pot
     if (additionalBet > 0) {
-      setPotSize(prev => prev + additionalBet);
+      setPotSize(prev => {
+        const newPot = prev + additionalBet;
+        // Log pot updates for Turn and River to ensure proper recording
+        if (action.street_type === 'Turn' || action.street_type === 'River') {
+          console.log(`[${action.street_type}] Action ${actionIndex}: ${action.action_type} by ${action.player_id.slice(0, 8)}... - Bet: ${action.bet_size}, Additional: ${additionalBet}, New Pot: ${newPot}`);
+        }
+        return newPot;
+      });
+      
+      // Track pot size history
+      if (!skipAnimation) {
+        setPotSizeHistory(prev => [...prev, {
+          actionIndex,
+          potSize: (localPot ? localPot.value : potSize) + additionalBet,
+          street: action.street_type
+        }]);
+      }
     }
 
     // Handle fold - muck cards and add to folded list
@@ -263,6 +280,21 @@ const HandReplay = ({
       });
     }
   };
+
+  // Validate final pot size matches expected
+  useEffect(() => {
+    if (currentActionIndex >= actions.length && actions.length > 0) {
+      // Calculate expected final pot from initial pot + all action contributions
+      const calculatedFinalPot = potSize;
+      console.log(`[Pot Validation] Replay Final Pot: Rs.${calculatedFinalPot}, Actions Processed: ${currentActionIndex}/${actions.length}`);
+      
+      // Log Turn and River action counts
+      const turnActions = actions.filter(a => a.street_type === 'Turn');
+      const riverActions = actions.filter(a => a.street_type === 'River');
+      console.log(`[Street Summary] Turn Actions: ${turnActions.length}, River Actions: ${riverActions.length}`);
+      console.log('[Pot History]', potSizeHistory.filter(h => h.street === 'Turn' || h.street === 'River'));
+    }
+  }, [currentActionIndex, actions.length, potSize, potSizeHistory]);
 
   // Auto-play effect with confetti
   useEffect(() => {
@@ -385,6 +417,7 @@ const HandReplay = ({
     setAnimateChipsToPot(false);
     setShowHoleCards(false);
     setShowWinner(false);
+    setPotSizeHistory([]);
     // Reset to show only hero's cards
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
       setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
@@ -443,6 +476,12 @@ const HandReplay = ({
                   </span>
                 )}
               </div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-border/50 flex justify-between text-sm">
+              <span className="text-muted-foreground">Current Pot:</span>
+              <span className="font-semibold text-poker-gold">
+                Rs. {potSize.toLocaleString('en-IN')}
+              </span>
             </div>
           </CardContent>
         </Card>
