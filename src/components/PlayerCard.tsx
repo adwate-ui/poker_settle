@@ -3,34 +3,60 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { GamePlayer } from "@/types/poker";
-import { Plus, Minus, TrendingUp, TrendingDown, Trophy, Target, Check } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { GamePlayer, BuyInHistory } from "@/types/poker";
+import { TrendingUp, TrendingDown, Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
+import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
   buyInAmount: number;
-  onUpdatePlayer: (gamePlayerId: string, updates: Partial<GamePlayer>) => void;
+  onUpdatePlayer: (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn?: boolean) => void;
+  fetchBuyInHistory: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
-const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps) => {
+const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory }: PlayerCardProps) => {
   const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [localBuyIns, setLocalBuyIns] = useState(gamePlayer.buy_ins);
+  const [hasFinalStackChanges, setHasFinalStackChanges] = useState(false);
+  const [showBuyInConfirm, setShowBuyInConfirm] = useState(false);
+  const [pendingBuyIns, setPendingBuyIns] = useState<number | null>(null);
   
   const netAmount = (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount);
   const isProfit = netAmount > 0;
 
-  const updateBuyIns = (change: number) => {
-    const newBuyIns = Math.max(1, gamePlayer.buy_ins + change);
-    onUpdatePlayer(gamePlayer.id, { 
-      buy_ins: newBuyIns,
-      net_amount: (gamePlayer.final_stack || 0) - (newBuyIns * buyInAmount)
-    });
+  const handleBuyInsChange = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    if (numValue > 0 && numValue <= 100) {
+      setLocalBuyIns(numValue);
+      if (numValue !== gamePlayer.buy_ins) {
+        setPendingBuyIns(numValue);
+        setShowBuyInConfirm(true);
+      }
+    }
+  };
+
+  const confirmBuyInChange = () => {
+    if (pendingBuyIns !== null) {
+      onUpdatePlayer(gamePlayer.id, { 
+        buy_ins: pendingBuyIns,
+        net_amount: (gamePlayer.final_stack || 0) - (pendingBuyIns * buyInAmount)
+      }, true); // Log this change
+      setShowBuyInConfirm(false);
+      setPendingBuyIns(null);
+    }
+  };
+
+  const cancelBuyInChange = () => {
+    setLocalBuyIns(gamePlayer.buy_ins);
+    setShowBuyInConfirm(false);
+    setPendingBuyIns(null);
   };
 
   const handleFinalStackChange = (value: number) => {
     setLocalFinalStack(value);
-    setHasChanges(value !== (gamePlayer.final_stack || 0));
+    setHasFinalStackChanges(value !== (gamePlayer.final_stack || 0));
   };
 
   const confirmFinalStack = () => {
@@ -38,7 +64,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
       final_stack: localFinalStack,
       net_amount: localFinalStack - (gamePlayer.buy_ins * buyInAmount)
     });
-    setHasChanges(false);
+    setHasFinalStackChanges(false);
   };
 
   return (
@@ -76,27 +102,23 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4">
         <div className="space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm text-muted-foreground">Buy-ins</span>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateBuyIns(-1)}
-                className="h-7 w-7 sm:h-8 sm:w-8 touch-manipulation"
-              >
-                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-              </Button>
-              <span className="font-semibold text-base sm:text-lg w-7 sm:w-8 text-center">{gamePlayer.buy_ins}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateBuyIns(1)}
-                className="h-7 w-7 sm:h-8 sm:w-8 touch-manipulation"
-              >
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-              </Button>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-muted-foreground">Buy-ins</span>
+              <BuyInHistoryDialog 
+                gamePlayerId={gamePlayer.id}
+                playerName={gamePlayer.player.name}
+                fetchHistory={fetchBuyInHistory}
+              />
             </div>
+            <Input
+              type="number"
+              min="1"
+              max="100"
+              value={localBuyIns}
+              onChange={(e) => handleBuyInsChange(e.target.value)}
+              className="text-center font-semibold text-base sm:text-lg"
+            />
           </div>
 
           <div className="space-y-2">
@@ -109,7 +131,7 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
                 className="text-center font-mono text-sm sm:text-base"
                 placeholder="Enter amount"
               />
-              {hasChanges && (
+              {hasFinalStackChanges && (
                 <Button 
                   variant="default" 
                   size="sm" 
@@ -140,6 +162,23 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer }: PlayerCardProps
           </div>
         </div>
       </CardContent>
+
+      <AlertDialog open={showBuyInConfirm} onOpenChange={setShowBuyInConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Buy-in Change</AlertDialogTitle>
+            <AlertDialogDescription>
+              Change buy-ins from <strong>{gamePlayer.buy_ins}</strong> to <strong>{pendingBuyIns}</strong> for {gamePlayer.player.name}?
+              <br /><br />
+              This will be recorded in the buy-in history log.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelBuyInChange}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBuyInChange}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

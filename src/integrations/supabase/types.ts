@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      buy_in_history: {
+        Row: {
+          buy_ins_added: number
+          created_at: string
+          game_player_id: string
+          id: string
+          timestamp: string
+          total_buy_ins_after: number
+        }
+        Insert: {
+          buy_ins_added: number
+          created_at?: string
+          game_player_id: string
+          id?: string
+          timestamp?: string
+          total_buy_ins_after: number
+        }
+        Update: {
+          buy_ins_added?: number
+          created_at?: string
+          game_player_id?: string
+          id?: string
+          timestamp?: string
+          total_buy_ins_after?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buy_in_history_game_player_id_fkey"
+            columns: ["game_player_id"]
+            isOneToOne: false
+            referencedRelation: "game_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_players: {
         Row: {
           buy_ins: number

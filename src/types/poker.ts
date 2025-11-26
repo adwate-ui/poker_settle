@@ -82,3 +82,12 @@ export interface PlayerAction {
   position: string | null;
   created_at: string;
 }
+
+export interface BuyInHistory {
+  id: string;
+  game_player_id: string;
+  timestamp: string;
+  buy_ins_added: number;
+  total_buy_ins_after: number;
+  created_at: string;
+}
