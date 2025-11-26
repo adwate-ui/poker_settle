@@ -36,7 +36,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [currentTablePosition, setCurrentTablePosition] = useState<TablePosition | null>(null);
   const [positionsJustChanged, setPositionsJustChanged] = useState(false);
   const [handTrackingStage, setHandTrackingStage] = useState<'setup' | 'ready' | 'recording'>('setup');
-  const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition } = useGameData();
+  const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition, fetchBuyInHistory } = useGameData();
   
   useEffect(() => {
     const loadTablePosition = async () => {
@@ -52,9 +52,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     loadTablePosition();
   }, [game.id]);
 
-  const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
+  const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
     try {
-      await updateGamePlayer(gamePlayerId, updates);
+      await updateGamePlayer(gamePlayerId, updates, logBuyIn);
       setGamePlayers(prev => prev.map(gp => 
         gp.id === gamePlayerId ? { ...gp, ...updates } : gp
       ));
@@ -461,6 +461,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               gamePlayer={gamePlayer}
               buyInAmount={game.buy_in_amount}
               onUpdatePlayer={handlePlayerUpdate}
+              fetchBuyInHistory={fetchBuyInHistory}
             />
           ))}
         </div>

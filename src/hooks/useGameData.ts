@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Player, Game, GamePlayer, SeatPosition, TablePosition } from "@/types/poker";
+import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
@@ -145,7 +145,7 @@ export const useGameData = () => {
     }
   };
 
-  const updateGamePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>) => {
+  const updateGamePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
     // Validate updates
     if (updates.final_stack !== undefined) {
       try {
@@ -169,12 +169,54 @@ export const useGameData = () => {
       }
     }
 
+    // If buy_ins are being updated and logging is requested, create a history entry
+    if (updates.buy_ins !== undefined && logBuyIn) {
+      // First get the current buy_ins
+      const { data: currentData } = await supabase
+        .from("game_players")
+        .select("buy_ins")
+        .eq("id", gamePlayerId)
+        .single();
+
+      if (currentData) {
+        const buyInsAdded = updates.buy_ins - currentData.buy_ins;
+        
+        // Only log if there's an actual change
+        if (buyInsAdded !== 0) {
+          await supabase
+            .from("buy_in_history")
+            .insert({
+              game_player_id: gamePlayerId,
+              buy_ins_added: buyInsAdded,
+              total_buy_ins_after: updates.buy_ins,
+              timestamp: new Date().toISOString()
+            });
+        }
+      }
+    }
+
     const { error } = await supabase
       .from("game_players")
       .update(updates)
       .eq("id", gamePlayerId);
 
     if (error) throw error;
+  };
+
+  const fetchBuyInHistory = async (gamePlayerId: string): Promise<BuyInHistory[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("buy_in_history")
+        .select("*")
+        .eq("game_player_id", gamePlayerId)
+        .order("timestamp", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching buy-in history:", error);
+      return [];
+    }
   };
 
   const deletePlayer = async (playerId: string) => {
@@ -463,6 +505,7 @@ export const useGameData = () => {
     saveTablePosition,
     fetchTablePositions,
     getCurrentTablePosition,
-    getTablePositionWithMostPlayers
+    getTablePositionWithMostPlayers,
+    fetchBuyInHistory
   };
 };
