@@ -72,7 +72,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                     )}
                     <div>
                       <div className="text-sm font-medium">
-                        {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added} buy-in{Math.abs(entry.buy_ins_added) !== 1 ? 's' : ''}
+                        Added {entry.buy_ins_added} buy-in{Math.abs(entry.buy_ins_added) !== 1 ? 's' : ''}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(entry.timestamp), "MMM d, yyyy h:mm a")}
@@ -80,8 +80,9 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                     </div>
                   </div>
                   <div className="text-right">
+                    <div className="text-xs text-muted-foreground">New Total</div>
                     <div className="text-sm font-semibold">
-                      Total: {entry.total_buy_ins_after}
+                      {entry.total_buy_ins_after}
                     </div>
                   </div>
                 </div>
