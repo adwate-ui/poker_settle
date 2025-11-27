@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { History, TrendingUp } from "lucide-react";
+import { History, TrendingUp, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface BuyInHistoryEntry {
   id: string;
@@ -22,6 +24,7 @@ interface ConsolidatedBuyInLogsProps {
 export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) => {
   const [history, setHistory] = useState<BuyInHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterName, setFilterName] = useState<string>("");
 
   useEffect(() => {
     fetchAllBuyInHistory();
@@ -62,6 +65,12 @@ export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) =>
     }
   };
 
+  const filteredHistory = history.filter(entry => 
+    filterName === "" || entry.player_name.toLowerCase().includes(filterName.toLowerCase())
+  );
+
+  const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
@@ -70,7 +79,42 @@ export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) =>
           Buy-in History
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="pt-4 space-y-4">
+        {!loading && history.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="Filter by player name..."
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                className="text-sm"
+              />
+              {filterName && (
+                <button
+                  onClick={() => setFilterName("")}
+                  className="p-2 hover:bg-accent rounded-md transition-colors"
+                  aria-label="Clear filter"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {uniquePlayerNames.map((name) => (
+                <Badge
+                  key={name}
+                  variant={filterName === name ? "default" : "outline"}
+                  className="cursor-pointer text-xs"
+                  onClick={() => setFilterName(filterName === name ? "" : name)}
+                >
+                  {name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -79,10 +123,14 @@ export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) =>
           <div className="text-center py-8 text-muted-foreground">
             No buy-in changes recorded
           </div>
+        ) : filteredHistory.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No buy-in changes found for "{filterName}"
+          </div>
         ) : (
           <ScrollArea className="h-[200px] pr-4">
             <div className="space-y-3">
-              {history.map((entry) => (
+              {filteredHistory.map((entry) => (
                 <div
                   key={entry.id}
                   className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
