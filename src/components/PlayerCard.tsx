@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { TrendingUp, TrendingDown, Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
@@ -20,40 +19,27 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
   const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
   const [addBuyInsAmount, setAddBuyInsAmount] = useState<string>('');
   const [hasFinalStackChanges, setHasFinalStackChanges] = useState(false);
-  const [showBuyInConfirm, setShowBuyInConfirm] = useState(false);
-  const [pendingAddBuyIns, setPendingAddBuyIns] = useState<number | null>(null);
   
   const netAmount = (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount);
   const isProfit = netAmount > 0;
 
   const handleAddBuyIns = () => {
     const numToAdd = parseInt(addBuyInsAmount) || 0;
-    if (numToAdd <= 0) {
+    if (numToAdd === 0) {
       return;
     }
-    if (numToAdd > 50) {
+    const newTotal = gamePlayer.buy_ins + numToAdd;
+    if (newTotal < 1) {
+      return; // Prevent going below 1 buy-in total
+    }
+    if (Math.abs(numToAdd) > 50) {
       return;
     }
-    setPendingAddBuyIns(numToAdd);
-    setShowBuyInConfirm(true);
-  };
-
-  const confirmBuyInChange = () => {
-    if (pendingAddBuyIns !== null) {
-      const newTotal = gamePlayer.buy_ins + pendingAddBuyIns;
-      onUpdatePlayer(gamePlayer.id, { 
-        buy_ins: newTotal,
-        net_amount: (gamePlayer.final_stack || 0) - (newTotal * buyInAmount)
-      }, true); // Log this change
-      setShowBuyInConfirm(false);
-      setPendingAddBuyIns(null);
-      setAddBuyInsAmount('');
-    }
-  };
-
-  const cancelBuyInChange = () => {
-    setShowBuyInConfirm(false);
-    setPendingAddBuyIns(null);
+    
+    onUpdatePlayer(gamePlayer.id, { 
+      buy_ins: newTotal,
+      net_amount: (gamePlayer.final_stack || 0) - (newTotal * buyInAmount)
+    }, true); // Log this change
     setAddBuyInsAmount('');
   };
 
@@ -120,22 +106,20 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs sm:text-sm text-muted-foreground">Add Buy-ins</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Add Buy-ins (+ or -)</span>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                min="1"
-                max="50"
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
                 className="text-center font-mono text-sm sm:text-base"
-                placeholder="Enter amount"
+                placeholder="e.g., 2 or -1"
               />
               <Button 
                 variant="default" 
                 size="sm" 
                 onClick={handleAddBuyIns}
-                disabled={!addBuyInsAmount || parseInt(addBuyInsAmount) <= 0}
+                disabled={!addBuyInsAmount || parseInt(addBuyInsAmount) === 0}
                 className="shrink-0 touch-manipulation"
               >
                 Add
@@ -184,25 +168,6 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
           </div>
         </div>
       </CardContent>
-
-      <AlertDialog open={showBuyInConfirm} onOpenChange={setShowBuyInConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Add Buy-ins</AlertDialogTitle>
-            <AlertDialogDescription>
-              Add <strong>{pendingAddBuyIns}</strong> buy-in{pendingAddBuyIns !== 1 ? 's' : ''} to {gamePlayer.player.name}?
-              <br />
-              Current: <strong>{gamePlayer.buy_ins}</strong> → New Total: <strong>{pendingAddBuyIns ? gamePlayer.buy_ins + pendingAddBuyIns : gamePlayer.buy_ins}</strong>
-              <br /><br />
-              This will be recorded in the buy-in history log.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelBuyInChange}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmBuyInChange}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 };
