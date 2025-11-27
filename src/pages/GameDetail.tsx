@@ -9,8 +9,10 @@ import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { formatIndianNumber } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
-import { Game, SeatPosition } from "@/types/poker";
+import { Game, SeatPosition, BuyInHistory } from "@/types/poker";
 import { Badge } from "@/components/ui/badge";
+import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
+import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 import {
   Table,
   TableBody,
@@ -60,6 +62,21 @@ const GameDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  const fetchBuyInHistory = async (gamePlayerId: string): Promise<BuyInHistory[]> => {
+    const { data, error } = await supabase
+      .from("buy_in_history")
+      .select("*")
+      .eq("game_player_id", gamePlayerId)
+      .order("timestamp", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching buy-in history:", error);
+      return [];
+    }
+
+    return data || [];
+  };
 
   useEffect(() => {
     if (gameId) {
@@ -320,15 +337,13 @@ const GameDetail = () => {
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <p className="text-lg font-semibold">
-                {game.is_complete ? "Completed" : "Active"}
-              </p>
-            </div>
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 gap-6">
+        <ConsolidatedBuyInLogs gameId={gameId!} />
+      </div>
 
       {/* Poker Table View */}
       <Card>
@@ -423,6 +438,9 @@ const GameDetail = () => {
                       {getSortIcon("final_stack")}
                     </Button>
                   </TableHead>
+                  <TableHead className="font-bold text-left">
+                    Buy-in Log
+                  </TableHead>
                 </TableRow>
               </TableHeader>
             <TableBody>
@@ -455,6 +473,13 @@ const GameDetail = () => {
                     </TableCell>
                     <TableCell className="font-semibold text-accent-foreground text-left">
                       Rs. {formatIndianNumber(gamePlayer.final_stack)}
+                    </TableCell>
+                    <TableCell className="text-left">
+                      <BuyInHistoryDialog
+                        gamePlayerId={gamePlayer.id}
+                        playerName={gamePlayer.players.name}
+                        fetchHistory={fetchBuyInHistory}
+                      />
                     </TableCell>
                   </TableRow>
                 );
