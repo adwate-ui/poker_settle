@@ -13,6 +13,9 @@ const updateSW = registerSW({
   },
   onOfflineReady() {
     console.log('App ready to work offline');
+    // Show a subtle notification that offline mode is ready
+    const event = new CustomEvent('offline-ready');
+    window.dispatchEvent(event);
   },
   onRegisteredSW(swUrl, r) {
     console.log('Service Worker registered:', swUrl);

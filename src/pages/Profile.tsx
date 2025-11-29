@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User } from 'lucide-react';
+import { ArrowLeft, User, Database } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CacheManager } from '@/components/CacheManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -41,27 +43,46 @@ const Profile = () => {
           Back to Dashboard
         </Button>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <User className="h-6 w-6 text-primary" />
-              <div>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Your account information</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Email</label>
-              <p className="text-lg">{user.email}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">User ID</label>
-              <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">
+              <User className="h-4 w-4 mr-2" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="storage">
+              <Database className="h-4 w-4 mr-2" />
+              Storage
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <User className="h-6 w-6 text-primary" />
+                  <div>
+                    <CardTitle>Profile</CardTitle>
+                    <CardDescription>Your account information</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Email</label>
+                  <p className="text-lg">{user.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                  <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="storage">
+            <CacheManager />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
