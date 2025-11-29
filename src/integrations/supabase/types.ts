@@ -446,6 +446,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_player: {
+        Args: { _player_id: string; _token: string }
+        Returns: boolean
+      }
       has_any_valid_link: {
         Args: { _token: string; _user_id: string }
         Returns: boolean

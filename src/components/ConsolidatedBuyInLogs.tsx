@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -19,21 +20,25 @@ interface BuyInHistoryEntry {
 
 interface ConsolidatedBuyInLogsProps {
   gameId: string;
+  token?: string; // Optional token for shared views
 }
 
-export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) => {
+export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsProps) => {
   const [history, setHistory] = useState<BuyInHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterName, setFilterName] = useState<string>("");
 
   useEffect(() => {
     fetchAllBuyInHistory();
-  }, [gameId]);
+  }, [gameId, token]);
 
   const fetchAllBuyInHistory = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Use shared client if token is provided, otherwise use regular authenticated client
+      const client = token ? createSharedClient(token) : supabase;
+      
+      const { data, error } = await client
         .from("buy_in_history")
         .select(`
           *,
