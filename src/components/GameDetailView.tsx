@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft } from "lucide-react";
-import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, formatGameDate, formatTimestamp } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -331,7 +330,7 @@ export const GameDetailView = memo(({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
-            Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
+            Game Details - {formatGameDate(game.date)}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -377,7 +376,7 @@ export const GameDetailView = memo(({
           {tablePositions.length > 1 && (
             <div className="flex items-center gap-4">
               <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
-                {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
+                {formatTimestamp(toZonedTime(new Date(currentTablePosition.snapshot_timestamp), "Asia/Kolkata"))} IST
               </span>
               <div className="flex items-center gap-2">
                 <Button
