@@ -100,58 +100,56 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
         </div>
       </CardHeader>
       <CardContent className="pt-3 space-y-2.5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {/* Add Buy-ins Input - Orange Theme */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <Coins className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-              <span className="text-xs font-medium text-orange-600 dark:text-orange-400">Add Buy-ins</span>
-            </div>
-            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50">
-              <Input
-                type="number"
-                value={addBuyInsAmount}
-                onChange={(e) => setAddBuyInsAmount(e.target.value)}
-                className="h-8 text-center font-mono text-sm border-orange-300 dark:border-orange-800 bg-background focus-visible:ring-orange-500"
-                placeholder="+2 or -1"
-              />
+        {/* Add Buy-ins Input - Orange Theme */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <Coins className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">Add Buy-ins</span>
+          </div>
+          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50">
+            <Input
+              type="number"
+              value={addBuyInsAmount}
+              onChange={(e) => setAddBuyInsAmount(e.target.value)}
+              className="h-8 text-center font-mono text-sm border-orange-300 dark:border-orange-800 bg-background focus-visible:ring-orange-500"
+              placeholder="+2 or -1"
+            />
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleAddBuyIns}
+              disabled={!addBuyInsAmount || parseInt(addBuyInsAmount) === 0}
+              className="h-8 shrink-0 bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-800"
+            >
+              Add
+            </Button>
+          </div>
+        </div>
+
+        {/* Final Stack Input - Green Theme */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <Wallet className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+            <span className="text-xs font-medium text-green-600 dark:text-green-400">Final Stack (Rs.)</span>
+          </div>
+          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
+            <Input
+              type="text"
+              value={formatInputDisplay(localFinalStack)}
+              onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
+              className="h-8 text-center font-mono text-sm border-green-300 dark:border-green-800 bg-background focus-visible:ring-green-500"
+              placeholder="0"
+            />
+            {hasFinalStackChanges && (
               <Button 
                 variant="default" 
                 size="sm" 
-                onClick={handleAddBuyIns}
-                disabled={!addBuyInsAmount || parseInt(addBuyInsAmount) === 0}
-                className="h-8 shrink-0 bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-800"
+                onClick={confirmFinalStack}
+                className="h-8 w-8 shrink-0 p-0 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
               >
-                Add
+                <Check className="w-3.5 h-3.5" />
               </Button>
-            </div>
-          </div>
-
-          {/* Final Stack Input - Green Theme */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium text-green-600 dark:text-green-400">Final Stack (Rs.)</span>
-            </div>
-            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
-              <Input
-                type="text"
-                value={formatInputDisplay(localFinalStack)}
-                onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
-                className="h-8 text-center font-mono text-sm border-green-300 dark:border-green-800 bg-background focus-visible:ring-green-500"
-                placeholder="0"
-              />
-              {hasFinalStackChanges && (
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={confirmFinalStack}
-                  className="h-8 w-8 shrink-0 p-0 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
