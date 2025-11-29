@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { formatIndianNumber } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { Game, SeatPosition, BuyInHistory } from "@/types/poker";
 import { Badge } from "@/components/ui/badge";
 import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
+import { useSharedLink } from "@/hooks/useSharedLink";
 import {
   Table,
   TableBody,
@@ -55,6 +56,7 @@ type SortOrder = "asc" | "desc" | null;
 const GameDetail = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
+  const { copySharedLink, loading: linkLoading } = useSharedLink();
   const [game, setGame] = useState<Game | null>(null);
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
   const [tablePositions, setTablePositions] = useState<TablePosition[]>([]);
@@ -336,6 +338,18 @@ const GameDetail = () => {
               <p className="text-lg font-semibold">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
+            </div>
+            <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copySharedLink('game', gameId!)}
+                disabled={linkLoading}
+                className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share Game
+              </Button>
             </div>
           </div>
         </CardContent>
