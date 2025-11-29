@@ -344,6 +344,33 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_links: {
+        Row: {
+          created_at: string
+          id: string
+          resource_id: string
+          resource_type: string
+          short_code: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resource_id: string
+          resource_type: string
+          short_code: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resource_id?: string
+          resource_type?: string
+          short_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       street_cards: {
         Row: {
           cards_notation: string
