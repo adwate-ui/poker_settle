@@ -208,11 +208,11 @@ const NewGame = () => {
   return (
     <Card className="max-w-4xl mx-auto relative">
       {hasActiveGame && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg p-3">
           <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Active Game in Progress</CardTitle>
-              <CardDescription className="text-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base sm:text-lg">Active Game in Progress</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 You have an ongoing game. Complete it before starting a new one.
               </CardDescription>
             </CardHeader>
@@ -225,14 +225,14 @@ const NewGame = () => {
           </Card>
         </div>
       )}
-      <CardHeader>
-        <CardTitle className="text-xl sm:text-2xl">Start New Game</CardTitle>
-        <CardDescription className="text-sm">Set up your poker game with buy-in and players</CardDescription>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Start New Game</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Set up your poker game with buy-in and players</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {/* Buy-in Section */}
-        <div className="space-y-2">
-          <Label htmlFor="buyin">Buy-in Amount (Rs.)</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="buyin" className="text-xs sm:text-sm">Buy-in Amount (Rs.)</Label>
           <Input
             id="buyin"
             type="text"
@@ -250,9 +250,9 @@ const NewGame = () => {
         </div>
 
         {/* Blinds Section */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="smallblind">Small Blind (Rs.)</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="smallblind" className="text-xs sm:text-sm">Small Blind (Rs.)</Label>
             <Input
               id="smallblind"
               type="text"
@@ -268,8 +268,8 @@ const NewGame = () => {
               disabled={hasActiveGame}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="bigblind">Big Blind (Rs.)</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="bigblind" className="text-xs sm:text-sm">Big Blind (Rs.)</Label>
             <Input
               id="bigblind"
               type="text"
@@ -288,30 +288,30 @@ const NewGame = () => {
         </div>
 
         {/* Add Players Section */}
-        <div className="space-y-4">
-          <h3 className="text-base sm:text-lg font-semibold">Players ({gamePlayers.length})</h3>
+        <div className="space-y-3">
+          <h3 className="text-sm sm:text-base font-semibold">Players ({gamePlayers.length})</h3>
           
           {/* Current Players List */}
           {gamePlayers.length > 0 && (
-            <div className="grid gap-2">
+            <div className="grid gap-1.5">
               {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
                 <Card key={player.id}>
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                  <CardContent className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                         <img 
                           src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
                           alt={player.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium">{player.name}</span>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-sm">{player.name}</span>
                         <div className="flex items-center gap-1">
-                          <Badge variant="info" className="text-xs">
+                          <Badge variant="info" className="text-[10px] h-4 px-1.5">
                             {player.total_games} games
                           </Badge>
-                          <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-xs">
+                          <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-[10px] h-4 px-1.5">
                             {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
                           </Badge>
                         </div>
@@ -331,7 +331,7 @@ const NewGame = () => {
           )}
 
           {/* Add New Player */}
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <Input
               placeholder="New player name"
               value={newPlayerName}
@@ -340,9 +340,9 @@ const NewGame = () => {
               className="flex-1"
               disabled={hasActiveGame}
             />
-            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} className="w-[140px]">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New
+            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} size="sm" className="px-3">
+              <Plus className="h-4 w-4 mr-1.5" />
+              <span className="text-xs sm:text-sm">Add</span>
             </Button>
           </div>
 
@@ -385,20 +385,20 @@ const NewGame = () => {
                             }`}
                           />
                           <div className="flex items-center gap-2 w-full">
-                            <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+                            <div className="w-7 h-7 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                               <img 
                                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
                                 alt={player.name}
                                 className="w-full h-full object-cover"
                               />
                             </div>
-                            <div className="flex flex-col gap-1 flex-1">
-                              <span className="font-medium">{player.name}</span>
+                            <div className="flex flex-col gap-0.5 flex-1">
+                              <span className="font-medium text-sm">{player.name}</span>
                               <div className="flex items-center gap-1">
-                                <Badge variant="info" className="text-xs">
+                                <Badge variant="info" className="text-[10px] h-4 px-1.5">
                                   {player.total_games} games
                                 </Badge>
-                                <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-xs">
+                                <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-[10px] h-4 px-1.5">
                                   {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
                                 </Badge>
                               </div>
