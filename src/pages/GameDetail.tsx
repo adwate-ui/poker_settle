@@ -109,6 +109,14 @@ const GameDetail = () => {
       if (playersError) throw playersError;
       if (positionsError) throw positionsError;
       
+      // Handle case where game is not found or user has no access
+      if (!gameData) {
+        console.error("Game not found or no access");
+        setGame(null);
+        setLoading(false);
+        return;
+      }
+      
       const gameWithPlayers: Game = {
         ...gameData,
         game_players: []
