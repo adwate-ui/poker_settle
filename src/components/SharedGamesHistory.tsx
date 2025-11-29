@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
-import { format } from 'date-fns';
-import { formatIndianNumber } from '@/lib/utils';
+import { formatIndianNumber, formatShortDate, formatMonthYear, getUniqueDates, getUniqueMonthYears } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -104,13 +103,11 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
   }, [token]);
 
   const uniqueDates = useMemo(() => {
-    const dates = games.map((game) => format(new Date(game.date), 'MMM d, yyyy'));
-    return Array.from(new Set(dates)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    return getUniqueDates(games.map((game) => game.date));
   }, [games]);
 
   const uniqueMonthYears = useMemo(() => {
-    const monthYears = games.map((game) => format(new Date(game.date), 'MMM yyyy'));
-    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    return getUniqueMonthYears(games.map((game) => game.date));
   }, [games]);
 
   const handleSort = (field: SortField) => {
@@ -134,8 +131,8 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
 
   const filteredAndSortedGames = useMemo(() => {
     let filtered = games.filter((game) => {
-      const gameDate = format(new Date(game.date), 'MMM d, yyyy');
-      const monthYear = format(new Date(game.date), 'MMM yyyy');
+      const gameDate = formatShortDate(game.date);
+      const monthYear = formatMonthYear(game.date);
       
       if (selectedDate !== 'all' && gameDate !== selectedDate) return false;
       if (selectedMonthYear !== 'all' && monthYear !== selectedMonthYear) return false;
@@ -291,7 +288,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="text-xs text-muted-foreground">Date</p>
-                          <p className="font-medium">{format(new Date(game.date), 'MMM d, yyyy')}</p>
+                          <p className="font-medium">{formatShortDate(game.date)}</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -313,7 +310,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                     {/* Desktop Layout */}
                     <div className="hidden md:grid grid-cols-4 gap-4 items-center text-sm">
                       <div className="font-medium">
-                        {format(new Date(game.date), 'MMM d, yyyy')}
+                        {formatShortDate(game.date)}
                       </div>
                       <div className="font-semibold">
                         Rs. {formatIndianNumber(game.buy_in_amount)}

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,4 +27,36 @@ export function parseIndianNumber(str: string): number {
 // Format display value for input (blank if zero, formatted if non-zero)
 export function formatInputDisplay(value: number | null | undefined): string {
   return (value === 0 || value === null || value === undefined) ? '' : formatIndianNumber(value);
+}
+
+// Date formatting utilities
+export function formatGameDate(date: string | Date): string {
+  return format(new Date(date), "MMMM d, yyyy");
+}
+
+export function formatShortDate(date: string | Date): string {
+  return format(new Date(date), "MMM d, yyyy");
+}
+
+export function formatMonthYear(date: string | Date): string {
+  return format(new Date(date), "MMM yyyy");
+}
+
+export function formatTimestamp(date: string | Date): string {
+  return format(new Date(date), "MMM d, h:mm a");
+}
+
+// Extract unique dates/months from games
+export function getUniqueDates(dates: (string | Date)[]): string[] {
+  const formatted = dates.map((d) => formatShortDate(d));
+  return Array.from(new Set(formatted)).sort((a, b) => 
+    new Date(b).getTime() - new Date(a).getTime()
+  );
+}
+
+export function getUniqueMonthYears(dates: (string | Date)[]): string[] {
+  const formatted = dates.map((d) => formatMonthYear(d));
+  return Array.from(new Set(formatted)).sort((a, b) => 
+    new Date(b).getTime() - new Date(a).getTime()
+  );
 }

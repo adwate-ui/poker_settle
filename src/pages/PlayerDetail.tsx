@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from "lucide-react";
-import { format } from "date-fns";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, formatShortDate, formatMonthYear, getUniqueMonthYears } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import {
@@ -111,14 +110,13 @@ const PlayerDetail = () => {
   };
 
   const uniqueMonthYears = useMemo(() => {
-    const monthYears = gameHistory.map((game) => format(new Date(game.games.date), "MMM yyyy"));
-    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    return getUniqueMonthYears(gameHistory.map((game) => game.games.date));
   }, [gameHistory]);
 
   const filteredGameHistory = useMemo(() => {
     return gameHistory.filter((game) => {
       if (selectedMonthYear === "all") return true;
-      const monthYear = format(new Date(game.games.date), "MMM yyyy");
+      const monthYear = formatMonthYear(game.games.date);
       return monthYear === selectedMonthYear;
     });
   }, [gameHistory, selectedMonthYear]);
@@ -321,7 +319,7 @@ const PlayerDetail = () => {
                     <TableCell className="font-medium text-primary">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {format(new Date(game.games.date), "MMM d, yyyy")}
+                        {formatShortDate(game.games.date)}
                       </div>
                     </TableCell>
                     <TableCell>

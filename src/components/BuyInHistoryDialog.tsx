@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
-import { format } from "date-fns";
+import { formatTimestamp } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -82,7 +82,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                      {formatTimestamp(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-right font-semibold">
                       {entry.total_buy_ins_after}
