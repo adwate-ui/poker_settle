@@ -12,6 +12,7 @@ const SharedView = () => {
   const { token } = useParams<{ token: string }>();
   const [validating, setValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
+  const [resourceType, setResourceType] = useState<string | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -23,16 +24,19 @@ const SharedView = () => {
 
       try {
         const sharedClient = createSharedClient(token);
-        // Try to fetch a single game to validate the token
-        const { data, error } = await sharedClient
-          .from('games')
-          .select('id')
-          .limit(1);
+        
+        // Fetch the shared link to get resource_type
+        const { data: linkData, error: linkError } = await sharedClient
+          .from('shared_links')
+          .select('resource_type, resource_id')
+          .eq('access_token', token)
+          .single();
 
-        if (error) {
-          console.error('Token validation error:', error);
+        if (linkError) {
+          console.error('Token validation error:', linkError);
           setIsValid(false);
         } else {
+          setResourceType(linkData.resource_type);
           setIsValid(true);
         }
       } catch (error) {
@@ -86,18 +90,22 @@ const SharedView = () => {
 
       <div className="max-w-7xl mx-auto p-4 sm:p-8">
         <Tabs defaultValue="games" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className={`grid w-full ${resourceType === 'player' ? 'grid-cols-2' : 'grid-cols-1'} mb-8`}>
             <TabsTrigger value="games">Games History</TabsTrigger>
-            <TabsTrigger value="players">Players History</TabsTrigger>
+            {resourceType === 'player' && (
+              <TabsTrigger value="players">Players History</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="games" className="space-y-6">
             <SharedGamesHistory token={token} />
           </TabsContent>
 
-          <TabsContent value="players" className="space-y-6">
-            <SharedPlayersHistory token={token} />
-          </TabsContent>
+          {resourceType === 'player' && (
+            <TabsContent value="players" className="space-y-6">
+              <SharedPlayersHistory token={token} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
