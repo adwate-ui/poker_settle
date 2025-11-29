@@ -42,7 +42,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>('all');
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>('all');
-  const [selectedPlayer, setSelectedPlayer] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
@@ -114,11 +113,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
     return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [games]);
 
-  const uniquePlayers = useMemo(() => {
-    const players = games.flatMap((game) => game.player_names);
-    return Array.from(new Set(players)).sort();
-  }, [games]);
-
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortOrder === 'asc') setSortOrder('desc');
@@ -145,7 +139,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
       
       if (selectedDate !== 'all' && gameDate !== selectedDate) return false;
       if (selectedMonthYear !== 'all' && monthYear !== selectedMonthYear) return false;
-      if (selectedPlayer !== 'all' && !game.player_names.includes(selectedPlayer)) return false;
       
       return true;
     });
@@ -178,7 +171,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
     }
 
     return filtered;
-  }, [games, selectedDate, selectedMonthYear, selectedPlayer, sortField, sortOrder]);
+  }, [games, selectedDate, selectedMonthYear, sortField, sortOrder]);
 
   if (loading) {
     return (
@@ -212,7 +205,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
           <CardDescription className="text-sm">View all completed poker games</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Select value={selectedDate} onValueChange={setSelectedDate}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by date" />
@@ -240,20 +233,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 ))}
               </SelectContent>
             </Select>
-
-            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by player" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Players</SelectItem>
-                {uniquePlayers.map((player) => (
-                  <SelectItem key={player} value={player}>
-                    {player}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -262,7 +241,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
         <CardContent className="p-0">
           <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
             <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-              <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
+              <div className="grid grid-cols-4 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('date')}
@@ -295,20 +274,10 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                   Chips in play
                   {getSortIcon('chips')}
                 </Button>
-                {selectedPlayer !== 'all' ? (
-                  <div className="flex items-center justify-start h-10 px-4 font-bold">
-                    Player P&L
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-start h-10 px-4 font-bold"></div>
-                )}
               </div>
             </div>
 
             {filteredAndSortedGames.map((game) => {
-              const playerData = game.game_players.find(
-                (gp) => gp.player_name === selectedPlayer
-              );
               
               return (
                 <Card
@@ -338,19 +307,11 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                           <p className="text-xs text-muted-foreground">Chips in play</p>
                           <p className="font-semibold">Rs. {formatIndianNumber(game.total_pot)}</p>
                         </div>
-                        {selectedPlayer !== 'all' && playerData && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Player P&L</p>
-                            <Badge variant={playerData.net_amount >= 0 ? 'success' : 'destructive'}>
-                              {playerData.net_amount >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
-                            </Badge>
-                          </div>
-                        )}
                       </div>
                     </div>
 
                     {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
+                    <div className="hidden md:grid grid-cols-4 gap-4 items-center text-sm">
                       <div className="font-medium">
                         {format(new Date(game.date), 'MMM d, yyyy')}
                       </div>
@@ -363,15 +324,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                       <div className="font-semibold">
                         Rs. {formatIndianNumber(game.total_pot)}
                       </div>
-                      {selectedPlayer !== 'all' && playerData ? (
-                        <div>
-                          <Badge variant={playerData.net_amount >= 0 ? 'success' : 'destructive'}>
-                            {playerData.net_amount >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
-                          </Badge>
-                        </div>
-                      ) : (
-                        <div></div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
