@@ -45,17 +45,23 @@ export const prefersReducedMotion = (): boolean => {
  */
 export const lazyLoadImage = (img: HTMLImageElement): void => {
   if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const target = entry.target as HTMLImageElement;
-          if (target.dataset.src) {
-            target.src = target.dataset.src;
-            observer.unobserve(target);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const target = entry.target as HTMLImageElement;
+            if (target.dataset.src) {
+              target.src = target.dataset.src;
+              observer.unobserve(target);
+            }
           }
-        }
-      });
-    });
+        });
+      },
+      {
+        rootMargin: '50px', // Load images 50px before they're visible
+        threshold: 0.01,
+      }
+    );
     
     observer.observe(img);
   } else {
@@ -64,4 +70,41 @@ export const lazyLoadImage = (img: HTMLImageElement): void => {
       img.src = img.dataset.src;
     }
   }
+};
+
+/**
+ * Batch multiple DOM reads to prevent layout thrashing
+ */
+export const batchedRead = <T>(reads: (() => T)[]): T[] => {
+  return reads.map(read => read());
+};
+
+/**
+ * Batch multiple DOM writes to prevent layout thrashing
+ */
+export const batchedWrite = (writes: (() => void)[]): void => {
+  requestAnimationFrame(() => {
+    writes.forEach(write => write());
+  });
+};
+
+/**
+ * Create a memoized function that caches results
+ */
+export const memoize = <Args extends any[], Result>(
+  fn: (...args: Args) => Result
+): ((...args: Args) => Result) => {
+  const cache = new Map<string, Result>();
+  
+  return (...args: Args): Result => {
+    const key = JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key)!;
+    }
+    
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
 };
