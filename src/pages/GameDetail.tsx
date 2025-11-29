@@ -27,11 +27,11 @@ interface GamePlayer {
   id: string;
   player_id: string;
   buy_ins: number;
-  final_stack: number;
-  net_amount: number;
+  final_stack: number | null;
+  net_amount: number | null;
   players: {
-    name: string;
-  };
+    name: string | null;
+  } | null;
 }
 
 interface TablePosition {
@@ -183,24 +183,27 @@ const GameDetail = () => {
       let aVal: any, bVal: any;
       
       switch (sortField) {
-        case "name":
-          aVal = a.players.name.toLowerCase();
-          bVal = b.players.name.toLowerCase();
-          if (sortOrder === "asc") return aVal < bVal ? -1 : 1;
-          return aVal > bVal ? -1 : 1;
+        case "name": {
+          const aName = (a.players?.name ?? "").toLowerCase();
+          const bName = (b.players?.name ?? "").toLowerCase();
+          if (sortOrder === "asc") return aName < bName ? -1 : 1;
+          return aName > bName ? -1 : 1;
+        }
         case "buy_ins":
           aVal = a.buy_ins;
           bVal = b.buy_ins;
           break;
         case "final_stack":
-          aVal = a.final_stack;
-          bVal = b.final_stack;
+          aVal = a.final_stack ?? 0;
+          bVal = b.final_stack ?? 0;
           break;
         case "net_amount":
-          aVal = a.net_amount;
-          bVal = b.net_amount;
+          aVal = a.net_amount ?? 0;
+          bVal = b.net_amount ?? 0;
           break;
       }
+      
+      if (aVal === undefined || bVal === undefined) return 0;
       
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
     });
@@ -233,7 +236,7 @@ const GameDetail = () => {
     : gamePlayers.map((gp, index) => ({
         seat: index + 1,
         player_id: gp.player_id,
-        player_name: gp.players.name,
+        player_name: gp.players?.name ?? `Player ${index + 1}`,
       }));
 
   const savedSettlements: Settlement[] = (game as any)?.settlements || [];
@@ -290,12 +293,8 @@ const GameDetail = () => {
     const manualSettlements: SettlementWithType[] = [];
     const calculatedSettlements: SettlementWithType[] = [];
     
-    // Get player balances to determine what's manual vs calculated
-    const playerBalances = sortedGamePlayers.reduce((acc, gp) => {
-      acc[gp.players.name] = gp.net_amount;
-      return acc;
-    }, {} as Record<string, number>);
-    
+    // Player balances calculation removed as it was unused and could throw when player data is incomplete
+
     savedSettlements.forEach(settlement => {
       // Check if this settlement was likely manual by seeing if it partially settles a debt
       // For simplicity, we'll mark early settlements as manual if there are multiple settlements
@@ -477,7 +476,9 @@ const GameDetail = () => {
               </TableHeader>
             <TableBody>
               {sortedGamePlayers.map((gamePlayer, index) => {
-                const isProfit = gamePlayer.net_amount >= 0;
+                const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
+                const netAmount = gamePlayer.net_amount ?? 0;
+                const isProfit = netAmount >= 0;
                 
                 return (
                   <TableRow
@@ -488,7 +489,7 @@ const GameDetail = () => {
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary text-left">{gamePlayer.players.name}</TableCell>
+                    <TableCell className="font-medium text-primary text-left">{playerName}</TableCell>
                     <TableCell className="text-left">
                       <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
                         {gamePlayer.buy_ins}
@@ -500,7 +501,7 @@ const GameDetail = () => {
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
                           : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                       }`}>
-                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(gamePlayer.net_amount)}
+                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(netAmount)}
                       </span>
                     </TableCell>
                     <TableCell className="font-semibold text-accent-foreground text-left">
@@ -509,7 +510,7 @@ const GameDetail = () => {
                     <TableCell className="text-left">
                       <BuyInHistoryDialog
                         gamePlayerId={gamePlayer.id}
-                        playerName={gamePlayer.players.name}
+                        playerName={playerName}
                         fetchHistory={fetchBuyInHistory}
                       />
                     </TableCell>
