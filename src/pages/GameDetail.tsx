@@ -90,25 +90,34 @@ const GameDetail = () => {
     setLoading(true);
     try {
       // Fetch all data in parallel for better performance
-      const [
-        { data: gameData, error: gameError },
-        { data: playersData, error: playersError },
-        { data: positionsData, error: positionsError }
-      ] = await Promise.all([
+      const [gameResult, playersResult, positionsResult] = await Promise.all([
         supabase.from("games").select("*").eq("id", gameId).maybeSingle(),
-        supabase.from("game_players").select(`
+        supabase
+          .from("game_players")
+          .select(
+            `
           *,
           players (
             name
           )
-        `).eq("game_id", gameId).order("players(name)", { ascending: true }),
-        supabase.from("table_positions").select("*").eq("game_id", gameId).order("snapshot_timestamp", { ascending: true })
+        `,
+          )
+          .eq("game_id", gameId)
+          .order("players(name)", { ascending: true }),
+        supabase
+          .from("table_positions")
+          .select("*")
+          .eq("game_id", gameId)
+          .order("snapshot_timestamp", { ascending: true }),
       ]);
 
-      if (gameError) throw gameError;
-      if (playersError) throw playersError;
-      if (positionsError) throw positionsError;
-      
+      const { data: gameData, error: gameError } = gameResult;
+
+      if (gameError) {
+        console.error("Error fetching game:", gameError);
+        throw gameError;
+      }
+
       // Handle case where game is not found or user has no access
       if (!gameData) {
         console.error("Game not found or no access");
@@ -116,29 +125,39 @@ const GameDetail = () => {
         setLoading(false);
         return;
       }
-      
+
+      const { data: playersData, error: playersError } = playersResult;
+      const { data: positionsData, error: positionsError } = positionsResult;
+
+      if (playersError) {
+        console.error("Error fetching game players:", playersError);
+      }
+
+      if (positionsError) {
+        console.error("Error fetching table positions:", positionsError);
+      }
+
       const gameWithPlayers: Game = {
         ...gameData,
-        game_players: []
+        game_players: [],
       };
       setGame(gameWithPlayers);
       setGamePlayers(playersData || []);
-      
+
       const formattedPositions: TablePosition[] = (positionsData || []).map((tp) => ({
         id: tp.id,
         snapshot_timestamp: tp.snapshot_timestamp,
         positions: tp.positions as unknown as SeatPosition[],
       }));
-      
+
       setTablePositions(formattedPositions);
     } catch (error) {
-      console.error("Error fetching game:", error);
+      console.error("Error fetching game details:", error);
       toast.error("Failed to load game details");
     } finally {
       setLoading(false);
     }
   };
-
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortOrder === "asc") setSortOrder("desc");
