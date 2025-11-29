@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useSharedLink } from "@/hooks/useSharedLink";
 import {
   Select,
   SelectContent,
@@ -46,6 +47,7 @@ type SortOrder = "asc" | "desc" | null;
 const GamesHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { createOrGetSharedLink } = useSharedLink();
   const [games, setGames] = useState<GameWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>("all");
@@ -115,6 +117,18 @@ const GamesHistory = () => {
       setLoading(false);
     }
   }, [user]);
+
+  const handleGameClick = useCallback(async (gameId: string) => {
+    try {
+      const shortCode = await createOrGetSharedLink("game", gameId);
+      if (!shortCode) return;
+
+      navigate(`/s/${shortCode}`);
+    } catch (error) {
+      console.error("Error opening shared game view:", error);
+      toast.error("Failed to open game details");
+    }
+  }, [createOrGetSharedLink, navigate]);
 
   const handleDeleteGame = useCallback(async (gameId: string) => {
     try {
@@ -345,7 +359,7 @@ const GamesHistory = () => {
                 <Card
                   key={game.id}
                   className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => navigate(`/games/${game.id}`)}
+                  onClick={() => handleGameClick(game.id)}
                 >
                   <CardContent className="p-4">
                     {/* Mobile Layout */}
