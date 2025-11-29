@@ -13,6 +13,7 @@ const SharedView = () => {
   const [validating, setValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
   const [resourceType, setResourceType] = useState<string | null>(null);
+  const [resourceId, setResourceId] = useState<string | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -37,6 +38,7 @@ const SharedView = () => {
           setIsValid(false);
         } else {
           setResourceType(linkData.resource_type);
+          setResourceId(linkData.resource_id);
           setIsValid(true);
         }
       } catch (error) {
@@ -101,9 +103,9 @@ const SharedView = () => {
             <SharedGamesHistory token={token} />
           </TabsContent>
 
-          {resourceType === 'player' && (
+          {resourceType === 'player' && resourceId && (
             <TabsContent value="players" className="space-y-6">
-              <SharedPlayersHistory token={token} />
+              <SharedPlayersHistory token={token} playerId={resourceId} />
             </TabsContent>
           )}
         </Tabs>
