@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import GameDetail from "./pages/GameDetail";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import SharedView from "./pages/SharedView";
@@ -37,7 +38,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={user ? <Index /> : <Auth />} />
         <Route path="/games" element={user ? <Index /> : <Auth />} />
-        <Route path="/games/:gameId" element={user ? <Index /> : <Auth />} />
+        <Route path="/games/:gameId" element={user ? <GameDetail /> : <Auth />} />
         <Route path="/players" element={user ? <Index /> : <Auth />} />
         <Route path="/players/:playerId" element={user ? <Index /> : <Auth />} />
         <Route path="/hands" element={user ? <Index /> : <Auth />} />
