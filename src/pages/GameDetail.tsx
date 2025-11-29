@@ -54,6 +54,7 @@ type SortField = "name" | "buy_ins" | "final_stack" | "net_amount";
 type SortOrder = "asc" | "desc" | null;
 
 const GameDetail = () => {
+  console.log("[GameDetail] Render start");
   const { gameId } = useParams();
   const navigate = useNavigate();
   const { copySharedLink, loading: linkLoading } = useSharedLink();
