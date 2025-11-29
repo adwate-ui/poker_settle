@@ -32,7 +32,7 @@ export const useSharedLink = () => {
       // Check if a shared link already exists for this resource
       const { data: existingLink, error: fetchError } = await supabase
         .from('shared_links')
-        .select('short_code')
+        .select('short_code, access_token')
         .eq('user_id', user.id)
         .eq('resource_type', resourceType)
         .eq('resource_id', resourceId)

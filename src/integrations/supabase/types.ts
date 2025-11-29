@@ -323,29 +323,9 @@ export type Database = {
         }
         Relationships: []
       }
-      share_tokens: {
-        Row: {
-          created_at: string
-          id: string
-          token: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          token: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          token?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       shared_links: {
         Row: {
+          access_token: string
           created_at: string
           id: string
           resource_id: string
@@ -354,6 +334,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_token?: string
           created_at?: string
           id?: string
           resource_id: string
@@ -362,6 +343,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_token?: string
           created_at?: string
           id?: string
           resource_id?: string
@@ -464,8 +446,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_valid_share_token: {
+      has_any_valid_link: {
         Args: { _token: string; _user_id: string }
+        Returns: boolean
+      }
+      is_valid_game_link: {
+        Args: { _game_id: string; _token: string }
+        Returns: boolean
+      }
+      is_valid_player_link: {
+        Args: { _player_id: string; _token: string }
         Returns: boolean
       }
     }

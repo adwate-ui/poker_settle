@@ -18,7 +18,7 @@ export default function ShortLinkRedirect() {
       try {
         const { data, error } = await supabase
           .from('shared_links')
-          .select('resource_type, resource_id, user_id')
+          .select('resource_type, resource_id, access_token')
           .eq('short_code', shortCode)
           .single();
 
@@ -27,23 +27,11 @@ export default function ShortLinkRedirect() {
           return;
         }
 
-        // Get the user's share token
-        const { data: tokenData, error: tokenError } = await supabase
-          .from('share_tokens')
-          .select('token')
-          .eq('user_id', data.user_id)
-          .single();
-
-        if (tokenError || !tokenData) {
-          setError(true);
-          return;
-        }
-
-        // Redirect to the appropriate shared view
+        // Redirect to the appropriate shared view using the access_token
         if (data.resource_type === 'game') {
-          navigate(`/shared/${tokenData.token}/game/${data.resource_id}`, { replace: true });
+          navigate(`/shared/${data.access_token}/game/${data.resource_id}`, { replace: true });
         } else if (data.resource_type === 'player') {
-          navigate(`/shared/${tokenData.token}/player/${data.resource_id}`, { replace: true });
+          navigate(`/shared/${data.access_token}/player/${data.resource_id}`, { replace: true });
         } else {
           setError(true);
         }
