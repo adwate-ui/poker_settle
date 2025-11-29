@@ -8,6 +8,10 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import SharedView from "./pages/SharedView";
+import SharedGameDetail from "./pages/SharedGameDetail";
+import SharedPlayerDetail from "./pages/SharedPlayerDetail";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -38,6 +42,10 @@ const AppContent = () => {
         <Route path="/hands" element={user ? <Index /> : <Auth />} />
         <Route path="/hands/:handId" element={user ? <Index /> : <Auth />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/profile" element={user ? <Profile /> : <Auth />} />
+        <Route path="/shared/:token" element={<SharedView />} />
+        <Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />
+        <Route path="/shared/:token/player/:playerId" element={<SharedPlayerDetail />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
