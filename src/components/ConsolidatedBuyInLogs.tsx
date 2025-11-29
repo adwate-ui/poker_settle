@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { History, TrendingUp, X } from "lucide-react";
+import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface BuyInHistoryEntry {
   id: string;
@@ -79,39 +79,19 @@ export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) =>
           Buy-in History
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 space-y-4">
+      <CardContent className="pt-4">
         {!loading && history.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Input
-                type="text"
-                placeholder="Filter by player name..."
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-                className="text-sm"
-              />
-              {filterName && (
-                <button
-                  onClick={() => setFilterName("")}
-                  className="p-2 hover:bg-accent rounded-md transition-colors"
-                  aria-label="Clear filter"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {uniquePlayerNames.map((name) => (
-                <Badge
-                  key={name}
-                  variant={filterName === name ? "default" : "outline"}
-                  className="cursor-pointer text-xs"
-                  onClick={() => setFilterName(filterName === name ? "" : name)}
-                >
-                  {name}
-                </Badge>
-              ))}
-            </div>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {uniquePlayerNames.map((name) => (
+              <Badge
+                key={name}
+                variant={filterName === name ? "default" : "outline"}
+                className="cursor-pointer text-xs hover:bg-primary/10 transition-colors"
+                onClick={() => setFilterName(filterName === name ? "" : name)}
+              >
+                {name}
+              </Badge>
+            ))}
           </div>
         )}
         
@@ -128,33 +108,42 @@ export const ConsolidatedBuyInLogs = ({ gameId }: ConsolidatedBuyInLogsProps) =>
             No buy-in changes found for "{filterName}"
           </div>
         ) : (
-          <ScrollArea className="h-[200px] pr-4">
-            <div className="space-y-3">
-              {filteredHistory.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium">
-                        {entry.player_name} added {entry.buy_ins_added} buy-in{Math.abs(entry.buy_ins_added) !== 1 ? 's' : ''}
+          <ScrollArea className="h-[240px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40%]">Player</TableHead>
+                  <TableHead className="w-[25%] text-center">Change</TableHead>
+                  <TableHead className="w-[25%]">Time</TableHead>
+                  <TableHead className="w-[10%] text-right">New Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredHistory.map((entry) => (
+                  <TableRow key={entry.id} className="hover:bg-accent/5">
+                    <TableCell className="font-medium">{entry.player_name}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {entry.buy_ins_added > 0 ? (
+                          <TrendingUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                        ) : (
+                          <TrendingDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        )}
+                        <span className={entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}>
+                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                        </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {format(new Date(entry.timestamp), "MMM d, yyyy h:mm a")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-muted-foreground">New Total</div>
-                    <div className="text-sm font-semibold">
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
                       {entry.total_buy_ins_after}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </ScrollArea>
         )}
       </CardContent>

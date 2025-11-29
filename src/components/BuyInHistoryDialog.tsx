@@ -5,6 +5,7 @@ import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface BuyInHistoryDialogProps {
   gamePlayerId: string;
@@ -43,14 +44,14 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
           <span className="text-xs sm:text-sm">Buy-in Log</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="w-5 h-5" />
             Buy-in History - {playerName}
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[400px] pr-4">
+        <ScrollArea className="max-h-[400px]">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : history.length === 0 ? (
@@ -58,36 +59,39 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
               No buy-in changes recorded yet
             </div>
           ) : (
-            <div className="space-y-3">
-              {history.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                >
-                  <div className="flex items-center gap-3">
-                    {entry.buy_ins_added > 0 ? (
-                      <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    )}
-                    <div>
-                      <div className="text-sm font-medium">
-                        Added {entry.buy_ins_added} buy-in{Math.abs(entry.buy_ins_added) !== 1 ? 's' : ''}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40%] text-center">Change</TableHead>
+                  <TableHead className="w-[40%]">Time</TableHead>
+                  <TableHead className="w-[20%] text-right">New Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {history.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {entry.buy_ins_added > 0 ? (
+                          <TrendingUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                        ) : (
+                          <TrendingDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        )}
+                        <span className={entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}>
+                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                        </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {format(new Date(entry.timestamp), "MMM d, yyyy h:mm a")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-muted-foreground">New Total</div>
-                    <div className="text-sm font-semibold">
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
                       {entry.total_buy_ins_after}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </ScrollArea>
       </DialogContent>
