@@ -2,7 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { GameDetailView } from "@/components/GameDetailView";
 import { BuyInHistory } from "@/types/poker";
-import GameErrorBoundary from "@/components/GameErrorBoundary";
 
 const GameDetail = () => {
   const { gameId } = useParams();
@@ -28,16 +27,14 @@ const GameDetail = () => {
   }
 
   return (
-    <GameErrorBoundary>
-      <GameDetailView
-        gameId={gameId}
-        client={supabase}
-        showOwnerControls={true}
-        onBack={() => navigate("/games")}
-        backLabel="Back to Games History"
-        fetchBuyInHistory={fetchBuyInHistory}
-      />
-    </GameErrorBoundary>
+    <GameDetailView
+      gameId={gameId}
+      client={supabase}
+      showOwnerControls={true}
+      onBack={() => navigate("/games")}
+      backLabel="Back to Games History"
+      fetchBuyInHistory={fetchBuyInHistory}
+    />
   );
 };
 
