@@ -27,9 +27,9 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Poker Tracker</h1>
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 max-w-7xl">
+        <div className="flex justify-between items-center mb-3 sm:mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Poker Tracker</h1>
           <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
             <UserProfile />
@@ -37,7 +37,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         </div>
         
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4 sm:mb-6 h-auto">
+          <TabsList className="grid w-full grid-cols-4 mb-3 sm:mb-4 h-auto">
             <TabsTrigger value="new-game" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <span className="hidden xs:inline">New Game</span>
               <span className="xs:hidden">New</span>
