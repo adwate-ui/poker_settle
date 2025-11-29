@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,9 +50,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       }
     };
     loadTablePosition();
-  }, [game.id]);
+  }, [game.id, getCurrentTablePosition]);
 
-  const handlePlayerUpdate = async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
+  const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
     try {
       await updateGamePlayer(gamePlayerId, updates, logBuyIn);
       setGamePlayers(prev => prev.map(gp => 
@@ -61,9 +61,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       console.error('Error updating player:', error);
     }
-  };
+  }, [updateGamePlayer]);
 
-  const addNewPlayer = async () => {
+  const addNewPlayer = useCallback(async () => {
     if (!newPlayerName.trim()) return;
     
     try {
@@ -76,9 +76,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to add player");
     }
-  };
+  }, [newPlayerName, createOrFindPlayer, game.id, addPlayerToGame, gamePlayers]);
 
-  const addExistingPlayer = async (player: Player) => {
+  const addExistingPlayer = useCallback(async (player: Player) => {
     try {
       const gamePlayer = await addPlayerToGame(game.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
@@ -87,9 +87,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to add player");
     }
-  };
+  }, [game.id, addPlayerToGame]);
 
-  const addManualTransfer = () => {
+  const addManualTransfer = useCallback(() => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
       toast.error("Please fill all transfer details");
       return;
@@ -112,13 +112,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     setNewTransferAmount('');
     setShowManualTransfer(false);
     toast.success("Manual transfer added");
-  };
+  }, [newTransferFrom, newTransferTo, newTransferAmount, manualTransfers]);
 
-  const removeManualTransfer = (index: number) => {
+  const removeManualTransfer = useCallback((index: number) => {
     setManualTransfers(manualTransfers.filter((_, i) => i !== index));
-  };
+  }, [manualTransfers]);
 
-  const calculateSettlements = () => {
+  const calculateSettlements = useCallback(() => {
     // Start with player balances
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
@@ -165,9 +165,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     }
     
     setSettlements(newSettlements);
-  };
+  }, [gamePlayers, manualTransfers]);
 
-  const handleCompleteGame = async () => {
+  const handleCompleteGame = useCallback(async () => {
     // Calculate remaining settlements
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
@@ -227,9 +227,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
     }
-  };
+  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate]);
 
-  const handleSaveTablePosition = async (positions: SeatPosition[]) => {
+  const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {
       const savedPosition = await saveTablePosition(game.id, positions);
       setCurrentTablePosition(savedPosition);
@@ -243,27 +243,55 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to save table position");
     }
-  };
+  }, [game.id, saveTablePosition]);
 
-  const handleStartHandTracking = () => {
+  const handleStartHandTracking = useCallback(() => {
     setHandTrackingStage('recording');
-  };
+  }, []);
 
-  const handleHandComplete = () => {
+  const handleHandComplete = useCallback(() => {
     setHandTrackingStage('ready');
-  };
+  }, []);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return `Rs. ${formatIndianNumber(amount)}`;
-  };
+  }, []);
 
-  const totalBuyIns = gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
-  const totalWinnings = gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount || 0), 0);
-  const totalLosses = gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount || 0), 0);
-  const totalFinalStack = gamePlayers.reduce((sum, gp) => sum + (gp.final_stack || 0), 0);
-  const isBalanced = Math.abs(totalWinnings + totalLosses) < 0.01;
-  const isStackBalanced = Math.abs(totalFinalStack - totalBuyIns) < 0.01;
-  const canCompleteGame = isBalanced && isStackBalanced;
+  // Memoize expensive calculations
+  const totalBuyIns = useMemo(() => 
+    gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0),
+    [gamePlayers, game.buy_in_amount]
+  );
+  
+  const totalWinnings = useMemo(() => 
+    gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount || 0), 0),
+    [gamePlayers]
+  );
+  
+  const totalLosses = useMemo(() => 
+    gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount || 0), 0),
+    [gamePlayers]
+  );
+  
+  const totalFinalStack = useMemo(() => 
+    gamePlayers.reduce((sum, gp) => sum + (gp.final_stack || 0), 0),
+    [gamePlayers]
+  );
+  
+  const isBalanced = useMemo(() => 
+    Math.abs(totalWinnings + totalLosses) < 0.01,
+    [totalWinnings, totalLosses]
+  );
+  
+  const isStackBalanced = useMemo(() => 
+    Math.abs(totalFinalStack - totalBuyIns) < 0.01,
+    [totalFinalStack, totalBuyIns]
+  );
+  
+  const canCompleteGame = useMemo(() => 
+    isBalanced && isStackBalanced,
+    [isBalanced, isStackBalanced]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">

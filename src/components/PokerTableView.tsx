@@ -1,5 +1,5 @@
 import { SeatPosition } from "@/types/poker";
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
 import PokerCard from "./PokerCard";
 import ChipStack from "./ChipStack";
@@ -26,7 +26,7 @@ interface PokerTableViewProps {
   playerStacks?: Record<string, number>; // Player chip stacks
 }
 
-const PokerTableView = ({ 
+const PokerTableView = memo(({ 
   positions, 
   totalSeats, 
   onPositionsChange, 
@@ -54,8 +54,8 @@ const PokerTableView = ({
   const numPlayers = positions.length;
   const numSeats = Math.max(4, totalSeats || numPlayers); // Use totalSeats if provided, otherwise numPlayers
 
-  // Calculate position for each player, spreading them evenly
-  const getPlayerPosition = (index: number) => {
+  // Calculate position for each player, spreading them evenly - memoized
+  const getPlayerPosition = useCallback((index: number) => {
     const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
     const radians = (angle * Math.PI) / 180;
     const radiusX = 44; // Horizontal radius
@@ -65,25 +65,25 @@ const PokerTableView = ({
       x: 50 + radiusX * Math.cos(radians),
       y: 50 + radiusY * Math.sin(radians),
     };
-  };
+  }, [numPlayers]);
 
-  const handleDragStart = (index: number) => {
+  const handleDragStart = useCallback((index: number) => {
     if (!enableDragDrop) return;
     setDraggedIndex(index);
-  };
+  }, [enableDragDrop]);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setDraggedIndex(null);
     setDragOverIndex(null);
-  };
+  }, []);
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
     if (!enableDragDrop || draggedIndex === null) return;
     setDragOverIndex(index);
-  };
+  }, [enableDragDrop, draggedIndex]);
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = useCallback((e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     if (!enableDragDrop || draggedIndex === null || draggedIndex === dropIndex || !onPositionsChange) return;
 
@@ -102,10 +102,10 @@ const PokerTableView = ({
     onPositionsChange(newPositions);
     setDraggedIndex(null);
     setDragOverIndex(null);
-  };
+  }, [enableDragDrop, draggedIndex, positions, onPositionsChange]);
 
-  // Get position label for a player
-  const getPositionLabel = (playerId: string) => {
+  // Get position label for a player - memoized
+  const getPositionLabel = useCallback((playerId: string) => {
     if (!buttonPlayerId || !showPositionLabels) return null;
     const sortedPositions = positions
       .map(p => ({ ...p, seat: seatPositions[p.player_id] ?? 999 }))
@@ -116,7 +116,7 @@ const PokerTableView = ({
       playerId,
       seatPositions
     );
-  };
+  }, [buttonPlayerId, showPositionLabels, positions, seatPositions]);
 
   return (
     <div className="relative w-full aspect-square max-w-2xl mx-auto">
@@ -329,6 +329,8 @@ const PokerTableView = ({
       </div>
     </div>
   );
-};
+});
+
+PokerTableView.displayName = 'PokerTableView';
 
 export default PokerTableView;

@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import chipRed20 from "@/assets/chip-red-20.png";
 import chipBlack100 from "@/assets/chip-black-100.png";
 import chipBlue500 from "@/assets/chip-blue-500.png";
@@ -18,9 +19,10 @@ const CHIP_DENOMINATIONS = [
   { value: 20, image: chipRed20, color: '#ef4444' },
 ];
 
-const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
+const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
   // Select the best single chip denomination to display (simplified approach)
-  const selectBestChip = (total: number) => {
+  const chip = useMemo(() => {
+    const selectBestChip = (total: number) => {
     if (total === 0) return null;
     
     // Find the best denomination that represents the amount most efficiently
@@ -44,9 +46,10 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
       count: Math.ceil(count * 10) / 10,
       visualCount: Math.min(Math.ceil(count), 3)
     };
-  };
-
-  const chip = selectBestChip(amount);
+    };
+    
+    return selectBestChip(amount);
+  }, [amount]);
 
   const sizeClasses = {
     sm: 'w-7 h-7',
@@ -123,6 +126,8 @@ const ChipStack = ({ amount, size = 'md', showLabel = true }: ChipStackProps) =>
       )}
     </div>
   );
-};
+});
+
+ChipStack.displayName = 'ChipStack';
 
 export default ChipStack;

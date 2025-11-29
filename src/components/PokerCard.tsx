@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -6,7 +6,7 @@ interface PokerCardProps {
   className?: string;
 }
 
-const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
+const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) => {
   // Handle card back - solid green design
   if (!card || card === 'back' || card === '??') {
     const sizes = {
@@ -79,6 +79,8 @@ const PokerCard = ({ card, size = 'md', className = '' }: PokerCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+PokerCard.displayName = 'PokerCard';
 
 export default PokerCard;
