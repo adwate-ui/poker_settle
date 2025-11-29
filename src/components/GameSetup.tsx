@@ -162,7 +162,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">
-      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-2xl mx-auto space-y-3">
         {showPositionSetup && pendingGame ? (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -184,22 +184,22 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           </div>
         ) : (
           <>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div className="text-center sm:text-left flex-1">
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Poker Game Setup</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Configure your game settings and select players</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Poker Game Setup</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Configure and select players</p>
               </div>
               <UserProfile />
             </div>
 
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-poker-gold">Game Settings</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-poker-gold text-lg">Quick Setup</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="buyIn">Buy-in Amount</Label>
+                <Label htmlFor="buyIn" className="text-xs">Buy-in Amount</Label>
                 <Input 
                   id="buyIn" 
                   type="text" 
@@ -208,35 +208,31 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     const parsed = parseIndianNumber(e.target.value);
                     setBuyInAmount(parsed);
                   }}
-                  className="bg-input border-border"
+                  className="bg-input border-border h-9"
                   placeholder="Enter amount"
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-poker-gold">Add New Player</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-              <Input 
-                value={newPlayerName} 
-                onChange={e => setNewPlayerName(e.target.value)} 
-                placeholder="Enter player name" 
-                className="bg-input border-border" 
-                onKeyPress={e => e.key === 'Enter' && addNewPlayer()} 
-              />
-              <Button 
-                onClick={addNewPlayer} 
-                disabled={!newPlayerName.trim()} 
-                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add
-              </Button>
+              <div>
+                <Label htmlFor="newPlayer" className="text-xs">Add New Player</Label>
+                <div className="flex gap-1.5">
+                  <Input 
+                    id="newPlayer"
+                    value={newPlayerName} 
+                    onChange={e => setNewPlayerName(e.target.value)} 
+                    placeholder="Player name" 
+                    className="bg-input border-border h-9" 
+                    onKeyPress={e => e.key === 'Enter' && addNewPlayer()} 
+                  />
+                  <Button 
+                    onClick={addNewPlayer} 
+                    disabled={!newPlayerName.trim()} 
+                    className="bg-primary hover:bg-primary/90 h-9 px-3"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -245,46 +241,51 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <Collapsible open={isPreviousPlayersOpen} onOpenChange={setIsPreviousPlayersOpen}>
             <Card className="bg-card border-border">
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <CardTitle className="text-poker-gold flex items-center justify-between">
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+                  <CardTitle className="text-poker-gold flex items-center justify-between text-base">
                     <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5" />
-                      Select from Previous Players ({players.length})
+                      <Users className="w-4 h-4" />
+                      Previous Players ({players.length})
                     </div>
-                    {isPreviousPlayersOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                    {isPreviousPlayersOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </CardTitle>
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
                     <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
                         placeholder="Search players..."
                         value={playerSearchQuery}
                         onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                        className="pl-10 bg-input border-border"
+                        className="pl-8 bg-input border-border h-9 text-sm"
                       />
                     </div>
                     {filteredPlayers.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
+                      <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
                         {filteredPlayers.map(player => (
-                          <div key={player.id} className="p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                              <div className="flex items-center gap-3 cursor-pointer w-full sm:w-auto" onClick={() => selectExistingPlayer(player)}>
-                                <span className="font-semibold">{player.name}</span>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-end">
-                                <Badge variant="outline" className="text-xs">
-                                  {player.total_games} games
+                          <div key={player.id} className="p-2 bg-secondary rounded hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => selectExistingPlayer(player)}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium text-sm">{player.name}</span>
+                              <div className="flex items-center gap-1.5">
+                                <Badge variant="outline" className="text-xs h-5 px-1.5">
+                                  {player.total_games}
                                 </Badge>
-                                <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
-                                  {player.total_profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                  {formatCurrency(Math.abs(player.total_profit))}
+                                <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs h-5 px-1.5">
+                                  {player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit))}
                                 </Badge>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeletePlayer(player.id)}>
-                                  <Trash2 className="w-4 h-4" />
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 w-6 p-0 hover:bg-destructive/20"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePlayer(player.id);
+                                  }}
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
                               </div>
                             </div>
@@ -292,8 +293,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">
-                        {playerSearchQuery ? 'No players found matching your search.' : 'No previous players available.'}
+                      <p className="text-muted-foreground text-center py-6 text-sm">
+                        {playerSearchQuery ? 'No players found.' : 'No previous players.'}
                       </p>
                     )}
                   </div>
@@ -305,26 +306,28 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
         {selectedPlayers.length > 0 && (
           <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-poker-gold">Selected Players ({selectedPlayers.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-muted-foreground">Selected Players</span>
+                <Badge variant="secondary" className="text-xs">{selectedPlayers.length} players</Badge>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
                 {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                  <div key={player.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-secondary rounded-lg gap-2">
-                    <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-                      <span className="font-semibold">{player.name}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {player.total_games} games
-                      </Badge>
-                      <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs">
-                        {player.total_profit >= 0 ? '+' : ''}{formatCurrency(player.total_profit)}
-                      </Badge>
-                    </div>
-                    <Button variant="destructive" size="sm" onClick={() => removeSelectedPlayer(player.id)} className="self-end sm:self-auto">
-                      <Trash2 className="w-4 h-4" />
+                  <Badge 
+                    key={player.id} 
+                    variant="outline" 
+                    className="pl-2.5 pr-1 py-1 text-sm bg-secondary hover:bg-secondary/80 group"
+                  >
+                    <span className="font-medium">{player.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1.5 hover:bg-destructive/20"
+                      onClick={() => removeSelectedPlayer(player.id)}
+                    >
+                      <X className="h-3 w-3" />
                     </Button>
-                  </div>
+                  </Badge>
                 ))}
               </div>
             </CardContent>
@@ -450,10 +453,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <PlayerPerformance players={players} games={games} />
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           {!canCreateGame && (
-            <Button onClick={continueGame} className="flex-1 bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3">
-              <Play className="w-5 h-5 mr-2" />
+            <Button onClick={continueGame} className="flex-1 bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold h-11">
+              <Play className="w-4 h-4 mr-2" />
               <span className="hidden xs:inline">Continue Current Game</span>
               <span className="xs:hidden">Continue Game</span>
             </Button>
@@ -461,9 +464,9 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <Button 
             onClick={startGame} 
             disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} 
-            className={`${!canCreateGame ? 'flex-1' : 'w-full'} bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold py-3`}
+            className={`${!canCreateGame ? 'flex-1' : 'w-full'} bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold h-11`}
           >
-            <Play className="w-5 h-5 mr-2" />
+            <Play className="w-4 h-4 mr-2" />
             Start New Game ({selectedPlayers.length} players)
           </Button>
         </div>
