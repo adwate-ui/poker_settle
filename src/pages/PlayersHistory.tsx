@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, TrendingDown, Trash2, ArrowUpDown, ArrowUp, ArrowDown, User } from "lucide-react";
+import { Loader2, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Player } from "@/types/poker";
 import { formatIndianNumber } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -206,9 +207,8 @@ const PlayersHistory = () => {
           </div>
         </div>
 
-        {sortedPlayers.map((player, index) => {
+        {sortedPlayers.map((player) => {
           const isProfit = (player.total_profit || 0) >= 0;
-          const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`;
 
           return (
             <Card
@@ -223,13 +223,7 @@ const PlayersHistory = () => {
                       className="flex items-center gap-3 flex-1 min-w-0"
                       onClick={() => navigate(`/players/${player.id}`)}
                     >
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                        <img 
-                          src={avatarUrl} 
-                          alt={player.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      <OptimizedAvatar name={player.name} size="md" />
                       <span className="font-bold text-base truncate">{player.name}</span>
                     </div>
                     <Button
@@ -264,13 +258,7 @@ const PlayersHistory = () => {
                     className="flex items-center gap-4"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                      <img 
-                        src={avatarUrl} 
-                        alt={player.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <OptimizedAvatar name={player.name} size="md" />
                     <span className="font-bold text-base truncate">{player.name}</span>
                   </div>
                   
