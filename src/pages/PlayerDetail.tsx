@@ -281,21 +281,21 @@ const PlayerDetail = () => {
                 <TableHead className="font-bold">
                   <Button
                     variant="ghost"
-                    onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
-                  >
-                    Final Stack
-                    {getSortIcon("final_stack")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold">
-                  <Button
-                    variant="ghost"
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >
                     Net P&L
                     {getSortIcon("net_amount")}
+                  </Button>
+                </TableHead>
+                <TableHead className="font-bold">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort("final_stack")}
+                    className="flex items-center gap-2 hover:text-primary font-bold"
+                  >
+                    Final Stack
+                    {getSortIcon("final_stack")}
                   </Button>
                 </TableHead>
                 <TableHead className="font-bold text-center">Actions</TableHead>
@@ -325,9 +325,6 @@ const PlayerDetail = () => {
                         {game.buy_ins}
                       </span>
                     </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground">
-                      Rs. {formatIndianNumber(game.final_stack)}
-                    </TableCell>
                     <TableCell>
                       <span className={`px-3 py-1 rounded-full font-bold ${
                         isWin 
@@ -336,6 +333,9 @@ const PlayerDetail = () => {
                       }`}>
                         {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
                       </span>
+                    </TableCell>
+                    <TableCell className="font-semibold text-accent-foreground">
+                      Rs. {formatIndianNumber(game.final_stack)}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
