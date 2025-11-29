@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,42 +89,32 @@ const GameDetail = () => {
   const fetchGameData = async () => {
     setLoading(true);
     try {
-      const { data: gameData, error: gameError } = await supabase
-        .from("games")
-        .select("*")
-        .eq("id", gameId)
-        .single();
+      // Fetch all data in parallel for better performance
+      const [
+        { data: gameData, error: gameError },
+        { data: playersData, error: playersError },
+        { data: positionsData, error: positionsError }
+      ] = await Promise.all([
+        supabase.from("games").select("*").eq("id", gameId).single(),
+        supabase.from("game_players").select(`
+          *,
+          players (
+            name
+          )
+        `).eq("game_id", gameId).order("players(name)", { ascending: true }),
+        supabase.from("table_positions").select("*").eq("game_id", gameId).order("snapshot_timestamp", { ascending: true })
+      ]);
 
       if (gameError) throw gameError;
+      if (playersError) throw playersError;
+      if (positionsError) throw positionsError;
       
       const gameWithPlayers: Game = {
         ...gameData,
         game_players: []
       };
       setGame(gameWithPlayers);
-
-      const { data: playersData, error: playersError } = await supabase
-        .from("game_players")
-        .select(`
-          *,
-          players (
-            name
-          )
-        `)
-        .eq("game_id", gameId)
-        .order("players(name)", { ascending: true });
-
-      if (playersError) throw playersError;
       setGamePlayers(playersData || []);
-
-      // Fetch table positions
-      const { data: positionsData, error: positionsError } = await supabase
-        .from("table_positions")
-        .select("*")
-        .eq("game_id", gameId)
-        .order("snapshot_timestamp", { ascending: true });
-
-      if (positionsError) throw positionsError;
       
       const formattedPositions: TablePosition[] = (positionsData || []).map((tp) => ({
         id: tp.id,
@@ -220,8 +210,8 @@ const GameDetail = () => {
 
   const savedSettlements: Settlement[] = (game as any)?.settlements || [];
 
-  // Calculate optimal settlements from net amounts
-  const calculateSettlements = (): Settlement[] => {
+  // Calculate optimal settlements from net amounts - memoized function
+  const calculateSettlements = useCallback((): Settlement[] => {
     const winners = sortedGamePlayers.filter(gp => gp.net_amount > 0);
     const losers = sortedGamePlayers.filter(gp => gp.net_amount < 0);
     
@@ -256,12 +246,12 @@ const GameDetail = () => {
     }
     
     return calculatedSettlements;
-  };
+  }, [sortedGamePlayers]);
 
-  // Determine manual and calculated settlements
-  const allCalculatedSettlements = calculateSettlements();
+  // Determine manual and calculated settlements - memoized
+  const allCalculatedSettlements = useMemo(() => calculateSettlements(), [calculateSettlements]);
   
-  const getSettlementsWithType = (): SettlementWithType[] => {
+  const getSettlementsWithType = useCallback((): SettlementWithType[] => {
     if (savedSettlements.length === 0) {
       // No manual settlements, show only calculated
       return allCalculatedSettlements.map(s => ({ ...s, isManual: false }));
@@ -300,9 +290,9 @@ const GameDetail = () => {
     }
     
     return [...manualSettlements, ...calculatedSettlements];
-  };
+  }, [savedSettlements, allCalculatedSettlements, sortedGamePlayers]);
 
-  const settlementsWithType = getSettlementsWithType();
+  const settlementsWithType = useMemo(() => getSettlementsWithType(), [getSettlementsWithType]);
   const manualSettlements = settlementsWithType.filter(s => s.isManual);
   const calculatedSettlements = settlementsWithType.filter(s => !s.isManual);
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,15 +15,18 @@ interface PlayerCardProps {
   fetchBuyInHistory: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
-const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory }: PlayerCardProps) => {
+const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory }: PlayerCardProps) => {
   const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
   const [addBuyInsAmount, setAddBuyInsAmount] = useState<string>('');
   const [hasFinalStackChanges, setHasFinalStackChanges] = useState(false);
   
-  const netAmount = (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount);
+  const netAmount = useMemo(() => 
+    (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
+    [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
+  );
   const isProfit = netAmount > 0;
 
-  const handleAddBuyIns = () => {
+  const handleAddBuyIns = useCallback(() => {
     const numToAdd = parseInt(addBuyInsAmount) || 0;
     if (numToAdd === 0) {
       return;
@@ -41,20 +44,20 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
       net_amount: (gamePlayer.final_stack || 0) - (newTotal * buyInAmount)
     }, true); // Log this change
     setAddBuyInsAmount('');
-  };
+  }, [addBuyInsAmount, gamePlayer.id, gamePlayer.buy_ins, gamePlayer.final_stack, buyInAmount, onUpdatePlayer]);
 
-  const handleFinalStackChange = (value: number) => {
+  const handleFinalStackChange = useCallback((value: number) => {
     setLocalFinalStack(value);
     setHasFinalStackChanges(value !== (gamePlayer.final_stack || 0));
-  };
+  }, [gamePlayer.final_stack]);
 
-  const confirmFinalStack = () => {
+  const confirmFinalStack = useCallback(() => {
     onUpdatePlayer(gamePlayer.id, { 
       final_stack: localFinalStack,
       net_amount: localFinalStack - (gamePlayer.buy_ins * buyInAmount)
     });
     setHasFinalStackChanges(false);
-  };
+  }, [gamePlayer.id, gamePlayer.buy_ins, localFinalStack, buyInAmount, onUpdatePlayer]);
 
   return (
     <Card className="hover:border-primary/50 transition-colors touch-manipulation">
@@ -172,6 +175,8 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
       </CardContent>
     </Card>
   );
-};
+});
+
+PlayerCard.displayName = 'PlayerCard';
 
 export default PlayerCard;
