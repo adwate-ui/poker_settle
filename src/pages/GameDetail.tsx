@@ -95,7 +95,7 @@ const GameDetail = () => {
         { data: playersData, error: playersError },
         { data: positionsData, error: positionsError }
       ] = await Promise.all([
-        supabase.from("games").select("*").eq("id", gameId).single(),
+        supabase.from("games").select("*").eq("id", gameId).maybeSingle(),
         supabase.from("game_players").select(`
           *,
           players (
