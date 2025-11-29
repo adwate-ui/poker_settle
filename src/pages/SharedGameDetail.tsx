@@ -323,7 +323,7 @@ const SharedGameDetail = () => {
         </Card>
 
         <div className="grid grid-cols-1 gap-6">
-          <ConsolidatedBuyInLogs gameId={gameId!} />
+          <ConsolidatedBuyInLogs gameId={gameId!} token={token} />
         </div>
 
         {/* Poker Table View */}
