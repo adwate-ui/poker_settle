@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -68,7 +68,7 @@ interface GameDetailViewProps {
   fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
-export const GameDetailView = memo(({
+export const GameDetailView = ({
   gameId,
   client,
   token,
@@ -90,10 +90,9 @@ export const GameDetailView = memo(({
     if (gameId) {
       fetchGameData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
 
-  const fetchGameData = useCallback(async () => {
+  const fetchGameData = async () => {
     setLoading(true);
     try {
       const [gameResult, playersResult, positionsResult] = await Promise.all([
@@ -155,9 +154,9 @@ export const GameDetailView = memo(({
     } finally {
       setLoading(false);
     }
-  }, [gameId, client]);
+  };
 
-  const handleSort = useCallback((field: SortField) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortOrder === "asc") setSortOrder("desc");
       else if (sortOrder === "desc") {
@@ -168,13 +167,13 @@ export const GameDetailView = memo(({
       setSortField(field);
       setSortOrder("asc");
     }
-  }, [sortField, sortOrder]);
+  };
 
-  const getSortIcon = useCallback((field: SortField) => {
+  const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
     if (sortOrder === "asc") return <ArrowUp className="h-4 w-4" />;
     return <ArrowDown className="h-4 w-4" />;
-  }, [sortField, sortOrder]);
+  };
 
   const sortedGamePlayers = useMemo(() => {
     return [...gamePlayers].sort((a, b) => {
@@ -243,7 +242,7 @@ export const GameDetailView = memo(({
     return calculatedSettlements;
   }, [sortedGamePlayers]);
 
-  const savedSettlements: Settlement[] = useMemo(() => game?.settlements || [], [game?.settlements]);
+  const savedSettlements: Settlement[] = game?.settlements || [];
   const allCalculatedSettlements = useMemo(() => calculateSettlements(), [calculateSettlements]);
   
   const getSettlementsWithType = useCallback((): SettlementWithType[] => {
@@ -290,30 +289,17 @@ export const GameDetailView = memo(({
     );
   }
 
-  const currentTablePosition = useMemo(
-    () => (tablePositions.length > 0 ? tablePositions[currentPositionIndex] : null),
-    [tablePositions, currentPositionIndex]
-  );
+  const currentTablePosition = tablePositions.length > 0 
+    ? tablePositions[currentPositionIndex]
+    : null;
 
-  const playersWithSeats: SeatPosition[] = useMemo(
-    () =>
-      currentTablePosition
-        ? currentTablePosition.positions
-        : gamePlayers.map((gp, index) => ({
-            seat: index + 1,
-            player_id: gp.player_id,
-            player_name: gp.players?.name ?? `Player ${index + 1}`,
-          })),
-    [currentTablePosition, gamePlayers]
-  );
-
-  const handlePositionPrev = useCallback(() => {
-    setCurrentPositionIndex((prev) => Math.max(0, prev - 1));
-  }, []);
-
-  const handlePositionNext = useCallback(() => {
-    setCurrentPositionIndex((prev) => Math.min(tablePositions.length - 1, prev + 1));
-  }, [tablePositions.length]);
+  const playersWithSeats: SeatPosition[] = currentTablePosition
+    ? currentTablePosition.positions
+    : gamePlayers.map((gp, index) => ({
+        seat: index + 1,
+        player_id: gp.player_id,
+        player_name: gp.players?.name ?? `Player ${index + 1}`,
+      }));
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -383,7 +369,7 @@ export const GameDetailView = memo(({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={handlePositionPrev}
+                  onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
                   disabled={currentPositionIndex === 0}
                   className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
                 >
@@ -395,7 +381,7 @@ export const GameDetailView = memo(({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={handlePositionNext}
+                  onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
                   disabled={currentPositionIndex === tablePositions.length - 1}
                   className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
                 >
@@ -579,6 +565,4 @@ export const GameDetailView = memo(({
       )}
     </div>
   );
-});
-
-GameDetailView.displayName = 'GameDetailView';
+};
