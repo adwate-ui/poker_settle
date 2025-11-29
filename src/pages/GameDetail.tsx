@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import GameErrorBoundary from "@/components/GameErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from "lucide-react";
@@ -324,7 +325,8 @@ const GameDetail = () => {
   const calculatedSettlements = settlementsWithType.filter(s => !s.isManual);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <GameErrorBoundary>
+      <div className="max-w-6xl mx-auto space-y-6">
       <Button
         variant="ghost"
         onClick={() => navigate("/games")}
@@ -579,6 +581,7 @@ const GameDetail = () => {
         </Card>
       )}
     </div>
+  </GameErrorBoundary>
   );
 };
 
