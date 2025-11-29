@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Loader2, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { formatIndianNumber, formatShortDate, formatMonthYear, getUniqueDates, getUniqueMonthYears } from "@/lib/utils";
+import { format } from "date-fns";
+import { formatIndianNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -135,11 +136,13 @@ const GamesHistory = () => {
   }, [fetchGames]);
 
   const uniqueDates = useMemo(() => {
-    return getUniqueDates(games.map((game) => game.date));
+    const dates = games.map((game) => format(new Date(game.date), "MMM d, yyyy"));
+    return Array.from(new Set(dates)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [games]);
 
   const uniqueMonthYears = useMemo(() => {
-    return getUniqueMonthYears(games.map((game) => game.date));
+    const monthYears = games.map((game) => format(new Date(game.date), "MMM yyyy"));
+    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [games]);
 
   const uniquePlayers = useMemo(() => {
@@ -168,8 +171,8 @@ const GamesHistory = () => {
 
   const filteredAndSortedGames = useMemo(() => {
     let filtered = games.filter((game) => {
-      const gameDate = formatShortDate(game.date);
-      const monthYear = formatMonthYear(game.date);
+      const gameDate = format(new Date(game.date), "MMM d, yyyy");
+      const monthYear = format(new Date(game.date), "MMM yyyy");
       
       if (selectedDate !== "all" && gameDate !== selectedDate) return false;
       if (selectedMonthYear !== "all" && monthYear !== selectedMonthYear) return false;
@@ -350,7 +353,7 @@ const GamesHistory = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="text-xs text-muted-foreground">Date</p>
-                          <p className="font-medium">{formatShortDate(game.date)}</p>
+                          <p className="font-medium">{format(new Date(game.date), "MMM d, yyyy")}</p>
                         </div>
                         {selectedPlayer === "all" && (
                           <Button
@@ -393,7 +396,7 @@ const GamesHistory = () => {
                     {/* Desktop Layout */}
                     <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
                       <div className="font-medium">
-                        {formatShortDate(game.date)}
+                        {format(new Date(game.date), "MMM d, yyyy")}
                       </div>
                       <div className="font-semibold">
                         Rs. {formatIndianNumber(game.buy_in_amount)}

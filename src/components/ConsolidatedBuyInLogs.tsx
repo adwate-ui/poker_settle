@@ -4,7 +4,7 @@ import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
-import { formatTimestamp } from "@/lib/utils";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -156,7 +156,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {formatTimestamp(entry.timestamp)}
+                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                     </TableCell>
                     <TableCell className="text-right font-semibold">
                       {entry.total_buy_ins_after}

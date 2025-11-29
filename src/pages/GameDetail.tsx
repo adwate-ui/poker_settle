@@ -27,16 +27,14 @@ const GameDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
-      <GameDetailView
-        gameId={gameId}
-        client={supabase}
-        showOwnerControls={true}
-        onBack={() => navigate("/games")}
-        backLabel="Back to Games History"
-        fetchBuyInHistory={fetchBuyInHistory}
-      />
-    </div>
+    <GameDetailView
+      gameId={gameId}
+      client={supabase}
+      showOwnerControls={true}
+      onBack={() => navigate("/games")}
+      backLabel="Back to Games History"
+      fetchBuyInHistory={fetchBuyInHistory}
+    />
   );
 };
 

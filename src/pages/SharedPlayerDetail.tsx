@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Loader2, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
-import { formatIndianNumber, formatShortDate, formatMonthYear, getUniqueMonthYears } from '@/lib/utils';
+import { format } from 'date-fns';
+import { formatIndianNumber } from '@/lib/utils';
 import { useSharedLink } from '@/hooks/useSharedLink';
 import {
   Select,
@@ -129,13 +130,14 @@ const SharedPlayerDetail = () => {
   };
 
   const uniqueMonthYears = useMemo(() => {
-    return getUniqueMonthYears(gameHistory.map((game) => game.games.date));
+    const monthYears = gameHistory.map((game) => format(new Date(game.games.date), 'MMM yyyy'));
+    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [gameHistory]);
 
   const filteredGameHistory = useMemo(() => {
     return gameHistory.filter((game) => {
       if (selectedMonthYear === 'all') return true;
-      const monthYear = formatMonthYear(game.games.date);
+      const monthYear = format(new Date(game.games.date), 'MMM yyyy');
       return monthYear === selectedMonthYear;
     });
   }, [gameHistory, selectedMonthYear]);
@@ -353,10 +355,10 @@ const SharedPlayerDetail = () => {
                       }`}
                     >
                       <TableCell className="font-medium text-primary">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {formatShortDate(game.games.date)}
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {format(new Date(game.games.date), 'MMM d, yyyy')}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
