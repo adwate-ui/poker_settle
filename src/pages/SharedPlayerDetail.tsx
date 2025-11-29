@@ -56,6 +56,7 @@ const SharedPlayerDetail = () => {
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>('all');
+  const [resourceType, setResourceType] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPlayerData = async () => {
@@ -63,6 +64,21 @@ const SharedPlayerDetail = () => {
 
       try {
         const sharedClient = createSharedClient(token);
+
+        // Validate that this is a player link
+        const { data: linkData } = await sharedClient
+          .from('shared_links')
+          .select('resource_type')
+          .eq('access_token', token)
+          .single();
+
+        setResourceType(linkData?.resource_type || null);
+
+        // Only fetch player data if it's a player link
+        if (linkData?.resource_type !== 'player') {
+          setLoading(false);
+          return;
+        }
 
         const [playerResult, historyResult] = await Promise.all([
           sharedClient.from('players').select('*').eq('id', playerId).single(),
@@ -165,7 +181,7 @@ const SharedPlayerDetail = () => {
     );
   }
 
-  if (!player) {
+  if (!player || resourceType !== 'player') {
     return (
       <div className="min-h-screen bg-background p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
@@ -175,7 +191,11 @@ const SharedPlayerDetail = () => {
           </Button>
           <Card className="mt-4">
             <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">Player not found</p>
+              <p className="text-center text-muted-foreground">
+                {resourceType === 'game' 
+                  ? 'Player details are not available with a game link. This link only provides access to game data.'
+                  : 'Player not found'}
+              </p>
             </CardContent>
           </Card>
         </div>
