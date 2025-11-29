@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
-import { TrendingUp, TrendingDown, Check } from "lucide-react";
+import { TrendingUp, TrendingDown, Check, Coins, Wallet, History } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 
@@ -58,106 +58,110 @@ const PlayerCard = ({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHistory
 
   return (
     <Card className="hover:border-primary/50 transition-colors touch-manipulation">
-      <CardHeader className="pb-2 sm:pb-3">
+      <CardHeader className="pb-2 space-y-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
               <img 
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(gamePlayer.player.name)}`}
                 alt={gamePlayer.player.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            <div>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="flex items-center gap-1.5 text-sm sm:text-base">
                 <span className="truncate">{gamePlayer.player.name}</span>
                 {isProfit ? (
-                  <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <TrendingUp className="w-3.5 h-3.5 text-green-600 dark:text-green-400 flex-shrink-0" />
                 ) : (
-                  <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                  <TrendingDown className="w-3.5 h-3.5 text-red-600 dark:text-red-400 flex-shrink-0" />
                 )}
               </CardTitle>
-              <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                <Badge variant="info" className="text-xs">
-                  {gamePlayer.player.total_games} games
+              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                <Badge variant="outline" className="text-[10px] h-4 px-1">
+                  {gamePlayer.player.total_games}g
                 </Badge>
-                <Badge variant={gamePlayer.player.total_profit >= 0 ? "success" : "destructive"} className="text-xs">
-                  {gamePlayer.player.total_profit >= 0 ? '+' : ''}Rs. {formatIndianNumber(Math.abs(gamePlayer.player.total_profit))}
+                <Badge variant={gamePlayer.player.total_profit >= 0 ? "success" : "destructive"} className="text-[10px] h-4 px-1">
+                  {gamePlayer.player.total_profit >= 0 ? '+' : ''}{formatIndianNumber(Math.abs(gamePlayer.player.total_profit))}
                 </Badge>
               </div>
             </div>
           </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Badge variant="secondary" className="text-xs font-semibold">
+              {gamePlayer.buy_ins} buy-ins
+            </Badge>
+            <BuyInHistoryDialog 
+              gamePlayerId={gamePlayer.id}
+              playerName={gamePlayer.player.name}
+              fetchHistory={fetchBuyInHistory}
+            />
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4">
-        <div className="space-y-3 sm:space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm text-muted-foreground">Current Buy-ins</span>
-              <BuyInHistoryDialog 
-                gamePlayerId={gamePlayer.id}
-                playerName={gamePlayer.player.name}
-                fetchHistory={fetchBuyInHistory}
-              />
+      <CardContent className="pt-3 space-y-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {/* Add Buy-ins Input - Orange Theme */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <Coins className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+              <span className="text-xs font-medium text-orange-600 dark:text-orange-400">Add Buy-ins</span>
             </div>
-            <div className="text-center font-semibold text-2xl sm:text-3xl text-primary">
-              {gamePlayer.buy_ins}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <span className="text-xs sm:text-sm text-muted-foreground">Add Buy-ins (+ or -)</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50">
               <Input
                 type="number"
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
-                className="text-center font-mono text-sm sm:text-base"
-                placeholder="e.g., 2 or -1"
+                className="h-8 text-center font-mono text-sm border-orange-300 dark:border-orange-800 bg-background focus-visible:ring-orange-500"
+                placeholder="+2 or -1"
               />
               <Button 
                 variant="default" 
                 size="sm" 
                 onClick={handleAddBuyIns}
                 disabled={!addBuyInsAmount || parseInt(addBuyInsAmount) === 0}
-                className="shrink-0 touch-manipulation"
+                className="h-8 shrink-0 bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-800"
               >
                 Add
               </Button>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <span className="text-xs sm:text-sm text-muted-foreground">Final Stack (Rs.)</span>
-            <div className="flex items-center gap-2">
+          {/* Final Stack Input - Green Theme */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <Wallet className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+              <span className="text-xs font-medium text-green-600 dark:text-green-400">Final Stack (Rs.)</span>
+            </div>
+            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
               <Input
                 type="text"
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
-                className="text-center font-mono text-sm sm:text-base"
-                placeholder="Enter amount"
+                className="h-8 text-center font-mono text-sm border-green-300 dark:border-green-800 bg-background focus-visible:ring-green-500"
+                placeholder="0"
               />
               {hasFinalStackChanges && (
                 <Button 
                   variant="default" 
                   size="sm" 
                   onClick={confirmFinalStack}
-                  className="shrink-0 touch-manipulation"
+                  className="h-8 w-8 shrink-0 p-0 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
                 >
-                  <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Check className="w-3.5 h-3.5" />
                 </Button>
               )}
             </div>
           </div>
         </div>
 
-        <div className="pt-2 sm:pt-3 border-t border-border space-y-1">
+        <div className="pt-2 border-t border-border space-y-0.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm text-muted-foreground">Total Buyin:</span>
-            <span className="font-semibold text-sm sm:text-base">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+            <span className="text-xs text-muted-foreground">Total Buyin:</span>
+            <span className="font-semibold text-xs sm:text-sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-medium">Net P&L:</span>
+            <span className="text-xs font-medium">Net P&L:</span>
             <span className={`font-bold text-sm sm:text-base ${
               isProfit 
                 ? 'text-green-600 dark:text-green-400' 

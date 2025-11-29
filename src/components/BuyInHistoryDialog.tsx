@@ -39,9 +39,8 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <History className="w-4 h-4" />
-          <span className="text-xs sm:text-sm">Buy-in Log</span>
+        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
+          <History className="w-3.5 h-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
