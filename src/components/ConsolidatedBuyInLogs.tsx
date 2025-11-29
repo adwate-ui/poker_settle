@@ -76,6 +76,22 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
 
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
 
+  // Calculate dynamic height based on number of entries
+  const ROW_HEIGHT = 44; // Approximate height per table row in pixels
+  const HEADER_HEIGHT = 40; // Table header height
+  const MIN_HEIGHT = 132; // Minimum height (shows ~2 rows)
+  const MAX_HEIGHT = 240; // Current maximum height
+  
+  const calculateHeight = () => {
+    const numEntries = filteredHistory.length;
+    if (numEntries === 0) return MIN_HEIGHT;
+    
+    const calculatedHeight = HEADER_HEIGHT + (numEntries * ROW_HEIGHT);
+    return Math.min(Math.max(calculatedHeight, MIN_HEIGHT), MAX_HEIGHT);
+  };
+
+  const dynamicHeight = calculateHeight();
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
@@ -113,7 +129,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
             No buy-in changes found for "{filterName}"
           </div>
         ) : (
-          <ScrollArea className="h-[240px]">
+          <ScrollArea style={{ height: `${dynamicHeight}px` }}>
             <Table>
               <TableHeader>
                 <TableRow>
