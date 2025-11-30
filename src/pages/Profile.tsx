@@ -1,16 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User, Database } from 'lucide-react';
+import { ArrowLeft, User, Database, Palette } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTheme } from '@/contexts/ThemeContext';
+import { themes, ThemeName } from '@/config/themes';
+import { toast } from 'sonner';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { currentTheme, setTheme, loading: themeLoading } = useTheme();
+  const [changingTheme, setChangingTheme] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,6 +36,19 @@ const Profile = () => {
 
   if (!user) return null;
 
+  const handleThemeChange = async (themeName: ThemeName) => {
+    setChangingTheme(true);
+    try {
+      await setTheme(themeName);
+      toast.success(`Theme changed to ${themes[themeName].displayName}`);
+    } catch (error) {
+      toast.error('Failed to change theme');
+      console.error('Error changing theme:', error);
+    } finally {
+      setChangingTheme(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -44,10 +62,14 @@ const Profile = () => {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="theme">
+              <Palette className="h-4 w-4 mr-2" />
+              Theme
             </TabsTrigger>
             <TabsTrigger value="storage">
               <Database className="h-4 w-4 mr-2" />
@@ -75,6 +97,70 @@ const Profile = () => {
                   <label className="text-sm font-medium text-muted-foreground">User ID</label>
                   <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="theme">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Palette className="h-6 w-6 text-primary" />
+                  <div>
+                    <CardTitle>Theme Selection</CardTitle>
+                    <CardDescription>Choose an anime theme to customize colors and player icons</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {themeLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {Object.entries(themes).map(([key, theme]) => {
+                      const isActive = currentTheme === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => handleThemeChange(key as ThemeName)}
+                          disabled={changingTheme || isActive}
+                          className={`
+                            p-4 rounded-lg border-2 text-left transition-all
+                            ${isActive 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50 hover:bg-accent'
+                            }
+                            ${changingTheme ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                          `}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg">{theme.displayName}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {theme.description}
+                              </p>
+                              {theme.characters.length > 0 && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Characters: {theme.characters.slice(0, 4).join(', ')}
+                                  {theme.characters.length > 4 && ` +${theme.characters.length - 4} more`}
+                                </p>
+                              )}
+                            </div>
+                            {isActive && (
+                              <div className="flex items-center gap-2 text-primary">
+                                <span className="text-sm font-medium">Active</span>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
