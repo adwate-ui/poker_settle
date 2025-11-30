@@ -7,7 +7,6 @@ import PlayersHistory from "./PlayersHistory";
 import PlayerDetail from "./PlayerDetail";
 import HandsHistory from "./HandsHistory";
 import HandDetail from "./HandDetail";
-import ChatBot from "@/components/ChatBot";
 import { TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -30,7 +29,6 @@ const Index = () => {
       <TabsContent value="hands-history">
         {isHandDetail ? <HandDetail /> : <HandsHistory />}
       </TabsContent>
-      <ChatBot />
     </TabLayout>
   );
 };
