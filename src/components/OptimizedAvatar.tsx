@@ -1,4 +1,7 @@
 import { memo, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { getCharacterForPlayer } from '@/config/themes';
+import { getCharacterImage } from '@/config/characterImages';
 
 interface OptimizedAvatarProps {
   name: string;
@@ -7,6 +10,7 @@ interface OptimizedAvatarProps {
 }
 
 const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAvatarProps) => {
+  const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
   
   const sizeClasses = {
@@ -15,7 +19,11 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAv
     lg: 'w-16 h-16',
   };
   
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+  // Try to get character avatar based on theme
+  const characterName = getCharacterForPlayer(currentTheme, name);
+  const characterImage = characterName ? getCharacterImage(characterName) : null;
+  
+  const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
   
   if (imageError) {
     const initials = name
