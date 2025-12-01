@@ -16,23 +16,37 @@ export default function ShortLinkRedirect() {
       }
 
       try {
+        console.log('[ShortLinkRedirect] Resolving short code:', shortCode);
+        
         const { data, error } = await supabase
           .from('shared_links')
           .select('resource_type, resource_id, access_token')
           .eq('short_code', shortCode)
-          .single();
+          .maybeSingle();
 
-        if (error || !data) {
+        console.log('[ShortLinkRedirect] Query result:', { data, error });
+
+        if (error) {
+          console.error('[ShortLinkRedirect] Supabase error:', error);
+          setError(true);
+          return;
+        }
+
+        if (!data) {
+          console.error('[ShortLinkRedirect] No shared link found for code:', shortCode);
           setError(true);
           return;
         }
 
         // Redirect to the appropriate shared view using the access_token
+        console.log('[ShortLinkRedirect] Redirecting to:', data.resource_type, data.resource_id);
+        
         if (data.resource_type === 'game') {
           navigate(`/shared/${data.access_token}/game/${data.resource_id}`, { replace: true });
         } else if (data.resource_type === 'player') {
           navigate(`/shared/${data.access_token}/player/${data.resource_id}`, { replace: true });
         } else {
+          console.error('[ShortLinkRedirect] Unknown resource type:', data.resource_type);
           setError(true);
         }
       } catch (err) {
