@@ -123,7 +123,7 @@ export const themes: Record<ThemeName, Theme> = {
         gradientDark: 'linear-gradient(180deg, hsl(210, 40%, 15%) 0%, hsl(210, 40%, 8%) 100%)',
       },
     },
-    characters: ['Luffy', 'Zoro', 'Nami', 'Sanji', 'Chopper', 'Robin', 'Franky', 'Brook', 'Usopp', 'Jinbe'],
+    characters: ['OnePiece01', 'OnePiece02', 'OnePiece03', 'OnePiece04', 'OnePiece05', 'OnePiece06', 'OnePiece07', 'OnePiece08', 'OnePiece09', 'OnePiece10', 'OnePiece11', 'OnePiece12', 'OnePiece13', 'OnePiece14', 'OnePiece15', 'OnePiece16', 'OnePiece17', 'OnePiece18', 'OnePiece19', 'OnePiece20', 'OnePiece21', 'OnePiece22', 'OnePiece23', 'OnePiece24', 'OnePiece25'],
   },
   
   bleach: {
@@ -168,7 +168,7 @@ export const themes: Record<ThemeName, Theme> = {
         gradientDark: 'linear-gradient(180deg, hsl(0, 0%, 12%) 0%, hsl(0, 0%, 5%) 100%)',
       },
     },
-    characters: ['Ichigo', 'Rukia', 'Renji', 'Byakuya', 'Toshiro', 'Kenpachi', 'Yoruichi', 'Urahara', 'Orihime', 'Uryu'],
+    characters: ['Bleach01', 'Bleach02', 'Bleach03', 'Bleach04', 'Bleach05', 'Bleach06', 'Bleach07', 'Bleach08', 'Bleach09', 'Bleach10', 'Bleach11', 'Bleach12', 'Bleach13', 'Bleach14', 'Bleach15', 'Bleach16', 'Bleach17', 'Bleach18', 'Bleach19', 'Bleach20', 'Bleach21', 'Bleach22', 'Bleach23', 'Bleach24', 'Bleach25'],
   },
   
   naruto: {
@@ -213,7 +213,7 @@ export const themes: Record<ThemeName, Theme> = {
         gradientDark: 'linear-gradient(180deg, hsl(220, 30%, 15%) 0%, hsl(220, 30%, 8%) 100%)',
       },
     },
-    characters: ['Naruto', 'Sasuke', 'Sakura', 'Kakashi', 'Hinata', 'Shikamaru', 'Rock Lee', 'Gaara', 'Itachi', 'Jiraiya'],
+    characters: ['Naruto01', 'Naruto02', 'Naruto03', 'Naruto04', 'Naruto05', 'Naruto06', 'Naruto07', 'Naruto08', 'Naruto09', 'Naruto10', 'Naruto11', 'Naruto12', 'Naruto13', 'Naruto14', 'Naruto15', 'Naruto16', 'Naruto17', 'Naruto18', 'Naruto19', 'Naruto20', 'Naruto21', 'Naruto22', 'Naruto23', 'Naruto24', 'Naruto25'],
   },
   
   dandadan: {
@@ -258,7 +258,7 @@ export const themes: Record<ThemeName, Theme> = {
         gradientDark: 'linear-gradient(180deg, hsl(280, 30%, 14%) 0%, hsl(280, 30%, 7%) 100%)',
       },
     },
-    characters: ['Momo', 'Okarun', 'Turbo Granny', 'Aira', 'Jiji', 'Seiko', 'Acrobatic Silky', 'Evil Eye', 'Serpo', 'Kinta'],
+    characters: ['Dandadan01', 'Dandadan02', 'Dandadan03', 'Dandadan04', 'Dandadan05', 'Dandadan06', 'Dandadan07', 'Dandadan08', 'Dandadan09', 'Dandadan10', 'Dandadan11', 'Dandadan12', 'Dandadan13', 'Dandadan14', 'Dandadan15', 'Dandadan16', 'Dandadan17', 'Dandadan18', 'Dandadan19', 'Dandadan20', 'Dandadan21', 'Dandadan22', 'Dandadan23', 'Dandadan24', 'Dandadan25'],
   },
 };
 
