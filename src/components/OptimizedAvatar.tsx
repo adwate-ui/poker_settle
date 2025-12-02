@@ -19,8 +19,8 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAv
     lg: 'w-16 h-16',
   };
   
-  // Try to get character avatar based on theme
-  const characterName = getCharacterForPlayer(currentTheme, name);
+  // For themed avatars, use player name as ID. For default theme, use dicebear
+  const characterName = currentTheme !== 'default' ? getCharacterForPlayer(currentTheme, name) : null;
   const characterImage = characterName ? getCharacterImage(characterName) : null;
   
   const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
