@@ -2,68 +2,67 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { buildSharedViewUrl } from '@/lib/shareUtils';
+
+type RedirectState = 'loading' | 'error';
 
 export default function ShortLinkRedirect() {
   const { shortCode } = useParams<{ shortCode: string }>();
   const navigate = useNavigate();
-  const [error, setError] = useState(false);
+  const [state, setState] = useState<RedirectState>('loading');
 
   useEffect(() => {
-    const resolveShortCode = async () => {
+    const resolveAndRedirect = async () => {
       if (!shortCode) {
-        setError(true);
+        setState('error');
         return;
       }
 
       try {
-        console.log('[ShortLinkRedirect] Resolving short code:', shortCode);
-        
         const { data, error } = await supabase
           .from('shared_links')
           .select('resource_type, resource_id, access_token')
           .eq('short_code', shortCode)
           .maybeSingle();
 
-        console.log('[ShortLinkRedirect] Query result:', { data, error });
-
-        if (error) {
-          console.error('[ShortLinkRedirect] Supabase error:', error);
-          setError(true);
+        if (error || !data) {
+          console.error('[ShortLinkRedirect] Link not found:', shortCode);
+          setState('error');
           return;
         }
 
-        if (!data) {
-          console.error('[ShortLinkRedirect] No shared link found for code:', shortCode);
-          setError(true);
+        // Validate resource type
+        if (data.resource_type !== 'game' && data.resource_type !== 'player') {
+          console.error('[ShortLinkRedirect] Invalid resource type:', data.resource_type);
+          setState('error');
           return;
         }
 
-        // Redirect to the appropriate shared view using the access_token
-        console.log('[ShortLinkRedirect] Redirecting to:', data.resource_type, data.resource_id);
+        // Redirect to shared view
+        const targetUrl = buildSharedViewUrl(
+          data.access_token,
+          data.resource_type as 'game' | 'player',
+          data.resource_id
+        );
         
-        if (data.resource_type === 'game') {
-          navigate(`/shared/${data.access_token}/game/${data.resource_id}`, { replace: true });
-        } else if (data.resource_type === 'player') {
-          navigate(`/shared/${data.access_token}/player/${data.resource_id}`, { replace: true });
-        } else {
-          console.error('[ShortLinkRedirect] Unknown resource type:', data.resource_type);
-          setError(true);
-        }
+        navigate(targetUrl, { replace: true });
       } catch (err) {
-        console.error('Error resolving short code:', err);
-        setError(true);
+        console.error('[ShortLinkRedirect] Error:', err);
+        setState('error');
       }
     };
 
-    resolveShortCode();
+    resolveAndRedirect();
   }, [shortCode, navigate]);
 
-  if (error) {
+  if (state === 'error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Link Not Found</h1>
-          <p className="text-muted-foreground">This share link is invalid or has expired.</p>
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">Link Not Found</h1>
+          <p className="text-muted-foreground">
+            This share link is invalid or has expired.
+          </p>
         </div>
       </div>
     );
@@ -71,8 +70,8 @@ export default function ShortLinkRedirect() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+      <div className="text-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
         <p className="text-muted-foreground">Loading...</p>
       </div>
     </div>
