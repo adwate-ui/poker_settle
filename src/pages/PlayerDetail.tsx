@@ -43,7 +43,7 @@ type SortOrder = "asc" | "desc" | null;
 const PlayerDetail = () => {
   const { playerId } = useParams();
   const navigate = useNavigate();
-  const { copySharedLink, loading: linkLoading } = useSharedLink();
+  const { copyShareLink, loading: linkLoading } = useSharedLink();
   const [player, setPlayer] = useState<Player | null>(null);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,7 +226,7 @@ const PlayerDetail = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => copySharedLink('player', playerId!)}
+                onClick={() => copyShareLink('player', playerId!)}
                 disabled={linkLoading}
                 className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
               >

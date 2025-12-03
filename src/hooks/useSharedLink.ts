@@ -1,58 +1,86 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import {
+  ShareResourceType,
+  ShareLinkData,
+  generateShortCode,
+  buildShortUrl,
+  copyToClipboard,
+} from '@/lib/shareUtils';
 
-type ResourceType = 'game' | 'player';
+interface UseSharedLinkReturn {
+  loading: boolean;
+  createOrGetSharedLink: (
+    resourceType: ShareResourceType,
+    resourceId: string
+  ) => Promise<ShareLinkData | null>;
+  copyShareLink: (
+    resourceType: ShareResourceType,
+    resourceId: string
+  ) => Promise<boolean>;
+  getShortUrl: (shortCode: string) => string;
+}
 
-export const useSharedLink = () => {
+const MAX_SHORT_CODE_ATTEMPTS = 5;
+
+export const useSharedLink = (): UseSharedLinkReturn => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const generateShortCode = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let code = '';
-    for (let i = 0; i < 7; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
+  /**
+   * Fetch existing shared link for a resource
+   */
+  const fetchExistingLink = useCallback(
+    async (
+      resourceType: ShareResourceType,
+      resourceId: string
+    ): Promise<ShareLinkData | null> => {
+      if (!user) return null;
 
-  const createOrGetSharedLink = async (
-    resourceType: ResourceType,
-    resourceId: string
-  ): Promise<string | null> => {
-    if (!user) {
-      toast.error('You must be logged in to create a shared link');
-      return null;
-    }
-
-    setLoading(true);
-    try {
-      // Check if a shared link already exists for this resource
-      const { data: existingLink, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('shared_links')
-        .select('short_code, access_token')
+        .select('short_code, access_token, resource_type, resource_id')
         .eq('user_id', user.id)
         .eq('resource_type', resourceType)
         .eq('resource_id', resourceId)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
+      if (error) {
+        console.error('[useSharedLink] Error fetching existing link:', error);
+        throw error;
       }
 
-      if (existingLink) {
-        return existingLink.short_code;
+      if (data) {
+        return {
+          shortCode: data.short_code,
+          accessToken: data.access_token,
+          resourceType: data.resource_type as ShareResourceType,
+          resourceId: data.resource_id,
+        };
       }
 
-      // Create a new shared link with a unique short code
+      return null;
+    },
+    [user]
+  );
+
+  /**
+   * Create a new shared link with unique short code
+   */
+  const createNewLink = useCallback(
+    async (
+      resourceType: ShareResourceType,
+      resourceId: string
+    ): Promise<ShareLinkData | null> => {
+      if (!user) return null;
+
       let attempts = 0;
-      const maxAttempts = 5;
 
-      while (attempts < maxAttempts) {
+      while (attempts < MAX_SHORT_CODE_ATTEMPTS) {
         const shortCode = generateShortCode();
-        
+
         const { data, error } = await supabase
           .from('shared_links')
           .insert({
@@ -61,53 +89,98 @@ export const useSharedLink = () => {
             resource_id: resourceId,
             short_code: shortCode,
           })
-          .select('short_code')
+          .select('short_code, access_token, resource_type, resource_id')
           .single();
 
-        if (!error) {
-          return data.short_code;
+        if (!error && data) {
+          return {
+            shortCode: data.short_code,
+            accessToken: data.access_token,
+            resourceType: data.resource_type as ShareResourceType,
+            resourceId: data.resource_id,
+          };
         }
 
-        // If unique constraint violation, try again with a new code
-        if (error.code === '23505') {
+        // Unique constraint violation - try again
+        if (error?.code === '23505') {
           attempts++;
           continue;
         }
 
+        // Other error - throw
+        console.error('[useSharedLink] Error creating link:', error);
         throw error;
       }
 
-      throw new Error('Failed to generate unique short code');
-    } catch (error) {
-      console.error('Error creating shared link:', error);
-      toast.error('Failed to create shared link');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+      throw new Error('Failed to generate unique short code after max attempts');
+    },
+    [user]
+  );
 
-  const getShortUrl = (shortCode: string) => {
-    return `${window.location.origin}/s/${shortCode}`;
-  };
+  /**
+   * Create or retrieve an existing shared link for a resource
+   */
+  const createOrGetSharedLink = useCallback(
+    async (
+      resourceType: ShareResourceType,
+      resourceId: string
+    ): Promise<ShareLinkData | null> => {
+      if (!user) {
+        toast.error('You must be logged in to create a share link');
+        return null;
+      }
 
-  const copySharedLink = async (resourceType: ResourceType, resourceId: string) => {
-    const shortCode = await createOrGetSharedLink(resourceType, resourceId);
-    if (!shortCode) return;
+      setLoading(true);
 
-    try {
-      await navigator.clipboard.writeText(getShortUrl(shortCode));
-      toast.success('Share link copied to clipboard!');
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-      toast.error('Failed to copy link');
-    }
-  };
+      try {
+        // Check for existing link first
+        const existingLink = await fetchExistingLink(resourceType, resourceId);
+        if (existingLink) {
+          return existingLink;
+        }
+
+        // Create new link
+        return await createNewLink(resourceType, resourceId);
+      } catch (error) {
+        console.error('[useSharedLink] Error:', error);
+        toast.error('Failed to create share link');
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, fetchExistingLink, createNewLink]
+  );
+
+  /**
+   * Create/get share link and copy short URL to clipboard
+   */
+  const copyShareLink = useCallback(
+    async (
+      resourceType: ShareResourceType,
+      resourceId: string
+    ): Promise<boolean> => {
+      const linkData = await createOrGetSharedLink(resourceType, resourceId);
+      if (!linkData) return false;
+
+      const shortUrl = buildShortUrl(linkData.shortCode);
+      const success = await copyToClipboard(shortUrl);
+
+      if (success) {
+        toast.success('Share link copied to clipboard');
+      } else {
+        toast.error('Failed to copy link to clipboard');
+      }
+
+      return success;
+    },
+    [createOrGetSharedLink]
+  );
 
   return {
     loading,
     createOrGetSharedLink,
-    copySharedLink,
-    getShortUrl,
+    copyShareLink,
+    getShortUrl: buildShortUrl,
   };
 };

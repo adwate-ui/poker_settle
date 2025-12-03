@@ -77,7 +77,7 @@ export const GameDetailView = ({
   backLabel = "Back",
   fetchBuyInHistory,
 }: GameDetailViewProps) => {
-  const { copySharedLink, loading: linkLoading } = useSharedLink();
+  const { copyShareLink, loading: linkLoading } = useSharedLink();
   const [game, setGame] = useState<Game | null>(null);
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
   const [tablePositions, setTablePositions] = useState<TablePosition[]>([]);
@@ -340,7 +340,7 @@ export const GameDetailView = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => copySharedLink('game', gameId)}
+                onClick={() => copyShareLink('game', gameId)}
                 disabled={linkLoading}
                 className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
               >
