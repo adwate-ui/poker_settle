@@ -18,48 +18,18 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ['**/*.{png,jpg,jpeg,svg,ico,woff,woff2}'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        // Clean up old caches automatically
         cleanupOutdatedCaches: true,
-        // Maximum size for precaching
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Skip waiting to activate new service worker immediately
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
-          // API calls to Supabase - NetworkFirst with offline fallback
+          // ALL Supabase calls - NetworkOnly (never cache, always online)
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 5 * 60, // 5 minutes
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          // Supabase Auth - NetworkOnly (never cache auth)
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkOnly',
           },
-          // Supabase Storage (images, assets) - CacheFirst with long expiry
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'storage-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          // External images and avatars - CacheFirst
+          // External images and avatars - CacheFirst (safe to cache)
           {
             urlPattern: /^https:\/\/api\.dicebear\.com\/.*/i,
             handler: 'CacheFirst',
@@ -67,14 +37,14 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'avatar-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                maxAgeSeconds: 7 * 24 * 60 * 60,
               },
               cacheableResponse: {
                 statuses: [0, 200],
               },
             },
           },
-          // Google Fonts - CacheFirst with long expiry
+          // Google Fonts - CacheFirst
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -82,7 +52,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'google-fonts-stylesheets',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+                maxAgeSeconds: 365 * 24 * 60 * 60,
               },
             },
           },
@@ -93,38 +63,16 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'google-fonts-webfonts',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+                maxAgeSeconds: 365 * 24 * 60 * 60,
               },
               cacheableResponse: {
                 statuses: [0, 200],
               },
             },
           },
-          // Static assets from CDN - CacheFirst
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-            },
-          },
-          // JavaScript and CSS - StaleWhileRevalidate for fast loads
-          {
-            urlPattern: /\.(?:js|css)$/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'static-resources',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 24 * 60 * 60, // 1 day
-              },
-            },
-          },
         ],
+        // Disable navigation preload to prevent stale responses
+        navigationPreload: false,
       },
       manifest: {
         name: 'Poker Game Tracker',
@@ -134,6 +82,7 @@ export default defineConfig(({ mode }) => ({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
+        start_url: '/',
         icons: [
           {
             src: '/placeholder.svg',
