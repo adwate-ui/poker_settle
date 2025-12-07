@@ -19,10 +19,9 @@ export default function ShortLinkRedirect() {
       }
 
       try {
+        // Use secure RPC function to resolve short link (prevents token enumeration)
         const { data, error } = await supabase
-          .from('shared_links')
-          .select('resource_type, resource_id, access_token')
-          .eq('short_code', shortCode)
+          .rpc('resolve_short_link', { _short_code: shortCode })
           .maybeSingle();
 
         if (error || !data) {
