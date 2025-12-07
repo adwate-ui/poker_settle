@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -20,6 +20,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface GamePlayer {
@@ -86,6 +102,13 @@ export const GameDetailView = ({
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  
+  // Manual transfer state
+  const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [newTransferFrom, setNewTransferFrom] = useState("");
+  const [newTransferTo, setNewTransferTo] = useState("");
+  const [newTransferAmount, setNewTransferAmount] = useState("");
 
   useEffect(() => {
     if (gameId) {
@@ -207,21 +230,41 @@ export const GameDetailView = ({
     });
   }, [gamePlayers, sortField, sortOrder]);
 
-  const calculateSettlements = useCallback((): Settlement[] => {
-    const winners = sortedGamePlayers.filter(gp => (gp.net_amount ?? 0) > 0);
-    const losers = sortedGamePlayers.filter(gp => (gp.net_amount ?? 0) < 0);
+  // Calculate settlements with manual transfers taken into account
+  const calculateSettlements = useCallback((transfers: Settlement[] = []): Settlement[] => {
+    // Build adjusted net amounts based on manual transfers
+    const adjustedAmounts: Record<string, number> = {};
+    
+    sortedGamePlayers.forEach(gp => {
+      const name = gp.players?.name ?? "";
+      adjustedAmounts[name] = gp.net_amount ?? 0;
+    });
+    
+    // Apply manual transfers: from pays to, so from's debt increases, to's credit decreases
+    transfers.forEach(transfer => {
+      if (adjustedAmounts[transfer.from] !== undefined) {
+        adjustedAmounts[transfer.from] -= transfer.amount; // from already paid this
+      }
+      if (adjustedAmounts[transfer.to] !== undefined) {
+        adjustedAmounts[transfer.to] += transfer.amount; // to already received this
+      }
+    });
+    
+    const winners = Object.entries(adjustedAmounts)
+      .filter(([_, amount]) => amount > 0)
+      .map(([name, amount]) => ({ name, amount }));
+    const losers = Object.entries(adjustedAmounts)
+      .filter(([_, amount]) => amount < 0)
+      .map(([name, amount]) => ({ name, amount: Math.abs(amount) }));
     
     const calculatedSettlements: Settlement[] = [];
-    
-    const winnersQueue = winners.map(w => ({ name: w.players?.name ?? "", amount: w.net_amount ?? 0 }));
-    const losersQueue = losers.map(l => ({ name: l.players?.name ?? "", amount: Math.abs(l.net_amount ?? 0) }));
     
     let winnerIndex = 0;
     let loserIndex = 0;
     
-    while (winnerIndex < winnersQueue.length && loserIndex < losersQueue.length) {
-      const winner = winnersQueue[winnerIndex];
-      const loser = losersQueue[loserIndex];
+    while (winnerIndex < winners.length && loserIndex < losers.length) {
+      const winner = winners[winnerIndex];
+      const loser = losers[loserIndex];
       
       const settlementAmount = Math.min(winner.amount, loser.amount);
       
@@ -236,12 +279,58 @@ export const GameDetailView = ({
       winner.amount -= settlementAmount;
       loser.amount -= settlementAmount;
       
-      if (winner.amount === 0) winnerIndex++;
-      if (loser.amount === 0) loserIndex++;
+      if (winner.amount <= 0) winnerIndex++;
+      if (loser.amount <= 0) loserIndex++;
     }
     
     return calculatedSettlements;
   }, [sortedGamePlayers]);
+  
+  const addManualTransfer = () => {
+    if (!newTransferFrom || !newTransferTo || !newTransferAmount) {
+      toast.error("Please fill all fields");
+      return;
+    }
+    if (newTransferFrom === newTransferTo) {
+      toast.error("From and To must be different players");
+      return;
+    }
+    const amount = parseFloat(newTransferAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Amount must be a positive number");
+      return;
+    }
+    
+    setManualTransfers(prev => [...prev, { from: newTransferFrom, to: newTransferTo, amount }]);
+    setNewTransferFrom("");
+    setNewTransferTo("");
+    setNewTransferAmount("");
+    setTransferDialogOpen(false);
+    toast.success("Manual transfer added");
+  };
+  
+  const removeManualTransfer = (index: number) => {
+    setManualTransfers(prev => prev.filter((_, i) => i !== index));
+    toast.success("Transfer removed");
+  };
+  
+  const recalculateAndSaveSettlements = async () => {
+    const newSettlements = calculateSettlements(manualTransfers);
+    const allSettlements = [...manualTransfers.map(t => ({ ...t, isManual: true })), ...newSettlements];
+    
+    const { error } = await client
+      .from("games")
+      .update({ settlements: allSettlements })
+      .eq("id", gameId);
+      
+    if (error) {
+      toast.error("Failed to save settlements");
+    } else {
+      setGame(prev => prev ? { ...prev, settlements: allSettlements } : null);
+      setManualTransfers([]);
+      toast.success("Settlements recalculated and saved");
+    }
+  };
 
   const savedSettlements: Settlement[] = game?.settlements || [];
   const allCalculatedSettlements = useMemo(() => calculateSettlements(), [calculateSettlements]);
@@ -509,38 +598,111 @@ export const GameDetailView = ({
       </Card>
 
       {/* Settlements */}
-      {settlementsWithType.length > 0 && (
-        <Card className="border-primary/20">
-          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 flex flex-row items-center justify-between">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <span className="text-2xl">💰</span>
-              Settlements
-            </CardTitle>
-            {showOwnerControls && (
+      <Card className="border-primary/20">
+        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 flex flex-row items-center justify-between">
+          <CardTitle className="text-primary flex items-center gap-2">
+            <span className="text-2xl">💰</span>
+            Settlements
+          </CardTitle>
+          {showOwnerControls && (
+            <div className="flex items-center gap-2">
+              <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Transfer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Manual Transfer</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>From (Payer)</Label>
+                      <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select player" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {gamePlayers.map(gp => (
+                            <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
+                              {gp.players?.name ?? "Unknown"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>To (Receiver)</Label>
+                      <Select value={newTransferTo} onValueChange={setNewTransferTo}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select player" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {gamePlayers.map(gp => (
+                            <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
+                              {gp.players?.name ?? "Unknown"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Amount</Label>
+                      <Input
+                        type="number"
+                        placeholder="Enter amount"
+                        value={newTransferAmount}
+                        onChange={(e) => setNewTransferAmount(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={addManualTransfer} className="w-full">
+                      Add Transfer
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={async () => {
-                  const newSettlements = calculateSettlements();
-                  const { error } = await client
-                    .from("games")
-                    .update({ settlements: newSettlements })
-                    .eq("id", gameId);
-                  if (error) {
-                    toast.error("Failed to recalculate settlements");
-                  } else {
-                    setGame(prev => prev ? { ...prev, settlements: newSettlements } : null);
-                    toast.success("Settlements recalculated");
-                  }
-                }}
+                onClick={recalculateAndSaveSettlements}
                 className="border-primary/20 hover:bg-primary/10"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Redo Settlements
               </Button>
-            )}
-          </CardHeader>
-          <CardContent className="p-0">
+            </div>
+          )}
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* Pending manual transfers */}
+          {showOwnerControls && manualTransfers.length > 0 && (
+            <div className="p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
+              <p className="text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
+                Pending Manual Transfers (click Redo to apply):
+              </p>
+              <div className="space-y-2">
+                {manualTransfers.map((transfer, index) => (
+                  <div key={index} className="flex items-center justify-between bg-background rounded-md px-3 py-2 border">
+                    <span className="text-sm">
+                      {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeManualTransfer(index)}
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {settlementsWithType.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
@@ -584,9 +746,13 @@ export const GameDetailView = ({
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="p-6 text-center text-muted-foreground">
+              No settlements needed - all players are even.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
