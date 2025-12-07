@@ -604,100 +604,102 @@ export const GameDetailView = ({
 
       {/* Settlements */}
       <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 flex flex-row items-center justify-between">
-          <CardTitle className="text-primary flex items-center gap-2">
-            <span className="text-2xl">💰</span>
-            Settlements
-          </CardTitle>
-          {showOwnerControls && (
-            <div className="flex items-center gap-2">
-              <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Transfer
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Manual Transfer</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>From (Payer)</Label>
-                      <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select player" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {gamePlayers.map(gp => (
-                            <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
-                              {gp.players?.name ?? "Unknown"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>To (Receiver)</Label>
-                      <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select player" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {gamePlayers.map(gp => (
-                            <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
-                              {gp.players?.name ?? "Unknown"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Amount</Label>
-                      <Input
-                        type="number"
-                        placeholder="Enter amount"
-                        value={newTransferAmount}
-                        onChange={(e) => setNewTransferAmount(e.target.value)}
-                      />
-                    </div>
-                    <Button onClick={addManualTransfer} className="w-full">
-                      Add Transfer
+        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-primary flex items-center gap-2">
+              <span className="text-2xl">💰</span>
+              Settlements
+            </CardTitle>
+            {showOwnerControls && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
+                      <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                      <span className="hidden xs:inline">Add</span> Transfer
                     </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={recalculateAndSaveSettlements}
-                className="border-primary/20 hover:bg-primary/10"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Redo Settlements
-              </Button>
-            </div>
-          )}
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Manual Transfer</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>From (Payer)</Label>
+                        <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select player" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {gamePlayers.map(gp => (
+                              <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
+                                {gp.players?.name ?? "Unknown"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>To (Receiver)</Label>
+                        <Select value={newTransferTo} onValueChange={setNewTransferTo}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select player" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {gamePlayers.map(gp => (
+                              <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
+                                {gp.players?.name ?? "Unknown"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Amount</Label>
+                        <Input
+                          type="number"
+                          placeholder="Enter amount"
+                          value={newTransferAmount}
+                          onChange={(e) => setNewTransferAmount(e.target.value)}
+                        />
+                      </div>
+                      <Button onClick={addManualTransfer} className="w-full">
+                        Add Transfer
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={recalculateAndSaveSettlements}
+                  className="border-primary/20 hover:bg-primary/10"
+                >
+                  <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
+                  Redo
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {/* Pending manual transfers */}
           {showOwnerControls && manualTransfers.length > 0 && (
-            <div className="p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
-              <p className="text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
+            <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
+              <p className="text-xs sm:text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
                 Pending Manual Transfers (click Redo to apply):
               </p>
               <div className="space-y-2">
                 {manualTransfers.map((transfer, index) => (
-                  <div key={index} className="flex items-center justify-between bg-background rounded-md px-3 py-2 border">
-                    <span className="text-sm">
+                  <div key={index} className="flex items-center justify-between bg-background rounded-md px-2 sm:px-3 py-2 border gap-2">
+                    <span className="text-xs sm:text-sm truncate">
                       {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
                     </span>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => removeManualTransfer(index)}
-                      className="h-6 w-6 text-destructive hover:text-destructive"
+                      className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -708,49 +710,51 @@ export const GameDetailView = ({
           )}
           
           {settlementsWithType.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                  <TableHead className="font-bold text-left">From</TableHead>
-                  <TableHead className="font-bold text-left">To</TableHead>
-                  <TableHead className="font-bold text-left">Amount</TableHead>
-                  <TableHead className="font-bold text-left">Type</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {settlementsWithType.map((settlement, index) => (
-                  <TableRow
-                    key={`settlement-${index}`}
-                    className={`transition-colors ${
-                      index % 2 === 0 
-                        ? "bg-secondary/5 hover:bg-secondary/20" 
-                        : "hover:bg-primary/10"
-                    }`}
-                  >
-                    <TableCell className="font-medium text-primary text-left">
-                      {settlement.from}
-                    </TableCell>
-                    <TableCell className="font-medium text-primary text-left">
-                      {settlement.to}
-                    </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground text-left">
-                      Rs. {formatIndianNumber(settlement.amount)}
-                    </TableCell>
-                    <TableCell className="text-left">
-                      {settlement.isManual ? (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                          Manual
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                          Calculated
-                        </Badge>
-                      )}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">From</TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">To</TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">Amount</TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">Type</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {settlementsWithType.map((settlement, index) => (
+                    <TableRow
+                      key={`settlement-${index}`}
+                      className={`transition-colors ${
+                        index % 2 === 0 
+                          ? "bg-secondary/5 hover:bg-secondary/20" 
+                          : "hover:bg-primary/10"
+                      }`}
+                    >
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                        {settlement.from}
+                      </TableCell>
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                        {settlement.to}
+                      </TableCell>
+                      <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
+                        Rs. {formatIndianNumber(settlement.amount)}
+                      </TableCell>
+                      <TableCell className="text-left py-2 sm:py-4">
+                        {settlement.isManual ? (
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
+                            Manual
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs">
+                            Calculated
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <div className="p-6 text-center text-muted-foreground">
               No settlements needed - all players are even.
