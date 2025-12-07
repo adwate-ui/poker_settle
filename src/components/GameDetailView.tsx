@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { formatIndianNumber } from "@/lib/utils";
@@ -510,11 +511,34 @@ export const GameDetailView = ({
       {/* Settlements */}
       {settlementsWithType.length > 0 && (
         <Card className="border-primary/20">
-          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 flex flex-row items-center justify-between">
             <CardTitle className="text-primary flex items-center gap-2">
               <span className="text-2xl">💰</span>
               Settlements
             </CardTitle>
+            {showOwnerControls && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const newSettlements = calculateSettlements();
+                  const { error } = await client
+                    .from("games")
+                    .update({ settlements: newSettlements })
+                    .eq("id", gameId);
+                  if (error) {
+                    toast.error("Failed to recalculate settlements");
+                  } else {
+                    setGame(prev => prev ? { ...prev, settlements: newSettlements } : null);
+                    toast.success("Settlements recalculated");
+                  }
+                }}
+                className="border-primary/20 hover:bg-primary/10"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Redo Settlements
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="p-0">
             <Table>
