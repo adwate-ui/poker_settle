@@ -469,6 +469,14 @@ export type Database = {
         Args: { _player_id: string; _token: string }
         Returns: boolean
       }
+      resolve_short_link: {
+        Args: { _short_code: string }
+        Returns: {
+          access_token: string
+          resource_id: string
+          resource_type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
