@@ -233,6 +233,8 @@ export const GameDetailView = ({
   // Calculate settlements with manual transfers taken into account
   const calculateSettlements = useCallback((transfers: Settlement[] = []): Settlement[] => {
     // Build adjusted net amounts based on manual transfers
+    // net_amount > 0 means player won (is owed money)
+    // net_amount < 0 means player lost (owes money)
     const adjustedAmounts: Record<string, number> = {};
     
     sortedGamePlayers.forEach(gp => {
@@ -240,13 +242,16 @@ export const GameDetailView = ({
       adjustedAmounts[name] = gp.net_amount ?? 0;
     });
     
-    // Apply manual transfers: from pays to, so from's debt increases, to's credit decreases
+    // Apply manual transfers: "from" pays "to"
+    // If "from" already paid "to", then:
+    // - "from" has already settled part of their debt, so add to their balance (less negative or more positive)
+    // - "to" has already received payment, so subtract from their balance (less positive or more negative)
     transfers.forEach(transfer => {
       if (adjustedAmounts[transfer.from] !== undefined) {
-        adjustedAmounts[transfer.from] -= transfer.amount; // from already paid this
+        adjustedAmounts[transfer.from] += transfer.amount; // from paid, so their balance improves
       }
       if (adjustedAmounts[transfer.to] !== undefined) {
-        adjustedAmounts[transfer.to] += transfer.amount; // to already received this
+        adjustedAmounts[transfer.to] -= transfer.amount; // to received, so their balance decreases
       }
     });
     
