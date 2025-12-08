@@ -65,17 +65,22 @@ const SharedPlayerDetail = () => {
       try {
         const sharedClient = createSharedClient(token);
 
-        // Validate that this is a player link
-        const { data: linkData } = await sharedClient
-          .from('shared_links')
-          .select('resource_type')
-          .eq('access_token', token)
-          .single();
+        // Validate token using secure RPC function (avoids direct table access)
+        const { data: linkData, error: linkError } = await sharedClient
+          .rpc('validate_share_token', { _token: token })
+          .maybeSingle();
 
-        setResourceType(linkData?.resource_type || null);
+        if (linkError || !linkData) {
+          console.error('Token validation error:', linkError);
+          setResourceType(null);
+          setLoading(false);
+          return;
+        }
+
+        setResourceType(linkData.resource_type);
 
         // Only fetch player data if it's a player link
-        if (linkData?.resource_type !== 'player') {
+        if (linkData.resource_type !== 'player') {
           setLoading(false);
           return;
         }
