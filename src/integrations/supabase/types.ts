@@ -477,6 +477,13 @@ export type Database = {
           resource_type: string
         }[]
       }
+      validate_share_token: {
+        Args: { _token: string }
+        Returns: {
+          resource_id: string
+          resource_type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

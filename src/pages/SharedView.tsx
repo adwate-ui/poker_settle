@@ -26,15 +26,16 @@ const SharedView = () => {
       try {
         const sharedClient = createSharedClient(token);
         
-        // Fetch the shared link to get resource_type
+        // Validate token using secure RPC function (avoids direct table access)
         const { data: linkData, error: linkError } = await sharedClient
-          .from('shared_links')
-          .select('resource_type, resource_id')
-          .eq('access_token', token)
-          .single();
+          .rpc('validate_share_token', { _token: token })
+          .maybeSingle();
 
         if (linkError) {
           console.error('Token validation error:', linkError);
+          setIsValid(false);
+        } else if (!linkData) {
+          console.error('Token not found');
           setIsValid(false);
         } else {
           setResourceType(linkData.resource_type);
