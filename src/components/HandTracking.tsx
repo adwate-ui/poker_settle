@@ -1256,7 +1256,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           onOpenChange={setShowHoleCardInput}
           onSelect={(cards) => {
             handleHoleCardSubmit(cards);
-            setShowHoleCardInput(false);
           }}
           maxCards={2}
           usedCards={getUsedCards()}

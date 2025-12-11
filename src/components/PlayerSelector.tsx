@@ -38,16 +38,8 @@ export const PlayerSelector = ({
     return allPlayers
       .filter(p => !selectedPlayers.find(sp => sp.id === p.id))
       .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      .sort((a, b) => {
-        // Sort by total games (most active first), then by name
-        const gamesCompare = (b.total_games || 0) - (a.total_games || 0);
-        return gamesCompare !== 0 ? gamesCompare : a.name.localeCompare(b.name);
-      });
+      .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
   }, [allPlayers, selectedPlayers, searchQuery]);
-
-  const recentPlayers = useMemo(() => {
-    return availablePlayers.slice(0, 5);
-  }, [availablePlayers]);
 
   const handleCreatePlayer = async () => {
     if (!newPlayerName.trim()) {
@@ -193,30 +185,12 @@ export const PlayerSelector = ({
                 />
               </div>
 
-              {/* Recent/Top Players */}
-              {!searchQuery && recentPlayers.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Top Players</h4>
-                  <div className="grid gap-2">
-                    {recentPlayers.map((player) => (
-                      <PlayerListItem
-                        key={player.id}
-                        player={player}
-                        onSelect={handleSelectPlayer}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* All Players */}
+              {/* All Players - Alphabetically Sorted */}
               {availablePlayers.length > 0 ? (
                 <div className="space-y-2">
-                  {searchQuery && (
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Search Results ({availablePlayers.length})
-                    </h4>
-                  )}
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    {searchQuery ? `Search Results (${availablePlayers.length})` : `All Players (${availablePlayers.length})`}
+                  </h4>
                   <ScrollArea key={`scroll-${open}`} className="h-[300px] pr-4">
                     <div className="grid gap-2">
                       {availablePlayers.map((player) => (

@@ -122,25 +122,12 @@ const TablePositionEditor = ({
       {availablePlayers.length > 0 && availableSeats.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-medium">Add Players to Table ({unseatedCount} unseated)</h4>
+          <p className="text-xs text-muted-foreground">Select seat position (left) and player (right)</p>
           
           <div className="space-y-2">
             {Array.from({ length: unseatedCount }).map((_, index) => (
               <div key={index} className="grid grid-cols-2 gap-2 items-start">
-                <Select value={selectedPlayers[index] || ''} onValueChange={(value) => handlePlayerSelect(index, value)}>
-                  <SelectTrigger className="bg-background w-full min-w-0">
-                    <SelectValue placeholder={`Player ${index + 1}`} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {availablePlayers
-                      .filter(p => !selectedPlayers.includes(p.id) || selectedPlayers[index] === p.id)
-                      .map((player) => (
-                        <SelectItem key={player.id} value={player.id}>
-                          {player.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-
+                {/* Seat selection on the LEFT */}
                 <Select value={selectedSeats[index] || ''} onValueChange={(value) => handleSeatSelect(index, value)}>
                   <SelectTrigger className="bg-background w-full min-w-0">
                     <SelectValue placeholder={`Seat ${index + 1}`} />
@@ -151,6 +138,22 @@ const TablePositionEditor = ({
                       .map((seat) => (
                         <SelectItem key={seat} value={seat.toString()}>
                           Seat {seat}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Player selection on the RIGHT */}
+                <Select value={selectedPlayers[index] || ''} onValueChange={(value) => handlePlayerSelect(index, value)}>
+                  <SelectTrigger className="bg-background w-full min-w-0">
+                    <SelectValue placeholder={`Player ${index + 1}`} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {availablePlayers
+                      .filter(p => !selectedPlayers.includes(p.id) || selectedPlayers[index] === p.id)
+                      .map((player) => (
+                        <SelectItem key={player.id} value={player.id}>
+                          {player.name}
                         </SelectItem>
                       ))}
                   </SelectContent>
