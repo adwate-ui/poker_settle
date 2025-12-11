@@ -26,23 +26,41 @@ export const useAuthProvider = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let mounted = true;
+
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
       }
     );
 
-    // THEN check for existing session
+    // Initialize session - this will handle OAuth hash fragments
+    // and trigger onAuthStateChange if authentication state changes
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      if (mounted) {
+        // If we have a session from localStorage, set it immediately
+        // If there's a hash fragment, Supabase will process it and trigger onAuthStateChange
+        setSession(session);
+        setUser(session?.user ?? null);
+        // Only set loading to false if we're sure there's no hash fragment to process
+        // Check if there are hash params that might be OAuth tokens
+        const hasAuthHash = window.location.hash.includes('access_token');
+        if (!hasAuthHash) {
+          setLoading(false);
+        }
+        // If there is an auth hash, wait for onAuthStateChange to set loading=false
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
