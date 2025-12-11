@@ -82,9 +82,15 @@ const HandReplay = ({
   // Initialize visible hole cards with hero's cards if available
   useEffect(() => {
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-      setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
+      setVisibleHoleCards(prev => {
+        // Only update if hero's cards aren't already visible
+        if (!prev[heroPlayerId]) {
+          return { ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] };
+        }
+        return prev;
+      });
     }
-  }, [heroPlayerId]);
+  }, [heroPlayerId, currentActionIndex]); // Re-run when action changes to ensure cards stay visible
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({

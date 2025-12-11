@@ -268,7 +268,7 @@ const PokerTableView = memo(({
                     POT
                   </div>
                   {showPotChips && <ChipStack amount={potSize} size="md" showLabel={false} />}
-                  <div className="text-sm font-bold text-foreground">
+                  <div className="bg-white dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
                     Rs. {potSize.toLocaleString('en-IN')}
                   </div>
                 </div>
@@ -345,8 +345,8 @@ const PokerTableView = memo(({
                     </div>
                     
                     {/* Player name and stack - directly below avatar */}
-                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 w-20">
-                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate w-full text-center">
+                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[80px] max-w-[120px]">
+                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-center" title={position.player_name}>
                         {position.player_name}
                       </span>
                       {playerStacks[position.player_id] !== undefined && (
