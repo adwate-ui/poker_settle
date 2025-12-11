@@ -9,11 +9,14 @@ import SharedGamesHistory from '@/components/SharedGamesHistory';
 import SharedPlayersHistory from '@/components/SharedPlayersHistory';
 
 const SharedView = () => {
-  const { token } = useParams<{ token: string }>();
+  const { token: encodedToken } = useParams<{ token: string }>();
   const [validating, setValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
   const [resourceType, setResourceType] = useState<string | null>(null);
   const [resourceId, setResourceId] = useState<string | null>(null);
+
+  // Decode the token from the URL
+  const token = encodedToken ? decodeURIComponent(encodedToken) : '';
 
   useEffect(() => {
     const validateToken = async () => {

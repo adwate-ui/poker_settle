@@ -15,36 +15,33 @@ const CHIP_DENOMINATIONS = [
   { value: 20, color: 'red', label: '20' },
 ];
 
+// Configuration for chip stack display
+const MAX_CHIPS_PER_STACK = 5; // Maximum chips to show visually per denomination
+const MAX_CHIP_DENOMINATIONS = 2; // Maximum different denominations to show
+
 const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
-  // Select the best single chip denomination to display (simplified approach)
-  const chip = useMemo(() => {
-    const selectBestChip = (total: number) => {
-    if (total === 0) return null;
+  // Calculate the chip breakdown - show multiple denominations like real poker apps
+  const chipBreakdown = useMemo(() => {
+    if (amount === 0) return [];
     
-    // Find the best denomination that represents the amount most efficiently
-    // We want to show 1-3 chips ideally (Full Tilt style)
+    const breakdown: Array<{ color: string; label: string; count: number; value: number }> = [];
+    let remaining = amount;
+    
+    // Break down amount into different denominations
     for (const denom of CHIP_DENOMINATIONS) {
-      const count = total / denom.value;
-      if (count >= 1 && count <= 10) {
-        return { 
+      const count = Math.floor(remaining / denom.value);
+      if (count > 0) {
+        breakdown.push({ 
           ...denom, 
-          count: Math.ceil(count * 10) / 10, // Round to 1 decimal
-          visualCount: Math.min(Math.ceil(count), 3) // Show max 3 chips visually
-        };
+          count: Math.min(count, MAX_CHIPS_PER_STACK) // Show max chips per denomination for visual clarity
+        });
+        remaining -= count * denom.value;
       }
+      // Only show up to MAX_CHIP_DENOMINATIONS different denominations for simplicity
+      if (breakdown.length >= MAX_CHIP_DENOMINATIONS) break;
     }
     
-    // Fallback: use the highest denomination
-    const highest = CHIP_DENOMINATIONS[0];
-    const count = total / highest.value;
-    return {
-      ...highest,
-      count: Math.ceil(count * 10) / 10,
-      visualCount: Math.min(Math.ceil(count), 3)
-    };
-    };
-    
-    return selectBestChip(amount);
+    return breakdown;
   }, [amount]);
 
   const sizeMaps = {
@@ -55,7 +52,7 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
 
   const chipSize = sizeMaps[size];
 
-  if (!chip) {
+  if (chipBreakdown.length === 0) {
     return showLabel ? (
       <div className="text-xs text-muted-foreground">Rs. 0</div>
     ) : null;
@@ -63,41 +60,30 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
 
   return (
     <div className="flex flex-col items-center gap-0.5">
-      {/* Single chip stack */}
-      <div className="relative flex flex-col items-center">
-        {/* Stack of chips (show 1-3 chips max) */}
-        <div className="relative" style={{ height: `${chip.visualCount * 2 + chipSize}px` }}>
-          {Array.from({ length: chip.visualCount }).map((_, stackIdx) => (
-            <div 
-              key={stackIdx}
-              className="absolute left-0"
-              style={{
-                bottom: `${stackIdx * 2}px`,
-                zIndex: stackIdx,
-              }}
-            >
-              <PokerChipSVG value={chip.label} color={chip.color} size={chipSize} />
+      {/* Multiple chip stacks side by side */}
+      <div className="flex gap-1 items-end">
+        {chipBreakdown.map((chip, stackIndex) => (
+          <div key={stackIndex} className="relative flex flex-col items-center">
+            {/* Stack of chips (show actual count up to 5) */}
+            <div className="relative" style={{ height: `${chip.count * 3 + chipSize}px` }}>
+              {Array.from({ length: chip.count }).map((_, chipIdx) => (
+                <div 
+                  key={chipIdx}
+                  className="absolute left-0"
+                  style={{
+                    bottom: `${chipIdx * 3}px`,
+                    zIndex: chipIdx,
+                  }}
+                >
+                  <PokerChipSVG value={chip.label} color={chip.color} size={chipSize} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        
-        {/* Multiplier badge - more prominent */}
-        {chip.count > 1 && (
-          <div 
-            className="absolute bg-black text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white z-20 px-1.5 shadow-lg"
-            style={{
-              minWidth: size === 'sm' ? 18 : size === 'md' ? 20 : 22,
-              height: size === 'sm' ? 16 : size === 'md' ? 18 : 20,
-              top: -4,
-              right: -6,
-            }}
-          >
-            ×{chip.count}
           </div>
-        )}
+        ))}
       </div>
 
-      {/* Amount label - more prominent Full Tilt style */}
+      {/* Amount label - Full Tilt style */}
       {showLabel && (
         <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2.5 py-1 rounded shadow-xl border border-poker-gold/60">
           <div className="text-base font-bold whitespace-nowrap text-poker-gold drop-shadow-md">

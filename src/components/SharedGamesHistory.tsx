@@ -296,7 +296,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 <Card
                   key={game.id}
                   className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => navigate(`/shared/${token}/game/${game.id}`)}
+                  onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)}
                 >
                   <CardContent className="p-4">
                     {/* Mobile Layout */}
