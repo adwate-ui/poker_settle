@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PokerCard from './PokerCard';
 import { cn } from '@/lib/utils';
+import { Sparkles } from 'lucide-react';
 
 interface CardSelectorProps {
   onSelect: (cards: string) => void;
@@ -27,8 +28,8 @@ const CardSelector = ({
 
   const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
   const suits = [
-    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600' },
-    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600' },
+    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
     { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
     { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
   ];
@@ -76,22 +77,29 @@ const CardSelector = ({
     }}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full gap-2">
+            <Sparkles className="w-4 h-4" />
             {label}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{label}</span>
+            <span className="text-xl font-bold flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              {label}
+            </span>
             <div className="flex items-center gap-2">
-              <Badge variant={tempSelection.length === maxCards ? "default" : "secondary"}>
-                {tempSelection.length} / {maxCards} selected
+              <Badge 
+                variant={tempSelection.length === maxCards ? "default" : "secondary"}
+                className="text-base px-3 py-1"
+              >
+                {tempSelection.length} / {maxCards}
               </Badge>
               {tempSelection.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={handleClear}>
-                  Clear
+                  Clear All
                 </Button>
               )}
             </div>
@@ -100,22 +108,25 @@ const CardSelector = ({
 
         {/* Selected cards preview */}
         {tempSelection.length > 0 && (
-          <div className="flex gap-2 p-4 bg-muted rounded-lg justify-center flex-wrap">
+          <div className="flex gap-2 p-6 bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border-2 border-green-700/40 justify-center flex-wrap">
+            <div className="text-sm font-semibold text-green-400 w-full text-center mb-2">
+              Selected Cards
+            </div>
             {tempSelection.map((card, idx) => (
-              <PokerCard key={idx} card={card} size="sm" />
+              <PokerCard key={idx} card={card} size="md" />
             ))}
           </div>
         )}
 
-        {/* Card grid by suit */}
-        <div className="space-y-4">
+        {/* Card grid by suit - improved layout */}
+        <div className="space-y-6">
           {suits.map(suit => (
-            <div key={suit.code} className="space-y-2">
-              <h3 className="font-semibold flex items-center gap-2">
-                <span className={suit.color}>{suit.symbol}</span>
-                <span>{suit.name}</span>
-              </h3>
-              <div className="grid grid-cols-13 gap-1">
+            <div key={suit.code} className="space-y-3">
+              <div className="flex items-center gap-3 pb-2 border-b border-border">
+                <span className={cn("text-3xl", suit.color)}>{suit.symbol}</span>
+                <h3 className="font-bold text-lg">{suit.name}</h3>
+              </div>
+              <div className="grid grid-cols-13 gap-2">
                 {ranks.map(rank => {
                   const card = `${rank}${suit.code}`;
                   const isUsed = usedCards.includes(card);
@@ -127,18 +138,23 @@ const CardSelector = ({
                       onClick={() => handleCardClick(card)}
                       disabled={isUsed}
                       className={cn(
-                        "relative aspect-[5/7] transition-all",
+                        "relative aspect-[5/7] transition-all duration-200",
                         isUsed && "opacity-30 cursor-not-allowed grayscale",
-                        isSelected && "ring-4 ring-primary ring-offset-2 scale-110 z-10",
-                        !isUsed && !isSelected && "hover:scale-105 cursor-pointer"
+                        isSelected && "ring-4 ring-primary ring-offset-2 ring-offset-background scale-110 z-10 shadow-xl",
+                        !isUsed && !isSelected && "hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95"
                       )}
                     >
                       <PokerCard card={card} size="xs" />
                       {isUsed && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-red-600 text-white text-[8px] px-1 rounded font-bold">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
+                          <div className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold shadow-md">
                             USED
                           </div>
+                        </div>
+                      )}
+                      {isSelected && (
+                        <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+                          ✓
                         </div>
                       )}
                     </button>
@@ -149,17 +165,24 @@ const CardSelector = ({
           ))}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-2 pt-4 border-t sticky bottom-0 bg-background">
-          <Button variant="outline" onClick={handleCancel} className="flex-1">
+        {/* Action buttons - improved styling */}
+        <div className="flex gap-3 pt-6 border-t sticky bottom-0 bg-background">
+          <Button variant="outline" onClick={handleCancel} className="flex-1 h-12 text-base">
             Cancel
           </Button>
           <Button 
             onClick={handleConfirm} 
             disabled={tempSelection.length !== maxCards}
-            className="flex-1"
+            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
           >
-            Confirm Selection
+            {tempSelection.length === maxCards ? (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Confirm Selection
+              </>
+            ) : (
+              `Select ${maxCards - tempSelection.length} More Card${maxCards - tempSelection.length !== 1 ? 's' : ''}`
+            )}
           </Button>
         </div>
       </DialogContent>

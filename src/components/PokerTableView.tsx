@@ -18,6 +18,7 @@ interface PokerTableViewProps {
   showPositionLabels?: boolean;
   foldedPlayers?: string[];
   animateChipsToPot?: boolean;
+  animatingPlayerId?: string | null; // Specific player whose chips are animating to pot
   animateChipsToWinner?: string | null;
   playerHoleCards?: Record<string, string>;
   communityCards?: string;
@@ -41,6 +42,7 @@ const PokerTableView = memo(({
   showPositionLabels = false,
   foldedPlayers = [],
   animateChipsToPot = false,
+  animatingPlayerId = null,
   animateChipsToWinner = null,
   playerHoleCards = {},
   communityCards = '',
@@ -268,7 +270,7 @@ const PokerTableView = memo(({
                     POT
                   </div>
                   {showPotChips && <ChipStack amount={potSize} size="md" showLabel={false} />}
-                  <div className="text-sm font-bold text-foreground">
+                  <div className="bg-white dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
                     Rs. {potSize.toLocaleString('en-IN')}
                   </div>
                 </div>
@@ -345,8 +347,8 @@ const PokerTableView = memo(({
                     </div>
                     
                     {/* Player name and stack - directly below avatar */}
-                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 w-20">
-                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate w-full text-center">
+                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[80px] max-w-[120px]">
+                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-center" title={position.player_name}>
                         {position.player_name}
                       </span>
                       {playerStacks[position.player_id] !== undefined && (
@@ -388,33 +390,43 @@ const PokerTableView = memo(({
                   </div>
                   
                   {/* Enhanced chip stack display */}
-                  {playerBet > 0 && !isFolded && (
-                    <div 
-                      className={`absolute z-20 transition-all duration-500 ease-in-out ${
-                        animateChipsToPot 
-                          ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
-                          : 'opacity-100 scale-100'
-                      }`}
-                      style={{
-                        top: pos.y > 50 ? '-60px' : '80px',
-                        left: pos.x > 50 ? '-50px' : '50px',
-                      }}
-                    >
-                      <ChipStack amount={playerBet} size="sm" showLabel={true} />
-                    </div>
-                  )}
+                  {playerBet > 0 && !isFolded && (() => {
+                    // Check if chips should animate for this player
+                    const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
+                    
+                    return (
+                      <div 
+                        className={`absolute z-20 transition-all duration-500 ease-in-out ${
+                          shouldAnimate
+                            ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
+                            : 'opacity-100 scale-100'
+                        }`}
+                        style={{
+                          top: pos.y > 50 ? '-60px' : '80px',
+                          left: pos.x > 50 ? '-50px' : '50px',
+                        }}
+                      >
+                        <ChipStack amount={playerBet} size="sm" showLabel={true} />
+                      </div>
+                    );
+                  })()}
                   
                   {/* Winner chip animation - shows pot chips coming to winner */}
                   {isWinner && (
                     <div 
-                      className="absolute z-20 animate-in fade-in zoom-in duration-500"
+                      className="absolute z-30 animate-in fade-in zoom-in duration-700"
                       style={{
-                        top: pos.y > 50 ? '-60px' : '80px',
-                        left: pos.x > 50 ? '-50px' : '50px',
+                        top: pos.y > 50 ? '-70px' : '90px',
+                        left: pos.x > 50 ? '-60px' : '60px',
                       }}
                     >
-                      <div className="flex items-center gap-2 bg-amber-500/20 px-2 py-1 rounded-lg border-2 border-amber-400 animate-pulse">
-                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🏆 Winner!</span>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 px-3 py-2 rounded-lg border-2 border-amber-300 animate-pulse shadow-xl">
+                          <span className="text-lg font-bold text-white drop-shadow-lg">🏆 WINNER!</span>
+                        </div>
+                        <div className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-white dark:bg-gray-900 px-2 py-1 rounded shadow-md">
+                          Chips Coming!
+                        </div>
                       </div>
                     </div>
                   )}
