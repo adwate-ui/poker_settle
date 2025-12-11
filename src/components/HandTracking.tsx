@@ -810,6 +810,23 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     setSelectedPlayerId('');
   };
 
+  // Memoize grouped actions by street - MUST be before conditional returns to avoid React hook error #310
+  const actionsByStreet = useMemo(() => {
+    return ['Preflop', 'Flop', 'Turn', 'River'].map(street => ({
+      street,
+      actions: allHandActions.filter(a => a.street_type === street)
+    })).filter(group => group.actions.length > 0);
+  }, [allHandActions]);
+
+  const currentPlayer = activePlayers[currentPlayerIndex];
+
+  // Helper function to get badge variant for action type
+  const getActionBadgeVariant = (actionType: string): "destructive" | "default" | "secondary" => {
+    if (actionType === 'Fold') return 'destructive';
+    if (actionType.includes('Raise') || actionType.includes('Bet')) return 'default';
+    return 'secondary';
+  };
+
   if (stage === 'setup') {
     const selectedPlayer = selectedPlayerId ? game.game_players.find(gp => gp.player_id === selectedPlayerId) : null;
     
@@ -1207,23 +1224,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     );
   }
 
-  // Helper function to get badge variant for action type
-  const getActionBadgeVariant = (actionType: string): "destructive" | "default" | "secondary" => {
-    if (actionType === 'Fold') return 'destructive';
-    if (actionType.includes('Raise') || actionType.includes('Bet')) return 'default';
-    return 'secondary';
-  };
-
-  // Memoize grouped actions by street
-  const actionsByStreet = useMemo(() => {
-    return ['Preflop', 'Flop', 'Turn', 'River'].map(street => ({
-      street,
-      actions: allHandActions.filter(a => a.street_type === street)
-    })).filter(group => group.actions.length > 0);
-  }, [allHandActions]);
-
-  const currentPlayer = activePlayers[currentPlayerIndex];
-
   return (
     <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
@@ -1270,6 +1270,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
               communityCards={(flopCards || '') + (turnCard || '') + (riverCard || '')}
               activePlayerId={currentPlayer?.player_id}
+              playerHoleCards={playerHoleCards}
+              playerStacks={playerStacks}
             />
           </div>
         )}

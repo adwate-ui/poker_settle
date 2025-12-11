@@ -60,8 +60,8 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
 
   return (
     <div className="flex flex-col items-center gap-0.5">
-      {/* Multiple chip stacks side by side */}
-      <div className="flex gap-1 items-end">
+      {/* Multiple chip stacks vertically stacked by denomination */}
+      <div className="flex flex-col gap-1 items-center">
         {chipBreakdown.map((chip, stackIndex) => (
           <div key={stackIndex} className="relative flex flex-col items-center">
             {/* Stack of chips (show actual count up to 5) */}

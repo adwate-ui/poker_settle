@@ -119,14 +119,14 @@ const CardSelector = ({
         )}
 
         {/* Card grid by suit - improved layout */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {suits.map(suit => (
-            <div key={suit.code} className="space-y-3">
-              <div className="flex items-center gap-3 pb-2 border-b border-border">
-                <span className={cn("text-3xl", suit.color)}>{suit.symbol}</span>
-                <h3 className="font-bold text-lg">{suit.name}</h3>
+            <div key={suit.code} className="space-y-2">
+              <div className="flex items-center gap-2 pb-1 border-b border-border">
+                <span className={cn("text-2xl", suit.color)}>{suit.symbol}</span>
+                <h3 className="font-semibold text-base">{suit.name}</h3>
               </div>
-              <div className="grid grid-cols-13 gap-2">
+              <div className="grid grid-cols-13 gap-1.5">
                 {ranks.map(rank => {
                   const card = `${rank}${suit.code}`;
                   const isUsed = usedCards.includes(card);
@@ -138,22 +138,22 @@ const CardSelector = ({
                       onClick={() => handleCardClick(card)}
                       disabled={isUsed}
                       className={cn(
-                        "relative aspect-[5/7] transition-all duration-200",
-                        isUsed && "opacity-30 cursor-not-allowed grayscale",
-                        isSelected && "ring-4 ring-primary ring-offset-2 ring-offset-background scale-110 z-10 shadow-xl",
-                        !isUsed && !isSelected && "hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95"
+                        "relative aspect-[5/7] transition-all duration-200 rounded",
+                        isUsed && "opacity-20 cursor-not-allowed grayscale",
+                        isSelected && "ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg",
+                        !isUsed && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
                       <PokerCard card={card} size="xs" />
                       {isUsed && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
-                          <div className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold shadow-md">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                          <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             USED
                           </div>
                         </div>
                       )}
                       {isSelected && (
-                        <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+                        <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
                           ✓
                         </div>
                       )}

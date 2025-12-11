@@ -81,17 +81,15 @@ const HandReplay = ({
   });
 
   // Initialize visible hole cards with hero's cards if available
+  // Keep hero's cards visible throughout the replay unless explicitly hidden
   useEffect(() => {
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
       setVisibleHoleCards(prev => {
-        // Only update if hero's cards aren't already visible
-        if (!prev[heroPlayerId]) {
-          return { ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] };
-        }
-        return prev;
+        // Always ensure hero's cards are visible
+        return { ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] };
       });
     }
-  }, [heroPlayerId, currentActionIndex]); // Re-run when action changes to ensure cards stay visible
+  }, [heroPlayerId]); // Only run when heroPlayerId changes, not on every action
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -439,11 +437,9 @@ const HandReplay = ({
       setAnimatingPlayerId(null);
       setShowHoleCards(false);
       setShowWinner(false);
-      // Reset to show only hero's cards
+      // Preserve hero's cards during jump
       if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-        setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
-      } else {
-        setVisibleHoleCards({});
+        setVisibleHoleCards(prev => ({ ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] }));
       }
       
       // BUG A FIX: Use local tracking during rapid replay to avoid stale state
@@ -475,7 +471,7 @@ const HandReplay = ({
     setShowHoleCards(false);
     setShowWinner(false);
     setPotSizeHistory([]);
-    // Reset to show only hero's cards
+    // Initialize with hero's cards
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
       setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
     } else {

@@ -91,18 +91,8 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
 
   return (
     <div className="space-y-3">
-      <Label>{label}</Label>
-      <div className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={placeholder || `e.g., AhKd${expectedCards > 2 ? '2c' : ''}`}
-          className="uppercase"
-          maxLength={expectedCards * 3} // Allow for spaces
-        />
-        <Button onClick={handleSubmit} disabled={!isComplete}>
-          Show Cards
-        </Button>
+      <div className="flex items-center justify-between">
+        <Label>{label}</Label>
         <CardSelector
           maxCards={expectedCards}
           usedCards={usedCards}
@@ -110,8 +100,9 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           onSelect={handleSelectorSubmit}
           label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
           trigger={
-            <Button variant="outline" type="button">
+            <Button variant="default" type="button" className="gap-2">
               <Grid3x3 className="w-4 h-4" />
+              Select Cards from Grid
             </Button>
           }
         />
@@ -131,10 +122,6 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           ))}
         </div>
       )}
-
-      <p className="text-xs text-muted-foreground">
-        Format: Rank (2-9, T, J, Q, K, A) + Suit (h=hearts, d=diamonds, c=clubs, s=spades)
-      </p>
     </div>
   );
 };
