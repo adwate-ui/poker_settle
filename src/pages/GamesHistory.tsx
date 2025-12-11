@@ -354,7 +354,7 @@ const GamesHistory = () => {
                 >
                   <CardContent className="p-2 sm:p-3">
                     {/* Mobile Layout */}
-                    <div className="md:hidden space-y-3">
+                    <div className="md:hidden space-y-3 pl-2">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="text-xs text-muted-foreground">Date</p>

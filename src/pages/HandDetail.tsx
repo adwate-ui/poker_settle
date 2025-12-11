@@ -255,6 +255,26 @@ const HandDetail = () => {
     return cards;
   }, [hand, communityCards, playersInHand]);
 
+  // Build community cards string, avoiding duplicates (moved before useMemo dependencies)
+  const communityCards = useMemo(() => {
+    if (!hand) return '';
+    return hand.street_cards
+      .sort((a, b) => {
+        const order = { Flop: 1, Turn: 2, River: 3 };
+        return order[a.street_type as keyof typeof order] - order[b.street_type as keyof typeof order];
+      })
+      .reduce((acc, streetCard) => {
+        // Split current cards into individual cards (2 characters each)
+        const existingCards = acc.match(/.{1,2}/g) || [];
+        const newCardsStr = streetCard.cards_notation;
+        const newCards = newCardsStr.match(/.{1,2}/g) || [];
+        
+        // Only add cards that aren't already in the accumulator
+        const cardsToAdd = newCards.filter(card => !existingCards.includes(card));
+        return acc + cardsToAdd.join('');
+      }, '');
+  }, [hand]);
+
   // Get known hole cards for greying out (excludes currently selected player)
   const knownHoleCards = useMemo(() => {
     if (!hand) return [];
@@ -290,23 +310,6 @@ const HandDetail = () => {
       </div>
     );
   }
-
-  // Build community cards string, avoiding duplicates
-  const communityCards = hand.street_cards
-    .sort((a, b) => {
-      const order = { Flop: 1, Turn: 2, River: 3 };
-      return order[a.street_type as keyof typeof order] - order[b.street_type as keyof typeof order];
-    })
-    .reduce((acc, streetCard) => {
-      // Split current cards into individual cards (2 characters each)
-      const existingCards = acc.match(/.{1,2}/g) || [];
-      const newCardsStr = streetCard.cards_notation;
-      const newCards = newCardsStr.match(/.{1,2}/g) || [];
-      
-      // Only add cards that aren't already in the accumulator
-      const cardsToAdd = newCards.filter(card => !existingCards.includes(card));
-      return acc + cardsToAdd.join('');
-    }, '');
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">

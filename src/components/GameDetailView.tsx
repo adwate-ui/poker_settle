@@ -420,37 +420,41 @@ export const GameDetailView = ({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">
-            Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
+          <CardTitle className="text-xl sm:text-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span>Game Details - {format(new Date(game.date), "MMMM d, yyyy")}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => copyShareLink('game', gameId)}
+              disabled={linkLoading}
+              className="hover:bg-primary/10 hover:text-primary border-primary/20 w-full sm:w-auto"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share Game
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Buy-in</p>
-              <p className="text-lg font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <p className="text-xs text-muted-foreground font-medium">Buy-in</p>
+              <p className="text-sm sm:text-base font-bold text-primary">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Players</p>
-              <p className="text-lg font-semibold">{gamePlayers.length}</p>
+            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <p className="text-xs text-muted-foreground font-medium">Players</p>
+              <p className="text-sm sm:text-base font-bold text-primary">{gamePlayers.length}</p>
             </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Chips in play</p>
-              <p className="text-lg font-semibold">
+            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <p className="text-xs text-muted-foreground font-medium">Chips in play</p>
+              <p className="text-sm sm:text-base font-bold text-primary">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyShareLink('game', gameId)}
-                disabled={linkLoading}
-                className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share Game
-              </Button>
+            <div className="space-y-0.5 p-3 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+              <p className="text-xs text-muted-foreground font-medium">Total P&L</p>
+              <p className="text-sm sm:text-base font-bold text-green-500">
+                +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -553,7 +557,8 @@ export const GameDetailView = ({
                     onClick={() => handleSort("name")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
-                    Player
+                    <span className="hidden sm:inline">Player</span>
+                    <span className="sm:hidden">Plyr</span>
                     {getSortIcon("name")}
                   </Button>
                 </TableHead>
@@ -563,7 +568,8 @@ export const GameDetailView = ({
                     onClick={() => handleSort("buy_ins")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
-                    Buy-ins
+                    <span className="hidden sm:inline">Buy-ins</span>
+                    <span className="sm:hidden">Buy</span>
                     {getSortIcon("buy_ins")}
                   </Button>
                 </TableHead>
@@ -573,7 +579,8 @@ export const GameDetailView = ({
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
-                    Net P&L
+                    <span className="hidden sm:inline">Net P&L</span>
+                    <span className="sm:hidden">P&L</span>
                     {getSortIcon("net_amount")}
                   </Button>
                 </TableHead>
@@ -583,13 +590,15 @@ export const GameDetailView = ({
                     onClick={() => handleSort("final_stack")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
-                    Final Stack
+                    <span className="hidden sm:inline">Final Stack</span>
+                    <span className="sm:hidden">Stack</span>
                     {getSortIcon("final_stack")}
                   </Button>
                 </TableHead>
                 {showOwnerControls && fetchBuyInHistory && (
                   <TableHead className="font-bold text-left h-10 py-2 text-sm">
-                    Buy-in Log
+                    <span className="hidden sm:inline">Buy-in Log</span>
+                    <span className="sm:hidden">Log</span>
                   </TableHead>
                 )}
               </TableRow>
@@ -765,10 +774,22 @@ export const GameDetailView = ({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">From</TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">To</TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">Amount</TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">Type</TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                      <span className="hidden sm:inline">From</span>
+                      <span className="sm:hidden">Fr</span>
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                      <span className="hidden sm:inline">To</span>
+                      <span className="sm:hidden">To</span>
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                      <span className="hidden sm:inline">Amount</span>
+                      <span className="sm:hidden">Amt</span>
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                      <span className="hidden sm:inline">Type</span>
+                      <span className="sm:hidden">Typ</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

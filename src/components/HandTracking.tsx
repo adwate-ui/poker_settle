@@ -1411,9 +1411,21 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 <Input
                   type="number"
                   value={betAmount}
-                  onChange={(e) => setBetAmount(e.target.value)}
-                  placeholder={currentBet === 0 ? 'Bet amount...' : `Min: ${currentBet * 2}`}
-                  min={currentBet === 0 ? game.big_blind : currentBet * 2}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setBetAmount('');
+                      return;
+                    }
+                    const numValue = parseFloat(value);
+                    const smallBlind = game.small_blind || 50;
+                    // Round to nearest small blind multiple
+                    const rounded = Math.round(numValue / smallBlind) * smallBlind;
+                    setBetAmount(rounded.toString());
+                  }}
+                  placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet + (game.big_blind || 100)}`}
+                  min={currentBet === 0 ? game.big_blind : currentBet + (game.big_blind || 100)}
+                  step={game.small_blind || 50}
                   disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                   className="flex-1 h-10 text-sm"
                 />
