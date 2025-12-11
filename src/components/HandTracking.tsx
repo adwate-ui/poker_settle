@@ -1375,47 +1375,72 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Action history - ALL actions from all streets */}
         {allHandActions.length > 0 && (
-          <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Action History</div>
-              <Badge variant="outline" className="text-xs">{allHandActions.length}</Badge>
+          <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border border-border shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Action History</div>
+                <Badge variant="outline" className="text-xs">{allHandActions.length}</Badge>
+              </div>
+              <Badge variant="secondary" className="text-xs">
+                {stage.toUpperCase()}
+              </Badge>
             </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-              {allHandActions.map((action, idx) => {
-                const player = game.game_players.find(gp => gp.player_id === action.player_id);
-                const canDelete = stage !== 'preflop' || idx >= 2; // Can't delete blinds
+            <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              {['Preflop', 'Flop', 'Turn', 'River'].map(street => {
+                const streetActions = allHandActions.filter(a => a.street_type === street);
+                if (streetActions.length === 0) return null;
                 
                 return (
-                  <div key={idx} className="bg-background/50 rounded-lg p-2.5 text-xs flex justify-between items-center gap-2 hover:bg-background/80 transition-colors">
-                    <div className="flex items-center gap-2 flex-1">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 font-semibold">
-                        {action.street_type}
-                      </Badge>
-                      <span className="font-semibold">{player?.player.name}</span>
-                      {action.position && (
-                        <span className="text-muted-foreground text-[10px]">({action.position})</span>
-                      )}
+                  <div key={street} className="space-y-1">
+                    <div className="flex items-center gap-2 sticky top-0 bg-muted/90 backdrop-blur-sm px-2 py-1 rounded-md z-10">
+                      <div className="h-px flex-1 bg-border"></div>
+                      <span className="text-xs font-bold text-primary">{street}</span>
+                      <div className="h-px flex-1 bg-border"></div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {action.action_type}
-                        {action.bet_size > 0 && (
-                          <span className="text-amber-600 dark:text-amber-400 ml-1">
-                            {formatWithBB(action.bet_size)}
-                          </span>
-                        )}
-                      </span>
-                      {canDelete && action.id.startsWith('temp-action-') && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
-                          onClick={() => deleteAction(action.id)}
-                        >
-                          ✕
-                        </Button>
-                      )}
-                    </div>
+                    {streetActions.map((action, idx) => {
+                      const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                      const canDelete = stage !== 'preflop' || allHandActions.indexOf(action) >= 2; // Can't delete blinds
+                      const actionIndex = allHandActions.indexOf(action);
+                      
+                      return (
+                        <div key={actionIndex} className="bg-background/50 rounded-lg p-2.5 text-xs flex justify-between items-center gap-2 hover:bg-background/80 transition-colors border border-border/50">
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                              {idx + 1}
+                            </div>
+                            <span className="font-semibold">{player?.player.name}</span>
+                            {action.position && (
+                              <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                {action.position}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={action.action_type === 'Fold' ? 'destructive' : action.action_type.includes('Raise') || action.action_type.includes('Bet') ? 'default' : 'secondary'}
+                              className="text-[10px] font-semibold"
+                            >
+                              {action.action_type}
+                            </Badge>
+                            {action.bet_size > 0 && (
+                              <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">
+                                {formatWithBB(action.bet_size)}
+                              </span>
+                            )}
+                            {canDelete && action.id.startsWith('temp-action-') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
+                                onClick={() => deleteAction(action.id)}
+                              >
+                                ✕
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
