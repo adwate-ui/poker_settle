@@ -1,6 +1,22 @@
 // SVG-based poker chip and card back assets
 // These are inline SVG components that are much smaller and scale perfectly
 
+// Pre-calculate edge pattern points for poker chip
+const CHIP_EDGE_PATTERN = Array.from({ length: 24 }).map((_, i) => {
+  const angle = (i * 360) / 24;
+  const x1 = 50 + 44 * Math.cos((angle * Math.PI) / 180);
+  const y1 = 50 + 44 * Math.sin((angle * Math.PI) / 180);
+  const x2 = 50 + 38 * Math.cos((angle * Math.PI) / 180);
+  const y2 = 50 + 38 * Math.sin((angle * Math.PI) / 180);
+  return { x1, y1, x2, y2 };
+});
+
+// Pre-calculate small value indicator positions
+const CHIP_VALUE_POSITIONS = [0, 90, 180, 270].map((angle) => ({
+  x: 50 + 20 * Math.cos((angle * Math.PI) / 180),
+  y: 50 + 20 * Math.sin((angle * Math.PI) / 180),
+}));
+
 export const PokerChipSVG = ({ 
   value, 
   color, 
@@ -32,24 +48,17 @@ export const PokerChipSVG = ({
       <circle cx="50" cy="50" r="48" fill={scheme.primary} stroke="#000" strokeWidth="1" />
       
       {/* Edge pattern */}
-      {Array.from({ length: 24 }).map((_, i) => {
-        const angle = (i * 360) / 24;
-        const x1 = 50 + 44 * Math.cos((angle * Math.PI) / 180);
-        const y1 = 50 + 44 * Math.sin((angle * Math.PI) / 180);
-        const x2 = 50 + 38 * Math.cos((angle * Math.PI) / 180);
-        const y2 = 50 + 38 * Math.sin((angle * Math.PI) / 180);
-        return (
-          <line
-            key={i}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke={scheme.secondary}
-            strokeWidth="2"
-          />
-        );
-      })}
+      {CHIP_EDGE_PATTERN.map((point, i) => (
+        <line
+          key={i}
+          x1={point.x1}
+          y1={point.y1}
+          x2={point.x2}
+          y2={point.y2}
+          stroke={scheme.secondary}
+          strokeWidth="2"
+        />
+      ))}
       
       {/* Inner circle */}
       <circle cx="50" cy="50" r="35" fill={scheme.secondary} />
@@ -72,24 +81,20 @@ export const PokerChipSVG = ({
       </text>
       
       {/* Small value indicators */}
-      {[0, 90, 180, 270].map((angle) => {
-        const x = 50 + 20 * Math.cos((angle * Math.PI) / 180);
-        const y = 50 + 20 * Math.sin((angle * Math.PI) / 180);
-        return (
-          <text
-            key={angle}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill={scheme.text}
-            fontSize="8"
-            fontWeight="bold"
-          >
-            {value}
-          </text>
-        );
-      })}
+      {CHIP_VALUE_POSITIONS.map((pos, i) => (
+        <text
+          key={i}
+          x={pos.x}
+          y={pos.y}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill={scheme.text}
+          fontSize="8"
+          fontWeight="bold"
+        >
+          {value}
+        </text>
+      ))}
     </svg>
   );
 };
