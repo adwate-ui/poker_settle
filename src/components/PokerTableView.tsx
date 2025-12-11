@@ -355,12 +355,10 @@ const PokerTableView = memo(({
                       <div 
                         className={`absolute flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
                           isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                        }`}
+                        } ${pos.x > 50 ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{
                           top: '50%',
                           transform: 'translateY(-50%)',
-                          [pos.x > 50 ? 'right' : 'left']: '100%',
-                          [pos.x > 50 ? 'marginRight' : 'marginLeft']: '4px',
                         }}
                       >
                         {hasKnownCards ? (

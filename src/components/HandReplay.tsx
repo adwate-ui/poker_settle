@@ -270,8 +270,9 @@ const HandReplay = ({
 
     // Handle fold - muck cards and add to folded list
     if (action.action_type === 'Fold') {
-      // Animate folded player's street bets moving to pot
       const foldedPlayerBet = currentBets[action.player_id] || 0;
+      
+      // Animate folded player's street bets moving to pot
       if (foldedPlayerBet > 0 && !skipAnimation) {
         // Temporarily trigger chip animation (will be handled by visual effect)
         setAnimateChipsToPot(true);
@@ -281,13 +282,12 @@ const HandReplay = ({
       }
       
       // Move folded player's bets to pot immediately
-      const betAmount = currentBets[action.player_id] || 0;
-      if (betAmount > 0) {
+      if (foldedPlayerBet > 0) {
         if (localPot) {
-          localPot.value += betAmount;
+          localPot.value += foldedPlayerBet;
         }
-        setPotSize(prev => prev + betAmount);
-        setUncommittedPot(prev => prev - betAmount);
+        setPotSize(prev => prev + foldedPlayerBet);
+        setUncommittedPot(prev => prev - foldedPlayerBet);
       }
       
       if (localFolded) {
