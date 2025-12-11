@@ -138,8 +138,8 @@ const Profile = () => {
                             ${changingTheme ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                           `}
                         >
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-lg">{theme.displayName}</h3>
                               <p className="text-sm text-muted-foreground mt-1">
                                 {theme.description}
@@ -159,6 +159,10 @@ const Profile = () => {
                                           alt={charName}
                                           title={charName}
                                           className="w-8 h-8 rounded-full object-cover border-2 border-border"
+                                          onError={(e) => {
+                                            // Fallback to initials if image fails to load
+                                            e.currentTarget.style.display = 'none';
+                                          }}
                                         />
                                       ) : null;
                                     })}
@@ -172,8 +176,8 @@ const Profile = () => {
                               )}
                             </div>
                             {isActive && (
-                              <div className="flex items-center gap-2 text-primary flex-shrink-0">
-                                <span className="text-sm font-medium">Active</span>
+                              <div className="flex items-center gap-2 text-primary flex-shrink-0 self-start">
+                                <span className="text-sm font-medium whitespace-nowrap">Active</span>
                               </div>
                             )}
                           </div>
