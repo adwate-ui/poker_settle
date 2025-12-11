@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,21 +30,22 @@ const CardSelector = ({
   onOpenChange: controlledOnOpenChange
 }: CardSelectorProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [tempSelection, setTempSelection] = useState<string[]>(selectedCards);
+  const [tempSelection, setTempSelection] = useState<string[]>([]);
   const [isConfirming, setIsConfirming] = useState(false); // Track if we're in the middle of confirming
 
   // Use controlled or internal open state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledOnOpenChange || setInternalOpen;
 
-  // Reset temp selection when dialog opens
+  // Reset temp selection when dialog opens (use a ref to track if we just opened)
+  const previousOpenRef = useRef(false);
   useEffect(() => {
-    if (open) {
+    // Only reset when dialog transitions from closed to open
+    if (open && !previousOpenRef.current) {
       setTempSelection(selectedCards);
       setIsConfirming(false); // Reset confirming flag when dialog opens
     }
-    // Note: Don't reset isConfirming when dialog closes here
-    // It will be reset in onOpenChange after the check is done
+    previousOpenRef.current = open;
   }, [open, selectedCards]);
 
   const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
