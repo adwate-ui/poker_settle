@@ -10,10 +10,10 @@ import OptimizedAvatar from "./OptimizedAvatar";
 const Z_INDEX = {
   HOLE_CARDS: 5,      // Hole cards should be below player avatars
   PLAYER_UNIT: 10,    // Player avatar, name, and related elements
-  POSITION_LABEL: 30, // Position labels should be above everything
-  BUTTON_BADGE: 20,   // Dealer button badge
+  BUTTON_BADGE: 15,   // Dealer button badge
   CHIP_STACK: 20,     // Chip stacks
-  WINNER_BADGE: 30,   // Winner badge
+  POSITION_LABEL: 25, // Position labels
+  WINNER_BADGE: 30,   // Winner badge (highest)
 } as const;
 
 interface PokerTableViewProps {
