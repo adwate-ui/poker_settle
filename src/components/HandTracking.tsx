@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle, TrendingUp, Trophy, X } from 'lucide-react';
+import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
@@ -85,6 +86,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [showPlayerActionDialog, setShowPlayerActionDialog] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [playerStacks, setPlayerStacks] = useState<Record<string, number>>({});
+  const [isActionHistoryOpen, setIsActionHistoryOpen] = useState(true); // State for collapsible action history
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -810,9 +812,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     setSelectedPlayerId('');
   };
 
-  // Memoize grouped actions by street - MUST be before conditional returns to avoid React hook error #310
+  // Memoize grouped actions by street in DESCENDING order (newest first) - MUST be before conditional returns to avoid React hook error #310
   const actionsByStreet = useMemo(() => {
-    return ['Preflop', 'Flop', 'Turn', 'River'].map(street => ({
+    return ['River', 'Turn', 'Flop', 'Preflop'].map(street => ({
       street,
       actions: allHandActions.filter(a => a.street_type === street)
     })).filter(group => group.actions.length > 0);
@@ -1310,16 +1312,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
 
 
-        {/* Action buttons */}
+        {/* Action buttons - MORE COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 onClick={() => recordAction('Call')} 
                 variant="outline"
-                size="lg"
+                size="default"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-14 text-base font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
+                className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
               >
                 {currentBet === 0 
                   ? '✓ Check' 
@@ -1329,17 +1331,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               <Button 
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
-                size="lg"
+                size="default"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-14 text-base font-semibold hover:bg-red-600 transition-all"
+                className="h-10 text-sm font-semibold hover:bg-red-600 transition-all"
               >
                 ❌ Fold
               </Button>
             </div>
             
-            {/* Raise input */}
-            <div className="bg-muted/30 p-4 rounded-lg border border-border">
-              <Label className="text-sm font-semibold mb-2 block">Raise Amount</Label>
+            {/* Raise input - more compact */}
+            <div className="bg-muted/30 p-2 rounded-lg border border-border">
               <div className="flex gap-2">
                 <Input
                   type="number"
@@ -1348,13 +1349,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   placeholder={currentBet === 0 ? 'Bet amount...' : `Min: ${currentBet * 2}`}
                   min={currentBet === 0 ? game.big_blind : currentBet * 2}
                   disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  className="flex-1 h-12 text-base"
+                  className="flex-1 h-10 text-sm"
                 />
                 <Button 
                   onClick={() => recordAction('Raise')} 
                   disabled={!betAmount || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  size="lg"
-                  className="h-12 px-6 font-semibold bg-orange-600 hover:bg-orange-700"
+                  size="default"
+                  className="h-10 px-4 font-semibold bg-orange-600 hover:bg-orange-700 text-sm"
                 >
                   {currentBet === 0 ? '💵 Bet' : '⬆️ Raise'}
                 </Button>
@@ -1362,19 +1363,19 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             </div>
           </div>
         ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
-          <div className="bg-muted/50 p-6 rounded-lg text-center border-2 border-dashed border-border">
-            <p className="text-base text-muted-foreground font-medium">
+          <div className="bg-muted/50 p-4 rounded-lg text-center border-2 border-dashed border-border">
+            <p className="text-sm text-muted-foreground font-medium">
               🃏 This player has folded
             </p>
           </div>
         ) : null}
 
-        {/* Navigation buttons */}
-        <div className="flex gap-3">
+        {/* Navigation buttons - more compact */}
+        <div className="flex gap-2">
           {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
             <Button 
               onClick={moveToPreviousStreet} 
-              className="flex-1 h-12 text-base font-semibold" 
+              className="flex-1 h-10 text-sm font-semibold" 
               variant="outline"
             >
               ← Previous Street
@@ -1382,7 +1383,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           )}
           <Button 
             onClick={moveToNextStreet} 
-            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
             variant="default"
             disabled={!canMoveToNextStreet()}
           >
@@ -1390,74 +1391,83 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </Button>
         </div>
 
-        {/* Action history - ALL actions from all streets */}
+        {/* Action history - ALL actions from all streets - COLLAPSIBLE */}
         {allHandActions.length > 0 && (
-          <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border border-border shadow-lg">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Action History</div>
-                <Badge variant="outline" className="text-xs">{allHandActions.length}</Badge>
-              </div>
-              <Badge variant="secondary" className="text-xs">
-                {stage.toUpperCase()}
-              </Badge>
-            </div>
-            <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-              {actionsByStreet.map(({ street, actions: streetActions }) => (
-                <div key={street} className="space-y-1">
-                  <div className="flex items-center gap-2 sticky top-0 bg-muted/90 backdrop-blur-sm px-2 py-1 rounded-md z-10">
-                    <div className="h-px flex-1 bg-border"></div>
-                    <span className="text-xs font-bold text-primary">{street}</span>
-                    <div className="h-px flex-1 bg-border"></div>
+          <Collapsible open={isActionHistoryOpen} onOpenChange={setIsActionHistoryOpen}>
+            <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border border-border shadow-lg">
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between mb-3 cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Action History</div>
+                    <Badge variant="outline" className="text-xs">{allHandActions.length}</Badge>
                   </div>
-                  {streetActions.map((action, idx) => {
-                    const player = game.game_players.find(gp => gp.player_id === action.player_id);
-                    const actionIndex = allHandActions.indexOf(action);
-                    const canDelete = stage !== 'preflop' || actionIndex >= 2; // Can't delete blinds
-                    
-                    return (
-                      <div key={actionIndex} className="bg-background/50 rounded-lg p-2.5 text-xs flex justify-between items-center gap-2 hover:bg-background/80 transition-colors border border-border/50">
-                        <div className="flex items-center gap-2 flex-1">
-                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                            {idx + 1}
-                          </div>
-                          <span className="font-semibold">{player?.player.name}</span>
-                          {action.position && (
-                            <Badge variant="outline" className="text-[10px] px-1 py-0">
-                              {action.position}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={getActionBadgeVariant(action.action_type)}
-                            className="text-[10px] font-semibold"
-                          >
-                            {action.action_type}
-                          </Badge>
-                          {action.bet_size > 0 && (
-                            <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">
-                              {formatWithBB(action.bet_size)}
-                            </span>
-                          )}
-                          {canDelete && action.id.startsWith('temp-action-') && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
-                              onClick={() => deleteAction(action.id)}
-                            >
-                              ✕
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {stage.toUpperCase()}
+                    </Badge>
+                    {isActionHistoryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </div>
                 </div>
-              ))}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                  {actionsByStreet.map(({ street, actions: streetActions }) => (
+                    <div key={street} className="space-y-1">
+                      <div className="flex items-center gap-2 sticky top-0 bg-muted/90 backdrop-blur-sm px-2 py-1 rounded-md z-10">
+                        <div className="h-px flex-1 bg-border"></div>
+                        <span className="text-xs font-bold text-primary">{street}</span>
+                        <div className="h-px flex-1 bg-border"></div>
+                      </div>
+                      {streetActions.map((action, idx) => {
+                        const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                        const actionIndex = allHandActions.indexOf(action);
+                        const canDelete = stage !== 'preflop' || actionIndex >= 2; // Can't delete blinds
+                        
+                        return (
+                          <div key={actionIndex} className="bg-background/50 rounded-lg p-2.5 text-xs flex justify-between items-center gap-2 hover:bg-background/80 transition-colors border border-border/50">
+                            <div className="flex items-center gap-2 flex-1">
+                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                {idx + 1}
+                              </div>
+                              <span className="font-semibold">{player?.player.name}</span>
+                              {action.position && (
+                                <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                  {action.position}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={getActionBadgeVariant(action.action_type)}
+                                className="text-[10px] font-semibold"
+                              >
+                                {action.action_type}
+                              </Badge>
+                              {action.bet_size > 0 && (
+                                <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">
+                                  {formatWithBB(action.bet_size)}
+                                </span>
+                              )}
+                              {canDelete && action.id.startsWith('temp-action-') && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
+                                  onClick={() => deleteAction(action.id)}
+                                >
+                                  ✕
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
             </div>
-          </div>
+          </Collapsible>
         )}
       </CardContent>
     </Card>
