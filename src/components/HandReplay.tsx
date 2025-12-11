@@ -50,6 +50,7 @@ const HandReplay = ({
   const [currentStreet, setCurrentStreet] = useState<'Preflop' | 'Flop' | 'Turn' | 'River'>('Preflop');
   const [potSize, setPotSize] = useState(0); // Start at 0, blinds are in actions
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
+  const [uncommittedPot, setUncommittedPot] = useState(0); // Chips not yet swept to pot
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
   const [muckedPlayers, setMuckedPlayers] = useState<string[]>([]);
@@ -168,6 +169,14 @@ const HandReplay = ({
       const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
       
       if (skipAnimation) {
+        // Sweep all uncommitted chips to pot
+        const uncommittedAmount = Object.values(currentBets).reduce((sum, bet) => sum + bet, 0);
+        if (localPot) {
+          localPot.value += uncommittedAmount;
+        }
+        setPotSize(prev => prev + uncommittedAmount);
+        setUncommittedPot(0);
+        
         // Clear street bets when moving to new street
         if (localStreetBets) {
           Object.keys(localStreetBets).forEach(key => localStreetBets[key] = 0);
@@ -193,10 +202,15 @@ const HandReplay = ({
           }
         }
       } else {
+        // Sweep all uncommitted chips to pot with animation
+        const uncommittedAmount = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
+        setPotSize(prev => prev + uncommittedAmount);
+        setUncommittedPot(0);
+        
         // Animate chips moving to pot
         setAnimateChipsToPot(true);
         setTimeout(() => {
-          // Clear street bets display (already added to pot during actions)
+          // Clear street bets display
           setStreetPlayerBets({});
           setCurrentStreet(action.street_type as 'Preflop' | 'Flop' | 'Turn' | 'River');
           
@@ -228,9 +242,6 @@ const HandReplay = ({
     if (localStreetBets && action.bet_size > 0) {
       localStreetBets[action.player_id] = action.bet_size;
     }
-    if (localPot && additionalBet > 0) {
-      localPot.value += additionalBet;
-    }
     
     // Update React state for UI display
     if (action.bet_size > 0) {
@@ -240,24 +251,20 @@ const HandReplay = ({
       }));
     }
     
-    // Add the additional bet to pot
+    // Track uncommitted pot (chips in front of players, not yet swept to pot)
     if (additionalBet > 0) {
-      setPotSize(prev => {
-        const newPot = prev + additionalBet;
-        // Log pot updates for Turn and River to ensure proper recording
-        if (action.street_type === 'Turn' || action.street_type === 'River') {
-          console.log(`[${action.street_type}] Action ${actionIndex}: ${action.action_type} by ${action.player_id.slice(0, 8)}... - Bet: ${action.bet_size}, Additional: ${additionalBet}, New Pot: ${newPot}`);
-        }
-        return newPot;
-      });
+      setUncommittedPot(prev => prev + additionalBet);
       
-      // Track pot size history
-      if (!skipAnimation) {
-        setPotSizeHistory(prev => [...prev, {
-          actionIndex,
-          potSize: (localPot ? localPot.value : potSize) + additionalBet,
-          street: action.street_type
-        }]);
+      // Track for local state if provided (for fast replay)
+      if (localPot) {
+        // For local tracking during fast replay, we still accumulate to help with calculations
+        // but the UI won't show this as pot until street changes
+        localPot.value += additionalBet;
+      }
+      
+      // Log bet tracking
+      if (action.street_type === 'Turn' || action.street_type === 'River') {
+        console.log(`[${action.street_type}] Action ${actionIndex}: ${action.action_type} by ${action.player_id.slice(0, 8)}... - Bet: ${action.bet_size}, Additional: ${additionalBet}, Uncommitted: ${uncommittedPot + additionalBet}`);
       }
     }
 
@@ -382,6 +389,7 @@ const HandReplay = ({
       setIsPlaying(false);
       setCurrentStreet('Preflop');
       setPotSize(0); // Reset to 0, blinds are in actions
+      setUncommittedPot(0); // Reset uncommitted chips
       setStreetPlayerBets({});
       setCommunityCards('');
       setFoldedPlayers([]);
@@ -415,6 +423,7 @@ const HandReplay = ({
     setIsPlaying(false);
     setCurrentStreet('Preflop');
     setPotSize(0); // Reset to 0, blinds are in actions
+    setUncommittedPot(0); // Reset uncommitted chips
     setStreetPlayerBets({});
     setCommunityCards('');
     setFoldedPlayers([]);
@@ -457,6 +466,7 @@ const HandReplay = ({
           communityCards={communityCards}
           showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
           playerStacks={playerStacks}
+          showPotChips={Object.keys(streetPlayerBets).length === 0 || animateChipsToPot} // Only show pot chips when no active bets or during sweep animation
         />
       </div>
 
@@ -494,7 +504,7 @@ const HandReplay = ({
             <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
               <span className="text-sm text-muted-foreground font-medium">Current Pot:</span>
               <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
-                Rs. {potSize.toLocaleString('en-IN')}
+                Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
               </span>
             </div>
           </CardContent>
@@ -575,7 +585,7 @@ const HandReplay = ({
               {winnerPlayerName} Wins!
             </div>
             <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
-              Pot: Rs. {potSize.toLocaleString('en-IN')}
+              Pot: Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
             </div>
           </CardContent>
         </Card>
