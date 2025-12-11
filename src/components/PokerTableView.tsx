@@ -73,10 +73,15 @@ const PokerTableView = memo(({
     setDraggedIndex(index);
   }, [enableDragDrop]);
 
-  const handleDragEnd = useCallback(() => {
+  // Shared cleanup function for drag/touch operations
+  const cleanupDragState = useCallback(() => {
     setDraggedIndex(null);
     setDragOverIndex(null);
   }, []);
+
+  const handleDragEnd = useCallback(() => {
+    cleanupDragState();
+  }, [cleanupDragState]);
 
   const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
@@ -101,9 +106,8 @@ const PokerTableView = memo(({
     newPositions.sort((a, b) => a.seat - b.seat);
     
     onPositionsChange(newPositions);
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  }, [enableDragDrop, draggedIndex, positions, onPositionsChange]);
+    cleanupDragState();
+  }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
 
   // Touch event handlers for mobile drag-and-drop
   const handleTouchStart = useCallback((index: number) => {
@@ -113,7 +117,6 @@ const PokerTableView = memo(({
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!enableDragDrop || draggedIndex === null) return;
-    e.preventDefault();
     
     const touch = e.touches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -124,6 +127,8 @@ const PokerTableView = memo(({
       const index = parseInt(playerElement.getAttribute('data-player-index') || '-1');
       if (index >= 0 && index !== draggedIndex) {
         setDragOverIndex(index);
+        // Only prevent default when over a valid drop target to allow scrolling otherwise
+        e.preventDefault();
       }
     }
   }, [enableDragDrop, draggedIndex]);
@@ -156,9 +161,8 @@ const PokerTableView = memo(({
       }
     }
     
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  }, [enableDragDrop, draggedIndex, positions, onPositionsChange]);
+    cleanupDragState();
+  }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
 
   // Get position label for a player - memoized
   const getPositionLabel = useCallback((playerId: string) => {
