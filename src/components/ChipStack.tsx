@@ -1,9 +1,5 @@
 import { memo, useMemo } from "react";
-import chipRed20 from "@/assets/chip-red-20.png";
-import chipBlack100 from "@/assets/chip-black-100.png";
-import chipBlue500 from "@/assets/chip-blue-500.png";
-import chipYellow1000 from "@/assets/chip-yellow-1000.png";
-import chipGreen5000 from "@/assets/chip-green-5000.png";
+import { PokerChipSVG } from "./PokerAssets";
 
 interface ChipStackProps {
   amount: number;
@@ -12,11 +8,11 @@ interface ChipStackProps {
 }
 
 const CHIP_DENOMINATIONS = [
-  { value: 5000, image: chipGreen5000, color: '#10b981' },
-  { value: 1000, image: chipYellow1000, color: '#eab308' },
-  { value: 500, image: chipBlue500, color: '#3b82f6' },
-  { value: 100, image: chipBlack100, color: '#111827' },
-  { value: 20, image: chipRed20, color: '#ef4444' },
+  { value: 5000, color: 'green', label: '5K' },
+  { value: 1000, color: 'yellow', label: '1K' },
+  { value: 500, color: 'blue', label: '500' },
+  { value: 100, color: 'black', label: '100' },
+  { value: 20, color: 'red', label: '20' },
 ];
 
 const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
@@ -51,13 +47,13 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
     return selectBestChip(amount);
   }, [amount]);
 
-  const sizeClasses = {
-    sm: 'w-7 h-7',
-    md: 'w-9 h-9',
-    lg: 'w-11 h-11',
+  const sizeMaps = {
+    sm: 28,
+    md: 36,
+    lg: 44,
   };
 
-  const chipSize = sizeClasses[size];
+  const chipSize = sizeMaps[size];
 
   if (!chip) {
     return showLabel ? (
@@ -70,32 +66,17 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
       {/* Single chip stack */}
       <div className="relative flex flex-col items-center">
         {/* Stack of chips (show 1-3 chips max) */}
-        <div className="relative" style={{ height: `${chip.visualCount * 2 + (size === 'sm' ? 24 : size === 'md' ? 30 : 38)}px` }}>
+        <div className="relative" style={{ height: `${chip.visualCount * 2 + chipSize}px` }}>
           {Array.from({ length: chip.visualCount }).map((_, stackIdx) => (
-            <div key={stackIdx}>
-              {/* Fallback circle (behind the image) */}
-              <div
-                className={`${chipSize} absolute left-0 rounded-full border-2 border-white shadow-md`}
-                style={{
-                  bottom: `${stackIdx * 2}px`,
-                  zIndex: stackIdx,
-                  backgroundColor: chip.color,
-                }}
-              />
-              {/* Image chip */}
-              <img
-                src={chip.image}
-                alt={`${chip.value} chip`}
-                className={`${chipSize} absolute left-0 rounded-full`}
-                style={{
-                  bottom: `${stackIdx * 2}px`,
-                  zIndex: stackIdx + 1,
-                }}
-                onError={(e) => {
-                  // hide the image to reveal the fallback circle
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
+            <div 
+              key={stackIdx}
+              className="absolute left-0"
+              style={{
+                bottom: `${stackIdx * 2}px`,
+                zIndex: stackIdx,
+              }}
+            >
+              <PokerChipSVG value={chip.label} color={chip.color} size={chipSize} />
             </div>
           ))}
         </div>
