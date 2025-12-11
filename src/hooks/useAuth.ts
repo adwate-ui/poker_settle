@@ -18,7 +18,7 @@ export const useAuthProvider = () => {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout | null = null;
+    let timeoutId: number | null = null;
 
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -61,7 +61,7 @@ export const useAuthProvider = () => {
         } else {
           // Set a safety timeout to prevent infinite loading
           // If onAuthStateChange doesn't fire within 5 seconds, stop loading anyway
-          timeoutId = setTimeout(() => {
+          timeoutId = window.setTimeout(() => {
             if (mounted) {
               console.warn('Auth state change timeout - stopping loading state');
               setLoading(false);
@@ -78,6 +78,7 @@ export const useAuthProvider = () => {
       mounted = false;
       if (timeoutId) {
         clearTimeout(timeoutId);
+        timeoutId = null;
       }
       subscription.unsubscribe();
     };
