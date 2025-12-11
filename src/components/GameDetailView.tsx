@@ -110,13 +110,7 @@ export const GameDetailView = ({
   const [newTransferTo, setNewTransferTo] = useState("");
   const [newTransferAmount, setNewTransferAmount] = useState("");
 
-  useEffect(() => {
-    if (gameId) {
-      fetchGameData();
-    }
-  }, [gameId]);
-
-  const fetchGameData = async () => {
+  const fetchGameData = useCallback(async () => {
     setLoading(true);
     try {
       const [gameResult, playersResult, positionsResult] = await Promise.all([
@@ -178,7 +172,13 @@ export const GameDetailView = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [gameId, client]);
+
+  useEffect(() => {
+    if (gameId) {
+      fetchGameData();
+    }
+  }, [gameId, fetchGameData]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
