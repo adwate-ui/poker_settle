@@ -318,30 +318,9 @@ const PokerTableView = memo(({
                     </div>
                   )}
                   
-                  {/* Player avatar with hole cards positioned above */}
-                  <div className="relative">
-                    {/* Player hole cards - positioned above the avatar to avoid covering player info */}
-                    <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 flex gap-1 z-10 transition-all duration-300 ease-in-out ${
-                      isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                    }`}>
-                      {hasKnownCards ? (
-                        // Show known cards face-up
-                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard 
-                            key={idx} 
-                            card={card} 
-                            size="xs"
-                          />
-                        ))
-                      ) : shouldShowCards ? (
-                        // Show card backs for unknown cards (not mucked)
-                        <>
-                          <PokerCard card="back" size="xs" />
-                          <PokerCard card="back" size="xs" />
-                        </>
-                      ) : null}
-                    </div>
-                    
+                  {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
+                  <div className="relative flex flex-col items-center gap-1">
+                    {/* Player avatar - central element */}
                     <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                       isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                       isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
@@ -351,24 +330,56 @@ const PokerTableView = memo(({
                         size="md"
                         className="w-full h-full"
                       />
+                      {/* Button indicator overlay */}
+                      {isButton && (
+                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg z-10">
+                          D
+                        </div>
+                      )}
                     </div>
-                    {/* Button indicator */}
-                    {isButton && (
-                      <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg">
-                        D
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Player name and stack */}
-                  <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0">
-                    <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap">
-                      {position.player_name}
-                    </span>
-                    {playerStacks[position.player_id] !== undefined && (
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                        Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                    
+                    {/* Player name and stack - directly below avatar */}
+                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[60px]">
+                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate max-w-[80px]">
+                        {position.player_name}
                       </span>
+                      {playerStacks[position.player_id] !== undefined && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Player hole cards - positioned to the side for better visibility */}
+                    {(hasKnownCards || shouldShowCards) && (
+                      <div 
+                        className={`absolute flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
+                          isFolded ? 'opacity-30 grayscale' : 'opacity-100'
+                        }`}
+                        style={{
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          [pos.x > 50 ? 'right' : 'left']: '100%',
+                          [pos.x > 50 ? 'marginRight' : 'marginLeft']: '4px',
+                        }}
+                      >
+                        {hasKnownCards ? (
+                          // Show known cards face-up
+                          playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard 
+                              key={idx} 
+                              card={card} 
+                              size="xs"
+                            />
+                          ))
+                        ) : shouldShowCards ? (
+                          // Show card backs for unknown cards (not mucked)
+                          <>
+                            <PokerCard card="back" size="xs" />
+                            <PokerCard card="back" size="xs" />
+                          </>
+                        ) : null}
+                      </div>
                     )}
                   </div>
                   
