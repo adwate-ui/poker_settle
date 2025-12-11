@@ -58,13 +58,6 @@ const HandDetail = () => {
   const { updateHoleCards } = useHandTracking();
   const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
 
-  useEffect(() => {
-    if (handId) {
-      fetchHandDetail();
-      loadTablePositions();
-    }
-  }, [handId, fetchHandDetail, loadTablePositions]);
-
   const loadTablePositions = useCallback(async () => {
     if (!handId) return;
     
@@ -179,6 +172,13 @@ const HandDetail = () => {
       setLoading(false);
     }
   }, [handId]);
+
+  useEffect(() => {
+    if (handId) {
+      fetchHandDetail();
+      loadTablePositions();
+    }
+  }, [handId, fetchHandDetail, loadTablePositions]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
