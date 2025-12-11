@@ -478,50 +478,46 @@ export const GameDetailView = ({
       {/* Poker Table View */}
       <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
         <Card>
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-primary text-lg">Table Positions</CardTitle>
-              <div className="flex items-center gap-4">
-                {tablePositions.length > 1 && tablePositionsOpen && (
-                  <>
-                    <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
-                      {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
+          <CardHeader className="py-3">
+            <div className="flex flex-row items-center justify-between">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                  <CardTitle className="text-primary text-lg">Table Positions</CardTitle>
+                  {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </button>
+              </CollapsibleTrigger>
+              {tablePositions.length > 1 && tablePositionsOpen && (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
+                    {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
+                      disabled={currentPositionIndex === 0}
+                      className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {currentPositionIndex + 1} / {tablePositions.length}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1));
-                        }}
-                        disabled={currentPositionIndex === 0}
-                        className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <span className="text-sm font-medium text-muted-foreground">
-                        {currentPositionIndex + 1} / {tablePositions.length}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1));
-                        }}
-                        disabled={currentPositionIndex === tablePositions.length - 1}
-                        className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </>
-                )}
-                {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </div>
-            </CardHeader>
-          </CollapsibleTrigger>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
+                      disabled={currentPositionIndex === tablePositions.length - 1}
+                      className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardHeader>
           <CollapsibleContent>
             <CardContent>
           <PokerTableView 

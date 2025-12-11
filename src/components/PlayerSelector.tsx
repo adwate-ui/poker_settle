@@ -217,7 +217,7 @@ export const PlayerSelector = ({
                       Search Results ({availablePlayers.length})
                     </h4>
                   )}
-                  <ScrollArea key={`scroll-${open}-${searchQuery}`} className="h-[300px] pr-4">
+                  <ScrollArea key={`scroll-${open}`} className="h-[300px] pr-4">
                     <div className="grid gap-2">
                       {availablePlayers.map((player) => (
                         <PlayerListItem
