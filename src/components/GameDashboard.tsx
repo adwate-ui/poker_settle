@@ -379,7 +379,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="pt-3 pb-3">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div className="space-y-0.5 p-2 rounded-lg bg-primary/5 border border-primary/20">
                 <p className="text-[10px] text-muted-foreground font-medium">Buy-ins</p>
                 <p className="text-sm font-bold text-primary">{formatCurrency(totalBuyIns)}</p>

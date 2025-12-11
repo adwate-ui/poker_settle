@@ -61,6 +61,7 @@ const TablePositionEditor = ({
       const playerId = selectedPlayers[i];
       const seatStr = selectedSeats[i];
       
+      // Both player and seat must be selected for this pair
       if (playerId && seatStr) {
         const player = players.find(p => p.id === playerId);
         if (player) {
@@ -79,6 +80,9 @@ const TablePositionEditor = ({
       setSelectedSeats([]);
     }
   };
+
+  // Count valid pairs (both player and seat selected)
+  const validPairCount = selectedPlayers.filter((p, i) => p && selectedSeats[i]).length;
 
   const handleRemovePlayer = (playerId: string) => {
     setPositions(positions.filter(p => p.player_id !== playerId));
@@ -157,10 +161,10 @@ const TablePositionEditor = ({
           
           <Button
             onClick={handleAddPlayers}
-            disabled={selectedPlayers.filter(p => p).length === 0 || selectedSeats.filter(s => s).length === 0}
+            disabled={validPairCount === 0}
             className="w-full sm:w-auto"
           >
-            Add {selectedPlayers.filter(p => p).length || 0} Player(s) to Table
+            Add {validPairCount || 0} Player(s) to Table
           </Button>
         </div>
       )}
