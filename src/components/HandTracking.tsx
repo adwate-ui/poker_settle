@@ -942,21 +942,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               )}
               {!buttonPlayerId && (
                 <div className="space-y-3">
-                  <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/30 text-center">
-                    <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mb-3">
-                      👆 Click on a player at the table or select from the list below
-                    </p>
-                  </div>
-                  
-                  {/* Alternative: List view for button selection */}
-                  <div className="grid grid-cols-2 gap-2">
+                  {/* Dealer selection in one row */}
+                  <div className="flex gap-2 flex-wrap justify-center">
                     {game.game_players
                       .filter(gp => !dealtOutPlayers.includes(gp.player_id))
                       .map(gp => (
                         <Button
                           key={gp.player_id}
                           variant="outline"
-                          className="h-auto py-3 flex flex-col items-center gap-1"
+                          className="h-auto py-2 flex flex-col items-center gap-1 min-w-[80px]"
                           onClick={() => setButtonPlayerId(gp.player_id)}
                         >
                           <div className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center">
@@ -1337,40 +1331,67 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Card edit buttons - shown only for just-added community cards until next betting action */}
         {stage === 'flop' && flopCards && cardsJustAdded && (
-          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Flop:</span>
-              <div className="flex gap-1">
-                {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                  <PokerCard key={idx} card={card} size="xs" />
-                ))}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">Flop:</span>
+                <div className="flex gap-1">
+                  {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={idx} card={card} size="xs" />
+                  ))}
+                </div>
               </div>
+              <Button variant="outline" size="sm" onClick={handleEditCards}>
+                Edit Cards
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={handleEditCards}>
-              Edit Cards
-            </Button>
+            {currentPlayer && (
+              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  👉 {currentPlayer.player.name} to act first
+                </p>
+              </div>
+            )}
           </div>
         )}
         {stage === 'turn' && turnCard && cardsJustAdded && (
-          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Turn:</span>
-              <PokerCard card={turnCard} size="xs" />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">Turn:</span>
+                <PokerCard card={turnCard} size="xs" />
+              </div>
+              <Button variant="outline" size="sm" onClick={handleEditCards}>
+                Edit Card
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={handleEditCards}>
-              Edit Card
-            </Button>
+            {currentPlayer && (
+              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  👉 {currentPlayer.player.name} to act first
+                </p>
+              </div>
+            )}
           </div>
         )}
         {stage === 'river' && riverCard && cardsJustAdded && (
-          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">River:</span>
-              <PokerCard card={riverCard} size="xs" />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">River:</span>
+                <PokerCard card={riverCard} size="xs" />
+              </div>
+              <Button variant="outline" size="sm" onClick={handleEditCards}>
+                Edit Card
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={handleEditCards}>
-              Edit Card
-            </Button>
+            {currentPlayer && (
+              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  👉 {currentPlayer.player.name} to act first
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -1379,34 +1400,34 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Action buttons - COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
-          <div className="space-y-1.5">
-            <div className="grid grid-cols-2 gap-1.5">
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 onClick={() => recordAction('Call')} 
                 variant="outline"
-                size="sm"
+                size="default"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-8 text-xs font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
+                className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
               >
                 {currentBet === 0 
                   ? '✓ Check' 
-                  : `📞 Call ${currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}`
+                  : `🪙 Call ${currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}`
                 }
               </Button>
               <Button 
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
-                size="sm"
+                size="default"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-8 text-xs font-semibold hover:bg-red-600 transition-all"
+                className="h-10 text-sm font-semibold hover:bg-red-600 transition-all"
               >
                 ❌ Fold
               </Button>
             </div>
             
             {/* Raise input - compact */}
-            <div className="bg-muted/30 p-1.5 rounded-lg border border-border">
-              <div className="flex gap-1.5">
+            <div className="bg-muted/30 p-2 rounded-lg border border-border">
+              <div className="flex gap-2">
                 <Input
                   type="number"
                   value={betAmount}
@@ -1414,44 +1435,44 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   placeholder={currentBet === 0 ? 'Bet amount...' : `Min: ${currentBet * 2}`}
                   min={currentBet === 0 ? game.big_blind : currentBet * 2}
                   disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  className="flex-1 h-8 text-xs"
+                  className="flex-1 h-10 text-sm"
                 />
                 <Button 
                   onClick={() => recordAction('Raise')} 
                   disabled={!betAmount || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  size="sm"
-                  className="h-8 px-3 font-semibold bg-orange-600 hover:bg-orange-700 text-xs"
+                  size="default"
+                  className="h-10 px-4 font-semibold bg-orange-600 hover:bg-orange-700 text-sm"
                 >
-                  {currentBet === 0 ? '💵 Bet' : '⬆️ Raise'}
+                  {currentBet === 0 ? '💰 Bet' : '📈 Raise'}
                 </Button>
               </div>
             </div>
           </div>
         ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="bg-muted/50 p-3 rounded-lg text-center border-2 border-dashed border-border">
-            <p className="text-xs text-muted-foreground font-medium">
+            <p className="text-sm text-muted-foreground font-medium">
               🃏 This player has folded
             </p>
           </div>
         ) : null}
 
         {/* Navigation buttons - compact */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
             <Button 
               onClick={moveToPreviousStreet} 
-              className="flex-1 h-8 text-xs font-semibold" 
+              className="flex-1 h-10 text-sm font-semibold" 
               variant="outline"
-              size="sm"
+              size="default"
             >
               ← Previous Street
             </Button>
           )}
           <Button 
             onClick={moveToNextStreet} 
-            className="flex-1 h-8 text-xs font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
             variant="default"
-            size="sm"
+            size="default"
             disabled={!canMoveToNextStreet()}
           >
             {stage === 'river' ? '🏆 Go to Showdown' : 'Next Street →'}
@@ -1571,7 +1592,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   <span className={`text-2xl ${suit.color}`}>{suit.symbol}</span>
                   <h3 className="font-semibold text-base">{suit.name}</h3>
                 </div>
-                <div className="grid grid-cols-13 gap-0.5">
+                <div className="grid grid-cols-13 gap-px justify-items-center">
                   {ranks.map(rank => {
                     const card = `${rank}${suit.code}`;
                     const isUsed = usedCards.includes(card);
@@ -1604,7 +1625,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                           }
                         }}
                         disabled={isUsed || isKnownHole}
-                        className={`relative aspect-[5/7] transition-all duration-200 rounded ${
+                        className={`relative aspect-[5/7] w-full transition-all duration-200 rounded ${
                           (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
                         } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg' : ''} ${
                           !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''

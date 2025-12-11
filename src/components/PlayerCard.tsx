@@ -147,17 +147,17 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         {/* Summary Row - Clearly labeled */}
         <div className="pt-2 border-t border-border space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground font-medium">Total Buy-ins:</span>
-            <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+            <span className="text-muted-foreground font-medium">Buy-ins:</span>
+            <span className="font-semibold">{gamePlayer.buy_ins} × Rs. {formatIndianNumber(buyInAmount)}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground font-medium">Net P&L:</span>
-            <span className={`font-bold ${
+            <span className={`font-bold px-2 py-0.5 rounded ${
               isProfit 
-                ? 'text-green-600 dark:text-green-400' 
-                : 'text-red-600 dark:text-red-400'
+                ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
+                : 'bg-red-500/20 text-red-600 dark:text-red-400'
             }`}>
-              {isProfit ? '+' : ''}Rs. {formatIndianNumber(Math.abs(netAmount))}
+              {isProfit ? '+' : '-'}Rs. {formatIndianNumber(Math.abs(netAmount))}
             </span>
           </div>
         </div>
