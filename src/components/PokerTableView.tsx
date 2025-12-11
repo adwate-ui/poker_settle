@@ -390,21 +390,26 @@ const PokerTableView = memo(({
                   </div>
                   
                   {/* Enhanced chip stack display */}
-                  {playerBet > 0 && !isFolded && (
-                    <div 
-                      className={`absolute z-20 transition-all duration-500 ease-in-out ${
-                        (animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id))
-                          ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
-                          : 'opacity-100 scale-100'
-                      }`}
-                      style={{
-                        top: pos.y > 50 ? '-60px' : '80px',
-                        left: pos.x > 50 ? '-50px' : '50px',
-                      }}
-                    >
-                      <ChipStack amount={playerBet} size="sm" showLabel={true} />
-                    </div>
-                  )}
+                  {playerBet > 0 && !isFolded && (() => {
+                    // Check if chips should animate for this player
+                    const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
+                    
+                    return (
+                      <div 
+                        className={`absolute z-20 transition-all duration-500 ease-in-out ${
+                          shouldAnimate
+                            ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
+                            : 'opacity-100 scale-100'
+                        }`}
+                        style={{
+                          top: pos.y > 50 ? '-60px' : '80px',
+                          left: pos.x > 50 ? '-50px' : '50px',
+                        }}
+                      >
+                        <ChipStack amount={playerBet} size="sm" showLabel={true} />
+                      </div>
+                    );
+                  })()}
                   
                   {/* Winner chip animation - shows pot chips coming to winner */}
                   {isWinner && (
