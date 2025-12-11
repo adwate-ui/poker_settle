@@ -15,6 +15,10 @@ const CHIP_DENOMINATIONS = [
   { value: 20, color: 'red', label: '20' },
 ];
 
+// Configuration for chip stack display
+const MAX_CHIPS_PER_STACK = 5; // Maximum chips to show visually per denomination
+const MAX_CHIP_DENOMINATIONS = 2; // Maximum different denominations to show
+
 const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
   // Calculate the chip breakdown - show multiple denominations like real poker apps
   const chipBreakdown = useMemo(() => {
@@ -29,12 +33,12 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
       if (count > 0) {
         breakdown.push({ 
           ...denom, 
-          count: Math.min(count, 5) // Show max 5 chips per denomination for visual clarity
+          count: Math.min(count, MAX_CHIPS_PER_STACK) // Show max chips per denomination for visual clarity
         });
         remaining -= count * denom.value;
       }
-      // Only show up to 2 different denominations for simplicity
-      if (breakdown.length >= 2) break;
+      // Only show up to MAX_CHIP_DENOMINATIONS different denominations for simplicity
+      if (breakdown.length >= MAX_CHIP_DENOMINATIONS) break;
     }
     
     return breakdown;

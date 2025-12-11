@@ -28,7 +28,6 @@ const TablePositionEditor = ({
   const [positions, setPositions] = useState<SeatPosition[]>(currentPositions);
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectedSeat, setSelectedSeat] = useState<string>("");
-  const [bulkAssignMode, setBulkAssignMode] = useState(false);
 
   // Get available players (not already seated)
   const seatedPlayerIds = positions.map(p => p.player_id);
@@ -73,7 +72,6 @@ const TablePositionEditor = ({
     });
     
     setPositions(newPositions.sort((a, b) => a.seat - b.seat));
-    setBulkAssignMode(false);
   };
 
   const handleRemovePlayer = (playerId: string) => {
