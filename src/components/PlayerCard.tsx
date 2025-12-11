@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
-import { TrendingUp, TrendingDown, Check, Coins, Wallet, History } from "lucide-react";
+import { TrendingUp, TrendingDown, Check, Coins, Wallet } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
+import OptimizedAvatar from "./OptimizedAvatar";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
@@ -64,13 +65,11 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
       <CardHeader className="pb-2 space-y-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-              <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(gamePlayer.player.name)}`}
-                alt={gamePlayer.player.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <OptimizedAvatar 
+              name={gamePlayer.player.name}
+              size="sm"
+              className="flex-shrink-0"
+            />
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-1.5 text-sm sm:text-base">
                 <span className="truncate">{gamePlayer.player.name}</span>

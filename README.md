@@ -24,7 +24,32 @@ npm run dev
 ```bash
 # Poker Settle (Poker Game Tracker)
 
-Track buy-ins, stacks, settlements and record hands for home poker games.
+Track buy-ins, stacks, settlements and record hands for home poker games with anime-themed customization.
+
+## Features
+
+- 🎮 **Game Management**: Track poker games, buy-ins, and settlements
+- 👥 **Player Tracking**: Monitor player statistics and performance
+- 🃏 **Hand Recording**: Record and replay poker hands
+- 🎨 **Anime Themes**: Choose from 5 anime-based themes with unique color schemes and player avatars
+  - One Piece (Ocean adventure vibes)
+  - Bleach (Soul Society style)
+  - Naruto (Hidden Leaf ninja)
+  - Dandadan (Supernatural retro)
+  - Default (Classic poker)
+- 📊 **Statistics**: Detailed analytics for players and games
+- 🌙 **Dark Mode**: Full dark mode support
+- 📱 **Responsive**: Works on desktop and mobile devices
+
+## Anime Theme System
+
+Each theme includes:
+- **Unique Color Scheme**: Custom colors for light and dark modes
+- **25 Character Avatars**: Each player gets a unique character avatar
+- **Automatic Assignment**: Characters are automatically assigned to players based on their name
+- **No Repetition**: Up to 25 players per theme with unique characters
+
+See [THEMES.md](THEMES.md) for detailed theme documentation.
 
 ## Local development
 

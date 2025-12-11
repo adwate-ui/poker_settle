@@ -14,7 +14,7 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAv
   const [imageError, setImageError] = useState(false);
   
   const sizeClasses = {
-    sm: 'w-8 h-8',
+    sm: 'w-9 h-9 sm:w-10 sm:h-10',
     md: 'w-12 h-12',
     lg: 'w-16 h-16',
   };

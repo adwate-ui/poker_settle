@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from '@/contexts/ThemeContext';
 import { themes, ThemeName } from '@/config/themes';
 import { toast } from 'sonner';
+import { getCharacterImage } from '@/config/characterImages';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -137,22 +138,46 @@ const Profile = () => {
                             ${changingTheme ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                           `}
                         >
-                          <div className="flex items-center justify-between">
-                            <div>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-lg">{theme.displayName}</h3>
                               <p className="text-sm text-muted-foreground mt-1">
                                 {theme.description}
                               </p>
                               {theme.characters.length > 0 && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  Characters: {theme.characters.slice(0, 4).join(', ')}
-                                  {theme.characters.length > 4 && ` +${theme.characters.length - 4} more`}
-                                </p>
+                                <>
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    {theme.characters.length} characters available
+                                  </p>
+                                  <div className="flex gap-1 mt-2 flex-wrap">
+                                    {theme.characters.slice(0, 6).map((charName) => {
+                                      const charImage = getCharacterImage(charName);
+                                      return charImage ? (
+                                        <img
+                                          key={charName}
+                                          src={charImage}
+                                          alt={charName}
+                                          title={charName}
+                                          className="w-8 h-8 rounded-full object-cover border-2 border-border"
+                                          onError={(e) => {
+                                            // Fallback to initials if image fails to load
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      ) : null;
+                                    })}
+                                    {theme.characters.length > 6 && (
+                                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-border">
+                                        +{theme.characters.length - 6}
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
                               )}
                             </div>
                             {isActive && (
-                              <div className="flex items-center gap-2 text-primary">
-                                <span className="text-sm font-medium">Active</span>
+                              <div className="flex items-center gap-2 text-primary flex-shrink-0 self-start">
+                                <span className="text-sm font-medium whitespace-nowrap">Active</span>
                               </div>
                             )}
                           </div>
