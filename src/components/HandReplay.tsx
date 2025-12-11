@@ -58,6 +58,7 @@ const HandReplay = ({
   const [animatingPlayerId, setAnimatingPlayerId] = useState<string | null>(null); // Track which player's chips are animating
   const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
+  const [winningAmount, setWinningAmount] = useState(0); // Store the winning pot amount
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
   const [playerStacks] = useState<Record<string, number>>({});
   const [potSizeHistory, setPotSizeHistory] = useState<Array<{ actionIndex: number; potSize: number; street: string }>>([]);
@@ -347,6 +348,9 @@ const HandReplay = ({
         // Show all players' hole cards when winner is decided
         setVisibleHoleCards(playerHoleCards);
         setTimeout(() => {
+          // Save winning amount before clearing pot
+          const totalWinnings = potSize + uncommittedPot;
+          setWinningAmount(totalWinnings);
           setShowWinner(true);
           // After a brief delay, move chips to winner and clear pot
           setTimeout(() => {
@@ -402,6 +406,9 @@ const HandReplay = ({
         if (nextIndex >= actions.length && winnerPlayerId) {
           setVisibleHoleCards(playerHoleCards); // Show all cards when winner declared
           setTimeout(() => {
+            // Save winning amount before clearing pot
+            const totalWinnings = potSize + uncommittedPot;
+            setWinningAmount(totalWinnings);
             setShowWinner(true);
             // Move chips to winner and clear pot
             setTimeout(() => {
@@ -437,6 +444,7 @@ const HandReplay = ({
       setAnimatingPlayerId(null);
       setShowHoleCards(false);
       setShowWinner(false);
+      setWinningAmount(0);
       // Preserve hero's cards during jump
       if (heroPlayerId && playerHoleCards[heroPlayerId]) {
         setVisibleHoleCards(prev => ({ ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] }));
@@ -470,6 +478,7 @@ const HandReplay = ({
     setAnimatingPlayerId(null);
     setShowHoleCards(false);
     setShowWinner(false);
+    setWinningAmount(0);
     setPotSizeHistory([]);
     // Initialize with hero's cards
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
@@ -625,7 +634,7 @@ const HandReplay = ({
               {winnerPlayerName} Wins!
             </div>
             <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
-              Winnings: Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+              Winnings: Rs. {winningAmount.toLocaleString('en-IN')}
             </div>
             <div className="text-sm text-muted-foreground mt-2 italic">
               Chips moved to winner
