@@ -14,6 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Filter constants
+const FILTER_ALL = "all";
+const FILTER_NONE = "";
+
 interface BuyInHistoryEntry {
   id: string;
   timestamp: string;
@@ -31,7 +35,7 @@ interface ConsolidatedBuyInLogsProps {
 export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsProps) => {
   const [history, setHistory] = useState<BuyInHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterName, setFilterName] = useState<string>("");
+  const [filterName, setFilterName] = useState<string>(FILTER_NONE);
 
   useEffect(() => {
     fetchAllBuyInHistory();
@@ -89,7 +93,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   };
 
   const filteredHistory = history.filter(entry => 
-    filterName === "" || filterName === "all" || entry.player_name === filterName
+    filterName === FILTER_NONE || filterName === FILTER_ALL || entry.player_name === filterName
   );
 
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
@@ -104,7 +108,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
               <SelectValue placeholder="Filter by player" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Players</SelectItem>
+              <SelectItem value={FILTER_ALL}>All Players</SelectItem>
               {uniquePlayerNames.map((name) => (
                 <SelectItem key={name} value={name}>
                   {name}

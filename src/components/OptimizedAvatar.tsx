@@ -20,13 +20,20 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
     lg: 'w-16 h-16',
   };
   
-  // For themed avatars, use player name as ID. For default theme, use dicebear
-  // If allPlayerNames is provided, use unique character assignment
-  const characterName = currentTheme !== 'default' 
-    ? (allPlayerNames && allPlayerNames.length > 0
-        ? getUniqueCharacterForPlayer(currentTheme, name, allPlayerNames)
-        : getCharacterForPlayer(currentTheme, name))
-    : null;
+  // Helper function to get character name based on context
+  const getCharacterName = (): string | null => {
+    if (currentTheme === 'default') return null;
+    
+    // If we have all player names, use unique assignment
+    if (allPlayerNames && allPlayerNames.length > 0) {
+      return getUniqueCharacterForPlayer(currentTheme, name, allPlayerNames);
+    }
+    
+    // Otherwise, use hash-based assignment
+    return getCharacterForPlayer(currentTheme, name);
+  };
+  
+  const characterName = getCharacterName();
   const characterImage = characterName ? getCharacterImage(characterName) : null;
   
   const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
