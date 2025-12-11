@@ -34,6 +34,12 @@ CREATE POLICY "Public can view players with valid share token"
       ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
       id
     )
+    OR
+    -- Or player is visible in game context (for showing names in game views)
+    can_view_player_in_game_context(
+      ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
+      id
+    )
   );
 
 -- Update game_players policy to include authenticated user access and player-specific links
@@ -68,7 +74,7 @@ CREATE POLICY "Public can view game_players with valid share token"
     )
   );
 
--- Update buy_in_history policy to include authenticated user access
+-- Update buy_in_history policy to include authenticated user access and player-specific links
 DROP POLICY IF EXISTS "Public can view buy-in history with valid share token" ON public.buy_in_history;
 CREATE POLICY "Public can view buy-in history with valid share token"
   ON public.buy_in_history
@@ -94,9 +100,20 @@ CREATE POLICY "Public can view buy-in history with valid share token"
           g.user_id
         )
     )
+    OR
+    -- Or via player-specific link for this player's buy-in history
+    EXISTS (
+      SELECT 1
+      FROM game_players gp
+      WHERE gp.id = buy_in_history.game_player_id
+        AND can_view_player(
+          ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
+          gp.player_id
+        )
+    )
   );
 
--- Update table_positions policy to include authenticated user access
+-- Update table_positions policy to include authenticated user access and player-specific links
 DROP POLICY IF EXISTS "Public can view table positions with valid share token" ON public.table_positions;
 CREATE POLICY "Public can view table positions with valid share token"
   ON public.table_positions
@@ -118,6 +135,17 @@ CREATE POLICY "Public can view table positions with valid share token"
         AND has_any_valid_link(
           ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
           games.user_id
+        )
+    )
+    OR
+    -- Or via player-specific link (for viewing table positions in player's game history)
+    EXISTS (
+      SELECT 1
+      FROM game_players gp
+      WHERE gp.game_id = table_positions.game_id
+        AND can_view_player(
+          ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
+          gp.player_id
         )
     )
   );
