@@ -132,8 +132,8 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         <div className="border rounded-lg overflow-hidden">
           <div className="max-h-[250px] overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-muted/50 z-10">
-                <TableRow>
+              <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur-sm z-10">
+                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
                   <TableHead className="font-semibold h-10">Player name</TableHead>
                   <TableHead className="font-semibold h-10">Incremental buy in</TableHead>
                   <TableHead className="font-semibold h-10">Updated total buy in</TableHead>
@@ -142,7 +142,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
               </TableHeader>
               <TableBody>
                 {filteredHistory.map((entry) => (
-                  <TableRow key={entry.id} className="h-10">
+                  <TableRow key={entry.id} className="h-10 hover:bg-primary/5">
                     <TableCell className="font-medium">{entry.player_name}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
