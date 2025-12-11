@@ -125,9 +125,9 @@ const TablePositionEditor = ({
           
           <div className="space-y-2">
             {Array.from({ length: unseatedCount }).map((_, index) => (
-              <div key={index} className="grid grid-cols-2 gap-2">
+              <div key={index} className="grid grid-cols-2 gap-2 items-start">
                 <Select value={selectedPlayers[index] || ''} onValueChange={(value) => handlePlayerSelect(index, value)}>
-                  <SelectTrigger className="bg-background">
+                  <SelectTrigger className="bg-background w-full min-w-0">
                     <SelectValue placeholder={`Player ${index + 1}`} />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
@@ -142,7 +142,7 @@ const TablePositionEditor = ({
                 </Select>
 
                 <Select value={selectedSeats[index] || ''} onValueChange={(value) => handleSeatSelect(index, value)}>
-                  <SelectTrigger className="bg-background">
+                  <SelectTrigger className="bg-background w-full min-w-0">
                     <SelectValue placeholder={`Seat ${index + 1}`} />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
