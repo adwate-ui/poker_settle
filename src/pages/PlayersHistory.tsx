@@ -216,7 +216,7 @@ const PlayersHistory = () => {
               key={player.id}
               className="cursor-pointer transition-colors hover:bg-muted/50"
             >
-              <CardContent className="p-5 sm:p-6">
+              <CardContent className="p-2 sm:p-3">
                 {/* Mobile Layout */}
                 <div className="md:hidden space-y-4">
                   <div className="flex items-center justify-between gap-3">
@@ -254,7 +254,7 @@ const PlayersHistory = () => {
                 </div>
 
                 {/* Desktop Layout */}
-                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm">
+                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm py-0.5">
                   <div 
                     className="flex items-center gap-4"
                     onClick={() => navigate(`/players/${player.id}`)}

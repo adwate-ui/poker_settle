@@ -348,23 +348,6 @@ const HandDetail = () => {
             </TabsContent>
             
             <TabsContent value="details" className="space-y-6">
-              {/* Community Cards */}
-              {communityCards && (
-                <>
-                  <div>
-                    <h3 className="font-semibold mb-3">Community Cards</h3>
-                    <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6">
-                      <div className="flex gap-2 justify-center flex-wrap">
-                        {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard key={idx} card={card} size="lg" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <Separator />
-                </>
-              )}
-
               {/* Hole Cards Section */}
               <div>
                 <h3 className="font-semibold mb-3">Hole Cards</h3>

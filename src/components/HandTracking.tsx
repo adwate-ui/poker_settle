@@ -161,6 +161,26 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const startNewHand = async () => {
     if (!buttonPlayerId) return;
 
+    // CRITICAL: Validate that seat positions are loaded
+    if (Object.keys(seatPositions).length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Table positions not loaded. Please refresh the page.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // CRITICAL: Validate that button player has a seat position
+    if (seatPositions[buttonPlayerId] === undefined) {
+      toast({
+        title: 'Error',
+        description: 'Button player does not have a seat position assigned. Please update table positions first.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     const nextHandNumber = await getNextHandNumber(game.id);
     
     // CRITICAL: Filter out dealt-out players and sort by seat position for consistent ordering
@@ -171,6 +191,26 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         const seatB = seatPositions[b.player_id] ?? 999;
         return seatA - seatB;
       });
+    
+    // CRITICAL: Validate that we have enough players
+    if (active.length < 2) {
+      toast({
+        title: 'Error',
+        description: 'At least 2 players are required to start a hand.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // CRITICAL: Validate that button player is in active players
+    if (!active.find(gp => gp.player_id === buttonPlayerId)) {
+      toast({
+        title: 'Error',
+        description: 'Button player is marked as dealt out. Please unmark them or select a different button player.',
+        variant: 'destructive'
+      });
+      return;
+    }
     
     // Calculate hero position using new utility with seat positions
     const heroPosition = heroPlayer?.player_id 
@@ -213,7 +253,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     setStreetPlayerBets(initialBets);
     
     // Create blind actions in memory (will be saved when hand is saved)
-    const sbPosition = getPositionForPlayer(active, buttonPlayerId, sbPlayer.player_id);
+    const sbPosition = getPositionForPlayer(active, buttonPlayerId, sbPlayer.player_id, seatPositions);
     const sbAction: PlayerAction = {
       id: `temp-sb-${Date.now()}`,
       hand_id: handObject.id,
@@ -228,7 +268,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
       created_at: new Date().toISOString()
     };
     
-    const bbPosition = getPositionForPlayer(active, buttonPlayerId, bbPlayer.player_id);
+    const bbPosition = getPositionForPlayer(active, buttonPlayerId, bbPlayer.player_id, seatPositions);
     const bbAction: PlayerAction = {
       id: `temp-bb-${Date.now()}`,
       hand_id: handObject.id,

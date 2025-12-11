@@ -352,7 +352,7 @@ const GamesHistory = () => {
                   className="cursor-pointer transition-colors hover:bg-muted/50"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <CardContent className="p-4">
+                  <CardContent className="p-2 sm:p-3">
                     {/* Mobile Layout */}
                     <div className="md:hidden space-y-3">
                       <div className="flex justify-between items-start">
@@ -399,7 +399,7 @@ const GamesHistory = () => {
                     </div>
 
                     {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm">
+                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm py-0.5">
                       <div className="font-medium">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </div>

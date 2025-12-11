@@ -26,6 +26,7 @@ interface PokerTableViewProps {
   showAllPlayerCards?: boolean; // Show cards for all players (before any action)
   muckedPlayers?: string[]; // Players who have mucked their cards
   playerStacks?: Record<string, number>; // Player chip stacks
+  showPotChips?: boolean; // Whether to show physical chips in pot (default true)
 }
 
 const PokerTableView = memo(({ 
@@ -47,7 +48,8 @@ const PokerTableView = memo(({
   activePlayerId,
   showAllPlayerCards = false,
   muckedPlayers = [],
-  playerStacks = {}
+  playerStacks = {},
+  showPotChips = true
 }: PokerTableViewProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -261,7 +263,7 @@ const PokerTableView = memo(({
                   <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold">
                     POT
                   </div>
-                  <ChipStack amount={potSize} size="md" showLabel={false} />
+                  {showPotChips && <ChipStack amount={potSize} size="md" showLabel={false} />}
                   <div className="text-sm font-bold text-foreground">
                     Rs. {potSize.toLocaleString('en-IN')}
                   </div>
