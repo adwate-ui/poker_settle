@@ -3,30 +3,6 @@
 -- 2. Player links: show game history + specific player history only
 -- 3. Authenticated users: can see all their own data through shared links
 
--- Update game_players RLS policy to allow player-specific links to view their own game history
-DROP POLICY IF EXISTS "Public can view game_players with valid share token" ON public.game_players;
-CREATE POLICY "Public can view game_players with valid share token"
-  ON public.game_players
-  FOR SELECT
-  USING (
-    -- Can view if accessing via any valid link (game or player) for game details
-    EXISTS (
-      SELECT 1
-      FROM games
-      WHERE games.id = game_players.game_id
-        AND has_any_valid_link(
-          ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
-          games.user_id
-        )
-    )
-    OR
-    -- Can view if accessing via player-specific link for this player's game history
-    can_view_player(
-      ((current_setting('request.headers'::text, true))::json ->> 'x-share-token'::text),
-      game_players.player_id
-    )
-  );
-
 -- Ensure authenticated users can always access their own data
 -- Update games policy to include authenticated user access
 DROP POLICY IF EXISTS "Public can view games with valid share token" ON public.games;
@@ -60,7 +36,7 @@ CREATE POLICY "Public can view players with valid share token"
     )
   );
 
--- Update game_players policy to include authenticated user access
+-- Update game_players policy to include authenticated user access and player-specific links
 DROP POLICY IF EXISTS "Public can view game_players with valid share token" ON public.game_players;
 CREATE POLICY "Public can view game_players with valid share token"
   ON public.game_players
