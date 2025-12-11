@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { CardBackSVG } from './PokerAssets';
+import { useCardBackDesign } from '@/hooks/useCardBackDesign';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -8,6 +9,8 @@ interface PokerCardProps {
 }
 
 const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) => {
+  const { design } = useCardBackDesign();
+  
   // Handle card back - use SVG for better quality
   if (!card || card === 'back' || card === '??') {
     const sizeMap = {
@@ -19,7 +22,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
     
     return (
       <div className={`${className} rounded-lg shadow-xl overflow-hidden`}>
-        <CardBackSVG {...sizeMap[size]} />
+        <CardBackSVG {...sizeMap[size]} design={design} />
       </div>
     );
   }

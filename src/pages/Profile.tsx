@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User, Database, Palette } from 'lucide-react';
+import { ArrowLeft, User, Database, Palette, Spade } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,12 +11,25 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { themes, ThemeName } from '@/config/themes';
 import { toast } from 'sonner';
 import { getCharacterImage } from '@/config/characterImages';
+import { useCardBackDesign, CardBackDesign } from '@/hooks/useCardBackDesign';
+import { CardBackSVG } from '@/components/PokerAssets';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { currentTheme, setTheme, loading: themeLoading } = useTheme();
+  const { design: cardBackDesign, setDesign: setCardBackDesign, loading: cardBackLoading } = useCardBackDesign();
   const [changingTheme, setChangingTheme] = useState(false);
+  const [changingCardBack, setChangingCardBack] = useState(false);
+
+  const cardBackDesigns: Array<{ id: CardBackDesign; name: string; description: string }> = [
+    { id: 'classic', name: 'Classic Green', description: 'Traditional poker table green with gold accents' },
+    { id: 'geometric', name: 'Geometric Blue', description: 'Modern sharp angles in royal blue' },
+    { id: 'diamond', name: 'Diamond Lattice', description: 'Elegant purple diamond pattern' },
+    { id: 'hexagon', name: 'Hexagon Teal', description: 'Contemporary hexagonal design in teal' },
+    { id: 'wave', name: 'Wave Crimson', description: 'Flowing wave pattern in deep red' },
+    { id: 'radial', name: 'Radial Orange', description: 'Radiating lines in vibrant orange' },
+  ];
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,6 +63,20 @@ const Profile = () => {
     }
   };
 
+  const handleCardBackChange = async (designId: CardBackDesign) => {
+    setChangingCardBack(true);
+    try {
+      await setCardBackDesign(designId);
+      const designInfo = cardBackDesigns.find(d => d.id === designId);
+      toast.success(`Card back changed to ${designInfo?.name || designId}`);
+    } catch (error) {
+      toast.error('Failed to change card back design');
+      console.error('Error changing card back:', error);
+    } finally {
+      setChangingCardBack(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -63,7 +90,7 @@ const Profile = () => {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Profile
@@ -71,6 +98,10 @@ const Profile = () => {
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
               Theme
+            </TabsTrigger>
+            <TabsTrigger value="cardback">
+              <Spade className="h-4 w-4 mr-2" />
+              Card Back
             </TabsTrigger>
             <TabsTrigger value="storage">
               <Database className="h-4 w-4 mr-2" />
@@ -180,6 +211,66 @@ const Profile = () => {
                                 <span className="text-sm font-medium whitespace-nowrap">Active</span>
                               </div>
                             )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cardback">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Spade className="h-6 w-6 text-primary" />
+                  <div>
+                    <CardTitle>Card Back Design</CardTitle>
+                    <CardDescription>Choose a card back design for your poker cards</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {cardBackLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {cardBackDesigns.map((designOption) => {
+                      const isActive = cardBackDesign === designOption.id;
+                      return (
+                        <button
+                          key={designOption.id}
+                          onClick={() => handleCardBackChange(designOption.id)}
+                          disabled={changingCardBack || isActive}
+                          className={`
+                            p-4 rounded-lg border-2 text-left transition-all
+                            ${isActive 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50 hover:bg-accent'
+                            }
+                            ${changingCardBack ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                          `}
+                        >
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="flex items-center justify-center">
+                              <CardBackSVG width={78} height={112} design={designOption.id} />
+                            </div>
+                            <div className="text-center w-full">
+                              <h3 className="font-semibold text-base">{designOption.name}</h3>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {designOption.description}
+                              </p>
+                              {isActive && (
+                                <div className="mt-2 text-xs text-primary font-medium">
+                                  ✓ Active
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </button>
                       );

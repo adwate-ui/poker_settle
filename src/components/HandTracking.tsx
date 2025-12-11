@@ -1377,16 +1377,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
 
 
-        {/* Action buttons - MORE COMPACT */}
+        {/* Action buttons - COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
               <Button 
                 onClick={() => recordAction('Call')} 
                 variant="outline"
-                size="default"
+                size="sm"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
+                className="h-8 text-xs font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
               >
                 {currentBet === 0 
                   ? '✓ Check' 
@@ -1396,17 +1396,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               <Button 
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
-                size="default"
+                size="sm"
                 disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-10 text-sm font-semibold hover:bg-red-600 transition-all"
+                className="h-8 text-xs font-semibold hover:bg-red-600 transition-all"
               >
                 ❌ Fold
               </Button>
             </div>
             
-            {/* Raise input - more compact */}
-            <div className="bg-muted/30 p-2 rounded-lg border border-border">
-              <div className="flex gap-2">
+            {/* Raise input - compact */}
+            <div className="bg-muted/30 p-1.5 rounded-lg border border-border">
+              <div className="flex gap-1.5">
                 <Input
                   type="number"
                   value={betAmount}
@@ -1414,13 +1414,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   placeholder={currentBet === 0 ? 'Bet amount...' : `Min: ${currentBet * 2}`}
                   min={currentBet === 0 ? game.big_blind : currentBet * 2}
                   disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  className="flex-1 h-10 text-sm"
+                  className="flex-1 h-8 text-xs"
                 />
                 <Button 
                   onClick={() => recordAction('Raise')} 
                   disabled={!betAmount || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                  size="default"
-                  className="h-10 px-4 font-semibold bg-orange-600 hover:bg-orange-700 text-sm"
+                  size="sm"
+                  className="h-8 px-3 font-semibold bg-orange-600 hover:bg-orange-700 text-xs"
                 >
                   {currentBet === 0 ? '💵 Bet' : '⬆️ Raise'}
                 </Button>
@@ -1428,28 +1428,30 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             </div>
           </div>
         ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
-          <div className="bg-muted/50 p-4 rounded-lg text-center border-2 border-dashed border-border">
-            <p className="text-sm text-muted-foreground font-medium">
+          <div className="bg-muted/50 p-3 rounded-lg text-center border-2 border-dashed border-border">
+            <p className="text-xs text-muted-foreground font-medium">
               🃏 This player has folded
             </p>
           </div>
         ) : null}
 
-        {/* Navigation buttons - more compact */}
-        <div className="flex gap-2">
+        {/* Navigation buttons - compact */}
+        <div className="flex gap-1.5">
           {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
             <Button 
               onClick={moveToPreviousStreet} 
-              className="flex-1 h-10 text-sm font-semibold" 
+              className="flex-1 h-8 text-xs font-semibold" 
               variant="outline"
+              size="sm"
             >
               ← Previous Street
             </Button>
           )}
           <Button 
             onClick={moveToNextStreet} 
-            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+            className="flex-1 h-8 text-xs font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
             variant="default"
+            size="sm"
             disabled={!canMoveToNextStreet()}
           >
             {stage === 'river' ? '🏆 Go to Showdown' : 'Next Street →'}
