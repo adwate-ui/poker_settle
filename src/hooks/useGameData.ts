@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory } from "@/types/poker";
+import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
@@ -17,7 +17,7 @@ export const useGameData = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -33,7 +33,7 @@ export const useGameData = () => {
       console.error("Error fetching players:", error);
       toast.error("Failed to fetch players");
     }
-  };
+  }, [user]);
 
   const createOrFindPlayer = async (name: string): Promise<Player> => {
     if (!user) throw new Error("User not authenticated");
@@ -229,7 +229,7 @@ export const useGameData = () => {
     await fetchPlayers();
   };
 
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -252,7 +252,7 @@ export const useGameData = () => {
       console.error("Error fetching games:", error);
       toast.error("Failed to fetch games");
     }
-  };
+  }, [user]);
 
   const addPlayerToGame = async (gameId: string, player: Player): Promise<GamePlayer> => {
     // Fetch game to get buy_in_amount
@@ -288,7 +288,7 @@ export const useGameData = () => {
     return gamePlayer as GamePlayer;
   };
 
-  const completeGame = async (gameId: string, settlements: any[] = []) => {
+  const completeGame = async (gameId: string, settlements: Settlement[] = []) => {
     // Fetch the latest game data to ensure we have all players including those added later
       const { data: gameData, error: gameError } = await supabase
         .from("games")
@@ -401,7 +401,7 @@ export const useGameData = () => {
         .from("table_positions")
         .insert([{
           game_id: gameId,
-          positions: positions as any,
+          positions: positions as unknown as Record<string, unknown>[],
           snapshot_timestamp: new Date().toISOString()
         }])
         .select()
@@ -411,7 +411,7 @@ export const useGameData = () => {
       
       return {
         ...data,
-        positions: data.positions as any as SeatPosition[]
+        positions: data.positions as unknown as SeatPosition[]
       };
     } catch (error) {
       console.error("Error saving table position:", error);
@@ -431,7 +431,7 @@ export const useGameData = () => {
       
       return (data || []).map(row => ({
         ...row,
-        positions: row.positions as any as SeatPosition[]
+        positions: row.positions as unknown as SeatPosition[]
       }));
     } catch (error) {
       console.error("Error fetching table positions:", error);
@@ -455,7 +455,7 @@ export const useGameData = () => {
       
       return {
         ...data,
-        positions: data.positions as any as SeatPosition[]
+        positions: data.positions as unknown as SeatPosition[]
       };
     } catch (error) {
       console.error("Error fetching current table position:", error);
@@ -485,7 +485,7 @@ export const useGameData = () => {
       fetchPlayers();
       fetchGames();
     }
-  }, [user]);
+  }, [user, fetchPlayers, fetchGames]);
 
   return {
     players,

@@ -108,7 +108,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         
         if (data && data.positions) {
           const positions: Record<string, number> = {};
-          (data.positions as any[]).forEach((pos: any) => {
+          const posArray = data.positions as unknown as SeatPosition[];
+          posArray.forEach((pos: SeatPosition) => {
             positions[pos.player_id] = pos.seat;
           });
           setSeatPositions(positions);
@@ -689,7 +690,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         title: 'Action Deleted',
         description: 'The action has been removed',
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to delete action',

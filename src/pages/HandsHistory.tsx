@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
 import MemoizedHandCard from '@/components/MemoizedHandCard';
-import { HOLE_CARD_FILTER_OPTIONS } from '@/utils/holeCardFilter';
+import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
 
 const HandsHistory = () => {
   const navigate = useNavigate();
@@ -193,7 +193,7 @@ const HandsHistory = () => {
               <Select
                 value={filters.result || 'all'}
                 onValueChange={(value) =>
-                  updateFilters({ result: value as any })
+                  updateFilters({ result: value as 'win' | 'loss' | 'split' | 'all' })
                 }
               >
                 <SelectTrigger>
@@ -213,7 +213,7 @@ const HandsHistory = () => {
               <Select
                 value={filters.showdown || 'all'}
                 onValueChange={(value) =>
-                  updateFilters({ showdown: value as any })
+                  updateFilters({ showdown: value as 'yes' | 'no' | 'all' })
                 }
               >
                 <SelectTrigger>
@@ -294,7 +294,7 @@ const HandsHistory = () => {
               <Select
                 value={filters.heroHoleCards || 'all'}
                 onValueChange={(value) =>
-                  updateFilters({ heroHoleCards: value === 'all' ? undefined : value as any })
+                  updateFilters({ heroHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
                 }
               >
                 <SelectTrigger>
@@ -315,7 +315,7 @@ const HandsHistory = () => {
               <Select
                 value={filters.villainHoleCards || 'all'}
                 onValueChange={(value) =>
-                  updateFilters({ villainHoleCards: value === 'all' ? undefined : value as any })
+                  updateFilters({ villainHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
                 }
               >
                 <SelectTrigger>

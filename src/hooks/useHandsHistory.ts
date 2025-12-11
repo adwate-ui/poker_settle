@@ -5,6 +5,14 @@ import { useToast } from '@/hooks/use-toast';
 import { HoleCardFilterType, matchesHoleCardFilter } from '@/utils/holeCardFilter';
 import { debounce } from '@/utils/performance';
 
+interface PlayerData {
+  name?: string;
+}
+
+interface ActionWithPlayer extends PlayerAction {
+  player?: PlayerData;
+}
+
 export interface HandWithDetails extends PokerHand {
   button_player_name: string;
   winner_player_name: string | null;
@@ -111,10 +119,11 @@ export const useHandsHistory = () => {
 
       setHands(prev => shouldAppend ? [...prev, ...enrichedHands] : enrichedHands);
       setPage(pageNum);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Loading Hands',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
     } finally {
@@ -132,7 +141,7 @@ export const useHandsHistory = () => {
   // Initial fetch
   useEffect(() => {
     fetchHands(1, false);
-  }, []);
+  }, [fetchHands]);
 
   // Apply filters with memoization
   const filteredHands = useMemo(() => {
@@ -173,7 +182,7 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => {
         // Check if any action has both the villain name AND position
         return h.actions.some(action => {
-          const playerData = (action as any).player;
+          const playerData = (action as ActionWithPlayer).player;
           return playerData?.name === filters.villainName && action.position === filters.villainPosition;
         });
       });
@@ -181,7 +190,7 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => {
         // Check if any action in the hand is from the villain (any position)
         return h.actions.some(action => {
-          const playerData = (action as any).player;
+          const playerData = (action as ActionWithPlayer).player;
           return playerData?.name === filters.villainName;
         });
       });
@@ -197,7 +206,7 @@ export const useHandsHistory = () => {
       filtered = filtered.filter(h => {
         // Find hero's hole cards (player named Adwate)
         const heroAction = h.actions.find(action => {
-          const playerData = (action as any).player;
+          const playerData = (action as ActionWithPlayer).player;
           return playerData?.name?.toLowerCase() === 'adwate' && action.hole_cards;
         });
         return heroAction?.hole_cards && matchesHoleCardFilter(heroAction.hole_cards, filters.heroHoleCards!);
@@ -210,14 +219,14 @@ export const useHandsHistory = () => {
         // If villain name is specified, check only that villain's hole cards
         if (filters.villainName) {
           const villainAction = h.actions.find(action => {
-            const playerData = (action as any).player;
+            const playerData = (action as ActionWithPlayer).player;
             return playerData?.name === filters.villainName && action.hole_cards;
           });
           return villainAction?.hole_cards && matchesHoleCardFilter(villainAction.hole_cards, filters.villainHoleCards!);
         } else {
           // Check if any non-Adwate player matches the filter
           return h.actions.some(action => {
-            const playerData = (action as any).player;
+            const playerData = (action as ActionWithPlayer).player;
             const isNotHero = playerData?.name?.toLowerCase() !== 'adwate';
             return isNotHero && action.hole_cards && matchesHoleCardFilter(action.hole_cards, filters.villainHoleCards!);
           });
@@ -271,7 +280,7 @@ export const useHandsHistory = () => {
     const names = new Set<string>();
     hands.forEach(hand => {
       hand.actions.forEach(action => {
-        const playerData = (action as any).player;
+        const playerData = (action as ActionWithPlayer).player;
         if (playerData?.name) names.add(playerData.name);
       });
     });

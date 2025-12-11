@@ -91,3 +91,14 @@ export interface BuyInHistory {
   total_buy_ins_after: number;
   created_at: string;
 }
+
+// Database record types (for any unknown fields from DB)
+export type DatabaseRecord = Record<string, unknown>;
+
+// Error response type
+export interface DatabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+}

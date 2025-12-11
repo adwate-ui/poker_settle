@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PokerHand, PlayerAction, StreetCard, Player } from '@/types/poker';
+import { PokerHand, PlayerAction, StreetCard, Player, SeatPosition } from '@/types/poker';
 import { useToast } from '@/hooks/use-toast';
 
 export const useHandTracking = () => {
@@ -12,7 +12,7 @@ export const useHandTracking = () => {
     buttonPlayerId: string,
     handNumber: number,
     heroPosition: string,
-    positions?: any
+    positions?: SeatPosition[]
   ): Promise<PokerHand | null> => {
     try {
       setLoading(true);
@@ -38,10 +38,11 @@ export const useHandTracking = () => {
       });
       
       return data as PokerHand;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
       return null;
@@ -95,10 +96,11 @@ export const useHandTracking = () => {
 
       if (error) throw error;
       return data as PlayerAction;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Recording Action',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
       return null;
@@ -123,10 +125,11 @@ export const useHandTracking = () => {
 
       if (error) throw error;
       return data as StreetCard;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Recording Cards',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
       return null;
@@ -141,10 +144,11 @@ export const useHandTracking = () => {
         .eq('id', handId);
 
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Updating Pot',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
     }
@@ -161,10 +165,11 @@ export const useHandTracking = () => {
         .eq('id', handId);
 
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Updating Stage',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
     }
@@ -180,7 +185,7 @@ export const useHandTracking = () => {
     try {
       const isSplit = winnerPlayerIds.length > 1;
       
-      const updateData: any = {
+      const updateData: Partial<PokerHand> & { is_split?: boolean } = {
         winner_player_id: winnerPlayerIds[0] || null,
         winner_player_ids: winnerPlayerIds,
         pot_size: potSize,
@@ -190,7 +195,7 @@ export const useHandTracking = () => {
       
       // Only update final_stage if provided
       if (finalStage) {
-        updateData.final_stage = finalStage;
+        updateData.final_stage = finalStage as PokerHand['final_stage'];
       }
       
       const { error } = await supabase
@@ -206,10 +211,11 @@ export const useHandTracking = () => {
           ? `Chopped pot between ${winnerPlayerIds.length} players`
           : 'Hand has been recorded successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error Completing Hand',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
     }
@@ -248,10 +254,11 @@ export const useHandTracking = () => {
       });
       
       return true;
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: 'Error',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       });
       return false;
