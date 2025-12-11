@@ -86,7 +86,13 @@ const CardSelector = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        // When dialog closes, reset temp selection to prevent recording unconfirmed changes
+        setTempSelection(selectedCards);
+      }
+      setOpen(isOpen);
+    }}>
       {trigger && <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>}
@@ -120,7 +126,10 @@ const CardSelector = ({
               Selected Cards
             </div>
             {tempSelection.map((card, idx) => (
-              <PokerCard key={idx} card={card} size="lg" />
+              <div key={idx}>
+                <PokerCard card={card} size="md" className="hidden sm:block" />
+                <PokerCard card={card} size="sm" className="sm:hidden" />
+              </div>
             ))}
           </div>
         )}
@@ -152,7 +161,8 @@ const CardSelector = ({
                         !isUsed && !isKnownHole && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
-                      <PokerCard card={card} size="sm" />
+                      <PokerCard card={card} size="xs" className="sm:hidden" />
+                      <PokerCard card={card} size="sm" className="hidden sm:block" />
                       {isUsed && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
                           <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">

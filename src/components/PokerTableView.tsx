@@ -363,10 +363,10 @@ const PokerTableView = memo(({
                       )}
                     </div>
                     
-                    {/* Player hole cards - positioned to the side for better visibility */}
+                    {/* Player hole cards - positioned to the side for better visibility, hidden on mobile */}
                     {(hasKnownCards || shouldShowCards) && (
                       <div 
-                        className={`absolute flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
+                        className={`absolute hidden sm:flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
                           isFolded ? 'opacity-30 grayscale' : 'opacity-100'
                         } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{

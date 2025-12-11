@@ -1232,26 +1232,18 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </CardContent>
         </Card>
 
-        {/* Hole Card Input Dialog - during showdown use visual card selector */}
-        <Dialog open={showHoleCardInput} onOpenChange={setShowHoleCardInput}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Select Hole Cards for{' '}
-                {remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name}
-              </DialogTitle>
-            </DialogHeader>
-            <CardSelector
-              onSelect={(cards) => {
-                handleHoleCardSubmit(cards);
-                setShowHoleCardInput(false);
-              }}
-              maxCards={2}
-              usedCards={getUsedCards()}
-              label="Select 2 Hole Cards"
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Hole Card Selector - Direct card selector without intermediate dialog */}
+        <CardSelector
+          open={showHoleCardInput}
+          onOpenChange={setShowHoleCardInput}
+          onSelect={(cards) => {
+            handleHoleCardSubmit(cards);
+            setShowHoleCardInput(false);
+          }}
+          maxCards={2}
+          usedCards={getUsedCards()}
+          label={`Select Hole Cards for ${remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name || 'Player'}`}
+        />
       </>
     );
   }
@@ -1423,8 +1415,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                     const rounded = Math.round(numValue / smallBlind) * smallBlind;
                     setBetAmount(rounded.toString());
                   }}
-                  placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet + (game.big_blind || 100)}`}
-                  min={currentBet === 0 ? game.big_blind : currentBet + (game.big_blind || 100)}
+                  placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}`}
+                  min={currentBet === 0 ? game.big_blind : currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}
                   step={game.small_blind || 50}
                   disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                   className="flex-1 h-10 text-sm"
