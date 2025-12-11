@@ -77,8 +77,11 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
             </div>
           </div>
           
-          {/* Right: Buy-in History Button */}
+          {/* Right: Buy-ins count and Buy-in History Button */}
           <div className="flex items-center gap-1 flex-shrink-0">
+            <Badge variant="secondary" className="text-xs font-semibold">
+              {gamePlayer.buy_ins} buy-in{gamePlayer.buy_ins !== 1 ? 's' : ''}
+            </Badge>
             <BuyInHistoryDialog 
               gamePlayerId={gamePlayer.id}
               playerName={gamePlayer.player.name}
@@ -147,8 +150,8 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         {/* Summary Row - Clearly labeled */}
         <div className="pt-2 border-t border-border space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground font-medium">Buy-ins:</span>
-            <span className="font-semibold">{gamePlayer.buy_ins} × Rs. {formatIndianNumber(buyInAmount)}</span>
+            <span className="text-muted-foreground font-medium">Total Buy-ins:</span>
+            <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground font-medium">Net P&L:</span>

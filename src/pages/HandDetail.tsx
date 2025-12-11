@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2, ArrowLeft, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PokerCard from '@/components/PokerCard';
-import CardNotationInput from '@/components/CardNotationInput';
+import CardSelector from '@/components/CardSelector';
 import HandReplay from '@/components/HandReplay';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatPosition } from '@/types/poker';
@@ -199,6 +198,44 @@ const HandDetail = () => {
       fetchHandDetail();
     }
   };
+
+  // Get all used cards (community cards + known hole cards)
+  const getUsedCards = useCallback(() => {
+    if (!hand) return [];
+    const cards: string[] = [];
+    
+    // Add community cards
+    if (communityCards) {
+      const communityCardArray = communityCards.match(/.{1,2}/g) || [];
+      cards.push(...communityCardArray);
+    }
+    
+    // Add known hole cards from all players
+    getPlayersInHand().forEach(player => {
+      if (player.holeCards) {
+        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
+        cards.push(...holeCardArray);
+      }
+    });
+    
+    return cards;
+  }, [hand, communityCards]);
+
+  // Get known hole cards for greying out
+  const getKnownHoleCards = useCallback(() => {
+    if (!hand) return [];
+    const cards: string[] = [];
+    
+    getPlayersInHand().forEach(player => {
+      // Exclude the currently selected player's hole cards
+      if (player.holeCards && (!selectedPlayerForHole || player.playerId !== selectedPlayerForHole.playerId)) {
+        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
+        cards.push(...holeCardArray);
+      }
+    });
+    
+    return cards;
+  }, [hand, selectedPlayerForHole]);
 
   // Get unique players who participated in the hand
   const getPlayersInHand = () => {
@@ -529,23 +566,22 @@ const HandDetail = () => {
         </CardContent>
       </Card>
 
-      {/* Hole Card Input Dialog */}
-      <Dialog open={showHoleCardInput} onOpenChange={setShowHoleCardInput}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Enter Hole Cards for{' '}
-              {selectedPlayerForHole && hand?.player_names[selectedPlayerForHole.playerId]}
-            </DialogTitle>
-          </DialogHeader>
-          <CardNotationInput
-            label="Hole Cards"
-            expectedCards={2}
-            onSubmit={handleHoleCardSubmit}
-            placeholder="AhKd"
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Hole Card Selector - Direct Card Grid */}
+      <CardSelector
+        open={showHoleCardInput && !!selectedPlayerForHole}
+        onOpenChange={(isOpen) => {
+          setShowHoleCardInput(isOpen);
+          if (!isOpen) {
+            setSelectedPlayerForHole(null);
+          }
+        }}
+        maxCards={2}
+        usedCards={getUsedCards()}
+        knownHoleCards={getKnownHoleCards()}
+        selectedCards={[]}
+        onSelect={handleHoleCardSubmit}
+        label={selectedPlayerForHole && hand ? `Select Hole Cards for ${hand.player_names[selectedPlayerForHole.playerId]}` : 'Select Hole Cards'}
+      />
     </div>
   );
 };

@@ -25,43 +25,41 @@ const ActionButtons = memo(({
   const isCheck = callAmount === 0;
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex gap-1.5">
       <Button
         variant="destructive"
         onClick={() => onAction('Fold')}
         disabled={disabled}
-        className="w-full"
+        className="flex-1 h-9 px-2 text-xs"
       >
-        <X className="h-4 w-4 mr-2" />
+        <X className="h-4 w-4 mr-1" />
         Fold
       </Button>
       <Button
         variant="default"
         onClick={() => onAction('Call')}
         disabled={disabled}
-        className="w-full"
+        className="flex-1 h-9 px-2 text-xs"
       >
-        {isCheck ? 'Check' : `Call Rs. ${callAmount.toLocaleString('en-IN')}`}
+        {isCheck ? 'Check' : `Call ${callAmount.toLocaleString('en-IN')}`}
       </Button>
-      <div className="col-span-2 flex gap-2">
-        <Input
-          type="number"
-          placeholder="Bet/Raise amount"
-          value={betAmount}
-          onChange={(e) => setBetAmount(e.target.value)}
-          disabled={disabled}
-          className="flex-1"
-        />
-        <Button
-          variant="default"
-          onClick={() => onAction('Raise')}
-          disabled={disabled || !betAmount}
-          className="bg-gradient-poker"
-        >
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Raise
-        </Button>
-      </div>
+      <Input
+        type="number"
+        placeholder="Raise amt"
+        value={betAmount}
+        onChange={(e) => setBetAmount(e.target.value)}
+        disabled={disabled}
+        className="flex-1 h-9 text-xs"
+      />
+      <Button
+        variant="default"
+        onClick={() => onAction('Raise')}
+        disabled={disabled || !betAmount}
+        className="bg-gradient-poker flex-1 h-9 px-2 text-xs"
+      >
+        <TrendingUp className="h-4 w-4 mr-1" />
+        Raise
+      </Button>
     </div>
   );
 });

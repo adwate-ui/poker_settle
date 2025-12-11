@@ -125,7 +125,7 @@ const NewGame = () => {
         player_id: player.id,
         buy_ins: 1,
         final_stack: 0,
-        net_amount: 0,
+        net_amount: -buyInAmount, // Final stack (0) - total buy-in (1 * buyInAmount) = -buyInAmount
       }));
 
       const { error: playersError } = await supabase
