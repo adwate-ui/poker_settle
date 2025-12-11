@@ -13,6 +13,7 @@ interface CardSelectorProps {
   selectedCards?: string[];
   label?: string;
   trigger?: React.ReactNode;
+  knownHoleCards?: string[]; // Add prop for known hole cards to grey out
 }
 
 const CardSelector = ({
@@ -21,7 +22,8 @@ const CardSelector = ({
   usedCards = [],
   selectedCards = [],
   label = "Select Cards",
-  trigger
+  trigger,
+  knownHoleCards = []
 }: CardSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [tempSelection, setTempSelection] = useState<string[]>(selectedCards);
@@ -39,7 +41,7 @@ const CardSelector = ({
   );
 
   const handleCardClick = (card: string) => {
-    if (usedCards.includes(card)) return;
+    if (usedCards.includes(card) || knownHoleCards.includes(card)) return;
     
     if (tempSelection.includes(card)) {
       setTempSelection(tempSelection.filter(c => c !== card));
@@ -108,12 +110,12 @@ const CardSelector = ({
 
         {/* Selected cards preview */}
         {tempSelection.length > 0 && (
-          <div className="flex gap-2 p-6 bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border-2 border-green-700/40 justify-center flex-wrap">
-            <div className="text-sm font-semibold text-green-400 w-full text-center mb-2">
+          <div className="flex gap-1 p-3 bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border-2 border-green-700/40 justify-center flex-wrap">
+            <div className="text-sm font-semibold text-green-400 w-full text-center mb-1">
               Selected Cards
             </div>
             {tempSelection.map((card, idx) => (
-              <PokerCard key={idx} card={card} size="md" />
+              <PokerCard key={idx} card={card} size="lg" />
             ))}
           </div>
         )}
@@ -126,29 +128,37 @@ const CardSelector = ({
                 <span className={cn("text-2xl", suit.color)}>{suit.symbol}</span>
                 <h3 className="font-semibold text-base">{suit.name}</h3>
               </div>
-              <div className="grid grid-cols-13 gap-1.5">
+              <div className="grid grid-cols-13 gap-0.5">
                 {ranks.map(rank => {
                   const card = `${rank}${suit.code}`;
                   const isUsed = usedCards.includes(card);
+                  const isKnownHole = knownHoleCards.includes(card);
                   const isSelected = tempSelection.includes(card);
                   
                   return (
                     <button
                       key={card}
                       onClick={() => handleCardClick(card)}
-                      disabled={isUsed}
+                      disabled={isUsed || isKnownHole}
                       className={cn(
                         "relative aspect-[5/7] transition-all duration-200 rounded",
-                        isUsed && "opacity-20 cursor-not-allowed grayscale",
+                        (isUsed || isKnownHole) && "opacity-30 cursor-not-allowed grayscale",
                         isSelected && "ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg",
-                        !isUsed && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
+                        !isUsed && !isKnownHole && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
-                      <PokerCard card={card} size="xs" />
+                      <PokerCard card={card} size="sm" />
                       {isUsed && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
                           <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             USED
+                          </div>
+                        </div>
+                      )}
+                      {isKnownHole && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                          <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                            HOLE
                           </div>
                         </div>
                       )}

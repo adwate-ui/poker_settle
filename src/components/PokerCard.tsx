@@ -51,17 +51,17 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const rankSizes = {
-    xs: 'text-[10px]',
-    sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-2xl',
-  };
-
-  const suitSizes = {
     xs: 'text-sm',
     sm: 'text-xl',
     md: 'text-3xl',
-    lg: 'text-5xl',
+    lg: 'text-4xl',
+  };
+
+  const suitSizes = {
+    xs: 'text-xl',
+    sm: 'text-3xl',
+    md: 'text-5xl',
+    lg: 'text-7xl',
   };
 
   const cornerSizes = {
