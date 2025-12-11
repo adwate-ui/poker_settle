@@ -75,14 +75,11 @@ const CardSelector = ({
       .map(idx => allCards[idx])
       .join('');
     
-    // Call onSelect first, then close dialog
-    // This prevents the reset in onOpenChange from interfering
+    // Call onSelect first
     onSelect(sortedCards);
-    // Small delay to ensure state updates complete before closing
-    setTimeout(() => {
-      setOpen(false);
-      setIsConfirming(false);
-    }, 0);
+    // Then close dialog - we use setIsConfirming to prevent reset in onOpenChange
+    setOpen(false);
+    setIsConfirming(false);
   };
 
   const handleCancel = () => {
