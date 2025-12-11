@@ -54,6 +54,10 @@ const PokerTableView = memo(({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Table layout constants
+  const TABLE_CENTER_X = 50; // Center X position as percentage
+  const TABLE_CENTER_Y = 50; // Center Y position as percentage
+
   // Always spread players evenly around the table regardless of seat numbers
   const numPlayers = positions.length;
   const numSeats = Math.max(4, totalSeats || numPlayers); // Use totalSeats if provided, otherwise numPlayers
@@ -66,8 +70,8 @@ const PokerTableView = memo(({
     const radiusY = 32; // Vertical radius (smaller for more rectangular, like real poker table)
     
     return {
-      x: 50 + radiusX * Math.cos(radians),
-      y: 50 + radiusY * Math.sin(radians),
+      x: TABLE_CENTER_X + radiusX * Math.cos(radians),
+      y: TABLE_CENTER_Y + radiusY * Math.sin(radians),
     };
   }, [numPlayers]);
 
@@ -321,26 +325,28 @@ const PokerTableView = memo(({
                   {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
                   <div className="relative flex flex-col items-center gap-1">
                     {/* Player avatar - central element */}
-                    <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
-                      isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
-                      isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                    }`}>
-                      <OptimizedAvatar 
-                        name={position.player_name}
-                        size="md"
-                        className="w-full h-full"
-                      />
-                      {/* Button indicator overlay */}
+                    <div className="relative">
+                      <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
+                        isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
+                        isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
+                      }`}>
+                        <OptimizedAvatar 
+                          name={position.player_name}
+                          size="md"
+                          className="w-full h-full"
+                        />
+                      </div>
+                      {/* Button indicator overlay - positioned as sibling for proper layering */}
                       {isButton && (
-                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg z-10">
+                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg z-20">
                           D
                         </div>
                       )}
                     </div>
                     
                     {/* Player name and stack - directly below avatar */}
-                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[60px]">
-                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate max-w-[80px]">
+                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 w-20">
+                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate w-full text-center">
                         {position.player_name}
                       </span>
                       {playerStacks[position.player_id] !== undefined && (
@@ -355,7 +361,7 @@ const PokerTableView = memo(({
                       <div 
                         className={`absolute flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
                           isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                        } ${pos.x > 50 ? 'right-full mr-1' : 'left-full ml-1'}`}
+                        } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{
                           top: '50%',
                           transform: 'translateY(-50%)',
