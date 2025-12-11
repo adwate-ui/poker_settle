@@ -325,7 +325,7 @@ const PokerTableView = memo(({
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
                   enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
-                  isFolded ? 'opacity-40 grayscale' : ''
+                  isFolded ? 'opacity-50 grayscale' : ''
                 }`}
                 style={{
                   left: `${pos.x}%`,
@@ -341,13 +341,13 @@ const PokerTableView = memo(({
                   )}
                   
                   {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
-                  <div className="relative flex flex-col items-center gap-1">
+                  <div className="relative flex flex-col items-center gap-1" style={{ zIndex: 10 }}>
                     {/* Player avatar - central element */}
                     <div className="relative">
                       <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                         isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                         isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                      } ${isFolded ? 'opacity-40 grayscale' : ''}`}>
+                      }`}>
                         <OptimizedAvatar 
                           name={position.player_name}
                           size="md"
@@ -378,12 +378,13 @@ const PokerTableView = memo(({
                     {/* Player hole cards - positioned to the side for better visibility, hidden on mobile */}
                     {(hasKnownCards || shouldShowCards) && (
                       <div 
-                        className={`absolute hidden sm:flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
+                        className={`absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out ${
                           isFolded ? 'opacity-30 grayscale' : 'opacity-100'
                         } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{
                           top: '50%',
                           transform: 'translateY(-50%)',
+                          zIndex: 5, // Lower z-index to prevent overlay on other players
                         }}
                       >
                         {hasKnownCards ? (

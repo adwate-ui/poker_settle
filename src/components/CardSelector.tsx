@@ -31,6 +31,7 @@ const CardSelector = ({
 }: CardSelectorProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [tempSelection, setTempSelection] = useState<string[]>(selectedCards);
+  const [isConfirming, setIsConfirming] = useState(false); // Track if we're in the middle of confirming
 
   // Use controlled or internal open state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -40,6 +41,7 @@ const CardSelector = ({
   useEffect(() => {
     if (open) {
       setTempSelection(selectedCards);
+      setIsConfirming(false); // Reset confirming flag when dialog opens
     }
   }, [open, selectedCards]);
 
@@ -66,14 +68,21 @@ const CardSelector = ({
   };
 
   const handleConfirm = () => {
+    setIsConfirming(true); // Mark that we're confirming
     const sortedCards = tempSelection
       .map(card => allCards.indexOf(card))
       .sort((a, b) => a - b)
       .map(idx => allCards[idx])
       .join('');
     
+    // Call onSelect first, then close dialog
+    // This prevents the reset in onOpenChange from interfering
     onSelect(sortedCards);
-    setOpen(false);
+    // Small delay to ensure state updates complete before closing
+    setTimeout(() => {
+      setOpen(false);
+      setIsConfirming(false);
+    }, 0);
   };
 
   const handleCancel = () => {
@@ -87,8 +96,8 @@ const CardSelector = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        // When dialog closes, reset temp selection to prevent recording unconfirmed changes
+      if (!isOpen && !isConfirming) {
+        // When dialog closes (not via confirm), reset temp selection to prevent recording unconfirmed changes
         setTempSelection(selectedCards);
       }
       setOpen(isOpen);
