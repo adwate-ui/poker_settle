@@ -26,8 +26,9 @@ const TablePositionEditor = ({
   onCancel,
 }: TablePositionEditorProps) => {
   const [positions, setPositions] = useState<SeatPosition[]>(currentPositions);
-  const [selectedPlayer, setSelectedPlayer] = useState<string>("");
-  const [selectedSeat, setSelectedSeat] = useState<string>("");
+  // Arrays to hold multiple player/seat selections
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   // Get available players (not already seated)
   const seatedPlayerIds = positions.map(p => p.player_id);
@@ -37,23 +38,51 @@ const TablePositionEditor = ({
   const allSeats = Array.from({ length: players.length }, (_, i) => i + 1);
   const occupiedSeats = positions.map(p => p.seat);
   const availableSeats = allSeats.filter(s => !occupiedSeats.includes(s));
+  
+  // Number of unseated players
+  const unseatedCount = availablePlayers.length;
 
-  const handleAddPlayer = () => {
-    if (!selectedPlayer || !selectedSeat) return;
-
-    const player = players.find(p => p.id === selectedPlayer);
-    if (!player) return;
-
-    const newPosition: SeatPosition = {
-      seat: parseInt(selectedSeat),
-      player_id: player.id,
-      player_name: player.name,
-    };
-
-    setPositions([...positions, newPosition].sort((a, b) => a.seat - b.seat));
-    setSelectedPlayer("");
-    setSelectedSeat("");
+  const handlePlayerSelect = (index: number, playerId: string) => {
+    const newSelection = [...selectedPlayers];
+    newSelection[index] = playerId;
+    setSelectedPlayers(newSelection);
   };
+
+  const handleSeatSelect = (index: number, seat: string) => {
+    const newSelection = [...selectedSeats];
+    newSelection[index] = seat;
+    setSelectedSeats(newSelection);
+  };
+
+  const handleAddPlayers = () => {
+    const newPositions: SeatPosition[] = [];
+    
+    for (let i = 0; i < unseatedCount; i++) {
+      const playerId = selectedPlayers[i];
+      const seatStr = selectedSeats[i];
+      
+      // Both player and seat must be selected for this pair
+      if (playerId && seatStr) {
+        const player = players.find(p => p.id === playerId);
+        if (player) {
+          newPositions.push({
+            seat: parseInt(seatStr),
+            player_id: player.id,
+            player_name: player.name,
+          });
+        }
+      }
+    }
+    
+    if (newPositions.length > 0) {
+      setPositions([...positions, ...newPositions].sort((a, b) => a.seat - b.seat));
+      setSelectedPlayers([]);
+      setSelectedSeats([]);
+    }
+  };
+
+  // Count valid pairs (both player and seat selected)
+  const validPairCount = selectedPlayers.filter((p, i) => p && selectedSeats[i]).length;
 
   const handleRemovePlayer = (playerId: string) => {
     setPositions(positions.filter(p => p.player_id !== playerId));
@@ -92,41 +121,50 @@ const TablePositionEditor = ({
       {/* Add Player Section */}
       {availablePlayers.length > 0 && availableSeats.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-medium">Add Players to Table</h4>
+          <h4 className="font-medium">Add Players to Table ({unseatedCount} unseated)</h4>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Select player" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                {availablePlayers.map((player) => (
-                  <SelectItem key={player.id} value={player.id}>
-                    {player.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-2">
+            {Array.from({ length: unseatedCount }).map((_, index) => (
+              <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Select value={selectedPlayers[index] || ''} onValueChange={(value) => handlePlayerSelect(index, value)}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder={`Select player ${index + 1}`} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {availablePlayers
+                      .filter(p => !selectedPlayers.includes(p.id) || selectedPlayers[index] === p.id)
+                      .map((player) => (
+                        <SelectItem key={player.id} value={player.id}>
+                          {player.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
 
-            <Select value={selectedSeat} onValueChange={setSelectedSeat}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Select seat" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                {availableSeats.map((seat) => (
-                  <SelectItem key={seat} value={seat.toString()}>
-                    Seat {seat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <Select value={selectedSeats[index] || ''} onValueChange={(value) => handleSeatSelect(index, value)}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder={`Select seat ${index + 1}`} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {availableSeats
+                      .filter(s => !selectedSeats.includes(s.toString()) || selectedSeats[index] === s.toString())
+                      .map((seat) => (
+                        <SelectItem key={seat} value={seat.toString()}>
+                          Seat {seat}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
           </div>
+          
           <Button
-            onClick={handleAddPlayer}
-            disabled={!selectedPlayer || !selectedSeat}
+            onClick={handleAddPlayers}
+            disabled={validPairCount === 0}
             className="w-full sm:w-auto"
           >
-            Add to Table
+            Add {validPairCount || 0} Player(s) to Table
           </Button>
         </div>
       )}

@@ -379,25 +379,25 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="pt-3 pb-3">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div className="space-y-0.5 p-2 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-[10px] text-muted-foreground font-medium">Total Buy-ins</p>
-                <p className="text-base font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Buy-ins</p>
+                <p className="text-sm font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
               </div>
               <div className="space-y-0.5 p-2 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-[10px] text-muted-foreground font-medium">Total Final Stack</p>
-                <p className="text-base font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Final Stack</p>
+                <p className="text-sm font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
                 {!isStackBalanced && (
                   <p className="text-[9px] text-destructive font-semibold">Must equal buy-ins</p>
                 )}
               </div>
               <div className="space-y-0.5 p-2 rounded-lg bg-green-500/10 border border-green-500/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Total Winnings</p>
-                <p className="text-base font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Winnings</p>
+                <p className="text-sm font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
               </div>
               <div className="space-y-0.5 p-2 rounded-lg bg-red-500/10 border border-red-500/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Total Losses</p>
-                <p className="text-base font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Losses</p>
+                <p className="text-sm font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
               </div>
             </div>
               </CardContent>
