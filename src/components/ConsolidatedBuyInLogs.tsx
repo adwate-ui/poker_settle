@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -89,114 +88,98 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
 
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
 
-  // Calculate dynamic height based on number of entries
-  const ROW_HEIGHT = 44; // Approximate height per table row in pixels
-  const HEADER_HEIGHT = 40; // Table header height
-  const MIN_HEIGHT = 132; // Minimum height (shows ~2 rows)
-  const MAX_HEIGHT = 240; // Current maximum height
-  
-  const calculateHeight = () => {
-    const numEntries = filteredHistory.length;
-    if (numEntries === 0) return MIN_HEIGHT;
-    
-    const calculatedHeight = HEADER_HEIGHT + (numEntries * ROW_HEIGHT);
-    return Math.min(Math.max(calculatedHeight, MIN_HEIGHT), MAX_HEIGHT);
-  };
-
-  const dynamicHeight = calculateHeight();
-
   return (
-    <Card className="border-primary/20">
-      <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-        <CardTitle className="flex items-center gap-2 text-primary">
-          <History className="w-5 h-5" />
-          Buy-in History
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4">
-        {!loading && history.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-muted-foreground">Filter by player:</span>
-              {filterName && (
-                <Badge
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-destructive/20 transition-colors text-xs"
-                  onClick={() => setFilterName("")}
-                  role="button"
-                  aria-label="Clear filter"
-                >
-                  Clear filter ✕
-                </Badge>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {uniquePlayerNames.map((name) => (
-                <Badge
-                  key={name}
-                  variant={filterName === name ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary/20 transition-colors px-3 py-1.5 text-sm font-medium"
-                  onClick={() => setFilterName(filterName === name ? "" : name)}
-                >
-                  {name}
-                </Badge>
-              ))}
-            </div>
+    <>
+      {/* Heading */}
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <History className="w-5 h-5" />
+        Buy-in logs
+      </h3>
+
+      {/* Player Name Filter */}
+      {!loading && history.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-medium text-muted-foreground">Filter by player:</span>
+            {filterName && (
+              <Badge
+                variant="secondary"
+                className="cursor-pointer hover:bg-destructive/20 transition-colors text-xs"
+                onClick={() => setFilterName("")}
+                role="button"
+                aria-label="Clear filter"
+              >
+                Clear filter ✕
+              </Badge>
+            )}
           </div>
-        )}
-        
-        {loading ? (
-          <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="flex flex-wrap gap-2">
+            {uniquePlayerNames.map((name) => (
+              <Badge
+                key={name}
+                variant={filterName === name ? "default" : "outline"}
+                className="cursor-pointer hover:bg-primary/20 transition-colors px-3 py-1.5 text-sm font-medium"
+                onClick={() => setFilterName(filterName === name ? "" : name)}
+              >
+                {name}
+              </Badge>
+            ))}
           </div>
-        ) : history.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No buy-in changes recorded
-          </div>
-        ) : filteredHistory.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No buy-in changes found for "{filterName}"
-          </div>
-        ) : (
-          <ScrollArea style={{ height: `${dynamicHeight}px` }}>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-border/50">
-                  <TableHead className="w-[30%] font-semibold">Player</TableHead>
-                  <TableHead className="w-[25%] text-center font-semibold">Incremental Buy-in</TableHead>
-                  <TableHead className="w-[30%] font-semibold">Time</TableHead>
-                  <TableHead className="w-[15%] text-right font-semibold">New Total</TableHead>
+        </div>
+      )}
+      
+      {/* Table */}
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : history.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No buy-in changes recorded
+        </div>
+      ) : filteredHistory.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No buy-in changes found for "{filterName}"
+        </div>
+      ) : (
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold h-12">Player name</TableHead>
+                <TableHead className="font-semibold h-12">Incremental buy in</TableHead>
+                <TableHead className="font-semibold h-12">Updated total buy in</TableHead>
+                <TableHead className="font-semibold h-12">Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredHistory.map((entry) => (
+                <TableRow key={entry.id} className="h-12">
+                  <TableCell className="font-medium">{entry.player_name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {entry.buy_ins_added > 0 ? (
+                        <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      )}
+                      <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                        {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-semibold">
+                    {entry.total_buy_ins_after}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHistory.map((entry) => (
-                  <TableRow key={entry.id} className="h-12 hover:bg-accent/10 transition-colors">
-                    <TableCell className="font-medium py-3">{entry.player_name}</TableCell>
-                    <TableCell className="text-center py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        {entry.buy_ins_added > 0 ? (
-                          <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        )}
-                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
-                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground py-3">
-                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold py-3">
-                      {entry.total_buy_ins_after}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
-        )}
-      </CardContent>
-    </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </>
   );
 };

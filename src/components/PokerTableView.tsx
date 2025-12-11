@@ -258,7 +258,7 @@ const PokerTableView = memo(({
               {/* Pot display with chip visualization */}
               {potSize > 0 && (
                 <div className={`flex flex-col items-center gap-1 transition-all duration-500 ${
-                  animateChipsToPot ? 'scale-110' : 'scale-100'
+                  animateChipsToPot ? 'scale-110' : animateChipsToWinner ? 'opacity-0 scale-0' : 'scale-100'
                 }`}>
                   <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold">
                     POT
@@ -386,6 +386,21 @@ const PokerTableView = memo(({
                       }}
                     >
                       <ChipStack amount={playerBet} size="sm" showLabel={true} />
+                    </div>
+                  )}
+                  
+                  {/* Winner chip animation - shows pot chips coming to winner */}
+                  {isWinner && (
+                    <div 
+                      className="absolute z-20 animate-in fade-in zoom-in duration-500"
+                      style={{
+                        top: pos.y > 50 ? '-60px' : '80px',
+                        left: pos.x > 50 ? '-50px' : '50px',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 bg-amber-500/20 px-2 py-1 rounded-lg border-2 border-amber-400 animate-pulse">
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🏆 Winner!</span>
+                      </div>
                     </div>
                   )}
                 </div>
