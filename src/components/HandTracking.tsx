@@ -1422,10 +1422,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                       return;
                     }
                     const numValue = parseFloat(value);
-                    if (!isNaN(numValue) && numValue > 0) {
-                      const smallBlind = game.small_blind || 50;
-                      const rounded = Math.round(numValue / smallBlind) * smallBlind;
-                      setBetAmount(rounded.toString());
+                    if (!isNaN(numValue)) {
+                      if (numValue <= 0) {
+                        // Clear invalid values
+                        setBetAmount('');
+                      } else {
+                        const smallBlind = game.small_blind || 50;
+                        const rounded = Math.round(numValue / smallBlind) * smallBlind;
+                        setBetAmount(rounded.toString());
+                      }
+                    } else {
+                      setBetAmount('');
                     }
                   }}
                   placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}`}
