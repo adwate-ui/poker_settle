@@ -1102,43 +1102,55 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                     key={gp.player_id}
                     className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-1">
                       <span className="font-medium">{gp.player.name}</span>
                       {gp.player_id === heroPlayer?.player_id && (
                         <Badge variant="secondary" className="text-xs">Hero</Badge>
                       )}
                     </div>
                     
-                    {playerHoleCards[gp.player_id] ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1">
-                          {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                            <PokerCard key={idx} card={card} size="sm" />
-                          ))}
-                        </div>
+                    <div className="flex items-center gap-2">
+                      {playerHoleCards[gp.player_id] ? (
+                        <>
+                          <div className="flex gap-1">
+                            {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                              <PokerCard key={idx} card={card} size="sm" />
+                            ))}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPlayerForHole(gp.player_id);
+                              setShowHoleCardInput(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          {!winnerResult && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => finishHand([gp.player_id], 'showdown')}
+                              className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
+                            >
+                              👑 Winner
+                            </Button>
+                          )}
+                        </>
+                      ) : (
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => {
                             setSelectedPlayerForHole(gp.player_id);
                             setShowHoleCardInput(true);
                           }}
                         >
-                          Edit
+                          Add Hole Cards
                         </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedPlayerForHole(gp.player_id);
-                          setShowHoleCardInput(true);
-                        }}
-                      >
-                        Add Hole Cards
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1215,38 +1227,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                     Confirm & Complete Hand
                   </Button>
                 </div>
-              </div>
-            )}
-
-            {/* Manual Winner Selection (if auto-detection not possible) - Only Players with Hole Cards */}
-            {!winnerResult && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground text-center">
-                  {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length === 0
-                    ? 'Add hole cards for automatic winner detection, or select winner manually after adding hole cards:'
-                    : 'Add all remaining players\' hole cards for automatic detection, or select winner manually:'}
-                </p>
-                {remainingPlayers.filter(gp => playerHoleCards[gp.player_id]).length > 0 ? (
-                  remainingPlayers.filter(gp => playerHoleCards[gp.player_id]).map((gp) => (
-                    <Button
-                      key={gp.player_id}
-                      onClick={() => finishHand([gp.player_id], 'showdown')}
-                      variant="outline"
-                      className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold">{gp.player.name}</span>
-                        {gp.player_id === heroPlayer?.player_id && (
-                          <Badge variant="secondary">Hero</Badge>
-                        )}
-                      </div>
-                    </Button>
-                  ))
-                ) : (
-                  <div className="text-center text-sm text-muted-foreground p-4 bg-muted/50 rounded-lg">
-                    No players with hole cards added yet. Add hole cards above to select a winner.
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
