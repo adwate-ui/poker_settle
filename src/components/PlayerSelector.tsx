@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Player } from '@/types/poker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,6 +75,13 @@ export const PlayerSelector = ({
     setSearchQuery('');
     setOpen(false);
   };
+
+  // Reset search query when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery('');
+    }
+  }, [open]);
 
   return (
     <div className="space-y-3">
@@ -210,7 +217,7 @@ export const PlayerSelector = ({
                       Search Results ({availablePlayers.length})
                     </h4>
                   )}
-                  <ScrollArea className="h-[300px] pr-4">
+                  <ScrollArea key={`scroll-${open}`} className="h-[300px] pr-4">
                     <div className="grid gap-2">
                       {availablePlayers.map((player) => (
                         <PlayerListItem
