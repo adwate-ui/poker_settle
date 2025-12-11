@@ -10,7 +10,7 @@ import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle, TrendingUp, Trophy } from 'lucide-react';
+import { Play, CheckCircle, TrendingUp, Trophy, X } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
@@ -829,10 +829,31 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 </div>
               )}
               {!buttonPlayerId && (
-                <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/30 text-center">
-                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                    👆 Click on a player to set as button
-                  </p>
+                <div className="space-y-3">
+                  <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/30 text-center">
+                    <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mb-3">
+                      👆 Click on a player at the table or select from the list below
+                    </p>
+                  </div>
+                  
+                  {/* Alternative: List view for button selection */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {game.game_players
+                      .filter(gp => !dealtOutPlayers.includes(gp.player_id))
+                      .map(gp => (
+                        <Button
+                          key={gp.player_id}
+                          variant="outline"
+                          className="h-auto py-3 flex flex-col items-center gap-1"
+                          onClick={() => setButtonPlayerId(gp.player_id)}
+                        >
+                          <div className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center">
+                            <span className="text-xs font-bold">D</span>
+                          </div>
+                          <span className="text-xs font-medium">{gp.player.name}</span>
+                        </Button>
+                      ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -852,32 +873,59 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </CardContent>
         </Card>
 
-        {/* Player Action Dialog */}
+        {/* Player Action Dialog - Mobile-friendly with improved UI */}
         <Dialog open={showPlayerActionDialog} onOpenChange={setShowPlayerActionDialog}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold">
+                    {selectedPlayer?.player.name.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
                 {selectedPlayer?.player.name}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 pt-4">
               <Button 
                 onClick={handleSetAsButton} 
-                className="w-full"
+                className="w-full h-14 text-base"
                 variant={buttonPlayerId === selectedPlayerId ? "default" : "outline"}
               >
-                {buttonPlayerId === selectedPlayerId ? '✓ Is Button' : 'Set as Button'}
+                {buttonPlayerId === selectedPlayerId ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Currently Button
+                  </>
+                ) : (
+                  <>
+                    <div className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center mr-2">
+                      <span className="text-xs font-bold">D</span>
+                    </div>
+                    Set as Button (Dealer)
+                  </>
+                )}
               </Button>
               <Button 
                 onClick={handleToggleDealtOut} 
-                className="w-full"
+                className="w-full h-14 text-base"
                 variant={dealtOutPlayers.includes(selectedPlayerId) ? "default" : "outline"}
               >
-                {dealtOutPlayers.includes(selectedPlayerId) ? '✓ Dealt Out' : 'Mark as Dealt Out'}
+                {dealtOutPlayers.includes(selectedPlayerId) ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Not Dealt In
+                  </>
+                ) : (
+                  <>
+                    <X className="w-5 h-5 mr-2" />
+                    Mark as Not Playing
+                  </>
+                )}
               </Button>
               <Button 
                 onClick={() => setShowPlayerActionDialog(false)} 
-                className="w-full"
+                className="w-full h-12"
                 variant="ghost"
               >
                 Cancel
