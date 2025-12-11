@@ -42,6 +42,9 @@ const CardSelector = ({
     if (open) {
       setTempSelection(selectedCards);
       setIsConfirming(false); // Reset confirming flag when dialog opens
+    } else {
+      // Reset confirming flag when dialog closes
+      setIsConfirming(false);
     }
   }, [open, selectedCards]);
 
@@ -77,8 +80,7 @@ const CardSelector = ({
     
     // Call onSelect which will handle closing the dialog
     onSelect(sortedCards);
-    // Reset confirming flag after the callback
-    setTimeout(() => setIsConfirming(false), 0);
+    // isConfirming will be reset by useEffect when dialog closes
   };
 
   const handleCancel = () => {
