@@ -89,29 +89,9 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
 
   return (
     <>
-      {/* Heading */}
-      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <History className="w-5 h-5" />
-        Buy-in logs
-      </h3>
-
       {/* Player Name Filter */}
       {!loading && history.length > 0 && (
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Filter by player:</span>
-            {filterName && (
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-destructive/20 transition-colors text-xs"
-                onClick={() => setFilterName("")}
-                role="button"
-                aria-label="Clear filter"
-              >
-                Clear filter ✕
-              </Badge>
-            )}
-          </div>
           <div className="flex flex-wrap gap-2">
             {uniquePlayerNames.map((name) => (
               <Badge
@@ -123,11 +103,22 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                 {name}
               </Badge>
             ))}
+            {filterName && (
+              <Badge
+                variant="secondary"
+                className="cursor-pointer hover:bg-destructive/20 transition-colors text-sm"
+                onClick={() => setFilterName("")}
+                role="button"
+                aria-label="Clear filter"
+              >
+                Clear ✕
+              </Badge>
+            )}
           </div>
         </div>
       )}
       
-      {/* Table */}
+      {/* Table with fixed height and scroll */}
       {loading ? (
         <div className="flex justify-center items-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -142,41 +133,43 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold h-12">Player name</TableHead>
-                <TableHead className="font-semibold h-12">Incremental buy in</TableHead>
-                <TableHead className="font-semibold h-12">Updated total buy in</TableHead>
-                <TableHead className="font-semibold h-12">Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredHistory.map((entry) => (
-                <TableRow key={entry.id} className="h-12">
-                  <TableCell className="font-medium">{entry.player_name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {entry.buy_ins_added > 0 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      )}
-                      <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                        {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold">
-                    {entry.total_buy_ins_after}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                  </TableCell>
+          <div className="max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted/50 z-10">
+                <TableRow>
+                  <TableHead className="font-semibold h-12">Player name</TableHead>
+                  <TableHead className="font-semibold h-12">Incremental buy in</TableHead>
+                  <TableHead className="font-semibold h-12">Updated total buy in</TableHead>
+                  <TableHead className="font-semibold h-12">Time</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredHistory.map((entry) => (
+                  <TableRow key={entry.id} className="h-12">
+                    <TableCell className="font-medium">{entry.player_name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {entry.buy_ins_added > 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        )}
+                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {entry.total_buy_ins_after}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </>

@@ -90,6 +90,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [isActionHistoryOpen, setIsActionHistoryOpen] = useState(true); // State for collapsible action history
   const [showCardSelector, setShowCardSelector] = useState(false); // State for card selector dialog
   const [cardSelectorType, setCardSelectorType] = useState<'flop' | 'turn' | 'river'>('flop'); // Which street cards to select
+  const [cardsJustAdded, setCardsJustAdded] = useState(false); // Track if community cards were just added
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -424,6 +425,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
       setStreetActions(prev => [...prev, action]);
       setAllHandActions(prev => [...prev, action]); // Add to all actions
+      
+      // Reset cards just added flag after first action
+      setCardsJustAdded(false);
 
       // Process action using state machine
       const stateUpdates = processAction(
@@ -499,6 +503,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
     const nextStage = getNextStage(stage);
     
+    // Reset cards just added flag when moving to next street
+    setCardsJustAdded(false);
+    
     // Use state machine to reset for new street (using active players only)
     const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
     const stateUpdates = resetForNewStreet(
@@ -553,12 +560,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     if (stage === 'flop') {
       setFlopCards(cards);
       setShowCardSelector(false); // Close the selector after selecting
+      setCardsJustAdded(true); // Mark cards as just added
     } else if (stage === 'turn') {
       setTurnCard(cards);
       setShowCardSelector(false); // Close the selector after selecting
+      setCardsJustAdded(true); // Mark cards as just added
     } else if (stage === 'river') {
       setRiverCard(cards);
       setShowCardSelector(false); // Close the selector after selecting
+      setCardsJustAdded(true); // Mark cards as just added
     }
   };
 
@@ -1248,21 +1258,23 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </CardContent>
         </Card>
 
-        {/* Hole Card Input Dialog */}
+        {/* Hole Card Input Dialog - during showdown use visual card selector */}
         <Dialog open={showHoleCardInput} onOpenChange={setShowHoleCardInput}>
-          <DialogContent>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                Enter Hole Cards for{' '}
+                Select Hole Cards for{' '}
                 {remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name}
               </DialogTitle>
             </DialogHeader>
-            <CardNotationInput
-              label="Hole Cards"
-              expectedCards={2}
-              onSubmit={handleHoleCardSubmit}
-              placeholder="AhKd"
+            <CardSelector
+              onSelect={(cards) => {
+                handleHoleCardSubmit(cards);
+                setShowHoleCardInput(false);
+              }}
+              maxCards={2}
               usedCards={getUsedCards()}
+              label="Select 2 Hole Cards"
             />
           </DialogContent>
         </Dialog>
@@ -1323,8 +1335,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </div>
         )}
 
-        {/* Card edit buttons - shown after cards are selected to allow editing until betting starts */}
-        {stage === 'flop' && flopCards && canMoveToNextStreet() && (
+        {/* Card edit buttons - shown only for just-added community cards until next betting action */}
+        {stage === 'flop' && flopCards && cardsJustAdded && (
           <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold">Flop:</span>
@@ -1339,7 +1351,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             </Button>
           </div>
         )}
-        {stage === 'turn' && turnCard && canMoveToNextStreet() && (
+        {stage === 'turn' && turnCard && cardsJustAdded && (
           <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold">Turn:</span>
@@ -1350,7 +1362,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             </Button>
           </div>
         )}
-        {stage === 'river' && riverCard && canMoveToNextStreet() && (
+        {stage === 'river' && riverCard && cardsJustAdded && (
           <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold">River:</span>

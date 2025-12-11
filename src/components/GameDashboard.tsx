@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 
 interface GameDashboardProps {
   game: Game;
@@ -48,6 +49,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   
   // Collapsible sections state
   const [gameStatsOpen, setGameStatsOpen] = useState(true);
+  const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
   const [tablePositionOpen, setTablePositionOpen] = useState(true);
   const [playersOpen, setPlayersOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
@@ -472,6 +474,30 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CardContent>
           </Card>
         )}
+
+        {/* Buy-in Logs */}
+        <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
+                <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                      <DollarSign className="w-5 h-5" />
+                    </div>
+                    Buy-in Logs
+                  </div>
+                  {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </CardTitle>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-4">
+                <ConsolidatedBuyInLogs gameId={game.id} />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Players Section */}
         <Collapsible open={playersOpen} onOpenChange={setPlayersOpen}>
