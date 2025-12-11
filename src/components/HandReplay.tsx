@@ -55,6 +55,7 @@ const HandReplay = ({
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
   const [muckedPlayers, setMuckedPlayers] = useState<string[]>([]);
   const [animateChipsToPot, setAnimateChipsToPot] = useState(false);
+  const [animatingPlayerId, setAnimatingPlayerId] = useState<string | null>(null); // Track which player's chips are animating
   const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
@@ -280,10 +281,12 @@ const HandReplay = ({
       
       // Animate folded player's street bets moving to pot
       if (foldedPlayerBet > 0 && !skipAnimation) {
-        // Temporarily trigger chip animation (will be handled by visual effect)
+        // Trigger chip animation for this specific player
+        setAnimatingPlayerId(action.player_id);
         setAnimateChipsToPot(true);
         setTimeout(() => {
           setAnimateChipsToPot(false);
+          setAnimatingPlayerId(null);
         }, 500);
       }
       
@@ -433,6 +436,7 @@ const HandReplay = ({
       setFoldedPlayers([]);
       setMuckedPlayers([]);
       setAnimateChipsToPot(false);
+      setAnimatingPlayerId(null);
       setShowHoleCards(false);
       setShowWinner(false);
       // Reset to show only hero's cards
@@ -467,6 +471,7 @@ const HandReplay = ({
     setFoldedPlayers([]);
     setMuckedPlayers([]);
     setAnimateChipsToPot(false);
+    setAnimatingPlayerId(null);
     setShowHoleCards(false);
     setShowWinner(false);
     setPotSizeHistory([]);
@@ -499,6 +504,7 @@ const HandReplay = ({
           foldedPlayers={foldedPlayers}
           muckedPlayers={muckedPlayers}
           animateChipsToPot={animateChipsToPot}
+          animatingPlayerId={animatingPlayerId}
           playerHoleCards={visibleHoleCards}
           animateChipsToWinner={showWinner ? winnerPlayerId : null}
           communityCards={communityCards}
