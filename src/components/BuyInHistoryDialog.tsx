@@ -47,7 +47,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="w-5 h-5" />
-            Buy-in History - {playerName}
+            {playerName}
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[400px]">
@@ -60,31 +60,38 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-border/50">
-                  <TableHead className="w-[40%] text-center font-semibold">Incremental Buy-in</TableHead>
-                  <TableHead className="w-[40%] font-semibold">Time</TableHead>
-                  <TableHead className="w-[20%] text-right font-semibold">New Total</TableHead>
+                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm text-center">Incremental Buy-in</TableHead>
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm">Time</TableHead>
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm text-right">New Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {history.map((entry) => (
-                  <TableRow key={entry.id} className="h-12 hover:bg-accent/10 transition-colors">
-                    <TableCell className="text-center py-3">
+                {history.map((entry, index) => (
+                  <TableRow 
+                    key={entry.id} 
+                    className={`transition-colors ${
+                      index % 2 === 0 
+                        ? "bg-secondary/5 hover:bg-secondary/20" 
+                        : "hover:bg-primary/10"
+                    }`}
+                  >
+                    <TableCell className="text-center py-2">
                       <div className="flex items-center justify-center gap-2">
                         {entry.buy_ins_added > 0 ? (
                           <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         ) : (
                           <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         )}
-                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
+                        <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground py-3">
+                    <TableCell className="text-sm text-muted-foreground py-2">
                       {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                     </TableCell>
-                    <TableCell className="text-right font-semibold py-3">
+                    <TableCell className="text-right font-semibold py-2 text-sm">
                       {entry.total_buy_ins_after}
                     </TableCell>
                   </TableRow>
