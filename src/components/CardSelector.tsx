@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PokerCard from './PokerCard';
@@ -117,22 +117,10 @@ const CardSelector = ({
               )}
             </div>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select {maxCards} cards from the grid below. Already used cards are greyed out.
+          </DialogDescription>
         </DialogHeader>
-
-        {/* Selected cards preview */}
-        {tempSelection.length > 0 && (
-          <div className="flex gap-1 p-3 bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border-2 border-green-700/40 justify-center flex-wrap">
-            <div className="text-sm font-semibold text-green-400 w-full text-center mb-1">
-              Selected Cards
-            </div>
-            {tempSelection.map((card, idx) => (
-              <div key={idx}>
-                <PokerCard card={card} size="md" className="hidden sm:block" />
-                <PokerCard card={card} size="sm" className="sm:hidden" />
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Card grid by suit - improved layout */}
         <div className="space-y-4">
