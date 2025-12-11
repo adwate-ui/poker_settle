@@ -4,6 +4,7 @@ import { getPositionForPlayer } from "@/utils/pokerPositions";
 import PokerCard from "./PokerCard";
 import ChipStack from "./ChipStack";
 import { GamePlayer } from "@/types/poker";
+import OptimizedAvatar from "./OptimizedAvatar";
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -343,10 +344,10 @@ const PokerTableView = memo(({
                       isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                       isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
                     }`}>
-                      <img 
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(position.player_name)}`}
-                        alt={position.player_name}
-                        className="w-full h-full object-cover"
+                      <OptimizedAvatar 
+                        name={position.player_name}
+                        size="md"
+                        className="w-full h-full"
                       />
                     </div>
                     {/* Button indicator */}

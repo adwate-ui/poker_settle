@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 
 interface GameDashboardProps {
   game: Game;
@@ -531,13 +532,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                               >
                                 <div className="flex items-center gap-3">
                                   {/* Avatar */}
-                                  <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex-shrink-0">
-                                    <img
-                                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                                      alt={player.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
+                                  <OptimizedAvatar 
+                                    name={player.name}
+                                    size="sm"
+                                    className="flex-shrink-0"
+                                  />
 
                                   {/* Info */}
                                   <div className="flex-1 min-w-0">

@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { CardBackSVG } from './PokerAssets';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -7,18 +8,18 @@ interface PokerCardProps {
 }
 
 const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) => {
-  // Handle card back - solid green design
+  // Handle card back - use SVG for better quality
   if (!card || card === 'back' || card === '??') {
-    const sizes = {
-      xs: 'w-[40px] h-[58px]',
-      sm: 'w-[58px] h-[84px]',
-      md: 'w-[78px] h-[112px]',
-      lg: 'w-[94px] h-[136px]',
+    const sizeMap = {
+      xs: { width: 40, height: 58 },
+      sm: { width: 58, height: 84 },
+      md: { width: 78, height: 112 },
+      lg: { width: 94, height: 136 },
     };
     
     return (
-      <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative bg-green-700 border-2 border-green-800`}>
-        {/* Solid green card back */}
+      <div className={`${className} rounded-lg shadow-xl overflow-hidden`}>
+        <CardBackSVG {...sizeMap[size]} />
       </div>
     );
   }
