@@ -53,7 +53,7 @@ interface Game {
   id: string;
   date: string;
   buy_in_amount: number;
-  settlements: any;
+  settlements: Settlement[];
 }
 
 interface TablePosition {
@@ -201,7 +201,7 @@ export const GameDetailView = ({
 
   const sortedGamePlayers = useMemo(() => {
     return [...gamePlayers].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number, bVal: number;
       
       switch (sortField) {
         case "name": {
@@ -222,6 +222,8 @@ export const GameDetailView = ({
           aVal = a.net_amount ?? 0;
           bVal = b.net_amount ?? 0;
           break;
+        default:
+          return 0;
       }
       
       if (aVal === undefined || bVal === undefined) return 0;

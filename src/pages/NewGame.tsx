@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,9 +35,9 @@ const NewGame = () => {
       fetchPlayers();
       checkActiveGame();
     }
-  }, [user]);
+  }, [user, fetchPlayers, checkActiveGame]);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     const { data, error } = await supabase
       .from("players")
       .select("*")
@@ -49,9 +49,9 @@ const NewGame = () => {
       return;
     }
     setPlayers(data || []);
-  };
+  }, [user]);
 
-  const checkActiveGame = async () => {
+  const checkActiveGame = useCallback(async () => {
     const { data, error } = await supabase
       .from("games")
       .select(`
@@ -70,7 +70,7 @@ const NewGame = () => {
     if (!error && data) {
       setActiveGame(data as Game);
     }
-  };
+  }, [user]);
 
   const addNewPlayer = async () => {
     if (!newPlayerName.trim()) {

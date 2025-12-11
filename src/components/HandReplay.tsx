@@ -63,12 +63,16 @@ const HandReplay = ({
   const playerHoleCards: Record<string, string> = {};
   let heroPlayerId: string | null = null;
   
+  interface ActionWithHero extends HandAction {
+    is_hero?: boolean;
+  }
+  
   actions.forEach(action => {
     if (action.hole_cards && !playerHoleCards[action.player_id]) {
       playerHoleCards[action.player_id] = action.hole_cards;
     }
     // Identify hero from is_hero field in actions
-    if ((action as any).is_hero && !heroPlayerId) {
+    if ((action as ActionWithHero).is_hero && !heroPlayerId) {
       heroPlayerId = action.player_id;
     }
   });
@@ -171,7 +175,7 @@ const HandReplay = ({
           localCurrentStreet.value = action.street_type;
         }
         setStreetPlayerBets({});
-        setCurrentStreet(action.street_type as any);
+        setCurrentStreet(action.street_type as 'Preflop' | 'Flop' | 'Turn' | 'River');
         
         // Add community cards for the new street (check if cards from this street are already shown)
         if (streetCard) {
@@ -193,7 +197,7 @@ const HandReplay = ({
         setTimeout(() => {
           // Clear street bets display (already added to pot during actions)
           setStreetPlayerBets({});
-          setCurrentStreet(action.street_type as any);
+          setCurrentStreet(action.street_type as 'Preflop' | 'Flop' | 'Turn' | 'River');
           
           // Add community cards for the new street
           if (streetCard) {

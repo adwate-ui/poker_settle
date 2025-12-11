@@ -53,7 +53,20 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
 
       if (error) throw error;
 
-      const formattedHistory: BuyInHistoryEntry[] = (data || []).map((entry: any) => ({
+      interface BuyInData {
+        id: string;
+        timestamp: string;
+        buy_ins_added: number;
+        total_buy_ins_after: number;
+        game_player_id: string;
+        game_players: {
+          players: {
+            name: string;
+          };
+        };
+      }
+
+      const formattedHistory: BuyInHistoryEntry[] = (data || []).map((entry: BuyInData) => ({
         id: entry.id,
         timestamp: entry.timestamp,
         buy_ins_added: entry.buy_ins_added,

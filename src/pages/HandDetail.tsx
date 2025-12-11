@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import HandReplay from '@/components/HandReplay';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SeatPosition } from '@/types/poker';
 
 interface HandDetail {
   id: string;
@@ -58,11 +59,13 @@ const HandDetail = () => {
   const [seatPositions, setSeatPositions] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    fetchHandDetail();
-    loadTablePositions();
-  }, [handId]);
+    if (handId) {
+      fetchHandDetail();
+      loadTablePositions();
+    }
+  }, [handId, fetchHandDetail, loadTablePositions]);
 
-  const loadTablePositions = async () => {
+  const loadTablePositions = useCallback(async () => {
     if (!handId) return;
     
     try {
@@ -77,7 +80,8 @@ const HandDetail = () => {
       
       if (handData && handData.positions) {
         const positions: Record<string, number> = {};
-        (handData.positions as any[]).forEach((pos: any) => {
+        const posArray = handData.positions as unknown as SeatPosition[];
+        posArray.forEach((pos: SeatPosition) => {
           positions[pos.player_id] = pos.seat;
         });
         setSeatPositions(positions);
@@ -85,9 +89,9 @@ const HandDetail = () => {
     } catch (error) {
       console.error('Error loading table positions:', error);
     }
-  };
+  }, [handId]);
 
-  const fetchHandDetail = async () => {
+  const fetchHandDetail = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -174,7 +178,7 @@ const HandDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
