@@ -328,20 +328,22 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-dark p-3 sm:p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-3 sm:p-4">
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <Button 
               onClick={onBackToSetup}
-              className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+              className="bg-primary hover:bg-primary/90 shadow-lg w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               <span className="hidden xs:inline">Back to Setup</span>
               <span className="xs:hidden">Back</span>
             </Button>
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Game Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-poker-gold to-yellow-500 bg-clip-text text-transparent">
+                Game Dashboard
+              </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
                 Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
               </p>
@@ -352,12 +354,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Game Summary */}
         <Collapsible open={gameStatsOpen} onOpenChange={setGameStatsOpen}>
-          <Card className="bg-card border-border">
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
                 <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
                   <div className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5" />
+                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                      <Calculator className="w-5 h-5" />
+                    </div>
                     Game Summary
                   </div>
                   {gameStatsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -365,25 +369,25 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent>
+              <CardContent className="pt-4">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Buy-ins</p>
+              <div className="space-y-1 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Total Buy-ins</p>
                 <p className="text-lg sm:text-2xl font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Final Stack</p>
+              <div className="space-y-1 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Total Final Stack</p>
                 <p className="text-lg sm:text-2xl font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
                 {!isStackBalanced && (
-                  <p className="text-xs text-destructive">Must equal buy-ins</p>
+                  <p className="text-xs text-destructive font-semibold">Must equal buy-ins</p>
                 )}
               </div>
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Winnings</p>
+              <div className="space-y-1 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Total Winnings</p>
                 <p className="text-lg sm:text-2xl font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Losses</p>
+              <div className="space-y-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Total Losses</p>
                 <p className="text-lg sm:text-2xl font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
               </div>
             </div>
@@ -402,12 +406,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
           <Collapsible open={tablePositionOpen} onOpenChange={setTablePositionOpen}>
-            <Card className="bg-card border-border">
+            <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+                <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
                   <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
                     <div className="flex items-center gap-2">
-                      <UsersIcon className="w-5 h-5" />
+                      <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                        <UsersIcon className="w-5 h-5" />
+                      </div>
                       Current Table Positions
                     </div>
                     {tablePositionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -415,19 +421,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent className="pt-0">
+                <CardContent className="pt-4">
               <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
               <div className="flex gap-2 mt-4">
                 <Button
                   onClick={() => setShowPositionEditor(true)}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 border-primary/30 hover:bg-primary/10"
                 >
                   Change Positions
                 </Button>
                 <Button
                   onClick={handleStartHandTracking}
-                  className="bg-primary hover:bg-primary/90 flex-1"
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
                 >
                   <Play className="w-4 h-4 mr-2" />
                   Start Hand
@@ -444,13 +450,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             onHandComplete={handleHandComplete}
           />
         ) : (
-          <Card className="bg-card border-border">
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <p className="text-muted-foreground">No table positions set yet</p>
                 <Button
                   onClick={() => setShowPositionEditor(true)}
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
                 >
                   <UsersIcon className="w-4 h-4 mr-2" />
                   Set Table Positions
@@ -462,12 +468,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Players Section */}
         <Collapsible open={playersOpen} onOpenChange={setPlayersOpen}>
-          <Card className="bg-card border-border">
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
                 <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
                   <div className="flex items-center gap-2">
-                    <UsersIcon className="w-5 h-5" />
+                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                      <UsersIcon className="w-5 h-5" />
+                    </div>
                     Players ({gamePlayers.length})
                   </div>
                   {playersOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -475,7 +483,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
                   <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
                     <DialogTrigger asChild>
@@ -650,11 +658,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </Collapsible>
 
         {manualTransfers.length > 0 && (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-poker-gold">Manual Transfers</CardTitle>
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
+            <CardHeader className="border-b border-primary/20">
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                Manual Transfers
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-2">
                 {manualTransfers.map((transfer, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
@@ -682,11 +695,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         )}
 
         {showManualTransfer && (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-poker-gold">Add Manual Transfer</CardTitle>
+          <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
+            <CardHeader className="border-b border-primary/20">
+              <CardTitle className="text-poker-gold flex items-center gap-2">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <Plus className="w-5 h-5" />
+                </div>
+                Add Manual Transfer
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="grid grid-cols-1 gap-3">
                 <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
                   <SelectTrigger className="bg-input border-border">
@@ -788,17 +806,22 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {settlements.length > 0 && (
           <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
-            <Card className="bg-card border-border">
+            <Card className="bg-gradient-to-br from-card to-card/80 border-primary/30 shadow-xl">
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+                <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
                   <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
-                    <span>Remaining Settlement Transfers</span>
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                        <DollarSign className="w-5 h-5" />
+                      </div>
+                      Remaining Settlement Transfers
+                    </div>
                     {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                   </CardTitle>
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent>
+                <CardContent className="pt-4">
               <div className="space-y-2">
                 {settlements.length === 0 && manualTransfers.length > 0 ? (
                   <p className="text-muted-foreground text-center py-4">

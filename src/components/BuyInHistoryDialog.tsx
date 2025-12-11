@@ -60,31 +60,31 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40%] text-center">Change</TableHead>
-                  <TableHead className="w-[40%]">Time</TableHead>
-                  <TableHead className="w-[20%] text-right">New Total</TableHead>
+                <TableRow className="border-b border-border/50">
+                  <TableHead className="w-[40%] text-center font-semibold">Incremental Buy-in</TableHead>
+                  <TableHead className="w-[40%] font-semibold">Time</TableHead>
+                  <TableHead className="w-[20%] text-right font-semibold">New Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {history.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1.5">
+                  <TableRow key={entry.id} className="h-12 hover:bg-accent/10 transition-colors">
+                    <TableCell className="text-center py-3">
+                      <div className="flex items-center justify-center gap-2">
                         {entry.buy_ins_added > 0 ? (
-                          <TrendingUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                          <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         ) : (
-                          <TrendingDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         )}
-                        <span className={entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}>
+                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="text-sm text-muted-foreground py-3">
                       {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="text-right font-semibold py-3">
                       {entry.total_buy_ins_after}
                     </TableCell>
                   </TableRow>
