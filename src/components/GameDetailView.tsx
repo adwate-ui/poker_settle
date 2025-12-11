@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -102,6 +103,12 @@ export const GameDetailView = ({
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  
+  // Collapsible sections state
+  const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
+  const [tablePositionsOpen, setTablePositionsOpen] = useState(true);
+  const [playerResultsOpen, setPlayerResultsOpen] = useState(true);
+  const [settlementsOpen, setSettlementsOpen] = useState(true);
   
   // Manual transfer state
   const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
@@ -449,105 +456,142 @@ export const GameDetailView = ({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-6">
-        <ConsolidatedBuyInLogs gameId={gameId} token={token} />
-      </div>
+      {/* Buy-in Logs */}
+      <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <CardTitle className="text-primary flex items-center justify-between text-lg">
+                <span>Buy-in Logs</span>
+                {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <ConsolidatedBuyInLogs gameId={gameId} token={token} />
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Poker Table View */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-primary">Table Positions</CardTitle>
-          {tablePositions.length > 1 && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
-                {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
-                  disabled={currentPositionIndex === 0}
-                  className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm font-medium text-muted-foreground">
-                  {currentPositionIndex + 1} / {tablePositions.length}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
-                  disabled={currentPositionIndex === tablePositions.length - 1}
-                  className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+      <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-primary text-lg">Table Positions</CardTitle>
+              <div className="flex items-center gap-4">
+                {tablePositions.length > 1 && tablePositionsOpen && (
+                  <>
+                    <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
+                      {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1));
+                        }}
+                        disabled={currentPositionIndex === 0}
+                        className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {currentPositionIndex + 1} / {tablePositions.length}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1));
+                        }}
+                        disabled={currentPositionIndex === tablePositions.length - 1}
+                        className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+                {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </div>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
           <PokerTableView 
             positions={playersWithSeats}
             totalSeats={playersWithSeats.length}
             enableDragDrop={false}
           />
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Player Results */}
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-          <CardTitle className="text-primary">Player Results</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
+        <Card className="border-primary/20">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
+              <CardTitle className="text-primary text-lg flex items-center justify-between">
+                <span>Player Results</span>
+                {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold text-left">
+                <TableHead className="font-bold text-left h-10 py-2">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("name")}
-                    className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
                     Player
                     {getSortIcon("name")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left">
+                <TableHead className="font-bold text-left h-10 py-2">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
                     Buy-ins
                     {getSortIcon("buy_ins")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left">
+                <TableHead className="font-bold text-left h-10 py-2">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
                     Net P&L
                     {getSortIcon("net_amount")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left">
+                <TableHead className="font-bold text-left h-10 py-2">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-2 hover:text-primary font-bold justify-start"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
                   >
                     Final Stack
                     {getSortIcon("final_stack")}
                   </Button>
                 </TableHead>
                 {showOwnerControls && fetchBuyInHistory && (
-                  <TableHead className="font-bold text-left">
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm">
                     Buy-in Log
                   </TableHead>
                 )}
@@ -569,14 +613,14 @@ export const GameDetailView = ({
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary text-left">{playerName}</TableCell>
-                    <TableCell className="text-left">
-                      <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
+                    <TableCell className="font-medium text-primary text-left py-2 text-sm">{playerName}</TableCell>
+                    <TableCell className="text-left py-2">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium text-xs">
                         {gamePlayer.buy_ins}
                       </span>
                     </TableCell>
-                    <TableCell className="text-left">
-                      <span className={`px-3 py-1 rounded-full font-bold ${
+                    <TableCell className="text-left py-2">
+                      <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
                         isProfit 
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
                           : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -584,11 +628,11 @@ export const GameDetailView = ({
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(netAmount)}
                       </span>
                     </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground text-left">
+                    <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm">
                       Rs. {formatIndianNumber(finalStack)}
                     </TableCell>
                     {showOwnerControls && fetchBuyInHistory && (
-                      <TableCell className="text-left">
+                      <TableCell className="text-left py-2">
                         <BuyInHistoryDialog
                           gamePlayerId={gamePlayer.id}
                           playerName={playerName}
@@ -601,27 +645,32 @@ export const GameDetailView = ({
               })}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Settlements */}
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <span className="text-2xl">💰</span>
-              Settlements
-            </CardTitle>
-            {showOwnerControls && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
-                      <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="hidden xs:inline">Add</span> Transfer
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
+      <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
+        <Card className="border-primary/20">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <CardTitle className="text-primary flex items-center gap-2 text-lg">
+                  <span className="text-2xl">💰</span>
+                  Settlements
+                  {settlementsOpen ? <ChevronUp className="h-5 w-5 ml-auto sm:ml-2" /> : <ChevronDown className="h-5 w-5 ml-auto sm:ml-2" />}
+                </CardTitle>
+                {showOwnerControls && settlementsOpen && (
+                  <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                    <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
+                          <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="hidden xs:inline">Add</span> Transfer
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Add Manual Transfer</DialogTitle>
                     </DialogHeader>
@@ -683,8 +732,10 @@ export const GameDetailView = ({
               </div>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-0">
           {/* Pending manual transfers */}
           {showOwnerControls && manualTransfers.length > 0 && (
             <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
@@ -762,8 +813,10 @@ export const GameDetailView = ({
               No settlements needed - all players are even.
             </div>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
     </div>
   );
 };
