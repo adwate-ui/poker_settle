@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'supabase-api',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 5 * 60, // 5 minutes
+                maxAgeSeconds: 2 * 60, // 2 minutes for real-time data
               },
               networkTimeoutSeconds: 10,
             },

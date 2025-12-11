@@ -260,7 +260,7 @@ const PlayerDetail = () => {
                   <CardTitle className="text-primary">Game History</CardTitle>
                   <ChevronDown className={`h-5 w-5 transition-transform ${isGameHistoryOpen ? 'transform rotate-180' : ''}`} />
                 </div>
-                <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear} onClick={(e) => e.stopPropagation()}>
+                <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear} onPointerDown={(e) => e.stopPropagation()}>
                   <SelectTrigger className="bg-background border-primary/20 w-full md:w-64">
                     <SelectValue placeholder="Filter by month-year" />
                   </SelectTrigger>

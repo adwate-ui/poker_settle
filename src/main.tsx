@@ -16,13 +16,13 @@ const updateSW = registerSW({
   },
   onRegisteredSW(swUrl, r) {
     console.log('Service Worker registered:', swUrl);
-    // Check for updates more frequently - every 30 seconds
+    // Check for updates every 3 minutes for better balance
     if (r) {
       setInterval(() => {
         r.update().catch(err => {
           console.log('SW update check failed:', err);
         });
-      }, 30 * 1000);
+      }, 3 * 60 * 1000);
     }
   },
   onRegisterError(error) {
