@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card and Chip Demo</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        .section {
+            margin-bottom: 60px;
+        }
+        h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+        .cards-demo {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+        .chips-demo {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+        .chip-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .chip-label {
+            color: #d4af37;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎴 Premium Card & Chip Designs 🎰</h1>
+        
+        <div class="section">
+            <h2>Premium Card Back Design</h2>
+            <div class="cards-demo">
+                <svg width="156" height="224" viewBox="0 0 78 112" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="cardBackGradient" cx="50%" cy="50%">
+                            <stop offset="0%" stop-color="#1a5c3e" />
+                            <stop offset="50%" stop-color="#0e4429" />
+                            <stop offset="100%" stop-color="#0a3520" />
+                        </radialGradient>
+                        <linearGradient id="borderShine" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#d4af37" stop-opacity="0.8" />
+                            <stop offset="50%" stop-color="#b8941f" stop-opacity="0.6" />
+                            <stop offset="100%" stop-color="#d4af37" stop-opacity="0.8" />
+                        </linearGradient>
+                        <pattern id="ornatePattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <circle cx="10" cy="10" r="1" fill="#2d7a51" opacity="0.3" />
+                        </pattern>
+                    </defs>
+                    <rect width="78" height="112" rx="7" fill="url(#cardBackGradient)" stroke="url(#borderShine)" stroke-width="2.5"/>
+                    <rect x="3" y="3" width="72" height="106" rx="5" fill="none" stroke="#d4af37" stroke-width="0.8" opacity="0.7"/>
+                    <rect x="7" y="7" width="64" height="98" rx="4" fill="url(#ornatePattern)"/>
+                    <rect x="7" y="7" width="64" height="98" rx="4" fill="none" stroke="#1a5c3e" stroke-width="1.5"/>
+                    <g opacity="0.85">
+                        <path d="M 39 25 L 53 39 L 39 53 L 25 39 Z" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M 39 30 L 48 39 L 39 48 L 30 39 Z" fill="none" stroke="#b8941f" stroke-width="1.2" opacity="0.6"/>
+                        <path d="M 39 59 L 53 73 L 39 87 L 25 73 Z" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M 39 64 L 48 73 L 39 82 L 30 73 Z" fill="none" stroke="#b8941f" stroke-width="1.2" opacity="0.6"/>
+                        <line x1="39" y1="53" x2="39" y2="59" stroke="#d4af37" stroke-width="1.5" opacity="0.7" />
+                        <circle cx="18" cy="25" r="3" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.7" />
+                        <circle cx="60" cy="25" r="3" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.7" />
+                        <circle cx="18" cy="87" r="3" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.7" />
+                        <circle cx="60" cy="87" r="3" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.7" />
+                        <path d="M 15 52 L 18 56 L 15 60" fill="none" stroke="#d4af37" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+                        <path d="M 63 52 L 60 56 L 63 60" fill="none" stroke="#d4af37" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+                    </g>
+                    <g opacity="0.4">
+                        <path d="M 10 10 L 14 10 L 10 14 Z" fill="#d4af37" />
+                        <path d="M 68 10 L 64 10 L 68 14 Z" fill="#d4af37" />
+                        <path d="M 10 102 L 14 102 L 10 98 Z" fill="#d4af37" />
+                        <path d="M 68 102 L 64 102 L 68 98 Z" fill="#d4af37" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Premium Poker Chips (Updated Denominations)</h2>
+            <p style="text-align: center; color: #d4af37; margin-bottom: 20px;">
+                Red = 20 • Black = 100 • Green = 500 • White = 1,000
+            </p>
+            <div class="chips-demo">
+                <div class="chip-item">
+                    <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="chipGradient-red" cx="35%" cy="35%">
+                                <stop offset="0%" stop-color="#dc2626" />
+                                <stop offset="70%" stop-color="#b91c1c" />
+                                <stop offset="100%" stop-color="#7f1d1d" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="51" cy="52" r="48" fill="black" opacity="0.15" />
+                        <circle cx="50" cy="50" r="49" fill="none" stroke="#fef3c7" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="47" fill="url(#chipGradient-red)" />
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#fef3c7" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="50" cy="50" r="36" fill="#7f1d1d" opacity="0.3" />
+                        <circle cx="50" cy="50" r="30" fill="#b91c1c" />
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#fef3c7" stroke-width="1" opacity="0.6"/>
+                        <ellipse cx="42" cy="42" rx="12" ry="8" fill="white" opacity="0.2" transform="rotate(-30 42 42)"/>
+                        <text x="50" y="52" text-anchor="middle" dominant-baseline="central" fill="black" font-size="20" font-weight="bold" opacity="0.2">20</text>
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="white" font-size="20" font-weight="bold">20</text>
+                    </svg>
+                    <span class="chip-label">Red - 20</span>
+                </div>
+
+                <div class="chip-item">
+                    <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="chipGradient-black" cx="35%" cy="35%">
+                                <stop offset="0%" stop-color="#333333" />
+                                <stop offset="70%" stop-color="#1a1a1a" />
+                                <stop offset="100%" stop-color="#0f0f0f" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="51" cy="52" r="48" fill="black" opacity="0.15" />
+                        <circle cx="50" cy="50" r="49" fill="none" stroke="#d4af37" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="47" fill="url(#chipGradient-black)" />
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="50" cy="50" r="36" fill="#0f0f0f" opacity="0.3" />
+                        <circle cx="50" cy="50" r="30" fill="#1a1a1a" />
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
+                        <ellipse cx="42" cy="42" rx="12" ry="8" fill="white" opacity="0.2" transform="rotate(-30 42 42)"/>
+                        <text x="50" y="52" text-anchor="middle" dominant-baseline="central" fill="black" font-size="20" font-weight="bold" opacity="0.2">100</text>
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="white" font-size="20" font-weight="bold">100</text>
+                    </svg>
+                    <span class="chip-label">Black - 100</span>
+                </div>
+
+                <div class="chip-item">
+                    <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="chipGradient-green" cx="35%" cy="35%">
+                                <stop offset="0%" stop-color="#16a34a" />
+                                <stop offset="70%" stop-color="#15803d" />
+                                <stop offset="100%" stop-color="#14532d" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="51" cy="52" r="48" fill="black" opacity="0.15" />
+                        <circle cx="50" cy="50" r="49" fill="none" stroke="#fef3c7" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="47" fill="url(#chipGradient-green)" />
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#fef3c7" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="50" cy="50" r="36" fill="#14532d" opacity="0.3" />
+                        <circle cx="50" cy="50" r="30" fill="#15803d" />
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#fef3c7" stroke-width="1" opacity="0.6"/>
+                        <ellipse cx="42" cy="42" rx="12" ry="8" fill="white" opacity="0.2" transform="rotate(-30 42 42)"/>
+                        <text x="50" y="52" text-anchor="middle" dominant-baseline="central" fill="black" font-size="20" font-weight="bold" opacity="0.2">500</text>
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="white" font-size="20" font-weight="bold">500</text>
+                    </svg>
+                    <span class="chip-label">Green - 500</span>
+                </div>
+
+                <div class="chip-item">
+                    <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="chipGradient-white" cx="35%" cy="35%">
+                                <stop offset="0%" stop-color="#e5e7eb" />
+                                <stop offset="70%" stop-color="#ffffff" />
+                                <stop offset="100%" stop-color="#f3f4f6" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="51" cy="52" r="48" fill="black" opacity="0.15" />
+                        <circle cx="50" cy="50" r="49" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="47" fill="url(#chipGradient-white)" />
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="50" cy="50" r="36" fill="#f3f4f6" opacity="0.3" />
+                        <circle cx="50" cy="50" r="30" fill="#ffffff" />
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.6"/>
+                        <ellipse cx="42" cy="42" rx="12" ry="8" fill="white" opacity="0.2" transform="rotate(-30 42 42)"/>
+                        <text x="50" y="52" text-anchor="middle" dominant-baseline="central" fill="black" font-size="18" font-weight="bold" opacity="0.2">1K</text>
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="#1f2937" font-size="18" font-weight="bold">1K</text>
+                    </svg>
+                    <span class="chip-label">White - 1,000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

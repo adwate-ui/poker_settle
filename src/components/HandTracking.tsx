@@ -745,10 +745,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      // Use setTimeout to ensure state is set before showing dialog
-      setTimeout(() => {
+      // Schedule dialog opening in next render cycle to ensure state is committed
+      requestAnimationFrame(() => {
         setShowPlayerActionDialog(true);
-      }, 0);
+      });
     }
   };
 

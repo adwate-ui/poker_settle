@@ -123,6 +123,8 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                   variant="secondary"
                   className="cursor-pointer hover:bg-destructive/20 transition-colors text-xs"
                   onClick={() => setFilterName("")}
+                  role="button"
+                  aria-label="Clear filter"
                 >
                   Clear filter ✕
                 </Badge>
