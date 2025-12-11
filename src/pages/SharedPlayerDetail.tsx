@@ -148,7 +148,8 @@ const SharedPlayerDetail = () => {
 
   const sortedGameHistory = useMemo(() => {
     return [...filteredGameHistory].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number;
+      let bVal: number;
       
       switch (sortField) {
         case 'date':

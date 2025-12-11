@@ -97,7 +97,8 @@ const PlayersHistory = () => {
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number | string;
+      let bVal: number | string;
       
       switch (sortField) {
         case "name":
