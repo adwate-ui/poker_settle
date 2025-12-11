@@ -47,7 +47,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="w-5 h-5" />
-            {playerName}
+            {playerName} - Buy-in History
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[400px]">
@@ -61,21 +61,33 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
             <Table>
               <TableHeader>
                 <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm">Player</TableHead>
                   <TableHead className="font-bold text-left h-10 py-2 text-sm text-center">Incremental Buy-in</TableHead>
                   <TableHead className="font-bold text-left h-10 py-2 text-sm">Time</TableHead>
                   <TableHead className="font-bold text-left h-10 py-2 text-sm text-right">New Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TableRow className="bg-secondary/5 hover:bg-secondary/20">
+                  <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
+                  <TableCell className="text-center py-2">
+                    <span className="font-semibold text-sm text-muted-foreground">-</span>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground py-2">Initial</TableCell>
+                  <TableCell className="text-right font-semibold py-2 text-sm">
+                    1
+                  </TableCell>
+                </TableRow>
                 {history.map((entry, index) => (
                   <TableRow 
                     key={entry.id} 
                     className={`transition-colors ${
-                      index % 2 === 0 
+                      (index + 1) % 2 === 0 
                         ? "bg-secondary/5 hover:bg-secondary/20" 
                         : "hover:bg-primary/10"
                     }`}
                   >
+                    <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
                     <TableCell className="text-center py-2">
                       <div className="flex items-center justify-center gap-2">
                         {entry.buy_ins_added > 0 ? (

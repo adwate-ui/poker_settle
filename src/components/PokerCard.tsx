@@ -72,36 +72,36 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   return (
-    <div className={`${sizes[size]} ${className} rounded-lg shadow-2xl overflow-hidden relative bg-gradient-to-br from-white via-white to-gray-50 border-2 border-gray-300`}>
+    <div className={`${sizes[size]} ${className} rounded-lg shadow-lg overflow-hidden relative bg-white dark:bg-gray-50 border border-gray-400`}>
       {/* Top-left corner index */}
       <div className={`absolute top-0 left-0 ${cornerSizes[size]} flex flex-col items-center leading-none`}>
-        <div className={`${rankSizes[size]} font-bold`} style={{ color: suitColors[suit] }}>
+        <div className={`${rankSizes[size]} font-extrabold`} style={{ color: suitColors[suit] }}>
           {rank}
         </div>
-        <div className={`${rankSizes[size]}`} style={{ color: suitColors[suit] }}>
+        <div className={`${rankSizes[size]} -mt-0.5`} style={{ color: suitColors[suit] }}>
           {suitSymbols[suit]}
         </div>
       </div>
       
       {/* Bottom-right corner index (rotated) */}
       <div className={`absolute bottom-0 right-0 ${cornerSizes[size]} flex flex-col items-center leading-none rotate-180`}>
-        <div className={`${rankSizes[size]} font-bold`} style={{ color: suitColors[suit] }}>
+        <div className={`${rankSizes[size]} font-extrabold`} style={{ color: suitColors[suit] }}>
           {rank}
         </div>
-        <div className={`${rankSizes[size]}`} style={{ color: suitColors[suit] }}>
+        <div className={`${rankSizes[size]} -mt-0.5`} style={{ color: suitColors[suit] }}>
           {suitSymbols[suit]}
         </div>
       </div>
 
-      {/* Center suit symbol - larger and more prominent */}
+      {/* Center suit symbol - larger and more prominent with professional styling */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`${suitSizes[size]} leading-none opacity-90`} style={{ color: suitColors[suit] }}>
+        <div className={`${suitSizes[size]} leading-none font-bold`} style={{ color: suitColors[suit], opacity: 0.15 }}>
           {suitSymbols[suit]}
         </div>
       </div>
       
-      {/* Subtle gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 pointer-events-none"></div>
+      {/* Crisp border for professional look */}
+      <div className="absolute inset-0 rounded-lg border-2 border-black/10 pointer-events-none"></div>
     </div>
   );
 });

@@ -319,6 +319,11 @@ const HandReplay = ({
         setVisibleHoleCards(playerHoleCards);
         setTimeout(() => {
           setShowWinner(true);
+          // After a brief delay, move chips to winner and clear pot
+          setTimeout(() => {
+            setPotSize(0);
+            setUncommittedPot(0);
+          }, 500);
           // Trigger confetti
           confetti({
             particleCount: 150,
@@ -369,6 +374,11 @@ const HandReplay = ({
           setVisibleHoleCards(playerHoleCards); // Show all cards when winner declared
           setTimeout(() => {
             setShowWinner(true);
+            // Move chips to winner and clear pot
+            setTimeout(() => {
+              setPotSize(0);
+              setUncommittedPot(0);
+            }, 500);
             confetti({
               particleCount: 150,
               spread: 70,
@@ -585,7 +595,10 @@ const HandReplay = ({
               {winnerPlayerName} Wins!
             </div>
             <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
-              Pot: Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+              Winnings: Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+            </div>
+            <div className="text-sm text-muted-foreground mt-2 italic">
+              Chips moved to winner
             </div>
           </CardContent>
         </Card>
