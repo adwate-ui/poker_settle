@@ -353,26 +353,11 @@ const HandDetail = () => {
                 <div>
                   <h3 className="font-semibold mb-3">Community Cards</h3>
                   <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-4 rounded-xl border border-green-700/30">
-                    {hand.street_cards
-                      .sort((a, b) => {
-                        const order = { Flop: 1, Turn: 2, River: 3 };
-                        return order[a.street_type as keyof typeof order] - order[b.street_type as keyof typeof order];
-                      })
-                      .map((streetCard) => {
-                        const cards = streetCard.cards_notation.match(/.{1,2}/g) || [];
-                        return (
-                          <div key={streetCard.street_type} className="mb-3 last:mb-0">
-                            <div className="text-xs font-semibold text-muted-foreground mb-2">
-                              {streetCard.street_type}
-                            </div>
-                            <div className="flex gap-2">
-                              {cards.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="md" />
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="flex gap-2 flex-wrap">
+                      {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="md" />
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
