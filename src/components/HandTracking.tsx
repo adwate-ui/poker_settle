@@ -293,6 +293,29 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     return true;
   };
 
+  // Get all currently used cards in the hand
+  const getUsedCards = (): string[] => {
+    const allUsedCards: string[] = [];
+    
+    // Collect all hole cards
+    Object.values(playerHoleCards).forEach(holeCards => {
+      if (holeCards) {
+        const cards = holeCards.match(/.{1,2}/g) || [];
+        allUsedCards.push(...cards);
+      }
+    });
+    
+    // Collect community cards
+    if (flopCards) {
+      const cards = flopCards.match(/.{1,2}/g) || [];
+      allUsedCards.push(...cards);
+    }
+    if (turnCard) allUsedCards.push(turnCard);
+    if (riverCard) allUsedCards.push(riverCard);
+    
+    return allUsedCards;
+  };
+
   const recordAction = async (actionType: ActionType) => {
     if (!currentHand || activePlayers.length === 0) return;
 
@@ -1081,6 +1104,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               expectedCards={2}
               onSubmit={handleHoleCardSubmit}
               placeholder="AhKd"
+              usedCards={getUsedCards()}
             />
           </DialogContent>
         </Dialog>
@@ -1147,6 +1171,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             expectedCards={3}
             onSubmit={saveStreetCards}
             placeholder="AhKd2c"
+            usedCards={getUsedCards()}
           />
         )}
 
@@ -1156,6 +1181,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             expectedCards={1}
             onSubmit={saveStreetCards}
             placeholder="Js"
+            usedCards={getUsedCards()}
           />
         )}
 
@@ -1165,6 +1191,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             expectedCards={1}
             onSubmit={saveStreetCards}
             placeholder="9h"
+            usedCards={getUsedCards()}
           />
         )}
 

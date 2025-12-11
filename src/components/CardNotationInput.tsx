@@ -3,17 +3,19 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import PokerCard from './PokerCard';
+import CardSelector from './CardSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Grid3x3 } from 'lucide-react';
 
 interface CardNotationInputProps {
   label: string;
   expectedCards: number;
   onSubmit: (cards: string) => void;
   placeholder?: string;
+  usedCards?: string[];
 }
 
-const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: CardNotationInputProps) => {
+const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCards = [] }: CardNotationInputProps) => {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
 
@@ -72,6 +74,14 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: Card
     }
   };
 
+  const handleSelectorSubmit = (cards: string) => {
+    setInput(cards);
+    if (validateCards(cards)) {
+      onSubmit(cards);
+      setInput('');
+    }
+  };
+
   // Only parse cards if input is complete enough
   const cleaned = input.replace(/\s+/g, '').toUpperCase();
   const cards = cleaned.length >= 2 && cleaned.length % 2 === 0 ? parseCards(input) : [];
@@ -93,6 +103,18 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder }: Card
         <Button onClick={handleSubmit} disabled={!isComplete}>
           Show Cards
         </Button>
+        <CardSelector
+          maxCards={expectedCards}
+          usedCards={usedCards}
+          selectedCards={cards}
+          onSelect={handleSelectorSubmit}
+          label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
+          trigger={
+            <Button variant="outline" type="button">
+              <Grid3x3 className="w-4 h-4" />
+            </Button>
+          }
+        />
       </div>
 
       {error && (

@@ -232,9 +232,26 @@ export const PlayerSelector = ({
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   {searchQuery ? (
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <p>No players found matching "{searchQuery}"</p>
-                      <p className="text-sm">Try creating a new player instead</p>
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const player = await onCreateNewPlayer(searchQuery.trim());
+                            onAddPlayer(player);
+                            toast.success(`${player.name} created and added!`);
+                            setSearchQuery('');
+                            setOpen(false);
+                          } catch (error) {
+                            toast.error('Failed to create player');
+                          }
+                        }}
+                        className="mx-auto"
+                        disabled={disabled}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Create "{searchQuery}"
+                      </Button>
                     </div>
                   ) : (
                     <p>All players have been added</p>
