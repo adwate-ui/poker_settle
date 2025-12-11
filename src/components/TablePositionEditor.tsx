@@ -38,7 +38,7 @@ const TablePositionEditor = ({
   positions.forEach(pos => seatToPlayer.set(pos.seat, pos));
 
   const handlePlayerSelect = (seat: number, playerId: string) => {
-    if (!playerId) {
+    if (!playerId || playerId === 'empty_seat') {
       // If empty selection, remove the player from this seat
       setPositions(positions.filter(p => p.seat !== seat));
       return;
@@ -118,7 +118,7 @@ const TablePositionEditor = ({
                     <SelectValue placeholder="Select player..." />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    <SelectItem value="">
+                    <SelectItem value="empty_seat">
                       <span className="text-muted-foreground italic">- Empty seat -</span>
                     </SelectItem>
                     {players

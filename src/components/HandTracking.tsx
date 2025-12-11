@@ -1259,6 +1259,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           }}
           maxCards={2}
           usedCards={getUsedCards()}
+          selectedCards={selectedPlayerForHole ? (playerHoleCards[selectedPlayerForHole]?.match(/.{1,2}/g) || []) : []}
           label={`Select Hole Cards for ${remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name || 'Player'}`}
         />
       </>
