@@ -68,6 +68,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {/* Initial buy-in row */}
                 <TableRow className="bg-secondary/5 hover:bg-secondary/20">
                   <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
                   <TableCell className="text-center py-2">
@@ -75,39 +76,44 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground py-2">Initial</TableCell>
                   <TableCell className="text-right font-semibold py-2 text-sm">
+                    {/* Initial buy-in is always 1 */}
                     1
                   </TableCell>
                 </TableRow>
-                {history.map((entry, index) => (
-                  <TableRow 
-                    key={entry.id} 
-                    className={`transition-colors ${
-                      (index + 1) % 2 === 0 
-                        ? "bg-secondary/5 hover:bg-secondary/20" 
-                        : "hover:bg-primary/10"
-                    }`}
-                  >
-                    <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
-                    <TableCell className="text-center py-2">
-                      <div className="flex items-center justify-center gap-2">
-                        {entry.buy_ins_added > 0 ? (
-                          <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        )}
-                        <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
-                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground py-2">
-                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold py-2 text-sm">
-                      {entry.total_buy_ins_after}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {history.map((entry, index) => {
+                  // Since we have an initial row, we need to offset the alternating pattern
+                  const isEvenRow = index % 2 === 0;
+                  return (
+                    <TableRow 
+                      key={entry.id} 
+                      className={`transition-colors ${
+                        isEvenRow 
+                          ? "hover:bg-primary/10" 
+                          : "bg-secondary/5 hover:bg-secondary/20"
+                      }`}
+                    >
+                      <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
+                      <TableCell className="text-center py-2">
+                        <div className="flex items-center justify-center gap-2">
+                          {entry.buy_ins_added > 0 ? (
+                            <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          )}
+                          <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
+                            {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground py-2">
+                        {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold py-2 text-sm">
+                        {entry.total_buy_ins_after}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
