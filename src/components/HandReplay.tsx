@@ -438,52 +438,61 @@ const HandReplay = ({
   const currentAction = getCurrentAction();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 animate-fade-in">
       {/* Poker Table with community cards inside */}
-      <PokerTableView
-        positions={positions}
-        buttonPlayerId={buttonPlayerId}
-        seatPositions={seatPositions}
-        playerBets={streetPlayerBets}
-        potSize={potSize}
-        showPositionLabels={true}
-        foldedPlayers={foldedPlayers}
-        muckedPlayers={muckedPlayers}
-        animateChipsToPot={animateChipsToPot}
-        playerHoleCards={visibleHoleCards}
-        animateChipsToWinner={showWinner ? winnerPlayerId : null}
-        communityCards={communityCards}
-        showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
-        playerStacks={playerStacks}
-      />
+      <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 p-4 rounded-2xl border-2 border-green-700/40 shadow-2xl">
+        <PokerTableView
+          positions={positions}
+          buttonPlayerId={buttonPlayerId}
+          seatPositions={seatPositions}
+          playerBets={streetPlayerBets}
+          potSize={potSize}
+          showPositionLabels={true}
+          foldedPlayers={foldedPlayers}
+          muckedPlayers={muckedPlayers}
+          animateChipsToPot={animateChipsToPot}
+          playerHoleCards={visibleHoleCards}
+          animateChipsToWinner={showWinner ? winnerPlayerId : null}
+          communityCards={communityCards}
+          showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
+          playerStacks={playerStacks}
+        />
+      </div>
 
       {/* Current Action Display */}
       {currentAction && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-lg animate-fade-in">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="font-semibold">
-                  {playerNames[currentAction.player_id]}
+                <div className="p-2 bg-primary/20 rounded-lg">
+                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                 </div>
-                {currentAction.position && (
-                  <div className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                    {currentAction.position}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="font-bold text-base sm:text-lg">
+                    {playerNames[currentAction.player_id]}
                   </div>
-                )}
+                  {currentAction.position && (
+                    <Badge className="w-fit text-xs bg-primary/30 text-primary-foreground border-primary/40">
+                      {currentAction.position}
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{currentAction.action_type}</span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <Badge variant="outline" className="w-fit text-sm font-semibold">
+                  {currentAction.action_type}
+                </Badge>
                 {currentAction.bet_size > 0 && (
-                  <span className="font-bold text-poker-gold">
+                  <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
                     Rs. {currentAction.bet_size.toLocaleString('en-IN')}
                   </span>
                 )}
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-border/50 flex justify-between text-sm">
-              <span className="text-muted-foreground">Current Pot:</span>
-              <span className="font-semibold text-poker-gold">
+            <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
+              <span className="text-sm text-muted-foreground font-medium">Current Pot:</span>
+              <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
                 Rs. {potSize.toLocaleString('en-IN')}
               </span>
             </div>
@@ -492,57 +501,84 @@ const HandReplay = ({
       )}
 
       {/* Playback Controls */}
-      <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleReset}
-          disabled={currentActionIndex === 0}
-        >
-          <RotateCcw className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleStepBack}
-          disabled={currentActionIndex === 0 || isPlaying}
-        >
-          <SkipBack className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          onClick={handlePlayPause}
-          disabled={currentActionIndex >= actions.length && !isPlaying}
-        >
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleStepForward}
-          disabled={currentActionIndex >= actions.length || isPlaying}
-        >
-          <SkipForward className="h-4 w-4" />
-        </Button>
-      </div>
+      <Card className="bg-muted/30 border-border/50">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleReset}
+              disabled={currentActionIndex === 0}
+              className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-primary/10"
+              title="Reset to beginning"
+            >
+              <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleStepBack}
+              disabled={currentActionIndex === 0 || isPlaying}
+              className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-primary/10"
+              title="Step back"
+            >
+              <SkipBack className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+            <Button
+              size="icon"
+              onClick={handlePlayPause}
+              disabled={currentActionIndex >= actions.length && !isPlaying}
+              className="h-12 w-12 sm:h-14 sm:w-14 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause className="h-5 w-5 sm:h-6 sm:w-6" /> : <Play className="h-5 w-5 sm:h-6 sm:w-6" />}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleStepForward}
+              disabled={currentActionIndex >= actions.length || isPlaying}
+              className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-primary/10"
+              title="Step forward"
+            >
+              <SkipForward className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          </div>
+          
+          {/* Progress Indicator */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-2">
+              <span className="font-medium">Action {currentActionIndex} of {actions.length}</span>
+              <Badge variant="secondary" className="text-xs">
+                {currentStreet}
+              </Badge>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+              <div 
+                className="bg-gradient-to-r from-green-600 to-green-500 h-full transition-all duration-300 ease-out"
+                style={{ width: `${(currentActionIndex / actions.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Winner Declaration */}
       {showWinner && winnerPlayerName && (
-        <Card className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-500 animate-fade-in">
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-amber-500 mb-2">🎉 Winner! 🎉</div>
-            <div className="text-xl font-semibold">{winnerPlayerName}</div>
-            <div className="text-lg text-poker-gold mt-2">
+        <Card className="bg-gradient-to-br from-amber-500/30 via-yellow-500/30 to-amber-500/30 border-2 border-amber-500 animate-fade-in shadow-2xl">
+          <CardContent className="p-6 sm:p-8 text-center">
+            <div className="text-3xl sm:text-4xl font-bold mb-3 animate-bounce">
+              🎉🏆🎉
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+              {winnerPlayerName} Wins!
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
               Pot: Rs. {potSize.toLocaleString('en-IN')}
             </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Progress Indicator */}
-      <div className="text-center text-sm text-muted-foreground">
-        Action {currentActionIndex} of {actions.length} • {currentStreet}
-      </div>
     </div>
   );
 };
