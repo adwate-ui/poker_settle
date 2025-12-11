@@ -722,27 +722,29 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
   const handleHoleCardSubmit = (cards: string) => {
     if (selectedPlayerForHole) {
+      // Parse cards once for all validations
+      const newCardsList = parseCardNotationString(cards);
+      
       // Validate card uniqueness (excluding current player's existing cards when editing)
       const allUsedCards: string[] = [];
       
       // Collect all hole cards EXCEPT the current player's existing cards
       Object.entries(playerHoleCards).forEach(([playerId, holeCards]) => {
         if (playerId !== selectedPlayerForHole && holeCards) {
-          const playerCards = holeCards.match(/.{1,2}/g) || [];
+          const playerCards = parseCardNotationString(holeCards);
           allUsedCards.push(...playerCards);
         }
       });
       
       // Collect community cards
       if (flopCards) {
-        const communityCardsList = flopCards.match(/.{1,2}/g) || [];
+        const communityCardsList = parseCardNotationString(flopCards);
         allUsedCards.push(...communityCardsList);
       }
       if (turnCard) allUsedCards.push(turnCard);
       if (riverCard) allUsedCards.push(riverCard);
       
-      // Check new cards against used cards
-      const newCardsList = parseCardNotationString(cards);
+      // Check new cards against used cards (community + other players' hole cards)
       for (const card of newCardsList) {
         if (allUsedCards.includes(card)) {
           toast({
@@ -754,10 +756,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         }
       }
       
-      // Additional validation: Check if any of these hole cards are already assigned to other players
-      const cardsList = parseCardNotationString(cards);
-      
-      // Optimize: Build a map of cards to player IDs for efficient lookup
+      // Additional validation: Build a map of cards to player IDs for duplicate player check
+      // (This is technically redundant with above check but provides better error message)
       const cardToPlayerMap = new Map<string, string>();
       for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
         if (playerId !== selectedPlayerForHole && holeCards) {
@@ -766,10 +766,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         }
       }
       
-      // Check for duplicates in a single pass
+      // Check for duplicates with specific player attribution
       const duplicates: string[] = [];
       const duplicatePlayerIds = new Set<string>();
-      for (const card of cardsList) {
+      for (const card of newCardsList) {
         const existingPlayerId = cardToPlayerMap.get(card);
         if (existingPlayerId) {
           duplicates.push(card);
