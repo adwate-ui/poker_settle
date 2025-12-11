@@ -18,14 +18,25 @@ export const useAuthProvider = () => {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
 
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
+          // Clear the timeout since auth state changed successfully
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          // Clean up hash fragment after successful sign in
+          if (event === 'SIGNED_IN' && window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
         }
       }
     );
@@ -47,6 +58,17 @@ export const useAuthProvider = () => {
            window.location.hash.includes('refresh_token'));
         if (!hasAuthHash) {
           setLoading(false);
+        } else {
+          // Set a safety timeout to prevent infinite loading
+          // If onAuthStateChange doesn't fire within 5 seconds, stop loading anyway
+          timeoutId = setTimeout(() => {
+            if (mounted) {
+              console.warn('Auth state change timeout - stopping loading state');
+              setLoading(false);
+              // Clean up hash
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }, 5000);
         }
         // If there is an auth hash, wait for onAuthStateChange to set loading=false
       }
@@ -54,6 +76,9 @@ export const useAuthProvider = () => {
 
     return () => {
       mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       subscription.unsubscribe();
     };
   }, []);
