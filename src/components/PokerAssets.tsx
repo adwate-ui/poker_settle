@@ -1,6 +1,8 @@
 // SVG-based poker chip and card back assets
 // These are inline SVG components that are much smaller and scale perfectly
 
+import { useMemo } from 'react';
+
 // Pre-calculate edge pattern points for poker chip
 const CHIP_EDGE_PATTERN = Array.from({ length: 24 }).map((_, i) => {
   const angle = (i * 360) / 24;
@@ -491,6 +493,19 @@ export const CardBackSVG = ({ width = 78, height = 112, design = 'classic' }: { 
   }
 
   // Radial design
+  // Pre-compute radiating line coordinates
+  const radialLines = useMemo(() => {
+    return Array.from({ length: 12 }).map((_, i) => {
+      const angle = (i * 360) / 12;
+      const rad = (angle * Math.PI) / 180;
+      const x1 = 39 + 8 * Math.cos(rad);
+      const y1 = 56 + 8 * Math.sin(rad);
+      const x2 = 39 + 40 * Math.cos(rad);
+      const y2 = 56 + 40 * Math.sin(rad);
+      return { x1, y1, x2, y2 };
+    });
+  }, []);
+  
   return (
     <svg 
       width={width} 
@@ -523,25 +538,17 @@ export const CardBackSVG = ({ width = 78, height = 112, design = 'classic' }: { 
         <circle cx="39" cy="56" r="36" opacity="0.3" />
         
         {/* Radiating lines */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const angle = (i * 360) / 12;
-          const rad = (angle * Math.PI) / 180;
-          const x1 = 39 + 8 * Math.cos(rad);
-          const y1 = 56 + 8 * Math.sin(rad);
-          const x2 = 39 + 40 * Math.cos(rad);
-          const y2 = 56 + 40 * Math.sin(rad);
-          return (
-            <line 
-              key={i} 
-              x1={x1} 
-              y1={y1} 
-              x2={x2} 
-              y2={y2} 
-              strokeWidth="1.2" 
-              opacity="0.4" 
-            />
-          );
-        })}
+        {radialLines.map((line, i) => (
+          <line 
+            key={i} 
+            x1={line.x1} 
+            y1={line.y1} 
+            x2={line.x2} 
+            y2={line.y2} 
+            strokeWidth="1.2" 
+            opacity="0.4" 
+          />
+        ))}
       </g>
     </svg>
   );

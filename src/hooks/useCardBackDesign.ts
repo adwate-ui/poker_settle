@@ -4,6 +4,12 @@ import { useAuth } from './useAuth';
 
 export type CardBackDesign = 'classic' | 'geometric' | 'diamond' | 'hexagon' | 'wave' | 'radial';
 
+const VALID_CARD_BACK_DESIGNS: CardBackDesign[] = ['classic', 'geometric', 'diamond', 'hexagon', 'wave', 'radial'];
+
+const isValidCardBackDesign = (value: string): value is CardBackDesign => {
+  return VALID_CARD_BACK_DESIGNS.includes(value as CardBackDesign);
+};
+
 export const useCardBackDesign = () => {
   const { user } = useAuth();
   const [design, setDesign] = useState<CardBackDesign>('classic');
@@ -27,7 +33,14 @@ export const useCardBackDesign = () => {
         if (error) throw error;
 
         if (data?.card_back_design) {
-          setDesign(data.card_back_design as CardBackDesign);
+          // Validate the value from database
+          if (isValidCardBackDesign(data.card_back_design)) {
+            setDesign(data.card_back_design);
+          } else {
+            console.warn('Invalid card back design in database:', data.card_back_design);
+            // Fall back to classic if invalid value
+            setDesign('classic');
+          }
         }
       } catch (error) {
         console.error('Error loading card back design:', error);
