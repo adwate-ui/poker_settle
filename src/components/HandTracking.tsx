@@ -722,26 +722,72 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
   const handleHoleCardSubmit = (cards: string) => {
     if (selectedPlayerForHole) {
-      if (!validateCardUniqueness(cards)) {
-        return;
+      // Validate card uniqueness (excluding current player's existing cards when editing)
+      const allUsedCards: string[] = [];
+      
+      // Collect all hole cards EXCEPT the current player's existing cards
+      Object.entries(playerHoleCards).forEach(([playerId, holeCards]) => {
+        if (playerId !== selectedPlayerForHole && holeCards) {
+          const playerCards = holeCards.match(/.{1,2}/g) || [];
+          allUsedCards.push(...playerCards);
+        }
+      });
+      
+      // Collect community cards
+      if (flopCards) {
+        const communityCardsList = flopCards.match(/.{1,2}/g) || [];
+        allUsedCards.push(...communityCardsList);
+      }
+      if (turnCard) allUsedCards.push(turnCard);
+      if (riverCard) allUsedCards.push(riverCard);
+      
+      // Check new cards against used cards
+      const newCardsList = parseCardNotationString(cards);
+      for (const card of newCardsList) {
+        if (allUsedCards.includes(card)) {
+          toast({
+            title: 'Duplicate Card',
+            description: `Card ${card} has already been used in this hand`,
+            variant: 'destructive',
+          });
+          return;
+        }
       }
       
       // Additional validation: Check if any of these hole cards are already assigned to other players
       const cardsList = parseCardNotationString(cards);
+      
+      // Optimize: Build a map of cards to player IDs for efficient lookup
+      const cardToPlayerMap = new Map<string, string>();
       for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
         if (playerId !== selectedPlayerForHole && holeCards) {
           const existingCards = parseCardNotationString(holeCards);
-          const duplicates = cardsList.filter(card => existingCards.includes(card));
-          if (duplicates.length > 0) {
-            const otherPlayer = activePlayers.find(p => p.player_id === playerId);
-            toast({
-              title: 'Duplicate Cards',
-              description: `Card(s) ${duplicates.join(', ')} already assigned to ${otherPlayer?.player.name || 'another player'}`,
-              variant: 'destructive',
-            });
-            return;
-          }
+          existingCards.forEach(card => cardToPlayerMap.set(card, playerId));
         }
+      }
+      
+      // Check for duplicates in a single pass
+      const duplicates: string[] = [];
+      const duplicatePlayerIds = new Set<string>();
+      for (const card of cardsList) {
+        const existingPlayerId = cardToPlayerMap.get(card);
+        if (existingPlayerId) {
+          duplicates.push(card);
+          duplicatePlayerIds.add(existingPlayerId);
+        }
+      }
+      
+      if (duplicates.length > 0) {
+        const playerNames = Array.from(duplicatePlayerIds)
+          .map(playerId => activePlayers.find(p => p.player_id === playerId)?.player.name)
+          .filter(Boolean)
+          .join(', ');
+        toast({
+          title: 'Duplicate Cards',
+          description: `Card(s) ${duplicates.join(', ')} already assigned to ${playerNames}`,
+          variant: 'destructive',
+        });
+        return;
       }
       
       // Update hole cards - this will trigger auto-calculation on re-render if in showdown
