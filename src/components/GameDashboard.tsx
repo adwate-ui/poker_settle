@@ -59,11 +59,18 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       const position = await getCurrentTablePosition(game.id);
       setCurrentTablePosition(position);
       // Set initial stage based on whether table is set
-      if (position && position.positions.length > 0) {
-        setHandTrackingStage('ready');
-      } else {
-        setHandTrackingStage('setup');
-      }
+      // Only update stage if we're not currently recording a hand
+      setHandTrackingStage(prev => {
+        // Don't change stage if we're in the middle of recording
+        if (prev === 'recording') return prev;
+        
+        // Otherwise, set based on whether positions exist
+        if (position && position.positions.length > 0) {
+          return 'ready';
+        } else {
+          return 'setup';
+        }
+      });
     };
     loadTablePosition();
   }, [game.id, getCurrentTablePosition]);
