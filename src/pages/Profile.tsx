@@ -63,6 +63,20 @@ const Profile = () => {
     }
   };
 
+  const handleCardBackChange = async (designId: CardBackDesign) => {
+    setChangingCardBack(true);
+    try {
+      await setCardBackDesign(designId);
+      const designInfo = cardBackDesigns.find(d => d.id === designId);
+      toast.success(`Card back changed to ${designInfo?.name || designId}`);
+    } catch (error) {
+      toast.error('Failed to change card back design');
+      console.error('Error changing card back:', error);
+    } finally {
+      setChangingCardBack(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
