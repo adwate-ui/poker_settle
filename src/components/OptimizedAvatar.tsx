@@ -1,15 +1,16 @@
 import { memo, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getCharacterForPlayer } from '@/config/themes';
+import { getCharacterForPlayer, getUniqueCharacterForPlayer } from '@/config/themes';
 import { getCharacterImage } from '@/config/characterImages';
 
 interface OptimizedAvatarProps {
   name: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  allPlayerNames?: string[]; // Optional: list of all player names in the current context (e.g., game)
 }
 
-const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAvatarProps) => {
+const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerNames }: OptimizedAvatarProps) => {
   const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
   
@@ -19,8 +20,20 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAv
     lg: 'w-16 h-16',
   };
   
-  // For themed avatars, use player name as ID. For default theme, use dicebear
-  const characterName = currentTheme !== 'default' ? getCharacterForPlayer(currentTheme, name) : null;
+  // Helper function to get character name based on context
+  const getCharacterName = (): string | null => {
+    if (currentTheme === 'default') return null;
+    
+    // If we have all player names, use unique assignment
+    if (allPlayerNames && allPlayerNames.length > 0) {
+      return getUniqueCharacterForPlayer(currentTheme, name, allPlayerNames);
+    }
+    
+    // Otherwise, use hash-based assignment
+    return getCharacterForPlayer(currentTheme, name);
+  };
+  
+  const characterName = getCharacterName();
   const characterImage = characterName ? getCharacterImage(characterName) : null;
   
   const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;

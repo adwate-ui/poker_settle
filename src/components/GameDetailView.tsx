@@ -543,6 +543,7 @@ export const GameDetailView = ({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
@@ -641,6 +642,7 @@ export const GameDetailView = ({
               })}
             </TableBody>
           </Table>
+          </div>
             </CardContent>
           </CollapsibleContent>
         </Card>

@@ -295,3 +295,38 @@ export const getCharacterForPlayer = (themeName: ThemeName, playerName: string):
   const index = Math.abs(hash) % theme.characters.length;
   return theme.characters[index];
 };
+
+/**
+ * Get a unique character for a player within a specific game context.
+ * Ensures no two players in the same game get the same character by assigning
+ * characters sequentially based on alphabetically sorted player names.
+ * 
+ * @param themeName - The theme to get characters from
+ * @param playerName - The name of the player to assign a character to
+ * @param allPlayerNames - Array of all player names in the current context (e.g., game)
+ * @returns The character name assigned to this player, or null if theme has no characters
+ * 
+ * @example
+ * // In a game with players "Alice", "Bob", "Charlie" in One Piece theme
+ * getUniqueCharacterForPlayer('one_piece', 'Alice', ['Alice', 'Bob', 'Charlie'])
+ * // Returns 'Luffy' (first character in sorted order)
+ */
+export const getUniqueCharacterForPlayer = (
+  themeName: ThemeName, 
+  playerName: string, 
+  allPlayerNames: string[]
+): string | null => {
+  const theme = getTheme(themeName);
+  if (theme.characters.length === 0) return null;
+  
+  // Sort player names to ensure consistent assignment
+  const sortedPlayers = [...allPlayerNames].sort();
+  const playerIndex = sortedPlayers.indexOf(playerName);
+  
+  if (playerIndex === -1) return getCharacterForPlayer(themeName, playerName);
+  
+  // Assign characters sequentially based on sorted player order
+  // Use modulo to handle cases where there are more players than characters
+  const characterIndex = playerIndex % theme.characters.length;
+  return theme.characters[characterIndex];
+};
