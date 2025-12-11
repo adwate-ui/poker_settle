@@ -3,8 +3,10 @@ import { useCallback, useRef, useState } from 'react';
 /**
  * Custom hook for batch state updates to reduce re-renders
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useBatchedState<T extends Record<string, any>>(
   initialState: T
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): [T, (updates: Partial<T>) => void, (key: keyof T, value: any) => void] {
   const [state, setState] = useState<T>(initialState);
   
@@ -12,6 +14,7 @@ export function useBatchedState<T extends Record<string, any>>(
     setState(prev => ({ ...prev, ...updates }));
   }, []);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSingle = useCallback((key: keyof T, value: any) => {
     setState(prev => ({ ...prev, [key]: value }));
   }, []);

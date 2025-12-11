@@ -3,23 +3,26 @@ import App from "./App.tsx";
 import "./index.css";
 import { registerSW } from 'virtual:pwa-register';
 
-// Register service worker - auto update without prompts to prevent stale content
+// Register service worker with better update strategy
 const updateSW = registerSW({
   immediate: true,
   onNeedRefresh() {
-    // Auto-update immediately without asking user
+    // Auto-update immediately to prevent stale content
+    console.log('PWA: New version available, updating...');
     updateSW(true);
   },
   onOfflineReady() {
-    console.log('PWA: Ready for install');
+    console.log('PWA: App ready to work offline');
   },
   onRegisteredSW(swUrl, r) {
     console.log('Service Worker registered:', swUrl);
-    // Check for updates every 5 minutes
+    // Check for updates every 3 minutes for better balance
     if (r) {
       setInterval(() => {
-        r.update();
-      }, 5 * 60 * 1000);
+        r.update().catch(err => {
+          console.log('SW update check failed:', err);
+        });
+      }, 3 * 60 * 1000);
     }
   },
   onRegisterError(error) {
@@ -27,14 +30,14 @@ const updateSW = registerSW({
   },
 });
 
-// Clear all old caches on startup to prevent stale data
+// Clear old caches more aggressively
 if ('caches' in window) {
   caches.keys().then((names) => {
     names.forEach((name) => {
-      // Clear API and game data caches
-      if (name.includes('api-cache') || name.includes('game-data')) {
+      // Keep only workbox caches, clear everything else
+      if (!name.startsWith('workbox-')) {
         caches.delete(name);
-        console.log('Cleared stale cache:', name);
+        console.log('Cleared cache:', name);
       }
     });
   });

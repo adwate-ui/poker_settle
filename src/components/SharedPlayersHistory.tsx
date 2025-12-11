@@ -6,6 +6,7 @@ import { Loader2, Calendar, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { formatIndianNumber } from '@/lib/utils';
 import { format } from 'date-fns';
+import OptimizedAvatar from '@/components/OptimizedAvatar';
 import {
   Select,
   SelectContent,
@@ -189,20 +190,13 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
   }
 
   const isProfit = (player.total_profit || 0) >= 0;
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-              <img 
-                src={avatarUrl}
-                alt={player.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <OptimizedAvatar name={player.name} size="md" />
             {player.name}
           </CardTitle>
         </CardHeader>

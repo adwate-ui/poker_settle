@@ -59,7 +59,7 @@ const GamesHistory = () => {
     if (user) {
       fetchGames();
     }
-  }, [user]);
+  }, [user, fetchGames]);
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
@@ -86,11 +86,15 @@ const GamesHistory = () => {
 
       if (error) throw error;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: any) => {
         const playerCount = game.game_players?.length || 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
         const totalPot = totalBuyIns * game.buy_in_amount;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const gamePlayers = game.game_players?.map((gp: any) => ({
           player_name: gp.player?.name || "",
           net_amount: gp.net_amount || 0,
@@ -183,7 +187,8 @@ const GamesHistory = () => {
 
     if (sortField && sortOrder) {
       filtered = [...filtered].sort((a, b) => {
-        let aVal: any, bVal: any;
+        let aVal: number | string;
+        let bVal: number | string;
         
         switch (sortField) {
           case "date":

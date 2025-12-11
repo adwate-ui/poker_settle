@@ -1,14 +1,20 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -50,14 +56,10 @@ const PlayerDetail = () => {
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
+  const [isStatsOpen, setIsStatsOpen] = useState(true);
+  const [isGameHistoryOpen, setIsGameHistoryOpen] = useState(true);
 
-  useEffect(() => {
-    if (playerId) {
-      fetchPlayerData();
-    }
-  }, [playerId]);
-
-  const fetchPlayerData = async () => {
+  const fetchPlayerData = useCallback(async () => {
     setLoading(true);
     try {
       const { data: playerData, error: playerError } = await supabase
@@ -89,7 +91,13 @@ const PlayerDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [playerId]);
+
+  useEffect(() => {
+    if (playerId) {
+      fetchPlayerData();
+    }
+  }, [playerId, fetchPlayerData]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -125,7 +133,8 @@ const PlayerDetail = () => {
 
   const sortedGameHistory = useMemo(() => {
     return [...filteredGameHistory].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number;
+      let bVal: number;
       
       switch (sortField) {
         case "date":
@@ -187,79 +196,89 @@ const PlayerDetail = () => {
         Back to Players History
       </Button>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-              <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                alt={player.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {player.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Total Games</p>
-              <p className="text-lg font-semibold">{player.total_games || 0}</p>
-            </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Total P&L</p>
-              <p className={`text-lg font-semibold ${
-                isProfit 
-                  ? "text-green-600 dark:text-green-400" 
-                  : "text-red-600 dark:text-red-400"
-              }`}>
-                {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
-              </p>
-            </div>
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground">Win Rate</p>
-              <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                {winRate.toFixed(1)}%
-              </p>
-            </div>
-            <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyShareLink('player', playerId!)}
-                disabled={linkLoading}
-                className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share Player
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
+        <Card>
+          <CardHeader>
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between cursor-pointer">
+                <CardTitle className="text-2xl flex items-center gap-3">
+                  <OptimizedAvatar name={player.name} size="md" />
+                  {player.name}
+                </CardTitle>
+                <ChevronDown className={`h-5 w-5 transition-transform ${isStatsOpen ? 'transform rotate-180' : ''}`} />
+              </div>
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Total Games</p>
+                  <p className="text-lg font-semibold">{player.total_games || 0}</p>
+                </div>
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Total P&L</p>
+                  <p className={`text-lg font-semibold ${
+                    isProfit 
+                      ? "text-green-600 dark:text-green-400" 
+                      : "text-red-600 dark:text-red-400"
+                  }`}>
+                    {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Win Rate</p>
+                  <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                    {winRate.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyShareLink('player', playerId!)}
+                    disabled={linkLoading}
+                    className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Player
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Game History */}
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <CardTitle className="text-primary">Game History</CardTitle>
-            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="bg-background border-primary/20 w-full md:w-64">
-                <SelectValue placeholder="Filter by month-year" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Months</SelectItem>
-                {uniqueMonthYears.map((monthYear) => (
-                  <SelectItem key={monthYear} value={monthYear}>
-                    {monthYear}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
+      <Collapsible open={isGameHistoryOpen} onOpenChange={setIsGameHistoryOpen}>
+        <Card className="border-primary/20">
+          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+            <CollapsibleTrigger asChild>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-primary">Game History</CardTitle>
+                  <ChevronDown className={`h-5 w-5 transition-transform ${isGameHistoryOpen ? 'transform rotate-180' : ''}`} />
+                </div>
+                <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear} onPointerDown={(e) => e.stopPropagation()}>
+                  <SelectTrigger className="bg-background border-primary/20 w-full md:w-64">
+                    <SelectValue placeholder="Filter by month-year" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="all">All Months</SelectItem>
+                    {uniqueMonthYears.map((monthYear) => (
+                      <SelectItem key={monthYear} value={monthYear}>
+                        {monthYear}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent className="p-0">
+              <Table>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
                 <TableHead className="font-bold">
@@ -357,7 +376,9 @@ const PlayerDetail = () => {
             </TableBody>
           </Table>
         </CardContent>
-      </Card>
+      </CollapsibleContent>
+    </Card>
+  </Collapsible>
     </div>
   );
 };

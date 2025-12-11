@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Calendar, ArrowUpDown, ArrowUp, ArrowDown } from 'l
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
 import { formatIndianNumber } from '@/lib/utils';
+import OptimizedAvatar from '@/components/OptimizedAvatar';
 import {
   Select,
   SelectContent,
@@ -147,7 +148,8 @@ const SharedPlayerDetail = () => {
 
   const sortedGameHistory = useMemo(() => {
     return [...filteredGameHistory].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number;
+      let bVal: number;
       
       switch (sortField) {
         case 'date':
@@ -229,13 +231,7 @@ const SharedPlayerDetail = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                  alt={player.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <OptimizedAvatar name={player.name} size="md" />
               {player.name}
             </CardTitle>
           </CardHeader>
