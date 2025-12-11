@@ -30,13 +30,6 @@ const NewGame = () => {
   const [showActiveGame, setShowActiveGame] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchPlayers();
-      checkActiveGame();
-    }
-  }, [user, fetchPlayers, checkActiveGame]);
-
   const fetchPlayers = useCallback(async () => {
     const { data, error } = await supabase
       .from("players")
@@ -71,6 +64,13 @@ const NewGame = () => {
       setActiveGame(data as Game);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPlayers();
+      checkActiveGame();
+    }
+  }, [user, fetchPlayers, checkActiveGame]);
 
   const addNewPlayer = async () => {
     if (!newPlayerName.trim()) {

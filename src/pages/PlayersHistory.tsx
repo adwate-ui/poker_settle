@@ -33,12 +33,6 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
-  useEffect(() => {
-    if (user) {
-      fetchPlayers();
-    }
-  }, [user, fetchPlayers]);
-
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
     try {
@@ -75,6 +69,12 @@ const PlayersHistory = () => {
       setDeletePlayerId(null);
     }
   }, [fetchPlayers]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPlayers();
+    }
+  }, [user, fetchPlayers]);
 
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
