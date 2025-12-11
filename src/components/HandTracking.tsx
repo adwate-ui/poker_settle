@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
+import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
 import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
@@ -87,6 +88,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [playerStacks, setPlayerStacks] = useState<Record<string, number>>({});
   const [isActionHistoryOpen, setIsActionHistoryOpen] = useState(true); // State for collapsible action history
+  const [showCardSelector, setShowCardSelector] = useState(false); // State for card selector dialog
+  const [cardSelectorType, setCardSelectorType] = useState<'flop' | 'turn' | 'river'>('flop'); // Which street cards to select
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -128,6 +131,20 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   useEffect(() => {
     setPositionsChanged(positionsJustChanged);
   }, [positionsJustChanged]);
+
+  // Auto-open card selector when community cards need to be selected
+  useEffect(() => {
+    if (stage === 'flop' && !flopCards && currentHand) {
+      setCardSelectorType('flop');
+      setShowCardSelector(true);
+    } else if (stage === 'turn' && !turnCard && flopCards && currentHand) {
+      setCardSelectorType('turn');
+      setShowCardSelector(true);
+    } else if (stage === 'river' && !riverCard && turnCard && currentHand) {
+      setCardSelectorType('river');
+      setShowCardSelector(true);
+    }
+  }, [stage, flopCards, turnCard, riverCard, currentHand]);
 
   // Auto-advance to next remaining player if current player has folded
   useEffect(() => {
@@ -535,10 +552,31 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     // Store cards in memory (will be saved when hand is saved)
     if (stage === 'flop') {
       setFlopCards(cards);
+      setShowCardSelector(false); // Close the selector after selecting
     } else if (stage === 'turn') {
       setTurnCard(cards);
+      setShowCardSelector(false); // Close the selector after selecting
     } else if (stage === 'river') {
       setRiverCard(cards);
+      setShowCardSelector(false); // Close the selector after selecting
+    }
+  };
+
+  const handleCardSelectorSubmit = (cards: string) => {
+    saveStreetCards(cards);
+  };
+
+  const handleEditCards = () => {
+    // Reopen the card selector to edit
+    if (stage === 'flop' && flopCards) {
+      setCardSelectorType('flop');
+      setShowCardSelector(true);
+    } else if (stage === 'turn' && turnCard) {
+      setCardSelectorType('turn');
+      setShowCardSelector(true);
+    } else if (stage === 'river' && riverCard) {
+      setCardSelectorType('river');
+      setShowCardSelector(true);
     }
   };
 
@@ -1176,29 +1214,35 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               </div>
             )}
 
-            {/* Manual Winner Selection (if auto-detection not possible) - Only Remaining Players */}
+            {/* Manual Winner Selection (if auto-detection not possible) - Only Players with Hole Cards */}
             {!winnerResult && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground text-center">
                   {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length === 0
-                    ? 'Add hole cards for automatic winner detection, or select winner manually:'
+                    ? 'Add hole cards for automatic winner detection, or select winner manually after adding hole cards:'
                     : 'Add all remaining players\' hole cards for automatic detection, or select winner manually:'}
                 </p>
-                {remainingPlayers.map((gp) => (
-                  <Button
-                    key={gp.player_id}
-                    onClick={() => finishHand([gp.player_id], 'showdown')}
-                    variant="outline"
-                    className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-semibold">{gp.player.name}</span>
-                      {gp.player_id === heroPlayer?.player_id && (
-                        <Badge variant="secondary">Hero</Badge>
-                      )}
-                    </div>
-                  </Button>
-                ))}
+                {remainingPlayers.filter(gp => playerHoleCards[gp.player_id]).length > 0 ? (
+                  remainingPlayers.filter(gp => playerHoleCards[gp.player_id]).map((gp) => (
+                    <Button
+                      key={gp.player_id}
+                      onClick={() => finishHand([gp.player_id], 'showdown')}
+                      variant="outline"
+                      className="w-full h-auto py-4 hover:bg-poker-gold/20 hover:border-poker-gold"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-semibold">{gp.player.name}</span>
+                        {gp.player_id === heroPlayer?.player_id && (
+                          <Badge variant="secondary">Hero</Badge>
+                        )}
+                      </div>
+                    </Button>
+                  ))
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground p-4 bg-muted/50 rounded-lg">
+                    No players with hole cards added yet. Add hole cards above to select a winner.
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -1227,6 +1271,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   }
 
   return (
+    <>
     <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
         <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -1278,35 +1323,43 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </div>
         )}
 
-        {/* Card input for current street */}
-        {stage === 'flop' && !flopCards && (
-          <CardNotationInput
-            label="Flop Cards"
-            expectedCards={3}
-            onSubmit={saveStreetCards}
-            placeholder="AhKd2c"
-            usedCards={getUsedCards()}
-          />
+        {/* Card edit buttons - shown after cards are selected to allow editing until betting starts */}
+        {stage === 'flop' && flopCards && canMoveToNextStreet() && (
+          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Flop:</span>
+              <div className="flex gap-1">
+                {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                  <PokerCard key={idx} card={card} size="xs" />
+                ))}
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleEditCards}>
+              Edit Cards
+            </Button>
+          </div>
         )}
-
-        {stage === 'turn' && !turnCard && flopCards && (
-          <CardNotationInput
-            label="Turn Card"
-            expectedCards={1}
-            onSubmit={saveStreetCards}
-            placeholder="Js"
-            usedCards={getUsedCards()}
-          />
+        {stage === 'turn' && turnCard && canMoveToNextStreet() && (
+          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Turn:</span>
+              <PokerCard card={turnCard} size="xs" />
+            </div>
+            <Button variant="outline" size="sm" onClick={handleEditCards}>
+              Edit Card
+            </Button>
+          </div>
         )}
-
-        {stage === 'river' && !riverCard && turnCard && (
-          <CardNotationInput
-            label="River Card"
-            expectedCards={1}
-            onSubmit={saveStreetCards}
-            placeholder="9h"
-            usedCards={getUsedCards()}
-          />
+        {stage === 'river' && riverCard && canMoveToNextStreet() && (
+          <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">River:</span>
+              <PokerCard card={riverCard} size="xs" />
+            </div>
+            <Button variant="outline" size="sm" onClick={handleEditCards}>
+              Edit Card
+            </Button>
+          </div>
         )}
 
 
@@ -1471,6 +1524,135 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         )}
       </CardContent>
     </Card>
+    
+    {/* Card Selector for community cards - auto-opens when cards need to be selected */}
+    <Dialog open={showCardSelector} onOpenChange={setShowCardSelector}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">
+            {cardSelectorType === 'flop' ? 'Select Flop Cards (3)' : 
+             cardSelectorType === 'turn' ? 'Select Turn Card (1)' : 
+             'Select River Card (1)'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        {/* Card grid by suit */}
+        <div className="space-y-4">
+          {[
+            { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+            { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
+            { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
+            { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+          ].map(suit => {
+            const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+            const usedCards = getUsedCards();
+            const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
+            const currentSelection = cardSelectorType === 'flop' && flopCards ? flopCards.match(/.{1,2}/g) || [] : 
+                          cardSelectorType === 'turn' && turnCard ? [turnCard] : 
+                          cardSelectorType === 'river' && riverCard ? [riverCard] : [];
+            
+            return (
+              <div key={suit.code} className="space-y-2">
+                <div className="flex items-center gap-2 pb-1 border-b border-border">
+                  <span className={`text-2xl ${suit.color}`}>{suit.symbol}</span>
+                  <h3 className="font-semibold text-base">{suit.name}</h3>
+                </div>
+                <div className="grid grid-cols-13 gap-0.5">
+                  {ranks.map(rank => {
+                    const card = `${rank}${suit.code}`;
+                    const isUsed = usedCards.includes(card);
+                    const isKnownHole = knownHoleCards.includes(card);
+                    const isSelected = currentSelection.includes(card);
+                    
+                    return (
+                      <button
+                        key={card}
+                        onClick={() => {
+                          if (isUsed || isKnownHole) return;
+                          
+                          if (isSelected) {
+                            // Remove from selection
+                            const newSelection = currentSelection.filter(c => c !== card);
+                            const newCards = newSelection.join('');
+                            if (cardSelectorType === 'flop') setFlopCards(newCards);
+                            else if (cardSelectorType === 'turn') setTurnCard(newCards);
+                            else if (cardSelectorType === 'river') setRiverCard(newCards);
+                          } else {
+                            // Add to selection
+                            const maxCards = cardSelectorType === 'flop' ? 3 : 1;
+                            if (currentSelection.length < maxCards) {
+                              const newSelection = [...currentSelection, card];
+                              const newCards = newSelection.join('');
+                              if (cardSelectorType === 'flop') setFlopCards(newCards);
+                              else if (cardSelectorType === 'turn') setTurnCard(newCards);
+                              else if (cardSelectorType === 'river') setRiverCard(newCards);
+                            }
+                          }
+                        }}
+                        disabled={isUsed || isKnownHole}
+                        className={`relative aspect-[5/7] transition-all duration-200 rounded ${
+                          (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
+                        } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg' : ''} ${
+                          !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
+                        }`}
+                      >
+                        <PokerCard card={card} size="sm" />
+                        {isUsed && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                            <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                              USED
+                            </div>
+                          </div>
+                        )}
+                        {isKnownHole && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                            <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                              HOLE
+                            </div>
+                          </div>
+                        )}
+                        {isSelected && (
+                          <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
+                            ✓
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Action buttons */}
+        <div className="flex gap-3 pt-6 border-t">
+          <Button variant="outline" onClick={() => setShowCardSelector(false)} className="flex-1 h-12 text-base">
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => {
+              const maxCards = cardSelectorType === 'flop' ? 3 : 1;
+              const currentSelection = cardSelectorType === 'flop' && flopCards ? flopCards.match(/.{1,2}/g) || [] : 
+                            cardSelectorType === 'turn' && turnCard ? [turnCard] : 
+                            cardSelectorType === 'river' && riverCard ? [riverCard] : [];
+              if (currentSelection.length === maxCards) {
+                setShowCardSelector(false);
+              }
+            }}
+            disabled={
+              (cardSelectorType === 'flop' && (!flopCards || flopCards.match(/.{1,2}/g)?.length !== 3)) ||
+              (cardSelectorType === 'turn' && !turnCard) ||
+              (cardSelectorType === 'river' && !riverCard)
+            }
+            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+          >
+            Confirm Selection
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 };
 
