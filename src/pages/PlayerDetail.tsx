@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,13 +59,7 @@ const PlayerDetail = () => {
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isGameHistoryOpen, setIsGameHistoryOpen] = useState(true);
 
-  useEffect(() => {
-    if (playerId) {
-      fetchPlayerData();
-    }
-  }, [playerId]);
-
-  const fetchPlayerData = async () => {
+  const fetchPlayerData = useCallback(async () => {
     setLoading(true);
     try {
       const { data: playerData, error: playerError } = await supabase
@@ -97,7 +91,13 @@ const PlayerDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [playerId]);
+
+  useEffect(() => {
+    if (playerId) {
+      fetchPlayerData();
+    }
+  }, [playerId, fetchPlayerData]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

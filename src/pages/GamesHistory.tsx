@@ -59,7 +59,7 @@ const GamesHistory = () => {
     if (user) {
       fetchGames();
     }
-  }, [user]);
+  }, [user, fetchGames]);
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
