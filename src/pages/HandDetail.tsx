@@ -199,46 +199,10 @@ const HandDetail = () => {
     }
   };
 
-  // Get all used cards (community cards + known hole cards)
-  const getUsedCards = useCallback(() => {
+  // Get unique players who participated in the hand - memoized
+  const playersInHand = useMemo(() => {
     if (!hand) return [];
-    const cards: string[] = [];
     
-    // Add community cards
-    if (communityCards) {
-      const communityCardArray = communityCards.match(/.{1,2}/g) || [];
-      cards.push(...communityCardArray);
-    }
-    
-    // Add known hole cards from all players
-    getPlayersInHand().forEach(player => {
-      if (player.holeCards) {
-        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
-        cards.push(...holeCardArray);
-      }
-    });
-    
-    return cards;
-  }, [hand, communityCards]);
-
-  // Get known hole cards for greying out
-  const getKnownHoleCards = useCallback(() => {
-    if (!hand) return [];
-    const cards: string[] = [];
-    
-    getPlayersInHand().forEach(player => {
-      // Exclude the currently selected player's hole cards
-      if (player.holeCards && (!selectedPlayerForHole || player.playerId !== selectedPlayerForHole.playerId)) {
-        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
-        cards.push(...holeCardArray);
-      }
-    });
-    
-    return cards;
-  }, [hand, selectedPlayerForHole]);
-
-  // Get unique players who participated in the hand
-  const getPlayersInHand = () => {
     const playerMap = new Map<string, { 
       playerId: string; 
       playerName: string; 
@@ -247,7 +211,7 @@ const HandDetail = () => {
       actionId: string;
     }>();
     
-    hand?.actions.forEach(action => {
+    hand.actions.forEach(action => {
       if (!playerMap.has(action.player_id)) {
         playerMap.set(action.player_id, {
           playerId: action.player_id,
@@ -267,7 +231,45 @@ const HandDetail = () => {
     });
     
     return Array.from(playerMap.values());
-  };
+  }, [hand]);
+
+  // Get all used cards (community cards + known hole cards)
+  const usedCards = useMemo(() => {
+    if (!hand) return [];
+    const cards: string[] = [];
+    
+    // Add community cards
+    if (communityCards) {
+      const communityCardArray = communityCards.match(/.{1,2}/g) || [];
+      cards.push(...communityCardArray);
+    }
+    
+    // Add known hole cards from all players
+    playersInHand.forEach(player => {
+      if (player.holeCards) {
+        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
+        cards.push(...holeCardArray);
+      }
+    });
+    
+    return cards;
+  }, [hand, communityCards, playersInHand]);
+
+  // Get known hole cards for greying out (excludes currently selected player)
+  const knownHoleCards = useMemo(() => {
+    if (!hand) return [];
+    const cards: string[] = [];
+    
+    playersInHand.forEach(player => {
+      // Exclude the currently selected player's hole cards
+      if (player.holeCards && (!selectedPlayerForHole || player.playerId !== selectedPlayerForHole.playerId)) {
+        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
+        cards.push(...holeCardArray);
+      }
+    });
+    
+    return cards;
+  }, [hand, selectedPlayerForHole, playersInHand]);
 
   if (loading) {
     return (
@@ -461,7 +463,7 @@ const HandDetail = () => {
               <div>
                 <h3 className="font-semibold mb-3">Hole Cards</h3>
                 <div className="space-y-2">
-                  {getPlayersInHand().map((player) => (
+                  {playersInHand.map((player) => (
                     <div
                       key={player.playerId}
                       className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -576,8 +578,8 @@ const HandDetail = () => {
           }
         }}
         maxCards={2}
-        usedCards={getUsedCards()}
-        knownHoleCards={getKnownHoleCards()}
+        usedCards={usedCards}
+        knownHoleCards={knownHoleCards}
         selectedCards={[]}
         onSelect={handleHoleCardSubmit}
         label={selectedPlayerForHole && hand ? `Select Hole Cards for ${hand.player_names[selectedPlayerForHole.playerId]}` : 'Select Hole Cards'}
