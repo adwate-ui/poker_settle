@@ -18,7 +18,7 @@ import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
 import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SeatPosition } from '@/types/poker';
 import {
   HandStage,
@@ -1580,6 +1580,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
              cardSelectorType === 'turn' ? 'Select Turn Card (1)' : 
              'Select River Card (1)'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select {cardSelectorType === 'flop' ? '3 cards for the flop' : '1 card for the ' + cardSelectorType} from the grid below. Already used cards are greyed out.
+          </DialogDescription>
         </DialogHeader>
         
         {/* Card grid by suit */}
@@ -1629,30 +1632,50 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                             }
                           }
                         }}
+                        onTouchEnd={(e) => {
+                          // Prevent default to avoid double-firing on mobile
+                          if (isUsed || isKnownHole) return;
+                          e.preventDefault();
+                          
+                          if (isSelected) {
+                            // Remove from selection
+                            const newSelection = currentSelection.filter(c => c !== card);
+                            const newCards = newSelection.join('');
+                            setTempCommunityCards(newCards);
+                          } else {
+                            // Add to selection
+                            const maxCards = cardSelectorType === 'flop' ? 3 : 1;
+                            if (currentSelection.length < maxCards) {
+                              const newSelection = [...currentSelection, card];
+                              const newCards = newSelection.join('');
+                              setTempCommunityCards(newCards);
+                            }
+                          }
+                        }}
                         disabled={isUsed || isKnownHole}
-                        className={`relative aspect-[5/7] w-full transition-all duration-200 rounded ${
+                        className={`relative aspect-[5/7] w-full transition-all duration-200 rounded touch-manipulation ${
                           (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
                         } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg' : ''} ${
                           !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
                         }`}
                       >
-                        <PokerCard card={card} size="sm" />
+                        <PokerCard card={card} size="sm" className="pointer-events-none" />
                         {isUsed && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                             <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                               USED
                             </div>
                           </div>
                         )}
                         {isKnownHole && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                             <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                               HOLE
                             </div>
                           </div>
                         )}
                         {isSelected && (
-                          <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
+                          <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg pointer-events-none">
                             ✓
                           </div>
                         )}
