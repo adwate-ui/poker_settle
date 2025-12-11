@@ -122,8 +122,10 @@ const PokerTableView = memo(({
   }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
 
   // Touch event handlers for mobile drag-and-drop
-  const handleTouchStart = useCallback((index: number) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
     if (!enableDragDrop) return;
+    // Prevent context menu on long press
+    e.preventDefault();
     setDraggedIndex(index);
   }, [enableDragDrop]);
 
@@ -254,12 +256,21 @@ const PokerTableView = memo(({
             <div className="flex flex-col items-center gap-2">
               {/* Community Cards - using Monarch design */}
               {communityCards && (
-                <div className="flex gap-1.5 animate-fade-in">
+                <div className="flex gap-1 sm:gap-1.5 animate-fade-in">
                   {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
                     <PokerCard 
                       key={idx} 
                       card={card} 
+                      size="xs"
+                      className="sm:hidden"
+                    />
+                  ))}
+                  {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard 
+                      key={`sm-${idx}`} 
+                      card={card} 
                       size="sm"
+                      className="hidden sm:block"
                     />
                   ))}
                 </div>
@@ -306,12 +317,13 @@ const PokerTableView = memo(({
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
-                onTouchStart={() => handleTouchStart(index)}
+                onTouchStart={(e) => handleTouchStart(e, index)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onContextMenu={(e) => enableDragDrop && e.preventDefault()}
                 onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
-                  enableDragDrop ? 'cursor-move' : onPlayerClick ? 'cursor-pointer' : ''
+                  enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
                   isFolded ? 'opacity-40 grayscale' : ''
                 }`}

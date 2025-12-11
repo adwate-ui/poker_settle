@@ -551,54 +551,54 @@ export const GameDetailView = ({
           <Table>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold text-left h-10 py-2">
+                <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("name")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
-                    <span className="hidden sm:inline">Player</span>
-                    <span className="sm:hidden">Plyr</span>
+                    <span className="hidden sm:inline truncate">Player</span>
+                    <span className="sm:hidden truncate">Plyr</span>
                     {getSortIcon("name")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2">
+                <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
-                    <span className="hidden sm:inline">Buy-ins</span>
-                    <span className="sm:hidden">Buy</span>
+                    <span className="hidden sm:inline truncate">Buy-ins</span>
+                    <span className="sm:hidden truncate">Buy</span>
                     {getSortIcon("buy_ins")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2">
+                <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
-                    <span className="hidden sm:inline">Net P&L</span>
-                    <span className="sm:hidden">P&L</span>
+                    <span className="hidden sm:inline truncate">Net P&L</span>
+                    <span className="sm:hidden truncate">P&L</span>
                     {getSortIcon("net_amount")}
                   </Button>
                 </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2">
+                <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm"
+                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
-                    <span className="hidden sm:inline">Final Stack</span>
-                    <span className="sm:hidden">Stack</span>
+                    <span className="hidden sm:inline truncate">Final Stack</span>
+                    <span className="sm:hidden truncate">Stack</span>
                     {getSortIcon("final_stack")}
                   </Button>
                 </TableHead>
                 {showOwnerControls && fetchBuyInHistory && (
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm">
-                    <span className="hidden sm:inline">Buy-in Log</span>
-                    <span className="sm:hidden">Log</span>
+                  <TableHead className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
+                    <span className="hidden sm:inline truncate">Buy-in Log</span>
+                    <span className="sm:hidden truncate">Log</span>
                   </TableHead>
                 )}
               </TableRow>

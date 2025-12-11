@@ -91,6 +91,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [showCardSelector, setShowCardSelector] = useState(false); // State for card selector dialog
   const [cardSelectorType, setCardSelectorType] = useState<'flop' | 'turn' | 'river'>('flop'); // Which street cards to select
   const [cardsJustAdded, setCardsJustAdded] = useState(false); // Track if community cards were just added
+  const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -137,12 +138,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   useEffect(() => {
     if (stage === 'flop' && !flopCards && currentHand) {
       setCardSelectorType('flop');
+      setTempCommunityCards(''); // Initialize temp with empty
       setShowCardSelector(true);
     } else if (stage === 'turn' && !turnCard && flopCards && currentHand) {
       setCardSelectorType('turn');
+      setTempCommunityCards(''); // Initialize temp with empty
       setShowCardSelector(true);
     } else if (stage === 'river' && !riverCard && turnCard && currentHand) {
       setCardSelectorType('river');
+      setTempCommunityCards(''); // Initialize temp with empty
       setShowCardSelector(true);
     }
   }, [stage, flopCards, turnCard, riverCard, currentHand]);
@@ -580,12 +584,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     // Reopen the card selector to edit
     if (stage === 'flop' && flopCards) {
       setCardSelectorType('flop');
+      setTempCommunityCards(flopCards); // Initialize temp with current cards
       setShowCardSelector(true);
     } else if (stage === 'turn' && turnCard) {
       setCardSelectorType('turn');
+      setTempCommunityCards(turnCard); // Initialize temp with current card
       setShowCardSelector(true);
     } else if (stage === 'river' && riverCard) {
       setCardSelectorType('river');
+      setTempCommunityCards(riverCard); // Initialize temp with current card
       setShowCardSelector(true);
     }
   };
@@ -1405,15 +1412,28 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   value={betAmount}
                   onChange={(e) => {
                     const value = e.target.value;
+                    // Allow empty input or direct value entry
+                    setBetAmount(value);
+                  }}
+                  onBlur={(e) => {
+                    // Round to nearest small blind multiple only on blur
+                    const value = e.target.value;
                     if (value === '') {
-                      setBetAmount('');
                       return;
                     }
                     const numValue = parseFloat(value);
-                    const smallBlind = game.small_blind || 50;
-                    // Round to nearest small blind multiple
-                    const rounded = Math.round(numValue / smallBlind) * smallBlind;
-                    setBetAmount(rounded.toString());
+                    if (!isNaN(numValue)) {
+                      if (numValue <= 0) {
+                        // Clear invalid values
+                        setBetAmount('');
+                      } else {
+                        const smallBlind = game.small_blind || 50;
+                        const rounded = Math.round(numValue / smallBlind) * smallBlind;
+                        setBetAmount(rounded.toString());
+                      }
+                    } else {
+                      setBetAmount('');
+                    }
                   }}
                   placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}`}
                   min={currentBet === 0 ? game.big_blind : currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}
@@ -1545,7 +1565,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     </Card>
     
     {/* Card Selector for community cards - auto-opens when cards need to be selected */}
-    <Dialog open={showCardSelector} onOpenChange={setShowCardSelector}>
+    <Dialog open={showCardSelector} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        // When closing without confirm, reset temp state
+        setTempCommunityCards('');
+      }
+      setShowCardSelector(isOpen);
+    }}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
@@ -1566,9 +1592,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
             const usedCards = getUsedCards();
             const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
-            const currentSelection = cardSelectorType === 'flop' && flopCards ? flopCards.match(/.{1,2}/g) || [] : 
-                          cardSelectorType === 'turn' && turnCard ? [turnCard] : 
-                          cardSelectorType === 'river' && riverCard ? [riverCard] : [];
+            const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
             
             return (
               <div key={suit.code} className="space-y-2">
@@ -1593,18 +1617,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                             // Remove from selection
                             const newSelection = currentSelection.filter(c => c !== card);
                             const newCards = newSelection.join('');
-                            if (cardSelectorType === 'flop') setFlopCards(newCards);
-                            else if (cardSelectorType === 'turn') setTurnCard(newCards);
-                            else if (cardSelectorType === 'river') setRiverCard(newCards);
+                            setTempCommunityCards(newCards);
                           } else {
                             // Add to selection
                             const maxCards = cardSelectorType === 'flop' ? 3 : 1;
                             if (currentSelection.length < maxCards) {
                               const newSelection = [...currentSelection, card];
                               const newCards = newSelection.join('');
-                              if (cardSelectorType === 'flop') setFlopCards(newCards);
-                              else if (cardSelectorType === 'turn') setTurnCard(newCards);
-                              else if (cardSelectorType === 'river') setRiverCard(newCards);
+                              setTempCommunityCards(newCards);
                             }
                           }
                         }}
@@ -1646,23 +1666,37 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         
         {/* Action buttons */}
         <div className="flex gap-3 pt-6 border-t">
-          <Button variant="outline" onClick={() => setShowCardSelector(false)} className="flex-1 h-12 text-base">
+          <Button variant="outline" onClick={() => {
+            // Cancel - reset temp state and close
+            setTempCommunityCards('');
+            setShowCardSelector(false);
+          }} className="flex-1 h-12 text-base">
             Cancel
           </Button>
           <Button 
             onClick={() => {
+              // Confirm - save temp state to actual state
               const maxCards = cardSelectorType === 'flop' ? 3 : 1;
-              const currentSelection = cardSelectorType === 'flop' && flopCards ? flopCards.match(/.{1,2}/g) || [] : 
-                            cardSelectorType === 'turn' && turnCard ? [turnCard] : 
-                            cardSelectorType === 'river' && riverCard ? [riverCard] : [];
+              const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
               if (currentSelection.length === maxCards) {
+                if (cardSelectorType === 'flop') {
+                  setFlopCards(tempCommunityCards);
+                  setCardsJustAdded(true);
+                } else if (cardSelectorType === 'turn') {
+                  setTurnCard(tempCommunityCards);
+                  setCardsJustAdded(true);
+                } else if (cardSelectorType === 'river') {
+                  setRiverCard(tempCommunityCards);
+                  setCardsJustAdded(true);
+                }
+                setTempCommunityCards('');
                 setShowCardSelector(false);
               }
             }}
             disabled={
-              (cardSelectorType === 'flop' && (!flopCards || flopCards.match(/.{1,2}/g)?.length !== 3)) ||
-              (cardSelectorType === 'turn' && !turnCard) ||
-              (cardSelectorType === 'river' && !riverCard)
+              (cardSelectorType === 'flop' && (!tempCommunityCards || tempCommunityCards.match(/.{1,2}/g)?.length !== 3)) ||
+              (cardSelectorType === 'turn' && !tempCommunityCards) ||
+              (cardSelectorType === 'river' && !tempCommunityCards)
             }
             className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
           >
