@@ -16,7 +16,7 @@ import CardNotationInput from './CardNotationInput';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
-import { determineWinner, formatCardNotation } from '@/utils/pokerHandEvaluator';
+import { determineWinner, formatCardNotation, parseCardNotationString } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SeatPosition } from '@/types/poker';
@@ -1259,7 +1259,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           }}
           maxCards={2}
           usedCards={getUsedCards()}
-          selectedCards={selectedPlayerForHole ? (playerHoleCards[selectedPlayerForHole]?.match(/.{1,2}/g) || []) : []}
+          selectedCards={selectedPlayerForHole ? parseCardNotationString(playerHoleCards[selectedPlayerForHole] || '') : []}
           label={`Select Hole Cards for ${remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name || 'Player'}`}
         />
       </>

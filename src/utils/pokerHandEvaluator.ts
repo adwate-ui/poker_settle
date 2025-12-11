@@ -15,6 +15,15 @@ interface HandResult {
   bestHand: string[];
 }
 
+/**
+ * Parse a card notation string into individual card strings
+ * @param notation - Card notation string (e.g., "AhKdQs")
+ * @returns Array of individual card strings (e.g., ["Ah", "Kd", "Qs"])
+ */
+export const parseCardNotationString = (notation: string): string[] => {
+  return notation.match(/.{1,2}/g) || [];
+};
+
 // Convert notation to card objects
 const parseCard = (notation: string): Card => {
   const rankMap: Record<string, string> = {
