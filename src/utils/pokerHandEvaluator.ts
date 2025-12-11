@@ -21,6 +21,9 @@ interface HandResult {
  * @returns Array of individual card strings (e.g., ["Ah", "Kd", "Qs"])
  */
 export const parseCardNotationString = (notation: string): string[] => {
+  if (!notation || typeof notation !== 'string') {
+    return [];
+  }
   return notation.match(/.{1,2}/g) || [];
 };
 
