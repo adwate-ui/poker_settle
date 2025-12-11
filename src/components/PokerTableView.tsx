@@ -6,6 +6,16 @@ import ChipStack from "./ChipStack";
 import { GamePlayer } from "@/types/poker";
 import OptimizedAvatar from "./OptimizedAvatar";
 
+// Z-index constants for proper layering
+const Z_INDEX = {
+  HOLE_CARDS: 5,      // Hole cards should be below player avatars
+  PLAYER_UNIT: 10,    // Player avatar, name, and related elements
+  BUTTON_BADGE: 15,   // Dealer button badge
+  CHIP_STACK: 20,     // Chip stacks
+  POSITION_LABEL: 25, // Position labels
+  WINNER_BADGE: 30,   // Winner badge (highest)
+} as const;
+
 interface PokerTableViewProps {
   positions: SeatPosition[];
   totalSeats?: number;
@@ -325,7 +335,7 @@ const PokerTableView = memo(({
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
                   enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
-                  isFolded ? 'opacity-40 grayscale' : ''
+                  isFolded ? 'opacity-50 grayscale' : ''
                 }`}
                 style={{
                   left: `${pos.x}%`,
@@ -335,19 +345,19 @@ const PokerTableView = memo(({
                 <div className="relative flex flex-col items-center gap-1">
                   {/* Position label - absolutely positioned to avoid layout shift */}
                   {positionLabel && (
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md whitespace-nowrap z-30">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md whitespace-nowrap" style={{ zIndex: Z_INDEX.POSITION_LABEL }}>
                       {positionLabel}
                     </div>
                   )}
                   
                   {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
-                  <div className="relative flex flex-col items-center gap-1">
+                  <div className="relative flex flex-col items-center gap-1" style={{ zIndex: Z_INDEX.PLAYER_UNIT }}>
                     {/* Player avatar - central element */}
                     <div className="relative">
                       <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                         isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                         isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                      } ${isFolded ? 'opacity-40 grayscale' : ''}`}>
+                      }`}>
                         <OptimizedAvatar 
                           name={position.player_name}
                           size="md"
@@ -357,7 +367,7 @@ const PokerTableView = memo(({
                       </div>
                       {/* Button indicator overlay - positioned as sibling for proper layering */}
                       {isButton && (
-                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg z-20">
+                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg" style={{ zIndex: Z_INDEX.BUTTON_BADGE }}>
                           D
                         </div>
                       )}
@@ -378,12 +388,13 @@ const PokerTableView = memo(({
                     {/* Player hole cards - positioned to the side for better visibility, hidden on mobile */}
                     {(hasKnownCards || shouldShowCards) && (
                       <div 
-                        className={`absolute hidden sm:flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
+                        className={`absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out ${
                           isFolded ? 'opacity-30 grayscale' : 'opacity-100'
                         } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{
                           top: '50%',
                           transform: 'translateY(-50%)',
+                          zIndex: Z_INDEX.HOLE_CARDS,
                         }}
                       >
                         {hasKnownCards ? (
@@ -413,7 +424,7 @@ const PokerTableView = memo(({
                     
                     return (
                       <div 
-                        className={`absolute z-20 transition-all duration-500 ease-in-out ${
+                        className={`absolute transition-all duration-500 ease-in-out ${
                           shouldAnimate
                             ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
                             : 'opacity-100 scale-100'
@@ -421,6 +432,7 @@ const PokerTableView = memo(({
                         style={{
                           top: pos.y > 50 ? '-60px' : '80px',
                           left: pos.x > 50 ? '-50px' : '50px',
+                          zIndex: Z_INDEX.CHIP_STACK,
                         }}
                       >
                         <ChipStack amount={playerBet} size="sm" showLabel={true} />
@@ -431,10 +443,11 @@ const PokerTableView = memo(({
                   {/* Winner chip animation - shows pot chips coming to winner */}
                   {isWinner && (
                     <div 
-                      className="absolute z-30 animate-in fade-in zoom-in duration-700"
+                      className="absolute animate-in fade-in zoom-in duration-700"
                       style={{
                         top: pos.y > 50 ? '-70px' : '90px',
                         left: pos.x > 50 ? '-60px' : '60px',
+                        zIndex: Z_INDEX.WINNER_BADGE,
                       }}
                     >
                       <div className="flex flex-col items-center gap-2">
