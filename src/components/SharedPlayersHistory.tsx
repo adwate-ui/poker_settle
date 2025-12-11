@@ -335,7 +335,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(`/shared/${token}/game/${game.game_id}`)}
+                        onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.game_id}`)}
                         className="hover:text-primary"
                       >
                         View Game

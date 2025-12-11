@@ -47,7 +47,7 @@ type SortField = 'date' | 'buy_ins' | 'final_stack' | 'net_amount';
 type SortOrder = 'asc' | 'desc' | null;
 
 const SharedPlayerDetail = () => {
-  const { token, playerId } = useParams<{ token: string; playerId: string }>();
+  const { token: encodedToken, playerId } = useParams<{ token: string; playerId: string }>();
   const navigate = useNavigate();
   const [player, setPlayer] = useState<Player | null>(null);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
@@ -56,6 +56,9 @@ const SharedPlayerDetail = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>('all');
   const [resourceType, setResourceType] = useState<string | null>(null);
+
+  // Decode the token from the URL
+  const token = encodedToken ? decodeURIComponent(encodedToken) : '';
 
   useEffect(() => {
     const fetchPlayerData = async () => {
@@ -190,7 +193,7 @@ const SharedPlayerDetail = () => {
     return (
       <div className="min-h-screen bg-background p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
-          <Button onClick={() => navigate(`/shared/${token}`)} variant="ghost">
+          <Button onClick={() => navigate(`/shared/${encodeURIComponent(token)}`)} variant="ghost">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
@@ -221,7 +224,7 @@ const SharedPlayerDetail = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         <Button
           variant="ghost"
-          onClick={() => navigate(`/shared/${token}`)}
+          onClick={() => navigate(`/shared/${encodeURIComponent(token)}`)}
           className="mb-4 hover:text-primary"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -368,7 +371,7 @@ const SharedPlayerDetail = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigate(`/shared/${token}/game/${game.game_id}`)}
+                          onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.game_id}`)}
                           className="hover:text-primary"
                         >
                           View Game

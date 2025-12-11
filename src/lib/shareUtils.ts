@@ -39,14 +39,14 @@ export const buildSharedViewUrl = (
   resourceType: ShareResourceType,
   resourceId: string
 ): string => {
-  return `/shared/${accessToken}/${resourceType}/${resourceId}`;
+  return `/shared/${encodeURIComponent(accessToken)}/${resourceType}/${resourceId}`;
 };
 
 /**
  * Build base shared view URL (for token validation page)
  */
 export const buildBaseSharedUrl = (accessToken: string): string => {
-  return `/shared/${accessToken}`;
+  return `/shared/${encodeURIComponent(accessToken)}`;
 };
 
 /**

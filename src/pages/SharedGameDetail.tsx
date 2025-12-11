@@ -3,10 +3,10 @@ import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { GameDetailView } from '@/components/GameDetailView';
 
 const SharedGameDetail = () => {
-  const { token, gameId } = useParams<{ token: string; gameId: string }>();
+  const { token: encodedToken, gameId } = useParams<{ token: string; gameId: string }>();
   const navigate = useNavigate();
 
-  if (!token || !gameId) {
+  if (!encodedToken || !gameId) {
     return (
       <div className="min-h-screen bg-background p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
@@ -16,6 +16,8 @@ const SharedGameDetail = () => {
     );
   }
 
+  // Decode the token from the URL
+  const token = decodeURIComponent(encodedToken);
   const sharedClient = createSharedClient(token);
 
   return (
@@ -25,7 +27,7 @@ const SharedGameDetail = () => {
         client={sharedClient}
         token={token}
         showOwnerControls={false}
-        onBack={() => navigate(`/shared/${token}`)}
+        onBack={() => navigate(`/shared/${encodeURIComponent(token)}`)}
         backLabel="Back to Games History"
       />
     </div>
