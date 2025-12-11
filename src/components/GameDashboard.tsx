@@ -633,7 +633,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </DialogContent>
             </Dialog>
           </div>
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
