@@ -47,7 +47,7 @@ const HandReplay = ({
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStreet, setCurrentStreet] = useState<'Preflop' | 'Flop' | 'Turn' | 'River'>('Preflop');
-  const [potSize, setPotSize] = useState(0); // Start from 0
+  const [potSize, setPotSize] = useState(0); // Start at 0, blinds are in actions
   const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
   const [communityCards, setCommunityCards] = useState<string>('');
   const [foldedPlayers, setFoldedPlayers] = useState<string[]>([]);
@@ -380,7 +380,7 @@ const HandReplay = ({
       setCurrentActionIndex(0);
       setIsPlaying(false);
       setCurrentStreet('Preflop');
-      setPotSize(0);
+      setPotSize(0); // Reset to 0, blinds are in actions
       setStreetPlayerBets({});
       setCommunityCards('');
       setFoldedPlayers([]);
@@ -397,7 +397,7 @@ const HandReplay = ({
       
       // BUG A FIX: Use local tracking during rapid replay to avoid stale state
       const localBets: Record<string, number> = {};
-      const localPot = { value: 0 };
+      const localPot = { value: 0 }; // Start at 0, blinds are in actions
       const localFolded: string[] = [];
       const localStreet = { value: 'Preflop' };
       
@@ -413,7 +413,7 @@ const HandReplay = ({
     setCurrentActionIndex(0);
     setIsPlaying(false);
     setCurrentStreet('Preflop');
-    setPotSize(0); // Reset to 0
+    setPotSize(0); // Reset to 0, blinds are in actions
     setStreetPlayerBets({});
     setCommunityCards('');
     setFoldedPlayers([]);
