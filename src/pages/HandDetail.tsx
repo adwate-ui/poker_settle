@@ -253,27 +253,19 @@ const HandDetail = () => {
       }, '');
   }, [hand]);
 
-  // Get all used cards (community cards + known hole cards)
-  const usedCards = useMemo(() => {
+  // Get community cards for greying out
+  const communityCardsArray = useMemo(() => {
     if (!hand) return [];
     const cards: string[] = [];
     
-    // Add community cards
+    // Add community cards only
     if (communityCards) {
       const communityCardArray = communityCards.match(/.{1,2}/g) || [];
       cards.push(...communityCardArray);
     }
     
-    // Add known hole cards from all players
-    playersInHand.forEach(player => {
-      if (player.holeCards) {
-        const holeCardArray = player.holeCards.match(/.{1,2}/g) || [];
-        cards.push(...holeCardArray);
-      }
-    });
-    
     return cards;
-  }, [hand, communityCards, playersInHand]);
+  }, [hand, communityCards]);
 
   // Get known hole cards for greying out (excludes currently selected player)
   const knownHoleCards = useMemo(() => {
@@ -581,7 +573,7 @@ const HandDetail = () => {
           }
         }}
         maxCards={2}
-        usedCards={usedCards}
+        usedCards={communityCardsArray}
         knownHoleCards={knownHoleCards}
         selectedCards={[]}
         onSelect={handleHoleCardSubmit}
