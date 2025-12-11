@@ -121,7 +121,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
                 className="h-7 text-xs text-center font-mono border-orange-300 dark:border-orange-800 bg-background"
-                placeholder="+2"
+                placeholder=""
               />
               <Button 
                 variant="default" 
@@ -147,7 +147,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
                 className="h-7 text-xs text-center font-mono border-green-300 dark:border-green-800 bg-background"
-                placeholder="0"
+                placeholder=""
               />
               {hasFinalStackChanges && (
                 <Button 

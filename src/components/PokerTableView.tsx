@@ -320,8 +320,8 @@ const PokerTableView = memo(({
                   
                   {/* Player avatar with hole cards positioned above */}
                   <div className="relative">
-                    {/* Player hole cards - positioned to overlap with player name below */}
-                    <div className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1 z-10 transition-all duration-300 ease-in-out ${
+                    {/* Player hole cards - positioned above the avatar to avoid covering player info */}
+                    <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 flex gap-1 z-10 transition-all duration-300 ease-in-out ${
                       isFolded ? 'opacity-30 grayscale' : 'opacity-100'
                     }`}>
                       {hasKnownCards ? (
