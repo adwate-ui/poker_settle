@@ -11,6 +11,9 @@ import {
 } from "./ui/select";
 import PokerTableView from "./PokerTableView";
 
+// Constant for empty seat placeholder value
+const EMPTY_SEAT_VALUE = "empty_seat";
+
 interface TablePositionEditorProps {
   players: Player[];
   currentPositions?: SeatPosition[];
@@ -38,7 +41,7 @@ const TablePositionEditor = ({
   positions.forEach(pos => seatToPlayer.set(pos.seat, pos));
 
   const handlePlayerSelect = (seat: number, playerId: string) => {
-    if (!playerId) {
+    if (!playerId || playerId === EMPTY_SEAT_VALUE) {
       // If empty selection, remove the player from this seat
       setPositions(positions.filter(p => p.seat !== seat));
       return;
@@ -118,7 +121,7 @@ const TablePositionEditor = ({
                     <SelectValue placeholder="Select player..." />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    <SelectItem value="">
+                    <SelectItem value={EMPTY_SEAT_VALUE}>
                       <span className="text-muted-foreground italic">- Empty seat -</span>
                     </SelectItem>
                     {players
