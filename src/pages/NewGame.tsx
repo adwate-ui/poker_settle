@@ -3,17 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Plus, Trash2, Play, ArrowLeft } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import GameDashboard from "@/components/GameDashboard";
+import PlayerSelector from "@/components/PlayerSelector";
 import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
 
 const NewGame = () => {
@@ -22,13 +18,10 @@ const NewGame = () => {
   const [smallBlind, setSmallBlind] = useState("20");
   const [bigBlind, setBigBlind] = useState("40");
   const [players, setPlayers] = useState<Player[]>([]);
-  const [newPlayerName, setNewPlayerName] = useState("");
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const [gamePlayers, setGamePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [showActiveGame, setShowActiveGame] = useState(false);
-  const [openCombobox, setOpenCombobox] = useState(false);
 
   const fetchPlayers = useCallback(async () => {
     const { data, error } = await supabase
@@ -72,49 +65,25 @@ const NewGame = () => {
     }
   }, [user, fetchPlayers, checkActiveGame]);
 
-  const addNewPlayer = async () => {
-    if (!newPlayerName.trim()) {
-      toast.error("Please enter a player name");
-      return;
-    }
+  const addNewPlayer = async (name: string): Promise<Player> => {
+    const { data, error } = await supabase
+      .from("players")
+      .insert({ name, user_id: user?.id })
+      .select()
+      .single();
 
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("players")
-        .insert({ name: newPlayerName, user_id: user?.id })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setPlayers([...players, data]);
-      setGamePlayers([...gamePlayers, data]);
-      setNewPlayerName("");
-      toast.success("Player added");
-    } catch (error) {
-      toast.error("Failed to add player");
-    } finally {
-      setLoading(false);
-    }
+    if (error) throw error;
+    
+    // Add to players list
+    setPlayers([...players, data]);
+    return data;
   };
 
-  const addExistingPlayer = (playerId?: string) => {
-    const player = players.find(p => p.id === (playerId || selectedPlayerId));
-    if (!player) return;
-
-    if (gamePlayers.find(p => p.id === player.id)) {
-      toast.error("Player already added");
-      return;
-    }
-
+  const addPlayerToGame = (player: Player) => {
     setGamePlayers([...gamePlayers, player]);
-    setSelectedPlayerId("");
-    setOpenCombobox(false);
-    toast.success("Player added to game");
   };
 
-  const removePlayer = (playerId: string) => {
+  const removePlayerFromGame = (playerId: string) => {
     setGamePlayers(gamePlayers.filter(p => p.id !== playerId));
   };
 
@@ -289,128 +258,16 @@ const NewGame = () => {
 
         {/* Add Players Section */}
         <div className="space-y-3">
-          <h3 className="text-sm sm:text-base font-semibold">Players ({gamePlayers.length})</h3>
+          <h3 className="text-sm sm:text-base font-semibold">Players</h3>
           
-          {/* Current Players List */}
-          {gamePlayers.length > 0 && (
-            <div className="grid gap-1.5">
-              {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
-                <Card key={player.id}>
-                  <CardContent className="flex items-center justify-between p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                        <img 
-                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                          alt={player.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-medium text-sm">{player.name}</span>
-                        <div className="flex items-center gap-1">
-                          <Badge variant="info" className="text-[10px] h-4 px-1.5">
-                            {player.total_games} games
-                          </Badge>
-                          <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-[10px] h-4 px-1.5">
-                            {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePlayer(player.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Add New Player */}
-          <div className="flex gap-1.5">
-            <Input
-              placeholder="New player name"
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
-              className="flex-1"
-              disabled={hasActiveGame}
-            />
-            <Button onClick={addNewPlayer} disabled={loading || hasActiveGame} size="sm" className="px-3">
-              <Plus className="h-4 w-4 mr-1.5" />
-              <span className="text-xs sm:text-sm">Add</span>
-            </Button>
-          </div>
-
-          {/* Add Existing Player */}
-          <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={openCombobox}
-                className="w-full justify-between"
-                disabled={hasActiveGame}
-              >
-                {selectedPlayerId
-                  ? players.find((player) => player.id === selectedPlayerId)?.name
-                  : "Select existing player..."}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search players..." />
-                <CommandList>
-                  <CommandEmpty>No player found.</CommandEmpty>
-                  <CommandGroup>
-                    {players
-                      .filter(p => !gamePlayers.find(gp => gp.id === p.id))
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((player) => (
-                        <CommandItem
-                          key={player.id}
-                          value={player.name}
-                          onSelect={() => {
-                            addExistingPlayer(player.id);
-                          }}
-                        >
-                          <Check
-                            className={`mr-2 h-4 w-4 ${
-                              selectedPlayerId === player.id ? "opacity-100" : "opacity-0"
-                            }`}
-                          />
-                          <div className="flex items-center gap-2 w-full">
-                            <div className="w-7 h-7 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                              <img 
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                                alt={player.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="flex flex-col gap-0.5 flex-1">
-                              <span className="font-medium text-sm">{player.name}</span>
-                              <div className="flex items-center gap-1">
-                                <Badge variant="info" className="text-[10px] h-4 px-1.5">
-                                  {player.total_games} games
-                                </Badge>
-                                <Badge variant={player.total_profit >= 0 ? "success" : "destructive"} className="text-[10px] h-4 px-1.5">
-                                  {player.total_profit >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit))}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <PlayerSelector
+            allPlayers={players}
+            selectedPlayers={gamePlayers}
+            onAddPlayer={addPlayerToGame}
+            onRemovePlayer={removePlayerFromGame}
+            onCreateNewPlayer={addNewPlayer}
+            disabled={hasActiveGame}
+          />
         </div>
 
         {/* Start Game Button */}

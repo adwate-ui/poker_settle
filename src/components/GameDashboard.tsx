@@ -15,6 +15,11 @@ import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface GameDashboardProps {
   game: Game;
@@ -27,6 +32,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
   const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
   const [showManualTransfer, setShowManualTransfer] = useState(false);
   const [newTransferFrom, setNewTransferFrom] = useState('');
@@ -64,17 +71,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   }, [updateGamePlayer]);
 
   const addNewPlayer = useCallback(async () => {
-    if (!newPlayerName.trim()) return;
+    if (!newPlayerName.trim()) {
+      toast.error("Please enter a player name");
+      return;
+    }
     
+    setIsCreatingPlayer(true);
     try {
       const player = await createOrFindPlayer(newPlayerName.trim());
       const gamePlayer = await addPlayerToGame(game.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
       setNewPlayerName('');
       setShowAddPlayer(false);
-      toast.success("Player added to game");
+      toast.success(`${player.name} added to game`);
     } catch (error) {
       toast.error("Failed to add player");
+    } finally {
+      setIsCreatingPlayer(false);
     }
   }, [newPlayerName, createOrFindPlayer, game.id, addPlayerToGame, gamePlayers]);
 
@@ -83,11 +96,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       const gamePlayer = await addPlayerToGame(game.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
-      toast.success("Player added to game");
+      setSearchQuery('');
+      toast.success(`${player.name} added to game`);
     } catch (error) {
       toast.error("Failed to add player");
     }
-  }, [game.id, addPlayerToGame]);
+  }, [game.id, addPlayerToGame, gamePlayers]);
+
+  const availablePlayers = useMemo(() => {
+    return players
+      .filter(p => !gamePlayers.find(gp => gp.player_id === p.id))
+      .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => {
+        // Sort by total games (most active first), then by name
+        const gamesCompare = (b.total_games || 0) - (a.total_games || 0);
+        return gamesCompare !== 0 ? gamesCompare : a.name.localeCompare(b.name);
+      });
+  }, [players, gamePlayers, searchQuery]);
 
   const addManualTransfer = useCallback(() => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
@@ -411,75 +436,164 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         <div className="space-y-4">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">Players</h2>
-            <Button 
-              onClick={() => setShowAddPlayer(!showAddPlayer)}
-              className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              {showAddPlayer ? 'Cancel' : 'Add Player'}
-            </Button>
-          </div>
+            
+            <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 w-full xs:w-auto">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Add Player
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh]">
+                <DialogHeader>
+                  <DialogTitle>Add Player to Game</DialogTitle>
+                  <DialogDescription>
+                    Select from existing players or create a new one
+                  </DialogDescription>
+                </DialogHeader>
 
-          {showAddPlayer && (
-            <Card className="bg-card border-border">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <Input 
-                      value={newPlayerName} 
-                      onChange={(e) => setNewPlayerName(e.target.value)}
-                      placeholder="Enter player name"
-                      className="bg-input border-border"
-                      onKeyPress={(e) => e.key === 'Enter' && addNewPlayer()}
-                    />
-                    <Button onClick={addNewPlayer} disabled={!newPlayerName.trim()} className="w-full sm:w-auto">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add New
-                    </Button>
-                  </div>
-                  
-                  {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2 text-sm sm:text-base">Or select existing player:</h4>
-                      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-                        {players.filter(p => !gamePlayers.find(gp => gp.player_id === p.id)).sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                          <Button
-                            key={player.id}
-                            variant="outline"
-                            onClick={() => addExistingPlayer(player)}
-                            className="justify-start flex-col items-start h-auto py-2"
-                          >
-                            <div className="flex items-center gap-2 w-full">
-                              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-                                <img 
-                                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                                  alt={player.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <span className="font-medium">{player.name}</span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="px-2 py-0.5 text-xs rounded-md bg-muted text-muted-foreground">
-                                {player.total_games} games
-                              </span>
-                              <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${
-                                player.total_profit >= 0 
-                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              }`}>
-                                Rs. {formatIndianNumber(player.total_profit)}
-                              </span>
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
+                <Tabs defaultValue="existing" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="existing">Existing Players</TabsTrigger>
+                    <TabsTrigger value="new">New Player</TabsTrigger>
+                  </TabsList>
+
+                  {/* Existing Players Tab */}
+                  <TabsContent value="existing" className="space-y-4">
+                    {/* Search */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search players by name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
+                      />
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
+                    {/* Players List */}
+                    {availablePlayers.length > 0 ? (
+                      <div className="space-y-2">
+                        {searchQuery && (
+                          <h4 className="text-sm font-medium text-muted-foreground">
+                            Search Results ({availablePlayers.length})
+                          </h4>
+                        )}
+                        <ScrollArea className="h-[300px] pr-4">
+                          <div className="grid gap-2">
+                            {availablePlayers.map((player) => (
+                              <button
+                                key={player.id}
+                                onClick={() => addExistingPlayer(player)}
+                                className={cn(
+                                  "w-full text-left p-3 rounded-lg border bg-card hover:bg-accent hover:shadow-md transition-all",
+                                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                )}
+                              >
+                                <div className="flex items-center gap-3">
+                                  {/* Avatar */}
+                                  <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex-shrink-0">
+                                    <img
+                                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
+                                      alt={player.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+
+                                  {/* Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold truncate">{player.name}</span>
+                                      {player.total_games && player.total_games > 10 && (
+                                        <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                                        <UsersIcon className="h-3 w-3 mr-1" />
+                                        {player.total_games || 0} games
+                                      </Badge>
+                                      {player.total_profit !== undefined && (
+                                        <Badge
+                                          variant={player.total_profit >= 0 ? 'success' : 'destructive'}
+                                          className="text-[10px] h-5 px-1.5"
+                                        >
+                                          {player.total_profit >= 0 ? (
+                                            <TrendingUp className="h-3 w-3 mr-1" />
+                                          ) : (
+                                            <TrendingDown className="h-3 w-3 mr-1" />
+                                          )}
+                                          {player.total_profit >= 0 ? '+' : ''}
+                                          Rs. {formatIndianNumber(Math.abs(player.total_profit))}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Select Icon */}
+                                  <Check className="h-5 w-5 text-primary" />
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        {searchQuery ? (
+                          <div className="space-y-2">
+                            <p>No players found matching "{searchQuery}"</p>
+                            <p className="text-sm">Try creating a new player instead</p>
+                          </div>
+                        ) : (
+                          <p>All players have been added</p>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  {/* New Player Tab */}
+                  <TabsContent value="new" className="space-y-4">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label htmlFor="newPlayerName" className="text-sm font-medium">
+                          Player Name
+                        </label>
+                        <Input
+                          id="newPlayerName"
+                          placeholder="Enter player name"
+                          value={newPlayerName}
+                          onChange={(e) => setNewPlayerName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isCreatingPlayer) {
+                              addNewPlayer();
+                            }
+                          }}
+                          autoFocus
+                        />
+                      </div>
+
+                      <Button
+                        onClick={addNewPlayer}
+                        disabled={!newPlayerName.trim() || isCreatingPlayer}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isCreatingPlayer ? (
+                          <>Creating...</>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Create and Add Player
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

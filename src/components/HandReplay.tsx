@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Play, Pause, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
 import PokerTableView from './PokerTableView';
 import { SeatPosition } from '@/types/poker';
