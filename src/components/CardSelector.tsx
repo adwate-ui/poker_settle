@@ -141,32 +141,37 @@ const CardSelector = ({
                     <button
                       key={card}
                       onClick={() => handleCardClick(card)}
+                      onTouchEnd={(e) => {
+                        // Prevent default to avoid double-firing on mobile
+                        e.preventDefault();
+                        handleCardClick(card);
+                      }}
                       disabled={isUsed || isKnownHole}
                       className={cn(
-                        "relative aspect-[5/7] transition-all duration-200 rounded",
+                        "relative aspect-[5/7] transition-all duration-200 rounded touch-manipulation",
                         (isUsed || isKnownHole) && "opacity-30 cursor-not-allowed grayscale",
                         isSelected && "ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg",
                         !isUsed && !isKnownHole && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
-                      <PokerCard card={card} size="xs" className="sm:hidden" />
-                      <PokerCard card={card} size="sm" className="hidden sm:block" />
+                      <PokerCard card={card} size="xs" className="sm:hidden pointer-events-none" />
+                      <PokerCard card={card} size="sm" className="hidden sm:block pointer-events-none" />
                       {isUsed && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                           <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             USED
                           </div>
                         </div>
                       )}
                       {isKnownHole && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                           <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             HOLE
                           </div>
                         </div>
                       )}
                       {isSelected && (
-                        <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
+                        <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg pointer-events-none">
                           ✓
                         </div>
                       )}

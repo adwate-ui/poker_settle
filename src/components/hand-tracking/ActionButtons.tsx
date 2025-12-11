@@ -45,6 +45,7 @@ const ActionButtons = memo(({
       </Button>
       <Input
         type="number"
+        inputMode="numeric"
         placeholder="Raise amt"
         value={betAmount}
         onChange={(e) => setBetAmount(e.target.value)}

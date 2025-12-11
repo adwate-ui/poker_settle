@@ -1409,6 +1409,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               <div className="flex gap-2">
                 <Input
                   type="number"
+                  inputMode="numeric"
                   value={betAmount}
                   onChange={(e) => {
                     const value = e.target.value;
