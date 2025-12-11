@@ -113,8 +113,8 @@ export const useGameData = () => {
         game_id: gameData.id,
         player_id: player.id,
         buy_ins: 1,
-        final_stack: buyInAmount, // Start with final_stack equal to buy-in
-        net_amount: 0 // Net is 0 initially (final_stack - buy_ins * buyInAmount = buyInAmount - 1 * buyInAmount = 0)
+        final_stack: 0, // Start with final_stack at 0 (not cashed out yet)
+        net_amount: -buyInAmount // Net is negative initially (final_stack - buy_ins * buyInAmount = 0 - 1 * buyInAmount = -buyInAmount)
       }));
 
       const { error: gamePlayersError } = await supabase

@@ -334,7 +334,7 @@ const PokerTableView = memo(({
                       <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                         isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                         isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                      }`}>
+                      } ${isFolded ? 'opacity-40 grayscale' : ''}`}>
                         <OptimizedAvatar 
                           name={position.player_name}
                           size="md"

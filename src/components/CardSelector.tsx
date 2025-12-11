@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,8 @@ interface CardSelectorProps {
   label?: string;
   trigger?: React.ReactNode;
   knownHoleCards?: string[]; // Add prop for known hole cards to grey out
+  open?: boolean; // Controlled open state
+  onOpenChange?: (open: boolean) => void; // Controlled open state callback
 }
 
 const CardSelector = ({
@@ -23,10 +25,23 @@ const CardSelector = ({
   selectedCards = [],
   label = "Select Cards",
   trigger,
-  knownHoleCards = []
+  knownHoleCards = [],
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: CardSelectorProps) => {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [tempSelection, setTempSelection] = useState<string[]>(selectedCards);
+
+  // Use controlled or internal open state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
+
+  // Reset temp selection when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTempSelection(selectedCards);
+    }
+  }, [open, selectedCards]);
 
   const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
   const suits = [
@@ -71,20 +86,10 @@ const CardSelector = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) {
-        setTempSelection(selectedCards);
-      }
-    }}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" className="w-full gap-2">
-            <Sparkles className="w-4 h-4" />
-            {label}
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>}
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">

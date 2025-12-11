@@ -458,10 +458,10 @@ export const GameDetailView = ({
 
       {/* Buy-in Logs */}
       <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
-        <Card>
+        <Card className="border-primary/20">
           <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-              <CardTitle className="text-primary flex items-center justify-between text-lg">
+            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
+              <CardTitle className="text-primary text-lg flex items-center justify-between">
                 <span>Buy-in Logs</span>
                 {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </CardTitle>

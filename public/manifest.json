@@ -9,15 +9,21 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/placeholder.svg",
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/x-icon",
       "purpose": "any maskable"
     },
     {
-      "src": "/placeholder.svg",
+      "src": "/favicon.ico",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/x-icon",
       "purpose": "any maskable"
     }
   ],
@@ -28,14 +34,14 @@
       "short_name": "New Game",
       "description": "Start a new poker game",
       "url": "/",
-      "icons": [{ "src": "/placeholder.svg", "sizes": "96x96" }]
+      "icons": [{ "src": "/favicon.ico", "sizes": "96x96" }]
     },
     {
       "name": "Games History",
       "short_name": "History",
       "description": "View past games",
       "url": "/games",
-      "icons": [{ "src": "/placeholder.svg", "sizes": "96x96" }]
+      "icons": [{ "src": "/favicon.ico", "sizes": "96x96" }]
     }
   ]
 }
