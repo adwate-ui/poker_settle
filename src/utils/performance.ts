@@ -3,6 +3,7 @@
 /**
  * Debounce function for optimizing frequent events like scrolling, resizing
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   delay: number
@@ -18,6 +19,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * Throttle function for rate-limiting events
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
   limit: number
@@ -91,6 +93,7 @@ export const batchedWrite = (writes: (() => void)[]): void => {
 /**
  * Create a memoized function that caches results
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const memoize = <Args extends any[], Result>(
   fn: (...args: Args) => Result
 ): ((...args: Args) => Result) => {

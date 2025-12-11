@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
   react(),
   VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['**/*.{png,jpg,jpeg,svg,ico,woff,woff2}'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
@@ -22,10 +22,18 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
-          // ALL Supabase calls - NetworkOnly (never cache, always online)
+          // ALL Supabase calls - NetworkFirst with fallback (better for offline)
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkOnly',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 5 * 60, // 5 minutes
+              },
+              networkTimeoutSeconds: 10,
+            },
           },
           // External images and avatars - CacheFirst (safe to cache)
           {
