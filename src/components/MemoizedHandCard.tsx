@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trophy } from 'lucide-react';
 import PokerCard from '@/components/PokerCard';
 import { HandWithDetails } from '@/hooks/useHandsHistory';
+import { PlayerAction } from '@/types/poker';
 
 interface MemoizedHandCardProps {
   hand: HandWithDetails;
@@ -24,11 +25,17 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
 
   const playersInHand = Array.from(new Map(
     hand.actions
-      .filter(a => (a as any).player?.name && a.position)
-      .map(a => [
-        (a as any).player.name,
-        { name: (a as any).player.name, position: a.position }
-      ])
+      .filter(a => {
+        const action = a as PlayerAction & { player?: { name: string } };
+        return action.player?.name && a.position;
+      })
+      .map(a => {
+        const action = a as PlayerAction & { player: { name: string } };
+        return [
+          action.player.name,
+          { name: action.player.name, position: a.position }
+        ] as const;
+      })
   ).values());
 
   return (

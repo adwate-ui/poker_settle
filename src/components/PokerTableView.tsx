@@ -3,6 +3,7 @@ import { useState, memo, useCallback, useMemo } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
 import PokerCard from "./PokerCard";
 import ChipStack from "./ChipStack";
+import { GamePlayer } from "@/types/poker";
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -111,7 +112,7 @@ const PokerTableView = memo(({
       .map(p => ({ ...p, seat: seatPositions[p.player_id] ?? 999 }))
       .sort((a, b) => a.seat - b.seat);
     return getPositionForPlayer(
-      sortedPositions.map(p => ({ player_id: p.player_id, player: { name: p.player_name } } as any)),
+      sortedPositions.map(p => ({ player_id: p.player_id, player: { name: p.player_name } } as GamePlayer)),
       buttonPlayerId,
       playerId,
       seatPositions

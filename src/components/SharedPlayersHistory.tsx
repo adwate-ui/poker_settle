@@ -134,7 +134,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
 
   const sortedGameHistory = useMemo(() => {
     return [...filteredGameHistory].sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: number, bVal: number;
       
       switch (sortField) {
         case "date":
@@ -153,6 +153,8 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
           aVal = a.net_amount;
           bVal = b.net_amount;
           break;
+        default:
+          return 0;
       }
       
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;

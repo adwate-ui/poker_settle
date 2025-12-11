@@ -74,12 +74,23 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
 
       if (error) throw error;
 
-      const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: any) => {
+      interface GameData {
+        id: string;
+        date: string;
+        buy_in_amount: number;
+        game_players?: Array<{
+          buy_ins?: number;
+          net_amount?: number;
+          player?: { name?: string };
+        }>;
+      }
+
+      const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: GameData) => {
         const playerCount = game.game_players?.length || 0;
-        const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
+        const totalBuyIns = game.game_players?.reduce((sum: number, gp) => sum + (gp.buy_ins || 0), 0) || 0;
         const totalPot = totalBuyIns * game.buy_in_amount;
-        const playerNames = game.game_players?.map((gp: any) => gp.player?.name || '').filter(Boolean) || [];
-        const gamePlayers = game.game_players?.map((gp: any) => ({
+        const playerNames = game.game_players?.map((gp) => gp.player?.name || '').filter(Boolean) || [];
+        const gamePlayers = game.game_players?.map((gp) => ({
           player_name: gp.player?.name || '',
           net_amount: gp.net_amount || 0,
         })) || [];
@@ -145,7 +156,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
 
     if (sortField && sortOrder) {
       filtered = [...filtered].sort((a, b) => {
-        let aVal: any, bVal: any;
+        let aVal: number, bVal: number;
         
         switch (sortField) {
           case 'date':
@@ -164,6 +175,8 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
             aVal = a.total_pot;
             bVal = b.total_pot;
             break;
+          default:
+            return 0;
         }
         
         return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
