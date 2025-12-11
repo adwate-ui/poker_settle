@@ -59,10 +59,6 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
 
-  useEffect(() => {
-    fetchPlayerData();
-  }, [token, playerId]);
-
   const fetchPlayerData = useCallback(async () => {
     setLoading(true);
     try {
@@ -99,6 +95,10 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
       setLoading(false);
     }
   }, [token, playerId]);
+
+  useEffect(() => {
+    fetchPlayerData();
+  }, [fetchPlayerData]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

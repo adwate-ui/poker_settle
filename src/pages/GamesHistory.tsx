@@ -55,12 +55,6 @@ const GamesHistory = () => {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchGames();
-    }
-  }, [user, fetchGames]);
-
   const fetchGames = useCallback(async () => {
     setLoading(true);
     try {
@@ -138,6 +132,12 @@ const GamesHistory = () => {
       setDeleteGameId(null);
     }
   }, [fetchGames]);
+
+  useEffect(() => {
+    if (user) {
+      fetchGames();
+    }
+  }, [user, fetchGames]);
 
   const uniqueDates = useMemo(() => {
     const dates = games.map((game) => format(new Date(game.date), "MMM d, yyyy"));

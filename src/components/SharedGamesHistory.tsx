@@ -45,10 +45,6 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
-  useEffect(() => {
-    fetchGames();
-  }, [token]);
-
   const fetchGames = useCallback(async () => {
     setLoading(true);
     try {
@@ -113,6 +109,10 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
       setLoading(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    fetchGames();
+  }, [fetchGames]);
 
   const uniqueDates = useMemo(() => {
     const dates = games.map((game) => format(new Date(game.date), 'MMM d, yyyy'));
