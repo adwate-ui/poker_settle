@@ -745,7 +745,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      setShowPlayerActionDialog(true);
+      // Use setTimeout to ensure state is set before showing dialog
+      setTimeout(() => {
+        setShowPlayerActionDialog(true);
+      }, 0);
     }
   };
 
@@ -761,6 +764,11 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     } else {
       setDealtOutPlayers([...dealtOutPlayers, selectedPlayerId]);
     }
+    setShowPlayerActionDialog(false);
+    setSelectedPlayerId('');
+  };
+
+  const handleCancelDialog = () => {
     setShowPlayerActionDialog(false);
     setSelectedPlayerId('');
   };
@@ -874,7 +882,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         </Card>
 
         {/* Player Action Dialog - Mobile-friendly with improved UI */}
-        <Dialog open={showPlayerActionDialog} onOpenChange={setShowPlayerActionDialog}>
+        <Dialog open={showPlayerActionDialog} onOpenChange={(open) => {
+          if (!open) handleCancelDialog();
+        }}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -924,7 +934,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 )}
               </Button>
               <Button 
-                onClick={() => setShowPlayerActionDialog(false)} 
+                onClick={handleCancelDialog} 
                 className="w-full h-12"
                 variant="ghost"
               >

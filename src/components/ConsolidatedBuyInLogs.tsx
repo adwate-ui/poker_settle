@@ -115,17 +115,31 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       </CardHeader>
       <CardContent className="pt-4">
         {!loading && history.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {uniquePlayerNames.map((name) => (
-              <Badge
-                key={name}
-                variant={filterName === name ? "default" : "outline"}
-                className="cursor-pointer text-xs hover:bg-primary/10 transition-colors"
-                onClick={() => setFilterName(filterName === name ? "" : name)}
-              >
-                {name}
-              </Badge>
-            ))}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-muted-foreground">Filter by player:</span>
+              {filterName && (
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-destructive/20 transition-colors text-xs"
+                  onClick={() => setFilterName("")}
+                >
+                  Clear filter ✕
+                </Badge>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {uniquePlayerNames.map((name) => (
+                <Badge
+                  key={name}
+                  variant={filterName === name ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/20 transition-colors px-3 py-1.5 text-sm font-medium"
+                  onClick={() => setFilterName(filterName === name ? "" : name)}
+                >
+                  {name}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
         
@@ -145,33 +159,33 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           <ScrollArea style={{ height: `${dynamicHeight}px` }}>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40%]">Player</TableHead>
-                  <TableHead className="w-[25%] text-center">Change</TableHead>
-                  <TableHead className="w-[25%]">Time</TableHead>
-                  <TableHead className="w-[10%] text-right">New Total</TableHead>
+                <TableRow className="border-b border-border/50">
+                  <TableHead className="w-[30%] font-semibold">Player</TableHead>
+                  <TableHead className="w-[25%] text-center font-semibold">Incremental Buy-in</TableHead>
+                  <TableHead className="w-[30%] font-semibold">Time</TableHead>
+                  <TableHead className="w-[15%] text-right font-semibold">New Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHistory.map((entry) => (
-                  <TableRow key={entry.id} className="hover:bg-accent/5">
-                    <TableCell className="font-medium">{entry.player_name}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1.5">
+                  <TableRow key={entry.id} className="h-12 hover:bg-accent/10 transition-colors">
+                    <TableCell className="font-medium py-3">{entry.player_name}</TableCell>
+                    <TableCell className="text-center py-3">
+                      <div className="flex items-center justify-center gap-2">
                         {entry.buy_ins_added > 0 ? (
-                          <TrendingUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                          <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         ) : (
-                          <TrendingDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         )}
-                        <span className={entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}>
+                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="text-sm text-muted-foreground py-3">
                       {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="text-right font-semibold py-3">
                       {entry.total_buy_ins_after}
                     </TableCell>
                   </TableRow>

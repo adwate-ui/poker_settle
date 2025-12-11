@@ -8,9 +8,9 @@ interface ChipStackProps {
 }
 
 const CHIP_DENOMINATIONS = [
-  { value: 5000, color: 'green', label: '5K' },
-  { value: 1000, color: 'yellow', label: '1K' },
-  { value: 500, color: 'blue', label: '500' },
+  { value: 5000, color: 'blue', label: '5K' },
+  { value: 1000, color: 'white', label: '1K' },
+  { value: 500, color: 'green', label: '500' },
   { value: 100, color: 'black', label: '100' },
   { value: 20, color: 'red', label: '20' },
 ];
