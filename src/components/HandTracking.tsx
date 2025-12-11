@@ -725,6 +725,25 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
       if (!validateCardUniqueness(cards)) {
         return;
       }
+      
+      // Additional validation: Check if any of these hole cards are already assigned to other players
+      const cardsList = parseCardNotationString(cards);
+      for (const [playerId, holeCards] of Object.entries(playerHoleCards)) {
+        if (playerId !== selectedPlayerForHole && holeCards) {
+          const existingCards = parseCardNotationString(holeCards);
+          const duplicates = cardsList.filter(card => existingCards.includes(card));
+          if (duplicates.length > 0) {
+            const otherPlayer = activePlayers.find(p => p.player_id === playerId);
+            toast({
+              title: 'Duplicate Cards',
+              description: `Card(s) ${duplicates.join(', ')} already assigned to ${otherPlayer?.player.name || 'another player'}`,
+              variant: 'destructive',
+            });
+            return;
+          }
+        }
+      }
+      
       // Update hole cards - this will trigger auto-calculation on re-render if in showdown
       setPlayerHoleCards(prev => ({
         ...prev,
@@ -1253,12 +1272,22 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         {/* Hole Card Selector - Direct card selector without intermediate dialog */}
         <CardSelector
           open={showHoleCardInput}
-          onOpenChange={setShowHoleCardInput}
+          onOpenChange={(isOpen) => {
+            setShowHoleCardInput(isOpen);
+            // Reset selected player when dialog closes
+            if (!isOpen) {
+              setSelectedPlayerForHole('');
+            }
+          }}
           onSelect={(cards) => {
             handleHoleCardSubmit(cards);
           }}
           maxCards={2}
           usedCards={getUsedCards()}
+          knownHoleCards={Object.entries(playerHoleCards)
+            .filter(([playerId]) => playerId !== selectedPlayerForHole)
+            .flatMap(([_, cards]) => parseCardNotationString(cards))
+          }
           selectedCards={selectedPlayerForHole ? parseCardNotationString(playerHoleCards[selectedPlayerForHole] || '') : []}
           label={`Select Hole Cards for ${remainingPlayers.find(p => p.player_id === selectedPlayerForHole)?.player.name || 'Player'}`}
         />
