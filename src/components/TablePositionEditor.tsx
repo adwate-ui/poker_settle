@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { X } from "lucide-react";
 import PokerTableView from "./PokerTableView";
 
 interface TablePositionEditorProps {
@@ -26,66 +25,39 @@ const TablePositionEditor = ({
   onCancel,
 }: TablePositionEditorProps) => {
   const [positions, setPositions] = useState<SeatPosition[]>(currentPositions);
-  // Arrays to hold multiple player/seat selections
-  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   // Get available players (not already seated)
   const seatedPlayerIds = positions.map(p => p.player_id);
   const availablePlayers = players.filter(p => !seatedPlayerIds.includes(p.id));
 
-  // Generate seat numbers based on total players in game
+  // Generate all seat numbers based on total players in game (fixed seats)
   const allSeats = Array.from({ length: players.length }, (_, i) => i + 1);
-  const occupiedSeats = positions.map(p => p.seat);
-  const availableSeats = allSeats.filter(s => !occupiedSeats.includes(s));
   
-  // Number of unseated players
-  const unseatedCount = availablePlayers.length;
+  // Create a map of seat to player for easy lookup
+  const seatToPlayer = new Map<number, SeatPosition>();
+  positions.forEach(pos => seatToPlayer.set(pos.seat, pos));
 
-  const handlePlayerSelect = (index: number, playerId: string) => {
-    const newSelection = [...selectedPlayers];
-    newSelection[index] = playerId;
-    setSelectedPlayers(newSelection);
-  };
-
-  const handleSeatSelect = (index: number, seat: string) => {
-    const newSelection = [...selectedSeats];
-    newSelection[index] = seat;
-    setSelectedSeats(newSelection);
-  };
-
-  const handleAddPlayers = () => {
-    const newPositions: SeatPosition[] = [];
-    
-    for (let i = 0; i < unseatedCount; i++) {
-      const playerId = selectedPlayers[i];
-      const seatStr = selectedSeats[i];
-      
-      // Both player and seat must be selected for this pair
-      if (playerId && seatStr) {
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-          newPositions.push({
-            seat: parseInt(seatStr),
-            player_id: player.id,
-            player_name: player.name,
-          });
-        }
-      }
+  const handlePlayerSelect = (seat: number, playerId: string) => {
+    if (!playerId) {
+      // If empty selection, remove the player from this seat
+      setPositions(positions.filter(p => p.seat !== seat));
+      return;
     }
+
+    const player = players.find(p => p.id === playerId);
+    if (!player) return;
+
+    // Remove this player from any other seat they might occupy
+    const updatedPositions = positions.filter(p => p.player_id !== playerId && p.seat !== seat);
     
-    if (newPositions.length > 0) {
-      setPositions([...positions, ...newPositions].sort((a, b) => a.seat - b.seat));
-      setSelectedPlayers([]);
-      setSelectedSeats([]);
-    }
-  };
-
-  // Count valid pairs (both player and seat selected)
-  const validPairCount = selectedPlayers.filter((p, i) => p && selectedSeats[i]).length;
-
-  const handleRemovePlayer = (playerId: string) => {
-    setPositions(positions.filter(p => p.player_id !== playerId));
+    // Add the player to the new seat
+    updatedPositions.push({
+      seat,
+      player_id: player.id,
+      player_name: player.name,
+    });
+    
+    setPositions(updatedPositions.sort((a, b) => a.seat - b.seat));
   };
 
   const handleSave = () => {
@@ -100,7 +72,7 @@ const TablePositionEditor = ({
       <div>
         <h3 className="text-lg sm:text-xl font-semibold mb-2">Set Table Positions</h3>
         <p className="text-sm text-muted-foreground">
-          Assign players to seat numbers (1-{players.length}). The table will display {positions.length} seated players.
+          Assign players to seat numbers (1-{players.length}). Select a player for each seat from the dropdown.
         </p>
       </div>
 
@@ -118,39 +90,39 @@ const TablePositionEditor = ({
         </div>
       )}
 
-      {/* Add Player Section */}
-      {availablePlayers.length > 0 && availableSeats.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="font-medium">Add Players to Table ({unseatedCount} unseated)</h4>
-          <p className="text-xs text-muted-foreground">Select seat position (left) and player (right)</p>
-          
-          <div className="space-y-2">
-            {Array.from({ length: unseatedCount }).map((_, index) => (
-              <div key={index} className="grid grid-cols-2 gap-2 items-start">
-                {/* Seat selection on the LEFT */}
-                <Select value={selectedSeats[index] || ''} onValueChange={(value) => handleSeatSelect(index, value)}>
-                  <SelectTrigger className="bg-background w-full min-w-0">
-                    <SelectValue placeholder={`Seat ${index + 1}`} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {availableSeats
-                      .filter(s => !selectedSeats.includes(s.toString()) || selectedSeats[index] === s.toString())
-                      .map((seat) => (
-                        <SelectItem key={seat} value={seat.toString()}>
-                          Seat {seat}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+      {/* Seat Assignment Section - All seats shown with player dropdowns */}
+      <div className="space-y-3">
+        <h4 className="font-medium">Assign Players to Seats</h4>
+        <p className="text-xs text-muted-foreground">
+          Each seat is fixed. Select a player from the dropdown for each seat position.
+        </p>
+        
+        <div className="space-y-2">
+          {allSeats.map((seat) => {
+            const currentPlayer = seatToPlayer.get(seat);
+            const currentPlayerId = currentPlayer?.player_id || '';
+            
+            return (
+              <div key={seat} className="grid grid-cols-[auto_1fr] gap-3 items-center">
+                {/* Fixed Seat Number on the LEFT */}
+                <div className="w-16 h-10 rounded-lg bg-primary/20 border-2 border-primary/40 flex items-center justify-center font-bold text-primary">
+                  Seat {seat}
+                </div>
 
                 {/* Player selection on the RIGHT */}
-                <Select value={selectedPlayers[index] || ''} onValueChange={(value) => handlePlayerSelect(index, value)}>
-                  <SelectTrigger className="bg-background w-full min-w-0">
-                    <SelectValue placeholder={`Player ${index + 1}`} />
+                <Select 
+                  value={currentPlayerId} 
+                  onValueChange={(value) => handlePlayerSelect(seat, value)}
+                >
+                  <SelectTrigger className="bg-background w-full">
+                    <SelectValue placeholder="Select player..." />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    {availablePlayers
-                      .filter(p => !selectedPlayers.includes(p.id) || selectedPlayers[index] === p.id)
+                    <SelectItem value="">
+                      <span className="text-muted-foreground italic">- Empty seat -</span>
+                    </SelectItem>
+                    {players
+                      .filter(p => !seatedPlayerIds.includes(p.id) || p.id === currentPlayerId)
                       .map((player) => (
                         <SelectItem key={player.id} value={player.id}>
                           {player.name}
@@ -159,47 +131,10 @@ const TablePositionEditor = ({
                   </SelectContent>
                 </Select>
               </div>
-            ))}
-          </div>
-          
-          <Button
-            onClick={handleAddPlayers}
-            disabled={validPairCount === 0}
-            className="w-full sm:w-auto"
-          >
-            Add {validPairCount || 0} Player(s) to Table
-          </Button>
+            );
+          })}
         </div>
-      )}
-
-      {/* Seated Players List */}
-      {positions.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="font-medium">Seated Players ({positions.length})</h4>
-          <div className="space-y-2">
-            {positions.map((position) => (
-              <div
-                key={position.player_id}
-                className="flex items-center justify-between p-3 bg-muted rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    {position.seat}
-                  </div>
-                  <span className="font-medium">{position.player_name}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemovePlayer(position.player_id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -208,7 +143,7 @@ const TablePositionEditor = ({
           disabled={positions.length === 0}
           className="flex-1"
         >
-          Save Table Position
+          Save Table Position ({positions.length} seated)
         </Button>
         <Button onClick={onCancel} variant="outline" className="flex-1">
           Cancel

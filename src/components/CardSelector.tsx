@@ -42,10 +42,9 @@ const CardSelector = ({
     if (open) {
       setTempSelection(selectedCards);
       setIsConfirming(false); // Reset confirming flag when dialog opens
-    } else {
-      // Reset confirming flag when dialog closes
-      setIsConfirming(false);
     }
+    // Note: Don't reset isConfirming when dialog closes here
+    // It will be reset in onOpenChange after the check is done
   }, [open, selectedCards]);
 
   const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
@@ -94,9 +93,14 @@ const CardSelector = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen && !isConfirming) {
-        // When dialog closes (not via confirm), reset temp selection to prevent recording unconfirmed changes
-        setTempSelection(selectedCards);
+      if (!isOpen) {
+        // When dialog closes, check if we're confirming
+        if (!isConfirming) {
+          // Not confirming - reset temp selection to prevent recording unconfirmed changes
+          setTempSelection(selectedCards);
+        }
+        // Reset the confirming flag after the check
+        setIsConfirming(false);
       }
       setOpen(isOpen);
     }}>
