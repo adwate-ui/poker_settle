@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 import {
   Select,
   SelectContent,
@@ -190,13 +191,7 @@ const PlayerDetail = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
-              <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                alt={player.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <OptimizedAvatar name={player.name} size="md" />
             {player.name}
           </CardTitle>
         </CardHeader>
