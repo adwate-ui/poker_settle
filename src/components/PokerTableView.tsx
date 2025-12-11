@@ -54,6 +54,10 @@ const PokerTableView = memo(({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Table layout constants
+  const TABLE_CENTER_X = 50; // Center X position as percentage
+  const TABLE_CENTER_Y = 50; // Center Y position as percentage
+
   // Always spread players evenly around the table regardless of seat numbers
   const numPlayers = positions.length;
   const numSeats = Math.max(4, totalSeats || numPlayers); // Use totalSeats if provided, otherwise numPlayers
@@ -66,8 +70,8 @@ const PokerTableView = memo(({
     const radiusY = 32; // Vertical radius (smaller for more rectangular, like real poker table)
     
     return {
-      x: 50 + radiusX * Math.cos(radians),
-      y: 50 + radiusY * Math.sin(radians),
+      x: TABLE_CENTER_X + radiusX * Math.cos(radians),
+      y: TABLE_CENTER_Y + radiusY * Math.sin(radians),
     };
   }, [numPlayers]);
 
@@ -258,7 +262,7 @@ const PokerTableView = memo(({
               {/* Pot display with chip visualization */}
               {potSize > 0 && (
                 <div className={`flex flex-col items-center gap-1 transition-all duration-500 ${
-                  animateChipsToPot ? 'scale-110' : 'scale-100'
+                  animateChipsToPot ? 'scale-110' : animateChipsToWinner ? 'opacity-0 scale-0' : 'scale-100'
                 }`}>
                   <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold">
                     POT
@@ -318,57 +322,68 @@ const PokerTableView = memo(({
                     </div>
                   )}
                   
-                  {/* Player avatar with hole cards positioned above */}
-                  <div className="relative">
-                    {/* Player hole cards - positioned above the avatar to avoid covering player info */}
-                    <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 flex gap-1 z-10 transition-all duration-300 ease-in-out ${
-                      isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                    }`}>
-                      {hasKnownCards ? (
-                        // Show known cards face-up
-                        playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                          <PokerCard 
-                            key={idx} 
-                            card={card} 
-                            size="xs"
-                          />
-                        ))
-                      ) : shouldShowCards ? (
-                        // Show card backs for unknown cards (not mucked)
-                        <>
-                          <PokerCard card="back" size="xs" />
-                          <PokerCard card="back" size="xs" />
-                        </>
-                      ) : null}
+                  {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
+                  <div className="relative flex flex-col items-center gap-1">
+                    {/* Player avatar - central element */}
+                    <div className="relative">
+                      <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
+                        isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
+                        isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
+                      }`}>
+                        <OptimizedAvatar 
+                          name={position.player_name}
+                          size="md"
+                          className="w-full h-full"
+                        />
+                      </div>
+                      {/* Button indicator overlay - positioned as sibling for proper layering */}
+                      {isButton && (
+                        <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg z-20">
+                          D
+                        </div>
+                      )}
                     </div>
                     
-                    <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
-                      isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
-                      isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                    }`}>
-                      <OptimizedAvatar 
-                        name={position.player_name}
-                        size="md"
-                        className="w-full h-full"
-                      />
-                    </div>
-                    {/* Button indicator */}
-                    {isButton && (
-                      <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg">
-                        D
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Player name and stack */}
-                  <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0">
-                    <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap">
-                      {position.player_name}
-                    </span>
-                    {playerStacks[position.player_id] !== undefined && (
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                        Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                    {/* Player name and stack - directly below avatar */}
+                    <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 w-20">
+                      <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap truncate w-full text-center">
+                        {position.player_name}
                       </span>
+                      {playerStacks[position.player_id] !== undefined && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Player hole cards - positioned to the side for better visibility */}
+                    {(hasKnownCards || shouldShowCards) && (
+                      <div 
+                        className={`absolute flex gap-0.5 z-10 transition-all duration-300 ease-in-out ${
+                          isFolded ? 'opacity-30 grayscale' : 'opacity-100'
+                        } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
+                        style={{
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                        }}
+                      >
+                        {hasKnownCards ? (
+                          // Show known cards face-up
+                          playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard 
+                              key={idx} 
+                              card={card} 
+                              size="xs"
+                            />
+                          ))
+                        ) : shouldShowCards ? (
+                          // Show card backs for unknown cards (not mucked)
+                          <>
+                            <PokerCard card="back" size="xs" />
+                            <PokerCard card="back" size="xs" />
+                          </>
+                        ) : null}
+                      </div>
                     )}
                   </div>
                   
@@ -386,6 +401,21 @@ const PokerTableView = memo(({
                       }}
                     >
                       <ChipStack amount={playerBet} size="sm" showLabel={true} />
+                    </div>
+                  )}
+                  
+                  {/* Winner chip animation - shows pot chips coming to winner */}
+                  {isWinner && (
+                    <div 
+                      className="absolute z-20 animate-in fade-in zoom-in duration-500"
+                      style={{
+                        top: pos.y > 50 ? '-60px' : '80px',
+                        left: pos.x > 50 ? '-50px' : '50px',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 bg-amber-500/20 px-2 py-1 rounded-lg border-2 border-amber-400 animate-pulse">
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🏆 Winner!</span>
+                      </div>
                     </div>
                   )}
                 </div>

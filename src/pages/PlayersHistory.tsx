@@ -254,7 +254,7 @@ const PlayersHistory = () => {
                 </div>
 
                 {/* Desktop Layout */}
-                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm py-0.5">
+                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm h-12">
                   <div 
                     className="flex items-center gap-4"
                     onClick={() => navigate(`/players/${player.id}`)}

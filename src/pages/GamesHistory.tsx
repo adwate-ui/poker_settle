@@ -399,7 +399,7 @@ const GamesHistory = () => {
                     </div>
 
                     {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm py-0.5">
+                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm h-12">
                       <div className="font-medium">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </div>
