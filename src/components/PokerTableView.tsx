@@ -130,6 +130,9 @@ const PokerTableView = memo(({
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!enableDragDrop || draggedIndex === null) return;
     
+    // Prevent default to stop scrolling while dragging
+    e.preventDefault();
+    
     const touch = e.touches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
     
@@ -139,8 +142,6 @@ const PokerTableView = memo(({
       const index = parseInt(playerElement.getAttribute('data-player-index') || '-1');
       if (index >= 0 && index !== draggedIndex) {
         setDragOverIndex(index);
-        // Only prevent default when over a valid drop target to allow scrolling otherwise
-        e.preventDefault();
       }
     }
   }, [enableDragDrop, draggedIndex]);

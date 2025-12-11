@@ -218,7 +218,7 @@ const PlayersHistory = () => {
             >
               <CardContent className="p-2 sm:p-3">
                 {/* Mobile Layout */}
-                <div className="md:hidden space-y-4">
+                <div className="md:hidden space-y-4 pl-2">
                   <div className="flex items-center justify-between gap-3">
                     <div 
                       className="flex items-center gap-3 flex-1 min-w-0"
