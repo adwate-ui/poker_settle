@@ -540,7 +540,7 @@ export const CardBackSVG = ({ width = 78, height = 112, design = 'classic' }: { 
         {/* Radiating lines */}
         {radialLines.map((line, i) => (
           <line 
-            key={i} 
+            key={`radial-line-${i}`}
             x1={line.x1} 
             y1={line.y1} 
             x2={line.x2} 

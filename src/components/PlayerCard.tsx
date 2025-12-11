@@ -104,7 +104,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 className="h-7 text-xs text-center font-mono bg-background"
                 placeholder="0"
               />
-              {addBuyInsAmount && parseInt(addBuyInsAmount) !== 0 && (
+              {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
                 <Button 
                   variant="default" 
                   size="sm" 

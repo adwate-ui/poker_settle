@@ -7,7 +7,7 @@ export type CardBackDesign = 'classic' | 'geometric' | 'diamond' | 'hexagon' | '
 const VALID_CARD_BACK_DESIGNS: CardBackDesign[] = ['classic', 'geometric', 'diamond', 'hexagon', 'wave', 'radial'];
 
 const isValidCardBackDesign = (value: string): value is CardBackDesign => {
-  return VALID_CARD_BACK_DESIGNS.includes(value as CardBackDesign);
+  return (VALID_CARD_BACK_DESIGNS as readonly string[]).includes(value);
 };
 
 export const useCardBackDesign = () => {
