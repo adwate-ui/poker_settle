@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Loader2, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
 import { formatIndianNumber } from '@/lib/utils';
-import { useSharedLink } from '@/hooks/useSharedLink';
 import {
   Select,
   SelectContent,
@@ -49,7 +48,6 @@ type SortOrder = 'asc' | 'desc' | null;
 const SharedPlayerDetail = () => {
   const { token, playerId } = useParams<{ token: string; playerId: string }>();
   const navigate = useNavigate();
-  const { copyShareLink, loading: linkLoading } = useSharedLink();
   const [player, setPlayer] = useState<Player | null>(null);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -242,7 +240,7 @@ const SharedPlayerDetail = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg border">
                 <p className="text-sm text-muted-foreground">Total Games</p>
                 <p className="text-lg font-semibold">{player.total_games || 0}</p>
@@ -262,18 +260,6 @@ const SharedPlayerDetail = () => {
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                   {winRate.toFixed(1)}%
                 </p>
-              </div>
-              <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyShareLink('player', playerId!)}
-                  disabled={linkLoading}
-                  className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share Player
-                </Button>
               </div>
             </div>
           </CardContent>
