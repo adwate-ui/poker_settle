@@ -42,6 +42,9 @@ const CardSelector = ({
     if (open) {
       setTempSelection(selectedCards);
       setIsConfirming(false); // Reset confirming flag when dialog opens
+    } else {
+      // Reset confirming flag when dialog closes
+      setIsConfirming(false);
     }
   }, [open, selectedCards]);
 
@@ -75,11 +78,9 @@ const CardSelector = ({
       .map(idx => allCards[idx])
       .join('');
     
-    // Call onSelect first
+    // Call onSelect which will handle closing the dialog
     onSelect(sortedCards);
-    // Then close dialog - we use setIsConfirming to prevent reset in onOpenChange
-    setOpen(false);
-    setIsConfirming(false);
+    // isConfirming will be reset by useEffect when dialog closes
   };
 
   const handleCancel = () => {

@@ -320,7 +320,7 @@ const PokerTableView = memo(({
             
             return (
               <div
-                key={position.seat}
+                key={position.player_id}
                 data-player-index={index}
                 draggable={enableDragDrop}
                 onDragStart={() => handleDragStart(index)}
