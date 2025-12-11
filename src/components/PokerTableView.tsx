@@ -316,10 +316,10 @@ const PokerTableView = memo(({
                   top: `${pos.y}%`,
                 }}
               >
-                <div className="flex flex-col items-center gap-1">
-                  {/* Position label */}
+                <div className="relative flex flex-col items-center gap-1">
+                  {/* Position label - absolutely positioned to avoid layout shift */}
                   {positionLabel && (
-                    <div className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md whitespace-nowrap z-30">
                       {positionLabel}
                     </div>
                   )}

@@ -58,6 +58,7 @@ const HandReplay = ({
   const [animatingPlayerId, setAnimatingPlayerId] = useState<string | null>(null); // Track which player's chips are animating
   const [showHoleCards, setShowHoleCards] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
+  const [winningAmount, setWinningAmount] = useState(0); // Store the winning pot amount
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
   const [playerStacks] = useState<Record<string, number>>({});
   const [potSizeHistory, setPotSizeHistory] = useState<Array<{ actionIndex: number; potSize: number; street: string }>>([]);
@@ -81,17 +82,15 @@ const HandReplay = ({
   });
 
   // Initialize visible hole cards with hero's cards if available
+  // Keep hero's cards visible throughout the replay unless explicitly hidden
   useEffect(() => {
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
       setVisibleHoleCards(prev => {
-        // Only update if hero's cards aren't already visible
-        if (!prev[heroPlayerId]) {
-          return { ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] };
-        }
-        return prev;
+        // Always ensure hero's cards are visible
+        return { ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] };
       });
     }
-  }, [heroPlayerId, currentActionIndex]); // Re-run when action changes to ensure cards stay visible
+  }, [heroPlayerId]); // Only run when heroPlayerId changes, not on every action
 
   // Convert player names to SeatPosition format
   const positions: SeatPosition[] = Object.entries(playerNames).map(([playerId, playerName]) => ({
@@ -349,6 +348,9 @@ const HandReplay = ({
         // Show all players' hole cards when winner is decided
         setVisibleHoleCards(playerHoleCards);
         setTimeout(() => {
+          // Save winning amount before clearing pot
+          const totalWinnings = potSize + uncommittedPot;
+          setWinningAmount(totalWinnings);
           setShowWinner(true);
           // After a brief delay, move chips to winner and clear pot
           setTimeout(() => {
@@ -404,6 +406,9 @@ const HandReplay = ({
         if (nextIndex >= actions.length && winnerPlayerId) {
           setVisibleHoleCards(playerHoleCards); // Show all cards when winner declared
           setTimeout(() => {
+            // Save winning amount before clearing pot
+            const totalWinnings = potSize + uncommittedPot;
+            setWinningAmount(totalWinnings);
             setShowWinner(true);
             // Move chips to winner and clear pot
             setTimeout(() => {
@@ -439,11 +444,10 @@ const HandReplay = ({
       setAnimatingPlayerId(null);
       setShowHoleCards(false);
       setShowWinner(false);
-      // Reset to show only hero's cards
+      setWinningAmount(0);
+      // Preserve hero's cards during jump
       if (heroPlayerId && playerHoleCards[heroPlayerId]) {
-        setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
-      } else {
-        setVisibleHoleCards({});
+        setVisibleHoleCards(prev => ({ ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] }));
       }
       
       // BUG A FIX: Use local tracking during rapid replay to avoid stale state
@@ -474,8 +478,9 @@ const HandReplay = ({
     setAnimatingPlayerId(null);
     setShowHoleCards(false);
     setShowWinner(false);
+    setWinningAmount(0);
     setPotSizeHistory([]);
-    // Reset to show only hero's cards
+    // Initialize with hero's cards
     if (heroPlayerId && playerHoleCards[heroPlayerId]) {
       setVisibleHoleCards({ [heroPlayerId]: playerHoleCards[heroPlayerId] });
     } else {
@@ -629,7 +634,7 @@ const HandReplay = ({
               {winnerPlayerName} Wins!
             </div>
             <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
-              Winnings: Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+              Winnings: Rs. {winningAmount.toLocaleString('en-IN')}
             </div>
             <div className="text-sm text-muted-foreground mt-2 italic">
               Chips moved to winner
