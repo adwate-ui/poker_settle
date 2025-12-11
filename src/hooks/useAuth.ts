@@ -1,16 +1,7 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -99,5 +90,3 @@ export const useAuthProvider = () => {
     signOut,
   };
 };
-
-export { AuthContext };

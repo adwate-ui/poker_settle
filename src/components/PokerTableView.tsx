@@ -73,10 +73,15 @@ const PokerTableView = memo(({
     setDraggedIndex(index);
   }, [enableDragDrop]);
 
-  const handleDragEnd = useCallback(() => {
+  // Shared cleanup function for drag/touch operations
+  const cleanupDragState = useCallback(() => {
     setDraggedIndex(null);
     setDragOverIndex(null);
   }, []);
+
+  const handleDragEnd = useCallback(() => {
+    cleanupDragState();
+  }, [cleanupDragState]);
 
   const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
@@ -101,9 +106,63 @@ const PokerTableView = memo(({
     newPositions.sort((a, b) => a.seat - b.seat);
     
     onPositionsChange(newPositions);
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  }, [enableDragDrop, draggedIndex, positions, onPositionsChange]);
+    cleanupDragState();
+  }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
+
+  // Touch event handlers for mobile drag-and-drop
+  const handleTouchStart = useCallback((index: number) => {
+    if (!enableDragDrop) return;
+    setDraggedIndex(index);
+  }, [enableDragDrop]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!enableDragDrop || draggedIndex === null) return;
+    
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Find which player position element we're over
+    const playerElement = element?.closest('[data-player-index]');
+    if (playerElement) {
+      const index = parseInt(playerElement.getAttribute('data-player-index') || '-1');
+      if (index >= 0 && index !== draggedIndex) {
+        setDragOverIndex(index);
+        // Only prevent default when over a valid drop target to allow scrolling otherwise
+        e.preventDefault();
+      }
+    }
+  }, [enableDragDrop, draggedIndex]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!enableDragDrop || draggedIndex === null) return;
+    
+    const touch = e.changedTouches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Find which player position element we're over
+    const playerElement = element?.closest('[data-player-index]');
+    if (playerElement && onPositionsChange) {
+      const dropIndex = parseInt(playerElement.getAttribute('data-player-index') || '-1');
+      
+      if (dropIndex >= 0 && dropIndex !== draggedIndex) {
+        const newPositions = [...positions];
+        const draggedPosition = newPositions[draggedIndex];
+        const dropPosition = newPositions[dropIndex];
+
+        // Swap the seat numbers
+        const tempSeat = draggedPosition.seat;
+        draggedPosition.seat = dropPosition.seat;
+        dropPosition.seat = tempSeat;
+
+        // Sort by seat number to maintain order
+        newPositions.sort((a, b) => a.seat - b.seat);
+        
+        onPositionsChange(newPositions);
+      }
+    }
+    
+    cleanupDragState();
+  }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
 
   // Get position label for a player - memoized
   const getPositionLabel = useCallback((playerId: string) => {
@@ -228,11 +287,15 @@ const PokerTableView = memo(({
             return (
               <div
                 key={position.seat}
+                data-player-index={index}
                 draggable={enableDragDrop}
                 onDragStart={() => handleDragStart(index)}
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
+                onTouchStart={() => handleTouchStart(index)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
                   enableDragDrop ? 'cursor-move' : onPlayerClick ? 'cursor-pointer' : ''
