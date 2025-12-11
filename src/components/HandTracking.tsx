@@ -1078,14 +1078,25 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           <CardContent className="space-y-4 pt-6">
             {/* Show all community cards */}
             {(flopCards || turnCard || riverCard) && (
-              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-4">
+              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
                 <div className="text-sm font-semibold text-white mb-2">Board:</div>
-                <div className="flex gap-2 justify-center flex-wrap">
-                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                    <PokerCard key={`flop-${idx}`} card={card} size="md" />
-                  ))}
-                  {turnCard && <PokerCard card={turnCard} size="md" />}
-                  {riverCard && <PokerCard card={riverCard} size="md" />}
+                <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
+                  {/* Mobile view - small cards */}
+                  <div className="flex gap-1 sm:hidden">
+                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                      <PokerCard key={`flop-${idx}`} card={card} size="sm" />
+                    ))}
+                    {turnCard && <PokerCard card={turnCard} size="sm" />}
+                    {riverCard && <PokerCard card={riverCard} size="sm" />}
+                  </div>
+                  {/* Desktop view - medium cards */}
+                  <div className="hidden sm:flex gap-2">
+                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                      <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
+                    ))}
+                    {turnCard && <PokerCard card={turnCard} size="md" />}
+                    {riverCard && <PokerCard card={riverCard} size="md" />}
+                  </div>
                 </div>
               </div>
             )}
@@ -1616,26 +1627,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                         key={card}
                         onClick={() => {
                           if (isUsed || isKnownHole) return;
-                          
-                          if (isSelected) {
-                            // Remove from selection
-                            const newSelection = currentSelection.filter(c => c !== card);
-                            const newCards = newSelection.join('');
-                            setTempCommunityCards(newCards);
-                          } else {
-                            // Add to selection
-                            const maxCards = cardSelectorType === 'flop' ? 3 : 1;
-                            if (currentSelection.length < maxCards) {
-                              const newSelection = [...currentSelection, card];
-                              const newCards = newSelection.join('');
-                              setTempCommunityCards(newCards);
-                            }
-                          }
-                        }}
-                        onTouchEnd={(e) => {
-                          // Prevent default to avoid double-firing on mobile
-                          if (isUsed || isKnownHole) return;
-                          e.preventDefault();
                           
                           if (isSelected) {
                             // Remove from selection

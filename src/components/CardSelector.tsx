@@ -141,11 +141,6 @@ const CardSelector = ({
                     <button
                       key={card}
                       onClick={() => handleCardClick(card)}
-                      onTouchEnd={(e) => {
-                        // Prevent default to avoid double-firing on mobile
-                        e.preventDefault();
-                        handleCardClick(card);
-                      }}
                       disabled={isUsed || isKnownHole}
                       className={cn(
                         "relative aspect-[5/7] transition-all duration-200 rounded touch-manipulation",
