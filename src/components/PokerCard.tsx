@@ -37,10 +37,10 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const suitColors: Record<string, string> = {
-    'h': 'text-red-600',
-    'd': 'text-red-600',
-    'c': 'text-gray-900',
-    's': 'text-gray-900',
+    'h': '#DC2626', // Red 600
+    'd': '#DC2626', // Red 600
+    'c': '#1F2937', // Gray 800
+    's': '#1F2937', // Gray 800
   };
 
   const sizes = {
@@ -51,33 +51,57 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const rankSizes = {
-    xs: 'text-xs',
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-3xl',
+    xs: 'text-[10px]',
+    sm: 'text-sm',
+    md: 'text-lg',
+    lg: 'text-2xl',
   };
 
   const suitSizes = {
-    xs: 'text-lg',
-    sm: 'text-3xl',
-    md: 'text-5xl',
-    lg: 'text-6xl',
+    xs: 'text-sm',
+    sm: 'text-xl',
+    md: 'text-3xl',
+    lg: 'text-5xl',
+  };
+
+  const cornerSizes = {
+    xs: 'p-0.5',
+    sm: 'p-1',
+    md: 'p-1.5',
+    lg: 'p-2',
   };
 
   return (
-    <div className={`${sizes[size]} ${className} rounded-lg shadow-xl overflow-hidden relative bg-white border-2 border-gray-200`}>
-      {/* Card content - centered rank and suit vertically */}
-      <div className="relative w-full h-full flex flex-col items-center justify-center gap-1">
-        {/* Rank */}
-        <div className={`${rankSizes[size]} font-bold ${suitColors[suit]}`}>
+    <div className={`${sizes[size]} ${className} rounded-lg shadow-2xl overflow-hidden relative bg-gradient-to-br from-white via-white to-gray-50 border-2 border-gray-300`}>
+      {/* Top-left corner index */}
+      <div className={`absolute top-0 left-0 ${cornerSizes[size]} flex flex-col items-center leading-none`}>
+        <div className={`${rankSizes[size]} font-bold`} style={{ color: suitColors[suit] }}>
           {rank}
         </div>
-        
-        {/* Suit symbol */}
-        <div className={`${suitSizes[size]} ${suitColors[suit]} leading-none`}>
+        <div className={`${rankSizes[size]}`} style={{ color: suitColors[suit] }}>
           {suitSymbols[suit]}
         </div>
       </div>
+      
+      {/* Bottom-right corner index (rotated) */}
+      <div className={`absolute bottom-0 right-0 ${cornerSizes[size]} flex flex-col items-center leading-none rotate-180`}>
+        <div className={`${rankSizes[size]} font-bold`} style={{ color: suitColors[suit] }}>
+          {rank}
+        </div>
+        <div className={`${rankSizes[size]}`} style={{ color: suitColors[suit] }}>
+          {suitSymbols[suit]}
+        </div>
+      </div>
+
+      {/* Center suit symbol - larger and more prominent */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className={`${suitSizes[size]} leading-none opacity-90`} style={{ color: suitColors[suit] }}>
+          {suitSymbols[suit]}
+        </div>
+      </div>
+      
+      {/* Subtle gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 pointer-events-none"></div>
     </div>
   );
 });

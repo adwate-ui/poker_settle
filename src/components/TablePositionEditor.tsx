@@ -28,6 +28,7 @@ const TablePositionEditor = ({
   const [positions, setPositions] = useState<SeatPosition[]>(currentPositions);
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectedSeat, setSelectedSeat] = useState<string>("");
+  const [bulkAssignMode, setBulkAssignMode] = useState(false);
 
   // Get available players (not already seated)
   const seatedPlayerIds = positions.map(p => p.player_id);
@@ -53,6 +54,26 @@ const TablePositionEditor = ({
     setPositions([...positions, newPosition].sort((a, b) => a.seat - b.seat));
     setSelectedPlayer("");
     setSelectedSeat("");
+  };
+
+  const handleBulkAssign = () => {
+    // Auto-assign all available players to available seats
+    const newPositions = [...positions];
+    const availablePlayersList = availablePlayers.slice();
+    const availableSeatsList = availableSeats.slice().sort((a, b) => a - b);
+    
+    availablePlayersList.forEach((player, index) => {
+      if (index < availableSeatsList.length) {
+        newPositions.push({
+          seat: availableSeatsList[index],
+          player_id: player.id,
+          player_name: player.name,
+        });
+      }
+    });
+    
+    setPositions(newPositions.sort((a, b) => a.seat - b.seat));
+    setBulkAssignMode(false);
   };
 
   const handleRemovePlayer = (playerId: string) => {
@@ -92,7 +113,20 @@ const TablePositionEditor = ({
       {/* Add Player Section */}
       {availablePlayers.length > 0 && availableSeats.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-medium">Add Player to Table</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium">Add Players to Table</h4>
+            {availablePlayers.length > 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkAssign}
+                className="text-xs"
+              >
+                Auto-Assign All ({availablePlayers.length})
+              </Button>
+            )}
+          </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
               <SelectTrigger className="bg-background">
