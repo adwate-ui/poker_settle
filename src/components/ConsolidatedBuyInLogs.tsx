@@ -6,6 +6,13 @@ import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BuyInHistoryEntry {
   id: string;
@@ -82,39 +89,29 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   };
 
   const filteredHistory = history.filter(entry => 
-    filterName === "" || entry.player_name.toLowerCase().includes(filterName.toLowerCase())
+    filterName === "" || filterName === "all" || entry.player_name === filterName
   );
 
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
 
   return (
     <>
-      {/* Player Name Filter */}
+      {/* Player Name Filter - Dropdown */}
       {!loading && history.length > 0 && (
         <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {uniquePlayerNames.map((name) => (
-              <Badge
-                key={name}
-                variant={filterName === name ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary/20 transition-colors px-3 py-1.5 text-sm font-medium"
-                onClick={() => setFilterName(filterName === name ? "" : name)}
-              >
-                {name}
-              </Badge>
-            ))}
-            {filterName && (
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-destructive/20 transition-colors text-sm"
-                onClick={() => setFilterName("")}
-                role="button"
-                aria-label="Clear filter"
-              >
-                Clear ✕
-              </Badge>
-            )}
-          </div>
+          <Select value={filterName} onValueChange={setFilterName}>
+            <SelectTrigger className="w-full sm:w-[250px]">
+              <SelectValue placeholder="Filter by player" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Players</SelectItem>
+              {uniquePlayerNames.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
       
@@ -133,19 +130,19 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[250px] overflow-y-auto">
             <Table>
               <TableHeader className="sticky top-0 bg-muted/50 z-10">
                 <TableRow>
-                  <TableHead className="font-semibold h-12">Player name</TableHead>
-                  <TableHead className="font-semibold h-12">Incremental buy in</TableHead>
-                  <TableHead className="font-semibold h-12">Updated total buy in</TableHead>
-                  <TableHead className="font-semibold h-12">Time</TableHead>
+                  <TableHead className="font-semibold h-10">Player name</TableHead>
+                  <TableHead className="font-semibold h-10">Incremental buy in</TableHead>
+                  <TableHead className="font-semibold h-10">Updated total buy in</TableHead>
+                  <TableHead className="font-semibold h-10">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHistory.map((entry) => (
-                  <TableRow key={entry.id} className="h-12">
+                  <TableRow key={entry.id} className="h-10">
                     <TableCell className="font-medium">{entry.player_name}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

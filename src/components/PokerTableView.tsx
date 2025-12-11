@@ -64,6 +64,9 @@ const PokerTableView = memo(({
   const numPlayers = positions.length;
   const numSeats = Math.max(4, totalSeats || numPlayers); // Use totalSeats if provided, otherwise numPlayers
 
+  // Extract all player names for unique character assignment
+  const allPlayerNames = useMemo(() => positions.map(p => p.player_name), [positions]);
+
   // Calculate position for each player, spreading them evenly - memoized
   const getPlayerPosition = useCallback((index: number) => {
     const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
@@ -336,6 +339,7 @@ const PokerTableView = memo(({
                           name={position.player_name}
                           size="md"
                           className="w-full h-full"
+                          allPlayerNames={allPlayerNames}
                         />
                       </div>
                       {/* Button indicator overlay - positioned as sibling for proper layering */}

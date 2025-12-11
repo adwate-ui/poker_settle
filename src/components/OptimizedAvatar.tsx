@@ -1,15 +1,16 @@
 import { memo, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getCharacterForPlayer } from '@/config/themes';
+import { getCharacterForPlayer, getUniqueCharacterForPlayer } from '@/config/themes';
 import { getCharacterImage } from '@/config/characterImages';
 
 interface OptimizedAvatarProps {
   name: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  allPlayerNames?: string[]; // Optional: list of all player names in the current context (e.g., game)
 }
 
-const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAvatarProps) => {
+const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerNames }: OptimizedAvatarProps) => {
   const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
   
@@ -20,7 +21,12 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '' }: OptimizedAv
   };
   
   // For themed avatars, use player name as ID. For default theme, use dicebear
-  const characterName = currentTheme !== 'default' ? getCharacterForPlayer(currentTheme, name) : null;
+  // If allPlayerNames is provided, use unique character assignment
+  const characterName = currentTheme !== 'default' 
+    ? (allPlayerNames && allPlayerNames.length > 0
+        ? getUniqueCharacterForPlayer(currentTheme, name, allPlayerNames)
+        : getCharacterForPlayer(currentTheme, name))
+    : null;
   const characterImage = characterName ? getCharacterImage(characterName) : null;
   
   const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;

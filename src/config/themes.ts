@@ -295,3 +295,25 @@ export const getCharacterForPlayer = (themeName: ThemeName, playerName: string):
   const index = Math.abs(hash) % theme.characters.length;
   return theme.characters[index];
 };
+
+// Get unique character for a player within a list of players (for a game)
+// This ensures no two players in the same game get the same character
+export const getUniqueCharacterForPlayer = (
+  themeName: ThemeName, 
+  playerName: string, 
+  allPlayerNames: string[]
+): string | null => {
+  const theme = getTheme(themeName);
+  if (theme.characters.length === 0) return null;
+  
+  // Sort player names to ensure consistent assignment
+  const sortedPlayers = [...allPlayerNames].sort();
+  const playerIndex = sortedPlayers.indexOf(playerName);
+  
+  if (playerIndex === -1) return getCharacterForPlayer(themeName, playerName);
+  
+  // Assign characters sequentially based on sorted player order
+  // Use modulo to handle cases where there are more players than characters
+  const characterIndex = playerIndex % theme.characters.length;
+  return theme.characters[characterIndex];
+};
