@@ -63,6 +63,7 @@ const CardSelector = ({
   const handleCardClick = (card: string) => {
     if (usedCards.includes(card) || knownHoleCards.includes(card)) return;
     
+    // Always allow deselection - this fixes the issue where cards can't be deselected when editing
     if (tempSelection.includes(card)) {
       setTempSelection(tempSelection.filter(c => c !== card));
     } else if (tempSelection.length < maxCards) {

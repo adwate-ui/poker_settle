@@ -16,6 +16,7 @@ import CardNotationInput from './CardNotationInput';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
+import OptimizedAvatar from './OptimizedAvatar';
 import { determineWinner, formatCardNotation, parseCardNotationString } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -45,13 +46,14 @@ interface HandTrackingProps {
   game: Game;
   positionsJustChanged?: boolean;
   onHandComplete?: () => void;
+  initialSeatPositions?: SeatPosition[]; // Passed from parent to avoid re-loading
 }
 
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
 
-const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: HandTrackingProps) => {
+const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const {
@@ -132,6 +134,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   useEffect(() => {
     const loadTablePositions = async () => {
       try {
+        // First, try to use initialSeatPositions passed from parent (avoids DB call)
+        if (initialSeatPositions.length > 0) {
+          const positions: Record<string, number> = {};
+          initialSeatPositions.forEach((pos) => {
+            positions[pos.player_id] = pos.seat;
+          });
+          setSeatPositions(positions);
+          return; // Exit early, no need to load from DB
+        }
+        
+        // Fallback: Load from database if not provided
         const { data, error } = await supabase
           .from('table_positions')
           .select('*')
@@ -156,7 +169,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     };
     
     loadTablePositions();
-  }, [game.id, positionsJustChanged]);
+  }, [game.id, positionsJustChanged, initialSeatPositions]);
 
   // Track if positions just changed
   useEffect(() => {
@@ -264,10 +277,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     // Remove the last history entry
     setActionHistory(prev => prev.slice(0, -1));
     
-    toast({
-      title: 'Action undone',
-      description: 'Previous action has been reverted',
-    });
+    // Don't show toast message - as per requirement
   };
 
   // Swipe gesture handlers
@@ -1172,23 +1182,38 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 </div>
               )}
               {!buttonPlayerId && (
-                <div className="space-y-3">
-                  {/* Dealer selection in one row */}
-                  <div className="flex gap-2 flex-wrap justify-center">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold mb-1">Select Dealer</h3>
+                    <p className="text-sm text-muted-foreground">Click on a player to assign them as the dealer</p>
+                  </div>
+                  {/* Dealer selection grid - professional layout */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {game.game_players
                       .filter(gp => !dealtOutPlayers.includes(gp.player_id))
                       .map(gp => (
-                        <Button
+                        <button
                           key={gp.player_id}
-                          variant="outline"
-                          className="h-auto py-2 flex flex-col items-center gap-1 min-w-[80px]"
                           onClick={() => setButtonPlayerId(gp.player_id)}
+                          className="group relative p-4 bg-gradient-to-br from-card to-card/80 border-2 border-border hover:border-primary rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95"
                         >
-                          <div className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center">
-                            <span className="text-xs font-bold">D</span>
+                          <div className="flex flex-col items-center gap-2">
+                            {/* Avatar */}
+                            <div className="relative">
+                              <OptimizedAvatar 
+                                name={gp.player.name}
+                                size="lg"
+                                allPlayerNames={game.game_players.map(p => p.player.name)}
+                              />
+                              {/* Dealer badge overlay */}
+                              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-gray-800 rounded-full border-2 border-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <span className="text-sm font-bold text-primary">D</span>
+                              </div>
+                            </div>
+                            {/* Player name */}
+                            <span className="text-sm font-semibold text-center line-clamp-1">{gp.player.name}</span>
                           </div>
-                          <span className="text-xs font-medium">{gp.player.name}</span>
-                        </Button>
+                        </button>
                       ))}
                   </div>
                 </div>
@@ -1608,7 +1633,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           {/* Community Cards Display - Separate from table, similar to hand history */}
           {(flopCards || turnCard || riverCard) && (
             <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 rounded-xl border border-green-700/30">
-              <div className="text-xs font-semibold text-muted-foreground mb-2">BOARD</div>
               <div className="flex gap-3 items-center flex-wrap">
                 {/* Flop */}
                 {flopCards && (
