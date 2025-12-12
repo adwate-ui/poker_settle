@@ -2370,7 +2370,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                     const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
                     const usedCards = getUsedCards();
                     const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
-                    const isSelected = tempCommunityCards === '';
                     
                     return (
                       <div key={suit.code} className="space-y-2">
