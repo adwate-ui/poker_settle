@@ -304,6 +304,7 @@ const PlayerDetail = () => {
                     <p className="text-xs text-muted-foreground mt-1">Click "Edit Details" to add phone number and UPI ID</p>
                   </div>
                 )}
+              </div>
             </CardContent>
           </CollapsibleContent>
         </Card>
