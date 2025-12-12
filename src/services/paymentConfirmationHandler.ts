@@ -12,11 +12,16 @@ import { SettlementConfirmation } from "@/types/poker";
 const CONFIRMATION_KEYWORDS = ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
 
 /**
- * Check if a message contains a confirmation keyword
+ * Check if a message contains a confirmation keyword as a standalone word
  */
 export function isConfirmationMessage(message: string): boolean {
   const upperMessage = message.trim().toUpperCase();
-  return CONFIRMATION_KEYWORDS.some(keyword => upperMessage.includes(keyword));
+  
+  // Use word boundaries to match keywords as standalone words
+  return CONFIRMATION_KEYWORDS.some(keyword => {
+    const regex = new RegExp(`\\b${keyword}\\b`);
+    return regex.test(upperMessage);
+  });
 }
 
 /**
@@ -37,11 +42,11 @@ export async function processIncomingMessage(
     }
 
     // Get player by phone number
-    const { data: players, error: playerError } = await supabase
+    const { data: player, error: playerError } = await supabase
       .from('players')
-      .select('id, name, phone_number')
+      .select('id, name')
       .eq('phone_number', phoneNumber)
-      .limit(1);
+      .single();
 
     if (playerError) {
       console.error('Error fetching player by phone:', playerError);
@@ -52,15 +57,13 @@ export async function processIncomingMessage(
       };
     }
 
-    if (!players || players.length === 0) {
+    if (!player) {
       return {
         confirmed: false,
         settlementsUpdated: 0,
         error: 'Player not found with this phone number',
       };
     }
-
-    const player = players[0];
 
     // Find all unconfirmed settlements where this player is the payer (settlement_from)
     const { data: confirmations, error: confirmationsError } = await supabase

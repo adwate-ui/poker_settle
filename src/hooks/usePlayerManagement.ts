@@ -81,17 +81,21 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
-        // First, fetch the current player's phone number to check if it's being added
-        const { data: currentPlayer, error: fetchError } = await supabase
-          .from("players")
-          .select("phone_number")
-          .eq("id", playerId)
-          .eq("user_id", user.id)
-          .single();
+        // Check if phone number is being added (before making the update)
+        // Only fetch if phone_number is being updated to avoid unnecessary query
+        let isAddingPhoneNumber = false;
+        if (playerData.phone_number !== undefined) {
+          const { data: currentPlayer, error: fetchError } = await supabase
+            .from("players")
+            .select("phone_number")
+            .eq("id", playerId)
+            .eq("user_id", user.id)
+            .single();
 
-        if (fetchError) throw fetchError;
+          if (fetchError) throw fetchError;
 
-        const isAddingPhoneNumber = !currentPlayer.phone_number && playerData.phone_number;
+          isAddingPhoneNumber = !currentPlayer.phone_number && !!playerData.phone_number;
+        }
 
         // Normalize payment preference based on UPI ID
         const normalizedData = normalizePlayerPaymentPreference(playerData);
