@@ -2486,7 +2486,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   <span className={`text-2xl ${suit.color}`}>{suit.symbol}</span>
                   <h3 className="font-semibold text-base">{suit.name}</h3>
                 </div>
-                <div className="grid grid-cols-13 gap-px justify-items-center">
+                <div className="grid grid-cols-13 gap-0.5">
                   {ranks.map(rank => {
                     const card = `${rank}${suit.code}`;
                     const isUsed = usedCards.includes(card);
@@ -2521,7 +2521,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                           !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
                         }`}
                       >
-                        <PokerCard card={card} size="sm" className="pointer-events-none" />
+                        <PokerCard card={card} size="xs" className="sm:hidden pointer-events-none" />
+                        <PokerCard card={card} size="sm" className="hidden sm:block pointer-events-none" />
                         {isUsed && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                             <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">

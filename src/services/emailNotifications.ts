@@ -29,11 +29,13 @@ export async function sendPlayerWelcomeNotification(
   playerLink: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!player.email) {
+    console.warn(`⚠️ Cannot send welcome email to ${player.name}: No email address`);
     return { success: false, error: "Player has no email address" };
   }
 
   if (!emailService.isConfigured()) {
-    console.warn("Email service not configured. Notification not sent.");
+    console.error("❌ Email service not configured. Notification not sent.");
+    console.error("Please check environment variables: VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY, VITE_FROM_EMAIL");
     return { success: false, error: "Email service not configured" };
   }
 
@@ -48,6 +50,12 @@ export async function sendPlayerWelcomeNotification(
     subject: "Welcome to Poker Settle! 🎮",
     message,
   });
+
+  if (result.success) {
+    console.log(`✅ Welcome email sent to ${player.name} (${player.email})`);
+  } else {
+    console.error(`❌ Failed to send welcome email to ${player.name}:`, result.error);
+  }
 
   return result;
 }
@@ -68,7 +76,8 @@ export async function sendGameCompletionNotifications(
   gameToken: string
 ): Promise<NotificationResult> {
   if (!emailService.isConfigured()) {
-    console.warn("Email service not configured. Notifications not sent.");
+    console.error("❌ Email service not configured. Game completion notifications not sent.");
+    console.error("Please check environment variables: VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY, VITE_FROM_EMAIL");
     return {
       success: false,
       sent: 0,
@@ -76,6 +85,8 @@ export async function sendGameCompletionNotifications(
       errors: ["Email service not configured"],
     };
   }
+
+  console.log(`📧 Sending game completion notifications to ${gamePlayers.length} players...`);
 
   const results: NotificationResult = {
     success: true,
@@ -135,7 +146,8 @@ export async function sendSettlementNotifications(
   gameDate?: string
 ): Promise<NotificationResult> {
   if (!emailService.isConfigured()) {
-    console.warn("Email service not configured. Notifications not sent.");
+    console.error("❌ Email service not configured. Settlement notifications not sent.");
+    console.error("Please check environment variables: VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY, VITE_FROM_EMAIL");
     return {
       success: false,
       sent: 0,
@@ -143,6 +155,8 @@ export async function sendSettlementNotifications(
       errors: ["Email service not configured"],
     };
   }
+
+  console.log(`📧 Sending settlement notifications for ${settlements.length} settlements...`);
 
   const results: NotificationResult = {
     success: true,
@@ -249,4 +263,11 @@ export async function testEmailConnection(): Promise<{ success: boolean; error?:
  */
 export function isEmailConfigured(): boolean {
   return emailService.isConfigured();
+}
+
+/**
+ * Get email service configuration status for debugging
+ */
+export function getEmailConfigStatus() {
+  return emailService.getConfigStatus();
 }
