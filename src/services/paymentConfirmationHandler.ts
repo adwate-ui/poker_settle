@@ -12,16 +12,20 @@ import { SettlementConfirmation } from "@/types/poker";
 const CONFIRMATION_KEYWORDS = ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
 
 /**
+ * Pre-compiled regex patterns for efficient keyword matching
+ */
+const CONFIRMATION_PATTERNS = CONFIRMATION_KEYWORDS.map(
+  keyword => new RegExp(`\\b${keyword}\\b`)
+);
+
+/**
  * Check if a message contains a confirmation keyword as a standalone word
  */
 export function isConfirmationMessage(message: string): boolean {
   const upperMessage = message.trim().toUpperCase();
   
-  // Use word boundaries to match keywords as standalone words
-  return CONFIRMATION_KEYWORDS.some(keyword => {
-    const regex = new RegExp(`\\b${keyword}\\b`);
-    return regex.test(upperMessage);
-  });
+  // Use pre-compiled patterns for better performance
+  return CONFIRMATION_PATTERNS.some(pattern => pattern.test(upperMessage));
 }
 
 /**
@@ -66,6 +70,7 @@ export async function processIncomingMessage(
     }
 
     // Find all unconfirmed settlements where this player is the payer (settlement_from)
+    // Note: settlement_from is stored as player name in the schema, not player ID
     const { data: confirmations, error: confirmationsError } = await supabase
       .from('settlement_confirmations')
       .select('id, settlement_from, settlement_to, amount, confirmed')
@@ -165,26 +170,24 @@ export async function getPendingSettlementsByPhone(
 ): Promise<{ settlements: SettlementConfirmation[]; error?: string }> {
   try {
     // Get player by phone number
-    const { data: players, error: playerError } = await supabase
+    const { data: player, error: playerError } = await supabase
       .from('players')
       .select('id, name')
       .eq('phone_number', phoneNumber)
-      .limit(1);
+      .single();
 
-    if (playerError || !players || players.length === 0) {
+    if (playerError || !player) {
       return {
         settlements: [],
         error: 'Player not found',
       };
     }
 
-    const player = players[0];
-
-    // Get pending settlements
+    // Get pending settlements - match by player ID for security
     const { data: confirmations, error: confirmationsError } = await supabase
       .from('settlement_confirmations')
       .select('id, game_id, player_name, settlement_from, settlement_to, amount, confirmed, confirmed_at, created_at, updated_at')
-      .eq('settlement_from', player.name)
+      .eq('player_name', player.name)
       .eq('confirmed', false);
 
     if (confirmationsError) {
