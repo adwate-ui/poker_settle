@@ -81,10 +81,10 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
-        // First, fetch the current player data to check if phone number is being added
+        // First, fetch the current player's phone number to check if it's being added
         const { data: currentPlayer, error: fetchError } = await supabase
           .from("players")
-          .select("*")
+          .select("phone_number")
           .eq("id", playerId)
           .eq("user_id", user.id)
           .single();

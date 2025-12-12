@@ -522,7 +522,7 @@ const HandReplay = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Poker Table - Desktop shows community cards on table, Mobile doesn't */}
+      {/* Poker Table - Show community cards in separate section below */}
       <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 p-4 rounded-2xl border-2 border-green-700/40 shadow-2xl">
         <PokerTableView
           positions={positions}
@@ -537,7 +537,7 @@ const HandReplay = ({
           animatingPlayerId={animatingPlayerId}
           playerHoleCards={visibleHoleCards}
           animateChipsToWinner={showWinner ? winnerPlayerId : null}
-          communityCards="" // Don't show on table for mobile - show in separate section below
+          communityCards="" // Community cards shown in separate section below for clarity
           showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
           playerStacks={playerStacks}
           showPotChips={Object.keys(streetPlayerBets).length === 0 || animateChipsToPot} // Only show pot chips when no active bets or during sweep animation

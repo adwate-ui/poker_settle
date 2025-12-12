@@ -65,7 +65,7 @@ export async function processIncomingMessage(
     // Find all unconfirmed settlements where this player is the payer (settlement_from)
     const { data: confirmations, error: confirmationsError } = await supabase
       .from('settlement_confirmations')
-      .select('*')
+      .select('id, settlement_from, settlement_to, amount, confirmed')
       .eq('settlement_from', player.name)
       .eq('confirmed', false);
 
@@ -180,7 +180,7 @@ export async function getPendingSettlementsByPhone(
     // Get pending settlements
     const { data: confirmations, error: confirmationsError } = await supabase
       .from('settlement_confirmations')
-      .select('*')
+      .select('id, game_id, player_name, settlement_from, settlement_to, amount, confirmed, confirmed_at, created_at, updated_at')
       .eq('settlement_from', player.name)
       .eq('confirmed', false);
 
