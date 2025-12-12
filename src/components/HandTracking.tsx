@@ -1122,198 +1122,210 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
     const winnerResult = autoSelectWinner();
     
-    return (
-      <>
-        <Card className="mt-6 border-2 border-poker-gold/50 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20">
-            <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/30 rounded-lg">
-                  <Trophy className="h-6 w-6 text-amber-500 animate-pulse" />
-                </div>
-                <span className="text-xl font-bold">🏆 Showdown</span>
+    const showdownContent = (
+      <Card className="border-2 border-poker-gold/50 shadow-2xl h-full overflow-y-auto">
+        <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20">
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/30 rounded-lg">
+                <Trophy className="h-6 w-6 text-amber-500 animate-pulse" />
               </div>
-              {winnerResult && (
-                <Badge className="bg-green-600 text-white px-3 py-1 text-sm animate-bounce">
-                  ✨ Winner Detected!
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            {/* Show all community cards */}
-            {(flopCards || turnCard || riverCard) && (
-              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
-                <div className="text-sm font-semibold text-white mb-2">Board:</div>
-                <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
-                  {/* Mobile view - small cards */}
-                  <div className="flex gap-1 sm:hidden">
-                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={`flop-${idx}`} card={card} size="sm" />
-                    ))}
-                    {turnCard && <PokerCard card={turnCard} size="sm" />}
-                    {riverCard && <PokerCard card={riverCard} size="sm" />}
-                  </div>
-                  {/* Desktop view - medium cards */}
-                  <div className="hidden sm:flex gap-2">
-                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
-                    ))}
-                    {turnCard && <PokerCard card={turnCard} size="md" />}
-                    {riverCard && <PokerCard card={riverCard} size="md" />}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="text-xl font-bold text-center text-poker-gold">
-              Pot: {formatWithBB(potSize)}
+              <span className="text-xl font-bold">🏆 Showdown</span>
             </div>
-
-            {/* Hole Cards Entry Section - Only Remaining Players */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
-                <p className="text-xs text-muted-foreground">
-                  {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
-                </p>
+            {winnerResult && (
+              <Badge className="bg-green-600 text-white px-3 py-1 text-sm animate-bounce">
+                ✨ Winner Detected!
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-6">
+          {/* Show all community cards */}
+          {(flopCards || turnCard || riverCard) && (
+            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
+              <div className="text-sm font-semibold text-white mb-2">Board:</div>
+              <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
+                {/* Mobile view - small cards */}
+                <div className="flex gap-1 sm:hidden">
+                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={`flop-${idx}`} card={card} size="sm" />
+                  ))}
+                  {turnCard && <PokerCard card={turnCard} size="sm" />}
+                  {riverCard && <PokerCard card={riverCard} size="sm" />}
+                </div>
+                {/* Desktop view - medium cards */}
+                <div className="hidden sm:flex gap-2">
+                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
+                  ))}
+                  {turnCard && <PokerCard card={turnCard} size="md" />}
+                  {riverCard && <PokerCard card={riverCard} size="md" />}
+                </div>
               </div>
-              
-              <div className="space-y-2">
-                {remainingPlayers.map((gp) => (
-                  <div
-                    key={gp.player_id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2 flex-1">
-                      <span className="font-medium">{gp.player.name}</span>
-                      {gp.player_id === heroPlayer?.player_id && (
-                        <Badge variant="secondary" className="text-xs">Hero</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {playerHoleCards[gp.player_id] ? (
-                        <>
-                          <div className="flex gap-1">
-                            {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="sm" />
-                            ))}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPlayerForHole(gp.player_id);
-                              setShowHoleCardInput(true);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          {!winnerResult && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => finishHand([gp.player_id], 'showdown')}
-                              className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
-                            >
-                              👑 Winner
-                            </Button>
-                          )}
-                        </>
-                      ) : (
+            </div>
+          )}
+
+          <div className="text-xl font-bold text-center text-poker-gold">
+            Pot: {formatWithBB(potSize)}
+          </div>
+
+          {/* Hole Cards Entry Section - Only Remaining Players */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
+              <p className="text-xs text-muted-foreground">
+                {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              {remainingPlayers.map((gp) => (
+                <div
+                  key={gp.player_id}
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="font-medium">{gp.player.name}</span>
+                    {gp.player_id === heroPlayer?.player_id && (
+                      <Badge variant="secondary" className="text-xs">Hero</Badge>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {playerHoleCards[gp.player_id] ? (
+                      <>
+                        <div className="flex gap-1">
+                          {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard key={idx} card={card} size="sm" />
+                          ))}
+                        </div>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             setSelectedPlayerForHole(gp.player_id);
                             setShowHoleCardInput(true);
                           }}
                         >
-                          Add Hole Cards
+                          Edit
                         </Button>
-                      )}
-                    </div>
+                        {!winnerResult && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => finishHand([gp.player_id], 'showdown')}
+                            className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
+                          >
+                            👑 Winner
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlayerForHole(gp.player_id);
+                          setShowHoleCardInput(true);
+                        }}
+                      >
+                        Add Hole Cards
+                      </Button>
+                    )}
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Winner Display */}
+          {winnerResult && (
+            <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
+              <div className="text-center space-y-3">
+                {winnerResult.winners.length === 1 ? (
+                  <>
+                    <div className="text-2xl font-bold text-green-400">
+                      🏆 {winnerResult.winners[0].playerName} Wins!
+                    </div>
+                    <div className="text-lg font-semibold text-poker-gold">
+                      {winnerResult.winners[0].handName}
+                    </div>
+                    <div className="flex gap-1 justify-center">
+                      {winnerResult.winners[0].bestHand.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="sm" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-green-400">
+                      🏆 Chopped Pot!
+                    </div>
+                    <div className="text-lg font-semibold text-poker-gold">
+                      {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
+                    </div>
+                    <div className="space-y-2">
+                      {winnerResult.winners.map((winner) => (
+                        <div key={winner.playerId} className="flex items-center justify-center gap-2">
+                          <span className="font-medium">{winner.playerName}</span>
+                          <div className="flex gap-1">
+                            {winner.bestHand.map((card, idx) => (
+                              <PokerCard key={idx} card={card} size="sm" />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+                
+                {winnerResult.allHands.length > 1 && (
+                  <details className="text-sm text-left">
+                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                      View All Hands
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      {winnerResult.allHands.map((hand, idx) => (
+                        <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">
+                              {idx + 1}. {hand.playerName}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {hand.handName}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                
+                <Button
+                  onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  Confirm & Complete Hand
+                </Button>
               </div>
             </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+    
+    return (
+      <>
+        {/* Mobile: Full-screen showdown */}
+        <div className="md:hidden fixed inset-0 z-50 bg-background">
+          {showdownContent}
+        </div>
 
-            {/* Winner Display */}
-            {winnerResult && (
-              <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
-                <div className="text-center space-y-3">
-                  {winnerResult.winners.length === 1 ? (
-                    <>
-                      <div className="text-2xl font-bold text-green-400">
-                        🏆 {winnerResult.winners[0].playerName} Wins!
-                      </div>
-                      <div className="text-lg font-semibold text-poker-gold">
-                        {winnerResult.winners[0].handName}
-                      </div>
-                      <div className="flex gap-1 justify-center">
-                        {winnerResult.winners[0].bestHand.map((card, idx) => (
-                          <PokerCard key={idx} card={card} size="sm" />
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-2xl font-bold text-green-400">
-                        🏆 Chopped Pot!
-                      </div>
-                      <div className="text-lg font-semibold text-poker-gold">
-                        {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
-                      </div>
-                      <div className="space-y-2">
-                        {winnerResult.winners.map((winner) => (
-                          <div key={winner.playerId} className="flex items-center justify-center gap-2">
-                            <span className="font-medium">{winner.playerName}</span>
-                            <div className="flex gap-1">
-                              {winner.bestHand.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="sm" />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  
-                  {winnerResult.allHands.length > 1 && (
-                    <details className="text-sm text-left">
-                      <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                        View All Hands
-                      </summary>
-                      <div className="mt-2 space-y-2">
-                        {winnerResult.allHands.map((hand, idx) => (
-                          <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">
-                                {idx + 1}. {hand.playerName}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {hand.handName}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-                  
-                  <Button
-                    onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    size="lg"
-                  >
-                    Confirm & Complete Hand
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Desktop: Regular card */}
+        <div className="hidden md:block mt-6">
+          {showdownContent}
+        </div>
 
         {/* Hole Card Selector - Direct card selector without intermediate dialog */}
         <CardSelector
@@ -1341,9 +1353,261 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     );
   }
 
+  // Mobile full-screen hand tracking content
+  const handTrackingContent = (
+    <div className="flex flex-col h-full bg-background">
+      {/* Header - compact on mobile */}
+      <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-2 sm:p-3 border-b border-primary/20 flex-shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/30 rounded-lg">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold">Hand #{currentHand?.hand_number}</span>
+              <Badge variant="outline" className="w-fit text-[10px] h-4 px-1">
+                {stage.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+          <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
+            💰 {formatWithBB(potSize)}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Main content area - 2/3 of remaining space for table view */}
+      <div className="flex-[2] overflow-y-auto min-h-0 bg-background">
+        <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+          {/* Poker Table - WITHOUT community cards on table for mobile */}
+          {activePlayers.length > 0 && (
+            <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border border-green-700/30">
+              <PokerTableView
+                positions={activePlayers.map(gp => ({
+                  seat: seatPositions[gp.player_id] ?? 0,
+                  player_id: gp.player_id,
+                  player_name: gp.player.name,
+                }))}
+                buttonPlayerId={currentHand?.button_player_id}
+                seatPositions={seatPositions}
+                playerBets={streetPlayerBets}
+                potSize={potSize}
+                showPositionLabels={true}
+                foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
+                communityCards="" // DON'T show community cards on table for mobile
+                activePlayerId={currentPlayer?.player_id}
+                playerHoleCards={playerHoleCards}
+                playerStacks={playerStacks}
+              />
+            </div>
+          )}
+
+          {/* Community Cards Display - Separate from table, similar to hand history */}
+          {(flopCards || turnCard || riverCard) && (
+            <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 rounded-xl border border-green-700/30">
+              <div className="text-xs font-semibold text-muted-foreground mb-2">BOARD</div>
+              <div className="flex gap-3 items-center flex-wrap">
+                {/* Flop */}
+                {flopCards && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                    <div className="flex gap-0.5">
+                      {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Turn */}
+                {turnCard && flopCards && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
+                      <div className="flex gap-0.5">
+                        <PokerCard card={turnCard} size="sm" />
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* River */}
+                {riverCard && turnCard && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
+                      <div className="flex gap-0.5">
+                        <PokerCard card={riverCard} size="sm" />
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* Edit button */}
+                {cardsJustAdded && (
+                  <Button variant="outline" size="sm" onClick={handleEditCards} className="ml-auto h-8 text-xs">
+                    Edit
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action History - Collapsible, compact */}
+          {allHandActions.length > 0 && (
+            <Collapsible open={isActionHistoryOpen} onOpenChange={setIsActionHistoryOpen}>
+              <div className="bg-muted/30 rounded-lg border border-border">
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between p-2 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-muted-foreground">ACTIONS</span>
+                      <Badge variant="outline" className="text-[10px] h-4 px-1">{allHandActions.length}</Badge>
+                    </div>
+                    {isActionHistoryOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-2 pt-0 space-y-2 max-h-32 overflow-y-auto">
+                    {actionsByStreet.map(({ street, actions: streetActions }) => (
+                      <div key={street} className="space-y-1">
+                        <div className="text-[10px] font-bold text-primary">{street}</div>
+                        {streetActions.map((action, idx) => {
+                          const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                          return (
+                            <div key={idx} className="bg-background/50 rounded p-1.5 text-[10px] flex justify-between items-center gap-1">
+                              <span className="font-semibold truncate">{player?.player.name}</span>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Badge variant={getActionBadgeVariant(action.action_type)} className="text-[9px] px-1 h-4">
+                                  {action.action_type}
+                                </Badge>
+                                {action.bet_size > 0 && (
+                                  <span className="text-amber-600 dark:text-amber-400 font-bold text-[10px]">
+                                    Rs.{action.bet_size}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom 1/3 - Action Buttons with clear player indication */}
+      <div className="flex-[1] flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 overflow-y-auto">
+        {/* Current Player Indicator */}
+        {currentPlayer && (
+          <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-center">
+            <div className="text-xs font-semibold text-muted-foreground">Action on</div>
+            <div className="text-lg font-bold text-primary flex items-center justify-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              {currentPlayer.player.name}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                onClick={() => recordAction('Call')} 
+                variant="outline"
+                size="lg"
+                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
+              >
+                {currentBet === 0 ? '✓ Check' : `Call ${currentBet}`}
+              </Button>
+              <Button 
+                onClick={() => recordAction('Fold')} 
+                variant="destructive"
+                size="lg"
+                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                className="h-12 text-sm font-bold"
+              >
+                ❌ Fold
+              </Button>
+            </div>
+            
+            {/* Raise/Bet */}
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value === '') return;
+                  const numValue = parseFloat(value);
+                  if (!isNaN(numValue) && numValue > 0) {
+                    const smallBlind = game.small_blind || 50;
+                    const rounded = Math.round(numValue / smallBlind) * smallBlind;
+                    setBetAmount(rounded.toString());
+                  } else {
+                    setBetAmount('');
+                  }
+                }}
+                placeholder={currentBet === 0 ? `Bet` : `Raise`}
+                className="flex-1 h-12 text-base"
+              />
+              <Button 
+                onClick={() => recordAction('Raise')} 
+                disabled={!betAmount}
+                size="lg"
+                className="h-12 px-6 font-bold bg-orange-600 hover:bg-orange-700"
+              >
+                {currentBet === 0 ? '💰 Bet' : '📈 Raise'}
+              </Button>
+            </div>
+          </div>
+        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+          <div className="bg-muted/50 p-3 rounded-lg text-center border border-dashed">
+            <p className="text-sm text-muted-foreground">🃏 Player has folded</p>
+          </div>
+        ) : null}
+
+        {/* Street Navigation */}
+        <div className="flex gap-2">
+          {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
+            <Button 
+              onClick={moveToPreviousStreet} 
+              className="flex-1 h-10 text-xs" 
+              variant="outline"
+            >
+              ← Prev
+            </Button>
+          )}
+          <Button 
+            onClick={moveToNextStreet} 
+            className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
+            disabled={!canMoveToNextStreet()}
+          >
+            {stage === 'river' ? '🏆 Showdown' : 'Next →'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-    <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in">
+    {/* Mobile: Full-screen dialog */}
+    <div className="md:hidden fixed inset-0 z-50 bg-background">
+      {handTrackingContent}
+    </div>
+
+    {/* Desktop view - unchanged */}
+    <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in hidden md:block">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
         <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
