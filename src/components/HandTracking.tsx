@@ -2245,29 +2245,153 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop: Show button to select community cards when needed */}
+        {/* Desktop: Inline card selector when cards need to be selected */}
         {((stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
-          <div className="bg-amber-500/20 border-2 border-amber-500/50 p-4 rounded-lg animate-pulse">
-            <div className="flex items-center justify-between gap-4">
+          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-2 border-amber-500/50 p-4 rounded-xl">
+            <div className="space-y-4">
               <div>
-                <p className="font-bold text-lg mb-1">
-                  {stage === 'flop' ? '🎴 Select Flop Cards' : stage === 'turn' ? '🎴 Select Turn Card' : '🎴 Select River Card'}
-                </p>
+                <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                  🎴 {stage === 'flop' ? 'Select Flop Cards (3)' : stage === 'turn' ? 'Select Turn Card (1)' : 'Select River Card (1)'}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  {stage === 'flop' ? 'Choose 3 cards for the flop' : stage === 'turn' ? 'Choose 1 card for the turn' : 'Choose 1 card for the river'}
+                  {stage === 'flop' ? 'Click 3 cards from the grid below' : 'Click 1 card from the grid below'}. Already used cards are greyed out.
                 </p>
               </div>
-              <Button
-                onClick={() => {
-                  setCardSelectorType(stage as 'flop' | 'turn' | 'river');
-                  setTempCommunityCards('');
-                  setShowCardSelector(true);
-                }}
-                size="lg"
-                className="bg-amber-600 hover:bg-amber-700 font-bold"
-              >
-                Select Cards
-              </Button>
+              
+              {/* Selected cards preview */}
+              {tempCommunityCards && (
+                <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/30">
+                  <span className="text-sm font-semibold">Selected:</span>
+                  <div className="flex gap-1">
+                    {tempCommunityCards.match(/.{1,2}/g)?.map((card, idx) => (
+                      <PokerCard key={idx} card={card} size="xs" />
+                    ))}
+                  </div>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {tempCommunityCards.match(/.{1,2}/g)?.length || 0}/{stage === 'flop' ? 3 : 1}
+                  </span>
+                </div>
+              )}
+              
+              {/* Card grid by suit - Inline on desktop */}
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {[
+                  { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+                  { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
+                  { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
+                  { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+                ].map(suit => {
+                  const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+                  const cardsBeingEdited = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                  const usedCards = getUsedCards(cardsBeingEdited);
+                  const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
+                  const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                  
+                  return (
+                    <div key={suit.code} className="space-y-1.5">
+                      <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                        <span className={`text-xl ${suit.color}`}>{suit.symbol}</span>
+                        <h4 className="font-semibold text-sm">{suit.name}</h4>
+                      </div>
+                      <div className="grid grid-cols-13 gap-0.5">
+                        {ranks.map(rank => {
+                          const card = `${rank}${suit.code}`;
+                          const isUsed = usedCards.includes(card);
+                          const isKnownHole = knownHoleCards.includes(card);
+                          const isSelected = currentSelection.includes(card);
+                          
+                          return (
+                            <button
+                              key={card}
+                              onClick={() => {
+                                if (isUsed || isKnownHole) return;
+                                
+                                if (isSelected) {
+                                  const newSelection = currentSelection.filter(c => c !== card);
+                                  setTempCommunityCards(newSelection.join(''));
+                                } else {
+                                  const maxCards = stage === 'flop' ? 3 : 1;
+                                  if (currentSelection.length < maxCards) {
+                                    const newSelection = [...currentSelection, card];
+                                    setTempCommunityCards(newSelection.join(''));
+                                  }
+                                }
+                              }}
+                              disabled={isUsed || isKnownHole}
+                              className={`relative aspect-[5/7] w-full transition-all duration-200 rounded touch-manipulation ${
+                                (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
+                              } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg' : ''} ${
+                                !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
+                              }`}
+                            >
+                              <PokerCard card={card} size="xs" className="pointer-events-none" />
+                              {isUsed && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
+                                  <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                                    USED
+                                  </div>
+                                </div>
+                              )}
+                              {isKnownHole && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
+                                  <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                                    HOLE
+                                  </div>
+                                </div>
+                              )}
+                              {isSelected && (
+                                <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg pointer-events-none">
+                                  ✓
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex gap-2 pt-2 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setTempCommunityCards('');
+                  }} 
+                  className="flex-1"
+                  disabled={!tempCommunityCards}
+                >
+                  Clear Selection
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const maxCards = stage === 'flop' ? 3 : 1;
+                    const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                    if (currentSelection.length === maxCards) {
+                      if (stage === 'flop') {
+                        setFlopCards(tempCommunityCards);
+                        setCardsJustAdded(true);
+                      } else if (stage === 'turn') {
+                        setTurnCard(tempCommunityCards);
+                        setCardsJustAdded(true);
+                      } else if (stage === 'river') {
+                        setRiverCard(tempCommunityCards);
+                        setCardsJustAdded(true);
+                      }
+                      setTempCommunityCards('');
+                    }
+                  }}
+                  disabled={
+                    (stage === 'flop' && (!tempCommunityCards || tempCommunityCards.match(/.{1,2}/g)?.length !== 3)) ||
+                    ((stage === 'turn' || stage === 'river') && !tempCommunityCards)
+                  }
+                  className="flex-1 font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                >
+                  Confirm Selection
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -2469,7 +2593,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       </CardContent>
     </Card>
     
-    {/* Card Selector for community cards - auto-opens when cards need to be selected */}
+    {/* Card Selector Dialog - MOBILE ONLY - auto-opens when cards need to be selected */}
     <Dialog open={showCardSelector} onOpenChange={(isOpen) => {
       if (!isOpen) {
         // When closing without confirm, treat it as a swipe/undo action
@@ -2484,7 +2608,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       }
       setShowCardSelector(isOpen);
     }}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto md:hidden">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {cardSelectorType === 'flop' ? 'Select Flop Cards (3)' : 
