@@ -21,28 +21,35 @@ export default defineConfig(({ mode }) => ({
         // Skip waiting to activate new service worker immediately
         skipWaiting: true,
         clientsClaim: true,
+        // Disable offline support - force network-first for everything during active game
         runtimeCaching: [
           // ALL Supabase calls - NetworkOnly (no offline fallback)
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkOnly',
           },
-          // External images and avatars - CacheFirst (safe to cache)
+          // ALL app navigation and API calls - NetworkOnly to prevent stale data
+          {
+            urlPattern: /^https?:\/\/.*\/(api|auth|game|hand|player).*/i,
+            handler: 'NetworkOnly',
+          },
+          // External images and avatars - NetworkFirst with short cache
           {
             urlPattern: /^https:\/\/api\.dicebear\.com\/.*/i,
-            handler: 'CacheFirst',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'avatar-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 7 * 24 * 60 * 60,
+                maxAgeSeconds: 24 * 60 * 60, // 1 day only
               },
+              networkTimeoutSeconds: 3,
               cacheableResponse: {
                 statuses: [0, 200],
               },
             },
           },
-          // Google Fonts - CacheFirst
+          // Google Fonts - CacheFirst (safe and static)
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
