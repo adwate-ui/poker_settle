@@ -476,6 +476,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             game={game} 
             positionsJustChanged={positionsJustChanged}
             onHandComplete={handleHandComplete}
+            initialSeatPositions={currentTablePosition?.positions || []}
           />
         )}
 

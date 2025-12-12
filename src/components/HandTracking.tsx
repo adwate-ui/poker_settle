@@ -45,13 +45,14 @@ interface HandTrackingProps {
   game: Game;
   positionsJustChanged?: boolean;
   onHandComplete?: () => void;
+  initialSeatPositions?: SeatPosition[]; // Passed from parent to avoid re-loading
 }
 
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
 
-const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: HandTrackingProps) => {
+const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const {
@@ -132,6 +133,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   useEffect(() => {
     const loadTablePositions = async () => {
       try {
+        // First, try to use initialSeatPositions passed from parent (avoids DB call)
+        if (initialSeatPositions.length > 0) {
+          const positions: Record<string, number> = {};
+          initialSeatPositions.forEach((pos: SeatPosition) => {
+            positions[pos.player_id] = pos.seat;
+          });
+          setSeatPositions(positions);
+          return; // Exit early, no need to load from DB
+        }
+        
+        // Fallback: Load from database if not provided
         const { data, error } = await supabase
           .from('table_positions')
           .select('*')
@@ -156,7 +168,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     };
     
     loadTablePositions();
-  }, [game.id, positionsJustChanged]);
+  }, [game.id, positionsJustChanged, initialSeatPositions]);
 
   // Track if positions just changed
   useEffect(() => {
