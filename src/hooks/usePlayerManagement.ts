@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PlayerFormData } from "@/components/PlayerFormDialog";
 import { sendPlayerWelcomeNotification } from "@/services/emailNotifications";
 import { generatePlayerShareLink } from "@/services/messageTemplates";
+import { generateShortCode } from "@/lib/shareUtils";
 
 export const usePlayerManagement = () => {
   const { user } = useAuth();
@@ -40,7 +41,40 @@ export const usePlayerManagement = () => {
 
         // Send welcome notification if email is provided
         if (data.email) {
-          const playerLink = generatePlayerShareLink(data.id);
+          // Create or get shared link for player
+          let playerToken = '';
+          
+          // Check for existing shared link
+          const { data: existingLink, error: fetchError } = await supabase
+            .from('shared_links')
+            .select('access_token')
+            .eq('user_id', user.id)
+            .eq('resource_type', 'player')
+            .eq('resource_id', data.id)
+            .maybeSingle();
+
+          if (existingLink) {
+            playerToken = existingLink.access_token;
+          } else {
+            // Create new shared link with short code
+            const shortCode = generateShortCode();
+            const { data: newLink, error: createError } = await supabase
+              .from('shared_links')
+              .insert({
+                user_id: user.id,
+                resource_type: 'player',
+                resource_id: data.id,
+                short_code: shortCode,
+              })
+              .select('access_token')
+              .single();
+
+            if (!createError && newLink) {
+              playerToken = newLink.access_token;
+            }
+          }
+          
+          const playerLink = generatePlayerShareLink(data.id, playerToken);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
           
           if (notificationResult.success) {
@@ -132,7 +166,40 @@ export const usePlayerManagement = () => {
 
         // If email was just added, treat this as onboarding and send welcome notification
         if (isAddingEmail && data.email) {
-          const playerLink = generatePlayerShareLink(data.id);
+          // Create or get shared link for player
+          let playerToken = '';
+          
+          // Check for existing shared link
+          const { data: existingLink, error: fetchError } = await supabase
+            .from('shared_links')
+            .select('access_token')
+            .eq('user_id', user.id)
+            .eq('resource_type', 'player')
+            .eq('resource_id', data.id)
+            .maybeSingle();
+
+          if (existingLink) {
+            playerToken = existingLink.access_token;
+          } else {
+            // Create new shared link with short code
+            const shortCode = generateShortCode();
+            const { data: newLink, error: createError } = await supabase
+              .from('shared_links')
+              .insert({
+                user_id: user.id,
+                resource_type: 'player',
+                resource_id: data.id,
+                short_code: shortCode,
+              })
+              .select('access_token')
+              .single();
+
+            if (!createError && newLink) {
+              playerToken = newLink.access_token;
+            }
+          }
+          
+          const playerLink = generatePlayerShareLink(data.id, playerToken);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
           
           if (notificationResult.success) {
