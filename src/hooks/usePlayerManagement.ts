@@ -81,6 +81,18 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
+        // First, fetch the current player data to check if phone number is being added
+        const { data: currentPlayer, error: fetchError } = await supabase
+          .from("players")
+          .select("*")
+          .eq("id", playerId)
+          .eq("user_id", user.id)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        const isAddingPhoneNumber = !currentPlayer.phone_number && playerData.phone_number;
+
         // Normalize payment preference based on UPI ID
         const normalizedData = normalizePlayerPaymentPreference(playerData);
 
@@ -105,7 +117,20 @@ export const usePlayerManagement = () => {
 
         if (error) throw error;
 
-        toast.success(`${data.name} updated!`);
+        // If phone number was just added, treat this as onboarding and send welcome notification
+        if (isAddingPhoneNumber && data.phone_number) {
+          const playerLink = generatePlayerShareLink(data.id);
+          const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
+          
+          if (notificationResult.success) {
+            toast.success(`${data.name} updated! Welcome message sent to WhatsApp.`);
+          } else {
+            toast.success(`${data.name} updated! (WhatsApp notification failed: ${notificationResult.error})`);
+          }
+        } else {
+          toast.success(`${data.name} updated!`);
+        }
+
         return data;
       } catch (error) {
         console.error("Error updating player:", error);
