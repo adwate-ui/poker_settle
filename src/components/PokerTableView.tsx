@@ -81,8 +81,8 @@ const PokerTableView = memo(({
   const getPlayerPosition = useCallback((index: number) => {
     const angle = index * (360 / numPlayers) - 90; // Start from top, spread evenly
     const radians = (angle * Math.PI) / 180;
-    const radiusX = 44; // Horizontal radius
-    const radiusY = 32; // Vertical radius (smaller for more rectangular, like real poker table)
+    const radiusX = 38; // Horizontal radius - reduced to keep elements within bounds
+    const radiusY = 28; // Vertical radius - reduced to keep elements within bounds
     
     return {
       x: TABLE_CENTER_X + radiusX * Math.cos(radians),
@@ -431,24 +431,24 @@ const PokerTableView = memo(({
                     let chipTop, chipLeft;
                     if (pos.y < 35) {
                       // Top players - chips above
-                      chipTop = isMobileView ? '-45px' : '-60px';
+                      chipTop = isMobileView ? '-40px' : '-50px';
                     } else if (pos.y > 65) {
                       // Bottom players - chips below
-                      chipTop = isMobileView ? '65px' : '80px';
+                      chipTop = isMobileView ? '60px' : '70px';
                     } else {
                       // Middle players - chips to the side, slightly below
-                      chipTop = isMobileView ? '50px' : '60px';
+                      chipTop = isMobileView ? '45px' : '55px';
                     }
                     
                     if (pos.x < 35) {
                       // Left side - chips to the left
-                      chipLeft = isMobileView ? '-40px' : '-50px';
+                      chipLeft = isMobileView ? '-35px' : '-45px';
                     } else if (pos.x > 65) {
                       // Right side - chips to the right
-                      chipLeft = isMobileView ? '40px' : '50px';
+                      chipLeft = isMobileView ? '35px' : '45px';
                     } else {
                       // Center - chips slightly to the side based on y position
-                      chipLeft = pos.y > 50 ? (isMobileView ? '35px' : '45px') : (isMobileView ? '-35px' : '-45px');
+                      chipLeft = pos.y > 50 ? (isMobileView ? '30px' : '40px') : (isMobileView ? '-30px' : '-40px');
                     }
                     
                     return (
@@ -474,8 +474,8 @@ const PokerTableView = memo(({
                     <div 
                       className="absolute animate-in fade-in zoom-in duration-700"
                       style={{
-                        top: pos.y > 50 ? '-70px' : '90px',
-                        left: pos.x > 50 ? '-60px' : '60px',
+                        top: pos.y > 50 ? '-60px' : '80px',
+                        left: pos.x > 50 ? '-50px' : '50px',
                         zIndex: Z_INDEX.WINNER_BADGE,
                       }}
                     >

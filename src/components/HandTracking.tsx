@@ -49,7 +49,7 @@ interface HandTrackingProps {
 
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
-const HAND_SAVE_DELAY_MS = 2000; // Delay before saving hand to database after completion
+const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
 
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: HandTrackingProps) => {
   const { user } = useAuth();
@@ -114,6 +114,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     turnCard: string;
     riverCard: string;
   }>>([]);
+  
+  // Swipe gesture state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -261,6 +268,35 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
       title: 'Action undone',
       description: 'Previous action has been reverted',
     });
+  };
+
+  // Swipe gesture handlers
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    // Right swipe = go back (undo action or edit cards)
+    if (isRightSwipe) {
+      if (cardsJustAdded) {
+        handleEditCards();
+      } else if (actionHistory.length > 0) {
+        undoLastAction();
+      }
+    }
+    // Left swipe could also trigger back in the future if needed
+    // Currently just using right swipe for back
   };
 
   const startNewHand = async () => {
@@ -1246,14 +1282,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     const winnerResult = autoSelectWinner();
     
     const showdownContent = (
-      <Card className="border-2 border-poker-gold/50 shadow-2xl h-full overflow-y-auto">
-        <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20">
+      <Card className="border-2 border-poker-gold/50 shadow-2xl">
+        <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 py-3">
           <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-amber-500/30 rounded-lg">
-                <Trophy className="h-6 w-6 text-amber-500 animate-pulse" />
+                <Trophy className="h-5 w-5 text-amber-500 animate-pulse" />
               </div>
-              <span className="text-xl font-bold">🏆 Showdown</span>
+              <span className="text-lg font-bold">🏆 Showdown</span>
             </div>
             {winnerResult && (
               <Badge className="bg-green-600 text-white px-3 py-1 text-sm animate-bounce">
@@ -1262,65 +1298,69 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pt-6">
-          {/* Show all community cards */}
+        <CardContent className="space-y-3 pt-4">
+          {/* Show all community cards with labels */}
           {(flopCards || turnCard || riverCard) && (
-            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
-              <div className="text-sm font-semibold text-white mb-2">Board:</div>
-              <div className="flex gap-2 justify-center flex-wrap items-center">
-                {/* Mobile view - small cards with gaps */}
-                <div className="flex gap-2 sm:hidden items-center">
-                  {flopCards && (
+            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-2 sm:p-3">
+              <div className="flex gap-2 sm:gap-3 justify-center flex-wrap items-center">
+                {/* Flop */}
+                {flopCards && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-semibold text-green-200 text-center">FLOP</span>
                     <div className="flex gap-0.5">
                       {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                        <PokerCard key={`flop-${idx}`} card={card} size="sm" />
+                        <PokerCard key={`flop-${idx}`} card={card} size="xs" />
                       ))}
                     </div>
-                  )}
-                  {turnCard && flopCards && <div className="w-px h-8 bg-green-500/50" />}
-                  {turnCard && <PokerCard card={turnCard} size="sm" />}
-                  {riverCard && turnCard && <div className="w-px h-8 bg-green-500/50" />}
-                  {riverCard && <PokerCard card={riverCard} size="sm" />}
-                </div>
-                {/* Desktop view - medium cards with gaps */}
-                <div className="hidden sm:flex gap-2 items-center">
-                  {flopCards && (
-                    <div className="flex gap-1">
-                      {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                        <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
-                      ))}
+                  </div>
+                )}
+                
+                {/* Turn */}
+                {turnCard && flopCards && (
+                  <>
+                    <div className="h-10 sm:h-12 w-px bg-green-500/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-green-200 text-center">TURN</span>
+                      <PokerCard card={turnCard} size="xs" />
                     </div>
-                  )}
-                  {turnCard && flopCards && <div className="w-px h-12 bg-green-500/50" />}
-                  {turnCard && <PokerCard card={turnCard} size="md" />}
-                  {riverCard && turnCard && <div className="w-px h-12 bg-green-500/50" />}
-                  {riverCard && <PokerCard card={riverCard} size="md" />}
-                </div>
+                  </>
+                )}
+                
+                {/* River */}
+                {riverCard && turnCard && (
+                  <>
+                    <div className="h-10 sm:h-12 w-px bg-green-500/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-green-200 text-center">RIVER</span>
+                      <PokerCard card={riverCard} size="xs" />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
 
-          <div className="text-xl font-bold text-center text-poker-gold">
+          <div className="text-lg font-bold text-center text-poker-gold">
             Pot: {formatWithBB(potSize)}
           </div>
 
-          {/* Hole Cards Entry Section - Only Remaining Players */}
-          <div className="space-y-3">
+          {/* Hole Cards Entry Section */}
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
+              <h3 className="text-sm font-semibold">Player Hole Cards</h3>
               <p className="text-xs text-muted-foreground">
                 {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
               </p>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {remainingPlayers.map((gp) => (
                 <div
                   key={gp.player_id}
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  className="flex items-center justify-between p-2 bg-muted/50 rounded-lg"
                 >
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="font-medium">{gp.player.name}</span>
+                    <span className="text-sm font-medium">{gp.player.name}</span>
                     {gp.player_id === heroPlayer?.player_id && (
                       <Badge variant="secondary" className="text-xs">Hero</Badge>
                     )}
@@ -1329,18 +1369,19 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                   <div className="flex items-center gap-2">
                     {playerHoleCards[gp.player_id] ? (
                       <>
-                        <div className="flex gap-1">
+                        <div className="flex gap-0.5">
                           {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                            <PokerCard key={idx} card={card} size="sm" />
+                            <PokerCard key={idx} card={card} size="xs" />
                           ))}
                         </div>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => {
                             setSelectedPlayerForHole(gp.player_id);
                             setShowHoleCardInput(true);
                           }}
+                          className="h-7 px-2 text-xs"
                         >
                           Edit
                         </Button>
@@ -1350,7 +1391,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                             variant="outline"
                             size="sm"
                             onClick={() => finishHand([gp.player_id], 'showdown')}
-                            className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
+                            className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50 h-7 px-2 text-xs"
                           >
                             👑 Winner
                           </Button>
@@ -1364,6 +1405,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                           setSelectedPlayerForHole(gp.player_id);
                           setShowHoleCardInput(true);
                         }}
+                        className="h-7 px-2 text-xs"
                       >
                         Add Hole Cards
                       </Button>
@@ -1376,37 +1418,37 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
           {/* Winner Display */}
           {winnerResult && (
-            <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
-              <div className="text-center space-y-3">
+            <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-3">
+              <div className="text-center space-y-2">
                 {winnerResult.winners.length === 1 ? (
                   <>
-                    <div className="text-2xl font-bold text-green-400">
+                    <div className="text-xl font-bold text-green-400">
                       🏆 {winnerResult.winners[0].playerName} Wins!
                     </div>
-                    <div className="text-lg font-semibold text-poker-gold">
+                    <div className="text-base font-semibold text-poker-gold">
                       {winnerResult.winners[0].handName}
                     </div>
-                    <div className="flex gap-1 justify-center">
+                    <div className="flex gap-0.5 justify-center">
                       {winnerResult.winners[0].bestHand.map((card, idx) => (
-                        <PokerCard key={idx} card={card} size="sm" />
+                        <PokerCard key={idx} card={card} size="xs" />
                       ))}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-2xl font-bold text-green-400">
+                    <div className="text-xl font-bold text-green-400">
                       🏆 Chopped Pot!
                     </div>
-                    <div className="text-lg font-semibold text-poker-gold">
+                    <div className="text-base font-semibold text-poker-gold">
                       {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {winnerResult.winners.map((winner) => (
                         <div key={winner.playerId} className="flex items-center justify-center gap-2">
-                          <span className="font-medium">{winner.playerName}</span>
-                          <div className="flex gap-1">
+                          <span className="text-sm font-medium">{winner.playerName}</span>
+                          <div className="flex gap-0.5">
                             {winner.bestHand.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="sm" />
+                              <PokerCard key={idx} card={card} size="xs" />
                             ))}
                           </div>
                         </div>
@@ -1416,13 +1458,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 )}
                 
                 {winnerResult.allHands.length > 1 && (
-                  <details className="text-sm text-left">
+                  <details className="text-xs text-left">
                     <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                       View All Hands
                     </summary>
-                    <div className="mt-2 space-y-2">
+                    <div className="mt-1.5 space-y-1">
                       {winnerResult.allHands.map((hand, idx) => (
-                        <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
+                        <div key={hand.playerId} className="p-1.5 bg-muted/30 rounded text-xs">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">
                               {idx + 1}. {hand.playerName}
@@ -1439,8 +1481,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                 
                 <Button
                   onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                  size="lg"
+                  className="w-full bg-green-600 hover:bg-green-700 h-9"
                 >
                   Confirm & Complete Hand
                 </Button>
@@ -1507,7 +1548,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
   // Mobile full-screen hand tracking content - WITHOUT action history
   const handTrackingContent = (
-    <div className="flex flex-col h-full bg-background">
+    <div 
+      className="flex flex-col h-full bg-background"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Header - compact on mobile */}
       <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-2 sm:p-3 border-b border-primary/20 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
@@ -1522,9 +1568,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
               </Badge>
             </div>
           </div>
-          <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
-            💰 {formatWithBB(potSize)}
-          </Badge>
+          <div className="flex flex-col items-end gap-0.5">
+            <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
+              💰 {formatWithBB(potSize)}
+            </Badge>
+            {(cardsJustAdded || actionHistory.length > 0) && (
+              <span className="text-[9px] text-muted-foreground">👉 Swipe right to {cardsJustAdded ? 'edit' : 'undo'}</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1676,31 +1727,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </div>
         ) : null}
 
-        {/* Street Navigation */}
+        {/* Street Navigation - swipe right to go back */}
         <div className="flex gap-2">
-          {/* Back button - handles undo or edit cards */}
-          <Button 
-            onClick={() => {
-              // If cards were just added, edit them instead of undo
-              if (cardsJustAdded) {
-                handleEditCards();
-              } else {
-                undoLastAction();
-              }
-            }} 
-            className="flex-1 h-10 text-xs" 
-            variant="outline"
-            disabled={!cardsJustAdded && actionHistory.length === 0}
-          >
-            {cardsJustAdded ? '✏️ Edit' : '← Back'}
-          </Button>
-          <Button 
-            onClick={moveToNextStreet} 
-            className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
-            disabled={!canMoveToNextStreet()}
-          >
-            {stage === 'river' ? '🏆 Show' : 'Next →'}
-          </Button>
+          {/* Only show Next button when it can be clicked */}
+          {canMoveToNextStreet() && (
+            <Button 
+              onClick={moveToNextStreet} 
+              className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
+            >
+              {stage === 'river' ? '🏆 Show' : 'Next →'}
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -1927,15 +1964,17 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           >
             {cardsJustAdded ? '✏️ Edit Cards' : '← Back'}
           </Button>
-          <Button 
-            onClick={moveToNextStreet} 
-            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
-            variant="default"
-            size="default"
-            disabled={!canMoveToNextStreet()}
-          >
-            {stage === 'river' ? '🏆 Go to Showdown' : 'Next Street →'}
-          </Button>
+          {/* Only show Next button when it can be clicked */}
+          {canMoveToNextStreet() && (
+            <Button 
+              onClick={moveToNextStreet} 
+              className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+              variant="default"
+              size="default"
+            >
+              {stage === 'river' ? '🏆 Go to Showdown' : 'Next Street →'}
+            </Button>
+          )}
         </div>
 
         {/* Action history - ALL actions from all streets - COLLAPSIBLE */}
