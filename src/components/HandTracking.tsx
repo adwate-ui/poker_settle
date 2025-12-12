@@ -1465,7 +1465,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   ? '⚠️ Positions Changed - Record Hand to Enable' 
                   : buttonPlayerId 
                     ? '🎴 Deal Cards' 
-                    : '👆 Select Button Player First'}
+                    : '👆 Select Button'}
               </Button>
             </div>
           </CardContent>
@@ -2006,18 +2006,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         ) : null}
 
-        {/* Street Navigation - swipe right to go back */}
-        <div className="flex gap-2">
-          {/* Only show Next button when it can be clicked */}
-          {canMoveToNextStreet() && (
-            <Button 
-              onClick={moveToNextStreet} 
-              className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
-            >
-              {stage === 'river' ? '🏆 Show' : 'Next →'}
-            </Button>
-          )}
-        </div>
+        {/* Street Navigation - Removed Next button in mobile, card selector auto-opens */}
       </div>
     </div>
   );
