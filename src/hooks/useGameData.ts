@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/emailNotifications";
-import { supabaseAnon } from "@/integrations/supabase/client-shared";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { formatMessageDate } from "@/services/messageTemplates";
 
@@ -337,52 +336,107 @@ export const useGameData = () => {
 
     // Send email notifications to all players
     try {
-      // Generate a game link token using supabaseAnon
-      const { data: tokenData, error: tokenError } = await supabaseAnon.rpc('generate_game_link', {
-        p_game_id: gameId
-      });
+      // Create or get shared link for the game
+      let gameToken = '';
+      
+      if (user) {
+        // Check for existing shared link
+        const { data: existingLink, error: fetchError } = await supabase
+          .from('shared_links')
+          .select('access_token')
+          .eq('user_id', user.id)
+          .eq('resource_type', 'game')
+          .eq('resource_id', gameId)
+          .maybeSingle();
 
-      if (!tokenError && tokenData) {
-        // Send game completion notifications
-        const notificationResult = await sendGameCompletionNotifications(
-          allGamePlayers,
-          gameId,
-          gameData.date,
-          gameData.buy_in_amount,
-          tokenData.token
+        if (fetchError) {
+          console.error('Error fetching shared link:', fetchError);
+        }
+
+        if (existingLink) {
+          gameToken = existingLink.access_token;
+        } else {
+          // Create new shared link with short code
+          const generateShortCode = () => {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+            let code = '';
+            for (let i = 0; i < 7; i++) {
+              code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+          };
+
+          const shortCode = generateShortCode();
+          const { data: newLink, error: createError } = await supabase
+            .from('shared_links')
+            .insert({
+              user_id: user.id,
+              resource_type: 'game',
+              resource_id: gameId,
+              short_code: shortCode,
+            })
+            .select('access_token')
+            .single();
+
+          if (createError) {
+            console.error('Error creating shared link:', createError);
+          } else if (newLink) {
+            gameToken = newLink.access_token;
+          }
+        }
+      }
+
+      // Send notifications even if we couldn't get a token
+      // (the notifications can still work without the game link)
+      
+      // Send game completion notifications
+      const notificationResult = await sendGameCompletionNotifications(
+        allGamePlayers,
+        gameId,
+        gameData.date,
+        gameData.buy_in_amount,
+        gameToken
+      );
+
+      if (notificationResult.sent > 0) {
+        toast.success(`Game completed! ${notificationResult.sent} email notifications sent.`);
+      } else if (notificationResult.failed > 0 && notificationResult.errors.length > 0) {
+        // Only show warning if all failed and there are actual errors (not just missing emails)
+        const actualErrors = notificationResult.errors.filter(e => !e.includes('No email address'));
+        if (actualErrors.length > 0) {
+          console.warn('Some email notifications failed:', actualErrors);
+          toast.warning('Game completed! Some email notifications failed to send.');
+        } else {
+          toast.success('Game completed!');
+        }
+      } else {
+        toast.success('Game completed!');
+      }
+
+      // Send settlement notifications with UPI payment links
+      if (settlements.length > 0) {
+        // Create a map of players by name
+        const playersMap = new Map<string, Player>();
+        allGamePlayers.forEach(gp => {
+          if (gp.player?.name) {
+            playersMap.set(gp.player.name, gp.player);
+          }
+        });
+
+        const settlementNotificationResult = await sendSettlementNotifications(
+          settlements,
+          playersMap,
+          formatMessageDate(gameData.date)
         );
 
-        if (notificationResult.sent > 0) {
-          toast.success(`Game completed! ${notificationResult.sent} email notifications sent.`);
-        }
-        if (notificationResult.failed > 0) {
-          console.warn('Some email notifications failed:', notificationResult.errors);
-        }
-
-        // Send settlement notifications with UPI payment links
-        if (settlements.length > 0) {
-          // Create a map of players by name
-          const playersMap = new Map<string, Player>();
-          allGamePlayers.forEach(gp => {
-            if (gp.player?.name) {
-              playersMap.set(gp.player.name, gp.player);
-            }
-          });
-
-          const settlementNotificationResult = await sendSettlementNotifications(
-            settlements,
-            playersMap,
-            formatMessageDate(gameData.date)
-          );
-
-          if (settlementNotificationResult.sent > 0) {
-            console.log(`${settlementNotificationResult.sent} settlement email notifications sent with payment links`);
-          }
+        if (settlementNotificationResult.sent > 0) {
+          console.log(`${settlementNotificationResult.sent} settlement email notifications sent with payment links`);
         }
       }
     } catch (notificationError) {
       // Don't fail the game completion if notifications fail
       console.error('Failed to send email notifications:', notificationError);
+      toast.warning('Game completed! But email notifications failed to send.');
     }
   };
 
