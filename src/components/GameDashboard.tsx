@@ -290,6 +290,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const handleStartHandTracking = useCallback(() => {
     setHandTrackingStage('recording');
+    setTablePositionOpen(false); // Auto-collapse table positions when starting hand tracking
   }, []);
 
   const handleHandComplete = useCallback(() => {
@@ -445,19 +446,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Start Hand
+                  Continue Hand
                 </Button>
               </div>
                 </CardContent>
               </CollapsibleContent>
             </Card>
           </Collapsible>
-        ) : handTrackingStage === 'recording' ? (
-          <HandTracking 
-            game={game} 
-            positionsJustChanged={positionsJustChanged}
-            onHandComplete={handleHandComplete}
-          />
         ) : (
           <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
             <CardContent className="pt-6">
@@ -473,6 +468,15 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Hand Tracking Section - Show when recording (keeps table positions visible above) */}
+        {handTrackingStage === 'recording' && (
+          <HandTracking 
+            game={game} 
+            positionsJustChanged={positionsJustChanged}
+            onHandComplete={handleHandComplete}
+          />
         )}
 
         {/* Buy-in Logs */}

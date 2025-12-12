@@ -11,6 +11,7 @@ export const OfflineIndicator = () => {
       setIsOnline(true);
       toast.success('Back online! Your data will sync now.', {
         icon: <Wifi className="h-4 w-4" />,
+        position: 'top-center',
       });
     };
 
@@ -19,6 +20,7 @@ export const OfflineIndicator = () => {
       toast.info('You are offline. Changes will sync when you reconnect.', {
         icon: <WifiOff className="h-4 w-4" />,
         duration: 5000,
+        position: 'top-center',
       });
     };
 

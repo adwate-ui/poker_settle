@@ -74,17 +74,11 @@ const TablePositionEditor = ({
     <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div>
         <h3 className="text-lg sm:text-xl font-semibold mb-2">Set Table Positions</h3>
-        <p className="text-sm text-muted-foreground">
-          Assign players to seat numbers (1-{players.length}). Select a player for each seat from the dropdown.
-        </p>
       </div>
 
       {/* Table Preview */}
       {positions.length > 0 && (
         <div className="py-4">
-          <p className="text-sm text-muted-foreground mb-3 text-center">
-            Drag and drop players to rearrange their positions
-          </p>
           <PokerTableView 
             positions={positions} 
             enableDragDrop={true}
@@ -96,9 +90,6 @@ const TablePositionEditor = ({
       {/* Seat Assignment Section - All seats shown with player dropdowns */}
       <div className="space-y-3">
         <h4 className="font-medium">Assign Players to Seats</h4>
-        <p className="text-xs text-muted-foreground">
-          Each seat is fixed. Select a player from the dropdown for each seat position.
-        </p>
         
         <div className="space-y-2">
           {allSeats.map((seat) => {
