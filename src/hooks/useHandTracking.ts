@@ -53,10 +53,11 @@ export const useHandTracking = () => {
 
   const getNextHandNumber = async (gameId: string): Promise<number> => {
     try {
+      // Get the highest hand number across ALL hands (not just this game)
+      // to ensure cumulative numbering from inception
       const { data, error } = await supabase
         .from('poker_hands')
         .select('hand_number')
-        .eq('game_id', gameId)
         .order('hand_number', { ascending: false })
         .limit(1)
         .maybeSingle();

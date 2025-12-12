@@ -12,7 +12,8 @@ const updateSW = registerSW({
     updateSW(true);
   },
   onOfflineReady() {
-    console.log('PWA: App ready to work offline');
+    // No offline functionality - always require network
+    console.log('PWA: Service worker registered but offline mode is disabled');
   },
   onRegisteredSW(swUrl, r) {
     console.log('Service Worker registered:', swUrl);

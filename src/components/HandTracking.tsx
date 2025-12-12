@@ -117,7 +117,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     gp.player.name === user?.email?.split('@')[0]
   );
 
-  // Load table positions on mount
+  // Load table positions on mount and when positions change
   useEffect(() => {
     const loadTablePositions = async () => {
       try {
@@ -145,7 +145,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     };
     
     loadTablePositions();
-  }, [game.id]);
+  }, [game.id, positionsJustChanged]);
 
   // Track if positions just changed
   useEffect(() => {
