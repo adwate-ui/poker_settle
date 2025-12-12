@@ -196,7 +196,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   useEffect(() => {
     const savedState = loadHandState();
     if (savedState && savedState.stage !== 'setup') {
-      // Restore all state
+      // Restore all state in a single batch to minimize re-renders
       setCurrentHand(savedState.currentHand);
       setStage(savedState.stage);
       setButtonPlayerId(savedState.buttonPlayerId);
@@ -221,20 +221,30 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       // Show mobile drawer if we're restoring an active hand
       setShowMobileHandTracking(true);
       
+      // Update saved hand state flag
+      setHasSavedHandState(true);
+      
       toast({
         title: 'Hand Restored',
         description: `Continuing Hand #${savedState.currentHand.hand_number}`,
       });
+    } else {
+      setHasSavedHandState(false);
     }
     // Only run on mount, not on game.id changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save state whenever important state changes
+  // Debounced save state - only save if there are actual changes and after a delay
   useEffect(() => {
-    if (currentHand && stage !== 'setup') {
+    if (!currentHand || stage === 'setup') return;
+    
+    // Debounce localStorage writes to reduce I/O
+    const timeoutId = setTimeout(() => {
       saveHandState();
-    }
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timeoutId);
     // saveHandState is stable and doesn't need to be in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -1249,19 +1259,21 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     return 'secondary';
   };
 
-  // Check if there's a saved hand state
-  const hasSavedHand = () => {
+  // Check if there's a saved hand state (memoized to avoid repeated localStorage reads)
+  const [hasSavedHandState, setHasSavedHandState] = useState(false);
+  
+  // Update saved hand state check when component mounts
+  useEffect(() => {
     const savedState = loadHandState();
-    return savedState && savedState.stage !== 'setup';
-  };
+    setHasSavedHandState(savedState && savedState.stage !== 'setup');
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Continue saved hand
   const continueHand = () => {
-    const savedState = loadHandState();
-    if (savedState && savedState.stage !== 'setup') {
-      // State is already restored in useEffect, just open the drawer
-      setShowMobileHandTracking(true);
-    }
+    // State is already restored in the mount useEffect, just open the drawer
+    setShowMobileHandTracking(true);
   };
 
   if (stage === 'setup') {
@@ -1371,13 +1383,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             </div>
 
             {/* Continue Hand button if saved state exists */}
-            {hasSavedHand() && (
+            {hasSavedHandState && currentHand && (
               <Button 
                 onClick={continueHand} 
                 className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-amber-600 hover:bg-amber-700"
                 size="lg"
               >
-                🔄 Continue Hand #{loadHandState()?.currentHand?.hand_number}
+                🔄 Continue Hand #{currentHand.hand_number}
               </Button>
             )}
 
