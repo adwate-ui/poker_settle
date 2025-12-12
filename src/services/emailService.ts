@@ -68,7 +68,8 @@ class EmailService {
    */
   async sendEmail(payload: SendEmailPayload): Promise<SendEmailResponse> {
     if (!this.isConfigured() || !this.config) {
-      console.warn('Email service not configured. Email not sent.');
+      console.warn('❌ Email service not configured. Email not sent.');
+      console.warn('Configuration status:', this.getConfigStatus());
       return {
         success: false,
         error: 'Email service not configured',
@@ -78,11 +79,14 @@ class EmailService {
     try {
       // Validate email format
       if (!this.validateEmail(payload.to_email)) {
+        console.error('❌ Invalid email format:', payload.to_email);
         return {
           success: false,
           error: 'Invalid email format',
         };
       }
+
+      console.log(`📧 Sending email to ${payload.to_email} - Subject: ${payload.subject}`);
 
       // Import EmailJS dynamically
       const emailjs = await import('@emailjs/browser');
@@ -107,18 +111,23 @@ class EmailService {
       );
 
       if (response.status === 200) {
+        console.log(`✅ Email sent successfully to ${payload.to_email}`);
         return {
           success: true,
           messageId: response.text,
         };
       } else {
+        console.error(`❌ Email send failed with status: ${response.status}`);
         return {
           success: false,
           error: `Email send failed with status: ${response.status}`,
         };
       }
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('❌ Error sending email:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message, error.stack);
+      }
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -218,7 +227,8 @@ class EmailService {
 export const emailService = new EmailService();
 
 // Initialize from environment variables if available
-if (typeof import.meta !== 'undefined' && import.meta.env) {
+// Auto-initialize on module load
+try {
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
@@ -226,6 +236,7 @@ if (typeof import.meta !== 'undefined' && import.meta.env) {
   const fromName = import.meta.env.VITE_FROM_NAME;
 
   if (serviceId && templateId && publicKey && fromEmail) {
+    console.log('✅ EmailJS service auto-configured from environment variables');
     emailService.configure({
       serviceId,
       templateId,
@@ -233,5 +244,14 @@ if (typeof import.meta !== 'undefined' && import.meta.env) {
       fromEmail,
       fromName,
     });
+  } else {
+    console.warn('⚠️ EmailJS configuration incomplete. Missing environment variables:', {
+      hasServiceId: !!serviceId,
+      hasTemplateId: !!templateId,
+      hasPublicKey: !!publicKey,
+      hasFromEmail: !!fromEmail,
+    });
   }
+} catch (error) {
+  console.error('❌ Failed to initialize EmailJS service:', error);
 }

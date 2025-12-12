@@ -2521,7 +2521,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                           !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
                         }`}
                       >
-                        <PokerCard card={card} size="sm" className="pointer-events-none" />
+                        <PokerCard card={card} size="xs" className="sm:hidden pointer-events-none" />
+                        <PokerCard card={card} size="sm" className="hidden sm:block pointer-events-none" />
                         {isUsed && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
                             <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
