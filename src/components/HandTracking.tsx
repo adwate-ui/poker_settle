@@ -334,8 +334,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   // Only on MOBILE to avoid blocking overlay on desktop
   useEffect(() => {
     // Only auto-open on mobile devices
-    const isMobile = window.innerWidth < MOBILE_BREAKPOINT_PX;
-    
     if (!isMobile) return; // Skip auto-open on desktop
     
     if (stage === 'flop' && !flopCards && currentHand) {
@@ -351,7 +349,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       setTempCommunityCards(''); // Initialize temp with empty
       setShowCardSelector(true);
     }
-  }, [stage, flopCards, turnCard, riverCard, currentHand]);
+  }, [stage, flopCards, turnCard, riverCard, currentHand, isMobile]);
 
   // Auto-advance to next remaining player if current player has folded
   useEffect(() => {
@@ -1557,7 +1555,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           <Dialog open={showPlayerActionDialog} onOpenChange={(open) => {
             if (!open) handleCancelDialog();
           }}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -2630,7 +2628,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         }
         setShowCardSelector(isOpen);
       }}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {cardSelectorType === 'flop' ? 'Select Flop Cards (3)' : 
