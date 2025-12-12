@@ -160,7 +160,7 @@ export function generateCustomMessage(playerName: string, message: string, gameL
  */
 export function generatePlayerShareLink(playerId: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
-  return `${base}/player/${playerId}`;
+  return `${base}/players/${playerId}`;
 }
 
 /**
@@ -168,7 +168,7 @@ export function generatePlayerShareLink(playerId: string, baseUrl?: string): str
  */
 export function generateGameShareLink(gameId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
-  return `${base}/shared/game/${gameId}?token=${token}`;
+  return `${base}/shared/${token}/game/${gameId}`;
 }
 
 /**
