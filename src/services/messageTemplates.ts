@@ -130,6 +130,11 @@ Here are your settlement details:
     if (data.settlements.some(s => s.toUpiId)) {
       message += `\n💡 *Tip:* Click the "Quick Pay" links above to open your UPI app and pay instantly!\n`;
     }
+    
+    // Add confirmation instruction for payers
+    message += `\n⚠️ *IMPORTANT:* After making the payment, please reply with:\n`;
+    message += `*PAID*\n`;
+    message += `\nThis will automatically confirm your payment and update the settlement records.\n`;
   }
 
   message += `\nPlease settle at your earliest convenience. Thank you! 🙏`;

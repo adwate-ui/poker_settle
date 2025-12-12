@@ -1254,6 +1254,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (stage === 'turn' && !turnCard) return false;
     if (stage === 'river' && !riverCard) return false;
     
+    // Check if cards are dealt for the NEXT street (before showing Next button)
+    // Don't show Next button on preflop until flop cards are ready
+    if (stage === 'preflop' && !flopCards) return false;
+    // Don't show Next button on flop until turn card is ready
+    if (stage === 'flop' && !turnCard) return false;
+    // Don't show Next button on turn until river card is ready
+    if (stage === 'turn' && !riverCard) return false;
+    
     // Use state machine to check if betting round is complete
     return isBettingRoundComplete(
       stage,
@@ -1477,6 +1485,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 </div>
                 {selectedPlayer?.player.name}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Select whether {selectedPlayer?.player.name} will play in this hand or be marked as not playing.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 pt-4">
               <Button 

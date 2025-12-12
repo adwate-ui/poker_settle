@@ -395,17 +395,20 @@ const HandDetail = () => {
               {hand.street_cards.length > 0 && (
                 <div>
                   <h3 className="font-semibold mb-3">Community Cards</h3>
-                  <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-4 rounded-xl border border-green-700/30">
-                    <div className="flex gap-3 md:gap-4 items-center flex-wrap">
+                  <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 sm:p-4 rounded-xl border border-green-700/30">
+                    <div className="flex gap-2 sm:gap-3 md:gap-4 items-center flex-wrap">
                       {/* Flop */}
                       {(() => {
                         const flopCard = hand.street_cards.find(sc => sc.street_type === 'Flop');
                         return flopCard && (
-                          <div className="flex flex-col gap-2">
-                            <span className="text-xs font-semibold text-muted-foreground">FLOP</span>
-                            <div className="flex gap-0.5 md:gap-1">
+                          <div className="flex flex-col gap-1 sm:gap-2">
+                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">FLOP</span>
+                            <div className="flex gap-0.5">
                               {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="sm" />
+                                <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
+                              ))}
+                              {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
+                                <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
                               ))}
                             </div>
                           </div>
@@ -417,12 +420,15 @@ const HandDetail = () => {
                         const turnCard = hand.street_cards.find(sc => sc.street_type === 'Turn');
                         return turnCard && (
                           <>
-                            <div className="h-12 md:h-16 w-px bg-green-700/50"></div>
-                            <div className="flex flex-col gap-2">
-                              <span className="text-xs font-semibold text-muted-foreground">TURN</span>
-                              <div className="flex gap-0.5 md:gap-1">
+                            <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
+                            <div className="flex flex-col gap-1 sm:gap-2">
+                              <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">TURN</span>
+                              <div className="flex gap-0.5">
                                 {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="sm" />
+                                  <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
+                                ))}
+                                {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
+                                  <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
                                 ))}
                               </div>
                             </div>
@@ -435,12 +441,15 @@ const HandDetail = () => {
                         const riverCard = hand.street_cards.find(sc => sc.street_type === 'River');
                         return riverCard && (
                           <>
-                            <div className="h-12 md:h-16 w-px bg-green-700/50"></div>
-                            <div className="flex flex-col gap-2">
-                              <span className="text-xs font-semibold text-muted-foreground">RIVER</span>
-                              <div className="flex gap-0.5 md:gap-1">
+                            <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
+                            <div className="flex flex-col gap-1 sm:gap-2">
+                              <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">RIVER</span>
+                              <div className="flex gap-0.5">
                                 {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="sm" />
+                                  <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
+                                ))}
+                                {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
+                                  <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
                                 ))}
                               </div>
                             </div>
@@ -472,9 +481,14 @@ const HandDetail = () => {
                       
                       {player.holeCards ? (
                         <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
+                          <div className="flex gap-0.5">
+                            {/* Mobile: xs size */}
                             {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="sm" />
+                              <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
+                            ))}
+                            {/* Desktop: sm size */}
+                            {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
+                              <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
                             ))}
                           </div>
                           <Button
