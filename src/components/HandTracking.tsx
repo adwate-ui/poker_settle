@@ -2460,7 +2460,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
              cardSelectorType === 'turn' ? 'Select Turn Card (1)' : 
              'Select River Card (1)'}
           </DialogTitle>
-          <DialogDescription className="sr-only">
+          <DialogDescription>
             Select {cardSelectorType === 'flop' ? '3 cards for the flop' : '1 card for the ' + cardSelectorType} from the grid below. Already used cards are greyed out.
           </DialogDescription>
         </DialogHeader>

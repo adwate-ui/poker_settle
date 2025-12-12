@@ -30,6 +30,7 @@ export const useSettlementConfirmations = () => {
 
   /**
    * Create settlement confirmations when a game is completed
+   * Uses upsert to avoid duplicate key violations
    */
   const createConfirmations = useCallback(async (
     gameId: string,
@@ -47,9 +48,13 @@ export const useSettlementConfirmations = () => {
         confirmed: false,
       }));
 
+      // Use upsert to handle existing confirmations (updates amount if changed)
       const { error } = await supabase
         .from("settlement_confirmations")
-        .insert(confirmationsData);
+        .upsert(confirmationsData, {
+          onConflict: 'game_id,player_name,settlement_from,settlement_to',
+          ignoreDuplicates: false, // Update existing records with new amount
+        });
 
       if (error) throw error;
     } catch (error) {
