@@ -14,12 +14,11 @@ export const OfflineIndicator = () => {
     };
     
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-
+    
     const handleOnline = () => {
       setIsOnline(true);
       // Don't show toast notifications on mobile
-      if (!isMobile) {
+      if (window.innerWidth >= 640) {
         toast.success('Back online! Your data will sync now.', {
           icon: <Wifi className="h-4 w-4" />,
           position: 'top-center',
@@ -30,7 +29,7 @@ export const OfflineIndicator = () => {
     const handleOffline = () => {
       setIsOnline(false);
       // Don't show toast notifications on mobile
-      if (!isMobile) {
+      if (window.innerWidth >= 640) {
         toast.info('You are offline. Changes will sync when you reconnect.', {
           icon: <WifiOff className="h-4 w-4" />,
           duration: 5000,
@@ -39,6 +38,7 @@ export const OfflineIndicator = () => {
       }
     };
 
+    window.addEventListener('resize', checkMobile);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -47,7 +47,7 @@ export const OfflineIndicator = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [isMobile]);
+  }, []); // Empty dependency array - only run once on mount
 
   if (isOnline) return null;
 

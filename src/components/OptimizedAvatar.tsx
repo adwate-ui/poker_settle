@@ -14,6 +14,17 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
   const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect mobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const sizeClasses = {
     sm: 'w-9 h-9 sm:w-10 sm:h-10',
@@ -49,17 +60,6 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
     .toUpperCase()
     .slice(0, 2);
   
-  // On mobile, use initials by default for faster rendering
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  
   // If error or on mobile with dicebear (external API), show initials
   if (imageError || (isMobile && !characterImage)) {
     return (
@@ -71,26 +71,37 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
     );
   }
   
-  return (
-    <>
-      {/* Show initials while loading */}
-      {!imageLoaded && (
+  // Show initials while loading, then switch to image
+  if (!imageLoaded) {
+    return (
+      <>
         <div 
           className={`${sizeClasses[size]} rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold ${className}`}
         >
           {initials}
         </div>
-      )}
-      <img
-        src={avatarUrl}
-        alt={name}
-        className={`${sizeClasses[size]} rounded-full object-cover ${className} ${!imageLoaded ? 'hidden' : ''}`}
-        onError={() => setImageError(true)}
-        onLoad={() => setImageLoaded(true)}
-        loading="lazy"
-        decoding="async"
-      />
-    </>
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="hidden"
+          onError={() => setImageError(true)}
+          onLoad={() => setImageLoaded(true)}
+          loading="lazy"
+          decoding="async"
+        />
+      </>
+    );
+  }
+  
+  return (
+    <img
+      src={avatarUrl}
+      alt={name}
+      className={`${sizeClasses[size]} rounded-full object-cover ${className}`}
+      onError={() => setImageError(true)}
+      loading="lazy"
+      decoding="async"
+    />
   );
 });
 

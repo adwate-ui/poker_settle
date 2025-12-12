@@ -10,7 +10,7 @@ import { formatIndianNumber } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { PlayerFormDialog } from "@/components/PlayerFormDialog";
+import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import {
   Collapsible,
@@ -103,7 +103,7 @@ const PlayerDetail = () => {
     }
   }, [playerId, fetchPlayerData]);
 
-  const handleUpdatePlayer = async (playerData: any) => {
+  const handleUpdatePlayer = async (playerData: Partial<PlayerFormData>) => {
     if (!playerId) return;
     
     try {

@@ -1280,8 +1280,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      // Only show dialog on mobile (< 768px = md breakpoint)
-      if (window.innerWidth < 768) {
+      // Only show dialog on mobile (< 640px to match other mobile detection)
+      if (window.innerWidth < 640) {
         setShowPlayerActionDialog(true);
       }
     }
