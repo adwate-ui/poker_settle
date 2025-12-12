@@ -169,9 +169,15 @@ class EmailService {
         // Convert markdown-style bold (*text*)
         line = line.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
         
-        // Convert URLs to links (including UPI payment links)
+        // Convert UPI payment links with special handling for mobile email clients
         line = line.replace(
-          /((?:https?|upi):\/\/[^\s]+)/g,
+          /(upi:\/\/[^\s]+)/g,
+          '<a href="$1" style="color: #3b82f6; text-decoration: underline; display: inline-block; padding: 4px 8px; background-color: #e0f2fe; border-radius: 4px; font-weight: bold;" x-apple-data-detectors="true">$1</a>'
+        );
+        
+        // Convert regular URLs to links
+        line = line.replace(
+          /(https?:\/\/[^\s]+)/g,
           '<a href="$1" style="color: #3b82f6; text-decoration: underline;">$1</a>'
         );
         

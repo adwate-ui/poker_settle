@@ -319,13 +319,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   }, [positionsJustChanged]);
 
   // Auto-open card selector when community cards need to be selected
-  // Only for MOBILE - desktop shows inline
+  // Works for both MOBILE and DESKTOP
   useEffect(() => {
-    // Only auto-open on mobile (< 768px)
-    const isMobile = window.innerWidth < 768;
-    
-    if (!isMobile) return; // Skip auto-open on desktop
-    
     if (stage === 'flop' && !flopCards && currentHand) {
       setCardSelectorType('flop');
       setTempCommunityCards(''); // Initialize temp with empty
@@ -2244,8 +2239,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop Inline Card Selector - shown when cards need to be selected */}
-        {!showMobileHandTracking && currentHand && (
+        {/* Desktop Inline Card Selector - REMOVED - now using popup dialog for both mobile and desktop */}
+        {false && !showMobileHandTracking && currentHand && (
           <>
             {(stage === 'flop' && !flopCards) && (
               <div className="border-2 border-primary/50 rounded-xl p-4 bg-gradient-to-br from-primary/5 to-primary/10 space-y-4">
