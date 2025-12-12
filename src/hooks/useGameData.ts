@@ -7,6 +7,7 @@ import { z } from "zod";
 import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/emailNotifications";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { formatMessageDate } from "@/services/messageTemplates";
+import { generateShortCode } from "@/lib/shareUtils";
 
 // Input validation schemas
 const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
@@ -356,16 +357,7 @@ export const useGameData = () => {
         if (existingLink) {
           gameToken = existingLink.access_token;
         } else {
-          // Create new shared link with short code
-          const generateShortCode = () => {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-            let code = '';
-            for (let i = 0; i < 7; i++) {
-              code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-          };
-
+          // Create new shared link with short code using utility function
           const shortCode = generateShortCode();
           const { data: newLink, error: createError } = await supabase
             .from('shared_links')
