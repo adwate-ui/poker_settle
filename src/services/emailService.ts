@@ -136,9 +136,9 @@ class EmailService {
         // Convert markdown-style bold (*text*)
         line = line.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
         
-        // Convert URLs to links
+        // Convert URLs to links (including UPI payment links)
         line = line.replace(
-          /(https?:\/\/[^\s]+)/g,
+          /((?:https?|upi):\/\/[^\s]+)/g,
           '<a href="$1" style="color: #3b82f6; text-decoration: underline;">$1</a>'
         );
         
