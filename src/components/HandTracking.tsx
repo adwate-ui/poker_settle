@@ -1122,198 +1122,210 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
     const winnerResult = autoSelectWinner();
     
-    return (
-      <>
-        <Card className="mt-6 border-2 border-poker-gold/50 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20">
-            <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/30 rounded-lg">
-                  <Trophy className="h-6 w-6 text-amber-500 animate-pulse" />
-                </div>
-                <span className="text-xl font-bold">🏆 Showdown</span>
+    const showdownContent = (
+      <Card className="border-2 border-poker-gold/50 shadow-2xl h-full overflow-y-auto">
+        <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20">
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/30 rounded-lg">
+                <Trophy className="h-6 w-6 text-amber-500 animate-pulse" />
               </div>
-              {winnerResult && (
-                <Badge className="bg-green-600 text-white px-3 py-1 text-sm animate-bounce">
-                  ✨ Winner Detected!
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            {/* Show all community cards */}
-            {(flopCards || turnCard || riverCard) && (
-              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
-                <div className="text-sm font-semibold text-white mb-2">Board:</div>
-                <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
-                  {/* Mobile view - small cards */}
-                  <div className="flex gap-1 sm:hidden">
-                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={`flop-${idx}`} card={card} size="sm" />
-                    ))}
-                    {turnCard && <PokerCard card={turnCard} size="sm" />}
-                    {riverCard && <PokerCard card={riverCard} size="sm" />}
-                  </div>
-                  {/* Desktop view - medium cards */}
-                  <div className="hidden sm:flex gap-2">
-                    {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
-                    ))}
-                    {turnCard && <PokerCard card={turnCard} size="md" />}
-                    {riverCard && <PokerCard card={riverCard} size="md" />}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="text-xl font-bold text-center text-poker-gold">
-              Pot: {formatWithBB(potSize)}
+              <span className="text-xl font-bold">🏆 Showdown</span>
             </div>
-
-            {/* Hole Cards Entry Section - Only Remaining Players */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
-                <p className="text-xs text-muted-foreground">
-                  {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
-                </p>
+            {winnerResult && (
+              <Badge className="bg-green-600 text-white px-3 py-1 text-sm animate-bounce">
+                ✨ Winner Detected!
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-6">
+          {/* Show all community cards */}
+          {(flopCards || turnCard || riverCard) && (
+            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-3 sm:p-4">
+              <div className="text-sm font-semibold text-white mb-2">Board:</div>
+              <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
+                {/* Mobile view - small cards */}
+                <div className="flex gap-1 sm:hidden">
+                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={`flop-${idx}`} card={card} size="sm" />
+                  ))}
+                  {turnCard && <PokerCard card={turnCard} size="sm" />}
+                  {riverCard && <PokerCard card={riverCard} size="sm" />}
+                </div>
+                {/* Desktop view - medium cards */}
+                <div className="hidden sm:flex gap-2">
+                  {flopCards && flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                    <PokerCard key={`flop-md-${idx}`} card={card} size="md" />
+                  ))}
+                  {turnCard && <PokerCard card={turnCard} size="md" />}
+                  {riverCard && <PokerCard card={riverCard} size="md" />}
+                </div>
               </div>
-              
-              <div className="space-y-2">
-                {remainingPlayers.map((gp) => (
-                  <div
-                    key={gp.player_id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2 flex-1">
-                      <span className="font-medium">{gp.player.name}</span>
-                      {gp.player_id === heroPlayer?.player_id && (
-                        <Badge variant="secondary" className="text-xs">Hero</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {playerHoleCards[gp.player_id] ? (
-                        <>
-                          <div className="flex gap-1">
-                            {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="sm" />
-                            ))}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPlayerForHole(gp.player_id);
-                              setShowHoleCardInput(true);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          {!winnerResult && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => finishHand([gp.player_id], 'showdown')}
-                              className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
-                            >
-                              👑 Winner
-                            </Button>
-                          )}
-                        </>
-                      ) : (
+            </div>
+          )}
+
+          <div className="text-xl font-bold text-center text-poker-gold">
+            Pot: {formatWithBB(potSize)}
+          </div>
+
+          {/* Hole Cards Entry Section - Only Remaining Players */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Player Hole Cards (Remaining Players)</h3>
+              <p className="text-xs text-muted-foreground">
+                {remainingPlayers.filter(p => playerHoleCards[p.player_id]).length}/{remainingPlayers.length} entered
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              {remainingPlayers.map((gp) => (
+                <div
+                  key={gp.player_id}
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="font-medium">{gp.player.name}</span>
+                    {gp.player_id === heroPlayer?.player_id && (
+                      <Badge variant="secondary" className="text-xs">Hero</Badge>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {playerHoleCards[gp.player_id] ? (
+                      <>
+                        <div className="flex gap-1">
+                          {playerHoleCards[gp.player_id].match(/.{1,2}/g)?.map((card, idx) => (
+                            <PokerCard key={idx} card={card} size="sm" />
+                          ))}
+                        </div>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             setSelectedPlayerForHole(gp.player_id);
                             setShowHoleCardInput(true);
                           }}
                         >
-                          Add Hole Cards
+                          Edit
                         </Button>
-                      )}
-                    </div>
+                        {!winnerResult && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => finishHand([gp.player_id], 'showdown')}
+                            className="bg-poker-gold/10 hover:bg-poker-gold/20 border-poker-gold/50"
+                          >
+                            👑 Winner
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlayerForHole(gp.player_id);
+                          setShowHoleCardInput(true);
+                        }}
+                      >
+                        Add Hole Cards
+                      </Button>
+                    )}
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Winner Display */}
+          {winnerResult && (
+            <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
+              <div className="text-center space-y-3">
+                {winnerResult.winners.length === 1 ? (
+                  <>
+                    <div className="text-2xl font-bold text-green-400">
+                      🏆 {winnerResult.winners[0].playerName} Wins!
+                    </div>
+                    <div className="text-lg font-semibold text-poker-gold">
+                      {winnerResult.winners[0].handName}
+                    </div>
+                    <div className="flex gap-1 justify-center">
+                      {winnerResult.winners[0].bestHand.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="sm" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-green-400">
+                      🏆 Chopped Pot!
+                    </div>
+                    <div className="text-lg font-semibold text-poker-gold">
+                      {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
+                    </div>
+                    <div className="space-y-2">
+                      {winnerResult.winners.map((winner) => (
+                        <div key={winner.playerId} className="flex items-center justify-center gap-2">
+                          <span className="font-medium">{winner.playerName}</span>
+                          <div className="flex gap-1">
+                            {winner.bestHand.map((card, idx) => (
+                              <PokerCard key={idx} card={card} size="sm" />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+                
+                {winnerResult.allHands.length > 1 && (
+                  <details className="text-sm text-left">
+                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                      View All Hands
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      {winnerResult.allHands.map((hand, idx) => (
+                        <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">
+                              {idx + 1}. {hand.playerName}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {hand.handName}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                
+                <Button
+                  onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  Confirm & Complete Hand
+                </Button>
               </div>
             </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+    
+    return (
+      <>
+        {/* Mobile: Full-screen showdown */}
+        <div className="md:hidden fixed inset-0 z-50 bg-background">
+          {showdownContent}
+        </div>
 
-            {/* Winner Display */}
-            {winnerResult && (
-              <div className="bg-gradient-to-r from-green-600/20 to-green-800/20 border border-green-600/50 rounded-lg p-4">
-                <div className="text-center space-y-3">
-                  {winnerResult.winners.length === 1 ? (
-                    <>
-                      <div className="text-2xl font-bold text-green-400">
-                        🏆 {winnerResult.winners[0].playerName} Wins!
-                      </div>
-                      <div className="text-lg font-semibold text-poker-gold">
-                        {winnerResult.winners[0].handName}
-                      </div>
-                      <div className="flex gap-1 justify-center">
-                        {winnerResult.winners[0].bestHand.map((card, idx) => (
-                          <PokerCard key={idx} card={card} size="sm" />
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-2xl font-bold text-green-400">
-                        🏆 Chopped Pot!
-                      </div>
-                      <div className="text-lg font-semibold text-poker-gold">
-                        {winnerResult.winners.length} Players with {winnerResult.winners[0].handName}
-                      </div>
-                      <div className="space-y-2">
-                        {winnerResult.winners.map((winner) => (
-                          <div key={winner.playerId} className="flex items-center justify-center gap-2">
-                            <span className="font-medium">{winner.playerName}</span>
-                            <div className="flex gap-1">
-                              {winner.bestHand.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="sm" />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  
-                  {winnerResult.allHands.length > 1 && (
-                    <details className="text-sm text-left">
-                      <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                        View All Hands
-                      </summary>
-                      <div className="mt-2 space-y-2">
-                        {winnerResult.allHands.map((hand, idx) => (
-                          <div key={hand.playerId} className="p-2 bg-muted/30 rounded">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">
-                                {idx + 1}. {hand.playerName}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {hand.handName}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-                  
-                  <Button
-                    onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    size="lg"
-                  >
-                    Confirm & Complete Hand
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Desktop: Regular card */}
+        <div className="hidden md:block mt-6">
+          {showdownContent}
+        </div>
 
         {/* Hole Card Selector - Direct card selector without intermediate dialog */}
         <CardSelector
@@ -1343,9 +1355,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
   // Mobile full-screen hand tracking content
   const handTrackingContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       {/* Header - compact on mobile */}
-      <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-3 border-b border-primary/20 flex-shrink-0">
+      <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-2 sm:p-3 border-b border-primary/20 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-primary/30 rounded-lg">
@@ -1364,9 +1376,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         </div>
       </div>
 
-      {/* Main content area - 2/3 table view */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="p-3 space-y-3">
+      {/* Main content area - 2/3 of remaining space for table view */}
+      <div className="flex-[2] overflow-y-auto min-h-0 bg-background">
+        <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
           {/* Poker Table - WITHOUT community cards on table for mobile */}
           {activePlayers.length > 0 && (
             <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border border-green-700/30">
@@ -1490,7 +1502,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
       </div>
 
       {/* Bottom 1/3 - Action Buttons with clear player indication */}
-      <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-3 space-y-2">
+      <div className="flex-[1] flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 overflow-y-auto">
         {/* Current Player Indicator */}
         {currentPlayer && (
           <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-center">
