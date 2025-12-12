@@ -286,18 +286,18 @@ const PokerTableView = memo(({
                 </div>
               )}
               
-              {/* Pot display with chip visualization */}
+              {/* Pot display with optimized layout */}
               {potSize > 0 && (
-                <div className={`flex flex-col items-center gap-1 transition-all duration-500 ${
+                <div className={`flex items-center gap-2 transition-all duration-500 ${
                   animateChipsToPot ? 'scale-110' : animateChipsToWinner ? 'opacity-0 scale-0' : 'scale-100'
                 }`}>
-                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-3 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold">
+                  <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-2 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold whitespace-nowrap">
                     POT
                   </div>
-                  {showPotChips && <ChipStack amount={potSize} size="md" showLabel={false} />}
-                  <div className="bg-white dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+                  <div className="bg-white dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 whitespace-nowrap">
                     Rs. {potSize.toLocaleString('en-IN')}
                   </div>
+                  {showPotChips && <ChipStack amount={potSize} size="sm" showLabel={false} />}
                 </div>
               )}
             </div>
