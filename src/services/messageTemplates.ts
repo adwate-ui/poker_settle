@@ -130,8 +130,10 @@ Here are your settlement details:
     message += `*Your Payment Method:* ${paymentMethod}\n`;
     
     if (data.settlements.some(s => s.toUpiId)) {
-      message += `\n💡 *Tip:* Tap/click the UPI payment link above to open your UPI app (Google Pay, PhonePe, Paytm, etc.) and pay instantly!\n`;
-      message += `\nIf the link doesn't work, copy the UPI ID and use it in your UPI app's "Pay to UPI ID" option.\n`;
+      message += `\n💡 *How to Pay:*\n`;
+      message += `• *On Android/Mobile:* Tap the blue "Tap to Pay via UPI" button above - it will open your UPI app (Google Pay, PhonePe, Paytm, etc.) directly with pre-filled details!\n`;
+      message += `• *If button doesn't work:* Copy the UPI ID shown below the button and use it in your UPI app's "Pay to UPI ID" option\n`;
+      message += `• *On Desktop:* Copy the UPI link or UPI ID and use it in your mobile UPI app\n`;
     }
     
     // Add confirmation instruction for payers

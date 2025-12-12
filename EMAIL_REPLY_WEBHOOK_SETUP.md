@@ -4,12 +4,15 @@
 
 This guide explains how to set up automatic payment confirmation via email replies. When players reply to settlement emails with keywords like "PAID", "DONE", or "SETTLED", the system automatically confirms their payment in the settlement table.
 
+**⚠️ IMPORTANT: All email replies are automatically configured to go to `pokersettleapp@gmail.com` for privacy and centralized handling via Zapier.**
+
 ## How It Works
 
-1. **Settlement Email Sent**: Players receive settlement notifications via email
+1. **Settlement Email Sent**: Players receive settlement notifications via email with Reply-To set to pokersettleapp@gmail.com
 2. **Player Replies**: Player replies to the email with a confirmation keyword (e.g., "PAID")
-3. **Email Service Webhook**: Your email service forwards the reply to the webhook
-4. **Auto-Confirmation**: The webhook processes the reply and updates the settlement status
+3. **Zapier Listens**: Zapier monitors pokersettleapp@gmail.com for incoming replies
+4. **Email Service Webhook**: Zapier forwards the reply to the webhook endpoint
+5. **Auto-Confirmation**: The webhook processes the reply and updates the settlement status
 
 ## Supported Keywords
 
@@ -49,9 +52,40 @@ Generate a secure random key:
 openssl rand -base64 32
 ```
 
-### Step 3: Configure Your Email Service
+### Step 3: Configure Zapier to Monitor Email Replies
 
-Choose one of the following email service providers:
+**Recommended Approach**: Use Zapier to listen to replies sent to pokersettleapp@gmail.com and forward them to the webhook.
+
+1. **Create a Zapier Account**: Go to [zapier.com](https://zapier.com) and sign up
+2. **Create a New Zap**:
+   - **Trigger**: Gmail - "New Email Matching Search" in pokersettleapp@gmail.com
+   - **Search String**: `is:unread` (to process only new emails)
+3. **Add Action**: Webhooks by Zapier - POST
+   - **URL**: `https://your-project.supabase.co/functions/v1/email-webhook`
+   - **Payload Type**: JSON
+   - **Data**: 
+     ```json
+     {
+       "from_email": "{{1. From Email}}",
+       "message": "{{1. Body Plain}}"
+     }
+     ```
+   - **Headers**:
+     - `Authorization`: `Bearer your-secret-key-here`
+     - `Content-Type`: `application/json`
+4. **Add Action**: Gmail - "Mark Email as Read" (to avoid reprocessing)
+5. **Test and Enable**: Test the Zap and turn it on
+
+**Benefits of Using Zapier**:
+- No need to configure custom email domains
+- No MX record changes required
+- Easy to monitor and debug
+- Can add additional actions (e.g., logging, notifications)
+- Works with existing Gmail account
+
+### Step 3 Alternative: Configure Your Email Service (Advanced)
+
+If you prefer not to use Zapier, choose one of the following email service providers:
 
 #### Option A: SendGrid Inbound Parse
 
@@ -108,7 +142,24 @@ If you're using a different email service, configure it to:
 }
 ```
 
-### Step 4: Update Settlement Email Instructions
+### Step 4: Configure EmailJS Template with Reply-To Header
+
+**CRITICAL**: Configure your EmailJS template to use the Reply-To header:
+
+1. Go to [EmailJS Dashboard](https://dashboard.emailjs.com/)
+2. Select your Email Service
+3. Go to Email Templates → Select your template
+4. In the template settings, find the **Reply-To** field
+5. Set it to: `{{reply_to}}`
+6. Save the template
+
+**Why This Matters**: 
+- The application automatically sets `reply_to` to `pokersettleapp@gmail.com` in all outgoing emails
+- This ensures all player replies go to the centralized inbox for Zapier to process
+- Players won't see pokersettleapp@gmail.com as the sender, only as the reply address
+- This provides privacy and centralized management of all settlement confirmations
+
+### Step 5: Update Settlement Email Instructions
 
 Ensure your settlement notification emails include clear instructions:
 

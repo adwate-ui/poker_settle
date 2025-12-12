@@ -108,6 +108,7 @@ class EmailService {
         to_name: payload.to_name,
         from_email: this.config.fromEmail,
         from_name: this.config.fromName || 'Poker Settle',
+        reply_to: 'pokersettleapp@gmail.com', // All replies go to this address for Zapier webhook
         subject: payload.subject,
         message: payload.message,
         html_message: payload.html_message || this.convertTextToHtml(payload.message),
@@ -160,7 +161,8 @@ class EmailService {
   }
 
   /**
-   * Convert plain text to simple HTML
+   * Convert plain text to simple HTML with proper formatting for mobile email clients
+   * Special handling for UPI links to work on Android email clients (Gmail, Outlook, etc.)
    */
   private convertTextToHtml(text: string): string {
     return text
@@ -169,16 +171,38 @@ class EmailService {
         // Convert markdown-style bold (*text*)
         line = line.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
         
-        // Convert UPI payment links with special handling for mobile email clients
+        // Convert UPI payment links with extensive attributes for Android email client compatibility
+        // Android Gmail and other email clients need specific attributes and styling to make UPI links clickable
         line = line.replace(
           /(upi:\/\/[^\s]+)/g,
-          '<a href="$1" style="color: #3b82f6; text-decoration: underline; display: inline-block; padding: 4px 8px; background-color: #e0f2fe; border-radius: 4px; font-weight: bold;" x-apple-data-detectors="true">$1</a>'
+          '<a href="$1" ' +
+          'style="' +
+            'color: #1a73e8; ' +
+            'text-decoration: none; ' +
+            'display: inline-block; ' +
+            'padding: 10px 16px; ' +
+            'margin: 8px 0; ' +
+            'background-color: #e8f0fe; ' +
+            'border: 2px solid #1a73e8; ' +
+            'border-radius: 8px; ' +
+            'font-weight: bold; ' +
+            'font-size: 14px; ' +
+            'font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; ' +
+            'word-break: break-all;' +
+          '" ' +
+          'target="_blank" ' +
+          'rel="noopener noreferrer" ' +
+          'x-apple-data-detectors="true" ' +
+          'data-saferedirecturl="$1">' +
+          '💰 Tap to Pay via UPI' +
+          '</a>' +
+          '<br><span style="color: #5f6368; font-size: 12px; font-family: monospace; word-break: break-all;">$1</span>'
         );
         
         // Convert regular URLs to links
         line = line.replace(
           /(https?:\/\/[^\s]+)/g,
-          '<a href="$1" style="color: #3b82f6; text-decoration: underline;">$1</a>'
+          '<a href="$1" style="color: #3b82f6; text-decoration: underline;" target="_blank" rel="noopener noreferrer">$1</a>'
         );
         
         return line;
