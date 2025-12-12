@@ -1456,7 +1456,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 {positionsChanged 
                   ? '⚠️ Positions Changed - Record Hand to Enable' 
                   : buttonPlayerId 
-                    ? '🎴 Deal Cards & Start Hand' 
+                    ? '🎴 Deal Cards' 
                     : '👆 Select Button Player First'}
               </Button>
             </div>
@@ -2017,6 +2017,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     <Drawer open={showMobileHandTracking} onOpenChange={(open) => {
       // Allow closing drawer via back button/swipe down
       setShowMobileHandTracking(open);
+      // When drawer is closed (swiped away), call onHandComplete to show table positions
+      if (!open && onHandComplete) {
+        onHandComplete();
+      }
     }} modal={true} dismissible={true}>
       <DrawerContent className="md:hidden h-[95vh] overflow-hidden">
         {handTrackingContent}
@@ -2067,11 +2071,56 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               potSize={potSize}
               showPositionLabels={true}
               foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
-              communityCards={(flopCards || '') + (turnCard || '') + (riverCard || '')}
+              communityCards="" // DON'T show community cards on table - show in separate section below
               activePlayerId={currentPlayer?.player_id}
               playerHoleCards={playerHoleCards}
               playerStacks={playerStacks}
             />
+          </div>
+        )}
+
+        {/* Community Cards Display - Separate from table (mobile flow on desktop) */}
+        {(flopCards || turnCard || riverCard) && (
+          <div className="mb-6 bg-gradient-to-br from-green-900/20 to-green-800/20 p-4 rounded-xl border border-green-700/30">
+            <div className="flex gap-4 items-center flex-wrap">
+              {/* Flop */}
+              {flopCards && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-muted-foreground">FLOP</span>
+                  <div className="flex gap-1">
+                    {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                      <PokerCard key={idx} card={card} size="sm" />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Turn */}
+              {turnCard && flopCards && (
+                <>
+                  <div className="h-12 w-px bg-green-700/50"></div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">TURN</span>
+                    <div className="flex gap-1">
+                      <PokerCard card={turnCard} size="sm" />
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              {/* River */}
+              {riverCard && turnCard && (
+                <>
+                  <div className="h-12 w-px bg-green-700/50"></div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">RIVER</span>
+                    <div className="flex gap-1">
+                      <PokerCard card={riverCard} size="sm" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 
