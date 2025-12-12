@@ -62,10 +62,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       const position = await getCurrentTablePosition(game.id);
       setCurrentTablePosition(position);
       
-      // Check for saved hand state
-      const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
-      const hasSaved = savedHandState && JSON.parse(savedHandState).stage !== 'setup';
-      setHasSavedHandState(!!hasSaved);
+      // Check for saved hand state with error handling
+      try {
+        const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
+        if (savedHandState) {
+          const parsedState = JSON.parse(savedHandState);
+          const hasSaved = parsedState && parsedState.stage !== 'setup';
+          setHasSavedHandState(!!hasSaved);
+        } else {
+          setHasSavedHandState(false);
+        }
+      } catch (error) {
+        console.error('Error parsing saved hand state:', error);
+        setHasSavedHandState(false);
+      }
       
       // Set initial stage based on whether table is set
       // Only update stage if we're not currently recording a hand

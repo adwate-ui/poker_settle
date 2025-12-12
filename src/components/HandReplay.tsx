@@ -560,7 +560,7 @@ const HandReplay = ({
                   </div>
                   {currentAction.position && (
                     <Badge className="text-[10px] px-1.5 py-0 bg-primary/30 text-primary-foreground border-primary/40 flex-shrink-0">
-                      {currentAction.position.substring(0, 3)}
+                      {currentAction.position.length > 3 ? currentAction.position.substring(0, 3) : currentAction.position}
                     </Badge>
                   )}
                 </div>
