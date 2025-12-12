@@ -4,6 +4,9 @@ import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Se
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
+import { sendGameCompletionNotifications } from "@/services/whatsappNotifications";
+import { supabaseAnon } from "@/integrations/supabase/client-shared";
+import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 
 // Input validation schemas
 const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
@@ -13,6 +16,7 @@ const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(1
 
 export const useGameData = () => {
   const { user } = useAuth();
+  const { createConfirmations } = useSettlementConfirmations();
   const [players, setPlayers] = useState<Player[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
@@ -321,6 +325,42 @@ export const useGameData = () => {
       .eq("id", gameId);
 
     if (error) throw error;
+
+    // Create settlement confirmation records
+    try {
+      await createConfirmations(gameId, settlements);
+    } catch (confirmationError) {
+      console.error('Failed to create settlement confirmations:', confirmationError);
+      // Don't fail the game completion if confirmation creation fails
+    }
+
+    // Send WhatsApp notifications to all players
+    try {
+      // Generate a game link token using supabaseAnon
+      const { data: tokenData, error: tokenError } = await supabaseAnon.rpc('generate_game_link', {
+        p_game_id: gameId
+      });
+
+      if (!tokenError && tokenData) {
+        const notificationResult = await sendGameCompletionNotifications(
+          allGamePlayers,
+          gameId,
+          gameData.date,
+          gameData.buy_in_amount,
+          tokenData.token
+        );
+
+        if (notificationResult.sent > 0) {
+          toast.success(`Game completed! ${notificationResult.sent} WhatsApp notifications sent.`);
+        }
+        if (notificationResult.failed > 0) {
+          console.warn('Some WhatsApp notifications failed:', notificationResult.errors);
+        }
+      }
+    } catch (notificationError) {
+      // Don't fail the game completion if notifications fail
+      console.error('Failed to send WhatsApp notifications:', notificationError);
+    }
   };
 
   const deleteGame = async (gameId: string) => {

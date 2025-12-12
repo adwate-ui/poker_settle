@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -13,6 +13,9 @@ import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import { calculateOptimizedSettlements, PlayerBalance } from "@/utils/settlementCalculator";
+import { getPaymentMethodIcon } from "@/utils/playerUtils";
+import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import {
   Table,
   TableBody,
@@ -96,6 +99,7 @@ export const GameDetailView = ({
   fetchBuyInHistory,
 }: GameDetailViewProps) => {
   const { copyShareLink, loading: linkLoading } = useSharedLink();
+  const { fetchConfirmations, confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
   const [game, setGame] = useState<Game | null>(null);
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
   const [tablePositions, setTablePositions] = useState<TablePosition[]>([]);
@@ -103,6 +107,7 @@ export const GameDetailView = ({
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [confirmations, setConfirmations] = useState<import('@/types/poker').SettlementConfirmation[]>([]);
   
   // Collapsible sections state
   const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
@@ -127,7 +132,9 @@ export const GameDetailView = ({
           .select(`
             *,
             players (
-              name
+              name,
+              payment_preference,
+              upi_id
             )
           `)
           .eq("game_id", gameId)
@@ -153,7 +160,7 @@ export const GameDetailView = ({
         return;
       }
 
-      const { data: playersData, error: playersError } = playersResult;
+      const { data: playersData, error: playersError} = playersResult;
       const { data: positionsData, error: positionsError } = positionsResult;
 
       if (playersError) {
@@ -174,12 +181,16 @@ export const GameDetailView = ({
       }));
 
       setTablePositions(formattedPositions);
+
+      // Fetch settlement confirmations
+      const confirmationsData = await fetchConfirmations(gameId);
+      setConfirmations(confirmationsData);
     } catch (error) {
       console.error("Error fetching game details:", error);
     } finally {
       setLoading(false);
     }
-  }, [gameId, client]);
+  }, [gameId, client, fetchConfirmations]);
 
   useEffect(() => {
     if (gameId) {
@@ -240,64 +251,20 @@ export const GameDetailView = ({
   }, [gamePlayers, sortField, sortOrder]);
 
   // Calculate settlements with manual transfers taken into account
+  // Uses optimized algorithm that prioritizes cash players
   const calculateSettlements = useCallback((transfers: Settlement[] = []): Settlement[] => {
-    // Build adjusted net amounts based on manual transfers
-    // net_amount > 0 means player won (is owed money)
-    // net_amount < 0 means player lost (owes money)
-    const adjustedAmounts: Record<string, number> = {};
+    // Build player balances with payment preferences
+    const playerBalances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
+      name: gp.players?.name ?? "",
+      amount: gp.net_amount ?? 0,
+      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
+    }));
+
+    // Use optimized settlement calculation
+    const settlements = calculateOptimizedSettlements(playerBalances, transfers);
     
-    sortedGamePlayers.forEach(gp => {
-      const name = gp.players?.name ?? "";
-      adjustedAmounts[name] = gp.net_amount ?? 0;
-    });
-    
-    // Apply manual transfers: "from" pays "to"
-    // If "from" already paid "to", then:
-    // - "from" has already settled part of their debt, so add to their balance (less negative or more positive)
-    // - "to" has already received payment, so subtract from their balance (less positive or more negative)
-    transfers.forEach(transfer => {
-      if (adjustedAmounts[transfer.from] !== undefined) {
-        adjustedAmounts[transfer.from] += transfer.amount; // from paid, so their balance improves
-      }
-      if (adjustedAmounts[transfer.to] !== undefined) {
-        adjustedAmounts[transfer.to] -= transfer.amount; // to received, so their balance decreases
-      }
-    });
-    
-    const winners = Object.entries(adjustedAmounts)
-      .filter(([_, amount]) => amount > 0)
-      .map(([name, amount]) => ({ name, amount }));
-    const losers = Object.entries(adjustedAmounts)
-      .filter(([_, amount]) => amount < 0)
-      .map(([name, amount]) => ({ name, amount: Math.abs(amount) }));
-    
-    const calculatedSettlements: Settlement[] = [];
-    
-    let winnerIndex = 0;
-    let loserIndex = 0;
-    
-    while (winnerIndex < winners.length && loserIndex < losers.length) {
-      const winner = winners[winnerIndex];
-      const loser = losers[loserIndex];
-      
-      const settlementAmount = Math.min(winner.amount, loser.amount);
-      
-      if (settlementAmount > 0) {
-        calculatedSettlements.push({
-          from: loser.name,
-          to: winner.name,
-          amount: Math.round(settlementAmount)
-        });
-      }
-      
-      winner.amount -= settlementAmount;
-      loser.amount -= settlementAmount;
-      
-      if (winner.amount <= 0) winnerIndex++;
-      if (loser.amount <= 0) loserIndex++;
-    }
-    
-    return calculatedSettlements;
+    // Return settlements without the involvesCashPlayer flag for backward compatibility
+    return settlements.map(({ from, to, amount }) => ({ from, to, amount }));
   }, [sortedGamePlayers]);
   
   const addManualTransfer = () => {
@@ -790,10 +757,17 @@ export const GameDetailView = ({
                       <span className="hidden sm:inline">Type</span>
                       <span className="sm:hidden">Typ</span>
                     </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                      <span className="hidden sm:inline">Status</span>
+                      <span className="sm:hidden">✓</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {settlementsWithType.map((settlement, index) => (
+                  {settlementsWithType.map((settlement, index) => {
+                    const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
+                    
+                    return (
                     <TableRow
                       key={`settlement-${index}`}
                       className={`transition-colors ${
@@ -822,8 +796,43 @@ export const GameDetailView = ({
                           </Badge>
                         )}
                       </TableCell>
+                      <TableCell className="text-left py-2 sm:py-4">
+                        {showOwnerControls && confirmation ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              if (confirmation.confirmed) {
+                                await unconfirmSettlement(confirmation.id);
+                              } else {
+                                await confirmSettlement(confirmation.id);
+                              }
+                              // Refresh confirmations
+                              const updatedConfirmations = await fetchConfirmations(gameId);
+                              setConfirmations(updatedConfirmations);
+                            }}
+                            className={confirmation.confirmed ? "text-green-600 hover:text-green-700" : "text-gray-400 hover:text-gray-600"}
+                          >
+                            {confirmation.confirmed ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </Button>
+                        ) : confirmation?.confirmed ? (
+                          <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                            <Check className="h-3 w-3 mr-1" />
+                            Paid
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 text-xs">
+                            Pending
+                          </Badge>
+                        )}
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  );
+                  })}
                 </TableBody>
               </Table>
             </div>

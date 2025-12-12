@@ -34,6 +34,19 @@ export interface Settlement {
   amount: number;
 }
 
+export interface SettlementConfirmation {
+  id: string;
+  game_id: string;
+  player_name: string;
+  settlement_from: string;
+  settlement_to: string;
+  amount: number;
+  confirmed: boolean;
+  confirmed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SeatPosition {
   seat: number;
   player_id: string;
