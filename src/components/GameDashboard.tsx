@@ -313,7 +313,22 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const handleHandComplete = useCallback(() => {
     setHandTrackingStage('ready');
     setTablePositionOpen(true); // Ensure table positions section is expanded
-  }, []);
+    
+    // Check if saved hand state was cleared
+    try {
+      const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
+      if (savedHandState) {
+        const parsedState = JSON.parse(savedHandState);
+        const hasSaved = parsedState && parsedState.stage !== 'setup';
+        setHasSavedHandState(!!hasSaved);
+      } else {
+        setHasSavedHandState(false);
+      }
+    } catch (error) {
+      console.error('Error checking saved hand state:', error);
+      setHasSavedHandState(false);
+    }
+  }, [game.id]);
 
   const formatCurrency = useCallback((amount: number) => {
     return `Rs. ${formatIndianNumber(amount)}`;

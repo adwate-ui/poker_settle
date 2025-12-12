@@ -5,35 +5,49 @@ import { toast } from 'sonner';
 
 export const OfflineIndicator = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Detect if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // Tailwind's sm breakpoint
+    };
+    
+    checkMobile();
+    
     const handleOnline = () => {
       setIsOnline(true);
-      // Network messages show at top-center for better visibility (per requirements)
-      toast.success('Back online! Your data will sync now.', {
-        icon: <Wifi className="h-4 w-4" />,
-        position: 'top-center',
-      });
+      // Don't show toast notifications on mobile
+      if (window.innerWidth >= 640) {
+        toast.success('Back online! Your data will sync now.', {
+          icon: <Wifi className="h-4 w-4" />,
+          position: 'top-center',
+        });
+      }
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      // Network messages show at top-center for better visibility (per requirements)
-      toast.info('You are offline. Changes will sync when you reconnect.', {
-        icon: <WifiOff className="h-4 w-4" />,
-        duration: 5000,
-        position: 'top-center',
-      });
+      // Don't show toast notifications on mobile
+      if (window.innerWidth >= 640) {
+        toast.info('You are offline. Changes will sync when you reconnect.', {
+          icon: <WifiOff className="h-4 w-4" />,
+          duration: 5000,
+          position: 'top-center',
+        });
+      }
     };
 
+    window.addEventListener('resize', checkMobile);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     return () => {
+      window.removeEventListener('resize', checkMobile);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, []); // Empty dependency array - only run once on mount
 
   if (isOnline) return null;
 

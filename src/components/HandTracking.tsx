@@ -1057,6 +1057,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     // Complete the hand with winner info and final stage
     await completeHand(savedHand.id, winnerIds, potSize, isHeroWin, finalStageValue);
     
+    // Clear saved hand state from localStorage
+    clearHandState();
+    
     // Reset everything
     setCurrentHand(null);
     setStage('setup');
@@ -1277,7 +1280,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      setShowPlayerActionDialog(true);
+      // Only show dialog on mobile (< 640px to match other mobile detection)
+      if (window.innerWidth < 640) {
+        setShowPlayerActionDialog(true);
+      }
     }
   };
 
@@ -1368,6 +1374,51 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             />
             </div>
 
+            {/* Desktop: Inline player action (show when player is selected) */}
+            {selectedPlayer && (
+              <div className="hidden md:block p-4 bg-primary/10 rounded-lg border border-primary/20 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">
+                        {selectedPlayer.player.name.substring(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold">{selectedPlayer.player.name}</p>
+                      <p className="text-xs text-muted-foreground">Click to toggle dealt in/out</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleToggleDealtOut} 
+                      variant={dealtOutPlayers.includes(selectedPlayerId) ? "default" : "outline"}
+                      size="sm"
+                    >
+                      {dealtOutPlayers.includes(selectedPlayerId) ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Not Dealt In
+                        </>
+                      ) : (
+                        <>
+                          <X className="w-4 h-4 mr-2" />
+                          Mark as Not Playing
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      onClick={handleCancelDialog} 
+                      variant="ghost"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Status Display */}
             <div className="space-y-3">
               {buttonPlayerId && (
@@ -1445,16 +1496,28 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             )}
 
             <div className="flex gap-2">
-              {buttonPlayerId && (
-                <Button 
-                  onClick={() => setButtonPlayerId('')}
-                  variant="outline"
-                  className="h-12 text-base font-semibold"
-                  size="lg"
-                >
-                  Cancel
-                </Button>
-              )}
+              {/* Cancel/Back button - always shown to allow stopping hand tracking */}
+              <Button 
+                onClick={() => {
+                  // Clear any saved state
+                  clearHandState();
+                  // Reset to initial state
+                  setStage('setup');
+                  setCurrentHand(null);
+                  setButtonPlayerId('');
+                  setDealtOutPlayers([]);
+                  setActivePlayers([]);
+                  // Call onHandComplete to return to table positions view
+                  if (onHandComplete) {
+                    onHandComplete();
+                  }
+                }}
+                variant="outline"
+                className="h-12 text-base font-semibold"
+                size="lg"
+              >
+                Cancel
+              </Button>
               <Button 
                 onClick={startNewHand} 
                 disabled={!buttonPlayerId || loading || positionsChanged} 
@@ -1471,11 +1534,11 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </CardContent>
         </Card>
 
-        {/* Player Action Dialog - Mobile-friendly with improved UI */}
+        {/* Mobile: Player Action Dialog */}
         <Dialog open={showPlayerActionDialog} onOpenChange={(open) => {
           if (!open) handleCancelDialog();
         }}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md md:hidden">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
+import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import {
   Collapsible,
   CollapsibleContent,
@@ -58,6 +60,8 @@ const PlayerDetail = () => {
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isGameHistoryOpen, setIsGameHistoryOpen] = useState(true);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const { updatePlayer, loading: updateLoading } = usePlayerManagement();
 
   const fetchPlayerData = useCallback(async () => {
     setLoading(true);
@@ -98,6 +102,19 @@ const PlayerDetail = () => {
       fetchPlayerData();
     }
   }, [playerId, fetchPlayerData]);
+
+  const handleUpdatePlayer = async (playerData: Partial<PlayerFormData>) => {
+    if (!playerId) return;
+    
+    try {
+      const updatedPlayer = await updatePlayer(playerId, playerData);
+      setPlayer(updatedPlayer);
+      toast.success("Player details updated successfully");
+    } catch (error) {
+      // Error is already handled by usePlayerManagement hook
+      throw error;
+    }
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -247,9 +264,20 @@ const PlayerDetail = () => {
               </div>
               
               {/* Player Details Section */}
-              {(player.phone_number || player.upi_id || player.payment_preference) && (
-                <div className="pt-4 border-t">
-                  <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Contact & Payment Details</h3>
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">Contact & Payment Details</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowEditDialog(true)}
+                    className="hover:bg-primary/10 hover:text-primary border-primary/20"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Details
+                  </Button>
+                </div>
+                {(player.phone_number || player.upi_id || player.payment_preference) ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {player.phone_number && (
                       <div className="p-4 rounded-lg border bg-card">
@@ -270,8 +298,13 @@ const PlayerDetail = () => {
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="p-4 rounded-lg border bg-muted/30 text-center">
+                    <p className="text-sm text-muted-foreground">No contact or payment details added yet</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click "Edit Details" to add phone number and UPI ID</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </CollapsibleContent>
         </Card>
@@ -406,6 +439,16 @@ const PlayerDetail = () => {
       </CollapsibleContent>
     </Card>
   </Collapsible>
+
+      {/* Edit Player Dialog */}
+      <PlayerFormDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onSave={handleUpdatePlayer}
+        initialData={player || undefined}
+        title="Edit Player Details"
+        description="Update player's contact information and payment preferences"
+      />
     </div>
   );
 };

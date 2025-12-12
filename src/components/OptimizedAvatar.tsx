@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getCharacterForPlayer, getUniqueCharacterForPlayer } from '@/config/themes';
 import { getCharacterImage } from '@/config/characterImages';
@@ -13,6 +13,18 @@ interface OptimizedAvatarProps {
 const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerNames }: OptimizedAvatarProps) => {
   const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect mobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const sizeClasses = {
     sm: 'w-9 h-9 sm:w-10 sm:h-10',
@@ -36,22 +48,48 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
   const characterName = getCharacterName();
   const characterImage = characterName ? getCharacterImage(characterName) : null;
   
-  const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+  // Use smaller size for dicebear avatars to reduce load time
+  const dicebearSize = size === 'sm' ? 40 : size === 'md' ? 48 : 64;
+  const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&size=${dicebearSize}&backgroundColor=transparent`;
   
-  if (imageError) {
-    const initials = name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-      
+  // Get initials for fallback
+  const initials = name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+  
+  // If error or on mobile with dicebear (external API), show initials
+  if (imageError || (isMobile && !characterImage)) {
     return (
       <div 
         className={`${sizeClasses[size]} rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold ${className}`}
       >
         {initials}
       </div>
+    );
+  }
+  
+  // Show initials while loading, then switch to image
+  if (!imageLoaded) {
+    return (
+      <>
+        <div 
+          className={`${sizeClasses[size]} rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold ${className}`}
+        >
+          {initials}
+        </div>
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="hidden"
+          onError={() => setImageError(true)}
+          onLoad={() => setImageLoaded(true)}
+          loading="lazy"
+          decoding="async"
+        />
+      </>
     );
   }
   
@@ -62,6 +100,7 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
       className={`${sizeClasses[size]} rounded-full object-cover ${className}`}
       onError={() => setImageError(true)}
       loading="lazy"
+      decoding="async"
     />
   );
 });
