@@ -320,12 +320,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     setPositionsChanged(positionsJustChanged);
   }, [positionsJustChanged]);
 
-  // Track window resize to update isMobile state (throttled to avoid excessive updates)
+  // Track window resize to update isMobile state (debounced to avoid excessive updates)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
     
     const handleResize = () => {
-      // Throttle resize events to avoid excessive state updates
+      // Debounce resize events to avoid excessive state updates
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setIsMobile(window.innerWidth < MOBILE_BREAKPOINT_PX);
@@ -2637,7 +2637,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         }
         setShowCardSelector(isOpen);
       }}>
-        <DialogContent className="w-[95vw] max-w-full max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {cardSelectorType === 'flop' ? 'Select Flop Cards (3)' : 
