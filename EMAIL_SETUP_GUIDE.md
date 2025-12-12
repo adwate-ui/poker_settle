@@ -69,6 +69,12 @@ This guide will help you set up email integration using EmailJS for the Poker Se
    ```
 
    - Note down the **Template ID**
+   
+   **⚠️ CRITICAL: Configure "To Email" Field**
+   - In the template settings (not the HTML content), find the "To Email" field
+   - Set it to: `{{to_email}}`
+   - This is required for EmailJS to know where to send the email
+   - Without this, you'll get "The recipients address is empty" error
 
 4. **Get Public Key:**
    - Go to "Account" → "General"
