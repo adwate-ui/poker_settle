@@ -1420,8 +1420,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     
     return (
       <>
-        {/* Mobile: Drawer for showdown */}
-        <Drawer open={true} onOpenChange={() => {}}>
+        {/* Mobile: Drawer for showdown - can't be dismissed */}
+        <Drawer open={true} onOpenChange={() => {
+          // Prevent dismissal during showdown - must complete or go back
+          toast({
+            title: 'Complete Hand',
+            description: 'Please complete the hand or use back button to return',
+          });
+        }}>
           <DrawerContent className="md:hidden h-[90vh]">
             <DrawerHeader>
               <DrawerTitle className="flex items-center gap-2">
@@ -1693,7 +1699,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     <Drawer open={showMobileHandTracking} onOpenChange={(open) => {
       // Don't allow closing drawer while hand is in progress
       if (!open && currentHand) {
-        // Only allow closing if explicitly set (e.g., after hand completion)
+        toast({
+          title: 'Hand in Progress',
+          description: 'Please complete the current hand or use the back button to undo actions',
+        });
         return;
       }
       setShowMobileHandTracking(open);
