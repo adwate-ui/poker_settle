@@ -86,7 +86,10 @@ class EmailService {
         };
       }
 
-      console.log(`📧 Sending email to ${payload.to_email} - Subject: ${payload.subject}`);
+      // Only log email details in development
+      if (import.meta.env.DEV) {
+        console.log(`📧 Sending email to ${payload.to_email} - Subject: ${payload.subject}`);
+      }
 
       // Import EmailJS dynamically
       const emailjs = await import('@emailjs/browser');
@@ -111,7 +114,9 @@ class EmailService {
       );
 
       if (response.status === 200) {
-        console.log(`✅ Email sent successfully to ${payload.to_email}`);
+        if (import.meta.env.DEV) {
+          console.log(`✅ Email sent successfully to ${payload.to_email}`);
+        }
         return {
           success: true,
           messageId: response.text,
@@ -234,17 +239,21 @@ try {
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
   const fromEmail = import.meta.env.VITE_FROM_EMAIL;
   const fromName = import.meta.env.VITE_FROM_NAME;
+  const isDev = import.meta.env.DEV;
 
-  console.log('📧 EmailJS Configuration Check:', {
-    hasServiceId: !!serviceId,
-    hasTemplateId: !!templateId,
-    hasPublicKey: !!publicKey,
-    hasFromEmail: !!fromEmail,
-    serviceIdPreview: serviceId ? `${serviceId.substring(0, 8)}...` : 'missing',
-    templateIdPreview: templateId ? `${templateId.substring(0, 8)}...` : 'missing',
-    publicKeyPreview: publicKey ? `${publicKey.substring(0, 8)}...` : 'missing',
-    fromEmail: fromEmail || 'missing',
-  });
+  // Only log detailed configuration in development mode
+  if (isDev) {
+    console.log('📧 EmailJS Configuration Check:', {
+      hasServiceId: !!serviceId,
+      hasTemplateId: !!templateId,
+      hasPublicKey: !!publicKey,
+      hasFromEmail: !!fromEmail,
+      serviceIdPreview: serviceId ? `${serviceId.substring(0, 8)}...` : 'missing',
+      templateIdPreview: templateId ? `${templateId.substring(0, 8)}...` : 'missing',
+      publicKeyPreview: publicKey ? `${publicKey.substring(0, 8)}...` : 'missing',
+      fromEmail: fromEmail || 'missing',
+    });
+  }
 
   if (serviceId && templateId && publicKey && fromEmail) {
     emailService.configure({
@@ -254,10 +263,15 @@ try {
       fromEmail,
       fromName,
     });
-    console.log('✅ EmailJS service configured successfully');
-    console.log('   Service ID:', `${serviceId.substring(0, 10)}...`);
-    console.log('   Template ID:', `${templateId.substring(0, 10)}...`);
-    console.log('   From Email:', fromEmail);
+    
+    if (isDev) {
+      console.log('✅ EmailJS service configured successfully');
+      console.log('   Service ID:', `${serviceId.substring(0, 10)}...`);
+      console.log('   Template ID:', `${templateId.substring(0, 10)}...`);
+      console.log('   From Email:', fromEmail);
+    } else {
+      console.log('✅ EmailJS service configured');
+    }
   } else {
     console.warn('⚠️ EmailJS configuration incomplete. Email notifications will not work.');
     console.warn('   Please set the following environment variables in your .env file:');

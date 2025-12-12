@@ -2486,7 +2486,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   <span className={`text-2xl ${suit.color}`}>{suit.symbol}</span>
                   <h3 className="font-semibold text-base">{suit.name}</h3>
                 </div>
-                <div className="grid grid-cols-13 gap-px justify-items-center">
+                <div className="grid grid-cols-13 gap-0.5">
                   {ranks.map(rank => {
                     const card = `${rank}${suit.code}`;
                     const isUsed = usedCards.includes(card);
