@@ -4,7 +4,7 @@ import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Se
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/whatsappNotifications";
+import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/emailNotifications";
 import { supabaseAnon } from "@/integrations/supabase/client-shared";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { formatMessageDate } from "@/services/messageTemplates";
@@ -335,7 +335,7 @@ export const useGameData = () => {
       // Don't fail the game completion if confirmation creation fails
     }
 
-    // Send WhatsApp notifications to all players
+    // Send email notifications to all players
     try {
       // Generate a game link token using supabaseAnon
       const { data: tokenData, error: tokenError } = await supabaseAnon.rpc('generate_game_link', {
@@ -353,10 +353,10 @@ export const useGameData = () => {
         );
 
         if (notificationResult.sent > 0) {
-          toast.success(`Game completed! ${notificationResult.sent} WhatsApp notifications sent.`);
+          toast.success(`Game completed! ${notificationResult.sent} email notifications sent.`);
         }
         if (notificationResult.failed > 0) {
-          console.warn('Some WhatsApp notifications failed:', notificationResult.errors);
+          console.warn('Some email notifications failed:', notificationResult.errors);
         }
 
         // Send settlement notifications with UPI payment links
@@ -376,13 +376,13 @@ export const useGameData = () => {
           );
 
           if (settlementNotificationResult.sent > 0) {
-            console.log(`${settlementNotificationResult.sent} settlement notifications sent with UPI links`);
+            console.log(`${settlementNotificationResult.sent} settlement email notifications sent with payment links`);
           }
         }
       }
     } catch (notificationError) {
       // Don't fail the game completion if notifications fail
-      console.error('Failed to send WhatsApp notifications:', notificationError);
+      console.error('Failed to send email notifications:', notificationError);
     }
   };
 

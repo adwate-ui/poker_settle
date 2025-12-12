@@ -1,5 +1,5 @@
 /**
- * Hook for managing players with WhatsApp and UPI functionality
+ * Hook for managing players with email and UPI functionality
  */
 
 import { useState, useCallback } from "react";
@@ -7,9 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Player } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { normalizePlayerPaymentPreference } from "@/utils/playerUtils";
 import { PlayerFormData } from "@/components/PlayerFormDialog";
-import { sendPlayerWelcomeNotification } from "@/services/whatsappNotifications";
+import { sendPlayerWelcomeNotification } from "@/services/emailNotifications";
 import { generatePlayerShareLink } from "@/services/messageTemplates";
 
 export const usePlayerManagement = () => {
@@ -17,7 +16,7 @@ export const usePlayerManagement = () => {
   const [loading, setLoading] = useState(false);
 
   /**
-   * Create a new player with optional WhatsApp and UPI details
+   * Create a new player with optional email and UPI details
    */
   const createPlayer = useCallback(
     async (playerData: PlayerFormData): Promise<Player> => {
@@ -25,16 +24,13 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
-        // Normalize payment preference based on UPI ID
-        const normalizedData = normalizePlayerPaymentPreference(playerData);
-
         const { data, error } = await supabase
           .from("players")
           .insert({
-            name: normalizedData.name,
-            phone_number: normalizedData.phone_number || null,
-            upi_id: normalizedData.upi_id || null,
-            payment_preference: normalizedData.payment_preference || "cash",
+            name: playerData.name,
+            email: playerData.email || null,
+            upi_id: playerData.upi_id || null,
+            payment_preference: playerData.payment_preference || "upi",
             user_id: user.id,
           })
           .select()
@@ -42,15 +38,15 @@ export const usePlayerManagement = () => {
 
         if (error) throw error;
 
-        // Send welcome notification if phone number is provided
-        if (data.phone_number) {
+        // Send welcome notification if email is provided
+        if (data.email) {
           const playerLink = generatePlayerShareLink(data.id);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
           
           if (notificationResult.success) {
-            toast.success(`${data.name} added! Welcome message sent to WhatsApp.`);
+            toast.success(`${data.name} added! Welcome email sent.`);
           } else {
-            toast.success(`${data.name} added! (WhatsApp notification failed: ${notificationResult.error})`);
+            toast.success(`${data.name} added! (Email notification failed: ${notificationResult.error})`);
           }
         } else {
           toast.success(`${data.name} added!`);
@@ -81,37 +77,34 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
-        // Check if phone number is being added (before making the update)
-        // Only fetch if phone_number is being updated to avoid unnecessary query
-        let isAddingPhoneNumber = false;
-        if (playerData.phone_number !== undefined) {
+        // Check if email is being added (before making the update)
+        // Only fetch if email is being updated to avoid unnecessary query
+        let isAddingEmail = false;
+        if (playerData.email !== undefined) {
           const { data: currentPlayer, error: fetchError } = await supabase
             .from("players")
-            .select("phone_number")
+            .select("email")
             .eq("id", playerId)
             .eq("user_id", user.id)
             .single();
 
           if (fetchError) throw fetchError;
 
-          isAddingPhoneNumber = !currentPlayer.phone_number && !!playerData.phone_number;
+          isAddingEmail = !currentPlayer.email && !!playerData.email;
         }
-
-        // Normalize payment preference based on UPI ID
-        const normalizedData = normalizePlayerPaymentPreference(playerData);
 
         const { data, error } = await supabase
           .from("players")
           .update({
-            ...(normalizedData.name && { name: normalizedData.name }),
-            ...(normalizedData.phone_number !== undefined && {
-              phone_number: normalizedData.phone_number || null,
+            ...(playerData.name && { name: playerData.name }),
+            ...(playerData.email !== undefined && {
+              email: playerData.email || null,
             }),
-            ...(normalizedData.upi_id !== undefined && {
-              upi_id: normalizedData.upi_id || null,
+            ...(playerData.upi_id !== undefined && {
+              upi_id: playerData.upi_id || null,
             }),
-            ...(normalizedData.payment_preference && {
-              payment_preference: normalizedData.payment_preference,
+            ...(playerData.payment_preference && {
+              payment_preference: playerData.payment_preference,
             }),
           })
           .eq("id", playerId)
@@ -121,15 +114,15 @@ export const usePlayerManagement = () => {
 
         if (error) throw error;
 
-        // If phone number was just added, treat this as onboarding and send welcome notification
-        if (isAddingPhoneNumber && data.phone_number) {
+        // If email was just added, treat this as onboarding and send welcome notification
+        if (isAddingEmail && data.email) {
           const playerLink = generatePlayerShareLink(data.id);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
           
           if (notificationResult.success) {
-            toast.success(`${data.name} updated! Welcome message sent to WhatsApp.`);
+            toast.success(`${data.name} updated! Welcome email sent.`);
           } else {
-            toast.success(`${data.name} updated! (WhatsApp notification failed: ${notificationResult.error})`);
+            toast.success(`${data.name} updated! (Email notification failed: ${notificationResult.error})`);
           }
         } else {
           toast.success(`${data.name} updated!`);

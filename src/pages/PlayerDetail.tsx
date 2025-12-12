@@ -277,12 +277,12 @@ const PlayerDetail = () => {
                     Edit Details
                   </Button>
                 </div>
-                {(player.phone_number || player.upi_id || player.payment_preference) ? (
+                {(player.email || player.upi_id || player.payment_preference) ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {player.phone_number && (
+                    {player.email && (
                       <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground mb-1">WhatsApp Number</p>
-                        <p className="text-base font-medium">{player.phone_number}</p>
+                        <p className="text-sm text-muted-foreground mb-1">Email Address</p>
+                        <p className="text-base font-medium">{player.email}</p>
                       </div>
                     )}
                     {player.upi_id && (
@@ -301,7 +301,7 @@ const PlayerDetail = () => {
                 ) : (
                   <div className="p-4 rounded-lg border bg-muted/30 text-center">
                     <p className="text-sm text-muted-foreground">No contact or payment details added yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click "Edit Details" to add phone number and UPI ID</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click "Edit Details" to add email and UPI ID</p>
                   </div>
                 )}
               </div>
