@@ -86,7 +86,7 @@ const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProp
       {/* Amount label - Full Tilt style with size adaptation */}
       {showLabel && (
         <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-xl border border-poker-gold/60 max-w-[100px] sm:max-w-none">
-          <div className="text-xs sm:text-sm font-bold text-poker-gold drop-shadow-md text-center whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="text-xs sm:text-sm font-bold text-poker-gold drop-shadow-md text-center truncate">
             Rs. {amount.toLocaleString('en-IN')}
           </div>
         </div>

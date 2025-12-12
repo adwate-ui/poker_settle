@@ -16,6 +16,7 @@ import CardNotationInput from './CardNotationInput';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
+import OptimizedAvatar from './OptimizedAvatar';
 import { determineWinner, formatCardNotation, parseCardNotationString } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
