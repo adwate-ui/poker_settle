@@ -29,6 +29,7 @@ function isConfirmationMessage(text: string): boolean {
  * Process incoming email and auto-confirm payments if applicable
  */
 async function processIncomingEmail(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   senderEmail: string,
   messageText: string
