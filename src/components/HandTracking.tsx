@@ -1057,6 +1057,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     // Complete the hand with winner info and final stage
     await completeHand(savedHand.id, winnerIds, potSize, isHeroWin, finalStageValue);
     
+    // Clear saved hand state from localStorage
+    clearHandState();
+    
     // Reset everything
     setCurrentHand(null);
     setStage('setup');
@@ -1445,16 +1448,28 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             )}
 
             <div className="flex gap-2">
-              {buttonPlayerId && (
-                <Button 
-                  onClick={() => setButtonPlayerId('')}
-                  variant="outline"
-                  className="h-12 text-base font-semibold"
-                  size="lg"
-                >
-                  Cancel
-                </Button>
-              )}
+              {/* Cancel/Back button - always shown to allow stopping hand tracking */}
+              <Button 
+                onClick={() => {
+                  // Clear any saved state
+                  clearHandState();
+                  // Reset to initial state
+                  setStage('setup');
+                  setCurrentHand(null);
+                  setButtonPlayerId('');
+                  setDealtOutPlayers([]);
+                  setActivePlayers([]);
+                  // Call onHandComplete to return to table positions view
+                  if (onHandComplete) {
+                    onHandComplete();
+                  }
+                }}
+                variant="outline"
+                className="h-12 text-base font-semibold"
+                size="lg"
+              >
+                Cancel
+              </Button>
               <Button 
                 onClick={startNewHand} 
                 disabled={!buttonPlayerId || loading || positionsChanged} 
