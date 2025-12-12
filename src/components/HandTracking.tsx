@@ -2095,7 +2095,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 </div>
               )}
               
-              {/* Turn */}
+              {/* Turn - only show if flop cards have been dealt (poker rules) */}
               {turnCard && flopCards && (
                 <>
                   <div className="h-12 w-px bg-green-700/50"></div>
@@ -2108,7 +2108,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 </>
               )}
               
-              {/* River */}
+              {/* River - only show if turn card has been dealt (poker rules) */}
               {riverCard && turnCard && (
                 <>
                   <div className="h-12 w-px bg-green-700/50"></div>
