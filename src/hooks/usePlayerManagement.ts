@@ -94,7 +94,12 @@ export const usePlayerManagement = () => {
         }
 
         // Build update object, treating empty strings as null to clear fields
-        const updateData: any = {};
+        const updateData: {
+          name?: string;
+          email?: string | null;
+          upi_id?: string | null;
+          payment_preference?: 'upi' | 'cash';
+        } = {};
         
         if (playerData.name) {
           updateData.name = playerData.name;
