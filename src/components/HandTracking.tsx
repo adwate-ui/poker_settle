@@ -124,6 +124,148 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
 
+  // LocalStorage key for hand state persistence
+  const getHandStateKey = () => `poker_hand_state_${game.id}`;
+
+  // Save hand state to localStorage
+  const saveHandState = () => {
+    if (!currentHand) return;
+    
+    const handState = {
+      currentHand,
+      stage,
+      buttonPlayerId,
+      dealtOutPlayers,
+      activePlayers,
+      currentPlayerIndex,
+      actionSequence,
+      currentBet,
+      flopCards,
+      turnCard,
+      riverCard,
+      potSize,
+      streetActions,
+      allHandActions,
+      playersInHand,
+      playerHoleCards,
+      playerBets,
+      streetPlayerBets,
+      lastAggressorIndex,
+      actionHistory,
+      timestamp: Date.now(),
+    };
+    
+    try {
+      localStorage.setItem(getHandStateKey(), JSON.stringify(handState));
+    } catch (error) {
+      console.error('Failed to save hand state:', error);
+    }
+  };
+
+  // Load hand state from localStorage
+  const loadHandState = () => {
+    try {
+      const savedState = localStorage.getItem(getHandStateKey());
+      if (!savedState) return null;
+      
+      const handState = JSON.parse(savedState);
+      // Check if state is not too old (e.g., 24 hours)
+      const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in ms
+      if (Date.now() - handState.timestamp > MAX_AGE) {
+        localStorage.removeItem(getHandStateKey());
+        return null;
+      }
+      
+      return handState;
+    } catch (error) {
+      console.error('Failed to load hand state:', error);
+      return null;
+    }
+  };
+
+  // Clear hand state from localStorage
+  const clearHandState = () => {
+    try {
+      localStorage.removeItem(getHandStateKey());
+    } catch (error) {
+      console.error('Failed to clear hand state:', error);
+    }
+  };
+
+  // Restore hand state on component mount
+  useEffect(() => {
+    const savedState = loadHandState();
+    if (savedState && savedState.stage !== 'setup') {
+      // Restore all state in a single batch to minimize re-renders
+      setCurrentHand(savedState.currentHand);
+      setStage(savedState.stage);
+      setButtonPlayerId(savedState.buttonPlayerId);
+      setDealtOutPlayers(savedState.dealtOutPlayers);
+      setActivePlayers(savedState.activePlayers);
+      setCurrentPlayerIndex(savedState.currentPlayerIndex);
+      setActionSequence(savedState.actionSequence);
+      setCurrentBet(savedState.currentBet);
+      setFlopCards(savedState.flopCards);
+      setTurnCard(savedState.turnCard);
+      setRiverCard(savedState.riverCard);
+      setPotSize(savedState.potSize);
+      setStreetActions(savedState.streetActions);
+      setAllHandActions(savedState.allHandActions);
+      setPlayersInHand(savedState.playersInHand);
+      setPlayerHoleCards(savedState.playerHoleCards);
+      setPlayerBets(savedState.playerBets);
+      setStreetPlayerBets(savedState.streetPlayerBets);
+      setLastAggressorIndex(savedState.lastAggressorIndex);
+      setActionHistory(savedState.actionHistory);
+      
+      // Show mobile drawer if we're restoring an active hand
+      setShowMobileHandTracking(true);
+      
+      // Update saved hand state flag
+      setHasSavedHandState(true);
+      
+      toast({
+        title: 'Hand Restored',
+        description: `Continuing Hand #${savedState.currentHand.hand_number}`,
+      });
+    } else {
+      setHasSavedHandState(false);
+    }
+    // Only run on mount, not on game.id changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced save state - only save if there are actual changes and after a delay
+  useEffect(() => {
+    if (!currentHand || stage === 'setup') return;
+    
+    // Debounce localStorage writes to reduce I/O
+    const timeoutId = setTimeout(() => {
+      saveHandState();
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timeoutId);
+    // saveHandState is stable and doesn't need to be in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentHand,
+    stage,
+    currentPlayerIndex,
+    actionSequence,
+    currentBet,
+    flopCards,
+    turnCard,
+    riverCard,
+    potSize,
+    streetActions,
+    allHandActions,
+    playersInHand,
+    playerHoleCards,
+    playerBets,
+    streetPlayerBets,
+    lastAggressorIndex,
+  ]);
+
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
     gp.player.name.toLowerCase() === 'adwate' || 
@@ -489,7 +631,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   };
 
   // Get all currently used cards in the hand
-  const getUsedCards = (): string[] => {
+  // excludeCards: cards to exclude from the used list (e.g., when editing)
+  const getUsedCards = (excludeCards: string[] = []): string[] => {
     const allUsedCards: string[] = [];
     
     // Collect all hole cards
@@ -508,7 +651,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (turnCard) allUsedCards.push(turnCard);
     if (riverCard) allUsedCards.push(riverCard);
     
-    return allUsedCards;
+    // Filter out excluded cards
+    return allUsedCards.filter(card => !excludeCards.includes(card));
   };
 
   const recordAction = async (actionType: ActionType) => {
@@ -765,6 +909,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
     // Close mobile drawer immediately
     setShowMobileHandTracking(false);
+    
+    // Clear saved hand state
+    clearHandState();
 
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
     
@@ -1080,12 +1227,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     }
   };
 
-  const handleSetAsButton = () => {
-    setButtonPlayerId(selectedPlayerId);
-    setShowPlayerActionDialog(false);
-    setSelectedPlayerId('');
-  };
-
   const handleToggleDealtOut = () => {
     if (dealtOutPlayers.includes(selectedPlayerId)) {
       setDealtOutPlayers(dealtOutPlayers.filter(id => id !== selectedPlayerId));
@@ -1116,6 +1257,23 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (actionType === 'Fold') return 'destructive';
     if (actionType.includes('Raise') || actionType.includes('Bet')) return 'default';
     return 'secondary';
+  };
+
+  // Check if there's a saved hand state (memoized to avoid repeated localStorage reads)
+  const [hasSavedHandState, setHasSavedHandState] = useState(false);
+  
+  // Update saved hand state check when component mounts
+  useEffect(() => {
+    const savedState = loadHandState();
+    setHasSavedHandState(savedState && savedState.stage !== 'setup');
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Continue saved hand
+  const continueHand = () => {
+    // State is already restored in the mount useEffect, just open the drawer
+    setShowMobileHandTracking(true);
   };
 
   if (stage === 'setup') {
@@ -1182,43 +1340,58 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 </div>
               )}
               {!buttonPlayerId && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-bold mb-1">Select Dealer</h3>
-                    <p className="text-sm text-muted-foreground">Click on a player to assign them as the dealer</p>
-                  </div>
-                  {/* Dealer selection grid - professional layout */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {game.game_players
-                      .filter(gp => !dealtOutPlayers.includes(gp.player_id))
-                      .map(gp => (
-                        <button
-                          key={gp.player_id}
-                          onClick={() => setButtonPlayerId(gp.player_id)}
-                          className="group relative p-4 bg-gradient-to-br from-card to-card/80 border-2 border-border hover:border-primary rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95"
-                        >
-                          <div className="flex flex-col items-center gap-2">
-                            {/* Avatar */}
-                            <div className="relative">
-                              <OptimizedAvatar 
-                                name={gp.player.name}
-                                size="lg"
-                                allPlayerNames={game.game_players.map(p => p.player.name)}
-                              />
-                              {/* Dealer badge overlay */}
-                              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-gray-800 rounded-full border-2 border-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                <span className="text-sm font-bold text-primary">D</span>
+                <div className="space-y-3">
+                  <Label htmlFor="dealer-select" className="text-base font-semibold">
+                    Select Dealer (Button Player)
+                  </Label>
+                  <Select value={buttonPlayerId} onValueChange={setButtonPlayerId}>
+                    <SelectTrigger id="dealer-select" className="w-full h-12 text-base">
+                      <SelectValue placeholder="Choose the dealer for this hand..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {game.game_players
+                        .filter(gp => !dealtOutPlayers.includes(gp.player_id))
+                        .sort((a, b) => {
+                          const seatA = seatPositions[a.player_id] ?? 999;
+                          const seatB = seatPositions[b.player_id] ?? 999;
+                          return seatA - seatB;
+                        })
+                        .map(gp => (
+                          <SelectItem key={gp.player_id} value={gp.player_id} className="text-base py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-sm font-bold text-primary">
+                                  {gp.player.name.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-semibold">{gp.player.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  Seat {seatPositions[gp.player_id] ?? '?'}
+                                </span>
                               </div>
                             </div>
-                            {/* Player name */}
-                            <span className="text-sm font-semibold text-center line-clamp-1">{gp.player.name}</span>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Select the player who will have the dealer button for this hand
+                  </p>
                 </div>
               )}
             </div>
+
+            {/* Continue Hand button if saved state exists */}
+            {hasSavedHandState && currentHand && (
+              <Button 
+                onClick={continueHand} 
+                className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-amber-600 hover:bg-amber-700"
+                size="lg"
+              >
+                🔄 Continue Hand #{currentHand.hand_number}
+              </Button>
+            )}
 
             <Button 
               onClick={startNewHand} 
@@ -1251,25 +1424,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 pt-4">
-              <Button 
-                onClick={handleSetAsButton} 
-                className="w-full h-14 text-base"
-                variant={buttonPlayerId === selectedPlayerId ? "default" : "outline"}
-              >
-                {buttonPlayerId === selectedPlayerId ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Currently Button
-                  </>
-                ) : (
-                  <>
-                    <div className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center mr-2">
-                      <span className="text-xs font-bold">D</span>
-                    </div>
-                    Set as Button (Dealer)
-                  </>
-                )}
-              </Button>
               <Button 
                 onClick={handleToggleDealtOut} 
                 className="w-full h-14 text-base"
@@ -1680,7 +1834,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       </div>
 
       {/* Bottom 1/3 - Action Buttons */}
-      <div className="flex-[1] flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 overflow-y-auto">
+      <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2">
         {/* Action Buttons */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
@@ -2111,7 +2265,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
           ].map(suit => {
             const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
-            const usedCards = getUsedCards();
+            // When editing, exclude the cards being edited from the used cards list
+            const cardsBeingEdited = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+            const usedCards = getUsedCards(cardsBeingEdited);
             const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
             const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
             
