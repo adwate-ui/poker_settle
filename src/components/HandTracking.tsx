@@ -94,6 +94,22 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const [cardsJustAdded, setCardsJustAdded] = useState(false); // Track if community cards were just added
   const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
   const [showMobileHandTracking, setShowMobileHandTracking] = useState(false); // Control mobile drawer visibility
+  const [actionHistory, setActionHistory] = useState<Array<{
+    stage: HandStage;
+    currentPlayerIndex: number;
+    actionSequence: number;
+    currentBet: number;
+    potSize: number;
+    streetPlayerBets: Record<string, number>;
+    totalPlayerBets: Record<string, number>;
+    playersInHand: string[];
+    streetActions: PlayerAction[];
+    allHandActions: PlayerAction[];
+    lastAggressorIndex: number | null;
+    flopCards: string;
+    turnCard: string;
+    riverCard: string;
+  }>>([]);
 
   // Find hero player - ALWAYS tag "Adwate" as the hero
   const heroPlayer = game.game_players.find(gp => 
@@ -182,6 +198,65 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     const bb = game.big_blind || 100;
     const bbMultiple = (amount / bb).toFixed(1);
     return `Rs. ${amount.toLocaleString('en-IN')} (${bbMultiple} BB)`;
+  };
+
+  // Save current state to action history
+  const saveStateToHistory = () => {
+    const currentState = {
+      stage,
+      currentPlayerIndex,
+      actionSequence,
+      currentBet,
+      potSize,
+      streetPlayerBets: { ...streetPlayerBets },
+      totalPlayerBets: { ...playerBets },
+      playersInHand: [...playersInHand],
+      streetActions: [...streetActions],
+      allHandActions: [...allHandActions],
+      lastAggressorIndex,
+      flopCards,
+      turnCard,
+      riverCard,
+    };
+    setActionHistory(prev => [...prev, currentState]);
+  };
+
+  // Undo last action
+  const undoLastAction = () => {
+    if (actionHistory.length === 0) {
+      toast({
+        title: 'No action to undo',
+        description: 'This is the beginning of the hand',
+        variant: 'default'
+      });
+      return;
+    }
+
+    const previousState = actionHistory[actionHistory.length - 1];
+    
+    // Restore state
+    setStage(previousState.stage);
+    setCurrentPlayerIndex(previousState.currentPlayerIndex);
+    setActionSequence(previousState.actionSequence);
+    setCurrentBet(previousState.currentBet);
+    setPotSize(previousState.potSize);
+    setStreetPlayerBets(previousState.streetPlayerBets);
+    setPlayerBets(previousState.totalPlayerBets);
+    setPlayersInHand(previousState.playersInHand);
+    setStreetActions(previousState.streetActions);
+    setAllHandActions(previousState.allHandActions);
+    setLastAggressorIndex(previousState.lastAggressorIndex);
+    setFlopCards(previousState.flopCards);
+    setTurnCard(previousState.turnCard);
+    setRiverCard(previousState.riverCard);
+    
+    // Remove the last history entry
+    setActionHistory(prev => prev.slice(0, -1));
+    
+    toast({
+      title: 'Action undone',
+      description: 'Previous action has been reverted',
+    });
   };
 
   const startNewHand = async () => {
@@ -397,6 +472,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
       return;
     }
 
+    // Save state before action for undo functionality
+    saveStateToHistory();
+
     const isHero = currentPlayer.player_id === heroPlayer?.player_id;
     const playerStreetBet = streetPlayerBets[currentPlayer.player_id] || 0;
     
@@ -510,6 +588,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
   const moveToNextStreet = async () => {
     if (!currentHand) return;
+
+    // Save state before moving to next street
+    saveStateToHistory();
 
     const nextStage = getNextStage(stage);
     
@@ -1576,13 +1657,22 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Street Navigation */}
         <div className="flex gap-2">
+          {/* Back button - always visible */}
+          <Button 
+            onClick={undoLastAction} 
+            className="flex-1 h-10 text-xs" 
+            variant="outline"
+            disabled={actionHistory.length === 0}
+          >
+            ← Back
+          </Button>
           {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
             <Button 
               onClick={moveToPreviousStreet} 
               className="flex-1 h-10 text-xs" 
               variant="outline"
             >
-              ← Prev
+              ⬆️ Prev St.
             </Button>
           )}
           <Button 
@@ -1590,7 +1680,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
             className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
             disabled={!canMoveToNextStreet()}
           >
-            {stage === 'river' ? '🏆 Showdown' : 'Next →'}
+            {stage === 'river' ? '🏆 Show' : 'Next →'}
           </Button>
         </div>
       </div>
@@ -1820,14 +1910,24 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Navigation buttons - compact */}
         <div className="flex gap-2">
+          {/* Back button - always visible */}
+          <Button 
+            onClick={undoLastAction} 
+            className="h-10 text-sm font-semibold" 
+            variant="outline"
+            size="default"
+            disabled={actionHistory.length === 0}
+          >
+            ← Back
+          </Button>
           {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
             <Button 
               onClick={moveToPreviousStreet} 
-              className="flex-1 h-10 text-sm font-semibold" 
+              className="h-10 text-sm font-semibold" 
               variant="outline"
               size="default"
             >
-              ← Previous Street
+              ⬆️ Prev Street
             </Button>
           )}
           <Button 
