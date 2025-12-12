@@ -11,6 +11,8 @@ import { Search, UserPlus, Users, X, Check, TrendingUp, TrendingDown, Star } fro
 import { formatIndianNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { PlayerFormDialog, PlayerFormData } from '@/components/PlayerFormDialog';
+import { getPaymentMethodIcon } from '@/utils/playerUtils';
 
 interface PlayerSelectorProps {
   allPlayers: Player[];
@@ -18,6 +20,7 @@ interface PlayerSelectorProps {
   onAddPlayer: (player: Player) => void;
   onRemovePlayer: (playerId: string) => void;
   onCreateNewPlayer: (name: string) => Promise<Player>;
+  onCreateNewPlayerWithDetails?: (playerData: import('@/components/PlayerFormDialog').PlayerFormData) => Promise<Player>;
   disabled?: boolean;
 }
 
@@ -27,9 +30,11 @@ export const PlayerSelector = ({
   onAddPlayer,
   onRemovePlayer,
   onCreateNewPlayer,
+  onCreateNewPlayerWithDetails,
   disabled = false,
 }: PlayerSelectorProps) => {
   const [open, setOpen] = useState(false);
+  const [showDetailedForm, setShowDetailedForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newPlayerName, setNewPlayerName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -58,6 +63,21 @@ export const PlayerSelector = ({
       toast.error('Failed to create player');
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleCreatePlayerWithDetails = async (playerData: PlayerFormData) => {
+    if (onCreateNewPlayerWithDetails) {
+      const player = await onCreateNewPlayerWithDetails(playerData);
+      onAddPlayer(player);
+      setShowDetailedForm(false);
+      setOpen(false);
+    } else {
+      // Fallback to simple creation
+      const player = await onCreateNewPlayer(playerData.name);
+      onAddPlayer(player);
+      setShowDetailedForm(false);
+      setOpen(false);
     }
   };
 
@@ -255,26 +275,60 @@ export const PlayerSelector = ({
                   />
                 </div>
 
-                <Button
-                  onClick={handleCreatePlayer}
-                  disabled={!newPlayerName.trim() || isCreating}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isCreating ? (
-                    <>Creating...</>
-                  ) : (
-                    <>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={handleCreatePlayer}
+                    disabled={!newPlayerName.trim() || isCreating}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isCreating ? (
+                      <>Creating...</>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Quick Add
+                      </>
+                    )}
+                  </Button>
+
+                  {onCreateNewPlayerWithDetails && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowDetailedForm(true);
+                        setOpen(false);
+                      }}
+                      className="w-full"
+                      size="lg"
+                    >
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Create and Add Player
-                    </>
+                      Add with Details
+                    </Button>
                   )}
-                </Button>
+                </div>
+                
+                {onCreateNewPlayerWithDetails && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Use "Add with Details" to include WhatsApp number and UPI ID
+                  </p>
+                )}
               </div>
             </TabsContent>
           </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Detailed Player Form Dialog */}
+      {onCreateNewPlayerWithDetails && (
+        <PlayerFormDialog
+          open={showDetailedForm}
+          onOpenChange={setShowDetailedForm}
+          onSave={handleCreatePlayerWithDetails}
+          title="Add Player with Details"
+          description="Add player with WhatsApp number and UPI ID for notifications and settlements."
+        />
+      )}
     </div>
   );
 };
@@ -328,6 +382,14 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
                 )}
                 {player.total_profit >= 0 ? '+' : ''}
                 Rs. {formatIndianNumber(Math.abs(player.total_profit))}
+              </Badge>
+            )}
+            {player.payment_preference && (
+              <Badge 
+                variant={player.payment_preference === 'cash' ? 'secondary' : 'default'}
+                className="text-[10px] h-5 px-1.5"
+              >
+                {getPaymentMethodIcon(player.payment_preference)} {player.payment_preference.toUpperCase()}
               </Badge>
             )}
           </div>

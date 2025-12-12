@@ -3,6 +3,9 @@ export interface Player {
   name: string;
   total_games: number;
   total_profit: number;
+  phone_number?: string;
+  upi_id?: string;
+  payment_preference?: 'upi' | 'cash';
 }
 
 export interface GamePlayer {
@@ -29,6 +32,19 @@ export interface Settlement {
   from: string;
   to: string;
   amount: number;
+}
+
+export interface SettlementConfirmation {
+  id: string;
+  game_id: string;
+  player_name: string;
+  settlement_from: string;
+  settlement_to: string;
+  amount: number;
+  confirmed: boolean;
+  confirmed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SeatPosition {

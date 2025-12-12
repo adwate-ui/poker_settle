@@ -11,9 +11,11 @@ import { Loader2, Play } from "lucide-react";
 import GameDashboard from "@/components/GameDashboard";
 import PlayerSelector from "@/components/PlayerSelector";
 import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
+import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 
 const NewGame = () => {
   const { user } = useAuth();
+  const { createPlayer, createOrFindPlayerByName } = usePlayerManagement();
   const [buyInAmount, setBuyInAmount] = useState("2,000");
   const [smallBlind, setSmallBlind] = useState("20");
   const [bigBlind, setBigBlind] = useState("40");
@@ -66,17 +68,21 @@ const NewGame = () => {
   }, [user, fetchPlayers, checkActiveGame]);
 
   const addNewPlayer = async (name: string): Promise<Player> => {
-    const { data, error } = await supabase
-      .from("players")
-      .insert({ name, user_id: user?.id })
-      .select()
-      .single();
+    const player = await createOrFindPlayerByName(name);
+    
+    // Add to players list if not already there
+    if (!players.find(p => p.id === player.id)) {
+      setPlayers([...players, player]);
+    }
+    return player;
+  };
 
-    if (error) throw error;
+  const addNewPlayerWithDetails = async (playerData: import('@/components/PlayerFormDialog').PlayerFormData): Promise<Player> => {
+    const player = await createPlayer(playerData);
     
     // Add to players list
-    setPlayers([...players, data]);
-    return data;
+    setPlayers([...players, player]);
+    return player;
   };
 
   const addPlayerToGame = (player: Player) => {
@@ -266,6 +272,7 @@ const NewGame = () => {
             onAddPlayer={addPlayerToGame}
             onRemovePlayer={removePlayerFromGame}
             onCreateNewPlayer={addNewPlayer}
+            onCreateNewPlayerWithDetails={addNewPlayerWithDetails}
             disabled={hasActiveGame}
           />
         </div>
