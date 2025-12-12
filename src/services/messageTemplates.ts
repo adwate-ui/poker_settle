@@ -119,7 +119,9 @@ Here are your settlement details:
           settlement.amount,
           data.gameDate ? `Poker settlement - ${data.gameDate}` : 'Poker settlement'
         );
-        message += `   💰 *Quick Pay:* ${upiLink}\n`;
+        // Format as clickable link - WhatsApp should auto-detect upi:// URLs
+        message += `   💰 *Quick Pay (tap to open UPI app):*\n`;
+        message += `   ${upiLink}\n`;
         message += `   📱 UPI ID: ${settlement.toUpiId}\n`;
       }
       message += `\n`;
@@ -128,7 +130,8 @@ Here are your settlement details:
     message += `*Your Payment Method:* ${paymentMethod}\n`;
     
     if (data.settlements.some(s => s.toUpiId)) {
-      message += `\n💡 *Tip:* Click the "Quick Pay" links above to open your UPI app and pay instantly!\n`;
+      message += `\n💡 *Tip:* Tap/click the UPI payment link above to open your UPI app (Google Pay, PhonePe, Paytm, etc.) and pay instantly!\n`;
+      message += `\nIf the link doesn't work, copy the UPI ID and use it in your UPI app's "Pay to UPI ID" option.\n`;
     }
     
     // Add confirmation instruction for payers
@@ -157,14 +160,16 @@ export function generateCustomMessage(playerName: string, message: string, gameL
 
 /**
  * Generate player link for sharing
+ * Uses read-only shared link with access token
  */
-export function generatePlayerShareLink(playerId: string, baseUrl?: string): string {
+export function generatePlayerShareLink(playerId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
-  return `${base}/players/${playerId}`;
+  return `${base}/shared/${token}/player/${playerId}`;
 }
 
 /**
  * Generate game link for sharing
+ * Uses read-only shared link with access token
  */
 export function generateGameShareLink(gameId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;

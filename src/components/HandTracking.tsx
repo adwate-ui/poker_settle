@@ -52,6 +52,7 @@ interface HandTrackingProps {
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
+const MOBILE_BREAKPOINT_PX = 640; // Mobile breakpoint in pixels (matches Tailwind's sm: breakpoint)
 
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
@@ -319,8 +320,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   }, [positionsJustChanged]);
 
   // Auto-open card selector when community cards need to be selected
-  // Works for both MOBILE and DESKTOP
+  // Only on MOBILE to avoid blocking overlay on desktop
   useEffect(() => {
+    // Only auto-open on mobile devices
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT_PX;
+    
+    if (!isMobile) return; // Skip auto-open on desktop
+    
     if (stage === 'flop' && !flopCards && currentHand) {
       setCardSelectorType('flop');
       setTempCommunityCards(''); // Initialize temp with empty
@@ -1281,8 +1287,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      // Only show dialog on mobile (< 640px to match other mobile detection)
-      if (window.innerWidth < 640) {
+      // Only show dialog on mobile
+      if (window.innerWidth < MOBILE_BREAKPOINT_PX) {
         setShowPlayerActionDialog(true);
       }
     }
@@ -2239,9 +2245,32 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop Inline Card Selector - REMOVED - now using popup dialog for both mobile and desktop */}
-
-
+        {/* Desktop: Show button to select community cards when needed */}
+        {((stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
+          <div className="bg-amber-500/20 border-2 border-amber-500/50 p-4 rounded-lg animate-pulse">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-bold text-lg mb-1">
+                  {stage === 'flop' ? '🎴 Select Flop Cards' : stage === 'turn' ? '🎴 Select Turn Card' : '🎴 Select River Card'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {stage === 'flop' ? 'Choose 3 cards for the flop' : stage === 'turn' ? 'Choose 1 card for the turn' : 'Choose 1 card for the river'}
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  setCardSelectorType(stage as 'flop' | 'turn' | 'river');
+                  setTempCommunityCards('');
+                  setShowCardSelector(true);
+                }}
+                size="lg"
+                className="bg-amber-600 hover:bg-amber-700 font-bold"
+              >
+                Select Cards
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Action buttons - COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
