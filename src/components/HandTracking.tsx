@@ -320,14 +320,23 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     setPositionsChanged(positionsJustChanged);
   }, [positionsJustChanged]);
 
-  // Track window resize to update isMobile state
+  // Track window resize to update isMobile state (throttled to avoid excessive updates)
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     const handleResize = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT_PX);
+      // Throttle resize events to avoid excessive state updates
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(window.innerWidth < MOBILE_BREAKPOINT_PX);
+      }, 150); // Wait 150ms after last resize event
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   // Auto-open card selector when community cards need to be selected
