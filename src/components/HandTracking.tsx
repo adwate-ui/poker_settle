@@ -101,7 +101,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const [cardsJustAdded, setCardsJustAdded] = useState(false); // Track if community cards were just added
   const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
   const [showMobileHandTracking, setShowMobileHandTracking] = useState(false); // Control mobile drawer visibility
-  const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT_PX); // Track if we're on mobile
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT_PX : false); // Track if we're on mobile (SSR-safe)
   const [actionHistory, setActionHistory] = useState<Array<{
     stage: HandStage;
     currentPlayerIndex: number;
