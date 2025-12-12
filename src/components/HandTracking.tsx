@@ -686,7 +686,53 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     } else if (actionType === 'Call') {
       betSize = currentBet;
     } else if (actionType === 'Raise') {
-      betSize = parseFloat(betAmount) || currentBet;
+      const requestedBet = parseFloat(betAmount) || currentBet;
+      const smallBlind = game.small_blind || 50;
+      const bigBlind = game.big_blind || 100;
+      
+      // Validate bet/raise amounts
+      if (currentBet === 0) {
+        // This is a bet (not a raise)
+        // Minimum bet must be at least big blind
+        if (requestedBet < bigBlind) {
+          toast({
+            title: 'Invalid Bet',
+            description: `Minimum bet is Rs. ${bigBlind.toLocaleString('en-IN')} (big blind)`,
+            variant: 'destructive'
+          });
+          return;
+        }
+        // Ensure bet is multiple of small blind and at least small blind
+        if (requestedBet % smallBlind !== 0) {
+          toast({
+            title: 'Invalid Bet',
+            description: `Bet must be a multiple of Rs. ${smallBlind.toLocaleString('en-IN')} (small blind)`,
+            variant: 'destructive'
+          });
+          return;
+        }
+      } else {
+        // This is a raise
+        const minRaise = currentBet * 2 - playerStreetBet;
+        if (requestedBet < minRaise) {
+          toast({
+            title: 'Invalid Raise',
+            description: `Minimum raise is Rs. ${minRaise.toLocaleString('en-IN')}`,
+            variant: 'destructive'
+          });
+          return;
+        }
+        // Ensure raise is multiple of small blind and at least small blind
+        if (requestedBet % smallBlind !== 0 || requestedBet < smallBlind) {
+          toast({
+            title: 'Invalid Raise',
+            description: `Raise must be a multiple of Rs. ${smallBlind.toLocaleString('en-IN')} (small blind) and at least Rs. ${smallBlind.toLocaleString('en-IN')}`,
+            variant: 'destructive'
+          });
+          return;
+        }
+      }
+      betSize = requestedBet;
     }
 
     try {
@@ -1375,9 +1421,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                         ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Select the player who will have the dealer button for this hand
-                  </p>
                 </div>
               )}
             </div>
@@ -1393,18 +1436,30 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Button>
             )}
 
-            <Button 
-              onClick={startNewHand} 
-              disabled={!buttonPlayerId || loading || positionsChanged} 
-              className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-              size="lg"
-            >
-              {positionsChanged 
-                ? '⚠️ Positions Changed - Record Hand to Enable' 
-                : buttonPlayerId 
-                  ? '🎴 Deal Cards & Start Hand' 
-                  : '👆 Select Button Player First'}
-            </Button>
+            <div className="flex gap-2">
+              {buttonPlayerId && (
+                <Button 
+                  onClick={() => setButtonPlayerId('')}
+                  variant="outline"
+                  className="h-12 text-base font-semibold"
+                  size="lg"
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button 
+                onClick={startNewHand} 
+                disabled={!buttonPlayerId || loading || positionsChanged} 
+                className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                size="lg"
+              >
+                {positionsChanged 
+                  ? '⚠️ Positions Changed - Record Hand to Enable' 
+                  : buttonPlayerId 
+                    ? '🎴 Deal Cards & Start Hand' 
+                    : '👆 Select Button Player First'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -1747,13 +1802,48 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Badge>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-0.5">
-            <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
-              💰 {formatWithBB(potSize)}
-            </Badge>
-            {(cardsJustAdded || actionHistory.length > 0) && (
-              <span className="text-[9px] text-muted-foreground">👉 Swipe right to {cardsJustAdded ? 'edit' : 'undo'}</span>
-            )}
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end gap-0.5">
+              <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
+                💰 {formatWithBB(potSize)}
+              </Badge>
+              {(cardsJustAdded || actionHistory.length > 0) && (
+                <span className="text-[9px] text-muted-foreground">👉 Swipe right to {cardsJustAdded ? 'edit' : 'undo'}</span>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/20"
+              onClick={() => {
+                // Cancel hand tracking - clear saved state and go back to dashboard
+                clearHandState();
+                setShowMobileHandTracking(false);
+                setStage('setup');
+                setCurrentHand(null);
+                setButtonPlayerId('');
+                setDealtOutPlayers([]);
+                setActivePlayers([]);
+                setActionSequence(0);
+                setPotSize(0);
+                setFlopCards('');
+                setTurnCard('');
+                setRiverCard('');
+                setStreetActions([]);
+                setAllHandActions([]);
+                setPlayersInHand([]);
+                setPlayerHoleCards({});
+                setPlayerBets({});
+                setStreetPlayerBets({});
+                setLastAggressorIndex(null);
+                setActionHistory([]);
+                if (onHandComplete) {
+                  onHandComplete();
+                }
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
@@ -2239,7 +2329,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     {/* Card Selector for community cards - auto-opens when cards need to be selected */}
     <Dialog open={showCardSelector} onOpenChange={(isOpen) => {
       if (!isOpen) {
-        // When closing without confirm, reset temp state
+        // When closing without confirm, treat it as a swipe/undo action
+        if (cardsJustAdded) {
+          // If cards were just added, allow editing
+          setTempCommunityCards('');
+        } else if (actionHistory.length > 0) {
+          // If no cards just added, undo last action
+          undoLastAction();
+        }
         setTempCommunityCards('');
       }
       setShowCardSelector(isOpen);

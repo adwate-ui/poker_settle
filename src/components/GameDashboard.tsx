@@ -295,6 +295,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const handleHandComplete = useCallback(() => {
     setHandTrackingStage('ready');
+    setTablePositionOpen(true); // Ensure table positions section is expanded
   }, []);
 
   const formatCurrency = useCallback((amount: number) => {
