@@ -67,15 +67,15 @@ export function getPaymentMethodIcon(paymentPreference: 'upi' | 'cash' | undefin
 }
 
 /**
- * Ensure player has correct payment preference based on UPI ID
- * This should be called when saving/updating player data
+ * Ensure player has payment preference set
+ * Payment preference is now user-controlled and independent of UPI ID
  */
 export function normalizePlayerPaymentPreference(player: Partial<Player>): Partial<Player> {
   const normalized = { ...player };
   
-  // Auto-determine payment preference based on UPI ID if not explicitly set
-  if (!normalized.payment_preference || normalized.upi_id !== undefined) {
-    normalized.payment_preference = determinePaymentPreference(normalized.upi_id);
+  // Default to 'upi' if not explicitly set
+  if (!normalized.payment_preference) {
+    normalized.payment_preference = 'upi';
   }
   
   return normalized;

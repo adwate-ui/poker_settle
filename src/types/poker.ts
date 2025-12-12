@@ -3,7 +3,7 @@ export interface Player {
   name: string;
   total_games: number;
   total_profit: number;
-  phone_number?: string;
+  email?: string;
   upi_id?: string;
   payment_preference?: 'upi' | 'cash';
 }

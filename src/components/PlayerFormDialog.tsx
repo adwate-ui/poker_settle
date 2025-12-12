@@ -18,8 +18,15 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { determinePaymentPreference, validateUpiId, getPaymentMethodIcon } from "@/utils/playerUtils";
-import { Loader2, Smartphone, CreditCard, User } from "lucide-react";
+import { validateUpiId, getPaymentMethodIcon } from "@/utils/playerUtils";
+import { Loader2, Mail, CreditCard, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PlayerFormDialogProps {
   open: boolean;
@@ -32,7 +39,7 @@ interface PlayerFormDialogProps {
 
 export interface PlayerFormData {
   name: string;
-  phone_number?: string;
+  email?: string;
   upi_id?: string;
   payment_preference?: 'upi' | 'cash';
 }
@@ -43,20 +50,27 @@ export const PlayerFormDialog = ({
   onSave,
   initialData,
   title = "Add New Player",
-  description = "Enter player details including WhatsApp number and UPI ID for payments.",
+  description = "Enter player details including email and UPI ID for payments.",
 }: PlayerFormDialogProps) => {
   const [name, setName] = useState(initialData?.name || "");
-  const [phoneNumber, setPhoneNumber] = useState(initialData?.phone_number || "");
+  const [email, setEmail] = useState(initialData?.email || "");
   const [upiId, setUpiId] = useState(initialData?.upi_id || "");
+  const [paymentPreference, setPaymentPreference] = useState<'upi' | 'cash'>(
+    initialData?.payment_preference || 'upi'
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const paymentPreference = determinePaymentPreference(upiId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
       toast.error("Player name is required");
+      return;
+    }
+
+    // Validate email format if provided
+    if (email.trim() && !validateEmail(email.trim())) {
+      toast.error("Invalid email format");
       return;
     }
 
@@ -70,17 +84,18 @@ export const PlayerFormDialog = ({
     try {
       const playerData: PlayerFormData = {
         name: name.trim(),
-        phone_number: phoneNumber.trim() || undefined,
+        email: email.trim() || undefined,
         upi_id: upiId.trim() || undefined,
-        payment_preference: determinePaymentPreference(upiId.trim() || undefined),
+        payment_preference: paymentPreference,
       };
 
       await onSave(playerData);
       
       // Reset form
       setName("");
-      setPhoneNumber("");
+      setEmail("");
       setUpiId("");
+      setPaymentPreference('upi');
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving player:", error);
@@ -90,10 +105,16 @@ export const PlayerFormDialog = ({
     }
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleCancel = () => {
     setName(initialData?.name || "");
-    setPhoneNumber(initialData?.phone_number || "");
+    setEmail(initialData?.email || "");
     setUpiId(initialData?.upi_id || "");
+    setPaymentPreference(initialData?.payment_preference || 'upi');
     onOpenChange(false);
   };
 
@@ -124,22 +145,22 @@ export const PlayerFormDialog = ({
               />
             </div>
 
-            {/* Phone Number Field */}
+            {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4" />
-                WhatsApp Number (Optional)
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email Address (Optional)
               </Label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="+91 9876543210"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="player@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
-                Format: +91 9876543210 (for WhatsApp notifications)
+                For receiving game reports and payment links
               </p>
             </div>
 
@@ -161,18 +182,36 @@ export const PlayerFormDialog = ({
               </p>
             </div>
 
-            {/* Payment Preference Display */}
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <span className="text-sm font-medium">Payment Preference:</span>
-              <Badge variant={paymentPreference === 'cash' ? 'secondary' : 'default'}>
-                {getPaymentMethodIcon(paymentPreference)}{' '}
-                {paymentPreference === 'cash' ? 'Cash' : 'UPI'}
-              </Badge>
-              {paymentPreference === 'cash' && !upiId.trim() && (
-                <span className="text-xs text-muted-foreground">
-                  (No UPI ID provided)
-                </span>
-              )}
+            {/* Payment Preference Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="payment-preference" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Preferred Payment Mode
+              </Label>
+              <Select
+                value={paymentPreference}
+                onValueChange={(value: 'upi' | 'cash') => setPaymentPreference(value)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="payment-preference">
+                  <SelectValue placeholder="Select payment preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upi">
+                    <div className="flex items-center gap-2">
+                      {getPaymentMethodIcon('upi')} UPI
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cash">
+                    <div className="flex items-center gap-2">
+                      {getPaymentMethodIcon('cash')} Cash
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                You can change this preference anytime
+              </p>
             </div>
           </div>
 
