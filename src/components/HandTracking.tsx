@@ -1341,9 +1341,261 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     );
   }
 
+  // Mobile full-screen hand tracking content
+  const handTrackingContent = (
+    <div className="flex flex-col h-full">
+      {/* Header - compact on mobile */}
+      <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-3 border-b border-primary/20 flex-shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/30 rounded-lg">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold">Hand #{currentHand?.hand_number}</span>
+              <Badge variant="outline" className="w-fit text-[10px] h-4 px-1">
+                {stage.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+          <Badge variant="secondary" className="text-sm px-2 py-1 bg-amber-500/20 border-amber-500/30">
+            💰 {formatWithBB(potSize)}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Main content area - 2/3 table view */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="p-3 space-y-3">
+          {/* Poker Table - WITHOUT community cards on table for mobile */}
+          {activePlayers.length > 0 && (
+            <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 rounded-xl border border-green-700/30">
+              <PokerTableView
+                positions={activePlayers.map(gp => ({
+                  seat: seatPositions[gp.player_id] ?? 0,
+                  player_id: gp.player_id,
+                  player_name: gp.player.name,
+                }))}
+                buttonPlayerId={currentHand?.button_player_id}
+                seatPositions={seatPositions}
+                playerBets={streetPlayerBets}
+                potSize={potSize}
+                showPositionLabels={true}
+                foldedPlayers={activePlayers.filter(gp => !playersInHand.includes(gp.player_id)).map(gp => gp.player_id).concat(dealtOutPlayers)}
+                communityCards="" // DON'T show community cards on table for mobile
+                activePlayerId={currentPlayer?.player_id}
+                playerHoleCards={playerHoleCards}
+                playerStacks={playerStacks}
+              />
+            </div>
+          )}
+
+          {/* Community Cards Display - Separate from table, similar to hand history */}
+          {(flopCards || turnCard || riverCard) && (
+            <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 rounded-xl border border-green-700/30">
+              <div className="text-xs font-semibold text-muted-foreground mb-2">BOARD</div>
+              <div className="flex gap-3 items-center flex-wrap">
+                {/* Flop */}
+                {flopCards && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                    <div className="flex gap-0.5">
+                      {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Turn */}
+                {turnCard && flopCards && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
+                      <div className="flex gap-0.5">
+                        <PokerCard card={turnCard} size="sm" />
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* River */}
+                {riverCard && turnCard && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
+                      <div className="flex gap-0.5">
+                        <PokerCard card={riverCard} size="sm" />
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* Edit button */}
+                {cardsJustAdded && (
+                  <Button variant="outline" size="sm" onClick={handleEditCards} className="ml-auto h-8 text-xs">
+                    Edit
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action History - Collapsible, compact */}
+          {allHandActions.length > 0 && (
+            <Collapsible open={isActionHistoryOpen} onOpenChange={setIsActionHistoryOpen}>
+              <div className="bg-muted/30 rounded-lg border border-border">
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between p-2 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-muted-foreground">ACTIONS</span>
+                      <Badge variant="outline" className="text-[10px] h-4 px-1">{allHandActions.length}</Badge>
+                    </div>
+                    {isActionHistoryOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-2 pt-0 space-y-2 max-h-32 overflow-y-auto">
+                    {actionsByStreet.map(({ street, actions: streetActions }) => (
+                      <div key={street} className="space-y-1">
+                        <div className="text-[10px] font-bold text-primary">{street}</div>
+                        {streetActions.map((action, idx) => {
+                          const player = game.game_players.find(gp => gp.player_id === action.player_id);
+                          return (
+                            <div key={idx} className="bg-background/50 rounded p-1.5 text-[10px] flex justify-between items-center gap-1">
+                              <span className="font-semibold truncate">{player?.player.name}</span>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Badge variant={getActionBadgeVariant(action.action_type)} className="text-[9px] px-1 h-4">
+                                  {action.action_type}
+                                </Badge>
+                                {action.bet_size > 0 && (
+                                  <span className="text-amber-600 dark:text-amber-400 font-bold text-[10px]">
+                                    Rs.{action.bet_size}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom 1/3 - Action Buttons with clear player indication */}
+      <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-3 space-y-2">
+        {/* Current Player Indicator */}
+        {currentPlayer && (
+          <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-center">
+            <div className="text-xs font-semibold text-muted-foreground">Action on</div>
+            <div className="text-lg font-bold text-primary flex items-center justify-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              {currentPlayer.player.name}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                onClick={() => recordAction('Call')} 
+                variant="outline"
+                size="lg"
+                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
+              >
+                {currentBet === 0 ? '✓ Check' : `Call ${currentBet}`}
+              </Button>
+              <Button 
+                onClick={() => recordAction('Fold')} 
+                variant="destructive"
+                size="lg"
+                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                className="h-12 text-sm font-bold"
+              >
+                ❌ Fold
+              </Button>
+            </div>
+            
+            {/* Raise/Bet */}
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value === '') return;
+                  const numValue = parseFloat(value);
+                  if (!isNaN(numValue) && numValue > 0) {
+                    const smallBlind = game.small_blind || 50;
+                    const rounded = Math.round(numValue / smallBlind) * smallBlind;
+                    setBetAmount(rounded.toString());
+                  } else {
+                    setBetAmount('');
+                  }
+                }}
+                placeholder={currentBet === 0 ? `Bet` : `Raise`}
+                className="flex-1 h-12 text-base"
+              />
+              <Button 
+                onClick={() => recordAction('Raise')} 
+                disabled={!betAmount}
+                size="lg"
+                className="h-12 px-6 font-bold bg-orange-600 hover:bg-orange-700"
+              >
+                {currentBet === 0 ? '💰 Bet' : '📈 Raise'}
+              </Button>
+            </div>
+          </div>
+        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+          <div className="bg-muted/50 p-3 rounded-lg text-center border border-dashed">
+            <p className="text-sm text-muted-foreground">🃏 Player has folded</p>
+          </div>
+        ) : null}
+
+        {/* Street Navigation */}
+        <div className="flex gap-2">
+          {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
+            <Button 
+              onClick={moveToPreviousStreet} 
+              className="flex-1 h-10 text-xs" 
+              variant="outline"
+            >
+              ← Prev
+            </Button>
+          )}
+          <Button 
+            onClick={moveToNextStreet} 
+            className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
+            disabled={!canMoveToNextStreet()}
+          >
+            {stage === 'river' ? '🏆 Showdown' : 'Next →'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-    <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in">
+    {/* Mobile: Full-screen dialog */}
+    <div className="md:hidden fixed inset-0 z-50 bg-background">
+      {handTrackingContent}
+    </div>
+
+    {/* Desktop view - unchanged */}
+    <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in hidden md:block">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
         <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
