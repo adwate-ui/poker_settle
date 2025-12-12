@@ -137,7 +137,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         // First, try to use initialSeatPositions passed from parent (avoids DB call)
         if (initialSeatPositions.length > 0) {
           const positions: Record<string, number> = {};
-          initialSeatPositions.forEach((pos: SeatPosition) => {
+          initialSeatPositions.forEach((pos) => {
             positions[pos.player_id] = pos.seat;
           });
           setSeatPositions(positions);
