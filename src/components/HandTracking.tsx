@@ -52,6 +52,7 @@ interface HandTrackingProps {
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
+const MOBILE_BREAKPOINT_PX = 640; // Mobile breakpoint in pixels (matches Tailwind's sm: breakpoint)
 
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
@@ -319,10 +320,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   }, [positionsJustChanged]);
 
   // Auto-open card selector when community cards need to be selected
-  // Only on MOBILE (width < 640px) to avoid blocking overlay on desktop
+  // Only on MOBILE to avoid blocking overlay on desktop
   useEffect(() => {
     // Only auto-open on mobile devices
-    const isMobile = window.innerWidth < 640;
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT_PX;
     
     if (!isMobile) return; // Skip auto-open on desktop
     
@@ -1286,8 +1287,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const handlePlayerClick = (playerId: string) => {
     if (stage === 'setup') {
       setSelectedPlayerId(playerId);
-      // Only show dialog on mobile (< 640px to match other mobile detection)
-      if (window.innerWidth < 640) {
+      // Only show dialog on mobile
+      if (window.innerWidth < MOBILE_BREAKPOINT_PX) {
         setShowPlayerActionDialog(true);
       }
     }

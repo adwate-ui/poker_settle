@@ -142,7 +142,12 @@ serve(async (req) => {
     if (payload.from) {
       // Extract email from "Name <email@domain.com>" format
       const emailMatch = payload.from.match(/<([^>]+)>/);
-      senderEmail = emailMatch ? emailMatch[1] : payload.from;
+      const extractedEmail = emailMatch ? emailMatch[1] : payload.from;
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(extractedEmail)) {
+        senderEmail = extractedEmail;
+      }
       messageText = payload.text || payload.html || '';
     }
     // Mailgun format
@@ -171,8 +176,17 @@ serve(async (req) => {
     }
 
     // Create Supabase client with service role key
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing required environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Process the email for payment confirmation
