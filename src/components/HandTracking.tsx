@@ -319,7 +319,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   }, [positionsJustChanged]);
 
   // Auto-open card selector when community cards need to be selected
+  // Only for MOBILE - desktop shows inline
   useEffect(() => {
+    // Only auto-open on mobile (< 768px)
+    const isMobile = window.innerWidth < 768;
+    
+    if (!isMobile) return; // Skip auto-open on desktop
+    
     if (stage === 'flop' && !flopCards && currentHand) {
       setCardSelectorType('flop');
       setTempCommunityCards(''); // Initialize temp with empty
@@ -2238,6 +2244,314 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
+        {/* Desktop Inline Card Selector - shown when cards need to be selected */}
+        {!showMobileHandTracking && currentHand && (
+          <>
+            {(stage === 'flop' && !flopCards) && (
+              <div className="border-2 border-primary/50 rounded-xl p-4 bg-gradient-to-br from-primary/5 to-primary/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Select Flop Cards (3 cards)</h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {tempCommunityCards.match(/.{1,2}/g)?.length || 0}/3 selected
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
+                    { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+                  ].map(suit => {
+                    const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+                    const usedCards = getUsedCards();
+                    const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
+                    const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                    
+                    return (
+                      <div key={suit.code} className="space-y-2">
+                        <div className="flex items-center gap-2 pb-1 border-b border-border">
+                          <span className={`text-xl ${suit.color}`}>{suit.symbol}</span>
+                          <h4 className="font-semibold text-sm">{suit.name}</h4>
+                        </div>
+                        <div className="grid grid-cols-13 gap-1">
+                          {ranks.map(rank => {
+                            const card = `${rank}${suit.code}`;
+                            const isUsed = usedCards.includes(card);
+                            const isKnownHole = knownHoleCards.includes(card);
+                            const isSelected = currentSelection.includes(card);
+                            
+                            return (
+                              <button
+                                key={card}
+                                onClick={() => {
+                                  if (isUsed || isKnownHole) return;
+                                  
+                                  if (isSelected) {
+                                    const newSelection = currentSelection.filter(c => c !== card);
+                                    setTempCommunityCards(newSelection.join(''));
+                                  } else {
+                                    if (currentSelection.length < 3) {
+                                      const newSelection = [...currentSelection, card];
+                                      setTempCommunityCards(newSelection.join(''));
+                                    }
+                                  }
+                                }}
+                                disabled={isUsed || isKnownHole}
+                                className={`relative aspect-[5/7] w-full transition-all duration-200 rounded ${
+                                  (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
+                                } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10' : ''} ${
+                                  !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 cursor-pointer active:scale-95' : ''
+                                }`}
+                              >
+                                <PokerCard card={card} size="sm" className="pointer-events-none" />
+                                {isUsed && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">USED</div>
+                                  </div>
+                                )}
+                                {isKnownHole && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">HOLE</div>
+                                  </div>
+                                )}
+                                {isSelected && (
+                                  <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">✓</div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setTempCommunityCards('')}
+                    disabled={!tempCommunityCards}
+                    className="flex-1"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const selection = tempCommunityCards.match(/.{1,2}/g) || [];
+                      if (selection.length === 3) {
+                        setFlopCards(tempCommunityCards);
+                        setCardsJustAdded(true);
+                        setTempCommunityCards('');
+                      }
+                    }}
+                    disabled={!tempCommunityCards || tempCommunityCards.match(/.{1,2}/g)?.length !== 3}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700"
+                  >
+                    Confirm Flop ({tempCommunityCards.match(/.{1,2}/g)?.length || 0}/3)
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {(stage === 'turn' && !turnCard && flopCards) && (
+              <div className="border-2 border-primary/50 rounded-xl p-4 bg-gradient-to-br from-primary/5 to-primary/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Select Turn Card (1 card)</h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {tempCommunityCards.length > 0 ? '1/1 selected' : '0/1 selected'}
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
+                    { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+                  ].map(suit => {
+                    const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+                    const usedCards = getUsedCards();
+                    const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
+                    const isSelected = tempCommunityCards === '';
+                    
+                    return (
+                      <div key={suit.code} className="space-y-2">
+                        <div className="flex items-center gap-2 pb-1 border-b border-border">
+                          <span className={`text-xl ${suit.color}`}>{suit.symbol}</span>
+                          <h4 className="font-semibold text-sm">{suit.name}</h4>
+                        </div>
+                        <div className="grid grid-cols-13 gap-1">
+                          {ranks.map(rank => {
+                            const card = `${rank}${suit.code}`;
+                            const isUsed = usedCards.includes(card);
+                            const isKnownHole = knownHoleCards.includes(card);
+                            const isSelected = tempCommunityCards === card;
+                            
+                            return (
+                              <button
+                                key={card}
+                                onClick={() => {
+                                  if (isUsed || isKnownHole) return;
+                                  
+                                  if (isSelected) {
+                                    setTempCommunityCards('');
+                                  } else {
+                                    setTempCommunityCards(card);
+                                  }
+                                }}
+                                disabled={isUsed || isKnownHole}
+                                className={`relative aspect-[5/7] w-full transition-all duration-200 rounded ${
+                                  (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
+                                } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10' : ''} ${
+                                  !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 cursor-pointer active:scale-95' : ''
+                                }`}
+                              >
+                                <PokerCard card={card} size="sm" className="pointer-events-none" />
+                                {isUsed && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">USED</div>
+                                  </div>
+                                )}
+                                {isKnownHole && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">HOLE</div>
+                                  </div>
+                                )}
+                                {isSelected && (
+                                  <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">✓</div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setTempCommunityCards('')}
+                    disabled={!tempCommunityCards}
+                    className="flex-1"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (tempCommunityCards) {
+                        setTurnCard(tempCommunityCards);
+                        setCardsJustAdded(true);
+                        setTempCommunityCards('');
+                      }
+                    }}
+                    disabled={!tempCommunityCards}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700"
+                  >
+                    Confirm Turn
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {(stage === 'river' && !riverCard && turnCard) && (
+              <div className="border-2 border-primary/50 rounded-xl p-4 bg-gradient-to-br from-primary/5 to-primary/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Select River Card (1 card)</h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {tempCommunityCards.length > 0 ? '1/1 selected' : '0/1 selected'}
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
+                    { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
+                    { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+                  ].map(suit => {
+                    const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+                    const usedCards = getUsedCards();
+                    const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
+                    
+                    return (
+                      <div key={suit.code} className="space-y-2">
+                        <div className="flex items-center gap-2 pb-1 border-b border-border">
+                          <span className={`text-xl ${suit.color}`}>{suit.symbol}</span>
+                          <h4 className="font-semibold text-sm">{suit.name}</h4>
+                        </div>
+                        <div className="grid grid-cols-13 gap-1">
+                          {ranks.map(rank => {
+                            const card = `${rank}${suit.code}`;
+                            const isUsed = usedCards.includes(card);
+                            const isKnownHole = knownHoleCards.includes(card);
+                            const isSelected = tempCommunityCards === card;
+                            
+                            return (
+                              <button
+                                key={card}
+                                onClick={() => {
+                                  if (isUsed || isKnownHole) return;
+                                  
+                                  if (isSelected) {
+                                    setTempCommunityCards('');
+                                  } else {
+                                    setTempCommunityCards(card);
+                                  }
+                                }}
+                                disabled={isUsed || isKnownHole}
+                                className={`relative aspect-[5/7] w-full transition-all duration-200 rounded ${
+                                  (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
+                                } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10' : ''} ${
+                                  !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 cursor-pointer active:scale-95' : ''
+                                }`}
+                              >
+                                <PokerCard card={card} size="sm" className="pointer-events-none" />
+                                {isUsed && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">USED</div>
+                                  </div>
+                                )}
+                                {isKnownHole && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded">
+                                    <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold">HOLE</div>
+                                  </div>
+                                )}
+                                {isSelected && (
+                                  <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">✓</div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setTempCommunityCards('')}
+                    disabled={!tempCommunityCards}
+                    className="flex-1"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (tempCommunityCards) {
+                        setRiverCard(tempCommunityCards);
+                        setCardsJustAdded(true);
+                        setTempCommunityCards('');
+                      }
+                    }}
+                    disabled={!tempCommunityCards}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700"
+                  >
+                    Confirm River
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
 
 

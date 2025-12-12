@@ -93,20 +93,31 @@ export const usePlayerManagement = () => {
           isAddingEmail = !currentPlayer.email && !!playerData.email;
         }
 
+        // Build update object, treating empty strings as null to clear fields
+        const updateData: any = {};
+        
+        if (playerData.name) {
+          updateData.name = playerData.name;
+        }
+        
+        // Allow clearing email by passing empty string -> convert to null
+        if (playerData.email !== undefined) {
+          updateData.email = playerData.email || null;
+        }
+        
+        // Allow clearing upi_id by passing empty string -> convert to null
+        if (playerData.upi_id !== undefined) {
+          updateData.upi_id = playerData.upi_id || null;
+        }
+        
+        // Allow updating payment_preference
+        if (playerData.payment_preference !== undefined) {
+          updateData.payment_preference = playerData.payment_preference;
+        }
+
         const { data, error } = await supabase
           .from("players")
-          .update({
-            ...(playerData.name && { name: playerData.name }),
-            ...(playerData.email !== undefined && {
-              email: playerData.email || null,
-            }),
-            ...(playerData.upi_id !== undefined && {
-              upi_id: playerData.upi_id || null,
-            }),
-            ...(playerData.payment_preference && {
-              payment_preference: playerData.payment_preference,
-            }),
-          })
+          .update(updateData)
           .eq("id", playerId)
           .eq("user_id", user.id)
           .select()

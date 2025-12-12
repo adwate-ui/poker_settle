@@ -100,8 +100,9 @@ export const PlayerFormDialog = ({
     try {
       const playerData: PlayerFormData = {
         name: name.trim(),
-        email: email.trim() || undefined,
-        upi_id: upiId.trim() || undefined,
+        // Pass empty string (not undefined) to allow clearing fields
+        email: email.trim() || '',
+        upi_id: upiId.trim() || '',
         payment_preference: paymentPreference,
       };
 

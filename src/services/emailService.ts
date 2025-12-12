@@ -77,7 +77,15 @@ class EmailService {
     }
 
     try {
-      // Validate email format
+      // Validate email format and presence
+      if (!payload.to_email || !payload.to_email.trim()) {
+        console.error('❌ Empty recipient email address');
+        return {
+          success: false,
+          error: 'Recipient email address is empty',
+        };
+      }
+      
       if (!this.validateEmail(payload.to_email)) {
         console.error('❌ Invalid email format:', payload.to_email);
         return {
@@ -133,9 +141,20 @@ class EmailService {
       if (error instanceof Error) {
         console.error('Error details:', error.message, error.stack);
       }
+      
+      // Check for specific EmailJS errors
+      let errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // If error contains "recipients address is empty", provide helpful instructions
+      if (errorMessage.toLowerCase().includes('recipients') && errorMessage.toLowerCase().includes('empty')) {
+        errorMessage = 'Email recipient configuration error. Please ensure your EmailJS template has "To Email" field set to {{to_email}} in the template settings (not just in the HTML content). See EMAIL_SETUP_GUIDE.md for details.';
+        console.error('⚠️ CONFIGURATION ISSUE: EmailJS template "To Email" field must be set to {{to_email}}');
+        console.error('   This is configured in the EmailJS dashboard under Email Templates > [Your Template] > Settings > To Email');
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       };
     }
   }
