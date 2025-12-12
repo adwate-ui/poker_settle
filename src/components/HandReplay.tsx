@@ -522,7 +522,7 @@ const HandReplay = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Poker Table with community cards inside */}
+      {/* Poker Table - Desktop shows community cards on table, Mobile doesn't */}
       <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 p-4 rounded-2xl border-2 border-green-700/40 shadow-2xl">
         <PokerTableView
           positions={positions}
@@ -537,12 +537,65 @@ const HandReplay = ({
           animatingPlayerId={animatingPlayerId}
           playerHoleCards={visibleHoleCards}
           animateChipsToWinner={showWinner ? winnerPlayerId : null}
-          communityCards={communityCards}
+          communityCards="" // Don't show on table for mobile - show in separate section below
           showAllPlayerCards={currentActionIndex === 0} // Show all cards initially (face-down)
           playerStacks={playerStacks}
           showPotChips={Object.keys(streetPlayerBets).length === 0 || animateChipsToPot} // Only show pot chips when no active bets or during sweep animation
         />
       </div>
+
+      {/* Community Cards - Separate section for mobile view */}
+      {communityCards && (
+        <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 sm:p-4 rounded-xl border border-green-700/30">
+          <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
+            {/* Extract and display cards by street */}
+            {(() => {
+              const allCards = communityCards.match(/.{1,2}/g) || [];
+              const flopCards = allCards.slice(0, 3);
+              const turnCard = allCards[3];
+              const riverCard = allCards[4];
+              
+              return (
+                <>
+                  {/* Flop */}
+                  {flopCards.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                      <div className="flex gap-0.5">
+                        {flopCards.map((card, idx) => (
+                          <PokerCard key={`flop-${idx}`} card={card} size="xs" />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Turn */}
+                  {turnCard && (
+                    <>
+                      <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
+                        <PokerCard card={turnCard} size="xs" />
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* River */}
+                  {riverCard && (
+                    <>
+                      <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
+                        <PokerCard card={riverCard} size="xs" />
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Current Action Display */}
       {currentAction && (
