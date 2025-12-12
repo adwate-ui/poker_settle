@@ -4,18 +4,7 @@
 
 import { Player } from "@/types/poker";
 
-/**
- * Determine payment preference based on UPI ID
- * If no UPI ID is provided, payment preference should be 'cash'
- */
-export function determinePaymentPreference(upiId: string | undefined | null): 'upi' | 'cash' {
-  // If UPI ID is provided and not empty, prefer UPI
-  if (upiId && upiId.trim().length > 0) {
-    return 'upi';
-  }
-  // Otherwise, prefer cash
-  return 'cash';
-}
+
 
 /**
  * Validate UPI ID format
@@ -43,7 +32,7 @@ export function formatUpiId(upiId: string | undefined | null): string {
  * Get payment method display name
  */
 export function getPaymentMethodDisplay(player: Player): string {
-  const preference = player.payment_preference || determinePaymentPreference(player.upi_id);
+  const preference = player.payment_preference || 'upi';
   
   if (preference === 'cash') {
     return '💵 Cash';
