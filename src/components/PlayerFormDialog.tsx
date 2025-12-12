@@ -3,7 +3,7 @@
  * Form for creating/editing players with phone number and UPI ID
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Player } from "@/types/poker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,22 @@ export const PlayerFormDialog = ({
     initialData?.payment_preference || 'upi'
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync form fields with initialData when it changes (for edit mode)
+  useEffect(() => {
+    if (open && initialData) {
+      setName(initialData.name || "");
+      setEmail(initialData.email || "");
+      setUpiId(initialData.upi_id || "");
+      setPaymentPreference(initialData.payment_preference || 'upi');
+    } else if (open && !initialData) {
+      // Reset for new player
+      setName("");
+      setEmail("");
+      setUpiId("");
+      setPaymentPreference('upi');
+    }
+  }, [open, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,9 +163,23 @@ export const PlayerFormDialog = ({
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email Address (Optional)
+              <Label htmlFor="email" className="flex items-center gap-2 justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email Address (Optional)
+                </span>
+                {email && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEmail("")}
+                    className="h-6 px-2 text-xs"
+                    disabled={isSubmitting}
+                  >
+                    Clear
+                  </Button>
+                )}
               </Label>
               <Input
                 id="email"
@@ -160,15 +190,29 @@ export const PlayerFormDialog = ({
                 disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
-                For receiving game reports and payment links
+                For receiving game reports and payment links. Leave empty to remove.
               </p>
             </div>
 
             {/* UPI ID Field */}
             <div className="space-y-2">
-              <Label htmlFor="upi" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                UPI ID (Optional)
+              <Label htmlFor="upi" className="flex items-center gap-2 justify-between">
+                <span className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  UPI ID (Optional)
+                </span>
+                {upiId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUpiId("")}
+                    className="h-6 px-2 text-xs"
+                    disabled={isSubmitting}
+                  >
+                    Clear
+                  </Button>
+                )}
               </Label>
               <Input
                 id="upi"
@@ -178,7 +222,7 @@ export const PlayerFormDialog = ({
                 disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
-                Leave empty if player prefers cash payments
+                For receiving UPI payment links. Leave empty if player prefers cash payments.
               </p>
             </div>
 

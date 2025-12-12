@@ -28,7 +28,8 @@ export async function sendPlayerWelcomeNotification(
   player: Player,
   playerLink: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!player.email) {
+  // Validate email exists and is not empty
+  if (!player.email || !player.email.trim()) {
     console.warn(`⚠️ Cannot send welcome email to ${player.name}: No email address`);
     return { success: false, error: "Player has no email address" };
   }
@@ -100,7 +101,8 @@ export async function sendGameCompletionNotifications(
   for (const gamePlayer of gamePlayers) {
     const player = gamePlayer.player;
 
-    if (!player.email) {
+    // Validate email exists and is not empty
+    if (!player.email || !player.email.trim()) {
       results.failed++;
       results.errors.push(`${player.name}: No email address`);
       continue;
@@ -213,7 +215,8 @@ export async function sendSettlementNotifications(
       continue;
     }
 
-    if (!player.email) {
+    // Validate email exists and is not empty
+    if (!player.email || !player.email.trim()) {
       results.failed++;
       results.errors.push(`${playerName}: No email address`);
       continue;
