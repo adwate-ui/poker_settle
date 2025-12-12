@@ -417,10 +417,38 @@ const PokerTableView = memo(({
                     )}
                   </div>
                   
-                  {/* Enhanced chip stack display */}
+                  {/* Enhanced chip stack display - positioned intelligently based on player location */}
                   {playerBet > 0 && !isFolded && (() => {
                     // Check if chips should animate for this player
                     const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
+                    
+                    // Calculate intelligent chip position based on player location
+                    // For mobile: position chips closer to avoid table overlap
+                    const isMobileView = window.innerWidth < 640; // Tailwind 'sm' breakpoint
+                    
+                    // Position chips AWAY from table center
+                    let chipTop, chipLeft;
+                    if (pos.y < 35) {
+                      // Top players - chips above
+                      chipTop = isMobileView ? '-45px' : '-60px';
+                    } else if (pos.y > 65) {
+                      // Bottom players - chips below
+                      chipTop = isMobileView ? '65px' : '80px';
+                    } else {
+                      // Middle players - chips to the side, slightly below
+                      chipTop = isMobileView ? '50px' : '60px';
+                    }
+                    
+                    if (pos.x < 35) {
+                      // Left side - chips to the left
+                      chipLeft = isMobileView ? '-40px' : '-50px';
+                    } else if (pos.x > 65) {
+                      // Right side - chips to the right
+                      chipLeft = isMobileView ? '40px' : '50px';
+                    } else {
+                      // Center - chips slightly to the side based on y position
+                      chipLeft = pos.y > 50 ? (isMobileView ? '35px' : '45px') : (isMobileView ? '-35px' : '-45px');
+                    }
                     
                     return (
                       <div 
@@ -430,8 +458,8 @@ const PokerTableView = memo(({
                             : 'opacity-100 scale-100'
                         }`}
                         style={{
-                          top: pos.y > 50 ? '-60px' : '80px',
-                          left: pos.x > 50 ? '-50px' : '50px',
+                          top: chipTop,
+                          left: chipLeft,
                           zIndex: Z_INDEX.CHIP_STACK,
                         }}
                       >

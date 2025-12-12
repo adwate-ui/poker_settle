@@ -577,6 +577,32 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           playersInHand
         );
         setCurrentPlayerIndex(nextIndex);
+        
+        // Check if betting round is now complete after this action
+        // If complete, automatically advance to next street
+        const updatedStreetActions = [...streetActions, action];
+        const isBettingComplete = isBettingRoundComplete(
+          stage,
+          activePlayers,
+          playersInHand,
+          stateUpdates.streetPlayerBets || streetPlayerBets,
+          updatedStreetActions,
+          currentHand.button_player_id,
+          stateUpdates.lastAggressorIndex !== undefined ? stateUpdates.lastAggressorIndex : lastAggressorIndex
+        );
+        
+        // Auto-advance to next street if betting is complete
+        if (isBettingComplete && stage !== 'river') {
+          // Use setTimeout to allow state to settle before advancing
+          setTimeout(() => {
+            moveToNextStreet();
+          }, 300);
+        } else if (isBettingComplete && stage === 'river') {
+          // Auto-advance to showdown
+          setTimeout(() => {
+            moveToNextStreet();
+          }, 300);
+        }
       }
     } catch (err) {
       console.error('recordAction error', err);
@@ -687,6 +713,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
   const finishHand = async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
     if (!currentHand) return;
 
+    // Close mobile drawer immediately
+    setShowMobileHandTracking(false);
+
     const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
     
     // Determine final stage based on when winner was decided:
@@ -705,6 +734,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     
     // Build complete list of actions including the last one if provided
     const actionsToSave = lastAction ? [...allHandActions, lastAction] : allHandActions;
+    
+    // Add 2-second delay before recording hand to database
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     // NOW save the hand to the database with all data
     const heroPosition = heroPlayer?.player_id 
@@ -781,9 +813,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
     // Complete the hand with winner info and final stage
     await completeHand(savedHand.id, winnerIds, potSize, isHeroWin, finalStageValue);
-    
-    // Close mobile drawer immediately
-    setShowMobileHandTracking(false);
     
     // Reset everything
     setCurrentHand(null);
@@ -1563,13 +1592,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
                     </div>
                   </>
                 )}
-                
-                {/* Edit button */}
-                {cardsJustAdded && (
-                  <Button variant="outline" size="sm" onClick={handleEditCards} className="ml-auto h-8 text-xs">
-                    Edit
-                  </Button>
-                )}
               </div>
             </div>
           )}
@@ -1578,19 +1600,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         </div>
       </div>
 
-      {/* Bottom 1/3 - Action Buttons with clear player indication */}
+      {/* Bottom 1/3 - Action Buttons */}
       <div className="flex-[1] flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 overflow-y-auto">
-        {/* Current Player Indicator */}
-        {currentPlayer && (
-          <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-center">
-            <div className="text-xs font-semibold text-muted-foreground">Action on</div>
-            <div className="text-lg font-bold text-primary flex items-center justify-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              {currentPlayer.player.name}
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
@@ -1663,24 +1674,22 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Street Navigation */}
         <div className="flex gap-2">
-          {/* Back button - always visible */}
+          {/* Back button - handles undo or edit cards */}
           <Button 
-            onClick={undoLastAction} 
+            onClick={() => {
+              // If cards were just added, edit them instead of undo
+              if (cardsJustAdded) {
+                handleEditCards();
+              } else {
+                undoLastAction();
+              }
+            }} 
             className="flex-1 h-10 text-xs" 
             variant="outline"
-            disabled={actionHistory.length === 0}
+            disabled={!cardsJustAdded && actionHistory.length === 0}
           >
-            ← Back
+            {cardsJustAdded ? '✏️ Edit' : '← Back'}
           </Button>
-          {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
-            <Button 
-              onClick={moveToPreviousStreet} 
-              className="flex-1 h-10 text-xs" 
-              variant="outline"
-            >
-              ⬆️ Prev St.
-            </Button>
-          )}
           <Button 
             onClick={moveToNextStreet} 
             className="flex-1 h-10 text-xs bg-gradient-to-r from-green-600 to-green-700"
@@ -1697,16 +1706,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     <>
     {/* Mobile: Drawer for hand tracking */}
     <Drawer open={showMobileHandTracking} onOpenChange={(open) => {
-      // Don't allow closing drawer while hand is in progress
-      if (!open && currentHand) {
-        toast({
-          title: 'Hand in Progress',
-          description: 'Please complete the current hand or use the back button to undo actions',
-        });
-        return;
-      }
+      // Allow closing drawer via back button/swipe down
       setShowMobileHandTracking(open);
-    }}>
+    }} modal={true} dismissible={true}>
       <DrawerContent className="md:hidden h-[95vh] overflow-hidden">
         {handTrackingContent}
       </DrawerContent>
@@ -1764,21 +1766,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           </div>
         )}
 
-        {/* Card edit buttons - shown only for just-added community cards until next betting action */}
+        {/* Card preview - shown only for just-added community cards until next betting action */}
         {stage === 'flop' && flopCards && cardsJustAdded && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Flop:</span>
-                <div className="flex gap-1">
-                  {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                    <PokerCard key={idx} card={card} size="xs" />
-                  ))}
-                </div>
+            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
+              <span className="text-sm font-semibold">Flop:</span>
+              <div className="flex gap-1">
+                {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                  <PokerCard key={idx} card={card} size="xs" />
+                ))}
               </div>
-              <Button variant="outline" size="sm" onClick={handleEditCards}>
-                Edit Cards
-              </Button>
             </div>
             {currentPlayer && (
               <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
@@ -1791,14 +1788,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         )}
         {stage === 'turn' && turnCard && cardsJustAdded && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Turn:</span>
-                <PokerCard card={turnCard} size="xs" />
-              </div>
-              <Button variant="outline" size="sm" onClick={handleEditCards}>
-                Edit Card
-              </Button>
+            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
+              <span className="text-sm font-semibold">Turn:</span>
+              <PokerCard card={turnCard} size="xs" />
             </div>
             {currentPlayer && (
               <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
@@ -1811,14 +1803,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         )}
         {stage === 'river' && riverCard && cardsJustAdded && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">River:</span>
-                <PokerCard card={riverCard} size="xs" />
-              </div>
-              <Button variant="outline" size="sm" onClick={handleEditCards}>
-                Edit Card
-              </Button>
+            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
+              <span className="text-sm font-semibold">River:</span>
+              <PokerCard card={riverCard} size="xs" />
             </div>
             {currentPlayer && (
               <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
@@ -1919,26 +1906,23 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
 
         {/* Navigation buttons - compact */}
         <div className="flex gap-2">
-          {/* Back button - always visible */}
+          {/* Back button - handles undo or edit cards */}
           <Button 
-            onClick={undoLastAction} 
+            onClick={() => {
+              // If cards were just added, edit them instead of undo
+              if (cardsJustAdded) {
+                handleEditCards();
+              } else {
+                undoLastAction();
+              }
+            }} 
             className="h-10 text-sm font-semibold" 
             variant="outline"
             size="default"
-            disabled={actionHistory.length === 0}
+            disabled={!cardsJustAdded && actionHistory.length === 0}
           >
-            ← Back
+            {cardsJustAdded ? '✏️ Edit Cards' : '← Back'}
           </Button>
-          {(stage === 'flop' || stage === 'turn' || stage === 'river') && (
-            <Button 
-              onClick={moveToPreviousStreet} 
-              className="h-10 text-sm font-semibold" 
-              variant="outline"
-              size="default"
-            >
-              ⬆️ Prev Street
-            </Button>
-          )}
           <Button 
             onClick={moveToNextStreet} 
             className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
