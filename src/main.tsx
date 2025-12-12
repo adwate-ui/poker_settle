@@ -3,17 +3,12 @@ import App from "./App.tsx";
 import "./index.css";
 import { registerSW } from 'virtual:pwa-register';
 
-// Force online mode - monitor network status
-let isOnline = navigator.onLine;
-
 // Add network status monitoring
 window.addEventListener('online', () => {
-  isOnline = true;
   console.log('Network: Online');
 });
 
 window.addEventListener('offline', () => {
-  isOnline = false;
   console.warn('Network: Offline - Some features may not work');
 });
 
@@ -52,8 +47,8 @@ const updateSW = registerSW({
 if ('caches' in window) {
   caches.keys().then((names) => {
     names.forEach((name) => {
-      // Keep only essential workbox caches, clear everything else
-      if (!name.startsWith('workbox-') || name.includes('runtime')) {
+      // Keep only essential workbox precache, clear all runtime caches
+      if (!name.startsWith('workbox-precache')) {
         caches.delete(name);
         console.log('Cleared cache:', name);
       }

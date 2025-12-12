@@ -47,6 +47,10 @@ interface HandTrackingProps {
   onHandComplete?: () => void;
 }
 
+// Constants
+const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when auto-advancing streets
+const HAND_SAVE_DELAY_MS = 2000; // Delay before saving hand to database after completion
+
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -580,13 +584,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
         
         // Check if betting round is now complete after this action
         // If complete, automatically advance to next street
-        const updatedStreetActions = [...streetActions, action];
+        // Note: streetActions state hasn't updated yet, so we check with the new action included
         const isBettingComplete = isBettingRoundComplete(
           stage,
           activePlayers,
           playersInHand,
           stateUpdates.streetPlayerBets || streetPlayerBets,
-          updatedStreetActions,
+          [...streetActions, action],
           currentHand.button_player_id,
           stateUpdates.lastAggressorIndex !== undefined ? stateUpdates.lastAggressorIndex : lastAggressorIndex
         );
@@ -596,12 +600,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
           // Use setTimeout to allow state to settle before advancing
           setTimeout(() => {
             moveToNextStreet();
-          }, 300);
+          }, AUTO_ADVANCE_DELAY_MS);
         } else if (isBettingComplete && stage === 'river') {
           // Auto-advance to showdown
           setTimeout(() => {
             moveToNextStreet();
-          }, 300);
+          }, AUTO_ADVANCE_DELAY_MS);
         }
       }
     } catch (err) {
@@ -735,8 +739,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete }: Ha
     // Build complete list of actions including the last one if provided
     const actionsToSave = lastAction ? [...allHandActions, lastAction] : allHandActions;
     
-    // Add 2-second delay before recording hand to database
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Add delay before recording hand to database to allow UI to settle
+    await new Promise(resolve => setTimeout(resolve, HAND_SAVE_DELAY_MS));
     
     // NOW save the hand to the database with all data
     const heroPosition = heroPlayer?.player_id 

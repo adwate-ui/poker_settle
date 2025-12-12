@@ -423,7 +423,8 @@ const PokerTableView = memo(({
                     const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
                     
                     // Calculate intelligent chip position based on player location
-                    // For mobile: position chips closer to avoid table overlap
+                    // Note: Uses window.innerWidth at render time - doesn't update on resize
+                    // This is acceptable since table layout doesn't change during a hand
                     const isMobileView = window.innerWidth < 640; // Tailwind 'sm' breakpoint
                     
                     // Position chips AWAY from table center
