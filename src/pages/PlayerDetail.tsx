@@ -245,6 +245,33 @@ const PlayerDetail = () => {
                   </Button>
                 </div>
               </div>
+              
+              {/* Player Details Section */}
+              {(player.phone_number || player.upi_id || player.payment_preference) && (
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Contact & Payment Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {player.phone_number && (
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground mb-1">WhatsApp Number</p>
+                        <p className="text-base font-medium">{player.phone_number}</p>
+                      </div>
+                    )}
+                    {player.upi_id && (
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground mb-1">UPI ID</p>
+                        <p className="text-base font-medium">{player.upi_id}</p>
+                      </div>
+                    )}
+                    {player.payment_preference && (
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground mb-1">Preferred Mode</p>
+                        <p className="text-base font-medium capitalize">{player.payment_preference === 'upi' ? 'UPI' : 'Cash'}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </CollapsibleContent>
         </Card>
