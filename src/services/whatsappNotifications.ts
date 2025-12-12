@@ -126,7 +126,8 @@ export async function sendGameCompletionNotifications(
  */
 export async function sendSettlementNotifications(
   settlements: Settlement[],
-  playersMap: Map<string, Player>
+  playersMap: Map<string, Player>,
+  gameDate?: string
 ): Promise<NotificationResult> {
   if (!evolutionApiService.isConfigured()) {
     console.warn("Evolution API not configured. Notifications not sent.");
@@ -145,8 +146,12 @@ export async function sendSettlementNotifications(
     errors: [],
   };
 
-  // Group settlements by player
-  const playerSettlements = new Map<string, { settlements: Settlement[]; isWinner: boolean; total: number }>();
+  // Group settlements by player and enrich with recipient UPI IDs
+  const playerSettlements = new Map<string, { 
+    settlements: Array<Settlement & { toUpiId?: string }>; 
+    isWinner: boolean; 
+    total: number 
+  }>();
 
   settlements.forEach((settlement) => {
     // For payer (from)
@@ -158,7 +163,12 @@ export async function sendSettlementNotifications(
       });
     }
     const fromData = playerSettlements.get(settlement.from)!;
-    fromData.settlements.push(settlement);
+    // Add UPI ID of the recipient (to) for payment links
+    const toPlayer = playersMap.get(settlement.to);
+    fromData.settlements.push({
+      ...settlement,
+      toUpiId: toPlayer?.upi_id,
+    });
     fromData.total += settlement.amount;
 
     // For receiver (to)
@@ -197,6 +207,7 @@ export async function sendSettlementNotifications(
       totalAmount: data.total,
       paymentPreference: player.payment_preference,
       upiId: player.upi_id,
+      gameDate,
     });
 
     const result = await evolutionApiService.sendMessage({

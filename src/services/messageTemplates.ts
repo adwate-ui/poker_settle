@@ -5,6 +5,7 @@
 
 import { Player, Settlement } from "@/types/poker";
 import { formatIndianNumber } from "@/lib/utils";
+import { generateUpiPaymentLink } from "@/utils/upiPaymentLinks";
 
 export interface PlayerWelcomeMessageData {
   playerName: string;
@@ -23,11 +24,12 @@ export interface GameCompletionMessageData {
 
 export interface SettlementMessageData {
   playerName: string;
-  settlements: Settlement[];
+  settlements: Array<Settlement & { toUpiId?: string }>;
   isWinner: boolean;
   totalAmount: number;
   paymentPreference?: 'upi' | 'cash';
   upiId?: string;
+  gameDate?: string;
 }
 
 /**
@@ -100,16 +102,34 @@ Here are your settlement details:
     
     if (data.paymentPreference === 'upi' && data.upiId) {
       message += `*Your UPI ID:* ${data.upiId}\n`;
+      message += `\nℹ️ Share your UPI ID with the payers above for easy payment.\n`;
     }
   } else {
     message += `❌ *You need to pay: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
-    message += `*Payments to:*\n`;
+    message += `*Payments to:*\n\n`;
     
     data.settlements.forEach((settlement, index) => {
-      message += `${index + 1}. ${settlement.to}: ₹${formatIndianNumber(settlement.amount)}\n`;
+      message += `${index + 1}. *${settlement.to}*: ₹${formatIndianNumber(settlement.amount)}\n`;
+      
+      // Add UPI payment link if recipient has UPI ID
+      if (settlement.toUpiId) {
+        const upiLink = generateUpiPaymentLink(
+          settlement.toUpiId,
+          settlement.to,
+          settlement.amount,
+          data.gameDate ? `Poker settlement - ${data.gameDate}` : 'Poker settlement'
+        );
+        message += `   💰 *Quick Pay:* ${upiLink}\n`;
+        message += `   📱 UPI ID: ${settlement.toUpiId}\n`;
+      }
+      message += `\n`;
     });
     
-    message += `\n*Your Payment Method:* ${paymentMethod}\n`;
+    message += `*Your Payment Method:* ${paymentMethod}\n`;
+    
+    if (data.settlements.some(s => s.toUpiId)) {
+      message += `\n💡 *Tip:* Click the "Quick Pay" links above to open your UPI app and pay instantly!\n`;
+    }
   }
 
   message += `\nPlease settle at your earliest convenience. Thank you! 🙏`;

@@ -4,9 +4,10 @@ import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Se
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { sendGameCompletionNotifications } from "@/services/whatsappNotifications";
+import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/whatsappNotifications";
 import { supabaseAnon } from "@/integrations/supabase/client-shared";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
+import { formatMessageDate } from "@/services/messageTemplates";
 
 // Input validation schemas
 const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
@@ -342,6 +343,7 @@ export const useGameData = () => {
       });
 
       if (!tokenError && tokenData) {
+        // Send game completion notifications
         const notificationResult = await sendGameCompletionNotifications(
           allGamePlayers,
           gameId,
@@ -355,6 +357,27 @@ export const useGameData = () => {
         }
         if (notificationResult.failed > 0) {
           console.warn('Some WhatsApp notifications failed:', notificationResult.errors);
+        }
+
+        // Send settlement notifications with UPI payment links
+        if (settlements.length > 0) {
+          // Create a map of players by name
+          const playersMap = new Map<string, Player>();
+          allGamePlayers.forEach(gp => {
+            if (gp.player?.name) {
+              playersMap.set(gp.player.name, gp.player);
+            }
+          });
+
+          const settlementNotificationResult = await sendSettlementNotifications(
+            settlements,
+            playersMap,
+            formatMessageDate(gameData.date)
+          );
+
+          if (settlementNotificationResult.sent > 0) {
+            console.log(`${settlementNotificationResult.sent} settlement notifications sent with UPI links`);
+          }
         }
       }
     } catch (notificationError) {

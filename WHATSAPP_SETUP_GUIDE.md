@@ -161,14 +161,24 @@ Hi [Player Name]!
 or
 ❌ You need to pay: ₹[Amount]
 
-Payments from/to:
-1. [Player]: ₹[Amount]
-2. [Player]: ₹[Amount]
+Payments to:
+
+1. *[Player Name]*: ₹[Amount]
+   💰 *Quick Pay:* upi://pay?pa=[UPI_ID]&pn=[Name]&am=[Amount]&cu=INR&tn=Poker%20settlement
+   📱 UPI ID: [UPI_ID]
+
+2. *[Player Name]*: ₹[Amount]
+   💰 *Quick Pay:* upi://pay?pa=[UPI_ID]&pn=[Name]&am=[Amount]&cu=INR&tn=Poker%20settlement
+   📱 UPI ID: [UPI_ID]
 
 Your Payment Method: 💵 Cash or 📱 UPI (UPI ID)
 
+💡 *Tip:* Click the "Quick Pay" links above to open your UPI app and pay instantly!
+
 Please settle at your earliest convenience. Thank you! 🙏
 ```
+
+**Note:** UPI payment intent links are automatically generated for players who need to make payments. These links can be clicked directly in WhatsApp to open any UPI app (Google Pay, PhonePe, Paytm, etc.) with pre-filled payment details.
 
 ## Testing
 
