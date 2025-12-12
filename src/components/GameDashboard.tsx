@@ -46,6 +46,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [currentTablePosition, setCurrentTablePosition] = useState<TablePosition | null>(null);
   const [positionsJustChanged, setPositionsJustChanged] = useState(false);
   const [handTrackingStage, setHandTrackingStage] = useState<'setup' | 'ready' | 'recording'>('setup');
+  const [hasSavedHandState, setHasSavedHandState] = useState(false);
   
   // Collapsible sections state
   const [gameStatsOpen, setGameStatsOpen] = useState(true);
@@ -60,6 +61,22 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     const loadTablePosition = async () => {
       const position = await getCurrentTablePosition(game.id);
       setCurrentTablePosition(position);
+      
+      // Check for saved hand state with error handling
+      try {
+        const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
+        if (savedHandState) {
+          const parsedState = JSON.parse(savedHandState);
+          const hasSaved = parsedState && parsedState.stage !== 'setup';
+          setHasSavedHandState(!!hasSaved);
+        } else {
+          setHasSavedHandState(false);
+        }
+      } catch (error) {
+        console.error('Error parsing saved hand state:', error);
+        setHasSavedHandState(false);
+      }
+      
       // Set initial stage based on whether table is set
       // Only update stage if we're not currently recording a hand
       setHandTrackingStage(prev => {
@@ -447,7 +464,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Continue Hand
+                  {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
                 </Button>
               </div>
                 </CardContent>

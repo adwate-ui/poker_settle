@@ -547,39 +547,77 @@ const HandReplay = ({
       {/* Current Action Display */}
       {currentAction && (
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-lg animate-fade-in">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                  <div className="font-bold text-base sm:text-lg">
+          <CardContent className="p-3 sm:p-5">
+            {/* Mobile: Single row layout */}
+            <div className="md:hidden">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="p-1.5 bg-primary/20 rounded-lg flex-shrink-0">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="font-bold text-sm truncate">
                     {playerNames[currentAction.player_id]}
                   </div>
                   {currentAction.position && (
-                    <Badge className="w-fit text-xs bg-primary/30 text-primary-foreground border-primary/40">
-                      {currentAction.position}
+                    <Badge className="text-[10px] px-1.5 py-0 bg-primary/30 text-primary-foreground border-primary/40 flex-shrink-0">
+                      {currentAction.position.length > 3 ? currentAction.position.substring(0, 3) : currentAction.position}
                     </Badge>
                   )}
                 </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5">
+                    {currentAction.action_type}
+                  </Badge>
+                  {additionalBetAmount > 0 && (
+                    <span className="font-bold text-sm text-amber-600 dark:text-amber-400">
+                      Rs. {additionalBetAmount.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <Badge variant="outline" className="w-fit text-sm font-semibold">
-                  {currentAction.action_type}
-                </Badge>
-                {additionalBetAmount > 0 && (
-                  <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
-                    Rs. {additionalBetAmount.toLocaleString('en-IN')}
-                  </span>
-                )}
+              <div className="mt-2 pt-2 border-t border-border/50 flex justify-between items-center">
+                <span className="text-xs text-muted-foreground font-medium">Current Pot:</span>
+                <span className="font-bold text-sm text-amber-600 dark:text-amber-400">
+                  Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+                </span>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
-              <span className="text-sm text-muted-foreground font-medium">Current Pot:</span>
-              <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
-                Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
-              </span>
+            
+            {/* Desktop: Original multi-row layout */}
+            <div className="hidden md:block">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div className="font-bold text-base sm:text-lg">
+                      {playerNames[currentAction.player_id]}
+                    </div>
+                    {currentAction.position && (
+                      <Badge className="w-fit text-xs bg-primary/30 text-primary-foreground border-primary/40">
+                        {currentAction.position}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                  <Badge variant="outline" className="w-fit text-sm font-semibold">
+                    {currentAction.action_type}
+                  </Badge>
+                  {additionalBetAmount > 0 && (
+                    <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
+                      Rs. {additionalBetAmount.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-medium">Current Pot:</span>
+                <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
+                  Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
