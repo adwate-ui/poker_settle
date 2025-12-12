@@ -31,6 +31,8 @@ Track buy-ins, stacks, settlements and record hands for home poker games with an
 - 🎮 **Game Management**: Track poker games, buy-ins, and settlements
 - 👥 **Player Tracking**: Monitor player statistics and performance
 - 🃏 **Hand Recording**: Record and replay poker hands
+- 📧 **Email Notifications**: Automatic game reports and settlement notifications via email
+- 💳 **Payment Integration**: UPI payment links for seamless settlements
 - 🎨 **Anime Themes**: Choose from 5 anime-based themes with unique color schemes and player avatars
   - One Piece (Ocean adventure vibes)
   - Bleach (Soul Society style)
