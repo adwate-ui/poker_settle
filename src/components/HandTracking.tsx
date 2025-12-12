@@ -2274,7 +2274,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               )}
               
               {/* Card grid by suit - Inline on desktop */}
-              <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
                 {[
                   { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
                   { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },

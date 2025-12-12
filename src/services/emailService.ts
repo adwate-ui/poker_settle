@@ -161,6 +161,29 @@ class EmailService {
   }
 
   /**
+   * Inline styles for UPI payment button - designed for Android/iOS email client compatibility
+   */
+  private readonly UPI_BUTTON_STYLES = [
+    'color: #1a73e8',
+    'text-decoration: none',
+    'display: inline-block',
+    'padding: 10px 16px',
+    'margin: 8px 0',
+    'background-color: #e8f0fe',
+    'border: 2px solid #1a73e8',
+    'border-radius: 8px',
+    'font-weight: bold',
+    'font-size: 14px',
+    'font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif',
+    'word-break: break-all',
+  ].join('; ') + ';';
+
+  /**
+   * Inline styles for UPI link text (shown below button)
+   */
+  private readonly UPI_TEXT_STYLES = 'color: #5f6368; font-size: 12px; font-family: monospace; word-break: break-all;';
+
+  /**
    * Convert plain text to simple HTML with proper formatting for mobile email clients
    * Special handling for UPI links to work on Android email clients (Gmail, Outlook, etc.)
    */
@@ -175,28 +198,17 @@ class EmailService {
         // Android Gmail and other email clients need specific attributes and styling to make UPI links clickable
         line = line.replace(
           /(upi:\/\/[^\s]+)/g,
-          '<a href="$1" ' +
-          'style="' +
-            'color: #1a73e8; ' +
-            'text-decoration: none; ' +
-            'display: inline-block; ' +
-            'padding: 10px 16px; ' +
-            'margin: 8px 0; ' +
-            'background-color: #e8f0fe; ' +
-            'border: 2px solid #1a73e8; ' +
-            'border-radius: 8px; ' +
-            'font-weight: bold; ' +
-            'font-size: 14px; ' +
-            'font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; ' +
-            'word-break: break-all;' +
-          '" ' +
-          'target="_blank" ' +
-          'rel="noopener noreferrer" ' +
-          'x-apple-data-detectors="true" ' +
-          'data-saferedirecturl="$1">' +
-          '💰 Tap to Pay via UPI' +
-          '</a>' +
-          '<br><span style="color: #5f6368; font-size: 12px; font-family: monospace; word-break: break-all;">$1</span>'
+          (match) => {
+            return `<a href="${match}" ` +
+              `style="${this.UPI_BUTTON_STYLES}" ` +
+              `target="_blank" ` +
+              `rel="noopener noreferrer" ` +
+              `x-apple-data-detectors="true" ` +
+              `data-saferedirecturl="${match}">` +
+              `💰 Tap to Pay via UPI` +
+              `</a>` +
+              `<br><span style="${this.UPI_TEXT_STYLES}">${match}</span>`;
+          }
         );
         
         // Convert regular URLs to links
