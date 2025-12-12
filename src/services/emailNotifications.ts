@@ -264,3 +264,10 @@ export async function testEmailConnection(): Promise<{ success: boolean; error?:
 export function isEmailConfigured(): boolean {
   return emailService.isConfigured();
 }
+
+/**
+ * Get email service configuration status for debugging
+ */
+export function getEmailConfigStatus() {
+  return emailService.getConfigStatus();
+}

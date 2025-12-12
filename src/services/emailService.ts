@@ -235,8 +235,18 @@ try {
   const fromEmail = import.meta.env.VITE_FROM_EMAIL;
   const fromName = import.meta.env.VITE_FROM_NAME;
 
+  console.log('📧 EmailJS Configuration Check:', {
+    hasServiceId: !!serviceId,
+    hasTemplateId: !!templateId,
+    hasPublicKey: !!publicKey,
+    hasFromEmail: !!fromEmail,
+    serviceIdPreview: serviceId ? `${serviceId.substring(0, 8)}...` : 'missing',
+    templateIdPreview: templateId ? `${templateId.substring(0, 8)}...` : 'missing',
+    publicKeyPreview: publicKey ? `${publicKey.substring(0, 8)}...` : 'missing',
+    fromEmail: fromEmail || 'missing',
+  });
+
   if (serviceId && templateId && publicKey && fromEmail) {
-    console.log('✅ EmailJS service auto-configured from environment variables');
     emailService.configure({
       serviceId,
       templateId,
@@ -244,13 +254,18 @@ try {
       fromEmail,
       fromName,
     });
+    console.log('✅ EmailJS service configured successfully');
+    console.log('   Service ID:', `${serviceId.substring(0, 10)}...`);
+    console.log('   Template ID:', `${templateId.substring(0, 10)}...`);
+    console.log('   From Email:', fromEmail);
   } else {
-    console.warn('⚠️ EmailJS configuration incomplete. Missing environment variables:', {
-      hasServiceId: !!serviceId,
-      hasTemplateId: !!templateId,
-      hasPublicKey: !!publicKey,
-      hasFromEmail: !!fromEmail,
-    });
+    console.warn('⚠️ EmailJS configuration incomplete. Email notifications will not work.');
+    console.warn('   Please set the following environment variables in your .env file:');
+    if (!serviceId) console.warn('   - VITE_EMAILJS_SERVICE_ID');
+    if (!templateId) console.warn('   - VITE_EMAILJS_TEMPLATE_ID');
+    if (!publicKey) console.warn('   - VITE_EMAILJS_PUBLIC_KEY');
+    if (!fromEmail) console.warn('   - VITE_FROM_EMAIL');
+    console.warn('   See EMAIL_SETUP_GUIDE.md for setup instructions');
   }
 } catch (error) {
   console.error('❌ Failed to initialize EmailJS service:', error);
