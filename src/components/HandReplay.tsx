@@ -501,6 +501,10 @@ const HandReplay = ({
     if (!action || action.bet_size === 0) return 0;
 
     // Look at all previous actions in the same street to find player's prior bet
+    // Note: bet_size is cumulative on each street, so we need the LAST bet_size
+    // from a previous action, not the sum of all bets
+    // Example: If player calls 100 (bet_size=100), then raises to 500 (bet_size=500),
+    // the additional amount for the raise is 500-100=400
     let priorBet = 0;
     for (let i = 0; i < currentActionIndex - 1; i++) {
       const prevAction = actions[i];
