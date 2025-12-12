@@ -22,18 +22,10 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
-          // ALL Supabase calls - NetworkFirst with fallback (better for offline)
+          // ALL Supabase calls - NetworkOnly (no offline fallback)
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 2 * 60, // 2 minutes for real-time data
-              },
-              networkTimeoutSeconds: 10,
-            },
+            handler: 'NetworkOnly',
           },
           // External images and avatars - CacheFirst (safe to cache)
           {

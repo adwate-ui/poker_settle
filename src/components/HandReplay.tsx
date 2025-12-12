@@ -493,7 +493,28 @@ const HandReplay = ({
     return actions[currentActionIndex - 1];
   };
 
+  // Calculate the additional bet amount for the current action
+  // This shows how much the player added in this action, not their total street bet
+  const getAdditionalBetAmount = () => {
+    if (currentActionIndex === 0) return 0;
+    const action = actions[currentActionIndex - 1];
+    if (!action || action.bet_size === 0) return 0;
+
+    // Look at all previous actions in the same street to find player's prior bet
+    let priorBet = 0;
+    for (let i = 0; i < currentActionIndex - 1; i++) {
+      const prevAction = actions[i];
+      if (prevAction.street_type === action.street_type && 
+          prevAction.player_id === action.player_id) {
+        priorBet = prevAction.bet_size;
+      }
+    }
+
+    return action.bet_size - priorBet;
+  };
+
   const currentAction = getCurrentAction();
+  const additionalBetAmount = getAdditionalBetAmount();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -543,9 +564,9 @@ const HandReplay = ({
                 <Badge variant="outline" className="w-fit text-sm font-semibold">
                   {currentAction.action_type}
                 </Badge>
-                {currentAction.bet_size > 0 && (
+                {additionalBetAmount > 0 && (
                   <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
-                    Rs. {currentAction.bet_size.toLocaleString('en-IN')}
+                    Rs. {additionalBetAmount.toLocaleString('en-IN')}
                   </span>
                 )}
               </div>
