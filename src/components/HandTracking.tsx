@@ -860,16 +860,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         );
         setCurrentPlayerIndex(nextIndex);
       } else {
-        // Non-fold actions: move to next player normally
-        const nextIndex = getNextPlayerIndex(
-          currentPlayerIndex,
-          stage,
-          activePlayers,
-          buttonIndex,
-          playersInHand
-        );
-        setCurrentPlayerIndex(nextIndex);
-        
         // Check if betting round is now complete after this action
         // If complete, automatically advance to next street
         // Note: streetActions state hasn't updated yet, so we check with the new action included
@@ -894,6 +884,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           setTimeout(() => {
             moveToNextStreet();
           }, AUTO_ADVANCE_DELAY_MS);
+        } else {
+          // Only move to next player if betting round is not complete
+          const nextIndex = getNextPlayerIndex(
+            currentPlayerIndex,
+            stage,
+            activePlayers,
+            buttonIndex,
+            playersInHand
+          );
+          setCurrentPlayerIndex(nextIndex);
         }
       }
     } catch (err) {
