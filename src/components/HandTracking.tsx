@@ -101,6 +101,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const [cardsJustAdded, setCardsJustAdded] = useState(false); // Track if community cards were just added
   const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
   const [showMobileHandTracking, setShowMobileHandTracking] = useState(false); // Control mobile drawer visibility
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT_PX : false); // Track if we're on mobile (SSR-safe)
   const [actionHistory, setActionHistory] = useState<Array<{
     stage: HandStage;
     currentPlayerIndex: number;
@@ -319,12 +320,29 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     setPositionsChanged(positionsJustChanged);
   }, [positionsJustChanged]);
 
+  // Track window resize to update isMobile state (debounced to avoid excessive updates)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    const handleResize = () => {
+      // Debounce resize events to avoid excessive state updates
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(window.innerWidth < MOBILE_BREAKPOINT_PX);
+      }, 150); // Wait 150ms after last resize event
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   // Auto-open card selector when community cards need to be selected
   // Only on MOBILE to avoid blocking overlay on desktop
   useEffect(() => {
     // Only auto-open on mobile devices
-    const isMobile = window.innerWidth < MOBILE_BREAKPOINT_PX;
-    
     if (!isMobile) return; // Skip auto-open on desktop
     
     if (stage === 'flop' && !flopCards && currentHand) {
@@ -340,7 +358,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       setTempCommunityCards(''); // Initialize temp with empty
       setShowCardSelector(true);
     }
-  }, [stage, flopCards, turnCard, riverCard, currentHand]);
+  }, [stage, flopCards, turnCard, riverCard, currentHand, isMobile]);
 
   // Auto-advance to next remaining player if current player has folded
   useEffect(() => {
@@ -1541,52 +1559,54 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </CardContent>
         </Card>
 
-        {/* Mobile: Player Action Dialog */}
-        <Dialog open={showPlayerActionDialog} onOpenChange={(open) => {
-          if (!open) handleCancelDialog();
-        }}>
-          <DialogContent className="sm:max-w-md md:hidden">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-lg font-bold">
-                    {selectedPlayer?.player.name.substring(0, 2).toUpperCase()}
-                  </span>
-                </div>
-                {selectedPlayer?.player.name}
-              </DialogTitle>
-              <DialogDescription className="sr-only">
-                Select whether {selectedPlayer?.player.name} will play in this hand or be marked as not playing.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3 pt-4">
-              <Button 
-                onClick={handleToggleDealtOut} 
-                className="w-full h-14 text-base"
-                variant={dealtOutPlayers.includes(selectedPlayerId) ? "default" : "outline"}
-              >
-                {dealtOutPlayers.includes(selectedPlayerId) ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Not Dealt In
-                  </>
-                ) : (
-                  <>
-                    <X className="w-5 h-5 mr-2" />
-                    Mark as Not Playing
-                  </>
-                )}
-              </Button>
-              <Button 
-                onClick={handleCancelDialog} 
-                className="w-full h-12"
-                variant="ghost"
-              >
-                Cancel
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Mobile: Player Action Dialog - Only render on mobile to avoid invisible overlay on desktop */}
+        {isMobile && (
+          <Dialog open={showPlayerActionDialog} onOpenChange={(open) => {
+            if (!open) handleCancelDialog();
+          }}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-lg font-bold">
+                      {selectedPlayer?.player.name.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                  {selectedPlayer?.player.name}
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Select whether {selectedPlayer?.player.name} will play in this hand or be marked as not playing.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 pt-4">
+                <Button 
+                  onClick={handleToggleDealtOut} 
+                  className="w-full h-14 text-base"
+                  variant={dealtOutPlayers.includes(selectedPlayerId) ? "default" : "outline"}
+                >
+                  {dealtOutPlayers.includes(selectedPlayerId) ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Not Dealt In
+                    </>
+                  ) : (
+                    <>
+                      <X className="w-5 h-5 mr-2" />
+                      Mark as Not Playing
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleCancelDialog} 
+                  className="w-full h-12"
+                  variant="ghost"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </>
     );
   }
@@ -1809,31 +1829,35 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     
     return (
       <>
-        {/* Mobile: Drawer for showdown - can't be dismissed */}
-        <Drawer open={true} onOpenChange={() => {
-          // Prevent dismissal during showdown - must complete or go back
-          toast({
-            title: 'Complete Hand',
-            description: 'Please complete the hand or use back button to return',
-          });
-        }}>
-          <DrawerContent className="md:hidden h-[90vh]">
-            <DrawerHeader>
-              <DrawerTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-500" />
-                Showdown - Hand #{currentHand?.hand_number}
-              </DrawerTitle>
-            </DrawerHeader>
-            <div className="flex-1 overflow-y-auto px-4 pb-4">
-              {showdownContent}
-            </div>
-          </DrawerContent>
-        </Drawer>
+        {/* Mobile: Drawer for showdown - can't be dismissed - Only render on mobile to avoid invisible overlay on desktop */}
+        {isMobile && (
+          <Drawer open={true} onOpenChange={() => {
+            // Prevent dismissal during showdown - must complete or go back
+            toast({
+              title: 'Complete Hand',
+              description: 'Please complete the hand or use back button to return',
+            });
+          }}>
+            <DrawerContent className="h-[90vh]">
+              <DrawerHeader>
+                <DrawerTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                  Showdown - Hand #{currentHand?.hand_number}
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="flex-1 overflow-y-auto px-4 pb-4">
+                {showdownContent}
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
 
         {/* Desktop: Regular card */}
-        <div className="hidden md:block mt-6">
-          {showdownContent}
-        </div>
+        {!isMobile && (
+          <div className="mt-6">
+            {showdownContent}
+          </div>
+        )}
 
         {/* Hole Card Selector - Direct card selector without intermediate dialog */}
         <CardSelector
@@ -2083,22 +2107,25 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
   return (
     <>
-    {/* Mobile: Drawer for hand tracking */}
-    <Drawer open={showMobileHandTracking} onOpenChange={(open) => {
-      // Allow closing drawer via back button/swipe down
-      setShowMobileHandTracking(open);
-      // When drawer is closed (swiped away), call onHandComplete to show table positions
-      if (!open && onHandComplete) {
-        onHandComplete();
-      }
-    }} modal={true} dismissible={true}>
-      <DrawerContent className="md:hidden h-[95vh] overflow-hidden">
-        {handTrackingContent}
-      </DrawerContent>
-    </Drawer>
+    {/* Mobile: Drawer for hand tracking - Only render on mobile to avoid invisible overlay on desktop */}
+    {isMobile && (
+      <Drawer open={showMobileHandTracking} onOpenChange={(open) => {
+        // Allow closing drawer via back button/swipe down
+        setShowMobileHandTracking(open);
+        // When drawer is closed (swiped away), call onHandComplete to show table positions
+        if (!open && onHandComplete) {
+          onHandComplete();
+        }
+      }} modal={true} dismissible={true}>
+        <DrawerContent className="h-[95vh] overflow-hidden">
+          {handTrackingContent}
+        </DrawerContent>
+      </Drawer>
+    )}
 
     {/* Desktop view - unchanged */}
-    <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in hidden md:block">
+    {!isMobile && (
+      <Card className="mt-6 border-2 border-primary/50 shadow-xl animate-fade-in">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
         <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -2591,24 +2618,26 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </Collapsible>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    )}
     
-    {/* Card Selector Dialog - MOBILE ONLY - auto-opens when cards need to be selected */}
-    <Dialog open={showCardSelector} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        // When closing without confirm, treat it as a swipe/undo action
-        if (cardsJustAdded) {
-          // If cards were just added, allow editing
+    {/* Card Selector Dialog - MOBILE ONLY - auto-opens when cards need to be selected - Only render on mobile to avoid invisible overlay on desktop */}
+    {isMobile && (
+      <Dialog open={showCardSelector} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          // When closing without confirm, treat it as a swipe/undo action
+          if (cardsJustAdded) {
+            // If cards were just added, allow editing
+            setTempCommunityCards('');
+          } else if (actionHistory.length > 0) {
+            // If no cards just added, undo last action
+            undoLastAction();
+          }
           setTempCommunityCards('');
-        } else if (actionHistory.length > 0) {
-          // If no cards just added, undo last action
-          undoLastAction();
         }
-        setTempCommunityCards('');
-      }
-      setShowCardSelector(isOpen);
-    }}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto md:hidden">
+        setShowCardSelector(isOpen);
+      }}>
+        <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {cardSelectorType === 'flop' ? 'Select Flop Cards (3)' : 
@@ -2745,8 +2774,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             Confirm Selection
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    )}
   </>
   );
 };
