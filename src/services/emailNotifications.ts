@@ -169,7 +169,7 @@ export async function sendSettlementNotifications(
   };
 
   // Fetch settlement confirmations to get UUIDs
-  let confirmationsMap = new Map<string, string>();
+  const confirmationsMap = new Map<string, string>();
   if (gameId) {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
