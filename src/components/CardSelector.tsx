@@ -109,7 +109,7 @@ const CardSelector = ({
       {trigger && <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>}
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="text-xl font-bold flex items-center gap-2">
@@ -136,12 +136,12 @@ const CardSelector = ({
         </DialogHeader>
 
         {/* Card grid by suit - improved layout */}
-        <div className="space-y-4">
+        <div className="space-y-2">
           {suits.map(suit => (
-            <div key={suit.code} className="space-y-2">
-              <div className="flex items-center gap-2 pb-1 border-b border-border">
-                <span className={cn("text-2xl", suit.color)}>{suit.symbol}</span>
-                <h3 className="font-semibold text-base">{suit.name}</h3>
+            <div key={suit.code} className="space-y-1">
+              <div className="flex items-center gap-2 pb-0.5 border-b border-border">
+                <span className={cn("text-xl", suit.color)}>{suit.symbol}</span>
+                <h3 className="font-semibold text-sm">{suit.name}</h3>
               </div>
               <div className="grid grid-cols-13 gap-0.5">
                 {ranks.map(rank => {
@@ -192,7 +192,7 @@ const CardSelector = ({
         </div>
 
         {/* Action buttons - improved styling */}
-        <div className="flex gap-3 pt-6 border-t sticky bottom-0 bg-background">
+        <div className="flex gap-3 pt-3 border-t sticky bottom-0 bg-background">
           <Button variant="outline" onClick={handleCancel} className="flex-1 h-12 text-base">
             Cancel
           </Button>

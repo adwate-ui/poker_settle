@@ -476,6 +476,32 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     // Currently just using right swipe for back
   };
 
+  // Reusable function to reset all hand state
+  const resetHandState = () => {
+    clearHandState();
+    setStage('setup');
+    setCurrentHand(null);
+    setButtonPlayerId('');
+    setDealtOutPlayers([]);
+    setActivePlayers([]);
+    setActionSequence(0);
+    setPotSize(0);
+    setFlopCards('');
+    setTurnCard('');
+    setRiverCard('');
+    setStreetActions([]);
+    setAllHandActions([]);
+    setPlayersInHand([]);
+    setPlayerHoleCards({});
+    setPlayerBets({});
+    setStreetPlayerBets({});
+    setLastAggressorIndex(null);
+    setActionHistory([]);
+    if (onHandComplete) {
+      onHandComplete();
+    }
+  };
+
   const startNewHand = async () => {
     if (!buttonPlayerId) return;
 
@@ -1523,20 +1549,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             <div className="flex gap-2">
               {/* Cancel/Back button - always shown to allow stopping hand tracking */}
               <Button 
-                onClick={() => {
-                  // Clear any saved state
-                  clearHandState();
-                  // Reset to initial state
-                  setStage('setup');
-                  setCurrentHand(null);
-                  setButtonPlayerId('');
-                  setDealtOutPlayers([]);
-                  setActivePlayers([]);
-                  // Call onHandComplete to return to table positions view
-                  if (onHandComplete) {
-                    onHandComplete();
-                  }
-                }}
+                onClick={resetHandState}
                 variant="outline"
                 className="h-12 text-base font-semibold"
                 size="lg"
@@ -1922,29 +1935,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               className="h-8 w-8 p-0 hover:bg-destructive/20"
               onClick={() => {
                 // Cancel hand tracking - clear saved state and go back to dashboard
-                clearHandState();
                 setShowMobileHandTracking(false);
-                setStage('setup');
-                setCurrentHand(null);
-                setButtonPlayerId('');
-                setDealtOutPlayers([]);
-                setActivePlayers([]);
-                setActionSequence(0);
-                setPotSize(0);
-                setFlopCards('');
-                setTurnCard('');
-                setRiverCard('');
-                setStreetActions([]);
-                setAllHandActions([]);
-                setPlayersInHand([]);
-                setPlayerHoleCards({});
-                setPlayerBets({});
-                setStreetPlayerBets({});
-                setLastAggressorIndex(null);
-                setActionHistory([]);
-                if (onHandComplete) {
-                  onHandComplete();
-                }
+                resetHandState();
               }}
             >
               <X className="h-4 w-4" />
@@ -2139,16 +2131,26 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Badge>
             </div>
           </div>
-          <div className="flex flex-col items-start sm:items-end gap-1">
-            <Badge variant="secondary" className="text-base sm:text-lg px-4 py-2 bg-amber-500/20 border-amber-500/30">
-              💰 {formatWithBB(potSize)}
-            </Badge>
-            {currentPlayer && (
-              <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                {currentPlayer.player.name}'s turn
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-start sm:items-end gap-1">
+              <Badge variant="secondary" className="text-base sm:text-lg px-4 py-2 bg-amber-500/20 border-amber-500/30">
+                💰 {formatWithBB(potSize)}
+              </Badge>
+              {currentPlayer && (
+                <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  {currentPlayer.player.name}'s turn
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/20"
+              onClick={resetHandState}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </CardTitle>
       </CardHeader>

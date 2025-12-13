@@ -1,5 +1,5 @@
 import { History, TrendingUp, TrendingDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
@@ -37,11 +37,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   const [loading, setLoading] = useState(true);
   const [filterName, setFilterName] = useState<string>(FILTER_NONE);
 
-  useEffect(() => {
-    fetchAllBuyInHistory();
-  }, [gameId, token]);
-
-  const fetchAllBuyInHistory = async () => {
+  const fetchAllBuyInHistory = useCallback(async () => {
     setLoading(true);
     try {
       // Use shared client if token is provided, otherwise use regular authenticated client
@@ -90,7 +86,37 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
     } finally {
       setLoading(false);
     }
-  };
+  }, [gameId, token]);
+
+  useEffect(() => {
+    // Fetch initial data
+    fetchAllBuyInHistory();
+    
+    // Set up real-time subscription for buy-in history updates
+    // Note: fetchAllBuyInHistory is stable (memoized with useCallback)
+    // and only changes when gameId or token changes, which is when we want to re-run this effect
+    const client = token ? createSharedClient(token) : supabase;
+    
+    const channel = client
+      .channel('buy_in_history_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'buy_in_history',
+        },
+        () => {
+          // Refetch history when any change occurs
+          fetchAllBuyInHistory();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [gameId, token, fetchAllBuyInHistory]);
 
   const filteredHistory = history.filter(entry => 
     filterName === FILTER_NONE || filterName === FILTER_ALL || entry.player_name === filterName
