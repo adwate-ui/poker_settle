@@ -1,5 +1,5 @@
 import { History, TrendingUp, TrendingDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
@@ -37,7 +37,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   const [loading, setLoading] = useState(true);
   const [filterName, setFilterName] = useState<string>(FILTER_NONE);
 
-  const fetchAllBuyInHistory = async () => {
+  const fetchAllBuyInHistory = useCallback(async () => {
     setLoading(true);
     try {
       // Use shared client if token is provided, otherwise use regular authenticated client
@@ -86,7 +86,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
     } finally {
       setLoading(false);
     }
-  };
+  }, [gameId, token]);
 
   useEffect(() => {
     fetchAllBuyInHistory();
@@ -113,8 +113,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
     return () => {
       channel.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId, token]);
+  }, [gameId, token, fetchAllBuyInHistory]);
 
   const filteredHistory = history.filter(entry => 
     filterName === FILTER_NONE || filterName === FILTER_ALL || entry.player_name === filterName

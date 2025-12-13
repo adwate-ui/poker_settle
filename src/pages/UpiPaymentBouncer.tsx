@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
  * UPI Payment Bouncer Page
@@ -13,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 const UpiPaymentBouncer = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     // Extract UPI parameters from URL
@@ -46,23 +48,43 @@ const UpiPaymentBouncer = () => {
     // Redirect to UPI link
     window.location.href = upiLink;
 
-    // Fallback: if redirect doesn't work after 2 seconds, show error or go back
+    // Fallback: if redirect doesn't work after 2 seconds, show error message
     const timeoutId = setTimeout(() => {
       // If we're still on this page, the UPI app didn't open
-      // Show a message or navigate back
-      console.log('UPI app did not open. User may need to install a UPI app.');
-      // Optionally navigate back or show an error message
+      setShowError(true);
     }, 2000);
 
     return () => clearTimeout(timeoutId);
   }, [searchParams, navigate]);
+
+  if (showError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4 max-w-md text-center">
+          <AlertCircle className="h-12 w-12 text-amber-500" />
+          <h1 className="text-xl font-bold">Unable to Open Payment App</h1>
+          <p className="text-base text-muted-foreground">
+            Please make sure you have a UPI app installed (Google Pay, PhonePe, Paytm, etc.)
+          </p>
+          <div className="flex gap-3 mt-4">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              Go Back
+            </Button>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="text-base text-muted-foreground">Opening payment app...</p>
-        <p className="text-sm text-muted-foreground">If nothing happens, please install a UPI app</p>
+        <p className="text-sm text-muted-foreground">Please wait a moment</p>
       </div>
     </div>
   );
