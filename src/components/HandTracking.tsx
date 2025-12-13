@@ -2249,37 +2249,47 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         )}
 
         {/* Desktop: Card selector dialog - auto-opens when cards need to be selected */}
-        <CardSelector
-          maxCards={stage === 'flop' ? 3 : 1}
-          usedCards={(() => {
-            const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-            return getUsedCards(editingCards);
-          })()}
-          selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
-          onSelect={(cards) => {
-            if (stage === 'flop') {
-              setFlopCards(cards);
-              setCardsJustAdded(true);
-            } else if (stage === 'turn') {
-              setTurnCard(cards);
-              setCardsJustAdded(true);
-            } else if (stage === 'river') {
-              setRiverCard(cards);
-              setCardsJustAdded(true);
-            }
-            setTempCommunityCards('');
-            setShowDesktopCardSelector(false);
-          }}
-          label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
-          knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
-          open={showDesktopCardSelector || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) {
-              setShowDesktopCardSelector(false);
-              setTempCommunityCards('');
-            }
-          }}
-        />
+        {(() => {
+          // Determine if card selector should be shown
+          const shouldShowCardSelector = showDesktopCardSelector || 
+            (stage === 'flop' && !flopCards) || 
+            (stage === 'turn' && !turnCard && flopCards) || 
+            (stage === 'river' && !riverCard && turnCard);
+          
+          return (
+            <CardSelector
+              maxCards={stage === 'flop' ? 3 : 1}
+              usedCards={(() => {
+                const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                return getUsedCards(editingCards);
+              })()}
+              selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
+              onSelect={(cards) => {
+                if (stage === 'flop') {
+                  setFlopCards(cards);
+                  setCardsJustAdded(true);
+                } else if (stage === 'turn') {
+                  setTurnCard(cards);
+                  setCardsJustAdded(true);
+                } else if (stage === 'river') {
+                  setRiverCard(cards);
+                  setCardsJustAdded(true);
+                }
+                setTempCommunityCards('');
+                setShowDesktopCardSelector(false);
+              }}
+              label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
+              knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
+              open={shouldShowCardSelector}
+              onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  setShowDesktopCardSelector(false);
+                  setTempCommunityCards('');
+                }
+              }}
+            />
+          );
+        })()}
 
         {/* Action buttons - COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
