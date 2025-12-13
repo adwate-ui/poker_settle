@@ -102,6 +102,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
   const [showMobileHandTracking, setShowMobileHandTracking] = useState(false); // Control mobile drawer visibility
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT_PX : false); // Track if we're on mobile (SSR-safe)
+  const [showDesktopCardSelector, setShowDesktopCardSelector] = useState(false); // Track if desktop card selector should be shown (for editing)
   const [actionHistory, setActionHistory] = useState<Array<{
     stage: HandStage;
     currentPlayerIndex: number;
@@ -989,15 +990,27 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (stage === 'flop' && flopCards) {
       setCardSelectorType('flop');
       setTempCommunityCards(flopCards); // Initialize temp with current cards
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     } else if (stage === 'turn' && turnCard) {
       setCardSelectorType('turn');
       setTempCommunityCards(turnCard); // Initialize temp with current card
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     } else if (stage === 'river' && riverCard) {
       setCardSelectorType('river');
       setTempCommunityCards(riverCard); // Initialize temp with current card
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     }
   };
 
@@ -2274,8 +2287,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop: Button to open card selector when cards need to be selected */}
-        {((stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
+        {/* Desktop: Button to open card selector when cards need to be selected or when editing */}
+        {(showDesktopCardSelector || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
           <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-2 border-amber-500/50 p-4 rounded-xl">
             <div className="space-y-4">
               <div>
@@ -2289,8 +2302,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               
               <CardSelector
                 maxCards={stage === 'flop' ? 3 : 1}
-                usedCards={getUsedCards()}
-                selectedCards={tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
+                usedCards={getUsedCards(tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [])}
+                selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
                 onSelect={(cards) => {
                   if (stage === 'flop') {
                     setFlopCards(cards);
@@ -2303,12 +2316,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                     setCardsJustAdded(true);
                   }
                   setTempCommunityCards('');
+                  setShowDesktopCardSelector(false);
                 }}
                 label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
                 trigger={
                   <Button variant="default" size="lg" className="w-full gap-2">
                     <Sparkles className="w-5 h-5" />
-                    Open Card Selector
+                    {showDesktopCardSelector ? 'Reopen Card Selector' : 'Open Card Selector'}
                   </Button>
                 }
                 knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
