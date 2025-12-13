@@ -27,11 +27,34 @@ const UpiPaymentBouncer = () => {
     // Validate required parameters
     if (!pa || !pn || !am) {
       console.error('Missing required UPI parameters');
-      navigate('/', { replace: true });
+      setShowError(true);
       return;
     }
 
-    // Build UPI intent link
+    // Validate UPI ID format (identifier@provider)
+    const upiRegex = /^[\w.-]+@[\w.-]+$/;
+    if (!upiRegex.test(pa)) {
+      console.error('Invalid UPI ID format');
+      setShowError(true);
+      return;
+    }
+
+    // Validate amount is a positive number
+    const amountNum = parseFloat(am);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      console.error('Invalid amount');
+      setShowError(true);
+      return;
+    }
+
+    // Validate currency is INR
+    if (cu !== 'INR') {
+      console.error('Only INR currency is supported');
+      setShowError(true);
+      return;
+    }
+
+    // Build UPI intent link with validated parameters
     const params = new URLSearchParams({
       pa,
       pn,
@@ -45,7 +68,7 @@ const UpiPaymentBouncer = () => {
 
     const upiLink = `upi://pay?${params.toString()}`;
 
-    // Redirect to UPI link
+    // Redirect to UPI link (safe because we've validated all parameters)
     window.location.href = upiLink;
 
     // Fallback: if redirect doesn't work after 2 seconds, show error message
