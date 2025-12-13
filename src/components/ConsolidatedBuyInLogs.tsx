@@ -1,5 +1,5 @@
 import { History, TrendingUp, TrendingDown } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
@@ -89,9 +89,12 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   }, [gameId, token]);
 
   useEffect(() => {
+    // Fetch initial data
     fetchAllBuyInHistory();
     
     // Set up real-time subscription for buy-in history updates
+    // Note: fetchAllBuyInHistory is stable (memoized with useCallback)
+    // and only changes when gameId or token changes, which is when we want to re-run this effect
     const client = token ? createSharedClient(token) : supabase;
     
     const channel = client

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isValidUpiId } from '@/utils/upiPaymentLinks';
 
 /**
  * UPI Payment Bouncer Page
@@ -31,9 +32,8 @@ const UpiPaymentBouncer = () => {
       return;
     }
 
-    // Validate UPI ID format (identifier@provider)
-    const upiRegex = /^[\w.-]+@[\w.-]+$/;
-    if (!upiRegex.test(pa)) {
+    // Validate UPI ID format using utility function
+    if (!isValidUpiId(pa)) {
       console.error('Invalid UPI ID format');
       setShowError(true);
       return;
@@ -77,7 +77,10 @@ const UpiPaymentBouncer = () => {
       setShowError(true);
     }, 2000);
 
-    return () => clearTimeout(timeoutId);
+    // Cleanup function to clear timeout if component unmounts
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [searchParams, navigate]);
 
   if (showError) {
