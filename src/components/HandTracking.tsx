@@ -2302,7 +2302,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               
               <CardSelector
                 maxCards={stage === 'flop' ? 3 : 1}
-                usedCards={getUsedCards(tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [])}
+                usedCards={(() => {
+                  const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                  return getUsedCards(editingCards);
+                })()}
                 selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
                 onSelect={(cards) => {
                   if (stage === 'flop') {

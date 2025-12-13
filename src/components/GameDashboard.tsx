@@ -293,7 +293,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
       setIsCompletingGame(false); // Reset on error
     }
-  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate, isCompletingGame]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {
