@@ -24,7 +24,7 @@ export interface GameCompletionMessageData {
 
 export interface SettlementMessageData {
   playerName: string;
-  settlements: Array<Settlement & { toUpiId?: string }>;
+  settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>;
   isWinner: boolean;
   totalAmount: number;
   paymentPreference?: 'upi' | 'cash';
@@ -119,10 +119,13 @@ Here are your settlement details:
           settlement.amount,
           data.gameDate ? `Poker settlement - ${data.gameDate}` : 'Poker settlement'
         );
-        // Format as clickable link - WhatsApp should auto-detect upi:// URLs
-        message += `   💰 *Quick Pay (tap to open UPI app):*\n`;
-        message += `   ${upiLink}\n`;
+        // Format as clickable link with hyperlink for better readability
+        message += `   💰 <a href="${upiLink}">Tap to Pay via UPI</a>\n`;
         message += `   📱 UPI ID: ${settlement.toUpiId}\n`;
+      }
+      // Add transaction reference if available
+      if (settlement.confirmationId) {
+        message += `   📋 Transaction Ref: #${settlement.confirmationId}\n`;
       }
       message += `\n`;
     });

@@ -145,7 +145,8 @@ export async function sendGameCompletionNotifications(
 export async function sendSettlementNotifications(
   settlements: Settlement[],
   playersMap: Map<string, Player>,
-  gameDate?: string
+  gameDate?: string,
+  gameId?: string
 ): Promise<NotificationResult> {
   if (!emailService.isConfigured()) {
     console.error("❌ Email service not configured. Settlement notifications not sent.");
@@ -167,14 +168,40 @@ export async function sendSettlementNotifications(
     errors: [],
   };
 
-  // Group settlements by player and enrich with recipient UPI IDs
+  // Fetch settlement confirmations to get UUIDs
+  let confirmationsMap = new Map<string, string>();
+  if (gameId) {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: confirmations } = await supabase
+        .from("settlement_confirmations")
+        .select("id, settlement_from, settlement_to")
+        .eq("game_id", gameId);
+      
+      if (confirmations) {
+        confirmations.forEach((conf) => {
+          const key = `${conf.settlement_from}-${conf.settlement_to}`;
+          confirmationsMap.set(key, conf.id);
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching settlement confirmations:", error);
+      // Continue without confirmations if fetch fails
+    }
+  }
+
+  // Group settlements by player and enrich with recipient UPI IDs and confirmation IDs
   const playerSettlements = new Map<string, { 
-    settlements: Array<Settlement & { toUpiId?: string }>; 
+    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>; 
     isWinner: boolean; 
     total: number 
   }>();
 
   settlements.forEach((settlement) => {
+    // Get confirmation ID for this settlement
+    const confirmationKey = `${settlement.from}-${settlement.to}`;
+    const confirmationId = confirmationsMap.get(confirmationKey);
+
     // For payer (from)
     if (!playerSettlements.has(settlement.from)) {
       playerSettlements.set(settlement.from, {
@@ -184,11 +211,12 @@ export async function sendSettlementNotifications(
       });
     }
     const fromData = playerSettlements.get(settlement.from)!;
-    // Add UPI ID of the recipient (to) for payment links
+    // Add UPI ID of the recipient (to) for payment links and confirmation ID
     const toPlayer = playersMap.get(settlement.to);
     fromData.settlements.push({
       ...settlement,
       toUpiId: toPlayer?.upi_id,
+      confirmationId: confirmationId,
     });
     fromData.total += settlement.amount;
 
@@ -201,7 +229,10 @@ export async function sendSettlementNotifications(
       });
     }
     const toData = playerSettlements.get(settlement.to)!;
-    toData.settlements.push(settlement);
+    toData.settlements.push({
+      ...settlement,
+      confirmationId: confirmationId,
+    });
     toData.total += settlement.amount;
   });
 

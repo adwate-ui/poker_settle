@@ -285,10 +285,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       await completeGame(game.id, allSettlements);
       toast.success("Game completed successfully");
       
-      // Wait 2 seconds then navigate to game details
-      setTimeout(() => {
-        navigate(`/games/${game.id}`);
-      }, 2000);
+      // Navigate immediately to game details
+      navigate(`/games/${game.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
       setIsCompletingGame(false); // Reset on error
