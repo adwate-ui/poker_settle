@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
 import { useGameData } from "@/hooks/useGameData";
@@ -47,6 +47,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [positionsJustChanged, setPositionsJustChanged] = useState(false);
   const [handTrackingStage, setHandTrackingStage] = useState<'setup' | 'ready' | 'recording'>('setup');
   const [hasSavedHandState, setHasSavedHandState] = useState(false);
+  const [isCompletingGame, setIsCompletingGame] = useState(false);
   
   // Collapsible sections state
   const [gameStatsOpen, setGameStatsOpen] = useState(true);
@@ -228,6 +229,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   }, [gamePlayers, manualTransfers]);
 
   const handleCompleteGame = useCallback(async () => {
+    if (isCompletingGame) return; // Prevent double-clicks
+    
+    setIsCompletingGame(true);
+    
     // Calculate remaining settlements
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
@@ -286,8 +291,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       }, 2000);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
+      setIsCompletingGame(false); // Reset on error
     }
-  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate]);
+  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate, isCompletingGame]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {
@@ -851,11 +857,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             
             <Button 
               onClick={handleCompleteGame} 
-              disabled={!canCompleteGame}
+              disabled={!canCompleteGame || isCompletingGame}
               className="bg-gradient-poker hover:opacity-90 text-primary-foreground w-full sm:w-auto"
             >
-              <Trophy className="w-4 h-4 mr-2" />
-              Complete Game
+              {isCompletingGame ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Completing...
+                </>
+              ) : (
+                <>
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Complete Game
+                </>
+              )}
             </Button>
           </div>
           
