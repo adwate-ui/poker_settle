@@ -32,6 +32,20 @@ export interface SettlementMessageData {
   gameDate?: string;
 }
 
+export interface CombinedGameSettlementMessageData {
+  playerName: string;
+  gameDate: string;
+  buyInAmount: number;
+  finalStack: number;
+  netAmount: number;
+  gameLink: string;
+  settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>;
+  isWinner: boolean;
+  totalAmount: number;
+  paymentPreference?: 'upi' | 'cash';
+  upiId?: string;
+}
+
 /**
  * Generate welcome message for newly added player
  */
@@ -179,6 +193,94 @@ export function generatePlayerShareLink(playerId: string, token: string, baseUrl
 export function generateGameShareLink(gameId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
   return `${base}/shared/${token}/game/${gameId}`;
+}
+
+/**
+ * Generate combined game completion and settlement message
+ * Combines game summary and settlement details into one email
+ */
+export function generateCombinedGameSettlementMessage(data: CombinedGameSettlementMessageData): string {
+  const profitLoss = data.netAmount >= 0 ? "profit" : "loss";
+  const emoji = data.netAmount >= 0 ? "🎉" : "📉";
+  const paymentMethod = data.paymentPreference === 'cash' ? '💵 Cash' : '📱 UPI';
+  
+  let message = `${emoji} *Game Completed - Settlement Details*
+
+Hi ${data.playerName}!
+
+The poker game from ${data.gameDate} has been completed.
+
+💰 *Your Results:*
+• Buy-in: ₹${formatIndianNumber(data.buyInAmount)}
+• Final Stack: ₹${formatIndianNumber(data.finalStack)}
+• Net ${profitLoss.charAt(0).toUpperCase() + profitLoss.slice(1)}: ₹${formatIndianNumber(Math.abs(data.netAmount))}
+
+📊 *Game Details:*
+${data.gameLink}
+
+`;
+
+  // Add settlement details
+  message += `💳 *Settlement Details:*\n\n`;
+  
+  if (data.isWinner) {
+    message += `✅ *You will receive: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `*Payments from:*\n`;
+    
+    data.settlements.forEach((settlement, index) => {
+      message += `${index + 1}. ${settlement.from}: ₹${formatIndianNumber(settlement.amount)}\n`;
+    });
+    
+    message += `\n*Your Payment Method:* ${paymentMethod}\n`;
+    
+    if (data.paymentPreference === 'upi' && data.upiId) {
+      message += `*Your UPI ID:* ${data.upiId}\n`;
+      message += `\nℹ️ Share your UPI ID with the payers above for easy payment.\n`;
+    }
+  } else {
+    message += `❌ *You need to pay: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `*Payments to:*\n\n`;
+    
+    data.settlements.forEach((settlement, index) => {
+      message += `${index + 1}. *${settlement.to}*: ₹${formatIndianNumber(settlement.amount)}\n`;
+      
+      // Add UPI payment link if recipient has UPI ID
+      if (settlement.toUpiId) {
+        const upiLink = generateUpiPaymentLink(
+          settlement.toUpiId,
+          settlement.to,
+          settlement.amount,
+          data.gameDate ? `Poker settlement - ${data.gameDate}` : 'Poker settlement'
+        );
+        // Plain UPI link - email service will convert to clickable button automatically
+        message += `   ${upiLink}\n`;
+        message += `   📱 UPI ID: ${settlement.toUpiId}\n`;
+      }
+      // Add transaction reference if available (UUID)
+      if (settlement.confirmationId) {
+        message += `   📋 Transaction Ref: #${settlement.confirmationId}\n`;
+      }
+      message += `\n`;
+    });
+    
+    message += `*Your Payment Method:* ${paymentMethod}\n`;
+    
+    if (data.settlements.some(s => s.toUpiId)) {
+      message += `\n💡 *How to Pay:*\n`;
+      message += `• *On Android/Mobile:* Tap the blue "Tap to Pay via UPI" button above - it will open your UPI app (Google Pay, PhonePe, Paytm, etc.) directly with pre-filled details!\n`;
+      message += `• *If button doesn't work:* Copy the UPI ID shown below the button and use it in your UPI app's "Pay to UPI ID" option\n`;
+      message += `• *On Desktop:* Copy the UPI link or UPI ID and use it in your mobile UPI app\n`;
+    }
+    
+    // Add confirmation instruction for payers
+    message += `\n⚠️ *IMPORTANT:* After making the payment, please reply with:\n`;
+    message += `*PAID*\n`;
+    message += `\nThis will automatically confirm your payment and update the settlement records.\n`;
+  }
+
+  message += `\nPlease settle at your earliest convenience. Thank you! 🙏`;
+  
+  return message;
 }
 
 /**

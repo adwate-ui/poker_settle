@@ -9,6 +9,7 @@ import {
   generatePlayerWelcomeMessage,
   generateGameCompletionMessage,
   generateSettlementMessage,
+  generateCombinedGameSettlementMessage,
   generateGameShareLink,
   formatMessageDate,
 } from "./messageTemplates";
@@ -275,6 +276,170 @@ export async function sendSettlementNotifications(
     } else {
       results.failed++;
       results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
+      results.success = false;
+    }
+
+    // Small delay between messages
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  return results;
+}
+
+/**
+ * Send combined game completion and settlement notifications to all players
+ * This function sends a single email containing both game summary and settlement details
+ */
+export async function sendCombinedGameSettlementNotifications(
+  gamePlayers: Array<{
+    player: Player;
+    buy_ins: number;
+    final_stack: number;
+    net_amount: number;
+  }>,
+  settlements: Settlement[],
+  gameId: string,
+  gameDate: string,
+  buyInAmount: number,
+  gameToken: string
+): Promise<NotificationResult> {
+  if (!emailService.isConfigured()) {
+    console.error("❌ Email service not configured. Combined notifications not sent.");
+    return {
+      success: false,
+      sent: 0,
+      failed: gamePlayers.length,
+      errors: ["Email service not configured"],
+    };
+  }
+
+  console.log(`📧 Sending combined game & settlement notifications to ${gamePlayers.length} players...`);
+
+  const results: NotificationResult = {
+    success: true,
+    sent: 0,
+    failed: 0,
+    errors: [],
+  };
+
+  const gameLink = generateGameShareLink(gameId, gameToken);
+
+  // Build players map for quick lookup
+  const playersMap = new Map<string, Player>();
+  gamePlayers.forEach((gp) => {
+    if (gp.player?.name) {
+      playersMap.set(gp.player.name, gp.player);
+    }
+  });
+
+  // Fetch settlement confirmations to get UUIDs
+  const confirmationsMap = new Map<string, string>();
+  try {
+    const { data: confirmations } = await supabase
+      .from("settlement_confirmations")
+      .select("id, settlement_from, settlement_to")
+      .eq("game_id", gameId);
+    
+    if (confirmations) {
+      confirmations.forEach((conf) => {
+        const key = `${conf.settlement_from}-${conf.settlement_to}`;
+        confirmationsMap.set(key, conf.id);
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching settlement confirmations:", error);
+    // Continue without confirmations if fetch fails
+  }
+
+  // Group settlements by player and enrich with recipient UPI IDs and confirmation IDs
+  const playerSettlements = new Map<string, { 
+    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>; 
+    isWinner: boolean; 
+    total: number 
+  }>();
+
+  settlements.forEach((settlement) => {
+    // Get confirmation ID for this settlement
+    const confirmationKey = `${settlement.from}-${settlement.to}`;
+    const confirmationId = confirmationsMap.get(confirmationKey);
+
+    // For payer (from)
+    if (!playerSettlements.has(settlement.from)) {
+      playerSettlements.set(settlement.from, {
+        settlements: [],
+        isWinner: false,
+        total: 0,
+      });
+    }
+    const fromData = playerSettlements.get(settlement.from)!;
+    // Add UPI ID of the recipient (to) for payment links and confirmation ID
+    const toPlayer = playersMap.get(settlement.to);
+    fromData.settlements.push({
+      ...settlement,
+      toUpiId: toPlayer?.upi_id,
+      confirmationId: confirmationId,
+    });
+    fromData.total += settlement.amount;
+
+    // For receiver (to)
+    if (!playerSettlements.has(settlement.to)) {
+      playerSettlements.set(settlement.to, {
+        settlements: [],
+        isWinner: true,
+        total: 0,
+      });
+    }
+    const toData = playerSettlements.get(settlement.to)!;
+    toData.settlements.push({
+      ...settlement,
+      confirmationId: confirmationId,
+    });
+    toData.total += settlement.amount;
+  });
+
+  for (const gamePlayer of gamePlayers) {
+    const player = gamePlayer.player;
+
+    // Validate email exists and is not empty
+    if (!player.email || !player.email.trim()) {
+      results.failed++;
+      results.errors.push(`${player.name}: No email address`);
+      continue;
+    }
+
+    // Get settlement data for this player
+    const settlementData = playerSettlements.get(player.name) || {
+      settlements: [],
+      isWinner: false,
+      total: 0,
+    };
+
+    const message = generateCombinedGameSettlementMessage({
+      playerName: player.name,
+      gameDate: formatMessageDate(gameDate),
+      buyInAmount: buyInAmount,
+      finalStack: gamePlayer.final_stack,
+      netAmount: gamePlayer.net_amount,
+      gameLink,
+      settlements: settlementData.settlements,
+      isWinner: settlementData.isWinner,
+      totalAmount: settlementData.total,
+      paymentPreference: player.payment_preference,
+      upiId: player.upi_id,
+    });
+
+    const result = await emailService.sendEmail({
+      to_email: player.email,
+      to_name: player.name,
+      subject: `Poker Game Settlement - ${formatMessageDate(gameDate)} ${settlementData.isWinner ? '💰' : '💳'}`,
+      message,
+    });
+
+    if (result.success) {
+      results.sent++;
+    } else {
+      results.failed++;
+      results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
       results.success = false;
     }
 
