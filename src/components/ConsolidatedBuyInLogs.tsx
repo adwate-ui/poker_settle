@@ -37,33 +37,6 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   const [loading, setLoading] = useState(true);
   const [filterName, setFilterName] = useState<string>(FILTER_NONE);
 
-  useEffect(() => {
-    fetchAllBuyInHistory();
-    
-    // Set up real-time subscription for buy-in history updates
-    const client = token ? createSharedClient(token) : supabase;
-    
-    const channel = client
-      .channel('buy_in_history_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'buy_in_history',
-        },
-        () => {
-          // Refetch history when any change occurs
-          fetchAllBuyInHistory();
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [gameId, token]);
-
   const fetchAllBuyInHistory = async () => {
     setLoading(true);
     try {
@@ -114,6 +87,34 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAllBuyInHistory();
+    
+    // Set up real-time subscription for buy-in history updates
+    const client = token ? createSharedClient(token) : supabase;
+    
+    const channel = client
+      .channel('buy_in_history_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'buy_in_history',
+        },
+        () => {
+          // Refetch history when any change occurs
+          fetchAllBuyInHistory();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      channel.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameId, token]);
 
   const filteredHistory = history.filter(entry => 
     filterName === FILTER_NONE || filterName === FILTER_ALL || entry.player_name === filterName
