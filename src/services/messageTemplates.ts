@@ -119,8 +119,8 @@ Here are your settlement details:
           settlement.amount,
           data.gameDate ? `Poker settlement - ${data.gameDate}` : 'Poker settlement'
         );
-        // Format as clickable link with hyperlink for better readability
-        message += `   💰 <a href="${upiLink}">Tap to Pay via UPI</a>\n`;
+        // Plain UPI link - email service will convert to clickable button automatically
+        message += `   ${upiLink}\n`;
         message += `   📱 UPI ID: ${settlement.toUpiId}\n`;
       }
       // Add transaction reference if available

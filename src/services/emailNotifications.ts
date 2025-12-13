@@ -13,6 +13,7 @@ import {
   formatMessageDate,
 } from "./messageTemplates";
 import { Player, Settlement } from "@/types/poker";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface NotificationResult {
   success: boolean;
@@ -172,7 +173,6 @@ export async function sendSettlementNotifications(
   const confirmationsMap = new Map<string, string>();
   if (gameId) {
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
       const { data: confirmations } = await supabase
         .from("settlement_confirmations")
         .select("id, settlement_from, settlement_to")
