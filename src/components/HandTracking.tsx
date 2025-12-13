@@ -2194,145 +2194,92 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         {/* Community Cards Display - Separate from table (mobile flow on desktop) */}
         {(flopCards || turnCard || riverCard) && (
           <div className="mb-6 bg-gradient-to-br from-green-900/20 to-green-800/20 p-4 rounded-xl border border-green-700/30">
-            <div className="flex gap-4 items-center flex-wrap">
-              {/* Flop */}
-              {flopCards && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold text-muted-foreground">FLOP</span>
-                  <div className="flex gap-1">
-                    {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={idx} card={card} size="sm" />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Turn - only show if flop cards have been dealt (poker rules) */}
-              {turnCard && flopCards && (
-                <>
-                  <div className="h-12 w-px bg-green-700/50"></div>
+            <div className="flex gap-4 items-center flex-wrap justify-between">
+              <div className="flex gap-4 items-center flex-wrap">
+                {/* Flop */}
+                {flopCards && (
                   <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground">TURN</span>
+                    <span className="text-xs font-semibold text-muted-foreground">FLOP</span>
                     <div className="flex gap-1">
-                      <PokerCard card={turnCard} size="sm" />
+                      {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                        <PokerCard key={idx} card={card} size="sm" />
+                      ))}
                     </div>
                   </div>
-                </>
-              )}
-              
-              {/* River - only show if turn card has been dealt (poker rules) */}
-              {riverCard && turnCard && (
-                <>
-                  <div className="h-12 w-px bg-green-700/50"></div>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground">RIVER</span>
-                    <div className="flex gap-1">
-                      <PokerCard card={riverCard} size="sm" />
+                )}
+                
+                {/* Turn - only show if flop cards have been dealt (poker rules) */}
+                {turnCard && flopCards && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-semibold text-muted-foreground">TURN</span>
+                      <div className="flex gap-1">
+                        <PokerCard card={turnCard} size="sm" />
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
+                
+                {/* River - only show if turn card has been dealt (poker rules) */}
+                {riverCard && turnCard && (
+                  <>
+                    <div className="h-12 w-px bg-green-700/50"></div>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-semibold text-muted-foreground">RIVER</span>
+                      <div className="flex gap-1">
+                        <PokerCard card={riverCard} size="sm" />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {/* Edit Cards button - moved to community cards display */}
+              <Button 
+                onClick={handleEditCards} 
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+              >
+                ✏️ Edit Cards
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Card preview - shown only for just-added community cards until next betting action */}
-        {stage === 'flop' && flopCards && cardsJustAdded && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
-              <span className="text-sm font-semibold">Flop:</span>
-              <div className="flex gap-1">
-                {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                  <PokerCard key={idx} card={card} size="xs" />
-                ))}
-              </div>
-            </div>
-            {currentPlayer && (
-              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                  👉 {currentPlayer.player.name} to act first
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-        {stage === 'turn' && turnCard && cardsJustAdded && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
-              <span className="text-sm font-semibold">Turn:</span>
-              <PokerCard card={turnCard} size="xs" />
-            </div>
-            {currentPlayer && (
-              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                  👉 {currentPlayer.player.name} to act first
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-        {stage === 'river' && riverCard && cardsJustAdded && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg border border-border">
-              <span className="text-sm font-semibold">River:</span>
-              <PokerCard card={riverCard} size="xs" />
-            </div>
-            {currentPlayer && (
-              <div className="bg-amber-500/20 border border-amber-500/50 p-2 rounded-lg text-center">
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                  👉 {currentPlayer.player.name} to act first
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Desktop: Button to open card selector when cards need to be selected or when editing */}
-        {(showDesktopCardSelector || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
-          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-2 border-amber-500/50 p-4 rounded-xl">
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-                  🎴 {stage === 'flop' ? 'Select Flop Cards (3)' : stage === 'turn' ? 'Select Turn Card (1)' : 'Select River Card (1)'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Click the button below to open the card selector grid.
-                </p>
-              </div>
-              
-              <CardSelector
-                maxCards={stage === 'flop' ? 3 : 1}
-                usedCards={(() => {
-                  const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-                  return getUsedCards(editingCards);
-                })()}
-                selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
-                onSelect={(cards) => {
-                  if (stage === 'flop') {
-                    setFlopCards(cards);
-                    setCardsJustAdded(true);
-                  } else if (stage === 'turn') {
-                    setTurnCard(cards);
-                    setCardsJustAdded(true);
-                  } else if (stage === 'river') {
-                    setRiverCard(cards);
-                    setCardsJustAdded(true);
-                  }
-                  setTempCommunityCards('');
-                  setShowDesktopCardSelector(false);
-                }}
-                label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
-                trigger={
-                  <Button variant="default" size="lg" className="w-full gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    {showDesktopCardSelector ? 'Reopen Card Selector' : 'Open Card Selector'}
-                  </Button>
-                }
-                knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
-              />
-            </div>
-          </div>
-        )}
+        {/* Desktop: Card selector dialog - auto-opens when cards need to be selected */}
+        <CardSelector
+          maxCards={stage === 'flop' ? 3 : 1}
+          usedCards={(() => {
+            const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+            return getUsedCards(editingCards);
+          })()}
+          selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
+          onSelect={(cards) => {
+            if (stage === 'flop') {
+              setFlopCards(cards);
+              setCardsJustAdded(true);
+            } else if (stage === 'turn') {
+              setTurnCard(cards);
+              setCardsJustAdded(true);
+            } else if (stage === 'river') {
+              setRiverCard(cards);
+              setCardsJustAdded(true);
+            }
+            setTempCommunityCards('');
+            setShowDesktopCardSelector(false);
+          }}
+          label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
+          knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
+          open={showDesktopCardSelector || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              setShowDesktopCardSelector(false);
+              setTempCommunityCards('');
+            }
+          }}
+        />
 
         {/* Action buttons - COMPACT */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
@@ -2420,22 +2367,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
         {/* Navigation buttons - compact */}
         <div className="flex gap-2">
-          {/* Back button - handles undo or edit cards */}
+          {/* Back/Undo button */}
           <Button 
-            onClick={() => {
-              // If cards were just added, edit them instead of undo
-              if (cardsJustAdded) {
-                handleEditCards();
-              } else {
-                undoLastAction();
-              }
-            }} 
+            onClick={undoLastAction} 
             className="h-10 text-sm font-semibold" 
             variant="outline"
             size="default"
-            disabled={!cardsJustAdded && actionHistory.length === 0}
+            disabled={actionHistory.length === 0}
           >
-            {cardsJustAdded ? '✏️ Edit Cards' : '← Back'}
+            ← Back
           </Button>
           {/* Only show Next button when it can be clicked */}
           {canMoveToNextStreet() && (
