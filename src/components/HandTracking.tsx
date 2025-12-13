@@ -2139,16 +2139,50 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Badge>
             </div>
           </div>
-          <div className="flex flex-col items-start sm:items-end gap-1">
-            <Badge variant="secondary" className="text-base sm:text-lg px-4 py-2 bg-amber-500/20 border-amber-500/30">
-              💰 {formatWithBB(potSize)}
-            </Badge>
-            {currentPlayer && (
-              <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                {currentPlayer.player.name}'s turn
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-start sm:items-end gap-1">
+              <Badge variant="secondary" className="text-base sm:text-lg px-4 py-2 bg-amber-500/20 border-amber-500/30">
+                💰 {formatWithBB(potSize)}
+              </Badge>
+              {currentPlayer && (
+                <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  {currentPlayer.player.name}'s turn
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/20"
+              onClick={() => {
+                // Cancel hand tracking - clear saved state and go back to dashboard
+                clearHandState();
+                setStage('setup');
+                setCurrentHand(null);
+                setButtonPlayerId('');
+                setDealtOutPlayers([]);
+                setActivePlayers([]);
+                setActionSequence(0);
+                setPotSize(0);
+                setFlopCards('');
+                setTurnCard('');
+                setRiverCard('');
+                setStreetActions([]);
+                setAllHandActions([]);
+                setPlayersInHand([]);
+                setPlayerHoleCards({});
+                setPlayerBets({});
+                setStreetPlayerBets({});
+                setLastAggressorIndex(null);
+                setActionHistory([]);
+                if (onHandComplete) {
+                  onHandComplete();
+                }
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </CardTitle>
       </CardHeader>

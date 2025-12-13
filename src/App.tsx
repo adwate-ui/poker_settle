@@ -17,6 +17,7 @@ import SharedView from "./pages/SharedView";
 import SharedGameDetail from "./pages/SharedGameDetail";
 import SharedPlayerDetail from "./pages/SharedPlayerDetail";
 import ShortLinkRedirect from "./pages/ShortLinkRedirect";
+import UpiPaymentBouncer from "./pages/UpiPaymentBouncer";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -49,6 +50,7 @@ const AppContent = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile" element={user ? <Profile /> : <Auth />} />
         <Route path="/s/:shortCode" element={<ShortLinkRedirect />} />
+        <Route path="/upi-pay" element={<UpiPaymentBouncer />} />
         <Route path="/shared/:token" element={<SharedView />} />
         <Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />
         <Route path="/shared/:token/player/:playerId" element={<SharedPlayerDetail />} />

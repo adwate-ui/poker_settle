@@ -39,6 +39,29 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
 
   useEffect(() => {
     fetchAllBuyInHistory();
+    
+    // Set up real-time subscription for buy-in history updates
+    const client = token ? createSharedClient(token) : supabase;
+    
+    const channel = client
+      .channel('buy_in_history_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'buy_in_history',
+        },
+        () => {
+          // Refetch history when any change occurs
+          fetchAllBuyInHistory();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      channel.unsubscribe();
+    };
   }, [gameId, token]);
 
   const fetchAllBuyInHistory = async () => {
