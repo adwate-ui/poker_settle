@@ -860,16 +860,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         );
         setCurrentPlayerIndex(nextIndex);
       } else {
-        // Non-fold actions: move to next player normally
-        const nextIndex = getNextPlayerIndex(
-          currentPlayerIndex,
-          stage,
-          activePlayers,
-          buttonIndex,
-          playersInHand
-        );
-        setCurrentPlayerIndex(nextIndex);
-        
         // Check if betting round is now complete after this action
         // If complete, automatically advance to next street
         // Note: streetActions state hasn't updated yet, so we check with the new action included
@@ -894,6 +884,16 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           setTimeout(() => {
             moveToNextStreet();
           }, AUTO_ADVANCE_DELAY_MS);
+        } else {
+          // Only move to next player if betting round is not complete
+          const nextIndex = getNextPlayerIndex(
+            currentPlayerIndex,
+            stage,
+            activePlayers,
+            buttonIndex,
+            playersInHand
+          );
+          setCurrentPlayerIndex(nextIndex);
         }
       }
     } catch (err) {
@@ -1375,6 +1375,33 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   }, [allHandActions]);
 
   const currentPlayer = activePlayers[currentPlayerIndex];
+
+  // Helper function to check if Call button should be shown
+  const shouldShowCallButton = (): boolean => {
+    if (!currentPlayer) return false;
+    
+    // Calculate call amount for current player
+    const callAmount = getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets);
+    
+    // Check if current player is BB in preflop
+    const isBBInPreflop = stage === 'preflop' && 
+      getBigBlindPlayer(activePlayers, buttonPlayerId, seatPositions)?.player_id === currentPlayer.player_id;
+    
+    // BB can check in preflop only if currentBet equals BB amount (no one raised)
+    const bbAmount = game.big_blind || 100;
+    const canBBCheck = isBBInPreflop && currentBet === bbAmount;
+    
+    // Show Call button only if:
+    // 1. callAmount > 0 (there's an amount to call), OR
+    // 2. BB in preflop can check (exception case)
+    return callAmount > 0 || canBBCheck;
+  };
+
+  // Helper function to get call amount for display
+  const getCallAmountForDisplay = (): number => {
+    if (!currentPlayer) return 0;
+    return getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets);
+  };
 
   // Helper function to get badge variant for action type
   const getActionBadgeVariant = (actionType: string): "destructive" | "default" | "secondary" => {
@@ -2039,19 +2066,21 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={() => {
-                  recordAction('Call');
-                  // Reset bet amount after action
-                  setBetAmount('');
-                }} 
-                variant="outline"
-                size="lg"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
-              >
-                {currentBet === 0 ? '✓ Check' : `Call ${currentBet}`}
-              </Button>
+              {shouldShowCallButton() && (
+                <Button 
+                  onClick={() => {
+                    recordAction('Call');
+                    // Reset bet amount after action
+                    setBetAmount('');
+                  }} 
+                  variant="outline"
+                  size="lg"
+                  disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                  className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
+                >
+                  {getCallAmountForDisplay() === 0 ? '✓ Check' : `Call ${getCallAmountForDisplay()}`}
+                </Button>
+              )}
               <Button 
                 onClick={() => {
                   recordAction('Fold');
@@ -2295,18 +2324,20 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={() => recordAction('Call')} 
-                variant="outline"
-                size="default"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
-              >
-                {currentBet === 0 
-                  ? '✓ Check' 
-                  : `🪙 Call ${currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}`
-                }
-              </Button>
+              {shouldShowCallButton() && (
+                <Button 
+                  onClick={() => recordAction('Call')} 
+                  variant="outline"
+                  size="default"
+                  disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                  className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
+                >
+                  {getCallAmountForDisplay() === 0 
+                    ? '✓ Check' 
+                    : `🪙 Call ${formatWithBB(getCallAmountForDisplay())}`
+                  }
+                </Button>
+              )}
               <Button 
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
