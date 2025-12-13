@@ -4,7 +4,7 @@ import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Se
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { sendGameCompletionNotifications, sendSettlementNotifications } from "@/services/emailNotifications";
+import { sendCombinedGameSettlementNotifications } from "@/services/emailNotifications";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { formatMessageDate } from "@/services/messageTemplates";
 import { generateShortCode } from "@/lib/shareUtils";
@@ -391,9 +391,10 @@ export const useGameData = () => {
       // Send notifications even if we couldn't get a token
       // (the notifications can still work without the game link)
       
-      // Send game completion notifications
-      const notificationResult = await sendGameCompletionNotifications(
+      // Send combined game completion and settlement notifications
+      const notificationResult = await sendCombinedGameSettlementNotifications(
         allGamePlayers,
+        settlements,
         gameId,
         gameData.date,
         gameData.buy_in_amount,
@@ -413,28 +414,6 @@ export const useGameData = () => {
         }
       } else {
         toast.success('Game completed!');
-      }
-
-      // Send settlement notifications with UPI payment links
-      if (settlements.length > 0) {
-        // Create a map of players by name
-        const playersMap = new Map<string, Player>();
-        allGamePlayers.forEach(gp => {
-          if (gp.player?.name) {
-            playersMap.set(gp.player.name, gp.player);
-          }
-        });
-
-        const settlementNotificationResult = await sendSettlementNotifications(
-          settlements,
-          playersMap,
-          formatMessageDate(gameData.date),
-          gameId
-        );
-
-        if (settlementNotificationResult.sent > 0) {
-          console.log(`${settlementNotificationResult.sent} settlement email notifications sent with payment links`);
-        }
       }
     } catch (notificationError) {
       // Don't fail the game completion if notifications fail
