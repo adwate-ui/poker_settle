@@ -142,8 +142,9 @@ export const isBettingRoundComplete = (
     }
   }
   
-  // Special preflop rule: SB and BB must have chance to act
+  // Check that all remaining players have acted at least once
   if (stage === 'preflop') {
+    // Preflop: Track non-blind actions separately
     const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
     if (buttonIndex === -1) return false;
     
@@ -154,17 +155,32 @@ export const isBettingRoundComplete = (
     
     if (!sbPlayerId || !bbPlayerId) return false;
     
-    // Count non-blind actions for SB and BB
-    const sbNonBlindActions = streetActions.filter(
-      a => a.player_id === sbPlayerId && a.action_type !== 'Small Blind'
-    ).length;
-    const bbNonBlindActions = streetActions.filter(
-      a => a.player_id === bbPlayerId && a.action_type !== 'Big Blind'
-    ).length;
-    
-    // Both must act at least once after posting blinds
-    if (sbNonBlindActions < 1 || bbNonBlindActions < 1) {
-      return false;
+    // Check that ALL remaining players have acted (excluding blind posts)
+    for (const player of remainingPlayers) {
+      const playerId = player.player_id;
+      
+      // For SB and BB, count non-blind actions
+      if (playerId === sbPlayerId) {
+        const sbNonBlindActions = streetActions.filter(
+          a => a.player_id === sbPlayerId && a.action_type !== 'Small Blind'
+        ).length;
+        if (sbNonBlindActions < 1) {
+          return false;
+        }
+      } else if (playerId === bbPlayerId) {
+        const bbNonBlindActions = streetActions.filter(
+          a => a.player_id === bbPlayerId && a.action_type !== 'Big Blind'
+        ).length;
+        if (bbNonBlindActions < 1) {
+          return false;
+        }
+      } else {
+        // For other players, check if they have any action
+        const hasActed = streetActions.some(a => a.player_id === playerId);
+        if (!hasActed) {
+          return false;
+        }
+      }
     }
   } else {
     // Postflop: All remaining players must have acted at least once
