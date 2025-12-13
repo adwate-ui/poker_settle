@@ -98,7 +98,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
     const client = token ? createSharedClient(token) : supabase;
     
     const channel = client
-      .channel('buy_in_history_changes')
+      .channel(`buy_in_history_changes_${gameId}`)
       .on(
         'postgres_changes',
         {

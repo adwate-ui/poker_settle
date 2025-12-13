@@ -11,7 +11,7 @@ import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import CardNotationInput from './CardNotationInput';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
@@ -102,6 +102,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const [tempCommunityCards, setTempCommunityCards] = useState<string>(''); // Temporary state for community card selection before confirm
   const [showMobileHandTracking, setShowMobileHandTracking] = useState(false); // Control mobile drawer visibility
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT_PX : false); // Track if we're on mobile (SSR-safe)
+  const [showDesktopCardSelector, setShowDesktopCardSelector] = useState(false); // Track if desktop card selector should be shown (for editing)
   const [actionHistory, setActionHistory] = useState<Array<{
     stage: HandStage;
     currentPlayerIndex: number;
@@ -989,15 +990,27 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (stage === 'flop' && flopCards) {
       setCardSelectorType('flop');
       setTempCommunityCards(flopCards); // Initialize temp with current cards
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     } else if (stage === 'turn' && turnCard) {
       setCardSelectorType('turn');
       setTempCommunityCards(turnCard); // Initialize temp with current card
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     } else if (stage === 'river' && riverCard) {
       setCardSelectorType('river');
       setTempCommunityCards(riverCard); // Initialize temp with current card
-      setShowCardSelector(true);
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
     }
   };
 
@@ -2274,8 +2287,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop: Inline card selector when cards need to be selected */}
-        {((stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
+        {/* Desktop: Button to open card selector when cards need to be selected or when editing */}
+        {(showDesktopCardSelector || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard && flopCards) || (stage === 'river' && !riverCard && turnCard)) && (
           <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-2 border-amber-500/50 p-4 rounded-xl">
             <div className="space-y-4">
               <div>
@@ -2283,144 +2296,40 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   🎴 {stage === 'flop' ? 'Select Flop Cards (3)' : stage === 'turn' ? 'Select Turn Card (1)' : 'Select River Card (1)'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {stage === 'flop' ? 'Click 3 cards from the grid below' : 'Click 1 card from the grid below'}. Already used cards are greyed out.
+                  Click the button below to open the card selector grid.
                 </p>
               </div>
               
-              {/* Selected cards preview */}
-              {tempCommunityCards && (
-                <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/30">
-                  <span className="text-sm font-semibold">Selected:</span>
-                  <div className="flex gap-1">
-                    {tempCommunityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                      <PokerCard key={idx} card={card} size="xs" />
-                    ))}
-                  </div>
-                  <span className="text-xs text-muted-foreground ml-auto">
-                    {tempCommunityCards.match(/.{1,2}/g)?.length || 0}/{stage === 'flop' ? 3 : 1}
-                  </span>
-                </div>
-              )}
-              
-              {/* Card grid by suit - Inline on desktop */}
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {[
-                  { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
-                  { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
-                  { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
-                  { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
-                ].map(suit => {
-                  const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
-                  const cardsBeingEdited = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-                  const usedCards = getUsedCards(cardsBeingEdited);
-                  const knownHoleCards = Object.values(playerHoleCards).flatMap(cards => cards.match(/.{1,2}/g) || []);
-                  const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-                  
-                  return (
-                    <div key={suit.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                        <span className={`text-xl ${suit.color}`}>{suit.symbol}</span>
-                        <h4 className="font-semibold text-sm">{suit.name}</h4>
-                      </div>
-                      <div className="grid grid-cols-13 gap-0.5">
-                        {ranks.map(rank => {
-                          const card = `${rank}${suit.code}`;
-                          const isUsed = usedCards.includes(card);
-                          const isKnownHole = knownHoleCards.includes(card);
-                          const isSelected = currentSelection.includes(card);
-                          
-                          return (
-                            <button
-                              key={card}
-                              onClick={() => {
-                                if (isUsed || isKnownHole) return;
-                                
-                                if (isSelected) {
-                                  const newSelection = currentSelection.filter(c => c !== card);
-                                  setTempCommunityCards(newSelection.join(''));
-                                } else {
-                                  const maxCards = stage === 'flop' ? 3 : 1;
-                                  if (currentSelection.length < maxCards) {
-                                    const newSelection = [...currentSelection, card];
-                                    setTempCommunityCards(newSelection.join(''));
-                                  }
-                                }
-                              }}
-                              disabled={isUsed || isKnownHole}
-                              className={`relative aspect-[5/7] w-full transition-all duration-200 rounded touch-manipulation ${
-                                (isUsed || isKnownHole) ? 'opacity-30 cursor-not-allowed grayscale' : ''
-                              } ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg' : ''} ${
-                                !isUsed && !isKnownHole && !isSelected ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' : ''
-                              }`}
-                            >
-                              <PokerCard card={card} size="xs" className="pointer-events-none" />
-                              {isUsed && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
-                                  <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
-                                    USED
-                                  </div>
-                                </div>
-                              )}
-                              {isKnownHole && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
-                                  <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
-                                    HOLE
-                                  </div>
-                                </div>
-                              )}
-                              {isSelected && (
-                                <div className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg pointer-events-none">
-                                  ✓
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Action buttons */}
-              <div className="flex gap-2 pt-2 border-t">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setTempCommunityCards('');
-                  }} 
-                  className="flex-1"
-                  disabled={!tempCommunityCards}
-                >
-                  Clear Selection
-                </Button>
-                <Button 
-                  onClick={() => {
-                    const maxCards = stage === 'flop' ? 3 : 1;
-                    const currentSelection = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-                    if (currentSelection.length === maxCards) {
-                      if (stage === 'flop') {
-                        setFlopCards(tempCommunityCards);
-                        setCardsJustAdded(true);
-                      } else if (stage === 'turn') {
-                        setTurnCard(tempCommunityCards);
-                        setCardsJustAdded(true);
-                      } else if (stage === 'river') {
-                        setRiverCard(tempCommunityCards);
-                        setCardsJustAdded(true);
-                      }
-                      setTempCommunityCards('');
-                    }
-                  }}
-                  disabled={
-                    (stage === 'flop' && (!tempCommunityCards || tempCommunityCards.match(/.{1,2}/g)?.length !== 3)) ||
-                    ((stage === 'turn' || stage === 'river') && !tempCommunityCards)
+              <CardSelector
+                maxCards={stage === 'flop' ? 3 : 1}
+                usedCards={(() => {
+                  const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+                  return getUsedCards(editingCards);
+                })()}
+                selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
+                onSelect={(cards) => {
+                  if (stage === 'flop') {
+                    setFlopCards(cards);
+                    setCardsJustAdded(true);
+                  } else if (stage === 'turn') {
+                    setTurnCard(cards);
+                    setCardsJustAdded(true);
+                  } else if (stage === 'river') {
+                    setRiverCard(cards);
+                    setCardsJustAdded(true);
                   }
-                  className="flex-1 font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
-                >
-                  Confirm Selection
-                </Button>
-              </div>
+                  setTempCommunityCards('');
+                  setShowDesktopCardSelector(false);
+                }}
+                label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
+                trigger={
+                  <Button variant="default" size="lg" className="w-full gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    {showDesktopCardSelector ? 'Reopen Card Selector' : 'Open Card Selector'}
+                  </Button>
+                }
+                knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
+              />
             </div>
           </div>
         )}
@@ -2646,7 +2555,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
              cardSelectorType === 'turn' ? 'Select Turn Card (1)' : 
              'Select River Card (1)'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="sr-only">
             Select {cardSelectorType === 'flop' ? '3 cards for the flop' : '1 card for the ' + cardSelectorType} from the grid below. Already used cards are greyed out.
           </DialogDescription>
         </DialogHeader>
