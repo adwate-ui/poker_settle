@@ -2039,19 +2039,39 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={() => {
-                  recordAction('Call');
-                  // Reset bet amount after action
-                  setBetAmount('');
-                }} 
-                variant="outline"
-                size="lg"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
-              >
-                {currentBet === 0 ? '✓ Check' : `Call ${currentBet}`}
-              </Button>
+              {(() => {
+                // Calculate call amount for current player
+                const callAmount = currentPlayer ? getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets) : 0;
+                
+                // Check if current player is BB in preflop
+                const isBBInPreflop = stage === 'preflop' && currentPlayer && 
+                  getBigBlindPlayer(activePlayers, buttonPlayerId, seatPositions)?.player_id === currentPlayer.player_id;
+                
+                // BB can check in preflop only if currentBet equals BB amount (no one raised)
+                const bbAmount = game.big_blind || 100;
+                const canBBCheck = isBBInPreflop && currentBet === bbAmount;
+                
+                // Show Call button only if:
+                // 1. callAmount > 0 (there's an amount to call), OR
+                // 2. BB in preflop can check (exception case)
+                const shouldShowCallButton = callAmount > 0 || canBBCheck;
+                
+                return shouldShowCallButton ? (
+                  <Button 
+                    onClick={() => {
+                      recordAction('Call');
+                      // Reset bet amount after action
+                      setBetAmount('');
+                    }} 
+                    variant="outline"
+                    size="lg"
+                    disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                    className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
+                  >
+                    {callAmount === 0 ? '✓ Check' : `Call ${callAmount}`}
+                  </Button>
+                ) : null;
+              })()}
               <Button 
                 onClick={() => {
                   recordAction('Fold');
@@ -2295,18 +2315,38 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={() => recordAction('Call')} 
-                variant="outline"
-                size="default"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
-                className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
-              >
-                {currentBet === 0 
-                  ? '✓ Check' 
-                  : `🪙 Call ${currentPlayer && formatWithBB(getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets))}`
-                }
-              </Button>
+              {(() => {
+                // Calculate call amount for current player
+                const callAmount = currentPlayer ? getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets) : 0;
+                
+                // Check if current player is BB in preflop
+                const isBBInPreflop = stage === 'preflop' && currentPlayer && 
+                  getBigBlindPlayer(activePlayers, buttonPlayerId, seatPositions)?.player_id === currentPlayer.player_id;
+                
+                // BB can check in preflop only if currentBet equals BB amount (no one raised)
+                const bbAmount = game.big_blind || 100;
+                const canBBCheck = isBBInPreflop && currentBet === bbAmount;
+                
+                // Show Call button only if:
+                // 1. callAmount > 0 (there's an amount to call), OR
+                // 2. BB in preflop can check (exception case)
+                const shouldShowCallButton = callAmount > 0 || canBBCheck;
+                
+                return shouldShowCallButton ? (
+                  <Button 
+                    onClick={() => recordAction('Call')} 
+                    variant="outline"
+                    size="default"
+                    disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                    className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
+                  >
+                    {callAmount === 0 
+                      ? '✓ Check' 
+                      : `🪙 Call ${formatWithBB(callAmount)}`
+                    }
+                  </Button>
+                ) : null;
+              })()}
               <Button 
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
