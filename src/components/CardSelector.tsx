@@ -109,8 +109,8 @@ const CardSelector = ({
       {trigger && <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>}
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-4">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-4">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center justify-between">
             <span className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -130,13 +130,10 @@ const CardSelector = ({
               )}
             </div>
           </DialogTitle>
-          <DialogDescription className="sr-only">
-            Select {maxCards} cards from the grid below. Already used cards are greyed out.
-          </DialogDescription>
         </DialogHeader>
 
-        {/* Card grid by suit - improved layout */}
-        <div className="space-y-2">
+        {/* Card grid by suit - scrollable area */}
+        <div className="space-y-2 overflow-y-auto flex-1 pr-2">
           {suits.map(suit => (
             <div key={suit.code} className="space-y-1">
               <div className="flex items-center gap-2 pb-0.5 border-b border-border">
@@ -191,8 +188,8 @@ const CardSelector = ({
           ))}
         </div>
 
-        {/* Action buttons - improved styling */}
-        <div className="flex gap-3 pt-3 border-t sticky bottom-0 bg-background">
+        {/* Action buttons - fixed footer */}
+        <div className="flex gap-3 pt-3 border-t flex-shrink-0 bg-background">
           <Button variant="outline" onClick={handleCancel} className="flex-1 h-12 text-base">
             Cancel
           </Button>

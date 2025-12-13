@@ -177,18 +177,23 @@ export const useGameData = () => {
     // If buy_ins are being updated and logging is requested, create a history entry
     if (updates.buy_ins !== undefined && logBuyIn) {
       // First get the current buy_ins
-      const { data: currentData } = await supabase
+      const { data: currentData, error: fetchError } = await supabase
         .from("game_players")
         .select("buy_ins")
         .eq("id", gamePlayerId)
         .single();
+
+      if (fetchError) {
+        console.error("Error fetching current buy_ins:", fetchError);
+        throw fetchError;
+      }
 
       if (currentData) {
         const buyInsAdded = updates.buy_ins - currentData.buy_ins;
         
         // Only log if there's an actual change
         if (buyInsAdded !== 0) {
-          await supabase
+          const { error: insertError } = await supabase
             .from("buy_in_history")
             .insert({
               game_player_id: gamePlayerId,
@@ -196,6 +201,11 @@ export const useGameData = () => {
               total_buy_ins_after: updates.buy_ins,
               timestamp: new Date().toISOString()
             });
+          
+          if (insertError) {
+            console.error("Error inserting buy-in history:", insertError);
+            throw insertError;
+          }
         }
       }
     }
@@ -418,7 +428,8 @@ export const useGameData = () => {
         const settlementNotificationResult = await sendSettlementNotifications(
           settlements,
           playersMap,
-          formatMessageDate(gameData.date)
+          formatMessageDate(gameData.date),
+          gameId
         );
 
         if (settlementNotificationResult.sent > 0) {
