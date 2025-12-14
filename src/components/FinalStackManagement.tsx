@@ -89,7 +89,7 @@ export const FinalStackManagement = ({
                   <Button
                     onClick={() => handleStartEdit(gamePlayer)}
                     variant="filled"
-                    color="blue"
+                    color="gray"
                     size="xs"
                     style={{ padding: '0 8px' }}
                   >

@@ -26,7 +26,7 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount, isLiveGame = false }:
       radius="md" 
       withBorder
       style={{ 
-        borderColor: isLiveGame ? 'var(--mantine-color-gray-4)' : (isProfit ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-red-6)'),
+        borderColor: 'var(--mantine-color-gray-4)',
         borderWidth: 2,
         height: '100%'
       }}
@@ -59,7 +59,7 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount, isLiveGame = false }:
         <Group justify="space-between">
           <Text size="sm" c="dimmed">Total Buy-ins</Text>
           <Group gap="xs">
-            <Badge color="blue" variant="filled">{gamePlayer.buy_ins}</Badge>
+            <Badge color="gray" variant="filled">{gamePlayer.buy_ins}</Badge>
             <Text fw={600} size="sm">Rs. {formatIndianNumber(totalBuyIns)}</Text>
           </Group>
         </Group>

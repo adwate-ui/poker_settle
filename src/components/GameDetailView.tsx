@@ -393,7 +393,7 @@ export const GameDetailView = ({
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
               <p className="text-xs text-muted-foreground font-medium">Total P&L</p>
               <p className="text-sm sm:text-base font-bold text-green-500">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}

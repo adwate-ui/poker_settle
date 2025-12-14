@@ -108,7 +108,7 @@ export const BuyInManagementTable = ({
                       setOpened(true);
                     }}
                     variant="filled"
-                    color="blue"
+                    color="gray"
                     size="xs"
                     style={{ padding: '0 8px' }}
                   >
