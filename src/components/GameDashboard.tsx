@@ -433,18 +433,18 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
           <Collapse in={gameStatsOpen}>
             <div className="pt-4 pb-4">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
-                <p className="text-sm text-muted-foreground font-medium">Buy-ins</p>
-                <p className="text-lg font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Buy-ins</p>
+                <p className="text-sm sm:text-lg font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
               </div>
-              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
-                <p className="text-sm text-muted-foreground font-medium">Final Stack</p>
-                <p className="text-lg font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Final Stack</p>
+                <p className="text-sm sm:text-lg font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
               </div>
-              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
-                <p className="text-sm text-muted-foreground font-medium"># Players</p>
-                <p className="text-lg font-bold text-primary">{gamePlayers.length}</p>
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium"># Players</p>
+                <p className="text-sm sm:text-lg font-bold text-primary">{gamePlayers.length}</p>
               </div>
             </div>
             </div>
