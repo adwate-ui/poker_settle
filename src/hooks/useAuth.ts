@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
+import { initializeUserEmailConfig } from '@/services/userConfigService';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -22,7 +23,7 @@ export const useAuthProvider = () => {
 
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         if (mounted) {
           setSession(session);
@@ -37,18 +38,26 @@ export const useAuthProvider = () => {
           if (event === 'SIGNED_IN' && window.location.hash) {
             window.history.replaceState(null, '', window.location.pathname);
           }
+          // Initialize user email config when user signs in
+          if (event === 'SIGNED_IN' && session?.user?.id) {
+            await initializeUserEmailConfig(session.user.id);
+          }
         }
       }
     );
 
     // Initialize session - this will handle OAuth hash fragments
     // and trigger onAuthStateChange if authentication state changes
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (mounted) {
         // If we have a session from localStorage, set it immediately
         // If there's a hash fragment, Supabase will process it and trigger onAuthStateChange
         setSession(session);
         setUser(session?.user ?? null);
+        // Initialize user email config if session exists
+        if (session?.user?.id) {
+          await initializeUserEmailConfig(session.user.id);
+        }
         // Only set loading to false if we're sure there's no hash fragment to process
         // Check if there are hash params that might be OAuth tokens
         const hasAuthHash = typeof window !== 'undefined' && 
