@@ -204,9 +204,9 @@ const PokerTableView = memo(({
   }, [buttonPlayerId, showPositionLabels, positions, seatPositions]);
 
   return (
-    <div className="relative w-full aspect-square max-w-2xl mx-auto">
+    <div className="relative w-full aspect-square max-w-3xl mx-auto my-2">
       {/* Poker Table - rotated 90 degrees on mobile for portrait mode */}
-      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-100 scale-[0.85]">
+      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-150 scale-[1.275]">
         <div className="relative w-full h-full">
           {/* Stadium-shaped table */}
           <svg viewBox="0 0 100 100" className="w-full h-full">

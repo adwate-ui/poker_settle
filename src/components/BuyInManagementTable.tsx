@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface BuyInManagementTableProps {
   gamePlayers: GamePlayer[];
@@ -63,44 +64,61 @@ export const BuyInManagementTable = ({
     a.player.name.localeCompare(b.player.name)
   );
 
+  const isMobile = useIsMobile();
+
+  // Helper function to abbreviate names for mobile
+  const getDisplayName = (name: string, isMobile: boolean) => {
+    if (!isMobile) return name;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return name;
+    return parts.map((part, idx) => 
+      idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
+    ).join(' ');
+  };
+
   return (
     <>
-      <Group justify="flex-end" mb="md">
-        <Button 
-          leftSection={<Plus size={16} />}
-          onClick={() => setOpened(true)}
-          variant="filled"
-          color="blue"
-          size="md"
-        >
-          Add Buy-in
-        </Button>
-      </Group>
-
-      <Table striped highlightOnHover withTableBorder withColumnBorders>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Player Name</Table.Th>
-            <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Buy-in Count</Table.Th>
-            <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Total Buy-in Amount</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {sortedPlayers.map((gamePlayer) => (
-            <Table.Tr key={gamePlayer.id}>
-              <Table.Td>
-                <Text fw={600} size="sm">{gamePlayer.player.name}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text fw={500} size="sm">{gamePlayer.buy_ins}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text fw={600} size="sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
-              </Table.Td>
+      <div className="overflow-x-auto">
+        <Table striped highlightOnHover withTableBorder withColumnBorders className="bg-card/95">
+          <Table.Thead className="bg-primary/10">
+            <Table.Tr>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Player</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Buy-ins</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Total</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Action</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {sortedPlayers.map((gamePlayer) => (
+              <Table.Tr key={gamePlayer.id}>
+                <Table.Td>
+                  <Text fw={600} size="sm">{getDisplayName(gamePlayer.player.name, isMobile)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text fw={500} size="sm">{gamePlayer.buy_ins}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text fw={600} size="sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Button
+                    leftSection={<Plus size={16} />}
+                    onClick={() => {
+                      setSelectedPlayerId(gamePlayer.id);
+                      setOpened(true);
+                    }}
+                    variant="filled"
+                    color="blue"
+                    size="xs"
+                  >
+                    Buy-in
+                  </Button>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </div>
 
       <Modal
         opened={opened}
