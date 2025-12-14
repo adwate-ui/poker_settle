@@ -8,115 +8,117 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light theme - poker-themed color palette */
+    /* Light theme - Material Design poker palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    --foreground: 158 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 158 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 158 10% 15%;
 
-    /* Poker table green as primary */
-    --primary: 142 76% 36%;
-    --primary-foreground: 210 40% 98%;
+    /* Material Design Green as primary */
+    --primary: 158 64% 42%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Gold as secondary */
+    --secondary: 45 100% 51%;
+    --secondary-foreground: 158 10% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 158 10% 95%;
+    --muted-foreground: 158 8% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 95% 92%;
+    --accent-foreground: 158 10% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 76% 36%;
+    --border: 158 15% 88%;
+    --input: 158 15% 88%;
+    --ring: 158 64% 42%;
 
     /* Custom poker theme tokens */
-    --poker-green: 142 76% 36%;
-    --poker-gold: 45 86% 48%;
-    --poker-felt: 142 40% 25%;
-    --chip-red: 0 84% 60%;
-    --chip-blue: 220 91% 56%;
+    --poker-green: 158 64% 42%;
+    --poker-gold: 45 100% 51%;
+    --poker-felt: 158 50% 30%;
+    --chip-red: 0 70% 50%;
+    --chip-blue: 220 85% 55%;
     --money-green: 142 71% 35%;
-    --money-red: 0 84% 50%;
+    --money-red: 0 70% 45%;
 
     /* Gradients */
-    --gradient-poker: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 40% 25%));
-    --gradient-gold: linear-gradient(135deg, hsl(45 86% 58%), hsl(38 92% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(0 0% 98%), hsl(210 40% 96.1%));
+    --gradient-poker: linear-gradient(135deg, hsl(158 64% 42%), hsl(158 50% 30%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 100% 45%));
+    --gradient-dark: linear-gradient(180deg, hsl(158 10% 20%), hsl(158 10% 15%));
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 142 76% 36%;
+    --sidebar-background: 158 15% 98%;
+    --sidebar-foreground: 158 10% 20%;
+    --sidebar-primary: 158 64% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 90% 95%;
+    --sidebar-accent-foreground: 158 10% 15%;
+    --sidebar-border: 158 15% 88%;
+    --sidebar-ring: 158 64% 42%;
   }
 
   .dark {
-    /* Dark theme - poker-themed color palette */
-    --background: 220 26% 8%;
-    --foreground: 60 30% 96%;
+    /* Dark theme - Material Design poker palette */
+    --background: 158 15% 8%;
+    --foreground: 158 8% 95%;
 
-    --card: 220 22% 12%;
-    --card-foreground: 60 30% 96%;
+    --card: 158 12% 12%;
+    --card-foreground: 158 8% 95%;
 
-    --popover: 220 22% 12%;
-    --popover-foreground: 60 30% 96%;
+    --popover: 158 12% 12%;
+    --popover-foreground: 158 8% 95%;
 
-    /* Poker table green as primary */
-    --primary: 142 76% 36%;
-    --primary-foreground: 220 26% 8%;
+    /* Material Design Green as primary */
+    --primary: 158 64% 52%;
+    --primary-foreground: 158 15% 8%;
 
-    --secondary: 220 20% 18%;
-    --secondary-foreground: 60 30% 96%;
+    /* Gold as secondary */
+    --secondary: 45 100% 60%;
+    --secondary-foreground: 158 15% 8%;
 
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 158 12% 18%;
+    --muted-foreground: 158 8% 65%;
 
-    --accent: 220 20% 18%;
-    --accent-foreground: 60 30% 96%;
+    --accent: 45 80% 25%;
+    --accent-foreground: 158 8% 95%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 20%;
-    --input: 220 20% 16%;
-    --ring: 142 76% 36%;
+    --border: 158 12% 22%;
+    --input: 158 12% 16%;
+    --ring: 158 64% 52%;
 
     /* Custom poker theme tokens */
-    --poker-green: 142 76% 36%;
-    --poker-gold: 45 86% 58%;
-    --poker-felt: 142 40% 25%;
-    --chip-red: 0 84% 60%;
-    --chip-blue: 220 91% 56%;
-    --money-green: 142 71% 45%;
-    --money-red: 0 84% 60%;
+    --poker-green: 158 64% 52%;
+    --poker-gold: 45 100% 60%;
+    --poker-felt: 158 50% 22%;
+    --chip-red: 0 70% 60%;
+    --chip-blue: 220 85% 60%;
+    --money-green: 142 71% 55%;
+    --money-red: 0 70% 60%;
 
     /* Gradients */
-    --gradient-poker: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 40% 25%));
-    --gradient-gold: linear-gradient(135deg, hsl(45 86% 58%), hsl(38 92% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(220 26% 8%), hsl(220 22% 12%));
+    --gradient-poker: linear-gradient(135deg, hsl(158 64% 52%), hsl(158 50% 28%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 60%), hsl(45 100% 52%));
+    --gradient-dark: linear-gradient(180deg, hsl(158 15% 12%), hsl(158 15% 8%));
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 142 76% 36%;
+    --sidebar-background: 158 15% 10%;
+    --sidebar-foreground: 158 8% 95%;
+    --sidebar-primary: 158 64% 52%;
+    --sidebar-primary-foreground: 158 15% 8%;
+    --sidebar-accent: 158 12% 18%;
+    --sidebar-accent-foreground: 158 8% 95%;
+    --sidebar-border: 158 12% 20%;
+    --sidebar-ring: 158 64% 52%;
   }
 }
 
