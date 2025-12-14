@@ -1,55 +1,53 @@
 /**
  * Payment Confirmation Handler
- * Processes incoming WhatsApp messages to auto-confirm payments
+ * Processes incoming WhatsApp/email messages to auto-confirm payments
  */
 
 import { supabase } from "@/integrations/supabase/client";
 import { SettlementConfirmation } from "@/types/poker";
-
-/**
- * Keywords that trigger payment confirmation
- */
-const CONFIRMATION_KEYWORDS = ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
-
-/**
- * Pre-compiled regex patterns for efficient keyword matching
- */
-const CONFIRMATION_PATTERNS = CONFIRMATION_KEYWORDS.map(
-  keyword => new RegExp(`\\b${keyword}\\b`)
-);
+import { getUserPaymentKeywords } from "./userConfigService";
+import { DEFAULT_PAYMENT_KEYWORDS } from "@/constants/paymentKeywords";
 
 /**
  * Check if a message contains a confirmation keyword as a standalone word
  */
-export function isConfirmationMessage(message: string): boolean {
+export function isConfirmationMessage(message: string, keywords: readonly string[] = DEFAULT_PAYMENT_KEYWORDS): boolean {
   const upperMessage = message.trim().toUpperCase();
   
-  // Use pre-compiled patterns for better performance
-  return CONFIRMATION_PATTERNS.some(pattern => pattern.test(upperMessage));
+  // Create regex patterns for the provided keywords
+  const patterns = keywords.map(keyword => new RegExp(`\\b${keyword}\\b`));
+  
+  // Use patterns for matching
+  return patterns.some(pattern => pattern.test(upperMessage));
 }
 
 /**
- * Process incoming WhatsApp message and auto-confirm payments if applicable
- * This function should be called by a webhook handler or message polling service
+ * Process incoming email message and auto-confirm payments if applicable
+ * This function should be called by a webhook handler
  */
 export async function processIncomingMessage(
-  phoneNumber: string,
-  messageText: string
+  email: string,
+  messageText: string,
+  userId: string
 ): Promise<{ confirmed: boolean; settlementsUpdated: number; error?: string }> {
   try {
+    // Get user-specific keywords
+    const keywords = await getUserPaymentKeywords(userId);
+
     // Check if message contains confirmation keyword
-    if (!isConfirmationMessage(messageText)) {
+    if (!isConfirmationMessage(messageText, keywords)) {
       return {
         confirmed: false,
         settlementsUpdated: 0,
       };
     }
 
-    // Get player by phone number
+    // Get player by email address (must belong to the user)
     const { data: player, error: playerError } = await supabase
       .from('players')
       .select('id, name')
-      .eq('phone_number', phoneNumber)
+      .eq('email', email)
+      .eq('user_id', userId)
       .single();
 
     if (playerError) {
