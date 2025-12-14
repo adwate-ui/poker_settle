@@ -150,7 +150,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       ) : (
         <div className="border rounded-lg overflow-hidden">
           <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-            <Table striped highlightOnHover>
+            <Table striped highlightOnHover withTableBorder>
               <Table.Thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                 <Table.Tr>
                   <Table.Th>Player name</Table.Th>

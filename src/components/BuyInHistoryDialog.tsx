@@ -58,7 +58,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
               No buy-in changes recorded yet
             </Text>
           ) : (
-            <Table striped highlightOnHover>
+            <Table striped highlightOnHover withTableBorder>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Player</Table.Th>
