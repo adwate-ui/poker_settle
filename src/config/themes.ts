@@ -4,6 +4,10 @@ export interface ThemeColors {
   // Main colors
   background: string;
   foreground: string;
+  card: string;
+  cardForeground: string;
+  popover: string;
+  popoverForeground: string;
   primary: string;
   primaryForeground: string;
   secondary: string;
@@ -12,6 +16,11 @@ export interface ThemeColors {
   accentForeground: string;
   muted: string;
   mutedForeground: string;
+  destructive: string;
+  destructiveForeground: string;
+  border: string;
+  input: string;
+  ring: string;
   
   // Poker specific
   pokerGreen: string;
@@ -44,6 +53,10 @@ export const themes: Record<ThemeName, Theme> = {
       light: {
         background: '0 0% 100%',
         foreground: '158 10% 15%',
+        card: '0 0% 100%',
+        cardForeground: '158 10% 15%',
+        popover: '0 0% 100%',
+        popoverForeground: '158 10% 15%',
         primary: '158 64% 42%',
         primaryForeground: '0 0% 100%',
         secondary: '45 100% 51%',
@@ -52,6 +65,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '158 10% 15%',
         muted: '158 10% 95%',
         mutedForeground: '158 8% 45%',
+        destructive: '0 70% 50%',
+        destructiveForeground: '0 0% 100%',
+        border: '158 15% 88%',
+        input: '158 15% 88%',
+        ring: '158 64% 42%',
         pokerGreen: '158 64% 42%',
         pokerGold: '45 100% 51%',
         pokerFelt: '158 50% 30%',
@@ -62,6 +80,10 @@ export const themes: Record<ThemeName, Theme> = {
       dark: {
         background: '158 15% 8%',
         foreground: '158 8% 95%',
+        card: '158 12% 12%',
+        cardForeground: '158 8% 95%',
+        popover: '158 12% 12%',
+        popoverForeground: '158 8% 95%',
         primary: '158 64% 52%',
         primaryForeground: '158 15% 8%',
         secondary: '45 100% 60%',
@@ -70,6 +92,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '158 8% 95%',
         muted: '158 12% 18%',
         mutedForeground: '158 8% 65%',
+        destructive: '0 70% 60%',
+        destructiveForeground: '0 0% 100%',
+        border: '158 12% 22%',
+        input: '158 12% 16%',
+        ring: '158 64% 52%',
         pokerGreen: '158 64% 52%',
         pokerGold: '45 100% 60%',
         pokerFelt: '158 50% 22%',
@@ -89,6 +116,10 @@ export const themes: Record<ThemeName, Theme> = {
       light: {
         background: '200 25% 97%',
         foreground: '210 50% 12%',
+        card: '200 20% 98%',
+        cardForeground: '210 50% 12%',
+        popover: '200 20% 98%',
+        popoverForeground: '210 50% 12%',
         primary: '200 85% 42%',
         primaryForeground: '0 0% 100%',
         secondary: '30 85% 52%',
@@ -97,6 +128,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '0 0% 100%',
         muted: '200 20% 90%',
         mutedForeground: '200 15% 35%',
+        destructive: '0 70% 50%',
+        destructiveForeground: '0 0% 100%',
+        border: '200 20% 85%',
+        input: '200 20% 85%',
+        ring: '200 85% 42%',
         pokerGreen: '200 85% 42%',
         pokerGold: '30 85% 52%',
         pokerFelt: '200 55% 32%',
@@ -107,6 +143,10 @@ export const themes: Record<ThemeName, Theme> = {
       dark: {
         background: '210 50% 6%',
         foreground: '200 15% 96%',
+        card: '210 40% 10%',
+        cardForeground: '200 15% 96%',
+        popover: '210 40% 10%',
+        popoverForeground: '200 15% 96%',
         primary: '200 85% 50%',
         primaryForeground: '210 50% 6%',
         secondary: '30 85% 58%',
@@ -115,6 +155,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '210 50% 6%',
         muted: '210 30% 16%',
         mutedForeground: '200 15% 68%',
+        destructive: '0 70% 60%',
+        destructiveForeground: '0 0% 100%',
+        border: '210 30% 20%',
+        input: '210 30% 14%',
+        ring: '200 85% 50%',
         pokerGreen: '200 85% 50%',
         pokerGold: '30 85% 58%',
         pokerFelt: '200 55% 22%',
@@ -138,6 +183,10 @@ export const themes: Record<ThemeName, Theme> = {
       light: {
         background: '0 0% 98%',
         foreground: '0 0% 8%',
+        card: '0 0% 100%',
+        cardForeground: '0 0% 8%',
+        popover: '0 0% 100%',
+        popoverForeground: '0 0% 8%',
         primary: '25 90% 50%',
         primaryForeground: '0 0% 100%',
         secondary: '0 0% 15%',
@@ -146,6 +195,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '0 0% 15%',
         muted: '0 0% 88%',
         mutedForeground: '0 0% 38%',
+        destructive: '0 70% 50%',
+        destructiveForeground: '0 0% 100%',
+        border: '0 0% 85%',
+        input: '0 0% 85%',
+        ring: '25 90% 50%',
         pokerGreen: '25 90% 50%',
         pokerGold: '45 95% 58%',
         pokerFelt: '0 0% 18%',
@@ -156,6 +210,10 @@ export const themes: Record<ThemeName, Theme> = {
       dark: {
         background: '0 0% 6%',
         foreground: '0 0% 96%',
+        card: '0 0% 10%',
+        cardForeground: '0 0% 96%',
+        popover: '0 0% 10%',
+        popoverForeground: '0 0% 96%',
         primary: '25 90% 55%',
         primaryForeground: '0 0% 6%',
         secondary: '0 0% 92%',
@@ -164,6 +222,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '0 0% 96%',
         muted: '0 0% 16%',
         mutedForeground: '0 0% 68%',
+        destructive: '0 70% 60%',
+        destructiveForeground: '0 0% 100%',
+        border: '0 0% 20%',
+        input: '0 0% 14%',
+        ring: '25 90% 55%',
         pokerGreen: '25 90% 55%',
         pokerGold: '45 95% 62%',
         pokerFelt: '0 0% 14%',
@@ -187,6 +250,10 @@ export const themes: Record<ThemeName, Theme> = {
       light: {
         background: '210 20% 97%',
         foreground: '220 35% 12%',
+        card: '210 18% 98%',
+        cardForeground: '220 35% 12%',
+        popover: '210 18% 98%',
+        popoverForeground: '220 35% 12%',
         primary: '25 95% 52%',
         primaryForeground: '0 0% 100%',
         secondary: '210 80% 52%',
@@ -195,6 +262,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '220 35% 12%',
         muted: '210 18% 90%',
         mutedForeground: '220 12% 38%',
+        destructive: '0 70% 50%',
+        destructiveForeground: '0 0% 100%',
+        border: '210 18% 85%',
+        input: '210 18% 85%',
+        ring: '25 95% 52%',
         pokerGreen: '25 95% 52%',
         pokerGold: '55 90% 58%',
         pokerFelt: '210 80% 42%',
@@ -205,6 +277,10 @@ export const themes: Record<ThemeName, Theme> = {
       dark: {
         background: '220 35% 7%',
         foreground: '210 12% 96%',
+        card: '220 28% 11%',
+        cardForeground: '210 12% 96%',
+        popover: '220 28% 11%',
+        popoverForeground: '210 12% 96%',
         primary: '25 95% 58%',
         primaryForeground: '220 35% 7%',
         secondary: '210 80% 58%',
@@ -213,6 +289,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '220 35% 7%',
         muted: '220 22% 17%',
         mutedForeground: '220 10% 68%',
+        destructive: '0 70% 60%',
+        destructiveForeground: '0 0% 100%',
+        border: '220 22% 21%',
+        input: '220 22% 15%',
+        ring: '25 95% 58%',
         pokerGreen: '25 95% 58%',
         pokerGold: '55 90% 62%',
         pokerFelt: '210 80% 32%',
@@ -236,6 +317,10 @@ export const themes: Record<ThemeName, Theme> = {
       light: {
         background: '280 18% 97%',
         foreground: '280 32% 10%',
+        card: '280 16% 98%',
+        cardForeground: '280 32% 10%',
+        popover: '280 16% 98%',
+        popoverForeground: '280 32% 10%',
         primary: '320 80% 58%',
         primaryForeground: '0 0% 100%',
         secondary: '180 85% 52%',
@@ -244,6 +329,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '280 32% 10%',
         muted: '280 14% 91%',
         mutedForeground: '280 10% 40%',
+        destructive: '0 70% 50%',
+        destructiveForeground: '0 0% 100%',
+        border: '280 14% 86%',
+        input: '280 14% 86%',
+        ring: '320 80% 58%',
         pokerGreen: '320 80% 58%',
         pokerGold: '280 75% 68%',
         pokerFelt: '180 85% 42%',
@@ -254,6 +344,10 @@ export const themes: Record<ThemeName, Theme> = {
       dark: {
         background: '280 32% 6%',
         foreground: '280 10% 96%',
+        card: '280 26% 10%',
+        cardForeground: '280 10% 96%',
+        popover: '280 26% 10%',
+        popoverForeground: '280 10% 96%',
         primary: '320 80% 62%',
         primaryForeground: '280 32% 6%',
         secondary: '180 85% 58%',
@@ -262,6 +356,11 @@ export const themes: Record<ThemeName, Theme> = {
         accentForeground: '280 32% 6%',
         muted: '280 22% 16%',
         mutedForeground: '280 8% 68%',
+        destructive: '0 70% 60%',
+        destructiveForeground: '0 0% 100%',
+        border: '280 22% 20%',
+        input: '280 22% 14%',
+        ring: '320 80% 62%',
         pokerGreen: '320 80% 62%',
         pokerGold: '280 75% 72%',
         pokerFelt: '180 85% 38%',
