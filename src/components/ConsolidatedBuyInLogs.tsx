@@ -1,18 +1,10 @@
-import { History, TrendingUp, TrendingDown } from "lucide-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, Table, Text, Group } from "@mantine/core";
 
 // Filter constants
 const FILTER_ALL = "all";
@@ -129,19 +121,16 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       {/* Player Name Filter - Dropdown */}
       {!loading && history.length > 0 && (
         <div className="mb-4">
-          <Select value={filterName} onValueChange={setFilterName}>
-            <SelectTrigger className="w-full sm:w-[250px]">
-              <SelectValue placeholder="Filter by player" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={FILTER_ALL}>All Players</SelectItem>
-              {uniquePlayerNames.map((name) => (
-                <SelectItem key={name} value={name}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Select
+            value={filterName || FILTER_ALL}
+            onChange={(value) => setFilterName(value || FILTER_ALL)}
+            data={[
+              { value: FILTER_ALL, label: 'All Players' },
+              ...uniquePlayerNames.map(name => ({ value: name, label: name }))
+            ]}
+            placeholder="Filter by player"
+            style={{ width: '100%', maxWidth: '250px' }}
+          />
         </div>
       )}
       
@@ -151,50 +140,50 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : history.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <Text ta="center" py="xl" c="dimmed">
           No buy-in changes recorded
-        </div>
+        </Text>
       ) : filteredHistory.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <Text ta="center" py="xl" c="dimmed">
           No buy-in changes found for "{filterName}"
-        </div>
+        </Text>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <div className="max-h-[250px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur-sm z-10">
-                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-                  <TableHead className="font-semibold h-10">Player name</TableHead>
-                  <TableHead className="font-semibold h-10">Incremental buy in</TableHead>
-                  <TableHead className="font-semibold h-10">Updated total buy in</TableHead>
-                  <TableHead className="font-semibold h-10">Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+            <Table striped highlightOnHover withTableBorder>
+              <Table.Thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+                <Table.Tr>
+                  <Table.Th>Player name</Table.Th>
+                  <Table.Th>Incremental buy in</Table.Th>
+                  <Table.Th>Updated total buy in</Table.Th>
+                  <Table.Th>Time</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {filteredHistory.map((entry) => (
-                  <TableRow key={entry.id} className="h-10 hover:bg-primary/5">
-                    <TableCell className="font-medium">{entry.player_name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+                  <Table.Tr key={entry.id}>
+                    <Table.Td><Text fw={500}>{entry.player_name}</Text></Table.Td>
+                    <Table.Td>
+                      <Group gap="xs">
                         {entry.buy_ins_added > 0 ? (
                           <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
                         ) : (
                           <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
                         )}
-                        <span className={`font-semibold ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                        <Text fw={600} c={entry.buy_ins_added > 0 ? "green" : "red"}>
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {entry.total_buy_ins_after}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                    </TableCell>
-                  </TableRow>
+                        </Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td><Text fw={600}>{entry.total_buy_ins_after}</Text></Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                      </Text>
+                    </Table.Td>
+                  </Table.Tr>
                 ))}
-              </TableBody>
+              </Table.Tbody>
             </Table>
           </div>
         </div>

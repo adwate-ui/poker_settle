@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@mantine/core";
 import { useNavigate, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
 import { UserProfile } from "./UserProfile";
@@ -36,25 +36,25 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
           </div>
         </div>
         
-        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-3 sm:mb-4 h-auto">
-            <TabsTrigger value="new-game" className="text-xs sm:text-sm py-2 sm:py-2.5">
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tabs.List grow>
+            <Tabs.Tab value="new-game">
               <span className="hidden xs:inline">New Game</span>
               <span className="xs:hidden">New</span>
-            </TabsTrigger>
-            <TabsTrigger value="games-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+            </Tabs.Tab>
+            <Tabs.Tab value="games-history">
               <span className="hidden xs:inline">Games</span>
               <span className="xs:hidden">Games</span>
-            </TabsTrigger>
-            <TabsTrigger value="players-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+            </Tabs.Tab>
+            <Tabs.Tab value="players-history">
               <span className="hidden xs:inline">Players</span>
               <span className="xs:hidden">Players</span>
-            </TabsTrigger>
-            <TabsTrigger value="hands-history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+            </Tabs.Tab>
+            <Tabs.Tab value="hands-history">
               <span className="hidden xs:inline">Hands</span>
               <span className="xs:hidden">Hands</span>
-            </TabsTrigger>
-          </TabsList>
+            </Tabs.Tab>
+          </Tabs.List>
           
           {children}
         </Tabs>

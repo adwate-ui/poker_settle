@@ -5,28 +5,10 @@
 
 import { useState, useEffect } from "react";
 import { Player } from "@/types/poker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Modal, Button, TextInput, Stack, Text, Group, Select } from "@mantine/core";
+import { toast } from "@/lib/notifications";
 import { validateUpiId, getPaymentMethodIcon } from "@/utils/playerUtils";
 import { Loader2, Mail, CreditCard, User } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface PlayerFormDialogProps {
   open: boolean;
@@ -136,146 +118,140 @@ export const PlayerFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+    <Modal 
+      opened={open} 
+      onClose={() => onOpenChange(false)} 
+      title={title}
+      size="lg"
+    >
+      <Stack gap="xs" mb="md">
+        <Text size="sm" c="dimmed">{description}</Text>
+      </Stack>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {/* Name Field */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center gap-2">
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          {/* Name Field */}
+          <TextInput
+            label={
+              <Group gap="xs">
                 <User className="h-4 w-4" />
-                Player Name *
-              </Label>
-              <Input
-                id="name"
-                placeholder="Enter player name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isSubmitting}
-                required
-                autoFocus
-              />
-            </div>
+                <span>Player Name *</span>
+              </Group>
+            }
+            placeholder="Enter player name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={isSubmitting}
+            required
+            autoFocus
+          />
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2 justify-between">
-                <span className="flex items-center gap-2">
+          {/* Email Field */}
+          <div>
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" fw={500}>
+                <Group gap="xs">
                   <Mail className="h-4 w-4" />
-                  Email Address (Optional)
-                </span>
-                {email && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEmail("")}
-                    className="h-6 px-2 text-xs"
-                    disabled={isSubmitting}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="player@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <p className="text-xs text-muted-foreground">
-                For receiving game reports and payment links. Leave empty to remove.
-              </p>
-            </div>
-
-            {/* UPI ID Field */}
-            <div className="space-y-2">
-              <Label htmlFor="upi" className="flex items-center gap-2 justify-between">
-                <span className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  UPI ID (Optional)
-                </span>
-                {upiId && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setUpiId("")}
-                    className="h-6 px-2 text-xs"
-                    disabled={isSubmitting}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </Label>
-              <Input
-                id="upi"
-                placeholder="username@paytm or 9876543210@ybl"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <p className="text-xs text-muted-foreground">
-                For receiving UPI payment links. Leave empty if player prefers cash payments.
-              </p>
-            </div>
-
-            {/* Payment Preference Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="payment-preference" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Preferred Payment Mode
-              </Label>
-              <Select
-                value={paymentPreference}
-                onValueChange={(value: 'upi' | 'cash') => setPaymentPreference(value)}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger id="payment-preference">
-                  <SelectValue placeholder="Select payment preference" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="upi">
-                    <div className="flex items-center gap-2">
-                      {getPaymentMethodIcon('upi')} UPI
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="cash">
-                    <div className="flex items-center gap-2">
-                      {getPaymentMethodIcon('cash')} Cash
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                You can change this preference anytime
-              </p>
-            </div>
+                  <span>Email Address (Optional)</span>
+                </Group>
+              </Text>
+              {email && (
+                <Button
+                  type="button"
+                  variant="subtle"
+                  size="xs"
+                  onClick={() => setEmail("")}
+                  disabled={isSubmitting}
+                >
+                  Clear
+                </Button>
+              )}
+            </Group>
+            <TextInput
+              type="email"
+              placeholder="player@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <Text size="xs" c="dimmed" mt="xs">
+              For receiving game reports and payment links. Leave empty to remove.
+            </Text>
           </div>
 
-          <DialogFooter>
+          {/* UPI ID Field */}
+          <div>
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" fw={500}>
+                <Group gap="xs">
+                  <CreditCard className="h-4 w-4" />
+                  <span>UPI ID (Optional)</span>
+                </Group>
+              </Text>
+              {upiId && (
+                <Button
+                  type="button"
+                  variant="subtle"
+                  size="xs"
+                  onClick={() => setUpiId("")}
+                  disabled={isSubmitting}
+                >
+                  Clear
+                </Button>
+              )}
+            </Group>
+            <TextInput
+              placeholder="username@paytm or 9876543210@ybl"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <Text size="xs" c="dimmed" mt="xs">
+              For receiving UPI payment links. Leave empty if player prefers cash payments.
+            </Text>
+          </div>
+
+          {/* Payment Preference Selection */}
+          <div>
+            <Text size="sm" fw={500} mb="xs">
+              <Group gap="xs">
+                <CreditCard className="h-4 w-4" />
+                <span>Preferred Payment Mode</span>
+              </Group>
+            </Text>
+            <Select
+              value={paymentPreference}
+              onChange={(value) => setPaymentPreference(value as 'upi' | 'cash')}
+              disabled={isSubmitting}
+              data={[
+                { value: 'upi', label: 'UPI' },
+                { value: 'cash', label: 'Cash' },
+              ]}
+            />
+            <Text size="xs" c="dimmed" mt="xs">
+              You can change this preference anytime
+            </Text>
+          </div>
+
+          <Group justify="flex-end" mt="md">
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              leftSection={isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            >
               {initialData ? "Update" : "Add"} Player
             </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   );
 };

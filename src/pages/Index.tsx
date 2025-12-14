@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { Tabs } from "@mantine/core";
 import TabLayout from "@/components/TabLayout";
 import NewGame from "./NewGame";
 import GamesHistory from "./GamesHistory";
@@ -7,7 +8,6 @@ import PlayersHistory from "./PlayersHistory";
 import PlayerDetail from "./PlayerDetail";
 import HandsHistory from "./HandsHistory";
 import HandDetail from "./HandDetail";
-import { TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
   const location = useLocation();
@@ -17,18 +17,18 @@ const Index = () => {
 
   return (
     <TabLayout>
-      <TabsContent value="new-game">
+      <Tabs.Panel value="new-game">
         <NewGame />
-      </TabsContent>
-      <TabsContent value="games-history">
+      </Tabs.Panel>
+      <Tabs.Panel value="games-history">
         {isGameDetail ? <GameDetail /> : <GamesHistory />}
-      </TabsContent>
-      <TabsContent value="players-history">
+      </Tabs.Panel>
+      <Tabs.Panel value="players-history">
         {isPlayerDetail ? <PlayerDetail /> : <PlayersHistory />}
-      </TabsContent>
-      <TabsContent value="hands-history">
+      </Tabs.Panel>
+      <Tabs.Panel value="hands-history">
         {isHandDetail ? <HandDetail /> : <HandsHistory />}
-      </TabsContent>
+      </Tabs.Panel>
     </TabLayout>
   );
 };

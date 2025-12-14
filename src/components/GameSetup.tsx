@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AlertTriangle, ChevronDown, ChevronUp, Users, Search, Trash2, Play, UserPlus, X, Plus, TrendingUp, TrendingDown, History, Calendar } from "lucide-react";
 import { Player, Game, SeatPosition } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";

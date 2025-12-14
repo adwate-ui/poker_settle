@@ -1,11 +1,8 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Modal, ActionIcon, ScrollArea, Table, Text, Group } from "@mantine/core";
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface BuyInHistoryDialogProps {
   gamePlayerId: string;
@@ -37,88 +34,85 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
-          <History className="w-3.5 h-3.5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <>
+      <ActionIcon variant="subtle" size="sm" onClick={() => setOpen(true)}>
+        <History className="w-3.5 h-3.5" />
+      </ActionIcon>
+      
+      <Modal 
+        opened={open} 
+        onClose={() => setOpen(false)}
+        title={
+          <Group gap="xs">
             <History className="w-5 h-5" />
-            {playerName} - Buy-in History
-          </DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="max-h-[400px]">
+            <span>{playerName} - Buy-in History</span>
+          </Group>
+        }
+        size="lg"
+      >
+        <ScrollArea style={{ maxHeight: 400 }}>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <Text ta="center" py="xl" c="dimmed">Loading...</Text>
           ) : history.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <Text ta="center" py="xl" c="dimmed">
               No buy-in changes recorded yet
-            </div>
+            </Text>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm">Player</TableHead>
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm text-center">Incremental Buy-in</TableHead>
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm">Time</TableHead>
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm text-right">New Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <Table striped highlightOnHover withTableBorder>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Player</Table.Th>
+                  <Table.Th style={{ textAlign: 'center' }}>Incremental Buy-in</Table.Th>
+                  <Table.Th>Time</Table.Th>
+                  <Table.Th style={{ textAlign: 'right' }}>New Total</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {/* Initial buy-in row */}
-                <TableRow className="bg-secondary/5 hover:bg-secondary/20">
-                  <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
-                  <TableCell className="text-center py-2">
-                    <span className="font-semibold text-sm text-muted-foreground">-</span>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground py-2">Initial</TableCell>
-                  <TableCell className="text-right font-semibold py-2 text-sm">
-                    {/* Initial buy-in is always 1 */}
-                    1
-                  </TableCell>
-                </TableRow>
-                {history.map((entry, index) => {
-                  // Since we have an initial row, we need to offset the alternating pattern
-                  const isEvenRow = index % 2 === 0;
-                  return (
-                    <TableRow 
-                      key={entry.id} 
-                      className={`transition-colors ${
-                        isEvenRow 
-                          ? "hover:bg-primary/10" 
-                          : "bg-secondary/5 hover:bg-secondary/20"
-                      }`}
-                    >
-                      <TableCell className="font-medium text-primary py-2 text-sm">{playerName}</TableCell>
-                      <TableCell className="text-center py-2">
-                        <div className="flex items-center justify-center gap-2">
-                          {entry.buy_ins_added > 0 ? (
-                            <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                          ) : (
-                            <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                          )}
-                          <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}>
-                            {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground py-2">
+                <Table.Tr>
+                  <Table.Td><Text fw={500}>{playerName}</Text></Table.Td>
+                  <Table.Td style={{ textAlign: 'center' }}>
+                    <Text fw={600} c="dimmed">-</Text>
+                  </Table.Td>
+                  <Table.Td><Text size="sm" c="dimmed">Initial</Text></Table.Td>
+                  <Table.Td style={{ textAlign: 'right' }}>
+                    <Text fw={600}>1</Text>
+                  </Table.Td>
+                </Table.Tr>
+                {history.map((entry) => (
+                  <Table.Tr key={entry.id}>
+                    <Table.Td><Text fw={500}>{playerName}</Text></Table.Td>
+                    <Table.Td style={{ textAlign: 'center' }}>
+                      <Group gap="xs" justify="center">
+                        {entry.buy_ins_added > 0 ? (
+                          <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        )}
+                        <Text 
+                          fw={600} 
+                          size="sm" 
+                          c={entry.buy_ins_added > 0 ? "orange" : "blue"}
+                        >
+                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                        </Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold py-2 text-sm">
-                        {entry.total_buy_ins_after}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
+                      </Text>
+                    </Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
+                      <Text fw={600}>{entry.total_buy_ins_after}</Text>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
             </Table>
           )}
         </ScrollArea>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   );
 };
