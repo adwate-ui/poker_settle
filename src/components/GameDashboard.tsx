@@ -16,7 +16,6 @@ import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
 import { cn } from "@/lib/utils";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 
 interface GameDashboardProps {
   game: Game;
@@ -45,7 +44,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   
   // Collapsible sections state
   const [gameStatsOpen, setGameStatsOpen] = useState(true);
-  const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
   const [tablePositionOpen, setTablePositionOpen] = useState(true);
   const [playersOpen, setPlayersOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
@@ -435,7 +433,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
           <Collapse in={gameStatsOpen}>
             <div className="pt-4 pb-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
                 <p className="text-sm text-muted-foreground font-medium">Buy-ins</p>
                 <p className="text-lg font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
@@ -443,17 +441,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
                 <p className="text-sm text-muted-foreground font-medium">Final Stack</p>
                 <p className="text-lg font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
-                {!isStackBalanced && (
-                  <p className="text-xs text-destructive font-semibold">Must equal buy-ins</p>
-                )}
               </div>
-              <div className="space-y-1 p-3 rounded-lg bg-green-500/10 border-2 border-green-500/30">
-                <p className="text-sm text-muted-foreground font-medium">Winnings</p>
-                <p className="text-lg font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
-              </div>
-              <div className="space-y-1 p-3 rounded-lg bg-red-500/10 border-2 border-red-500/30">
-                <p className="text-sm text-muted-foreground font-medium">Losses</p>
-                <p className="text-lg font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
+              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-sm text-muted-foreground font-medium"># Players</p>
+                <p className="text-lg font-bold text-primary">{gamePlayers.length}</p>
               </div>
             </div>
             </div>
@@ -535,29 +526,41 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         )}
 
-        {/* Buy-in Logs */}
+        {/* Buy-in Management */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <div 
-            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
-            onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
-          >
-            <Group justify="space-between">
-              <Group gap="xs">
-                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                  <DollarSign className="w-5 h-5" />
-                </div>
-                <Text className="text-poker-gold" size="lg" fw={600}>
-                  Buy-in Logs
-                </Text>
-              </Group>
-              {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-            </Group>
-          </div>
-          <Collapse in={buyInLogsOpen}>
-            <div className="pt-4">
-              <ConsolidatedBuyInLogs gameId={game.id} />
+          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+              <Plus className="w-5 h-5" />
             </div>
-          </Collapse>
+            <Text className="text-poker-gold" size="xl" fw={600}>
+              Buy-in Management
+            </Text>
+          </Group>
+          <div className="pt-4">
+            <BuyInManagementTable
+              gamePlayers={gamePlayers}
+              buyInAmount={game.buy_in_amount}
+              onAddBuyIn={handleAddBuyIn}
+            />
+          </div>
+        </Card>
+
+        {/* Final Stack Management */}
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <Text className="text-poker-gold" size="xl" fw={600}>
+              Final Stack Management
+            </Text>
+          </Group>
+          <div className="pt-4">
+            <FinalStackManagement
+              gamePlayers={gamePlayers}
+              onUpdateFinalStack={handleUpdateFinalStack}
+            />
+          </div>
         </Card>
 
         {/* Players Section */}
@@ -743,43 +746,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </div>
             </Stack>
           </Collapse>
-        </Card>
-
-        {/* Buy-in Management */}
-        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
-            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-              <Plus className="w-5 h-5" />
-            </div>
-            <Text className="text-poker-gold" size="xl" fw={600}>
-              Buy-in Management
-            </Text>
-          </Group>
-          <div className="pt-4">
-            <BuyInManagementTable
-              gamePlayers={gamePlayers}
-              buyInAmount={game.buy_in_amount}
-              onAddBuyIn={handleAddBuyIn}
-            />
-          </div>
-        </Card>
-
-        {/* Final Stack Management */}
-        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
-            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-              <DollarSign className="w-5 h-5" />
-            </div>
-            <Text className="text-poker-gold" size="xl" fw={600}>
-              Final Stack Management
-            </Text>
-          </Group>
-          <div className="pt-4">
-            <FinalStackManagement
-              gamePlayers={gamePlayers}
-              onUpdateFinalStack={handleUpdateFinalStack}
-            />
-          </div>
         </Card>
 
         {manualTransfers.length > 0 && (

@@ -2151,7 +2151,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           onHandComplete();
         }
       }} modal={true} dismissible={true}>
-        <DrawerContent className="h-[95vh] overflow-hidden">
+        <DrawerContent className="max-h-[95vh] overflow-y-auto">
           {handTrackingContent}
         </DrawerContent>
       </Drawer>

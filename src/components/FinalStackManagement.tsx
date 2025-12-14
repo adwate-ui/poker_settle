@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Table, Collapse, Button, NumberInput, Group, Text, ActionIcon, Stack } from '@mantine/core';
-import { ChevronDown, ChevronUp, Edit, Check, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Table, Modal, NumberInput, Group, Text, Button, Stack } from '@mantine/core';
+import { Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
@@ -15,21 +15,17 @@ export const FinalStackManagement = ({
   onUpdateFinalStack 
 }: FinalStackManagementProps) => {
   const [opened, setOpened] = useState(false);
-  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [editValue, setEditValue] = useState<number | string>(0);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStartEdit = (gamePlayer: GamePlayer) => {
-    setEditingPlayerId(gamePlayer.id);
+    setSelectedPlayerId(gamePlayer.id);
     setEditValue(gamePlayer.final_stack || 0);
+    setOpened(true);
   };
 
-  const handleCancelEdit = () => {
-    setEditingPlayerId(null);
-    setEditValue(0);
-  };
-
-  const handleSaveEdit = async (gamePlayerId: string) => {
+  const handleSaveEdit = async () => {
     if (typeof editValue !== 'number' || editValue < 0) {
       toast.error('Please enter a valid stack amount');
       return;
@@ -37,9 +33,11 @@ export const FinalStackManagement = ({
 
     setIsUpdating(true);
     try {
-      await onUpdateFinalStack(gamePlayerId, editValue);
+      await onUpdateFinalStack(selectedPlayerId, editValue);
       toast.success('Final stack updated');
-      setEditingPlayerId(null);
+      setOpened(false);
+      setSelectedPlayerId('');
+      setEditValue(0);
     } catch (error) {
       console.error('Error updating final stack:', error);
       toast.error('Failed to update final stack');
@@ -52,89 +50,111 @@ export const FinalStackManagement = ({
     a.player.name.localeCompare(b.player.name)
   );
 
-  return (
-    <Stack gap="md">
-      <Button
-        onClick={() => setOpened(!opened)}
-        variant="subtle"
-        fullWidth
-        rightSection={opened ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        size="md"
-      >
-        {opened ? 'Hide' : 'Show'} Final Stack Details
-      </Button>
+  // Helper function to abbreviate names for mobile
+  const getDisplayName = (name: string, isMobile: boolean) => {
+    if (!isMobile) return name;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return name;
+    return parts.map((part, idx) => 
+      idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
+    ).join(' ');
+  };
 
-      <Collapse in={opened}>
-        <Table striped highlightOnHover withTableBorder withColumnBorders>
-          <Table.Thead>
+  // Check if mobile (simplified check based on window width)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const selectedPlayer = sortedPlayers.find(gp => gp.id === selectedPlayerId);
+
+  return (
+    <>
+      <div className="overflow-x-auto">
+        <Table striped highlightOnHover withTableBorder withColumnBorders className="bg-card/95">
+          <Table.Thead className="bg-primary/10">
             <Table.Tr>
-              <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Player Name</Table.Th>
-              <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Final Stack</Table.Th>
-              <Table.Th style={{ fontSize: '0.95rem', fontWeight: 700 }}>Actions</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Player</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Final Stack</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Action</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {sortedPlayers.map((gamePlayer) => {
-              const isEditing = editingPlayerId === gamePlayer.id;
-
-              return (
-                <Table.Tr key={gamePlayer.id}>
-                  <Table.Td>
-                    <Text fw={600} size="sm">{gamePlayer.player.name}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    {isEditing ? (
-                      <NumberInput
-                        value={editValue}
-                        onChange={setEditValue}
-                        min={0}
-                        size="sm"
-                        style={{ width: '150px' }}
-                        placeholder="Enter amount"
-                      />
-                    ) : (
-                      <Text fw={600} size="sm">Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}</Text>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    {isEditing ? (
-                      <Group gap="xs">
-                        <ActionIcon
-                          color="green"
-                          variant="filled"
-                          onClick={() => handleSaveEdit(gamePlayer.id)}
-                          loading={isUpdating}
-                          size="sm"
-                        >
-                          <Check size={16} />
-                        </ActionIcon>
-                        <ActionIcon
-                          color="red"
-                          variant="filled"
-                          onClick={handleCancelEdit}
-                          disabled={isUpdating}
-                          size="sm"
-                        >
-                          <X size={16} />
-                        </ActionIcon>
-                      </Group>
-                    ) : (
-                      <ActionIcon
-                        color="blue"
-                        variant="light"
-                        onClick={() => handleStartEdit(gamePlayer)}
-                        size="sm"
-                      >
-                        <Edit size={16} />
-                      </ActionIcon>
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              );
-            })}
+            {sortedPlayers.map((gamePlayer) => (
+              <Table.Tr key={gamePlayer.id}>
+                <Table.Td>
+                  <Text fw={600} size="sm">{getDisplayName(gamePlayer.player.name, isMobile)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text fw={600} size="sm">Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Button
+                    leftSection={<Edit size={16} />}
+                    onClick={() => handleStartEdit(gamePlayer)}
+                    variant="filled"
+                    color="blue"
+                    size="xs"
+                  >
+                    Edit
+                  </Button>
+                </Table.Td>
+              </Table.Tr>
+            ))}
           </Table.Tbody>
         </Table>
-      </Collapse>
-    </Stack>
+      </div>
+
+      <Modal
+        opened={opened}
+        onClose={() => {
+          setOpened(false);
+          setSelectedPlayerId('');
+          setEditValue(0);
+        }}
+        title={<Text fw={700} size="lg">Edit Final Stack</Text>}
+        centered
+        size="md"
+      >
+        <Stack gap="md">
+          <Text size="sm" fw={500}>
+            Player: {selectedPlayer?.player.name}
+          </Text>
+
+          <NumberInput
+            label="Final Stack Amount"
+            placeholder="Enter final stack"
+            value={editValue}
+            onChange={setEditValue}
+            min={0}
+            required
+          />
+
+          <Group justify="flex-end" mt="md">
+            <Button 
+              variant="default" 
+              onClick={() => {
+                setOpened(false);
+                setSelectedPlayerId('');
+                setEditValue(0);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveEdit}
+              loading={isUpdating}
+              disabled={!editValue}
+            >
+              Save
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </>
   );
 };
