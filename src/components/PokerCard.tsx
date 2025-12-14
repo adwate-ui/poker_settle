@@ -4,7 +4,7 @@ import { useCardBackDesign } from '@/hooks/useCardBackDesign';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -14,6 +14,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   // Handle card back - use SVG for better quality
   if (!card || card === 'back' || card === '??') {
     const sizeMap = {
+      xxs: { width: 32, height: 46 },
       xs: { width: 40, height: 58 },
       sm: { width: 58, height: 84 },
       md: { width: 78, height: 112 },
@@ -47,6 +48,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const sizes = {
+    xxs: 'w-[32px] h-[46px]',
     xs: 'w-[40px] h-[58px]',
     sm: 'w-[58px] h-[84px]',
     md: 'w-[78px] h-[112px]',
@@ -54,6 +56,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const rankSizes = {
+    xxs: 'text-xs',
     xs: 'text-sm',
     sm: 'text-xl',
     md: 'text-3xl',
@@ -61,6 +64,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const suitSizes = {
+    xxs: 'text-lg',
     xs: 'text-xl',
     sm: 'text-3xl',
     md: 'text-5xl',
@@ -68,6 +72,7 @@ const PokerCard = memo(({ card, size = 'md', className = '' }: PokerCardProps) =
   };
 
   const cornerSizes = {
+    xxs: 'p-0.5',
     xs: 'p-0.5',
     sm: 'p-1',
     md: 'p-1.5',

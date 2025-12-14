@@ -379,21 +379,21 @@ export const GameDetailView = ({
             </Button>
           </Group>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Buy-in</p>
-              <p className="text-sm sm:text-base font-bold text-primary">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+              <p className="text-sm sm:text-base font-bold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Players</p>
-              <p className="text-sm sm:text-base font-bold text-primary">{gamePlayers.length}</p>
+              <p className="text-sm sm:text-base font-bold">{gamePlayers.length}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Chips in play</p>
-              <p className="text-sm sm:text-base font-bold text-primary">
+              <p className="text-sm sm:text-base font-bold">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Total P&L</p>
               <p className="text-sm sm:text-base font-bold text-green-500">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
@@ -410,8 +410,8 @@ export const GameDetailView = ({
           onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
         >
           <Group justify="space-between">
-            <Text className="text-primary" size="lg" fw={600}>Buy-in Logs</Text>
-            {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <Text className="text-white dark:text-white" size="lg" fw={600}>Buy-in Logs</Text>
+            {buyInLogsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
           </Group>
         </div>
         <Collapse in={buyInLogsOpen}>
@@ -478,8 +478,8 @@ export const GameDetailView = ({
           onClick={() => setPlayerResultsOpen(!playerResultsOpen)}
         >
           <Group justify="space-between">
-            <Text className="text-primary" size="lg" fw={600}>Player Results</Text>
-            {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <Text className="text-white dark:text-white" size="lg" fw={600}>Player Results</Text>
+            {playerResultsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
           </Group>
         </div>
         <Collapse in={playerResultsOpen}>
@@ -595,11 +595,11 @@ export const GameDetailView = ({
           <Group justify="space-between" wrap="wrap">
             <Group gap="xs">
               <span className="text-2xl">💰</span>
-              <Text className="text-primary" size="lg" fw={600}>
+              <Text className="text-white dark:text-white" size="lg" fw={600}>
                 Settlements
               </Text>
             </Group>
-            {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            {settlementsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
           </Group>
           {showOwnerControls && settlementsOpen && (
             <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
