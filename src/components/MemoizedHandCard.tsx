@@ -113,7 +113,7 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/hands/${hand.id}`)}>
       <Stack gap="sm">
-        {/* First row: Date, Button, Winner, Pot Size, and Result Badge */}
+        {/* First row: Hand number, result badge, date, button, winner, and pot size */}
         <div className="flex items-start justify-between gap-2">
           <Stack gap="xs" className="flex-1">
             <Group gap="xs" wrap="wrap">

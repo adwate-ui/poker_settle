@@ -27,7 +27,7 @@ export const FinalStackManagement = ({
   };
 
   const handleSaveEdit = async () => {
-    if (typeof editValue !== 'number' || editValue < 0) {
+    if (editValue === '' || editValue == null || typeof editValue !== 'number' || editValue < 0) {
       toast.error('Please enter a valid stack amount');
       return;
     }
