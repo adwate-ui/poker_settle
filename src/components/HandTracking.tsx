@@ -54,6 +54,27 @@ const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when au
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
 const MOBILE_BREAKPOINT_PX = 640; // Mobile breakpoint in pixels (matches Tailwind's sm: breakpoint)
 
+// Helper function to open card selector for the appropriate street
+const openCardSelectorForStreet = (
+  stage: HandStage,
+  isMobile: boolean,
+  setCardSelectorType: (type: 'flop' | 'turn' | 'river') => void,
+  setTempCommunityCards: (cards: string) => void,
+  setShowCardSelector: (show: boolean) => void,
+  setShowDesktopCardSelector: (show: boolean) => void
+) => {
+  const cardType = stage === 'flop' ? 'flop' : stage === 'turn' ? 'turn' : stage === 'river' ? 'river' : null;
+  if (!cardType) return;
+  
+  setCardSelectorType(cardType);
+  setTempCommunityCards('');
+  if (isMobile) {
+    setShowCardSelector(true);
+  } else {
+    setShowDesktopCardSelector(true);
+  }
+};
+
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -347,30 +368,20 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (!currentHand || stage === 'setup' || stage === 'showdown') return;
     
     // Auto-open card selector when cards need to be selected for current street
-    if (stage === 'flop' && !flopCards) {
-      setCardSelectorType('flop');
-      setTempCommunityCards('');
-      if (isMobile) {
-        setShowCardSelector(true);
-      } else {
-        setShowDesktopCardSelector(true);
-      }
-    } else if (stage === 'turn' && !turnCard && flopCards) {
-      setCardSelectorType('turn');
-      setTempCommunityCards('');
-      if (isMobile) {
-        setShowCardSelector(true);
-      } else {
-        setShowDesktopCardSelector(true);
-      }
-    } else if (stage === 'river' && !riverCard && turnCard) {
-      setCardSelectorType('river');
-      setTempCommunityCards('');
-      if (isMobile) {
-        setShowCardSelector(true);
-      } else {
-        setShowDesktopCardSelector(true);
-      }
+    const shouldOpenSelector = 
+      (stage === 'flop' && !flopCards) ||
+      (stage === 'turn' && !turnCard && flopCards) ||
+      (stage === 'river' && !riverCard && turnCard);
+    
+    if (shouldOpenSelector) {
+      openCardSelectorForStreet(
+        stage,
+        isMobile,
+        setCardSelectorType,
+        setTempCommunityCards,
+        setShowCardSelector,
+        setShowDesktopCardSelector
+      );
     }
   }, [stage, flopCards, turnCard, riverCard, currentHand, isMobile]);
 
@@ -2164,17 +2175,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           (stage === 'turn' && !turnCard) || 
           (stage === 'river' && !riverCard)) && (
           <Button 
-            onClick={() => {
-              if (stage === 'flop') {
-                setCardSelectorType('flop');
-              } else if (stage === 'turn') {
-                setCardSelectorType('turn');
-              } else if (stage === 'river') {
-                setCardSelectorType('river');
-              }
-              setTempCommunityCards('');
-              setShowCardSelector(true);
-            }}
+            onClick={() => openCardSelectorForStreet(
+              stage,
+              isMobile,
+              setCardSelectorType,
+              setTempCommunityCards,
+              setShowCardSelector,
+              setShowDesktopCardSelector
+            )}
             variant="outline"
             className="w-full h-10 text-sm font-semibold"
           >
@@ -2459,17 +2467,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             (stage === 'turn' && !turnCard) || 
             (stage === 'river' && !riverCard)) && (
             <Button 
-              onClick={() => {
-                if (stage === 'flop') {
-                  setCardSelectorType('flop');
-                } else if (stage === 'turn') {
-                  setCardSelectorType('turn');
-                } else if (stage === 'river') {
-                  setCardSelectorType('river');
-                }
-                setTempCommunityCards('');
-                setShowDesktopCardSelector(true);
-              }}
+              onClick={() => openCardSelectorForStreet(
+                stage,
+                isMobile,
+                setCardSelectorType,
+                setTempCommunityCards,
+                setShowCardSelector,
+                setShowDesktopCardSelector
+              )}
               variant="outline"
               className="flex-1 h-10 text-sm font-semibold"
             >
