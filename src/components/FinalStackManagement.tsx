@@ -17,12 +17,12 @@ export const FinalStackManagement = ({
 }: FinalStackManagementProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [editValue, setEditValue] = useState<number | string>(0);
+  const [editValue, setEditValue] = useState<number | string>('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStartEdit = (gamePlayer: GamePlayer) => {
     setSelectedPlayerId(gamePlayer.id);
-    setEditValue(gamePlayer.final_stack || 0);
+    setEditValue('');
     setOpened(true);
   };
 
@@ -38,7 +38,7 @@ export const FinalStackManagement = ({
       toast.success('Final stack updated');
       setOpened(false);
       setSelectedPlayerId('');
-      setEditValue(0);
+      setEditValue('');
     } catch (error) {
       console.error('Error updating final stack:', error);
       toast.error('Failed to update final stack');
@@ -107,10 +107,11 @@ export const FinalStackManagement = ({
         onClose={() => {
           setOpened(false);
           setSelectedPlayerId('');
-          setEditValue(0);
+          setEditValue('');
         }}
         title={<Text fw={700} size="lg">Edit Final Stack</Text>}
-        centered
+        centered={!isMobile}
+        yOffset={isMobile ? '5vh' : undefined}
         size="sm"
         scrollAreaComponent={ScrollArea.Autosize}
       >
@@ -130,7 +131,7 @@ export const FinalStackManagement = ({
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
-                setEditValue(0);
+                setEditValue('');
               }}
             >
               Cancel
