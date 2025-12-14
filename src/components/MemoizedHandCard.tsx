@@ -38,14 +38,7 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
   ).values());
 
   return (
-    <Card 
-      shadow="sm" 
-      padding="md" 
-      radius="md" 
-      withBorder
-      className="cursor-pointer hover:bg-muted/50 transition-colors"
-      onClick={() => navigate(`/hands/${hand.id}`)}
-    >
+    <Card shadow="sm" padding="md" radius="md" withBorder className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/hands/${hand.id}`)}>
       <Stack gap="sm">
         <div className="flex items-center justify-between gap-4">
           <Stack gap="xs" className="flex-1">

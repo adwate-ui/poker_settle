@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button, Card, Stack, Group, Text, ActionIcon } from '@mantine/core';
 import { Download, X } from 'lucide-react';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 
@@ -35,45 +34,45 @@ export const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm animate-in slide-in-from-bottom">
-      <Card className="shadow-2xl border-2 border-primary/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-base flex items-center gap-2">
+      <Card shadow="xl" padding="md" radius="md" withBorder>
+        <Stack gap="sm">
+          <Group justify="space-between" align="flex-start">
+            <Stack gap={4} style={{ flex: 1 }}>
+              <Group gap="xs">
                 <Download className="h-5 w-5 text-primary" />
-                Install Poker Tracker
-              </CardTitle>
-              <CardDescription className="text-xs mt-1">
+                <Text size="md" fw={600}>Install Poker Tracker</Text>
+              </Group>
+              <Text size="xs" c="dimmed">
                 Install for faster access and offline play
-              </CardDescription>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 -mt-1 -mr-1"
+              </Text>
+            </Stack>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
               onClick={handleDismiss}
             >
               <X className="h-4 w-4" />
+            </ActionIcon>
+          </Group>
+          <Group gap="xs">
+            <Button
+              onClick={handleInstall}
+              disabled={installing}
+              size="sm"
+              style={{ flex: 1 }}
+            >
+              {installing ? 'Installing...' : 'Install App'}
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="flex gap-2 pt-0">
-          <Button
-            onClick={handleInstall}
-            disabled={installing}
-            size="sm"
-            className="flex-1"
-          >
-            {installing ? 'Installing...' : 'Install App'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDismiss}
-          >
-            Not Now
-          </Button>
-        </CardContent>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleDismiss}
+            >
+              Not Now
+            </Button>
+          </Group>
+        </Stack>
       </Card>
     </div>
   );

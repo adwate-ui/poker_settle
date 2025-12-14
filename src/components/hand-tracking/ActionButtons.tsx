@@ -49,8 +49,8 @@ const ActionButtons = memo(({
         value={betAmount}
         onChange={(e) => setBetAmount(e.target.value)}
         disabled={disabled}
+        size="sm"
         className="flex-1"
-        styles={{ input: { height: '36px', fontSize: '12px' } }}
       />
       <Button
         color="blue"

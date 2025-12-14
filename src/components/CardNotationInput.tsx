@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { TextInput, Button, Text, Alert, Group, Stack } from '@mantine/core';
 import PokerCard from './PokerCard';
 import CardSelector from './CardSelector';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Grid3x3 } from 'lucide-react';
 
 interface CardNotationInputProps {
@@ -90,9 +87,9 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
   const isComplete = cleaned.length === expectedCards * 2;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label>{label}</Label>
+    <Stack gap="sm">
+      <Group justify="space-between" align="center">
+        <Text size="sm" fw={500}>{label}</Text>
         <CardSelector
           maxCards={expectedCards}
           usedCards={usedCards}
@@ -100,29 +97,27 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           onSelect={handleSelectorSubmit}
           label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
           trigger={
-            <Button variant="default" type="button" className="gap-2">
-              <Grid3x3 className="w-4 h-4" />
+            <Button variant="default" type="button" leftSection={<Grid3x3 className="w-4 h-4" />}>
               Select Cards from Grid
             </Button>
           }
         />
-      </div>
+      </Group>
 
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+        <Alert color="red" icon={<AlertCircle className="h-4 w-4" />}>
+          {error}
         </Alert>
       )}
 
       {cards.length > 0 && !error && (
-        <div className="flex gap-2 justify-center flex-wrap p-4 bg-gradient-to-br from-green-700 to-green-900 rounded-lg">
+        <Group gap="xs" justify="center" className="p-4 bg-gradient-to-br from-green-700 to-green-900 rounded-lg">
           {cards.map((card, idx) => (
             <PokerCard key={idx} card={card} size="md" />
           ))}
-        </div>
+        </Group>
       )}
-    </div>
+    </Stack>
   );
 };
 
