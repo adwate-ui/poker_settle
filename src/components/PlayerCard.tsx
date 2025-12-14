@@ -1,9 +1,5 @@
 import { useState, memo, useCallback, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Card, Button, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@mantine/core";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
@@ -62,24 +58,23 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   }, [gamePlayer.id, gamePlayer.buy_ins, localFinalStack, buyInAmount, onUpdatePlayer]);
 
   return (
-    <Card className="hover:border-primary/50 transition-colors touch-manipulation">
-      <CardHeader className="pb-2 pt-2 px-3 space-y-0">
-        <div className="flex items-start justify-between gap-2">
-          {/* Left: Avatar and Player Name */}
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+    <Card shadow="sm" padding="xs" radius="md" withBorder className="hover:border-primary/50 transition-colors touch-manipulation">
+      <Stack gap="xs">
+        {/* Header: Avatar, Player Name, Buy-ins Badge, and History Button */}
+        <Group justify="space-between" gap="xs" wrap="nowrap">
+          <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
             <OptimizedAvatar 
               name={gamePlayer.player.name}
               size="sm"
               className="flex-shrink-0"
             />
-            <div className="min-w-0 flex-1">
-              <CardTitle className="text-sm truncate">{gamePlayer.player.name}</CardTitle>
-            </div>
-          </div>
+            <Text size="sm" fw={700} truncate style={{ flex: 1 }}>
+              {gamePlayer.player.name}
+            </Text>
+          </Group>
           
-          {/* Right: Buy-ins count and Buy-in History Button */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Badge variant="secondary" className="text-xs font-semibold">
+          <Group gap={4} wrap="nowrap">
+            <Badge size="xs" variant="light">
               {gamePlayer.buy_ins} buy-in{gamePlayer.buy_ins !== 1 ? 's' : ''}
             </Badge>
             <BuyInHistoryDialog 
@@ -87,84 +82,100 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
               playerName={gamePlayer.player.name}
               fetchHistory={fetchBuyInHistory}
             />
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0 pb-2 px-3 space-y-2">
+          </Group>
+        </Group>
+
         {/* Buy-ins and Final Stack Row */}
         <div className="grid grid-cols-2 gap-2">
           {/* Buy-ins Input */}
-          <div className="space-y-1">
-            <Label className="text-[10px] font-semibold text-muted-foreground">
+          <Stack gap={4}>
+            <Text size="10px" fw={600} c="dimmed">
               Add Buy-ins
-            </Label>
-            <div className="flex items-center gap-1">
-              <Input
+            </Text>
+            <Group gap={4} wrap="nowrap">
+              <TextInput
                 type="number"
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
-                className="h-7 text-xs text-center font-mono bg-background"
+                size="xs"
                 placeholder="0"
+                styles={{
+                  input: {
+                    textAlign: 'center',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                  }
+                }}
               />
               {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
                 <Button 
-                  variant="default" 
-                  size="sm" 
+                  size="xs" 
                   onClick={handleAddBuyIns}
-                  className="h-7 px-2 shrink-0 text-xs"
+                  style={{ minWidth: '28px', height: '28px', padding: '0 8px' }}
                 >
                   +
                 </Button>
               )}
-            </div>
-          </div>
+            </Group>
+          </Stack>
 
           {/* Final Stack Input */}
-          <div className="space-y-1">
-            <Label className="text-[10px] font-semibold text-muted-foreground">
+          <Stack gap={4}>
+            <Text size="10px" fw={600} c="dimmed">
               Final Stack (Rs.)
-            </Label>
-            <div className="flex items-center gap-1">
-              <Input
+            </Text>
+            <Group gap={4} wrap="nowrap">
+              <TextInput
                 type="text"
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
-                className="h-7 text-xs text-center font-mono bg-background"
+                size="xs"
                 placeholder="0"
+                styles={{
+                  input: {
+                    textAlign: 'center',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                  }
+                }}
               />
               {hasFinalStackChanges && (
                 <Button 
-                  variant="default" 
-                  size="sm" 
+                  size="xs" 
                   onClick={confirmFinalStack}
-                  className="h-7 w-7 shrink-0 p-0"
+                  style={{ minWidth: '28px', width: '28px', height: '28px', padding: 0 }}
                 >
                   <Check className="w-3 h-3" />
                 </Button>
               )}
-            </div>
-          </div>
+            </Group>
+          </Stack>
         </div>
 
-        {/* Summary Row - Clearly labeled */}
-        <div className="pt-2 border-t border-border space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground font-medium">Total Buy-ins:</span>
-            <span className="font-semibold">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground font-medium">Net P&L:</span>
-            <span className={`font-bold px-2 py-0.5 rounded ${
-              isProfit 
-                ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
-                : 'bg-red-500/20 text-red-600 dark:text-red-400'
-            }`}>
-              {isProfit ? '+' : '-'}Rs. {formatIndianNumber(Math.abs(netAmount))}
-            </span>
-          </div>
-        </div>
-      </CardContent>
+        {/* Summary Row */}
+        <Box pt="xs" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+          <Stack gap={4}>
+            <Group justify="space-between">
+              <Text size="xs" c="dimmed" fw={500}>Total Buy-ins:</Text>
+              <Text size="xs" fw={600}>Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
+            </Group>
+            <Group justify="space-between">
+              <Text size="xs" c="dimmed" fw={500}>Net P&L:</Text>
+              <Box 
+                className={`font-bold px-2 py-0.5 rounded ${
+                  isProfit 
+                    ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
+                    : 'bg-red-500/20 text-red-600 dark:text-red-400'
+                }`}
+              >
+                <Text size="xs" fw={700} span>
+                  {isProfit ? '+' : '-'}Rs. {formatIndianNumber(Math.abs(netAmount))}
+                </Text>
+              </Box>
+            </Group>
+          </Stack>
+        </Box>
+      </Stack>
     </Card>
   );
 });
