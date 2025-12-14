@@ -2,7 +2,7 @@ import { useState, memo, useCallback, useMemo } from "react";
 import { Card, Button, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@mantine/core";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check } from "lucide-react";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
 
@@ -22,7 +22,6 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
     (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
     [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
   );
-  const isProfit = netAmount > 0;
 
   const handleAddBuyIns = useCallback(() => {
     const numToAdd = parseInt(addBuyInsAmount) || 0;
@@ -161,17 +160,13 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
             </Group>
             <Group justify="space-between">
               <Text size="xs" c="dimmed" fw={500}>Net P&L:</Text>
-              <Box 
-                className={`font-bold px-2 py-0.5 rounded ${
-                  isProfit 
-                    ? 'bg-green-500/20 text-green-600 dark:text-green-400' 
-                    : 'bg-red-500/20 text-red-600 dark:text-red-400'
-                }`}
+              <Badge 
+                color={getProfitLossColor(netAmount)}
+                variant="filled"
+                size="sm"
               >
-                <Text size="xs" fw={700} span>
-                  {isProfit ? '+' : '-'}Rs. {formatIndianNumber(Math.abs(netAmount))}
-                </Text>
-              </Box>
+                {formatProfitLoss(netAmount)}
+              </Badge>
             </Group>
           </Stack>
         </Box>

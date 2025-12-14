@@ -22,6 +22,8 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
     .map(c => c.cards_notation)
     .join('');
 
+  const communityCardArray = communityCards ? communityCards.match(/.{1,2}/g)?.slice(0, 5) : undefined;
+
   const playersInHand = Array.from(new Map(
     hand.actions
       .filter(a => {
@@ -71,19 +73,15 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
           </Stack>
 
           <Group gap="md">
-            {communityCards && (
-              <>
-                <Group gap="xs" className="hidden md:flex">
-                  {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                    <PokerCard key={idx} card={card} size="sm" />
-                  ))}
-                </Group>
-                <Group gap="xs" className="flex md:hidden">
-                  {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                    <PokerCard key={idx} card={card} size="xs" />
-                  ))}
-                </Group>
-              </>
+            {communityCardArray && (
+              <Group gap="xs">
+                {communityCardArray.map((card, idx) => (
+                  <PokerCard key={`desktop-${idx}`} card={card} size="sm" className="hidden md:block" />
+                ))}
+                {communityCardArray.map((card, idx) => (
+                  <PokerCard key={`mobile-${idx}`} card={card} size="xs" className="md:hidden" />
+                ))}
+              </Group>
             )}
             <Stack gap={0} align="flex-end">
               <Text size="lg" fw={700} className="text-poker-gold">

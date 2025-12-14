@@ -27,3 +27,21 @@ export function parseIndianNumber(str: string): number {
 export function formatInputDisplay(value: number | null | undefined): string {
   return (value === 0 || value === null || value === undefined) ? '' : formatIndianNumber(value);
 }
+
+// Get consistent badge color for profit/loss values
+export function getProfitLossColor(amount: number): 'green' | 'red' {
+  return amount >= 0 ? 'green' : 'red';
+}
+
+// Get consistent badge variant for profit/loss values (for shadcn badges)
+export function getProfitLossVariant(amount: number): 'success' | 'destructive' {
+  return amount >= 0 ? 'success' : 'destructive';
+}
+
+// Format profit/loss with sign
+// For positive amounts: adds '+' prefix (e.g., "+Rs. 1,000")
+// For negative amounts: adds '-' prefix (e.g., "-Rs. 1,000")
+export function formatProfitLoss(amount: number): string {
+  const sign = amount >= 0 ? '+' : '-';
+  return `${sign}Rs. ${formatIndianNumber(Math.abs(amount))}`;
+}

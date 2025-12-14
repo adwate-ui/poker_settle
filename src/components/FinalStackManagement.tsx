@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Modal, NumberInput, Group, Text, Button, Stack } from '@mantine/core';
+import { Table, Modal, NumberInput, Group, Text, Button, Stack, ScrollArea } from '@mantine/core';
 import { Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
@@ -112,6 +112,7 @@ export const FinalStackManagement = ({
         title={<Text fw={700} size="lg">Edit Final Stack</Text>}
         centered
         size="md"
+        scrollAreaComponent={ScrollArea.Autosize}
       >
         <Stack gap="md">
           <Text size="sm" fw={500}>

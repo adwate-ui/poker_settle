@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Modal, NumberInput, Group, Text, Select, Stack } from '@mantine/core';
+import { Table, Button, Modal, NumberInput, Group, Text, Select, Stack, ScrollArea } from '@mantine/core';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
@@ -131,6 +131,7 @@ export const BuyInManagementTable = ({
         title={<Text fw={700} size="lg">Add Buy-in</Text>}
         centered
         size="md"
+        scrollAreaComponent={ScrollArea.Autosize}
       >
         <Stack gap="md">
           <div>

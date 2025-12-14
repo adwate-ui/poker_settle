@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, Arr
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -544,7 +544,6 @@ export const GameDetailView = ({
                 const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
                 const netAmount = gamePlayer.net_amount ?? 0;
                 const finalStack = gamePlayer.final_stack ?? 0;
-                const isProfit = netAmount >= 0;
                 
                 return (
                   <Table.Tr
@@ -562,13 +561,9 @@ export const GameDetailView = ({
                       </span>
                     </Table.Td>
                     <Table.Td className="text-left py-2">
-                      <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
-                        isProfit 
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}>
-                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(netAmount)}
-                      </span>
+                      <Badge color={getProfitLossColor(netAmount)} variant="filled" size="sm">
+                        {formatProfitLoss(netAmount)}
+                      </Badge>
                     </Table.Td>
                     <Table.Td className="font-semibold text-accent-foreground text-left py-2 text-sm">
                       Rs. {formatIndianNumber(finalStack)}
