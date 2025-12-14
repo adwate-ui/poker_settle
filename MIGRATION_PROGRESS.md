@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The migration of Poker Settle from shadcn/ui to Mantine UI is **47% complete** (8 of 17 identified components migrated).
+The migration of Poker Settle from shadcn/ui to Mantine UI is **71% complete** (12 of 17 identified components migrated).
 
 ### What Has Been Accomplished
 
@@ -15,15 +15,15 @@ The migration of Poker Settle from shadcn/ui to Mantine UI is **47% complete** (
 
 #### ✅ Component Migrations (47% Complete - 8/17 components)
 
-**Pages (2/5 completed)**
+**Pages (4/6 completed)**
 1. ✅ **Auth.tsx** - Migrated Button and Card components
 2. ✅ **Index.tsx** - Migrated Tabs components
-3. ❌ NewGame.tsx - Remaining
-4. ❌ GamesHistory.tsx - Remaining
-5. ❌ PlayersHistory.tsx - Remaining
+3. ✅ **NewGame.tsx** - Migrated Card, Button, TextInput, Label
+4. ✅ **PlayersHistory.tsx** - Migrated Card, Badge, Button, Modal (AlertDialog)
+5. ❌ GamesHistory.tsx - Remaining
 6. ❌ PlayerDetail.tsx - Remaining
 
-**Components (6/11 completed)**
+**Components (8/11 completed)**
 1. ✅ **TabLayout.tsx** - Migrated Tabs navigation system
 2. ✅ **ThemeToggle.tsx** - Migrated Button to ActionIcon
 3. ✅ **GameErrorBoundary.tsx** - Migrated Card with error styling
@@ -31,8 +31,8 @@ The migration of Poker Settle from shadcn/ui to Mantine UI is **47% complete** (
 5. ✅ **PlayerFormDialog.tsx** - Migrated Modal, Button, TextInput, Select
 6. ✅ **BuyInHistoryDialog.tsx** - Migrated Modal, ActionIcon, ScrollArea, Table
 7. ✅ **ConsolidatedBuyInLogs.tsx** - Migrated Table, Select
-8. ❌ PlayerCard.tsx - Remaining (173 lines)
-9. ❌ PlayerPerformance.tsx - Remaining (173 lines)
+8. ✅ **PlayerCard.tsx** - Migrated Card, Button, TextInput, Badge
+9. ✅ **PlayerPerformance.tsx** - Migrated Card, Badge, Collapse, Select
 10. ❌ GameSetup.tsx - Remaining (479 lines)
 11. ❌ GameDashboard.tsx - Remaining (997 lines)
 12. ❌ GameDetailView.tsx - Remaining (855 lines)
@@ -42,7 +42,7 @@ The migration of Poker Settle from shadcn/ui to Mantine UI is **47% complete** (
 #### Build Status: ✅ PASSING
 - No TypeScript errors
 - No build warnings
-- Bundle size: 756.49 KB (reduced from ~778 KB)
+- Bundle size: 730.67 KB (gzip: 203.56 KB)
 
 #### Security Status: ✅ SECURE
 - CodeQL analysis: 0 alerts found
@@ -55,47 +55,37 @@ The migration of Poker Settle from shadcn/ui to Mantine UI is **47% complete** (
 
 ## Remaining Work
 
-### Component Migration (9 files, ~3,355 lines of code)
+### Component Migration (5 files, ~2,855 lines of code)
 
-The remaining 9 components require migration of the following shadcn/ui components:
+The remaining 5 components require migration of the following shadcn/ui components:
 
 | Component | Lines | Complexity | shadcn Components Used |
 |-----------|-------|------------|------------------------|
-| PlayerCard.tsx | 173 | Medium | Card, Button, Input, Label, Badge |
-| PlayerPerformance.tsx | 173 | Medium | Card, Badge, Collapsible, Select, Table |
-| NewGame.tsx | 304 | Medium | Card, Button, Input, Label |
 | GameSetup.tsx | 479 | High | Button, Input, Card, Badge, Label, Separator, Collapsible, Alert |
-| GamesHistory.tsx | 468 | High | Card, Badge, Button, Input, Select, Separator |
-| PlayersHistory.tsx | 323 | Medium | Card, Badge, Button, Input, Select |
-| PlayerDetail.tsx | 456 | High | Card, Badge, Button, Tabs, Separator, Collapsible |
+| GamesHistory.tsx | 468 | High | Card, Badge, Button, Select, AlertDialog |
+| PlayerDetail.tsx | 456 | High | Card, Badge, Button, Tabs, Collapsible, Select, Table |
 | GameDashboard.tsx | 997 | Very High | Button, Input, Card, Badge, Collapsible, Select, Dialog, Tabs, ScrollArea |
 | GameDetailView.tsx | 855 | Very High | Similar to GameDashboard |
 
-**Total remaining lines to migrate: ~3,355**
+**Total remaining lines to migrate: ~2,855**
 
 ### Estimated Effort
 
 Based on the migration rate so far:
-- **Completed**: 8 components, ~800 lines (4 hours)
-- **Remaining**: 9 components, ~3,355 lines
-- **Estimated time**: 16-20 hours of focused development work
+- **Completed**: 12 components, ~1,473 lines (current session)
+- **Remaining**: 5 components, ~2,855 lines
+- **Estimated time**: 10-12 hours of focused development work
 
 ### Migration Strategy for Remaining Files
 
-#### Phase 1: Medium Complexity (4 files - ~973 lines)
-1. PlayerCard.tsx
-2. PlayerPerformance.tsx
-3. NewGame.tsx
-4. PlayersHistory.tsx
-
-#### Phase 2: High Complexity (3 files - ~1,247 lines)
-5. GameSetup.tsx
-6. GamesHistory.tsx
-7. PlayerDetail.tsx
+#### Phase 2: High Complexity (3 files - ~1,403 lines) ⏳
+1. GameSetup.tsx (479 lines)
+2. GamesHistory.tsx (468 lines)
+3. PlayerDetail.tsx (456 lines)
 
 #### Phase 3: Very High Complexity (2 files - ~1,852 lines)
-8. GameDashboard.tsx
-9. GameDetailView.tsx
+4. GameDashboard.tsx (997 lines)
+5. GameDetailView.tsx (855 lines)
 
 ## Benefits Achieved So Far
 
