@@ -287,9 +287,9 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+                className="flex items-center gap-2 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10"
               >
-                Players
+                # Players
                 {getSortIcon("players")}
               </Button>
               <Button
@@ -304,7 +304,11 @@ const GamesHistory = () => {
                 <div className="flex items-center justify-start px-4 font-bold">
                   Player P&L
                 </div>
-              ) : null}
+              ) : (
+                <div className="flex items-center justify-start px-4 font-bold">
+                  Actions
+                </div>
+              )}
             </div>
           </div>
 
@@ -328,7 +332,7 @@ const GamesHistory = () => {
                     <div className="flex items-center justify-between gap-2">
                       <Text fw={500} size="sm">{format(new Date(game.date), "MMM d, yyyy")}</Text>
                       <div className="flex items-center gap-2">
-                        <Badge color="blue" size="sm">{game.player_count} players</Badge>
+                        <Badge color="gray" size="sm">{game.player_count} players</Badge>
                         <Text fw={600} size="sm">Rs. {formatIndianNumber(game.total_pot)}</Text>
                         {selectedPlayer !== "all" ? (
                           playerData && (
@@ -361,8 +365,8 @@ const GamesHistory = () => {
                     <Text fw={600}>
                       Rs. {formatIndianNumber(game.buy_in_amount)}
                     </Text>
-                    <div>
-                      <Badge color="blue">{game.player_count}</Badge>
+                    <div className="flex items-center justify-center">
+                      <Text fw={500}>{game.player_count}</Text>
                     </div>
                     <Text fw={600}>
                       Rs. {formatIndianNumber(game.total_pot)}

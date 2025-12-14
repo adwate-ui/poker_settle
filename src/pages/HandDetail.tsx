@@ -405,10 +405,7 @@ const HandDetail = () => {
                             <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">FLOP</span>
                             <div className="flex gap-0.5">
                               {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
-                              ))}
-                              {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
+                                <PokerCard key={idx} card={card} size="xs" />
                               ))}
                             </div>
                           </div>
@@ -425,10 +422,7 @@ const HandDetail = () => {
                               <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">TURN</span>
                               <div className="flex gap-0.5">
                                 {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
-                                ))}
-                                {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
+                                  <PokerCard key={idx} card={card} size="xs" />
                                 ))}
                               </div>
                             </div>
@@ -446,10 +440,7 @@ const HandDetail = () => {
                               <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">RIVER</span>
                               <div className="flex gap-0.5">
                                 {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
-                                ))}
-                                {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
-                                  <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
+                                  <PokerCard key={idx} card={card} size="xs" />
                                 ))}
                               </div>
                             </div>

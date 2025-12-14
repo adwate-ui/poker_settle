@@ -177,9 +177,9 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+              className="flex items-center gap-2 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10"
             >
-              Games
+              # Games
               {getSortIcon("total_games")}
             </Button>
             <Button
@@ -190,6 +190,9 @@ const PlayersHistory = () => {
               Net P&L
               {getSortIcon("total_profit")}
             </Button>
+            <div className="flex items-center justify-start px-4 font-bold">
+              Actions
+            </div>
           </div>
         </div>
 
@@ -216,7 +219,7 @@ const PlayersHistory = () => {
                     <Text fw={700} size="sm" truncate>{player.name}</Text>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge color="blue" size="sm">{player.total_games || 0}</Badge>
+                    <Badge color="gray" size="sm">{player.total_games || 0}</Badge>
                     <Badge color={isProfit ? "green" : "red"} size="sm">
                       {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                     </Badge>
@@ -247,9 +250,10 @@ const PlayersHistory = () => {
                 </div>
                 
                 <div 
+                  className="flex items-center justify-center"
                   onClick={() => navigate(`/players/${player.id}`)}
                 >
-                  <Badge color="blue">{player.total_games || 0}</Badge>
+                  <Text fw={500}>{player.total_games || 0}</Text>
                 </div>
                 
                 <div 

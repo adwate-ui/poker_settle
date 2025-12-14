@@ -35,7 +35,7 @@ const ActionButtons = memo(({
         Fold
       </Button>
       <Button
-        color="blue"
+        color="gray"
         onClick={() => onAction('Call')}
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
@@ -53,7 +53,7 @@ const ActionButtons = memo(({
         className="flex-1"
       />
       <Button
-        color="blue"
+        color="gray"
         onClick={() => onAction('Raise')}
         disabled={disabled || !betAmount}
         className="bg-gradient-poker flex-1 h-9 px-2 text-xs"
