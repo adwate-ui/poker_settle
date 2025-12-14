@@ -47,6 +47,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [tablePositionOpen, setTablePositionOpen] = useState(true);
   const [playersOpen, setPlayersOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
+  const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
+  const [finalStackLogsOpen, setFinalStackLogsOpen] = useState(true);
   
   const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition, fetchBuyInHistory } = useGameData();
   
@@ -434,17 +436,17 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           <Collapse in={gameStatsOpen}>
             <div className="pt-4 pb-4">
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
                 <p className="text-xs sm:text-sm text-muted-foreground font-medium">Buy-ins</p>
-                <p className="text-sm sm:text-lg font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+                <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalBuyIns)}</p>
               </div>
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
                 <p className="text-xs sm:text-sm text-muted-foreground font-medium">Final Stack</p>
-                <p className="text-sm sm:text-lg font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+                <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalFinalStack)}</p>
               </div>
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
                 <p className="text-xs sm:text-sm text-muted-foreground font-medium"># Players</p>
-                <p className="text-sm sm:text-lg font-bold text-primary">{gamePlayers.length}</p>
+                <p className="text-sm sm:text-lg font-bold">{gamePlayers.length}</p>
               </div>
             </div>
             </div>
@@ -526,41 +528,61 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         )}
 
-        {/* Buy-in Management */}
+        {/* Buy-in Logs */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
-            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-              <Plus className="w-5 h-5" />
-            </div>
-            <Text className="text-poker-gold" size="xl" fw={600}>
-              Buy-in Management
-            </Text>
-          </Group>
-          <div className="pt-4">
-            <BuyInManagementTable
-              gamePlayers={gamePlayers}
-              buyInAmount={game.buy_in_amount}
-              onAddBuyIn={handleAddBuyIn}
-            />
+          <div 
+            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+            onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
+          >
+            <Group justify="space-between">
+              <Group gap="xs">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <Text className="text-poker-gold" size="xl" fw={600}>
+                  Buy-in Logs
+                </Text>
+              </Group>
+              {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Group>
           </div>
+          <Collapse in={buyInLogsOpen}>
+            <div className="pt-4">
+              <BuyInManagementTable
+                gamePlayers={gamePlayers}
+                buyInAmount={game.buy_in_amount}
+                onAddBuyIn={handleAddBuyIn}
+              />
+            </div>
+          </Collapse>
         </Card>
 
-        {/* Final Stack Management */}
+        {/* Final Stack Logs */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
-            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-              <DollarSign className="w-5 h-5" />
-            </div>
-            <Text className="text-poker-gold" size="xl" fw={600}>
-              Final Stack Management
-            </Text>
-          </Group>
-          <div className="pt-4">
-            <FinalStackManagement
-              gamePlayers={gamePlayers}
-              onUpdateFinalStack={handleUpdateFinalStack}
-            />
+          <div 
+            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+            onClick={() => setFinalStackLogsOpen(!finalStackLogsOpen)}
+          >
+            <Group justify="space-between">
+              <Group gap="xs">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <Text className="text-poker-gold" size="xl" fw={600}>
+                  Final Stack Logs
+                </Text>
+              </Group>
+              {finalStackLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Group>
           </div>
+          <Collapse in={finalStackLogsOpen}>
+            <div className="pt-4">
+              <FinalStackManagement
+                gamePlayers={gamePlayers}
+                onUpdateFinalStack={handleUpdateFinalStack}
+              />
+            </div>
+          </Collapse>
         </Card>
 
         {/* Players Section */}
@@ -647,32 +669,26 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                                   {/* Info */}
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 mb-1">
                                       <span className="font-semibold truncate">{player.name}</span>
                                       {player.total_games && player.total_games > 10 && (
                                         <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                      <Badge variant="outline" className="text-[10px] h-5 px-1.5">
-                                        <UsersIcon className="h-3 w-3 mr-1" />
-                                        {player.total_games || 0} games
+                                    <Group gap="xs" wrap="nowrap">
+                                      <Badge variant="outline" size="sm">
+                                        {player.total_games || 0}
                                       </Badge>
                                       {player.total_profit !== undefined && (
                                         <Badge
-                                          variant={player.total_profit >= 0 ? 'success' : 'destructive'}
-                                          className="text-[10px] h-5 px-1.5"
+                                          color={player.total_profit >= 0 ? 'blue' : 'red'}
+                                          size="sm"
                                         >
-                                          {player.total_profit >= 0 ? (
-                                            <TrendingUp className="h-3 w-3 mr-1" />
-                                          ) : (
-                                            <TrendingDown className="h-3 w-3 mr-1" />
-                                          )}
                                           {player.total_profit >= 0 ? '+' : ''}
                                           Rs. {formatIndianNumber(Math.abs(player.total_profit))}
                                         </Badge>
                                       )}
-                                    </div>
+                                    </Group>
                                   </div>
 
                                   {/* Select Icon */}

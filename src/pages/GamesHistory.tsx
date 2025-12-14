@@ -268,11 +268,11 @@ const GamesHistory = () => {
         <div className="space-y-2 sm:space-y-3">
           {/* Desktop Header */}
           <div className="hidden md:block rounded-lg overflow-hidden">
-            <div className="grid grid-cols-5 gap-2 sm:gap-4 bg-primary text-primary-foreground p-3 sm:p-4">
+            <div className="grid grid-cols-5 gap-2 sm:gap-4 bg-primary text-white p-3 sm:p-4">
               <Button
                 variant="subtle"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
               >
                 Date
                 {getSortIcon("date")}
@@ -280,7 +280,7 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
               >
                 Buy-in
                 {getSortIcon("buy_in")}
@@ -288,7 +288,7 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-2 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10"
+                className="flex items-center gap-2 justify-center font-bold text-white hover:bg-white/10"
               >
                 # Players
                 {getSortIcon("players")}
@@ -296,18 +296,14 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("chips")}
-                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
               >
                 Chips in play
                 {getSortIcon("chips")}
               </Button>
-              {selectedPlayer !== "all" ? (
-                <div className="flex items-center justify-start px-4 font-bold">
+              {selectedPlayer !== "all" && (
+                <div className="flex items-center justify-start px-4 font-bold text-white">
                   Player P&L
-                </div>
-              ) : (
-                <div className="flex items-center justify-start px-4 font-bold">
-                  Actions
                 </div>
               )}
             </div>
@@ -315,11 +311,11 @@ const GamesHistory = () => {
 
           {/* Mobile Header */}
           <div className="md:hidden rounded-lg overflow-hidden">
-            <div className="grid grid-cols-5 gap-1 bg-primary text-primary-foreground p-2 text-xs">
+            <div className="grid grid-cols-5 gap-1 bg-primary text-white p-2 text-xs">
               <Button
                 variant="subtle"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-1 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-start font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
               >
                 Date
                 {getSortIcon("date")}
@@ -327,7 +323,7 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-1 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-center font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
               >
                 Buy-in
                 {getSortIcon("buy_in")}
@@ -335,17 +331,19 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-1 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-center font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
               >
                 Players
                 {getSortIcon("players")}
               </Button>
-              <div className="flex items-center justify-center font-bold text-xs">
+              <div className="flex items-center justify-center font-bold text-xs text-white">
                 Chips
               </div>
-              <div className="flex items-center justify-center font-bold text-xs">
-                {selectedPlayer !== "all" ? "P&L" : "Action"}
-              </div>
+              {selectedPlayer !== "all" && (
+                <div className="flex items-center justify-center font-bold text-xs text-white">
+                  P&L
+                </div>
+              )}
             </div>
           </div>
 

@@ -166,11 +166,11 @@ const PlayersHistory = () => {
       <div className="space-y-2 sm:space-y-3">
         {/* Desktop Header */}
         <div className="hidden md:block rounded-lg overflow-hidden">
-          <div className="grid grid-cols-4 gap-4 bg-primary text-primary-foreground p-3 sm:p-4">
+          <div className="grid grid-cols-4 gap-4 bg-primary text-white p-3 sm:p-4">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
-              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+              className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
             >
               Player Name
               {getSortIcon("name")}
@@ -178,7 +178,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-2 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10"
+              className="flex items-center gap-2 justify-center font-bold text-white hover:bg-white/10"
             >
               # Games
               {getSortIcon("total_games")}
@@ -186,24 +186,21 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_profit")}
-              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
+              className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
             >
               Net P&L
               {getSortIcon("total_profit")}
             </Button>
-            <div className="flex items-center justify-start px-4 font-bold">
-              Actions
-            </div>
           </div>
         </div>
 
         {/* Mobile Header */}
         <div className="md:hidden rounded-lg overflow-hidden">
-          <div className="grid grid-cols-4 gap-2 bg-primary text-primary-foreground p-2 text-xs">
+          <div className="grid grid-cols-4 gap-2 bg-primary text-white p-2 text-xs">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
-              className="flex items-center gap-1 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+              className="flex items-center gap-1 justify-start font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
             >
               Player
               {getSortIcon("name")}
@@ -211,16 +208,13 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-1 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+              className="flex items-center gap-1 justify-center font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
             >
               Games
               {getSortIcon("total_games")}
             </Button>
-            <div className="flex items-center justify-center font-bold text-xs">
+            <div className="flex items-center justify-center font-bold text-xs text-white">
               P&L
-            </div>
-            <div className="flex items-center justify-center font-bold text-xs">
-              Action
             </div>
           </div>
         </div>
