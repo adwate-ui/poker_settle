@@ -22,6 +22,8 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
     .map(c => c.cards_notation)
     .join('');
 
+  const communityCardArray = communityCards ? communityCards.match(/.{1,2}/g)?.slice(0, 5) : undefined;
+
   const playersInHand = Array.from(new Map(
     hand.actions
       .filter(a => {
@@ -71,12 +73,12 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
           </Stack>
 
           <Group gap="md">
-            {communityCards && (
+            {communityCardArray && (
               <Group gap="xs">
-                {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                {communityCardArray.map((card, idx) => (
                   <PokerCard key={idx} card={card} size="sm" className="hidden md:block" />
                 ))}
-                {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                {communityCardArray.map((card, idx) => (
                   <PokerCard key={idx} card={card} size="xs" className="md:hidden" />
                 ))}
               </Group>

@@ -39,7 +39,9 @@ export function getProfitLossVariant(amount: number): 'success' | 'destructive' 
 }
 
 // Format profit/loss with sign
+// For positive amounts: adds '+' prefix (e.g., "+Rs. 1,000")
+// For negative amounts: adds '-' prefix (e.g., "-Rs. 1,000")
 export function formatProfitLoss(amount: number): string {
-  const sign = amount >= 0 ? '+' : '';
+  const sign = amount >= 0 ? '+' : '-';
   return `${sign}Rs. ${formatIndianNumber(Math.abs(amount))}`;
 }
