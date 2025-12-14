@@ -263,7 +263,7 @@ const PokerTableView = memo(({
 
           {/* Center area - Community Cards and Pot */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2 sm:rotate-0 -rotate-90">
               {/* Community Cards - using Monarch design */}
               {communityCards && (
                 <div className="flex gap-1 sm:gap-1.5 animate-fade-in">

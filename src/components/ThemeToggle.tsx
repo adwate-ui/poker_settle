@@ -26,7 +26,7 @@ const ThemeToggle = () => {
       variant="default"
       size="lg"
       onClick={toggleTheme}
-      className="fixed sm:top-4 sm:right-4 bottom-4 right-4 z-50"
+      className="fixed bottom-4 right-4 z-50"
     >
       {theme === "light" ? (
         <Moon className="h-5 w-5" />

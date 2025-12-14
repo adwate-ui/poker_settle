@@ -72,11 +72,18 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
 
           <Group gap="md">
             {communityCards && (
-              <Group gap="xs" className="hidden md:flex">
-                {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
-                  <PokerCard key={idx} card={card} size="sm" />
-                ))}
-              </Group>
+              <>
+                <Group gap="xs" className="hidden md:flex">
+                  {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                    <PokerCard key={idx} card={card} size="sm" />
+                  ))}
+                </Group>
+                <Group gap="xs" className="flex md:hidden">
+                  {communityCards.match(/.{1,2}/g)?.slice(0, 5).map((card, idx) => (
+                    <PokerCard key={idx} card={card} size="xs" />
+                  ))}
+                </Group>
+              </>
             )}
             <Stack gap={0} align="flex-end">
               <Text size="lg" fw={700} className="text-poker-gold">

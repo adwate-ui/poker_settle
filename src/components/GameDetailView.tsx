@@ -352,9 +352,9 @@ export const GameDetailView = ({
     <div className="max-w-6xl mx-auto space-y-6">
       {onBack && (
         <Button
-          variant="subtle"
+          variant="filled"
           onClick={onBack}
-          className="mb-4 hover:text-primary"
+          className="mb-4 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {backLabel}
@@ -674,10 +674,6 @@ export const GameDetailView = ({
                       <span className="sm:hidden">Amt</span>
                     </Table.Th>
                     <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                      <span className="hidden sm:inline">Type</span>
-                      <span className="sm:hidden">Typ</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Status</span>
                       <span className="sm:hidden">✓</span>
                     </Table.Th>
@@ -704,17 +700,6 @@ export const GameDetailView = ({
                       </Table.Td>
                       <Table.Td className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
                         Rs. {formatIndianNumber(settlement.amount)}
-                      </Table.Td>
-                      <Table.Td className="text-left py-2 sm:py-4">
-                        {settlement.isManual ? (
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
-                            Manual
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs">
-                            Calculated
-                          </Badge>
-                        )}
                       </Table.Td>
                       <Table.Td className="text-left py-2 sm:py-4">
                         {showOwnerControls && confirmation ? (
