@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { Loader2, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Player } from "@/types/poker";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 
@@ -220,8 +220,6 @@ const PlayersHistory = () => {
         </div>
 
         {sortedPlayers.map((player) => {
-          const isProfit = (player.total_profit || 0) >= 0;
-
           return (
             <Card
               key={player.id}
@@ -251,8 +249,8 @@ const PlayersHistory = () => {
                     className="flex items-center justify-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <Badge color={isProfit ? "green" : "red"} size="sm">
-                      {isProfit ? "+" : ""}{formatIndianNumber(Math.abs(player.total_profit || 0))}
+                    <Badge color={getProfitLossColor(player.total_profit || 0)} size="sm">
+                      {formatProfitLoss(player.total_profit || 0)}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-center">
@@ -292,8 +290,8 @@ const PlayersHistory = () => {
                 <div 
                   onClick={() => navigate(`/players/${player.id}`)}
                 >
-                  <Badge color={isProfit ? "green" : "red"}>
-                    {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                  <Badge color={getProfitLossColor(player.total_profit || 0)}>
+                    {formatProfitLoss(player.total_profit || 0)}
                   </Badge>
                 </div>
                 

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Card, Badge, Collapse, Select, Stack, Group, Text, Box } from "@mantine/core";
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, User } from "lucide-react";
 import { Player, Game, TablePosition } from "@/types/poker";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
 import { useGameData } from "@/hooks/useGameData";
 import PokerTableView from "@/components/PokerTableView";
 
@@ -104,12 +104,13 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                     </Box>
                     <Box ta="center" p="sm" className="bg-background rounded">
                       <Text size="sm" c="dimmed">Total P&L</Text>
-                      <Group justify="center" gap="xs" className={selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}>
-                        {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> : <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
-                        <Text size="xl" fw={700} span>
-                          {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
-                        </Text>
-                      </Group>
+                      <Badge 
+                        color={getProfitLossColor(selectedPlayer.total_profit)} 
+                        size="xl"
+                        variant="filled"
+                      >
+                        {formatProfitLoss(selectedPlayer.total_profit)}
+                      </Badge>
                     </Box>
                   </div>
                 </Box>
@@ -131,10 +132,10 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                     {game.buyIns} buy-in{game.buyIns > 1 ? 's' : ''}
                                   </Badge>
                                   <Badge 
-                                    color={game.netAmount >= 0 ? "green" : "red"} 
+                                    color={getProfitLossColor(game.netAmount)} 
                                     size="sm"
                                   >
-                                    {game.netAmount >= 0 ? '+' : ''}{formatCurrency(game.netAmount)}
+                                    {formatProfitLoss(game.netAmount)}
                                   </Badge>
                                 </Group>
                               </Group>

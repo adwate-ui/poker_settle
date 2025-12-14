@@ -6,7 +6,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
 import TablePositionEditor from "@/components/TablePositionEditor";
 
 interface GameSetupProps {
@@ -259,8 +259,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                             <Badge variant="outline" size="sm">
                               {player.total_games}
                             </Badge>
-                            <Badge color={player.total_profit >= 0 ? "blue" : "red"} size="sm">
-                              {player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit))}
+                            <Badge color={getProfitLossColor(player.total_profit)} size="sm">
+                              {formatProfitLoss(player.total_profit)}
                             </Badge>
                             <ActionIcon
                               variant="subtle"
@@ -407,8 +407,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                   <Badge variant="outline" size="sm">
                                     {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
                                   </Badge>
-                                  <Badge color={gp.net_amount >= 0 ? "blue" : "red"} size="sm">
-                                    {gp.net_amount >= 0 ? '+' : ''}{formatCurrency(gp.net_amount)}
+                                  <Badge color={getProfitLossColor(gp.net_amount)} size="sm">
+                                    {formatProfitLoss(gp.net_amount)}
                                   </Badge>
                                 </Group>
                               </div>
