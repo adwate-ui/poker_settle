@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@mantine/core';
 import { formatIndianNumber } from '@/lib/utils';
 
 interface PlayerStackDisplayProps {
@@ -16,7 +16,7 @@ const PlayerStackDisplay = memo(({
   return (
     <div className={`flex items-center justify-between p-2 rounded ${isCurrentPlayer ? 'bg-primary/10 border border-primary' : 'bg-muted'}`}>
       <span className="font-medium text-sm">{playerName}</span>
-      <Badge variant={isCurrentPlayer ? "default" : "secondary"} className="text-xs">
+      <Badge color={isCurrentPlayer ? "blue" : "gray"} size="sm">
         Rs. {formatIndianNumber(stack)}
       </Badge>
     </div>
