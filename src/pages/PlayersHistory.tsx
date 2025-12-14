@@ -164,6 +164,7 @@ const PlayersHistory = () => {
       </Card>
 
       <div className="space-y-2 sm:space-y-3">
+        {/* Desktop Header */}
         <div className="hidden md:block rounded-lg overflow-hidden">
           <div className="grid grid-cols-4 gap-4 bg-primary text-primary-foreground p-3 sm:p-4">
             <Button
@@ -196,6 +197,34 @@ const PlayersHistory = () => {
           </div>
         </div>
 
+        {/* Mobile Header */}
+        <div className="md:hidden rounded-lg overflow-hidden">
+          <div className="grid grid-cols-4 gap-2 bg-primary text-primary-foreground p-2 text-xs">
+            <Button
+              variant="ghost"
+              onClick={() => handleSort("name")}
+              className="flex items-center gap-1 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+            >
+              Player
+              {getSortIcon("name")}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handleSort("total_games")}
+              className="flex items-center gap-1 justify-center font-bold text-primary-foreground hover:bg-primary-foreground/10 text-xs p-1 h-auto"
+            >
+              Games
+              {getSortIcon("total_games")}
+            </Button>
+            <div className="flex items-center justify-center font-bold text-xs">
+              P&L
+            </div>
+            <div className="flex items-center justify-center font-bold text-xs">
+              Action
+            </div>
+          </div>
+        </div>
+
         {sortedPlayers.map((player) => {
           const isProfit = (player.total_profit || 0) >= 0;
 
@@ -208,21 +237,31 @@ const PlayersHistory = () => {
               withBorder
               className="cursor-pointer transition-colors hover:bg-muted/50"
             >
-              {/* Mobile Layout */}
+              {/* Mobile Layout - Grid to match header */}
               <div className="md:hidden">
-                <div className="flex items-center justify-between gap-2">
+                <div className="grid grid-cols-4 gap-2 items-center text-xs">
                   <div 
-                    className="flex items-center gap-2 flex-1 min-w-0"
+                    className="flex items-center gap-1 min-w-0"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
                     <OptimizedAvatar name={player.name} size="sm" />
-                    <Text fw={700} size="sm" truncate>{player.name}</Text>
+                    <Text fw={700} size="xs" truncate>{player.name}</Text>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge color="gray" size="sm">{player.total_games || 0}</Badge>
+                  <div 
+                    className="flex items-center justify-center"
+                    onClick={() => navigate(`/players/${player.id}`)}
+                  >
+                    <Text fw={500} size="sm" ta="center">{player.total_games || 0}</Text>
+                  </div>
+                  <div 
+                    className="flex items-center justify-center"
+                    onClick={() => navigate(`/players/${player.id}`)}
+                  >
                     <Badge color={isProfit ? "green" : "red"} size="sm">
-                      {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                      {isProfit ? "+" : ""}{formatIndianNumber(Math.abs(player.total_profit || 0))}
                     </Badge>
+                  </div>
+                  <div className="flex items-center justify-center">
                     <Button
                       variant="subtle"
                       color="red"

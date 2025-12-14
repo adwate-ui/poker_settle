@@ -2054,50 +2054,71 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             </div>
           )}
 
-          {/* Community Cards Display - Separate from table, similar to hand history */}
-          {(flopCards || turnCard || riverCard) && (
-            <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 rounded-xl border border-green-700/30">
-              <div className="flex gap-3 items-center flex-wrap">
-                {/* Flop */}
-                {flopCards && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
-                    <div className="flex gap-0.5">
-                      {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
-                        <PokerCard key={idx} card={card} size="sm" />
-                      ))}
-                    </div>
+          {/* Community Cards Display - Always show, even if empty */}
+          <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 rounded-xl border border-green-700/30">
+            <div className="flex gap-3 items-center flex-wrap min-h-[60px]">
+              {/* Flop */}
+              {flopCards ? (
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                  <div className="flex gap-0.5">
+                    {flopCards.match(/.{1,2}/g)?.map((card, idx) => (
+                      <PokerCard key={idx} card={card} size="sm" />
+                    ))}
                   </div>
-                )}
-                
-                {/* Turn */}
-                {turnCard && flopCards && (
-                  <>
-                    <div className="h-12 w-px bg-green-700/50"></div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                  <span className="text-xs text-muted-foreground/50">Not dealt yet</span>
+                </div>
+              )}
+              
+              {/* Turn */}
+              {flopCards && (
+                <>
+                  <div className="h-12 w-px bg-green-700/50"></div>
+                  {turnCard ? (
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
                       <div className="flex gap-0.5">
                         <PokerCard card={turnCard} size="sm" />
                       </div>
                     </div>
-                  </>
-                )}
-                
-                {/* River */}
-                {riverCard && turnCard && (
-                  <>
-                    <div className="h-12 w-px bg-green-700/50"></div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
+                      <span className="text-xs text-muted-foreground/50">Not dealt yet</span>
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* River */}
+              {turnCard && (
+                <>
+                  <div className="h-12 w-px bg-green-700/50"></div>
+                  {riverCard ? (
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
                       <div className="flex gap-0.5">
                         <PokerCard card={riverCard} size="sm" />
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
+                      <span className="text-xs text-muted-foreground/50">Not dealt yet</span>
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {!flopCards && !turnCard && !riverCard && (
+                <span className="text-sm text-muted-foreground/70">Community cards will appear here</span>
+              )}
             </div>
-          )}
+          </div>
 
           {/* NO ACTION HISTORY IN MOBILE VIEW */}
         </div>
@@ -2210,7 +2231,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           onHandComplete();
         }
       }} modal={true} dismissible={true} repositionInputs={false}>
-        <DrawerContent className="h-[85vh] max-h-[85vh] overflow-x-hidden overflow-y-auto">
+        <DrawerContent className="h-[95vh] max-h-[95vh] overflow-x-hidden overflow-y-auto">
           {handTrackingContent}
         </DrawerContent>
       </Drawer>
