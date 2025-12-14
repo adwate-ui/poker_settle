@@ -205,8 +205,8 @@ const PokerTableView = memo(({
 
   return (
     <div className="relative w-full aspect-square max-w-2xl mx-auto">
-      {/* Poker Table */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      {/* Poker Table - rotated 90 degrees on mobile for portrait mode */}
+      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-100 scale-[0.85]">
         <div className="relative w-full h-full">
           {/* Stadium-shaped table */}
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -332,7 +332,7 @@ const PokerTableView = memo(({
                 onTouchEnd={handleTouchEnd}
                 onContextMenu={(e) => enableDragDrop && e.preventDefault()}
                 onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 sm:rotate-0 -rotate-90 ${
                   enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
                 } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
                   isFolded ? 'opacity-50 grayscale' : ''
