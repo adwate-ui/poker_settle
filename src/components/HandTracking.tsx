@@ -759,6 +759,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       betSize = (game.small_blind || 50);
     } else if (actionType === 'Big Blind') {
       betSize = (game.big_blind || 100);
+    } else if (actionType === 'Check') {
+      betSize = 0; // Check adds no money to the pot
     } else if (actionType === 'Call') {
       betSize = currentBet;
     } else if (actionType === 'Raise') {
@@ -2107,7 +2109,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => {
-                    recordAction('Call');
+                    const callAmount = getCallAmountForDisplay();
+                    recordAction(callAmount === 0 ? 'Check' : 'Call');
                     // Reset bet amount after action
                     setBetAmount('');
                   }} 
@@ -2372,7 +2375,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             <div className="grid grid-cols-2 gap-2">
               {canPlayerCallOrCheck() && (
                 <Button 
-                  onClick={() => recordAction('Call')} 
+                  onClick={() => {
+                    const callAmount = getCallAmountForDisplay();
+                    recordAction(callAmount === 0 ? 'Check' : 'Call');
+                  }} 
                   variant="outline"
                   size="default"
                   className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
