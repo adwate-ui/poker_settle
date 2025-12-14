@@ -1441,6 +1441,11 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     return getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets);
   };
 
+  // Helper function to get the appropriate action type based on call amount
+  const getCallOrCheckAction = (): 'Check' | 'Call' => {
+    return getCallAmountForDisplay() === 0 ? 'Check' : 'Call';
+  };
+
   // Helper function to get badge variant for action type
   const getActionBadgeVariant = (actionType: string): "destructive" | "default" | "secondary" => {
     if (actionType === 'Fold') return 'destructive';
@@ -2107,7 +2112,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => {
-                    recordAction('Call');
+                    recordAction(getCallOrCheckAction());
                     // Reset bet amount after action
                     setBetAmount('');
                   }} 
@@ -2372,7 +2377,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             <div className="grid grid-cols-2 gap-2">
               {canPlayerCallOrCheck() && (
                 <Button 
-                  onClick={() => recordAction('Call')} 
+                  onClick={() => {
+                    recordAction(getCallOrCheckAction());
+                  }} 
                   variant="outline"
                   size="default"
                   className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"

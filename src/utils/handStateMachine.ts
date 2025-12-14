@@ -1,7 +1,7 @@
 import { GamePlayer, PlayerAction } from '@/types/poker';
 
 export type HandStage = 'setup' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'complete';
-export type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Call' | 'Raise' | 'Fold';
+export type ActionType = 'Small Blind' | 'Big Blind' | 'Straddle' | 'Re-Straddle' | 'Check' | 'Call' | 'Raise' | 'Fold';
 
 export interface HandState {
   stage: HandStage;
@@ -260,7 +260,9 @@ export const processAction = (
   let additionalAmount = 0;
 
   // Calculate additional amount added to pot
-  if (actionType === 'Call') {
+  if (actionType === 'Check') {
+    additionalAmount = 0; // Check adds no money to pot
+  } else if (actionType === 'Call') {
     additionalAmount = state.currentBet - playerStreetBet;
   } else if (actionType === 'Raise') {
     additionalAmount = betSize - playerStreetBet;
