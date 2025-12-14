@@ -155,4 +155,22 @@ All colors MUST be HSL.
       -webkit-overflow-scrolling: touch;
     }
   }
+  
+  /* Poker table container - 15% taller on mobile, square on desktop */
+  .poker-table-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .poker-table-container::before {
+    content: "";
+    display: block;
+    padding-bottom: 115%; /* 15% taller than square on mobile */
+  }
+  
+  @media (min-width: 640px) {
+    .poker-table-container::before {
+      padding-bottom: 100%; /* Square on desktop */
+    }
+  }
 }
