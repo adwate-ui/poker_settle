@@ -410,8 +410,8 @@ export const GameDetailView = ({
           onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
         >
           <Group justify="space-between">
-            <Text className="text-white dark:text-white" size="lg" fw={600}>Buy-in Logs</Text>
-            {buyInLogsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
+            <Text className="text-primary" size="lg" fw={600}>Buy-in Logs</Text>
+            {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </Group>
         </div>
         <Collapse in={buyInLogsOpen}>
@@ -478,8 +478,8 @@ export const GameDetailView = ({
           onClick={() => setPlayerResultsOpen(!playerResultsOpen)}
         >
           <Group justify="space-between">
-            <Text className="text-white dark:text-white" size="lg" fw={600}>Player Results</Text>
-            {playerResultsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
+            <Text className="text-primary" size="lg" fw={600}>Player Results</Text>
+            {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </Group>
         </div>
         <Collapse in={playerResultsOpen}>
@@ -595,11 +595,11 @@ export const GameDetailView = ({
           <Group justify="space-between" wrap="wrap">
             <Group gap="xs">
               <span className="text-2xl">💰</span>
-              <Text className="text-white dark:text-white" size="lg" fw={600}>
+              <Text className="text-primary" size="lg" fw={600}>
                 Settlements
               </Text>
             </Group>
-            {settlementsOpen ? <ChevronUp className="h-5 w-5 text-white dark:text-white" /> : <ChevronDown className="h-5 w-5 text-white dark:text-white" />}
+            {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </Group>
           {showOwnerControls && settlementsOpen && (
             <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
