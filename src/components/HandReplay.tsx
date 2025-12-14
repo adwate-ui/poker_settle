@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -563,10 +563,10 @@ const HandReplay = ({
                       <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
                       <div className="flex gap-0.5">
                         {flopCards.map((card, idx) => (
-                          <>
-                            <PokerCard key={`flop-${idx}`} card={card} size="sm" className="sm:hidden" />
-                            <PokerCard key={`flop-desktop-${idx}`} card={card} size="md" className="hidden sm:block" />
-                          </>
+                          <React.Fragment key={`flop-${idx}`}>
+                            <PokerCard card={card} size="sm" className="sm:hidden" />
+                            <PokerCard card={card} size="md" className="hidden sm:block" />
+                          </React.Fragment>
                         ))}
                       </div>
                     </div>
@@ -578,10 +578,10 @@ const HandReplay = ({
                       <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
-                        <div className="flex gap-0.5">
+                        <>
                           <PokerCard card={turnCard} size="sm" className="sm:hidden" />
                           <PokerCard card={turnCard} size="md" className="hidden sm:block" />
-                        </div>
+                        </>
                       </div>
                     </>
                   )}
@@ -592,10 +592,10 @@ const HandReplay = ({
                       <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
-                        <div className="flex gap-0.5">
+                        <>
                           <PokerCard card={riverCard} size="sm" className="sm:hidden" />
                           <PokerCard card={riverCard} size="md" className="hidden sm:block" />
-                        </div>
+                        </>
                       </div>
                     </>
                   )}
