@@ -339,11 +339,9 @@ const GamesHistory = () => {
               <div className="flex items-center justify-center font-bold text-xs text-white">
                 Chips
               </div>
-              {selectedPlayer !== "all" && (
-                <div className="flex items-center justify-center font-bold text-xs text-white">
-                  P&L
-                </div>
-              )}
+              <div className="flex items-center justify-center font-bold text-xs text-white">
+                {selectedPlayer !== "all" ? "P&L" : "Action"}
+              </div>
             </div>
           </div>
 

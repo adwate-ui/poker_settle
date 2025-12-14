@@ -216,6 +216,9 @@ const PlayersHistory = () => {
             <div className="flex items-center justify-center font-bold text-xs text-white">
               P&L
             </div>
+            <div className="flex items-center justify-center font-bold text-xs text-white">
+              Action
+            </div>
           </div>
         </div>
 
