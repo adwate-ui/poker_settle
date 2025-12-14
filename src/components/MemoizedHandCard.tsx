@@ -76,10 +76,10 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
             {communityCardArray && (
               <Group gap="xs">
                 {communityCardArray.map((card, idx) => (
-                  <PokerCard key={idx} card={card} size="sm" className="hidden md:block" />
+                  <PokerCard key={`desktop-${idx}`} card={card} size="sm" className="hidden md:block" />
                 ))}
                 {communityCardArray.map((card, idx) => (
-                  <PokerCard key={idx} card={card} size="xs" className="md:hidden" />
+                  <PokerCard key={`mobile-${idx}`} card={card} size="xs" className="md:hidden" />
                 ))}
               </Group>
             )}
