@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, createTheme } from '@mantine/core';
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -22,6 +22,13 @@ import ShortLinkRedirect from "./pages/ShortLinkRedirect";
 import UpiPaymentBouncer from "./pages/UpiPaymentBouncer";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
+
+// Mantine theme configuration that syncs with app's dark mode
+const mantineTheme = createTheme({
+  primaryColor: 'blue',
+  fontFamily: 'inherit',
+  defaultRadius: 'md',
+});
 
 const queryClient = new QueryClient();
 
@@ -64,22 +71,42 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ThemeProvider>
-        <MantineProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <OfflineIndicator />
-            <PWAInstallPrompt />
-            <AppContent />
-          </TooltipProvider>
-        </MantineProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Track dark mode for Mantine
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider>
+          <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <OfflineIndicator />
+              <PWAInstallPrompt />
+              <AppContent />
+            </TooltipProvider>
+          </MantineProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
