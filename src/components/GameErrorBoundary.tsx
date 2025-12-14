@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, Text, Stack } from "@mantine/core";
 
 interface GameErrorBoundaryProps {
   children: React.ReactNode;
@@ -31,16 +31,14 @@ class GameErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div className="max-w-6xl mx-auto mt-8">
-          <Card className="border-destructive/40">
-            <CardHeader>
-              <CardTitle>Unable to load game details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
+          <Card shadow="sm" padding="lg" radius="md" withBorder style={{ borderColor: 'var(--mantine-color-red-6)' }}>
+            <Stack gap="md">
+              <Text size="lg" fw={700}>Unable to load game details</Text>
+              <Text c="dimmed">
                 Something went wrong while rendering this game. Please refresh the
                 page or return to the games list.
-              </p>
-            </CardContent>
+              </Text>
+            </Stack>
           </Card>
         </div>
       );
