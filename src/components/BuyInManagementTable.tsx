@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Table, Button, Modal, NumberInput, Group, Text, Select, Stack } from '@mantine/core';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface BuyInManagementTableProps {
   gamePlayers: GamePlayer[];
@@ -63,6 +64,8 @@ export const BuyInManagementTable = ({
     a.player.name.localeCompare(b.player.name)
   );
 
+  const isMobile = useIsMobile();
+
   // Helper function to abbreviate names for mobile
   const getDisplayName = (name: string, isMobile: boolean) => {
     if (!isMobile) return name;
@@ -72,16 +75,6 @@ export const BuyInManagementTable = ({
       idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
     ).join(' ');
   };
-
-  // Check if mobile (simplified check based on window width)
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   return (
     <>
