@@ -129,7 +129,8 @@ export const BuyInManagementTable = ({
           setBuyInCount('');
         }}
         title={<Text fw={700} size="lg">Add Buy-in</Text>}
-        centered
+        centered={!isMobile}
+        yOffset={isMobile ? '5vh' : undefined}
         size="sm"
         scrollAreaComponent={ScrollArea.Autosize}
       >
