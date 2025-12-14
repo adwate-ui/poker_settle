@@ -368,7 +368,6 @@ const PlayerDetail = () => {
                     {getSortIcon("final_stack")}
                   </Button>
                 </Table.Th>
-                <Table.Th className="font-bold text-center w-[50px]"></Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>

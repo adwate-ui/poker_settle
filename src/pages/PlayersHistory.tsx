@@ -190,7 +190,6 @@ const PlayersHistory = () => {
               Net P&L
               {getSortIcon("total_profit")}
             </Button>
-            <div className="flex items-center justify-start px-4 font-bold"></div>
           </div>
         </div>
 

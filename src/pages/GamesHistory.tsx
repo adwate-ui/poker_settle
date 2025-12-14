@@ -304,9 +304,7 @@ const GamesHistory = () => {
                 <div className="flex items-center justify-start px-4 font-bold">
                   Player P&L
                 </div>
-              ) : (
-                <div className="flex items-center justify-start px-4 font-bold"></div>
-              )}
+              ) : null}
             </div>
           </div>
 
