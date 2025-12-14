@@ -850,15 +850,39 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           return; // Don't move to next player after finishing hand
         }
 
-        // Move to next player with unchanged activePlayers and updated playersInHand
-        const nextIndex = getNextPlayerIndex(
-          currentPlayerIndex,
+        // Check if betting round is complete after the fold
+        const isBettingComplete = isBettingRoundComplete(
           stage,
           activePlayers,
-          buttonIndex,
-          updatedPlayersInHand
+          updatedPlayersInHand,
+          stateUpdates.streetPlayerBets || streetPlayerBets,
+          [...streetActions, action],
+          currentHand.button_player_id,
+          stateUpdates.lastAggressorIndex !== undefined ? stateUpdates.lastAggressorIndex : lastAggressorIndex
         );
-        setCurrentPlayerIndex(nextIndex);
+
+        // Auto-advance to next street if betting is complete
+        if (isBettingComplete && stage !== 'river') {
+          // Use setTimeout to allow state to settle before advancing
+          setTimeout(() => {
+            moveToNextStreet();
+          }, AUTO_ADVANCE_DELAY_MS);
+        } else if (isBettingComplete && stage === 'river') {
+          // Auto-advance to showdown
+          setTimeout(() => {
+            moveToNextStreet();
+          }, AUTO_ADVANCE_DELAY_MS);
+        } else {
+          // Move to next player with unchanged activePlayers and updated playersInHand
+          const nextIndex = getNextPlayerIndex(
+            currentPlayerIndex,
+            stage,
+            activePlayers,
+            buttonIndex,
+            updatedPlayersInHand
+          );
+          setCurrentPlayerIndex(nextIndex);
+        }
       } else {
         // Check if betting round is now complete after this action
         // If complete, automatically advance to next street
