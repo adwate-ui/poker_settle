@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, Button, TextInput, Text, Stack, Box } from "@mantine/core";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { Game, Player } from "@/types/poker";
@@ -181,34 +178,36 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card className="max-w-4xl mx-auto relative">
+    <Card shadow="sm" padding="md" radius="md" withBorder className="max-w-4xl mx-auto relative">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg p-3">
-          <Card className="w-full max-w-md">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base sm:text-lg">Active Game in Progress</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                You have an ongoing game. Complete it before starting a new one.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={continueGame} className="w-full" size="lg">
+          <Card shadow="md" padding="md" radius="md" withBorder className="w-full max-w-md">
+            <Stack gap="md">
+              <Box>
+                <Text size="lg" fw={700} mb="xs">Active Game in Progress</Text>
+                <Text size="sm" c="dimmed">
+                  You have an ongoing game. Complete it before starting a new one.
+                </Text>
+              </Box>
+              <Button onClick={continueGame} fullWidth size="lg">
                 <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Continue Game
               </Button>
-            </CardContent>
+            </Stack>
           </Card>
         </div>
       )}
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Start New Game</CardTitle>
-        <CardDescription className="text-xs sm:text-sm">Set up your poker game with buy-in and players</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Buy-in Section */}
-        <div className="space-y-1.5">
-          <Label htmlFor="buyin" className="text-xs sm:text-sm">Buy-in Amount (Rs.)</Label>
-          <Input
+      
+      <Stack gap="md">
+        <Box>
+          <Text size="xl" fw={700} mb={4}>Start New Game</Text>
+          <Text size="sm" c="dimmed">Set up your poker game with buy-in and players</Text>
+        </Box>
+
+        <Stack gap="md">
+          {/* Buy-in Section */}
+          <TextInput
+            label="Buy-in Amount (Rs.)"
             id="buyin"
             type="text"
             placeholder="Enter buy-in amount"
@@ -221,14 +220,15 @@ const NewGame = () => {
               }
             }}
             disabled={hasActiveGame}
+            styles={{
+              label: { fontSize: '14px' }
+            }}
           />
-        </div>
 
-        {/* Blinds Section */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="smallblind" className="text-xs sm:text-sm">Small Blind (Rs.)</Label>
-            <Input
+          {/* Blinds Section */}
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput
+              label="Small Blind (Rs.)"
               id="smallblind"
               type="text"
               placeholder="Small blind"
@@ -241,11 +241,12 @@ const NewGame = () => {
                 }
               }}
               disabled={hasActiveGame}
+              styles={{
+                label: { fontSize: '14px' }
+              }}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="bigblind" className="text-xs sm:text-sm">Big Blind (Rs.)</Label>
-            <Input
+            <TextInput
+              label="Big Blind (Rs.)"
               id="bigblind"
               type="text"
               placeholder="Big blind"
@@ -258,45 +259,48 @@ const NewGame = () => {
                 }
               }}
               disabled={hasActiveGame}
+              styles={{
+                label: { fontSize: '14px' }
+              }}
             />
           </div>
-        </div>
 
-        {/* Add Players Section */}
-        <div className="space-y-3">
-          <h3 className="text-sm sm:text-base font-semibold">Players</h3>
-          
-          <PlayerSelector
-            allPlayers={players}
-            selectedPlayers={gamePlayers}
-            onAddPlayer={addPlayerToGame}
-            onRemovePlayer={removePlayerFromGame}
-            onCreateNewPlayer={addNewPlayer}
-            onCreateNewPlayerWithDetails={addNewPlayerWithDetails}
-            disabled={hasActiveGame}
-          />
-        </div>
+          {/* Add Players Section */}
+          <Stack gap="sm">
+            <Text size="md" fw={600}>Players</Text>
+            
+            <PlayerSelector
+              allPlayers={players}
+              selectedPlayers={gamePlayers}
+              onAddPlayer={addPlayerToGame}
+              onRemovePlayer={removePlayerFromGame}
+              onCreateNewPlayer={addNewPlayer}
+              onCreateNewPlayerWithDetails={addNewPlayerWithDetails}
+              disabled={hasActiveGame}
+            />
+          </Stack>
 
-        {/* Start Game Button */}
-        <Button 
-          onClick={startGame} 
-          disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-          className="w-full"
-          size="lg"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Starting Game...
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-5 w-5" />
-              Start Game
-            </>
-          )}
-        </Button>
-      </CardContent>
+          {/* Start Game Button */}
+          <Button 
+            onClick={startGame} 
+            disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
+            fullWidth
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Starting Game...
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-5 w-5" />
+                Start Game
+              </>
+            )}
+          </Button>
+        </Stack>
+      </Stack>
     </Card>
   );
 };

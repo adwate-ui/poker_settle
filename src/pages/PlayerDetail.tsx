@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, Button, Select, Table, Collapse, Stack, Group, Text, Box, Badge } from "@mantine/core";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit } from "lucide-react";
@@ -12,26 +11,6 @@ import { useSharedLink } from "@/hooks/useSharedLink";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface GameHistory {
   id: string;
@@ -186,10 +165,8 @@ const PlayerDetail = () => {
 
   if (!player) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">Player not found</p>
-        </CardContent>
+      <Card shadow="sm" padding="md" radius="md" withBorder className="max-w-4xl mx-auto">
+        <Text ta="center" c="dimmed">Player not found</Text>
       </Card>
     );
   }
@@ -213,21 +190,23 @@ const PlayerDetail = () => {
         Back to Players History
       </Button>
 
-      <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
-        <Card>
-          <CardHeader>
-            <CollapsibleTrigger asChild>
-              <div className="flex items-center justify-between cursor-pointer">
-                <CardTitle className="text-2xl flex items-center gap-3">
-                  <OptimizedAvatar name={player.name} size="md" />
-                  {player.name}
-                </CardTitle>
-                <ChevronDown className={`h-5 w-5 transition-transform ${isStatsOpen ? 'transform rotate-180' : ''}`} />
-              </div>
-            </CollapsibleTrigger>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent className="space-y-4">
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Stack gap="md">
+          <Box 
+            onClick={() => setIsStatsOpen(!isStatsOpen)}
+            style={{ cursor: 'pointer' }}
+          >
+            <Group justify="space-between">
+              <Group gap="sm">
+                <OptimizedAvatar name={player.name} size="md" />
+                <Text size="xl" fw={700}>{player.name}</Text>
+              </Group>
+              <ChevronDown className={`h-5 w-5 transition-transform ${isStatsOpen ? 'transform rotate-180' : ''}`} />
+            </Group>
+          </Box>
+          
+          <Collapse in={isStatsOpen}>
+            <Stack gap="md">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg border">
                   <p className="text-sm text-muted-foreground">Total Games</p>
@@ -305,91 +284,95 @@ const PlayerDetail = () => {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+            </Stack>
+          </Collapse>
+        </Stack>
+      </Card>
 
       {/* Game History */}
-      <Collapsible open={isGameHistoryOpen} onOpenChange={setIsGameHistoryOpen}>
-        <Card className="border-primary/20">
-          <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
-            <CollapsibleTrigger asChild>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-primary">Game History</CardTitle>
-                  <ChevronDown className={`h-5 w-5 transition-transform ${isGameHistoryOpen ? 'transform rotate-180' : ''}`} />
-                </div>
-                <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear} onPointerDown={(e) => e.stopPropagation()}>
-                  <SelectTrigger className="bg-background border-primary/20 w-full md:w-64">
-                    <SelectValue placeholder="Filter by month-year" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="all">All Months</SelectItem>
-                    {uniqueMonthYears.map((monthYear) => (
-                      <SelectItem key={monthYear} value={monthYear}>
-                        {monthYear}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CollapsibleTrigger>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent className="p-0">
-              <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold">
+      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+        <Stack gap="md">
+          <Box 
+            onClick={() => setIsGameHistoryOpen(!isGameHistoryOpen)}
+            style={{ cursor: 'pointer' }}
+            className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10"
+            p="sm"
+          >
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <Group gap="xs">
+                <Text size="lg" fw={700} className="text-primary">Game History</Text>
+                <ChevronDown className={`h-5 w-5 transition-transform ${isGameHistoryOpen ? 'transform rotate-180' : ''}`} />
+              </Group>
+              <Select
+                value={selectedMonthYear}
+                onChange={(value) => setSelectedMonthYear(value || "all")}
+                data={[
+                  { value: "all", label: "All Months" },
+                  ...uniqueMonthYears.map((monthYear) => ({
+                    value: monthYear,
+                    label: monthYear
+                  }))
+                ]}
+                className="w-full md:w-64"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </Box>
+          
+          <Collapse in={isGameHistoryOpen}>
+            <Box>
+              <Table striped highlightOnHover withTableBorder>
+            <Table.Thead>
+              <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                <Table.Th className="font-bold">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("date")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >
                     Date
                     {getSortIcon("date")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold">
+                </Table.Th>
+                <Table.Th className="font-bold">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("buy_ins")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >
                     Buy-ins
                     {getSortIcon("buy_ins")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold">
+                </Table.Th>
+                <Table.Th className="font-bold">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >
                     Net P&L
                     {getSortIcon("net_amount")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold">
+                </Table.Th>
+                <Table.Th className="font-bold">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("final_stack")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >
                     Final Stack
                     {getSortIcon("final_stack")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                </Table.Th>
+                <Table.Th className="font-bold text-center">Actions</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {sortedGameHistory.map((game, index) => {
                 const isWin = game.net_amount > 0;
                 
                 return (
-                  <TableRow
+                  <Table.Tr
                     key={game.id}
                     className={`transition-colors ${
                       index % 2 === 0 
@@ -397,18 +380,18 @@ const PlayerDetail = () => {
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary">
+                    <Table.Td className="font-medium text-primary">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         {format(new Date(game.games.date), "MMM d, yyyy")}
                       </div>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Td>
+                    <Table.Td>
                       <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
                         {game.buy_ins}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Td>
+                    <Table.Td>
                       <span className={`px-3 py-1 rounded-full font-bold ${
                         isWin 
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
@@ -416,29 +399,29 @@ const PlayerDetail = () => {
                       }`}>
                         {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
                       </span>
-                    </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground">
+                    </Table.Td>
+                    <Table.Td className="font-semibold text-accent-foreground">
                       Rs. {formatIndianNumber(game.final_stack)}
-                    </TableCell>
-                    <TableCell className="text-center">
+                    </Table.Td>
+                    <Table.Td className="text-center">
                       <Button
-                        variant="ghost"
+                        variant="subtle"
                         size="sm"
                         onClick={() => navigate(`/games/${game.game_id}`)}
                         className="hover:text-primary"
                       >
                         View Game
                       </Button>
-                    </TableCell>
-                  </TableRow>
+                    </Table.Td>
+                  </Table.Tr>
                 );
               })}
-            </TableBody>
+            </Table.Tbody>
           </Table>
-        </CardContent>
-      </CollapsibleContent>
-    </Card>
-  </Collapsible>
+            </Box>
+          </Collapse>
+        </Stack>
+      </Card>
 
       {/* Edit Player Dialog */}
       <PlayerFormDialog

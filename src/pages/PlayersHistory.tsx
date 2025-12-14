@@ -1,7 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, Button, Badge, Stack, Group, Text, Box, Modal } from "@mantine/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
@@ -10,16 +8,6 @@ import { Player } from "@/types/poker";
 import { formatIndianNumber } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
@@ -130,51 +118,49 @@ const PlayersHistory = () => {
 
   if (players.length === 0) {
     return (
-      <Card className="max-w-6xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl">Players History</CardTitle>
-          <CardDescription>No players yet</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-8">
+      <Card shadow="sm" padding="md" radius="md" withBorder className="max-w-6xl mx-auto">
+        <Stack gap="md">
+          <Box>
+            <Text size="xl" fw={700} mb={4}>Players History</Text>
+            <Text size="sm" c="dimmed">No players yet</Text>
+          </Box>
+          <Text c="dimmed" ta="center" py="xl">
             Add players to your games to see their statistics here!
-          </p>
-        </CardContent>
+          </Text>
+        </Stack>
       </Card>
     );
   }
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl sm:text-2xl">Players Performance</CardTitle>
-          <CardDescription className="text-sm">Overall statistics for all players</CardDescription>
-        </CardHeader>
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Box>
+          <Text size="xl" fw={700} mb={4}>Players Performance</Text>
+          <Text size="sm" c="dimmed">Overall statistics for all players</Text>
+        </Box>
       </Card>
 
       {/* Summary Stats - Moved to top */}
-      <Card>
-        <CardContent className="pt-4 sm:pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <div className="p-3 sm:p-4 rounded-lg border">
-              <p className="text-xs sm:text-sm text-muted-foreground">Total Players</p>
-              <p className="text-xl sm:text-2xl font-bold">{players.length}</p>
-            </div>
-            <div className="p-3 sm:p-4 rounded-lg border">
-              <p className="text-xs sm:text-sm text-muted-foreground">Total Games</p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
-              </p>
-            </div>
-            <div className="p-3 sm:p-4 rounded-lg border">
-              <p className="text-xs sm:text-sm text-muted-foreground">Winning Players</p>
-              <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
-                {players.filter(p => (p.total_profit || 0) >= 0).length}
-              </p>
-            </div>
-          </div>
-        </CardContent>
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          <Box p="md" className="rounded-lg border">
+            <Text size="sm" c="dimmed">Total Players</Text>
+            <Text size="xl" fw={700}>{players.length}</Text>
+          </Box>
+          <Box p="md" className="rounded-lg border">
+            <Text size="sm" c="dimmed">Total Games</Text>
+            <Text size="xl" fw={700}>
+              {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
+            </Text>
+          </Box>
+          <Box p="md" className="rounded-lg border">
+            <Text size="sm" c="dimmed">Winning Players</Text>
+            <Text size="xl" fw={700} className="text-green-600 dark:text-green-400">
+              {players.filter(p => (p.total_profit || 0) >= 0).length}
+            </Text>
+          </Box>
+        </div>
       </Card>
 
       <div className="space-y-2 sm:space-y-3">
@@ -214,108 +200,115 @@ const PlayersHistory = () => {
           return (
             <Card
               key={player.id}
+              shadow="sm"
+              padding="sm"
+              radius="md"
+              withBorder
               className="cursor-pointer transition-colors hover:bg-muted/50"
             >
-              <CardContent className="p-2 sm:p-3">
-                {/* Mobile Layout */}
-                <div className="md:hidden space-y-4 pl-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div 
-                      className="flex items-center gap-3 flex-1 min-w-0"
-                      onClick={() => navigate(`/players/${player.id}`)}
-                    >
-                      <OptimizedAvatar name={player.name} size="md" />
-                      <span className="font-bold text-base truncate">{player.name}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletePlayerId(player.id);
-                      }}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/20 flex-shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Games</p>
-                      <Badge variant="info">{player.total_games || 0}</Badge>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Net P&L</p>
-                      <Badge variant={isProfit ? "success" : "destructive"}>
-                        {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Desktop Layout */}
-                <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm h-12">
+              {/* Mobile Layout */}
+              <div className="md:hidden space-y-4 pl-2">
+                <div className="flex items-center justify-between gap-3">
                   <div 
-                    className="flex items-center gap-4"
+                    className="flex items-center gap-3 flex-1 min-w-0"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
                     <OptimizedAvatar name={player.name} size="md" />
-                    <span className="font-bold text-base truncate">{player.name}</span>
+                    <Text fw={700} size="md" truncate>{player.name}</Text>
                   </div>
-                  
-                  <div 
-                    onClick={() => navigate(`/players/${player.id}`)}
+                  <Button
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletePlayerId(player.id);
+                    }}
+                    className="flex-shrink-0"
                   >
-                    <Badge variant="info">{player.total_games || 0}</Badge>
-                  </div>
-                  
-                  <div 
-                    onClick={() => navigate(`/players/${player.id}`)}
-                  >
-                    <Badge variant={isProfit ? "success" : "destructive"}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Games</Text>
+                    <Badge color="blue">{player.total_games || 0}</Badge>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Net P&L</Text>
+                    <Badge color={isProfit ? "green" : "red"}>
                       {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                     </Badge>
-                  </div>
-                  
-                  <div className="flex items-center justify-start">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletePlayerId(player.id);
-                      }}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/20"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  </Stack>
                 </div>
-              </CardContent>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:grid grid-cols-4 gap-6 items-center text-sm h-12">
+                <div 
+                  className="flex items-center gap-4"
+                  onClick={() => navigate(`/players/${player.id}`)}
+                >
+                  <OptimizedAvatar name={player.name} size="md" />
+                  <Text fw={700} size="md" truncate>{player.name}</Text>
+                </div>
+                
+                <div 
+                  onClick={() => navigate(`/players/${player.id}`)}
+                >
+                  <Badge color="blue">{player.total_games || 0}</Badge>
+                </div>
+                
+                <div 
+                  onClick={() => navigate(`/players/${player.id}`)}
+                >
+                  <Badge color={isProfit ? "green" : "red"}>
+                    {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-start">
+                  <Button
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletePlayerId(player.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </Card>
           );
         })}
       </div>
 
-      <AlertDialog open={!!deletePlayerId} onOpenChange={() => setDeletePlayerId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Player</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this player? This action cannot be undone and will remove all their game history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+      <Modal 
+        opened={!!deletePlayerId} 
+        onClose={() => setDeletePlayerId(null)}
+        title="Delete Player"
+        centered
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            Are you sure you want to delete this player? This action cannot be undone and will remove all their game history.
+          </Text>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setDeletePlayerId(null)}>
+              Cancel
+            </Button>
+            <Button 
+              color="red"
               onClick={() => deletePlayerId && handleDeletePlayer(deletePlayerId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </div>
   );
 };

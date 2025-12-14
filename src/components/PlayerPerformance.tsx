@@ -1,9 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, Badge, Collapse, Select, Stack, Group, Text, Box } from "@mantine/core";
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, User } from "lucide-react";
 import { Player, Game, TablePosition } from "@/types/poker";
 import { formatIndianNumber } from "@/lib/utils";
@@ -65,108 +61,112 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
   if (players.length === 0) return null;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-card border-border">
-        <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardTitle className="text-poker-gold flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Player Performance
-              </div>
-              {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </CardTitle>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent>
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Select Player</label>
-                <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
-                  <SelectTrigger className="bg-input border-border">
-                    <SelectValue placeholder="Choose a player..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sortedPlayers.map(player => (
-                      <SelectItem key={player.id} value={player.id}>
-                        {player.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+    <Card shadow="sm" padding="md" radius="md" withBorder>
+      <Stack gap="md">
+        <Box 
+          onClick={() => setIsOpen(!isOpen)}
+          style={{ cursor: 'pointer' }}
+          className="hover:bg-muted/50 transition-colors"
+          p="xs"
+        >
+          <Group justify="space-between">
+            <Group gap="xs">
+              <User className="w-5 h-5 text-poker-gold" />
+              <Text size="lg" fw={700} className="text-poker-gold">Player Performance</Text>
+            </Group>
+            {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </Group>
+        </Box>
 
-              {selectedPlayer && (
-                <>
-                  <div className="p-4 bg-secondary rounded-lg">
-                    <h3 className="text-base sm:text-lg font-semibold mb-3">{selectedPlayer.name} - Overall Stats</h3>
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div className="text-center p-3 bg-background rounded">
-                        <div className="text-xs sm:text-sm text-muted-foreground">Total Games</div>
-                        <div className="text-xl sm:text-2xl font-bold text-primary">{selectedPlayer.total_games}</div>
-                      </div>
-                      <div className="text-center p-3 bg-background rounded">
-                        <div className="text-xs sm:text-sm text-muted-foreground">Total P&L</div>
-                        <div className={`text-lg sm:text-2xl font-bold flex items-center justify-center gap-1 sm:gap-2 ${selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> : <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
-                          <span className="text-sm sm:text-2xl">
-                            {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+        <Collapse in={isOpen}>
+          <Stack gap="lg">
+            <Box>
+              <Text size="sm" fw={500} mb="xs">Select Player</Text>
+              <Select
+                value={selectedPlayerId}
+                onChange={(value) => setSelectedPlayerId(value || "")}
+                placeholder="Choose a player..."
+                data={sortedPlayers.map(player => ({
+                  value: player.id,
+                  label: player.name
+                }))}
+              />
+            </Box>
+
+            {selectedPlayer && (
+              <>
+                <Box p="md" className="bg-secondary rounded-lg">
+                  <Text size="lg" fw={600} mb="sm">{selectedPlayer.name} - Overall Stats</Text>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <Box ta="center" p="sm" className="bg-background rounded">
+                      <Text size="sm" c="dimmed">Total Games</Text>
+                      <Text size="xl" fw={700} c="blue">{selectedPlayer.total_games}</Text>
+                    </Box>
+                    <Box ta="center" p="sm" className="bg-background rounded">
+                      <Text size="sm" c="dimmed">Total P&L</Text>
+                      <Group justify="center" gap="xs" className={selectedPlayer.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}>
+                        {selectedPlayer.total_profit >= 0 ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> : <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
+                        <Text size="xl" fw={700} span>
+                          {selectedPlayer.total_profit >= 0 ? '+' : ''}{formatCurrency(selectedPlayer.total_profit)}
+                        </Text>
+                      </Group>
+                    </Box>
                   </div>
+                </Box>
 
-                  {playerGames.length > 0 ? (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold mb-3">Game History</h3>
-                      {playerGames.map((game) => (
-                        <div key={game.gameId} className="space-y-3">
-                          <div className="rounded-lg border border-border overflow-hidden">
-                            <div className="bg-secondary p-3">
-                              <div className="flex justify-between items-center">
-                                <span className="font-semibold">
+                {playerGames.length > 0 ? (
+                  <Stack gap="md">
+                    <Text size="lg" fw={600} mb="sm">Game History</Text>
+                    {playerGames.map((game) => (
+                      <Box key={game.gameId}>
+                        <Card shadow="xs" padding="sm" radius="md" withBorder>
+                          <Stack gap="xs">
+                            <Box className="bg-secondary" p="sm" style={{ borderRadius: '8px' }}>
+                              <Group justify="space-between" align="center">
+                                <Text fw={600}>
                                   {new Date(game.date).toLocaleDateString()}
-                                </span>
-                                <div className="flex gap-2">
-                                  <Badge variant="outline" className="text-xs">
+                                </Text>
+                                <Group gap="xs">
+                                  <Badge variant="outline" size="sm">
                                     {game.buyIns} buy-in{game.buyIns > 1 ? 's' : ''}
                                   </Badge>
-                                  <Badge variant={game.netAmount >= 0 ? "default" : "destructive"} className="text-xs whitespace-nowrap">
+                                  <Badge 
+                                    color={game.netAmount >= 0 ? "green" : "red"} 
+                                    size="sm"
+                                  >
                                     {game.netAmount >= 0 ? '+' : ''}{formatCurrency(game.netAmount)}
                                   </Badge>
-                                </div>
-                              </div>
-                            </div>
+                                </Group>
+                              </Group>
+                            </Box>
                             {gameTablePositions[game.gameId] && gameTablePositions[game.gameId]!.positions.length > 0 && (
-                              <div className="p-4 bg-card">
-                                <h4 className="text-sm font-medium mb-2">Table Position (Peak)</h4>
+                              <Box p="sm" className="bg-card">
+                                <Text size="sm" fw={500} mb="xs">Table Position (Peak)</Text>
                                 <PokerTableView positions={gameTablePositions[game.gameId]!.positions} />
-                              </div>
+                              </Box>
                             )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">
-                      No games found for this player.
-                    </p>
-                  )}
-                </>
-              )}
+                          </Stack>
+                        </Card>
+                      </Box>
+                    ))}
+                  </Stack>
+                ) : (
+                  <Text c="dimmed" ta="center" py="xl">
+                    No games found for this player.
+                  </Text>
+                )}
+              </>
+            )}
 
-              {!selectedPlayerId && (
-                <p className="text-muted-foreground text-center py-8">
-                  Select a player to view their performance.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+            {!selectedPlayerId && (
+              <Text c="dimmed" ta="center" py="xl">
+                Select a player to view their performance.
+              </Text>
+            )}
+          </Stack>
+        </Collapse>
+      </Stack>
+    </Card>
   );
 };
 
