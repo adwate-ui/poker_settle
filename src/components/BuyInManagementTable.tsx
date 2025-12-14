@@ -21,17 +21,28 @@ export const BuyInManagementTable = ({
   const [buyInCount, setBuyInCount] = useState<number | string>(1);
   const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddBuyIn = async () => {
+  const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
     if (!selectedPlayerId || !buyInCount || typeof buyInCount !== 'number' || buyInCount <= 0) {
       toast.error('Please select a player and enter a valid buy-in count');
-      return;
+      return { valid: false };
     }
 
     const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
     if (!selectedPlayer) {
       toast.error('Player not found');
+      return { valid: false };
+    }
+
+    return { valid: true, player: selectedPlayer };
+  };
+
+  const handleAddBuyIn = async () => {
+    const validation = validateBuyInInput();
+    if (!validation.valid || !validation.player) {
       return;
     }
+
+    const selectedPlayer = validation.player;
 
     setIsAdding(true);
     try {
@@ -127,7 +138,10 @@ export const BuyInManagementTable = ({
           />
 
           <Text size="sm" c="dimmed">
-            This will add {typeof buyInCount === 'number' ? buyInCount : 0} buy-in(s) worth Rs. {formatIndianNumber((typeof buyInCount === 'number' ? buyInCount : 0) * buyInAmount)}
+            {(() => {
+              const validBuyInCount = typeof buyInCount === 'number' ? buyInCount : 0;
+              return `This will add ${validBuyInCount} buy-in(s) worth Rs. ${formatIndianNumber(validBuyInCount * buyInAmount)}`;
+            })()}
           </Text>
 
           <Group justify="flex-end" mt="md">

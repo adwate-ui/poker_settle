@@ -34,11 +34,12 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount }: PlayerCardMantinePr
         {/* Player Header */}
         <Group justify="space-between" wrap="nowrap">
           <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
-            <OptimizedAvatar 
-              name={gamePlayer.player.name}
-              size="sm"
-              className="flex-shrink-0"
-            />
+            <div style={{ flexShrink: 0 }}>
+              <OptimizedAvatar 
+                name={gamePlayer.player.name}
+                size="sm"
+              />
+            </div>
             <Text 
               fw={700} 
               size="md" 
