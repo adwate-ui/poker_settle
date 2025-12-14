@@ -129,6 +129,17 @@ The following components already use Mantine:
    - Manages final stack entry and calculations
    - Uses: Table, Collapse, Button, NumberInput, Group, Text, ActionIcon, Stack
 
+## Color System Integration
+
+As of the latest update, Mantine components are fully integrated with the app's theme system:
+
+- **Unified Colors**: Mantine now uses the same color variables as shadcn/ui components
+- **Theme Sync**: All five themes (default, One Piece, Bleach, Naruto, Dandadan) apply to Mantine components
+- **Dark Mode**: Seamless dark mode support that syncs automatically
+- **CSS Bridge**: A CSS bridge file (`src/styles/mantine-theme.css`) maps Mantine's color system to our app's CSS variables
+
+See `COLOR_SCHEME_IMPLEMENTATION.md` for full details.
+
 ## Best Practices
 
 ### 1. Component Choice
@@ -138,8 +149,9 @@ The following components already use Mantine:
 
 ### 2. Styling
 - Use Mantine's built-in props for styling (e.g., `fw`, `size`, `color`)
-- Leverage the theme configuration for consistent design
-- Styles automatically adapt to light/dark mode
+- Use semantic color names (`c="dimmed"`, `color="green"`) which automatically use theme colors
+- Styles automatically adapt to light/dark mode and theme changes
+- Avoid hardcoded colors; use theme-aware props instead
 
 ### 3. Responsive Design
 - Mantine components are responsive by default
