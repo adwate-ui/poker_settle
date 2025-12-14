@@ -1,6 +1,5 @@
 import { memo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button, TextInput } from '@mantine/core';
 import { X, TrendingUp } from 'lucide-react';
 import { ActionType } from '@/utils/handStateMachine';
 
@@ -27,38 +26,39 @@ const ActionButtons = memo(({
   return (
     <div className="flex gap-1.5">
       <Button
-        variant="destructive"
+        color="red"
         onClick={() => onAction('Fold')}
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
+        leftSection={<X className="h-4 w-4" />}
       >
-        <X className="h-4 w-4 mr-1" />
         Fold
       </Button>
       <Button
-        variant="default"
+        color="blue"
         onClick={() => onAction('Call')}
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
       >
         {isCheck ? 'Check' : `Call ${callAmount.toLocaleString('en-IN')}`}
       </Button>
-      <Input
+      <TextInput
         type="number"
         inputMode="numeric"
         placeholder="Raise amt"
         value={betAmount}
         onChange={(e) => setBetAmount(e.target.value)}
         disabled={disabled}
-        className="flex-1 h-9 text-xs"
+        className="flex-1"
+        styles={{ input: { height: '36px', fontSize: '12px' } }}
       />
       <Button
-        variant="default"
+        color="blue"
         onClick={() => onAction('Raise')}
         disabled={disabled || !betAmount}
         className="bg-gradient-poker flex-1 h-9 px-2 text-xs"
+        leftSection={<TrendingUp className="h-4 w-4" />}
       >
-        <TrendingUp className="h-4 w-4 mr-1" />
         Raise
       </Button>
     </div>
