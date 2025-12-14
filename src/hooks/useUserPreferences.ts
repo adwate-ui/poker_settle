@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserPreferences } from '@/types/poker';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { DEFAULT_PAYMENT_KEYWORDS } from '@/constants/paymentKeywords';
 
 export const useUserPreferences = () => {
   const { user } = useAuth();
@@ -34,7 +35,7 @@ export const useUserPreferences = () => {
               user_id: user.id,
               card_back_design: 'classic',
               tutorial_completed: false,
-              payment_keywords: ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'],
+              payment_keywords: [...DEFAULT_PAYMENT_KEYWORDS],
             })
             .select()
             .single();
@@ -63,7 +64,7 @@ export const useUserPreferences = () => {
 
   // Update user preferences
   const updatePreferences = useCallback(async (updates: Partial<UserPreferences>) => {
-    if (!user || !preferences) {
+    if (!user) {
       toast.error('User not authenticated');
       return false;
     }

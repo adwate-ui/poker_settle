@@ -4,10 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useHandsHistory } from '@/hooks/useHandsHistory';
+import { useHandsHistory, HandWithDetails } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
 import MemoizedHandCard from '@/components/MemoizedHandCard';
 import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
+
+// Type for grouped hands by game
+interface GameHandGroup {
+  game_id: string;
+  game_date: string;
+  game_buy_in: number;
+  hands: HandWithDetails[];
+}
 
 const HandsHistory = () => {
   const navigate = useNavigate();
@@ -368,7 +376,7 @@ const HandsHistory = () => {
                   }
                   acc[gameKey].hands.push(hand);
                   return acc;
-                }, {} as Record<string, { game_id: string; game_date: string; game_buy_in: number; hands: typeof currentHands }>);
+                }, {} as Record<string, GameHandGroup>);
 
                 return Object.values(handsByGame).map((gameGroup) => (
                   <div key={gameGroup.game_id} className="mb-6 last:mb-0">

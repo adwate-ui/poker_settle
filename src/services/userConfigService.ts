@@ -6,6 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { emailService } from './emailService';
 import { UserPreferences } from '@/types/poker';
+import { DEFAULT_PAYMENT_KEYWORDS } from '@/constants/paymentKeywords';
 
 /**
  * Load and apply user-specific email configuration
@@ -68,13 +69,13 @@ export async function getUserPaymentKeywords(userId: string): Promise<string[]> 
 
     if (error || !preferences) {
       // Return default keywords
-      return ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
+      return [...DEFAULT_PAYMENT_KEYWORDS];
     }
 
-    return preferences.payment_keywords || ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
+    return preferences.payment_keywords || [...DEFAULT_PAYMENT_KEYWORDS];
   } catch (error) {
     console.error('Failed to load user payment keywords:', error);
-    return ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
+    return [...DEFAULT_PAYMENT_KEYWORDS];
   }
 }
 

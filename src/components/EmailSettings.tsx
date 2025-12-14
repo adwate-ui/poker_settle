@@ -38,13 +38,18 @@ export const EmailSettings: React.FC = () => {
   }, [preferences]);
 
   const handleSave = async () => {
-    await updateEmailSettings({
+    const success = await updateEmailSettings({
       email_service_id: serviceId || undefined,
       email_template_id: templateId || undefined,
       email_public_key: publicKey || undefined,
       email_from_address: fromEmail || undefined,
       email_from_name: fromName || undefined,
     });
+
+    if (!success) {
+      // Error is already handled by updateEmailSettings with toast
+      return;
+    }
   };
 
   if (loading) {

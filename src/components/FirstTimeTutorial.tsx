@@ -226,7 +226,12 @@ export const FirstTimeTutorial: React.FC<FirstTimeTutorialProps> = ({ open, onCl
   };
 
   const handleComplete = async () => {
-    await completeTutorial();
+    const success = await completeTutorial();
+    if (!success) {
+      // Still close the tutorial even if saving fails
+      // User can replay it if needed
+      console.warn('Failed to save tutorial completion status');
+    }
     onClose();
   };
 

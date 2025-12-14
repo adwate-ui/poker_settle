@@ -6,16 +6,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { SettlementConfirmation } from "@/types/poker";
 import { getUserPaymentKeywords } from "./userConfigService";
-
-/**
- * Default keywords that trigger payment confirmation
- */
-const DEFAULT_CONFIRMATION_KEYWORDS = ['PAID', 'DONE', 'SETTLED', 'COMPLETE', 'CONFIRMED'];
+import { DEFAULT_PAYMENT_KEYWORDS } from "@/constants/paymentKeywords";
 
 /**
  * Check if a message contains a confirmation keyword as a standalone word
  */
-export function isConfirmationMessage(message: string, keywords: string[] = DEFAULT_CONFIRMATION_KEYWORDS): boolean {
+export function isConfirmationMessage(message: string, keywords: readonly string[] = DEFAULT_PAYMENT_KEYWORDS): boolean {
   const upperMessage = message.trim().toUpperCase();
   
   // Create regex patterns for the provided keywords
@@ -32,14 +28,11 @@ export function isConfirmationMessage(message: string, keywords: string[] = DEFA
 export async function processIncomingMessage(
   email: string,
   messageText: string,
-  userId?: string
+  userId: string
 ): Promise<{ confirmed: boolean; settlementsUpdated: number; error?: string }> {
   try {
-    // Get user-specific keywords if userId is provided
-    let keywords = DEFAULT_CONFIRMATION_KEYWORDS;
-    if (userId) {
-      keywords = await getUserPaymentKeywords(userId);
-    }
+    // Get user-specific keywords
+    const keywords = await getUserPaymentKeywords(userId);
 
     // Check if message contains confirmation keyword
     if (!isConfirmationMessage(messageText, keywords)) {
@@ -49,11 +42,12 @@ export async function processIncomingMessage(
       };
     }
 
-    // Get player by email address
+    // Get player by email address (must belong to the user)
     const { data: player, error: playerError } = await supabase
       .from('players')
-      .select('id, name, user_id')
+      .select('id, name')
       .eq('email', email)
+      .eq('user_id', userId)
       .single();
 
     if (playerError) {
