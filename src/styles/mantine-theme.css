@@ -6,7 +6,7 @@
 :root {
   /* Mantine uses its own CSS variable system. We override them to match our theme */
   
-  /* Primary color - maps to our green theme */
+  /* Primary color - maps to current theme's primary color */
     --mantine-color-primary-0: hsl(var(--primary) / 0.05);
     --mantine-color-primary-1: hsl(var(--primary) / 0.15);
     --mantine-color-primary-2: hsl(var(--primary) / 0.25);
@@ -99,9 +99,9 @@
     --mantine-color-gray-8: hsl(var(--foreground) / 0.85);
     --mantine-color-gray-9: hsl(var(--foreground));
     
-    /* Ensure good contrast for filled elements */
-    --mantine-color-default: hsl(var(--muted) / 1.2);
-    --mantine-color-default-hover: hsl(var(--muted) / 1.4);
+    /* Ensure good contrast for filled elements in dark mode */
+    --mantine-color-default: hsl(var(--muted));
+    --mantine-color-default-hover: hsl(var(--accent));
 }
 
 /* Override Mantine component styles to use our color system */
