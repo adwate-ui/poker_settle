@@ -141,7 +141,7 @@ export const FinalStackManagement = ({
             <Button 
               onClick={handleSaveEdit}
               loading={isUpdating}
-              disabled={editValue === '' || editValue === null || editValue === undefined}
+              disabled={editValue === '' || editValue == null}
             >
               Save
             </Button>
