@@ -7,9 +7,10 @@ import OptimizedAvatar from "./OptimizedAvatar";
 interface PlayerCardMantineProps {
   gamePlayer: GamePlayer;
   buyInAmount: number;
+  isLiveGame?: boolean;
 }
 
-const PlayerCardMantine = memo(({ gamePlayer, buyInAmount }: PlayerCardMantineProps) => {
+const PlayerCardMantine = memo(({ gamePlayer, buyInAmount, isLiveGame = false }: PlayerCardMantineProps) => {
   const netAmount = useMemo(() => 
     (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
     [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
@@ -25,7 +26,7 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount }: PlayerCardMantinePr
       radius="md" 
       withBorder
       style={{ 
-        borderColor: isProfit ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-red-6)',
+        borderColor: isLiveGame ? 'var(--mantine-color-gray-4)' : (isProfit ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-red-6)'),
         borderWidth: 2,
         height: '100%'
       }}

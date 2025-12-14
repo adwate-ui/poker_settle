@@ -741,6 +741,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               key={gamePlayer.id}
               gamePlayer={gamePlayer}
               buyInAmount={game.buy_in_amount}
+              isLiveGame={true}
             />
           ))}
         </div>
