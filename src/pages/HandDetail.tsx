@@ -473,13 +473,8 @@ const HandDetail = () => {
                       {player.holeCards ? (
                         <div className="flex items-center gap-2">
                           <div className="flex gap-0.5">
-                            {/* Mobile: xs size */}
                             {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="xs" className="sm:hidden" />
-                            ))}
-                            {/* Desktop: sm size */}
-                            {player.holeCards.match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard key={idx} card={card} size="sm" className="hidden sm:block" />
+                              <PokerCard key={idx} card={card} size="xs" />
                             ))}
                           </div>
                           <Button
