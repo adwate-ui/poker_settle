@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User, Database, Palette, Mail, CreditCard, BookOpen } from 'lucide-react';
+import { ArrowLeft, User, Database, Palette } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,16 +11,12 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { themes, ThemeName } from '@/config/themes';
 import { toast } from 'sonner';
 import { getCharacterImage } from '@/config/characterImages';
-import { EmailSettings } from '@/components/EmailSettings';
-import { PaymentSettings } from '@/components/PaymentSettings';
-import { FirstTimeTutorial } from '@/components/FirstTimeTutorial';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { currentTheme, setTheme, loading: themeLoading } = useTheme();
   const [changingTheme, setChangingTheme] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -67,30 +63,18 @@ const Profile = () => {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Profile</span>
-            </TabsTrigger>
-            <TabsTrigger value="email">
-              <Mail className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Email</span>
-            </TabsTrigger>
-            <TabsTrigger value="payments">
-              <CreditCard className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Payments</span>
+              Profile
             </TabsTrigger>
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Theme</span>
-            </TabsTrigger>
-            <TabsTrigger value="tutorial">
-              <BookOpen className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Tutorial</span>
+              Theme
             </TabsTrigger>
             <TabsTrigger value="storage">
               <Database className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Storage</span>
+              Storage
             </TabsTrigger>
           </TabsList>
 
@@ -206,56 +190,10 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="email">
-            <EmailSettings />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <PaymentSettings />
-          </TabsContent>
-
-          <TabsContent value="tutorial">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                  <div>
-                    <CardTitle>Tutorial</CardTitle>
-                    <CardDescription>Learn how to use Poker Settle</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  New to Poker Settle? Run through our interactive tutorial to learn how to:
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
-                  <li>Add players and create games</li>
-                  <li>Track buy-ins and stacks</li>
-                  <li>Record poker hands</li>
-                  <li>Send settlement notifications</li>
-                  <li>Configure email and payment settings</li>
-                </ul>
-                <Button 
-                  onClick={() => setShowTutorial(true)}
-                  className="mt-4"
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Start Tutorial
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="storage">
             <CacheManager />
           </TabsContent>
         </Tabs>
-
-        <FirstTimeTutorial
-          open={showTutorial}
-          onClose={() => setShowTutorial(false)}
-        />
       </div>
     </div>
   );
