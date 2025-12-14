@@ -10,7 +10,6 @@ import { MantineProvider, createTheme } from '@mantine/core';
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
-import { TutorialManager } from "@/components/TutorialManager";
 import Index from "./pages/Index";
 import GameDetail from "./pages/GameDetail";
 import Auth from "./pages/Auth";
@@ -48,7 +47,6 @@ const AppContent = () => {
 
   return (
     <BrowserRouter>
-      <TutorialManager />
       <Routes>
         <Route path="/" element={user ? <Index /> : <Auth />} />
         <Route path="/games" element={user ? <Index /> : <Auth />} />

@@ -444,57 +444,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_preferences: {
-        Row: {
-          id: string
-          user_id: string
-          card_back_design: string
-          email_service_id: string | null
-          email_template_id: string | null
-          email_public_key: string | null
-          email_from_address: string | null
-          email_from_name: string | null
-          payment_keywords: string[] | null
-          custom_supabase_url: string | null
-          custom_supabase_key: string | null
-          tutorial_completed: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          card_back_design?: string
-          email_service_id?: string | null
-          email_template_id?: string | null
-          email_public_key?: string | null
-          email_from_address?: string | null
-          email_from_name?: string | null
-          payment_keywords?: string[] | null
-          custom_supabase_url?: string | null
-          custom_supabase_key?: string | null
-          tutorial_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          card_back_design?: string
-          email_service_id?: string | null
-          email_template_id?: string | null
-          email_public_key?: string | null
-          email_from_address?: string | null
-          email_from_name?: string | null
-          payment_keywords?: string[] | null
-          custom_supabase_url?: string | null
-          custom_supabase_key?: string | null
-          tutorial_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
