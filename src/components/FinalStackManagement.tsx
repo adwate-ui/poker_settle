@@ -111,14 +111,10 @@ export const FinalStackManagement = ({
         }}
         title={<Text fw={700} size="lg">Edit Final Stack</Text>}
         centered
-        size="md"
+        size="sm"
         scrollAreaComponent={ScrollArea.Autosize}
       >
         <Stack gap="md">
-          <Text size="sm" fw={500}>
-            Player: {selectedPlayer?.player.name}
-          </Text>
-
           <NumberInput
             label="Final Stack Amount"
             placeholder="Enter final stack"

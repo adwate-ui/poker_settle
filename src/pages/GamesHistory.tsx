@@ -272,7 +272,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
+                style={{ color: 'white' }}
               >
                 Date
                 {getSortIcon("date")}
@@ -280,7 +281,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
+                style={{ color: 'white' }}
               >
                 Buy-in
                 {getSortIcon("buy_in")}
@@ -288,7 +290,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-2 justify-center font-bold text-white hover:bg-white/10"
+                className="flex items-center gap-2 justify-center font-bold hover:bg-white/10"
+                style={{ color: 'white' }}
               >
                 # Players
                 {getSortIcon("players")}
@@ -296,7 +299,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("chips")}
-                className="flex items-center gap-2 justify-start font-bold text-white hover:bg-white/10"
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
+                style={{ color: 'white' }}
               >
                 Chips in play
                 {getSortIcon("chips")}
@@ -315,7 +319,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-1 justify-start font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-start font-bold hover:bg-white/10 text-xs p-1 h-auto"
+                style={{ color: 'white' }}
               >
                 Date
                 {getSortIcon("date")}
@@ -323,7 +328,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-1 justify-center font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto"
+                style={{ color: 'white' }}
               >
                 Buy-in
                 {getSortIcon("buy_in")}
@@ -331,7 +337,8 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-1 justify-center font-bold text-white hover:bg-white/10 text-xs p-1 h-auto"
+                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto"
+                style={{ color: 'white' }}
               >
                 Players
                 {getSortIcon("players")}

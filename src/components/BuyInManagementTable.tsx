@@ -130,15 +130,10 @@ export const BuyInManagementTable = ({
         }}
         title={<Text fw={700} size="lg">Add Buy-in</Text>}
         centered
-        size="md"
+        size="sm"
         scrollAreaComponent={ScrollArea.Autosize}
       >
         <Stack gap="md">
-          <div>
-            <Text size="sm" fw={500} mb="xs">Player</Text>
-            <Text size="md" fw={600}>{sortedPlayers.find(gp => gp.id === selectedPlayerId)?.player.name}</Text>
-          </div>
-
           <NumberInput
             label="Number of Buy-ins"
             placeholder="Enter buy-in count"

@@ -379,21 +379,21 @@ export const GameDetailView = ({
             </Button>
           </Group>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Buy-in</p>
-              <p className="text-sm sm:text-base font-bold text-primary">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+              <p className="text-sm sm:text-base font-bold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Players</p>
-              <p className="text-sm sm:text-base font-bold text-primary">{gamePlayers.length}</p>
+              <p className="text-sm sm:text-base font-bold">{gamePlayers.length}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Chips in play</p>
-              <p className="text-sm sm:text-base font-bold text-primary">
+              <p className="text-sm sm:text-base font-bold">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+            <div className="space-y-0.5 p-3 rounded-lg border">
               <p className="text-xs text-muted-foreground font-medium">Total P&L</p>
               <p className="text-sm sm:text-base font-bold text-green-500">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
