@@ -214,8 +214,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <Button
                     onClick={addNewPlayer}
                     disabled={!newPlayerName.trim()}
-                    size="sm"
-                    px="xs"
+                    size="xs"
                   >
                     <Plus className="w-4 h-4" />
                   </Button>

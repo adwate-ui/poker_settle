@@ -862,7 +862,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   <Plus className="w-4 h-4 mr-2" />
                   Add
                 </Button>
-                <Button variant="default" onClick={() => setShowManualTransfer(false)} className="flex-1">
+                <Button onClick={() => setShowManualTransfer(false)} className="flex-1">
                   Cancel
                 </Button>
               </Group>

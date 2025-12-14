@@ -352,7 +352,7 @@ export const GameDetailView = ({
     <div className="max-w-6xl mx-auto space-y-6">
       {onBack && (
         <Button
-          variant="ghost"
+          variant="subtle"
           onClick={onBack}
           className="mb-4 hover:text-primary"
         >
@@ -489,7 +489,7 @@ export const GameDetailView = ({
               <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
                 <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("name")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -500,7 +500,7 @@ export const GameDetailView = ({
                 </Table.Th>
                 <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("buy_ins")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -511,7 +511,7 @@ export const GameDetailView = ({
                 </Table.Th>
                 <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -522,7 +522,7 @@ export const GameDetailView = ({
                 </Table.Th>
                 <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("final_stack")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -643,7 +643,7 @@ export const GameDetailView = ({
                       {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
                     </span>
                     <Button
-                      variant="ghost"
+                      variant="subtle"
                       size="icon"
                       onClick={() => removeManualTransfer(index)}
                       className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
@@ -719,7 +719,7 @@ export const GameDetailView = ({
                       <Table.Td className="text-left py-2 sm:py-4">
                         {showOwnerControls && confirmation ? (
                           <Button
-                            variant="ghost"
+                            variant="subtle"
                             size="sm"
                             onClick={async () => {
                               if (confirmation.confirmed) {
