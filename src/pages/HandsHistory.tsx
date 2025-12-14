@@ -334,7 +334,7 @@ const HandsHistory = () => {
         </CardContent>
       </Card>
 
-      {/* Hands List */}
+      {/* Hands List - Grouped by Game */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -352,15 +352,49 @@ const HandsHistory = () => {
               <p>No hands found matching your filters</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {currentHands.map((hand) => (
-                <MemoizedHandCard 
-                  key={hand.id}
-                  hand={hand}
-                  formatDate={formatDate}
-                />
-              ))}
-            </div>
+            <>
+              {/* Group hands by game */}
+              {(() => {
+                // Group hands by game_id
+                const handsByGame = currentHands.reduce((acc, hand) => {
+                  const gameKey = hand.game_id;
+                  if (!acc[gameKey]) {
+                    acc[gameKey] = {
+                      game_id: hand.game_id,
+                      game_date: hand.game_date,
+                      game_buy_in: hand.game_buy_in,
+                      hands: []
+                    };
+                  }
+                  acc[gameKey].hands.push(hand);
+                  return acc;
+                }, {} as Record<string, { game_id: string; game_date: string; game_buy_in: number; hands: typeof currentHands }>);
+
+                return Object.values(handsByGame).map((gameGroup) => (
+                  <div key={gameGroup.game_id} className="mb-6 last:mb-0">
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base">
+                          Game: {formatDate(gameGroup.game_date)}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Buy-in: Rs. {gameGroup.game_buy_in} • {gameGroup.hands.length} hands
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {gameGroup.hands.map((hand) => (
+                        <MemoizedHandCard 
+                          key={hand.id}
+                          hand={hand}
+                          formatDate={formatDate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </>
           )}
 
           {/* Pagination */}
