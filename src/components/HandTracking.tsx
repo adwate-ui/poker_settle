@@ -340,8 +340,39 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     };
   }, []);
 
-  // REMOVED: Auto-open card selector - let user click to add cards
-  // This was causing extra unwanted steps in the flow
+  // Auto-open card selector when moving to a new street without cards
+  // Opens AFTER betting is complete and street advances
+  useEffect(() => {
+    // Only auto-open if we're in an active hand
+    if (!currentHand || stage === 'setup' || stage === 'showdown') return;
+    
+    // Auto-open card selector when cards need to be selected for current street
+    if (stage === 'flop' && !flopCards) {
+      setCardSelectorType('flop');
+      setTempCommunityCards('');
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
+    } else if (stage === 'turn' && !turnCard && flopCards) {
+      setCardSelectorType('turn');
+      setTempCommunityCards('');
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
+    } else if (stage === 'river' && !riverCard && turnCard) {
+      setCardSelectorType('river');
+      setTempCommunityCards('');
+      if (isMobile) {
+        setShowCardSelector(true);
+      } else {
+        setShowDesktopCardSelector(true);
+      }
+    }
+  }, [stage, flopCards, turnCard, riverCard, currentHand, isMobile]);
 
   // Auto-advance to next remaining player if current player has folded
   useEffect(() => {
@@ -1382,8 +1413,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
   const currentPlayer = activePlayers[currentPlayerIndex];
 
-  // Helper function to check if Call/Check button should be shown
-  const shouldShowCallButton = (): boolean => {
+  // Helper function to check if player can call or check
+  // Returns true for all active players (button shows "Check" or "Call X" based on situation)
+  const canPlayerCallOrCheck = (): boolean => {
     if (!currentPlayer) return false;
     
     // ALWAYS show Call/Check button for active players
@@ -2058,10 +2090,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       {/* Bottom section - Action Buttons - positioned to avoid keyboard overlap */}
       <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 pb-safe">
         {/* Action Buttons */}
-        {playersInHand.includes(currentPlayer?.player_id || '') ? (
+        {currentPlayer && playersInHand.includes(currentPlayer.player_id) ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              {shouldShowCallButton() && (
+              {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => {
                     recordAction('Call');
@@ -2121,7 +2153,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Button>
             </div>
           </div>
-        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+        ) : currentPlayer && !playersInHand.includes(currentPlayer.player_id) ? (
           <div className="bg-muted/50 p-3 rounded-lg text-center border border-dashed">
             <p className="text-sm text-muted-foreground">🃏 Player has folded</p>
           </div>
@@ -2327,10 +2359,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         )}
 
         {/* Action buttons - COMPACT - Always show for active players */}
-        {playersInHand.includes(currentPlayer?.player_id || '') ? (
+        {currentPlayer && playersInHand.includes(currentPlayer.player_id) ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              {shouldShowCallButton() && (
+              {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => recordAction('Call')} 
                   variant="outline"
@@ -2401,7 +2433,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </div>
             </div>
           </div>
-        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+        ) : currentPlayer && !playersInHand.includes(currentPlayer.player_id) ? (
           <div className="bg-muted/50 p-3 rounded-lg text-center border-2 border-dashed border-border">
             <p className="text-sm text-muted-foreground font-medium">
               🃏 This player has folded
