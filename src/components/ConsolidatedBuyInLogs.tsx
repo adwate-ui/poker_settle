@@ -1,4 +1,3 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
@@ -151,33 +150,35 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         <div className="border rounded-lg overflow-hidden">
           <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
             <Table striped highlightOnHover withTableBorder>
-              <Table.Thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+              <Table.Thead style={{ position: 'sticky', top: 0, zIndex: 10 }} className="bg-background">
                 <Table.Tr>
-                  <Table.Th>Player name</Table.Th>
-                  <Table.Th>Incremental buy in</Table.Th>
-                  <Table.Th>Updated total buy in</Table.Th>
-                  <Table.Th>Time</Table.Th>
+                  <Table.Th className="text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Player name</span>
+                    <span className="sm:hidden">Player</span>
+                  </Table.Th>
+                  <Table.Th className="text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Incremental buy in</span>
+                    <span className="sm:hidden">Buy in</span>
+                  </Table.Th>
+                  <Table.Th className="text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Updated total buy in</span>
+                    <span className="sm:hidden">Total</span>
+                  </Table.Th>
+                  <Table.Th className="text-xs sm:text-sm">Time</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {filteredHistory.map((entry) => (
                   <Table.Tr key={entry.id}>
-                    <Table.Td><Text fw={500}>{entry.player_name}</Text></Table.Td>
+                    <Table.Td><Text fw={500} size="sm">{entry.player_name}</Text></Table.Td>
                     <Table.Td>
-                      <Group gap="xs">
-                        {entry.buy_ins_added > 0 ? (
-                          <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
-                        )}
-                        <Text fw={600} c={entry.buy_ins_added > 0 ? "green" : "red"}>
-                          {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                        </Text>
-                      </Group>
+                      <Text fw={600} c={entry.buy_ins_added > 0 ? "green" : "red"} size="sm">
+                        {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                      </Text>
                     </Table.Td>
-                    <Table.Td><Text fw={600}>{entry.total_buy_ins_after}</Text></Table.Td>
+                    <Table.Td><Text fw={600} size="sm">{entry.total_buy_ins_after}</Text></Table.Td>
                     <Table.Td>
-                      <Text size="sm" c="dimmed">
+                      <Text size="xs" c="dimmed">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                       </Text>
                     </Table.Td>

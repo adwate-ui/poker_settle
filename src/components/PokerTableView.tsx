@@ -204,9 +204,9 @@ const PokerTableView = memo(({
   }, [buttonPlayerId, showPositionLabels, positions, seatPositions]);
 
   return (
-    <div className="poker-table-container max-w-3xl mx-auto my-2">
+    <div className="poker-table-container max-w-3xl mx-auto my-1 sm:my-2">
       {/* Poker Table - rotated 90 degrees on mobile for portrait mode, scaled to 50% size on desktop */}
-      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-50 scale-[1.275]">
+      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-[0.55] scale-[1.275]">
         <div className="relative w-full h-full">
           {/* Stadium-shaped table */}
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -263,7 +263,7 @@ const PokerTableView = memo(({
 
           {/* Center area - Community Cards and Pot */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2 sm:rotate-0 -rotate-90">
               {/* Community Cards - using Monarch design */}
               {communityCards && (
                 <div className="flex gap-1 sm:gap-1.5 animate-fade-in">

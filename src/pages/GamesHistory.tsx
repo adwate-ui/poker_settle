@@ -266,12 +266,12 @@ const GamesHistory = () => {
 
       <Card shadow="sm" padding="md" radius="md" withBorder>
         <div className="space-y-2 sm:space-y-3">
-          <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-            <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
+          <div className="hidden md:block rounded-lg overflow-hidden">
+            <div className="grid grid-cols-5 gap-2 sm:gap-4 bg-primary text-primary-foreground p-3 sm:p-4">
               <Button
                 variant="subtle"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-2 justify-start font-bold"
+                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
               >
                 Date
                 {getSortIcon("date")}
@@ -279,7 +279,7 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-2 justify-start font-bold"
+                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
               >
                 Buy-in
                 {getSortIcon("buy_in")}
@@ -287,7 +287,7 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-2 justify-start font-bold"
+                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
               >
                 Players
                 {getSortIcon("players")}
@@ -295,18 +295,16 @@ const GamesHistory = () => {
               <Button
                 variant="subtle"
                 onClick={() => handleSort("chips")}
-                className="flex items-center gap-2 justify-start font-bold"
+                className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
               >
                 Chips in play
                 {getSortIcon("chips")}
               </Button>
               {selectedPlayer !== "all" ? (
-                <div className="flex items-center justify-start h-10 px-4 font-bold">
+                <div className="flex items-center justify-start px-4 font-bold">
                   Player P&L
                 </div>
-              ) : (
-                <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
-              )}
+              ) : null}
             </div>
           </div>
 
@@ -326,46 +324,32 @@ const GamesHistory = () => {
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
                   {/* Mobile Layout */}
-                  <div className="md:hidden space-y-3 pl-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <Text size="xs" c="dimmed">Date</Text>
-                        <Text fw={500}>{format(new Date(game.date), "MMM d, yyyy")}</Text>
+                  <div className="md:hidden">
+                    <div className="flex items-center justify-between gap-2">
+                      <Text fw={500} size="sm">{format(new Date(game.date), "MMM d, yyyy")}</Text>
+                      <div className="flex items-center gap-2">
+                        <Badge color="blue" size="sm">{game.player_count} players</Badge>
+                        <Text fw={600} size="sm">Rs. {formatIndianNumber(game.total_pot)}</Text>
+                        {selectedPlayer !== "all" ? (
+                          playerData && (
+                            <Badge color={playerData.net_amount >= 0 ? "green" : "red"} size="sm">
+                              {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
+                            </Badge>
+                          )
+                        ) : (
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteGameId(game.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </ActionIcon>
+                        )}
                       </div>
-                      {selectedPlayer === "all" && (
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteGameId(game.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </ActionIcon>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Text size="xs" c="dimmed">Buy-in</Text>
-                        <Text fw={600}>Rs. {formatIndianNumber(game.buy_in_amount)}</Text>
-                      </div>
-                      <div>
-                        <Text size="xs" c="dimmed">Players</Text>
-                        <Badge color="blue">{game.player_count}</Badge>
-                      </div>
-                      <div>
-                        <Text size="xs" c="dimmed">Chips in play</Text>
-                        <Text fw={600}>Rs. {formatIndianNumber(game.total_pot)}</Text>
-                      </div>
-                      {selectedPlayer !== "all" && playerData && (
-                        <div>
-                          <Text size="xs" c="dimmed">Player P&L</Text>
-                          <Badge color={playerData.net_amount >= 0 ? "green" : "red"}>
-                            {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
-                          </Badge>
-                        </div>
-                      )}
                     </div>
                   </div>
 

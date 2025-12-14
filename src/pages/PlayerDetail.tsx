@@ -324,47 +324,50 @@ const PlayerDetail = () => {
               <Table striped highlightOnHover withTableBorder>
             <Table.Thead>
               <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <Table.Th className="font-bold">
+                <Table.Th className="font-bold w-[100px] sm:w-auto">
                   <Button
                     variant="subtle"
                     onClick={() => handleSort("date")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
-                    Date
+                    <span className="hidden sm:inline">Date</span>
+                    <span className="sm:hidden">Dt</span>
                     {getSortIcon("date")}
                   </Button>
                 </Table.Th>
-                <Table.Th className="font-bold">
+                <Table.Th className="font-bold w-[70px] sm:w-auto">
                   <Button
                     variant="subtle"
                     onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
-                    Buy-ins
+                    <span className="hidden sm:inline">Buy-ins</span>
+                    <span className="sm:hidden">Buy</span>
                     {getSortIcon("buy_ins")}
                   </Button>
                 </Table.Th>
-                <Table.Th className="font-bold">
+                <Table.Th className="font-bold w-[80px] sm:w-auto">
                   <Button
                     variant="subtle"
                     onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
-                    Net P&L
+                    <span className="hidden sm:inline">Net P&L</span>
+                    <span className="sm:hidden">P&L</span>
                     {getSortIcon("net_amount")}
                   </Button>
                 </Table.Th>
-                <Table.Th className="font-bold">
+                <Table.Th className="font-bold w-[80px] sm:w-auto">
                   <Button
                     variant="subtle"
                     onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-2 hover:text-primary font-bold"
+                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
-                    Final Stack
+                    <span className="hidden sm:inline">Final Stack</span>
+                    <span className="sm:hidden">Stack</span>
                     {getSortIcon("final_stack")}
                   </Button>
                 </Table.Th>
-                <Table.Th className="font-bold text-center">Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>

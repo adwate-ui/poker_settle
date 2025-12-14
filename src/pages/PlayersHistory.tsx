@@ -143,16 +143,10 @@ const PlayersHistory = () => {
 
       {/* Summary Stats - Moved to top */}
       <Card shadow="sm" padding="md" radius="md" withBorder>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <Box p="md" className="rounded-lg border">
             <Text size="sm" c="dimmed">Total Players</Text>
             <Text size="xl" fw={700}>{players.length}</Text>
-          </Box>
-          <Box p="md" className="rounded-lg border">
-            <Text size="sm" c="dimmed">Total Games</Text>
-            <Text size="xl" fw={700}>
-              {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
-            </Text>
           </Box>
           <Box p="md" className="rounded-lg border">
             <Text size="sm" c="dimmed">Winning Players</Text>
@@ -160,16 +154,22 @@ const PlayersHistory = () => {
               {players.filter(p => (p.total_profit || 0) >= 0).length}
             </Text>
           </Box>
+          <Box p="md" className="rounded-lg border hidden md:block">
+            <Text size="sm" c="dimmed">Total Games</Text>
+            <Text size="xl" fw={700}>
+              {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
+            </Text>
+          </Box>
         </div>
       </Card>
 
       <div className="space-y-2 sm:space-y-3">
-        <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-          <div className="grid grid-cols-4 gap-4 font-bold text-sm">
+        <div className="hidden md:block rounded-lg overflow-hidden">
+          <div className="grid grid-cols-4 gap-4 bg-primary text-primary-foreground p-3 sm:p-4">
             <Button
               variant="ghost"
               onClick={() => handleSort("name")}
-              className="flex items-center gap-2 justify-start font-bold"
+              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
             >
               Player Name
               {getSortIcon("name")}
@@ -177,7 +177,7 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_games")}
-              className="flex items-center gap-2 justify-start font-bold"
+              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
             >
               Games
               {getSortIcon("total_games")}
@@ -185,12 +185,11 @@ const PlayersHistory = () => {
             <Button
               variant="ghost"
               onClick={() => handleSort("total_profit")}
-              className="flex items-center gap-2 justify-start font-bold"
+              className="flex items-center gap-2 justify-start font-bold text-primary-foreground hover:bg-primary-foreground/10"
             >
               Net P&L
               {getSortIcon("total_profit")}
             </Button>
-            <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
           </div>
         </div>
 
@@ -207,39 +206,33 @@ const PlayersHistory = () => {
               className="cursor-pointer transition-colors hover:bg-muted/50"
             >
               {/* Mobile Layout */}
-              <div className="md:hidden space-y-4 pl-2">
-                <div className="flex items-center justify-between gap-3">
+              <div className="md:hidden">
+                <div className="flex items-center justify-between gap-2">
                   <div 
-                    className="flex items-center gap-3 flex-1 min-w-0"
+                    className="flex items-center gap-2 flex-1 min-w-0"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <OptimizedAvatar name={player.name} size="md" />
-                    <Text fw={700} size="md" truncate>{player.name}</Text>
+                    <OptimizedAvatar name={player.name} size="sm" />
+                    <Text fw={700} size="sm" truncate>{player.name}</Text>
                   </div>
-                  <Button
-                    variant="subtle"
-                    color="red"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletePlayerId(player.id);
-                    }}
-                    className="flex-shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Stack gap={4}>
-                    <Text size="xs" c="dimmed">Games</Text>
-                    <Badge color="blue">{player.total_games || 0}</Badge>
-                  </Stack>
-                  <Stack gap={4}>
-                    <Text size="xs" c="dimmed">Net P&L</Text>
-                    <Badge color={isProfit ? "green" : "red"}>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge color="blue" size="sm">{player.total_games || 0}</Badge>
+                    <Badge color={isProfit ? "green" : "red"} size="sm">
                       {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                     </Badge>
-                  </Stack>
+                    <Button
+                      variant="subtle"
+                      color="red"
+                      size="xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletePlayerId(player.id);
+                      }}
+                      className="flex-shrink-0"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 

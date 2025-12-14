@@ -31,7 +31,6 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Poker Tracker</h1>
           <div className="flex items-center gap-2 sm:gap-4">
-            <ThemeToggle />
             <UserProfile />
           </div>
         </div>
