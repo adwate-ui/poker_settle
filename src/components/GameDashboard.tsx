@@ -8,6 +8,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
+import PlayerCardMantine from "@/components/PlayerCardMantine";
+import { BuyInManagementTable } from "@/components/BuyInManagementTable";
+import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
@@ -105,6 +108,27 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       console.error('Error updating player:', error);
     }
   }, [updateGamePlayer]);
+
+  const handleAddBuyIn = useCallback(async (gamePlayerId: string, buyInsToAdd: number) => {
+    const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
+    if (!gamePlayer) return;
+
+    const newTotal = gamePlayer.buy_ins + buyInsToAdd;
+    await handlePlayerUpdate(gamePlayerId, { 
+      buy_ins: newTotal,
+      net_amount: (gamePlayer.final_stack || 0) - (newTotal * game.buy_in_amount)
+    }, true);
+  }, [gamePlayers, game.buy_in_amount, handlePlayerUpdate]);
+
+  const handleUpdateFinalStack = useCallback(async (gamePlayerId: string, finalStack: number) => {
+    const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
+    if (!gamePlayer) return;
+
+    await handlePlayerUpdate(gamePlayerId, { 
+      final_stack: finalStack,
+      net_amount: finalStack - (gamePlayer.buy_ins * game.buy_in_amount)
+    });
+  }, [gamePlayers, game.buy_in_amount, handlePlayerUpdate]);
 
   const addNewPlayer = useCallback(async () => {
     if (!newPlayerName.trim()) {
@@ -404,39 +428,39 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         <Collapsible open={gameStatsOpen} onOpenChange={setGameStatsOpen}>
           <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-2 border-b border-primary/20">
-                <CardTitle className="text-poker-gold flex items-center justify-between text-base">
+              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
+                <CardTitle className="text-poker-gold flex items-center justify-between text-xl">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-poker-gold/20 rounded-lg">
-                      <Calculator className="w-4 h-4" />
+                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                      <Calculator className="w-5 h-5" />
                     </div>
                     Game Summary
                   </div>
-                  {gameStatsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {gameStatsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </CardTitle>
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="pt-3 pb-3">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="space-y-0.5 p-2 rounded-lg bg-primary/10 border-2 border-primary/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Buy-ins</p>
-                <p className="text-sm font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
+              <CardContent className="pt-4 pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-sm text-muted-foreground font-medium">Buy-ins</p>
+                <p className="text-lg font-bold text-primary">{formatCurrency(totalBuyIns)}</p>
               </div>
-              <div className="space-y-0.5 p-2 rounded-lg bg-primary/10 border-2 border-primary/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Final Stack</p>
-                <p className="text-sm font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
+              <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                <p className="text-sm text-muted-foreground font-medium">Final Stack</p>
+                <p className="text-lg font-bold text-primary">{formatCurrency(totalFinalStack)}</p>
                 {!isStackBalanced && (
-                  <p className="text-[9px] text-destructive font-semibold">Must equal buy-ins</p>
+                  <p className="text-xs text-destructive font-semibold">Must equal buy-ins</p>
                 )}
               </div>
-              <div className="space-y-0.5 p-2 rounded-lg bg-green-500/10 border-2 border-green-500/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Winnings</p>
-                <p className="text-sm font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
+              <div className="space-y-1 p-3 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+                <p className="text-sm text-muted-foreground font-medium">Winnings</p>
+                <p className="text-lg font-bold text-green-500">{formatCurrency(totalWinnings)}</p>
               </div>
-              <div className="space-y-0.5 p-2 rounded-lg bg-red-500/10 border-2 border-red-500/30">
-                <p className="text-[10px] text-muted-foreground font-medium">Losses</p>
-                <p className="text-sm font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
+              <div className="space-y-1 p-3 rounded-lg bg-red-500/10 border-2 border-red-500/30">
+                <p className="text-sm text-muted-foreground font-medium">Losses</p>
+                <p className="text-lg font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
               </div>
             </div>
               </CardContent>
@@ -719,12 +743,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
-            <PlayerCard
+            <PlayerCardMantine
               key={gamePlayer.id}
               gamePlayer={gamePlayer}
               buyInAmount={game.buy_in_amount}
-              onUpdatePlayer={handlePlayerUpdate}
-              fetchBuyInHistory={fetchBuyInHistory}
             />
           ))}
         </div>
@@ -732,6 +754,43 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </CollapsibleContent>
           </Card>
         </Collapsible>
+
+        {/* Buy-in Management */}
+        <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <CardHeader className="border-b border-primary/20 py-3">
+            <CardTitle className="text-poker-gold flex items-center gap-2 text-xl">
+              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                <Plus className="w-5 h-5" />
+              </div>
+              Buy-in Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <BuyInManagementTable
+              gamePlayers={gamePlayers}
+              buyInAmount={game.buy_in_amount}
+              onAddBuyIn={handleAddBuyIn}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Final Stack Management */}
+        <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <CardHeader className="border-b border-primary/20 py-3">
+            <CardTitle className="text-poker-gold flex items-center gap-2 text-xl">
+              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                <DollarSign className="w-5 h-5" />
+              </div>
+              Final Stack Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <FinalStackManagement
+              gamePlayers={gamePlayers}
+              onUpdateFinalStack={handleUpdateFinalStack}
+            />
+          </CardContent>
+        </Card>
 
         {manualTransfers.length > 0 && (
           <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
