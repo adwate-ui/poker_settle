@@ -1,31 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, Badge, Button, Select, Modal, Stack, Text, Group, ActionIcon, Loader } from "@mantine/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { Loader2, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatIndianNumber } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface GameWithStats {
   id: string;
@@ -219,127 +200,115 @@ const GamesHistory = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader size="lg" />
       </div>
     );
   }
 
   if (games.length === 0) {
     return (
-      <Card className="max-w-6xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl">Games History</CardTitle>
-          <CardDescription>No completed games yet</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-8">
+      <Card shadow="sm" padding="lg" radius="md" withBorder className="max-w-6xl mx-auto">
+        <Stack gap="sm">
+          <Text size="xl" fw={700}>Games History</Text>
+          <Text size="sm" c="dimmed">No completed games yet</Text>
+          <Text c="dimmed" ta="center" py="xl">
             Start your first game to see it here!
-          </p>
-        </CardContent>
+          </Text>
+        </Stack>
       </Card>
     );
   }
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl sm:text-2xl">Games History</CardTitle>
-          <CardDescription className="text-sm">View all your completed poker games</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <Select value={selectedDate} onValueChange={setSelectedDate}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by date" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Dates</SelectItem>
-                {uniqueDates.map((date) => (
-                  <SelectItem key={date} value={date}>
-                    {date}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by month-year" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Months</SelectItem>
-                {uniqueMonthYears.map((monthYear) => (
-                  <SelectItem key={monthYear} value={monthYear}>
-                    {monthYear}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by player" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Players</SelectItem>
-                {uniquePlayers.map((player) => (
-                  <SelectItem key={player} value={player}>
-                    {player}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Stack gap="md">
+          <div>
+            <Text size="xl" fw={700} className="sm:text-2xl">Games History</Text>
+            <Text size="sm" c="dimmed">View all your completed poker games</Text>
           </div>
-        </CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <Select
+              value={selectedDate}
+              onChange={(value) => setSelectedDate(value || "all")}
+              placeholder="Filter by date"
+              data={[
+                { value: "all", label: "All Dates" },
+                ...uniqueDates.map((date) => ({ value: date, label: date }))
+              ]}
+              clearable={false}
+            />
+
+            <Select
+              value={selectedMonthYear}
+              onChange={(value) => setSelectedMonthYear(value || "all")}
+              placeholder="Filter by month-year"
+              data={[
+                { value: "all", label: "All Months" },
+                ...uniqueMonthYears.map((monthYear) => ({ value: monthYear, label: monthYear }))
+              ]}
+              clearable={false}
+            />
+
+            <Select
+              value={selectedPlayer}
+              onChange={(value) => setSelectedPlayer(value || "all")}
+              placeholder="Filter by player"
+              data={[
+                { value: "all", label: "All Players" },
+                ...uniquePlayers.map((player) => ({ value: player, label: player }))
+              ]}
+              clearable={false}
+            />
+          </div>
+        </Stack>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
-            <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-              <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("date")}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Date
-                  {getSortIcon("date")}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("buy_in")}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Buy-in
-                  {getSortIcon("buy_in")}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("players")}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Players
-                  {getSortIcon("players")}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("chips")}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Chips in play
-                  {getSortIcon("chips")}
-                </Button>
-                {selectedPlayer !== "all" ? (
-                  <div className="flex items-center justify-start h-10 px-4 font-bold">
-                    Player P&L
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
-                )}
-              </div>
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <div className="space-y-2 sm:space-y-3">
+          <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
+            <div className="grid grid-cols-5 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
+              <Button
+                variant="subtle"
+                onClick={() => handleSort("date")}
+                className="flex items-center gap-2 justify-start font-bold"
+              >
+                Date
+                {getSortIcon("date")}
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() => handleSort("buy_in")}
+                className="flex items-center gap-2 justify-start font-bold"
+              >
+                Buy-in
+                {getSortIcon("buy_in")}
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() => handleSort("players")}
+                className="flex items-center gap-2 justify-start font-bold"
+              >
+                Players
+                {getSortIcon("players")}
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() => handleSort("chips")}
+                className="flex items-center gap-2 justify-start font-bold"
+              >
+                Chips in play
+                {getSortIcon("chips")}
+              </Button>
+              {selectedPlayer !== "all" ? (
+                <div className="flex items-center justify-start h-10 px-4 font-bold">
+                  Player P&L
+                </div>
+              ) : (
+                <div className="flex items-center justify-start h-10 px-4 font-bold">Actions</div>
+              )}
             </div>
+          </div>
 
             {filteredAndSortedGames.map((game, index) => {
               const playerData = game.game_players.find(
@@ -349,118 +318,121 @@ const GamesHistory = () => {
               return (
                 <Card
                   key={game.id}
+                  shadow="sm"
+                  padding="sm"
+                  radius="md"
+                  withBorder
                   className="cursor-pointer transition-colors hover:bg-muted/50"
                   onClick={() => navigate(`/games/${game.id}`)}
                 >
-                  <CardContent className="p-2 sm:p-3">
-                    {/* Mobile Layout */}
-                    <div className="md:hidden space-y-3 pl-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Date</p>
-                          <p className="font-medium">{format(new Date(game.date), "MMM d, yyyy")}</p>
-                        </div>
-                        {selectedPlayer === "all" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteGameId(game.id);
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/20"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                  {/* Mobile Layout */}
+                  <div className="md:hidden space-y-3 pl-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <Text size="xs" c="dimmed">Date</Text>
+                        <Text fw={500}>{format(new Date(game.date), "MMM d, yyyy")}</Text>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Buy-in</p>
-                          <p className="font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Players</p>
-                          <Badge variant="info">{game.player_count}</Badge>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Chips in play</p>
-                          <p className="font-semibold">Rs. {formatIndianNumber(game.total_pot)}</p>
-                        </div>
-                        {selectedPlayer !== "all" && playerData && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Player P&L</p>
-                            <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
-                              {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+                      {selectedPlayer === "all" && (
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteGameId(game.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </ActionIcon>
+                      )}
                     </div>
-
-                    {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm h-12">
-                      <div className="font-medium">
-                        {format(new Date(game.date), "MMM d, yyyy")}
-                      </div>
-                      <div className="font-semibold">
-                        Rs. {formatIndianNumber(game.buy_in_amount)}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Text size="xs" c="dimmed">Buy-in</Text>
+                        <Text fw={600}>Rs. {formatIndianNumber(game.buy_in_amount)}</Text>
                       </div>
                       <div>
-                        <Badge variant="info">{game.player_count}</Badge>
+                        <Text size="xs" c="dimmed">Players</Text>
+                        <Badge color="blue">{game.player_count}</Badge>
                       </div>
-                      <div className="font-semibold">
-                        Rs. {formatIndianNumber(game.total_pot)}
+                      <div>
+                        <Text size="xs" c="dimmed">Chips in play</Text>
+                        <Text fw={600}>Rs. {formatIndianNumber(game.total_pot)}</Text>
                       </div>
-                      {selectedPlayer !== "all" && playerData ? (
+                      {selectedPlayer !== "all" && playerData && (
                         <div>
-                          <Badge variant={playerData.net_amount >= 0 ? "success" : "destructive"}>
+                          <Text size="xs" c="dimmed">Player P&L</Text>
+                          <Badge color={playerData.net_amount >= 0 ? "green" : "red"}>
                             {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
                           </Badge>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-start">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteGameId(game.id);
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/20"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       )}
                     </div>
-                  </CardContent>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm h-12">
+                    <Text fw={500}>
+                      {format(new Date(game.date), "MMM d, yyyy")}
+                    </Text>
+                    <Text fw={600}>
+                      Rs. {formatIndianNumber(game.buy_in_amount)}
+                    </Text>
+                    <div>
+                      <Badge color="blue">{game.player_count}</Badge>
+                    </div>
+                    <Text fw={600}>
+                      Rs. {formatIndianNumber(game.total_pot)}
+                    </Text>
+                    {selectedPlayer !== "all" && playerData ? (
+                      <div>
+                        <Badge color={playerData.net_amount >= 0 ? "green" : "red"}>
+                          {playerData.net_amount >= 0 ? "+" : ""}Rs. {formatIndianNumber(Math.abs(playerData.net_amount))}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-start">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteGameId(game.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </ActionIcon>
+                      </div>
+                    )}
+                  </div>
                 </Card>
               );
             })}
-          </div>
-        </CardContent>
+        </div>
       </Card>
 
-      <AlertDialog open={!!deleteGameId} onOpenChange={() => setDeleteGameId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Game</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this game? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+      <Modal
+        opened={!!deleteGameId}
+        onClose={() => setDeleteGameId(null)}
+        title="Delete Game"
+        centered
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            Are you sure you want to delete this game? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => setDeleteGameId(null)}>
+              Cancel
+            </Button>
+            <Button
+              color="red"
               onClick={() => deleteGameId && handleDeleteGame(deleteGameId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </div>
   );
 };

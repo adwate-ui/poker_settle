@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Button, TextInput, Card, Badge, Collapse, Select, Modal, Tabs, ScrollArea, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerCardMantine from "@/components/PlayerCardMantine";
@@ -14,15 +10,10 @@ import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -425,23 +416,25 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </div>
 
         {/* Game Summary */}
-        <Collapsible open={gameStatsOpen} onOpenChange={setGameStatsOpen}>
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
-                <CardTitle className="text-poker-gold flex items-center justify-between text-xl">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                      <Calculator className="w-5 h-5" />
-                    </div>
-                    Game Summary
-                  </div>
-                  {gameStatsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </CardTitle>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="pt-4 pb-4">
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <div 
+            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+            onClick={() => setGameStatsOpen(!gameStatsOpen)}
+          >
+            <Group justify="space-between">
+              <Group gap="xs">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <Calculator className="w-5 h-5" />
+                </div>
+                <Text className="text-poker-gold" size="xl" fw={600}>
+                  Game Summary
+                </Text>
+              </Group>
+              {gameStatsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Group>
+          </div>
+          <Collapse in={gameStatsOpen}>
+            <div className="pt-4 pb-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="space-y-1 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
                 <p className="text-sm text-muted-foreground font-medium">Buy-ins</p>
@@ -463,10 +456,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 <p className="text-lg font-bold text-red-500">{formatCurrency(Math.abs(totalLosses))}</p>
               </div>
             </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+            </div>
+          </Collapse>
+        </Card>
 
         {/* Unified Table Position & Hand Tracking Section */}
         {showPositionEditor ? (
@@ -477,23 +469,25 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             onCancel={() => setShowPositionEditor(false)}
           />
         ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
-          <Collapsible open={tablePositionOpen} onOpenChange={setTablePositionOpen}>
-            <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
-                  <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                        <UsersIcon className="w-5 h-5" />
-                      </div>
-                      Current Table Positions
-                    </div>
-                    {tablePositionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-4">
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+            <div 
+              className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+              onClick={() => setTablePositionOpen(!tablePositionOpen)}
+            >
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                    <UsersIcon className="w-5 h-5" />
+                  </div>
+                  <Text className="text-poker-gold" size="lg" fw={600}>
+                    Current Table Positions
+                  </Text>
+                </Group>
+                {tablePositionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </Group>
+            </div>
+            <Collapse in={tablePositionOpen}>
+              <div className="pt-4">
               <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
               <div className="flex gap-2 mt-4">
                 <Button
@@ -511,13 +505,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
                 </Button>
               </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+              </div>
+            </Collapse>
+          </Card>
         ) : (
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CardContent className="pt-6">
+          <Card shadow="sm" padding="lg" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+            <div className="pt-6">
               <div className="text-center space-y-4">
                 <p className="text-muted-foreground">No table positions set yet</p>
                 <Button
@@ -528,7 +521,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   Set Table Positions
                 </Button>
               </div>
-            </CardContent>
+            </div>
           </Card>
         )}
 
@@ -543,81 +536,84 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         )}
 
         {/* Buy-in Logs */}
-        <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
-                <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                      <DollarSign className="w-5 h-5" />
-                    </div>
-                    Buy-in Logs
-                  </div>
-                  {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </CardTitle>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="pt-4">
-                <ConsolidatedBuyInLogs gameId={game.id} />
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <div 
+            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+            onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
+          >
+            <Group justify="space-between">
+              <Group gap="xs">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <Text className="text-poker-gold" size="lg" fw={600}>
+                  Buy-in Logs
+                </Text>
+              </Group>
+              {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Group>
+          </div>
+          <Collapse in={buyInLogsOpen}>
+            <div className="pt-4">
+              <ConsolidatedBuyInLogs gameId={game.id} />
+            </div>
+          </Collapse>
+        </Card>
 
         {/* Players Section */}
-        <Collapsible open={playersOpen} onOpenChange={setPlayersOpen}>
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
-                <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                      <UsersIcon className="w-5 h-5" />
-                    </div>
-                    Players ({gamePlayers.length})
-                  </div>
-                  {playersOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </CardTitle>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="space-y-4 pt-4">
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <div 
+            className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+            onClick={() => setPlayersOpen(!playersOpen)}
+          >
+            <Group justify="space-between">
+              <Group gap="xs">
+                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                  <UsersIcon className="w-5 h-5" />
+                </div>
+                <Text className="text-poker-gold" size="lg" fw={600}>
+                  Players ({gamePlayers.length})
+                </Text>
+              </Group>
+              {playersOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Group>
+          </div>
+          <Collapse in={playersOpen}>
+            <Stack gap="md" className="pt-4">
                 <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
-                  <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90 w-full xs:w-auto">
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Add Player
-                      </Button>
-                    </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh]">
-                <DialogHeader>
-                  <DialogTitle>Add Player to Game</DialogTitle>
-                  <DialogDescription>
-                    Select from existing players or create a new one
-                  </DialogDescription>
-                </DialogHeader>
+                  <Button 
+                    className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
+                    onClick={() => setShowAddPlayer(true)}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add Player
+                  </Button>
+              <Modal 
+                opened={showAddPlayer} 
+                onClose={() => setShowAddPlayer(false)}
+                title="Add Player to Game"
+                size="xl"
+              >
+                <Text size="sm" c="dimmed" mb="md">
+                  Select from existing players or create a new one
+                </Text>
 
-                <Tabs defaultValue="existing" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="existing">Existing Players</TabsTrigger>
-                    <TabsTrigger value="new">New Player</TabsTrigger>
-                  </TabsList>
+                <Tabs defaultValue="existing">
+                  <Tabs.List grow>
+                    <Tabs.Tab value="existing">Existing Players</Tabs.Tab>
+                    <Tabs.Tab value="new">New Player</Tabs.Tab>
+                  </Tabs.List>
 
                   {/* Existing Players Tab */}
-                  <TabsContent value="existing" className="space-y-4">
+                  <Tabs.Panel value="existing" pt="md">
+                    <Stack gap="md">
                     {/* Search */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search players by name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
+                    <TextInput
+                      placeholder="Search players by name..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      leftSection={<Search className="h-4 w-4" />}
+                    />
 
                     {/* Players List */}
                     {availablePlayers.length > 0 ? (
@@ -627,7 +623,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             Search Results ({availablePlayers.length})
                           </h4>
                         )}
-                        <ScrollArea className="h-[300px] pr-4">
+                        <ScrollArea h={300} pr="md">
                           <div className="grid gap-2">
                             {availablePlayers.map((player) => (
                               <button
@@ -696,33 +692,29 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         )}
                       </div>
                     )}
-                  </TabsContent>
+                    </Stack>
+                  </Tabs.Panel>
 
                   {/* New Player Tab */}
-                  <TabsContent value="new" className="space-y-4">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label htmlFor="newPlayerName" className="text-sm font-medium">
-                          Player Name
-                        </label>
-                        <Input
-                          id="newPlayerName"
-                          placeholder="Enter player name"
-                          value={newPlayerName}
-                          onChange={(e) => setNewPlayerName(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !isCreatingPlayer) {
-                              addNewPlayer();
-                            }
-                          }}
-                          autoFocus
-                        />
-                      </div>
+                  <Tabs.Panel value="new" pt="md">
+                    <Stack gap="md">
+                      <TextInput
+                        label="Player Name"
+                        placeholder="Enter player name"
+                        value={newPlayerName}
+                        onChange={(e) => setNewPlayerName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !isCreatingPlayer) {
+                            addNewPlayer();
+                          }
+                        }}
+                        autoFocus
+                      />
 
                       <Button
                         onClick={addNewPlayer}
                         disabled={!newPlayerName.trim() || isCreatingPlayer}
-                        className="w-full"
+                        fullWidth
                         size="lg"
                       >
                         {isCreatingPlayer ? (
@@ -734,11 +726,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                           </>
                         )}
                       </Button>
-                    </div>
-                  </TabsContent>
+                    </Stack>
+                  </Tabs.Panel>
                 </Tabs>
-              </DialogContent>
-            </Dialog>
+              </Modal>
           </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -750,59 +741,58 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             />
           ))}
         </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+            </Stack>
+          </Collapse>
+        </Card>
 
         {/* Buy-in Management */}
-        <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <CardHeader className="border-b border-primary/20 py-3">
-            <CardTitle className="text-poker-gold flex items-center gap-2 text-xl">
-              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                <Plus className="w-5 h-5" />
-              </div>
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+              <Plus className="w-5 h-5" />
+            </div>
+            <Text className="text-poker-gold" size="xl" fw={600}>
               Buy-in Management
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
+            </Text>
+          </Group>
+          <div className="pt-4">
             <BuyInManagementTable
               gamePlayers={gamePlayers}
               buyInAmount={game.buy_in_amount}
               onAddBuyIn={handleAddBuyIn}
             />
-          </CardContent>
+          </div>
         </Card>
 
         {/* Final Stack Management */}
-        <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <CardHeader className="border-b border-primary/20 py-3">
-            <CardTitle className="text-poker-gold flex items-center gap-2 text-xl">
-              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                <DollarSign className="w-5 h-5" />
-              </div>
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+          <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+            <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <Text className="text-poker-gold" size="xl" fw={600}>
               Final Stack Management
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
+            </Text>
+          </Group>
+          <div className="pt-4">
             <FinalStackManagement
               gamePlayers={gamePlayers}
               onUpdateFinalStack={handleUpdateFinalStack}
             />
-          </CardContent>
+          </div>
         </Card>
 
         {manualTransfers.length > 0 && (
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CardHeader className="border-b border-primary/20">
-              <CardTitle className="text-poker-gold flex items-center gap-2">
-                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                  <DollarSign className="w-5 h-5" />
-                </div>
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+            <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                <DollarSign className="w-5 h-5" />
+              </div>
+              <Text className="text-poker-gold" size="lg" fw={600}>
                 Manual Transfers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
+              </Text>
+            </Group>
+            <div className="pt-4">
               <div className="space-y-2">
                 {manualTransfers.map((transfer, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
@@ -825,67 +815,58 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </div>
                 ))}
               </div>
-            </CardContent>
+            </div>
           </Card>
         )}
 
         {showManualTransfer && (
-          <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <CardHeader className="border-b border-primary/20">
-              <CardTitle className="text-poker-gold flex items-center gap-2">
-                <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                  <Plus className="w-5 h-5" />
-                </div>
-                Add Manual Transfer
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="grid grid-cols-1 gap-3">
-                <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                  <SelectTrigger className="bg-input border-border">
-                    <SelectValue placeholder="From Player" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
-                      <SelectItem key={gp.id} value={gp.player.name}>
-                        {gp.player.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                  <SelectTrigger className="bg-input border-border">
-                    <SelectValue placeholder="To Player" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
-                      <SelectItem key={gp.id} value={gp.player.name}>
-                        {gp.player.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Input
-                  type="text"
-                  placeholder="Amount"
-                  value={newTransferAmount}
-                  onChange={(e) => setNewTransferAmount(e.target.value)}
-                  className="bg-input border-border"
-                />
-
-                <div className="flex gap-2">
-                  <Button onClick={addManualTransfer} className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowManualTransfer(false)} className="flex-1">
-                    Cancel
-                  </Button>
-                </div>
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+            <Group gap="xs" mb="md" className="border-b border-primary/20 pb-3">
+              <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                <Plus className="w-5 h-5" />
               </div>
-            </CardContent>
+              <Text className="text-poker-gold" size="lg" fw={600}>
+                Add Manual Transfer
+              </Text>
+            </Group>
+            <Stack gap="md" className="pt-4">
+              <Select 
+                value={newTransferFrom} 
+                onChange={(value) => setNewTransferFrom(value || '')}
+                placeholder="From Player"
+                data={gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => ({
+                  value: gp.player.name,
+                  label: gp.player.name
+                }))}
+              />
+
+              <Select 
+                value={newTransferTo} 
+                onChange={(value) => setNewTransferTo(value || '')}
+                placeholder="To Player"
+                data={gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => ({
+                  value: gp.player.name,
+                  label: gp.player.name
+                }))}
+              />
+
+              <TextInput
+                type="text"
+                placeholder="Amount"
+                value={newTransferAmount}
+                onChange={(e) => setNewTransferAmount(e.target.value)}
+              />
+
+              <Group gap="sm">
+                <Button onClick={addManualTransfer} className="flex-1">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add
+                </Button>
+                <Button onClick={() => setShowManualTransfer(false)} className="flex-1">
+                  Cancel
+                </Button>
+              </Group>
+            </Stack>
           </Card>
         )}
 
@@ -920,7 +901,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             >
               {isCompletingGame ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader size="xs" className="mr-2" />
                   Completing...
                 </>
               ) : (
@@ -949,28 +930,29 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         </div>
 
         {settlements.length > 0 && (
-          <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
-            <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors py-3 border-b border-primary/20">
-                  <CardTitle className="text-poker-gold flex items-center justify-between text-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-poker-gold/20 rounded-lg">
-                        <DollarSign className="w-5 h-5" />
-                      </div>
-                      Remaining Settlement Transfers
-                    </div>
-                    {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-4">
-              <div className="space-y-2">
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
+            <div 
+              className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
+              onClick={() => setSettlementsOpen(!settlementsOpen)}
+            >
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <div className="p-1.5 bg-poker-gold/20 rounded-lg">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                  <Text className="text-poker-gold" size="lg" fw={600}>
+                    Remaining Settlement Transfers
+                  </Text>
+                </Group>
+                {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </Group>
+            </div>
+            <Collapse in={settlementsOpen}>
+              <Stack gap="xs" className="pt-4">
                 {settlements.length === 0 && manualTransfers.length > 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
+                  <Text c="dimmed" ta="center" py="md">
                     All settlements covered by manual transfers
-                  </p>
+                  </Text>
                 ) : (
                   settlements.map((settlement, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
@@ -984,11 +966,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   ))
                 )}
-              </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+              </Stack>
+            </Collapse>
+          </Card>
         )}
       </div>
     </div>

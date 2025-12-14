@@ -1,9 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp, Check, X } from "lucide-react";
+import { Card, Badge, Button, Collapse, Table, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp, Check, X } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -16,30 +13,6 @@ import { useSharedLink } from "@/hooks/useSharedLink";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/utils/settlementCalculator";
 import { getPaymentMethodIcon } from "@/utils/playerUtils";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface GamePlayer {
@@ -350,17 +323,15 @@ export const GameDetailView = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader size="lg" />
       </div>
     );
   }
 
   if (!game) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">Game not found</p>
-        </CardContent>
+      <Card shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
+        <Text c="dimmed" ta="center">Game not found</Text>
       </Card>
     );
   }
@@ -381,7 +352,7 @@ export const GameDetailView = ({
     <div className="max-w-6xl mx-auto space-y-6">
       {onBack && (
         <Button
-          variant="ghost"
+          variant="subtle"
           onClick={onBack}
           className="mb-4 hover:text-primary"
         >
@@ -390,10 +361,12 @@ export const GameDetailView = ({
         </Button>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl sm:text-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <span>Game Details - {format(new Date(game.date), "MMMM d, yyyy")}</span>
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Stack gap="md">
+          <Group justify="space-between" wrap="wrap">
+            <Text size="xl" fw={700} className="sm:text-2xl">
+              Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
+            </Text>
             <Button
               variant="outline"
               size="sm"
@@ -404,9 +377,7 @@ export const GameDetailView = ({
               <Share2 className="h-4 w-4 mr-2" />
               Share Game
             </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </Group>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className="space-y-0.5 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
               <p className="text-xs text-muted-foreground font-medium">Buy-in</p>
@@ -429,103 +400,96 @@ export const GameDetailView = ({
               </p>
             </div>
           </div>
-        </CardContent>
+        </Stack>
       </Card>
 
       {/* Buy-in Logs */}
-      <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
-        <Card className="border-primary/20">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
-              <CardTitle className="text-primary text-lg flex items-center justify-between">
-                <span>Buy-in Logs</span>
-                {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </CardTitle>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="pt-0">
-              <ConsolidatedBuyInLogs gameId={gameId} token={token} />
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+        <div 
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
+          onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
+        >
+          <Group justify="space-between">
+            <Text className="text-primary" size="lg" fw={600}>Buy-in Logs</Text>
+            {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </Group>
+        </div>
+        <Collapse in={buyInLogsOpen}>
+          <div>
+            <ConsolidatedBuyInLogs gameId={gameId} token={token} />
+          </div>
+        </Collapse>
+      </Card>
 
       {/* Poker Table View */}
-      <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
-        <Card>
-          <CardHeader className="py-3">
-            <div className="flex flex-row items-center justify-between">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                  <CardTitle className="text-primary text-lg">Table Positions</CardTitle>
-                  {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </button>
-              </CollapsibleTrigger>
-              {tablePositions.length > 1 && tablePositionsOpen && (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
-                    {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
-                      disabled={currentPositionIndex === 0}
-                      className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {currentPositionIndex + 1} / {tablePositions.length}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
-                      disabled={currentPositionIndex === tablePositions.length - 1}
-                      className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 h-8 w-8"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent>
-          <PokerTableView 
-            positions={playersWithSeats}
-            totalSeats={playersWithSeats.length}
-            enableDragDrop={false}
-          />
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Stack gap="md">
+          <Group justify="space-between">
+            <button 
+              className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setTablePositionsOpen(!tablePositionsOpen)}
+            >
+              <Text className="text-primary" size="lg" fw={600}>Table Positions</Text>
+              {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </button>
+            {tablePositions.length > 1 && tablePositionsOpen && (
+              <Group gap="md">
+                <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
+                  {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
+                </span>
+                <Group gap="xs">
+                  <ActionIcon
+                    variant="outline"
+                    onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
+                    disabled={currentPositionIndex === 0}
+                    className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </ActionIcon>
+                  <Text size="sm" c="dimmed" fw={500}>
+                    {currentPositionIndex + 1} / {tablePositions.length}
+                  </Text>
+                  <ActionIcon
+                    variant="outline"
+                    onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
+                    disabled={currentPositionIndex === tablePositions.length - 1}
+                    className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </ActionIcon>
+                </Group>
+              </Group>
+            )}
+          </Group>
+          <Collapse in={tablePositionsOpen}>
+            <PokerTableView 
+              positions={playersWithSeats}
+              totalSeats={playersWithSeats.length}
+              enableDragDrop={false}
+            />
+          </Collapse>
+        </Stack>
+      </Card>
 
       {/* Player Results */}
-      <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
-        <Card className="border-primary/20">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
-              <CardTitle className="text-primary text-lg flex items-center justify-between">
-                <span>Player Results</span>
-                {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </CardTitle>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="p-0">
+      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+        <div 
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
+          onClick={() => setPlayerResultsOpen(!playerResultsOpen)}
+        >
+          <Group justify="space-between">
+            <Text className="text-primary" size="lg" fw={600}>Player Results</Text>
+            {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </Group>
+        </div>
+        <Collapse in={playerResultsOpen}>
           <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
+            <Table striped highlightOnHover withTableBorder>
+            <Table.Thead>
+              <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("name")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -533,10 +497,10 @@ export const GameDetailView = ({
                     <span className="sm:hidden truncate">Plyr</span>
                     {getSortIcon("name")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
+                </Table.Th>
+                <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("buy_ins")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -544,10 +508,10 @@ export const GameDetailView = ({
                     <span className="sm:hidden truncate">Buy</span>
                     {getSortIcon("buy_ins")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
+                </Table.Th>
+                <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -555,10 +519,10 @@ export const GameDetailView = ({
                     <span className="sm:hidden truncate">P&L</span>
                     {getSortIcon("net_amount")}
                   </Button>
-                </TableHead>
-                <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
+                </Table.Th>
+                <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("final_stack")}
                     className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
                   >
@@ -566,16 +530,16 @@ export const GameDetailView = ({
                     <span className="sm:hidden truncate">Stack</span>
                     {getSortIcon("final_stack")}
                   </Button>
-                </TableHead>
+                </Table.Th>
                 {showOwnerControls && fetchBuyInHistory && (
-                  <TableHead className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
+                  <Table.Th className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
                     <span className="hidden sm:inline truncate">Buy-in Log</span>
                     <span className="sm:hidden truncate">Log</span>
-                  </TableHead>
+                  </Table.Th>
                 )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {sortedGamePlayers.map((gamePlayer, index) => {
                 const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
                 const netAmount = gamePlayer.net_amount ?? 0;
@@ -583,7 +547,7 @@ export const GameDetailView = ({
                 const isProfit = netAmount >= 0;
                 
                 return (
-                  <TableRow
+                  <Table.Tr
                     key={gamePlayer.id}
                     className={`transition-colors ${
                       index % 2 === 0 
@@ -591,13 +555,13 @@ export const GameDetailView = ({
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <TableCell className="font-medium text-primary text-left py-2 text-sm">{playerName}</TableCell>
-                    <TableCell className="text-left py-2">
+                    <Table.Td className="font-medium text-primary text-left py-2 text-sm">{playerName}</Table.Td>
+                    <Table.Td className="text-left py-2">
                       <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium text-xs">
                         {gamePlayer.buy_ins}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-left py-2">
+                    </Table.Td>
+                    <Table.Td className="text-left py-2">
                       <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
                         isProfit 
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
@@ -605,101 +569,55 @@ export const GameDetailView = ({
                       }`}>
                         {isProfit ? "+" : ""}Rs. {formatIndianNumber(netAmount)}
                       </span>
-                    </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm">
+                    </Table.Td>
+                    <Table.Td className="font-semibold text-accent-foreground text-left py-2 text-sm">
                       Rs. {formatIndianNumber(finalStack)}
-                    </TableCell>
+                    </Table.Td>
                     {showOwnerControls && fetchBuyInHistory && (
-                      <TableCell className="text-left py-2">
+                      <Table.Td className="text-left py-2">
                         <BuyInHistoryDialog
                           gamePlayerId={gamePlayer.id}
                           playerName={playerName}
                           fetchHistory={fetchBuyInHistory}
                         />
-                      </TableCell>
+                      </Table.Td>
                     )}
-                  </TableRow>
+                  </Table.Tr>
                 );
               })}
-            </TableBody>
+            </Table.Tbody>
           </Table>
           </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+        </Collapse>
+      </Card>
 
       {/* Settlements */}
-      <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
-        <Card className="border-primary/20">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 py-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <CardTitle className="text-primary flex items-center gap-2 text-lg">
-                  <span className="text-2xl">💰</span>
-                  Settlements
-                  {settlementsOpen ? <ChevronUp className="h-5 w-5 ml-auto sm:ml-2" /> : <ChevronDown className="h-5 w-5 ml-auto sm:ml-2" />}
-                </CardTitle>
-                {showOwnerControls && settlementsOpen && (
-                  <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                    <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
-                          <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                          <span className="hidden xs:inline">Add</span> Transfer
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Manual Transfer</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>From (Payer)</Label>
-                        <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select player" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {gamePlayers.map(gp => (
-                              <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
-                                {gp.players?.name ?? "Unknown"}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>To (Receiver)</Label>
-                        <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select player" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {gamePlayers.map(gp => (
-                              <SelectItem key={gp.id} value={gp.players?.name ?? ""}>
-                                {gp.players?.name ?? "Unknown"}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Amount</Label>
-                        <Input
-                          type="number"
-                          placeholder="Enter amount"
-                          value={newTransferAmount}
-                          onChange={(e) => setNewTransferAmount(e.target.value)}
-                        />
-                      </div>
-                      <Button onClick={addManualTransfer} className="w-full">
-                        Add Transfer
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button
+      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+        <div 
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
+          onClick={() => setSettlementsOpen(!settlementsOpen)}
+        >
+          <Group justify="space-between" wrap="wrap">
+            <Group gap="xs">
+              <span className="text-2xl">💰</span>
+              <Text className="text-primary" size="lg" fw={600}>
+                Settlements
+              </Text>
+            </Group>
+            {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </Group>
+          {showOwnerControls && settlementsOpen && (
+            <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-primary/20 hover:bg-primary/10"
+                onClick={() => setTransferDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Add</span> Transfer
+              </Button>
+              <Button
                   variant="outline"
                   size="sm"
                   onClick={recalculateAndSaveSettlements}
@@ -708,13 +626,10 @@ export const GameDetailView = ({
                   <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
                   Redo
                 </Button>
-              </div>
-            )}
-          </div>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="p-0">
+            </div>
+          )}
+        </div>
+        <Collapse in={settlementsOpen}>
           {/* Pending manual transfers */}
           {showOwnerControls && manualTransfers.length > 0 && (
             <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
@@ -728,7 +643,7 @@ export const GameDetailView = ({
                       {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
                     </span>
                     <Button
-                      variant="ghost"
+                      variant="subtle"
                       size="icon"
                       onClick={() => removeManualTransfer(index)}
                       className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
@@ -744,36 +659,36 @@ export const GameDetailView = ({
           {settlementsWithType.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                <Table.Thead>
+                  <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">From</span>
                       <span className="sm:hidden">Fr</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </Table.Th>
+                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">To</span>
                       <span className="sm:hidden">To</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </Table.Th>
+                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Amount</span>
                       <span className="sm:hidden">Amt</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </Table.Th>
+                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Type</span>
                       <span className="sm:hidden">Typ</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </Table.Th>
+                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Status</span>
                       <span className="sm:hidden">✓</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                    </Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
                   {settlementsWithType.map((settlement, index) => {
                     const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                     
                     return (
-                    <TableRow
+                    <Table.Tr
                       key={`settlement-${index}`}
                       className={`transition-colors ${
                         index % 2 === 0 
@@ -781,16 +696,16 @@ export const GameDetailView = ({
                           : "hover:bg-primary/10"
                       }`}
                     >
-                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.from}
-                      </TableCell>
-                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      </Table.Td>
+                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.to}
-                      </TableCell>
-                      <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
+                      </Table.Td>
+                      <Table.Td className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
                         Rs. {formatIndianNumber(settlement.amount)}
-                      </TableCell>
-                      <TableCell className="text-left py-2 sm:py-4">
+                      </Table.Td>
+                      <Table.Td className="text-left py-2 sm:py-4">
                         {settlement.isManual ? (
                           <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
                             Manual
@@ -800,11 +715,11 @@ export const GameDetailView = ({
                             Calculated
                           </Badge>
                         )}
-                      </TableCell>
-                      <TableCell className="text-left py-2 sm:py-4">
+                      </Table.Td>
+                      <Table.Td className="text-left py-2 sm:py-4">
                         {showOwnerControls && confirmation ? (
                           <Button
-                            variant="ghost"
+                            variant="subtle"
                             size="sm"
                             onClick={async () => {
                               if (confirmation.confirmed) {
@@ -834,11 +749,11 @@ export const GameDetailView = ({
                             Pending
                           </Badge>
                         )}
-                      </TableCell>
-                    </TableRow>
+                      </Table.Td>
+                    </Table.Tr>
                   );
                   })}
-                </TableBody>
+                </Table.Tbody>
               </Table>
             </div>
           ) : (
@@ -846,10 +761,49 @@ export const GameDetailView = ({
               No settlements needed - all players are even.
             </div>
           )}
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+        </Collapse>
+      </Card>
+
+      {/* Transfer Dialog Modal */}
+      <Modal
+        opened={transferDialogOpen}
+        onClose={() => setTransferDialogOpen(false)}
+        title="Add Manual Transfer"
+        centered
+      >
+        <Stack gap="md">
+          <Select
+            label="From (Payer)"
+            value={newTransferFrom}
+            onChange={(value) => setNewTransferFrom(value || '')}
+            placeholder="Select player"
+            data={gamePlayers.map(gp => ({
+              value: gp.players?.name ?? "",
+              label: gp.players?.name ?? "Unknown"
+            }))}
+          />
+          <Select
+            label="To (Receiver)"
+            value={newTransferTo}
+            onChange={(value) => setNewTransferTo(value || '')}
+            placeholder="Select player"
+            data={gamePlayers.map(gp => ({
+              value: gp.players?.name ?? "",
+              label: gp.players?.name ?? "Unknown"
+            }))}
+          />
+          <TextInput
+            label="Amount"
+            type="number"
+            placeholder="Enter amount"
+            value={newTransferAmount}
+            onChange={(e) => setNewTransferAmount(e.target.value)}
+          />
+          <Button onClick={addManualTransfer} fullWidth>
+            Add Transfer
+          </Button>
+        </Stack>
+      </Modal>
     </div>
   );
 };
