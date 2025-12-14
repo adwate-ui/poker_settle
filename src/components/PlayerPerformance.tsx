@@ -100,7 +100,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <Box ta="center" p="sm" className="bg-background rounded">
                       <Text size="sm" c="dimmed">Total Games</Text>
-                      <Text size="xl" fw={700} c="var(--mantine-primary-color-filled)">{selectedPlayer.total_games}</Text>
+                      <Text size="xl" fw={700} c="blue">{selectedPlayer.total_games}</Text>
                     </Box>
                     <Box ta="center" p="sm" className="bg-background rounded">
                       <Text size="sm" c="dimmed">Total P&L</Text>

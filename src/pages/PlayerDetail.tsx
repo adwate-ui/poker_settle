@@ -326,7 +326,7 @@ const PlayerDetail = () => {
               <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
                 <Table.Th className="font-bold">
                   <Button
-                    variant="ghost"
+                    variant="subtle"
                     onClick={() => handleSort("date")}
                     className="flex items-center gap-2 hover:text-primary font-bold"
                   >

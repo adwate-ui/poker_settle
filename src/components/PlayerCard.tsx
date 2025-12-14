@@ -89,7 +89,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         <div className="grid grid-cols-2 gap-2">
           {/* Buy-ins Input */}
           <Stack gap={4}>
-            <Text size="10px" fw={600} c="dimmed">
+            <Text size="xs" fw={600} c="dimmed" style={{ fontSize: '10px' }}>
               Add Buy-ins
             </Text>
             <Group gap={4} wrap="nowrap">
@@ -121,7 +121,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
 
           {/* Final Stack Input */}
           <Stack gap={4}>
-            <Text size="10px" fw={600} c="dimmed">
+            <Text size="xs" fw={600} c="dimmed" style={{ fontSize: '10px' }}>
               Final Stack (Rs.)
             </Text>
             <Group gap={4} wrap="nowrap">
