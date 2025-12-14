@@ -1,5 +1,5 @@
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ActionIcon } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 const ThemeToggle = () => {
@@ -22,9 +22,9 @@ const ThemeToggle = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
+    <ActionIcon
+      variant="default"
+      size="lg"
       onClick={toggleTheme}
       className="fixed top-4 right-4 z-50"
     >
@@ -33,7 +33,7 @@ const ThemeToggle = () => {
       ) : (
         <Sun className="h-5 w-5" />
       )}
-    </Button>
+    </ActionIcon>
   );
 };
 
