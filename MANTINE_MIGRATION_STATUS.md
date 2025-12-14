@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the progress of migrating the Poker Settle app from shadcn/ui to Mantine UI library.
 
-## Completed Migrations (12 components - 71% complete)
+## Completed Migrations (13 components - 76% complete)
 
 ### Infrastructure & Core
 - ✅ **App.tsx** - Replaced Toaster/Sonner with Mantine Notifications
@@ -16,6 +16,7 @@ This document tracks the progress of migrating the Poker Settle app from shadcn/
 - ✅ **pages/Index.tsx** - Migrated Tabs components
 - ✅ **pages/NewGame.tsx** - Migrated Card, Button, TextInput, Label
 - ✅ **pages/PlayersHistory.tsx** - Migrated Card, Badge, Button, Modal (AlertDialog)
+- ✅ **pages/PlayerDetail.tsx** - Migrated Card, Collapse, Select, Table, Button
 
 ### Components
 - ✅ **TabLayout.tsx** - Migrated Tabs to Mantine
@@ -28,7 +29,7 @@ This document tracks the progress of migrating the Poker Settle app from shadcn/
 - ✅ **PlayerCard.tsx** - Migrated Card, Button, TextInput, Badge
 - ✅ **PlayerPerformance.tsx** - Migrated Card, Badge, Collapse, Select
 
-## Remaining Migrations (5 large files)
+## Remaining Migrations (4 large files)
 
 ### High Priority Components (Remaining)
 
@@ -51,16 +52,12 @@ import { Divider, Alert } from "@mantine/core";
 Current shadcn imports:
 - Card, Badge, Button, Select, AlertDialog
 
-#### 3. **pages/PlayerDetail.tsx** (456 lines)
-Current shadcn imports:
-- Card, Button, Collapsible, Select, Table
-
-#### 4. **components/GameDashboard.tsx** (997 lines)
+#### 3. **components/GameDashboard.tsx** (997 lines)
 **Most complex file** - Contains many shadcn imports
 Current imports:
 - Button, Input, Card, Badge, Collapsible, Select, Dialog, Tabs, ScrollArea
 
-#### 5. **components/GameDetailView.tsx** (855 lines)
+#### 4. **components/GameDetailView.tsx** (855 lines)
 Similar to GameDashboard in complexity
 
 ## Migration Patterns Reference
@@ -232,7 +229,7 @@ After all migrations are complete:
 ✅ All current migrations build successfully
 ✅ No TypeScript errors
 ✅ Bundle size: 730.67 KB (gzip: 203.56 KB)
-✅ **71% of components migrated** (12 of 17 components)
+✅ **76% of components migrated** (13 of 17 components)
 
 ## Notes
 
