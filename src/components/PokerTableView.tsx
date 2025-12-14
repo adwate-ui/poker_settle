@@ -205,7 +205,7 @@ const PokerTableView = memo(({
 
   return (
     <div className="poker-table-container max-w-3xl mx-auto my-2">
-      {/* Poker Table - rotated 90 degrees on mobile for portrait mode, scaled down 50% on desktop */}
+      {/* Poker Table - rotated 90 degrees on mobile for portrait mode, scaled to 50% size on desktop */}
       <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-50 scale-[1.275]">
         <div className="relative w-full h-full">
           {/* Stadium-shaped table */}
