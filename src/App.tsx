@@ -20,11 +20,35 @@ import UpiPaymentBouncer from "./pages/UpiPaymentBouncer";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
-// Mantine theme configuration that syncs with app's dark mode
+// Mantine theme configuration that syncs with app's dark mode and color system
 const mantineTheme = createTheme({
-  primaryColor: 'blue',
+  primaryColor: 'green',
   fontFamily: 'inherit',
   defaultRadius: 'md',
+  colors: {
+    // Define a custom green palette that will sync with our CSS variables
+    green: [
+      'var(--mantine-color-primary-0)',
+      'var(--mantine-color-primary-1)',
+      'var(--mantine-color-primary-2)',
+      'var(--mantine-color-primary-3)',
+      'var(--mantine-color-primary-4)',
+      'var(--mantine-color-primary-5)',
+      'var(--mantine-color-primary-6)',
+      'var(--mantine-color-primary-7)',
+      'var(--mantine-color-primary-8)',
+      'var(--mantine-color-primary-9)',
+    ],
+  },
+  other: {
+    // Pass through our color variables for custom usage
+    background: 'hsl(var(--background))',
+    foreground: 'hsl(var(--foreground))',
+    primary: 'hsl(var(--primary))',
+    secondary: 'hsl(var(--secondary))',
+    muted: 'hsl(var(--muted))',
+    accent: 'hsl(var(--accent))',
+  },
 });
 
 const queryClient = new QueryClient();

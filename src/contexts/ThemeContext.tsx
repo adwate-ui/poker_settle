@@ -91,9 +91,13 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const isDark = root.classList.contains('dark');
     const colors = isDark ? theme.colors.dark : theme.colors.light;
 
-    // Apply CSS variables
+    // Apply all shadcn/Tailwind CSS variables
     root.style.setProperty('--background', colors.background);
     root.style.setProperty('--foreground', colors.foreground);
+    root.style.setProperty('--card', colors.card);
+    root.style.setProperty('--card-foreground', colors.cardForeground);
+    root.style.setProperty('--popover', colors.popover);
+    root.style.setProperty('--popover-foreground', colors.popoverForeground);
     root.style.setProperty('--primary', colors.primary);
     root.style.setProperty('--primary-foreground', colors.primaryForeground);
     root.style.setProperty('--secondary', colors.secondary);
@@ -102,12 +106,26 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     root.style.setProperty('--accent-foreground', colors.accentForeground);
     root.style.setProperty('--muted', colors.muted);
     root.style.setProperty('--muted-foreground', colors.mutedForeground);
+    root.style.setProperty('--destructive', colors.destructive);
+    root.style.setProperty('--destructive-foreground', colors.destructiveForeground);
+    root.style.setProperty('--border', colors.border);
+    root.style.setProperty('--input', colors.input);
+    root.style.setProperty('--ring', colors.ring);
     root.style.setProperty('--poker-green', colors.pokerGreen);
     root.style.setProperty('--poker-gold', colors.pokerGold);
     root.style.setProperty('--poker-felt', colors.pokerFelt);
     root.style.setProperty('--gradient-poker', colors.gradientPoker);
     root.style.setProperty('--gradient-gold', colors.gradientGold);
     root.style.setProperty('--gradient-dark', colors.gradientDark);
+
+    // Apply Mantine-specific color variables for better integration
+    // These will be used by the CSS in mantine-theme.css
+    root.style.setProperty('--mantine-color-body', `hsl(${colors.background})`);
+    root.style.setProperty('--mantine-color-text', `hsl(${colors.foreground})`);
+    root.style.setProperty('--mantine-color-primary-filled', `hsl(${colors.primary})`);
+    root.style.setProperty('--mantine-color-primary-filled-hover', `hsl(${colors.primary} / 0.9)`);
+    root.style.setProperty('--mantine-color-primary-light', `hsl(${colors.primary} / ${isDark ? '0.2' : '0.15'})`);
+    root.style.setProperty('--mantine-color-primary-light-hover', `hsl(${colors.primary} / ${isDark ? '0.25' : '0.2'})`);
   };
 
   // Re-apply theme colors when light/dark mode changes

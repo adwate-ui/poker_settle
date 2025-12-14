@@ -1,0 +1,305 @@
+/* Mantine Theme Integration with App Color System
+ * This file bridges Mantine's color system with our Tailwind/shadcn CSS variables
+ * to ensure consistent colors across both UI frameworks
+ */
+
+:root {
+  /* Mantine uses its own CSS variable system. We override them to match our theme */
+  
+  /* Primary color - maps to our green theme */
+    --mantine-color-primary-0: hsl(var(--primary) / 0.05);
+    --mantine-color-primary-1: hsl(var(--primary) / 0.15);
+    --mantine-color-primary-2: hsl(var(--primary) / 0.25);
+    --mantine-color-primary-3: hsl(var(--primary) / 0.35);
+    --mantine-color-primary-4: hsl(var(--primary) / 0.45);
+    --mantine-color-primary-5: hsl(var(--primary) / 0.65);
+    --mantine-color-primary-6: hsl(var(--primary));
+    --mantine-color-primary-7: hsl(var(--primary) / 0.85);
+    --mantine-color-primary-8: hsl(var(--primary) / 0.75);
+    --mantine-color-primary-9: hsl(var(--primary) / 0.65);
+    --mantine-color-primary-filled: hsl(var(--primary));
+    --mantine-color-primary-filled-hover: hsl(var(--primary) / 0.9);
+    --mantine-color-primary-light: hsl(var(--primary) / 0.15);
+    --mantine-color-primary-light-hover: hsl(var(--primary) / 0.2);
+    --mantine-color-primary-light-color: hsl(var(--primary));
+    --mantine-color-primary-outline: hsl(var(--primary));
+    --mantine-color-primary-outline-hover: hsl(var(--primary) / 0.05);
+    
+    /* Background colors */
+    --mantine-color-body: hsl(var(--background));
+    --mantine-color-text: hsl(var(--foreground));
+    --mantine-color-default: hsl(var(--muted));
+    --mantine-color-default-hover: hsl(var(--muted) / 0.8);
+    --mantine-color-default-color: hsl(var(--muted-foreground));
+    --mantine-color-default-border: hsl(var(--border));
+    
+    /* Gray scale - maps to our muted colors */
+    --mantine-color-gray-0: hsl(var(--muted) / 0.3);
+    --mantine-color-gray-1: hsl(var(--muted) / 0.4);
+    --mantine-color-gray-2: hsl(var(--muted) / 0.5);
+    --mantine-color-gray-3: hsl(var(--muted) / 0.6);
+    --mantine-color-gray-4: hsl(var(--border));
+    --mantine-color-gray-5: hsl(var(--muted-foreground) / 0.5);
+    --mantine-color-gray-6: hsl(var(--muted-foreground) / 0.7);
+    --mantine-color-gray-7: hsl(var(--muted-foreground));
+    --mantine-color-gray-8: hsl(var(--foreground) / 0.7);
+    --mantine-color-gray-9: hsl(var(--foreground));
+    
+    /* Card and surface colors */
+    --mantine-color-card: hsl(var(--card));
+    --mantine-color-card-hover: hsl(var(--card) / 0.8);
+    
+    /* Accent color - maps to our secondary */
+    --mantine-color-accent-0: hsl(var(--accent) / 0.1);
+    --mantine-color-accent-1: hsl(var(--accent) / 0.2);
+    --mantine-color-accent-2: hsl(var(--accent) / 0.3);
+    --mantine-color-accent-3: hsl(var(--accent) / 0.4);
+    --mantine-color-accent-4: hsl(var(--accent) / 0.5);
+    --mantine-color-accent-5: hsl(var(--accent) / 0.7);
+    --mantine-color-accent-6: hsl(var(--accent));
+    --mantine-color-accent-7: hsl(var(--accent) / 0.85);
+    --mantine-color-accent-8: hsl(var(--accent) / 0.75);
+    --mantine-color-accent-9: hsl(var(--accent) / 0.65);
+    
+    /* Other color mappings */
+    --mantine-color-dimmed: hsl(var(--muted-foreground));
+    --mantine-color-bright: hsl(var(--foreground));
+    --mantine-color-anchor: hsl(var(--primary));
+    --mantine-color-error: hsl(var(--destructive));
+    
+    /* Spacing */
+    --mantine-spacing-xs: 0.625rem;
+    --mantine-spacing-sm: 0.75rem;
+    --mantine-spacing-md: 1rem;
+    --mantine-spacing-lg: 1.25rem;
+    --mantine-spacing-xl: 1.5rem;
+    
+    /* Border radius - sync with shadcn */
+    --mantine-radius-default: var(--radius);
+    --mantine-radius-xs: calc(var(--radius) * 0.5);
+    --mantine-radius-sm: calc(var(--radius) - 2px);
+    --mantine-radius-md: var(--radius);
+    --mantine-radius-lg: calc(var(--radius) + 2px);
+    --mantine-radius-xl: calc(var(--radius) * 2);
+}
+
+.dark {
+  /* Dark mode Mantine variables - automatically use dark theme values */
+  /* The CSS variables are already updated by ThemeContext, so we just need to ensure proper contrast */
+  
+  /* Adjust gray scale for better dark mode contrast */
+    --mantine-color-gray-0: hsl(var(--muted) / 0.4);
+    --mantine-color-gray-1: hsl(var(--muted) / 0.5);
+    --mantine-color-gray-2: hsl(var(--muted) / 0.6);
+    --mantine-color-gray-3: hsl(var(--border));
+    --mantine-color-gray-4: hsl(var(--border) / 1.2);
+    --mantine-color-gray-5: hsl(var(--muted-foreground) / 0.6);
+    --mantine-color-gray-6: hsl(var(--muted-foreground) / 0.8);
+    --mantine-color-gray-7: hsl(var(--muted-foreground));
+    --mantine-color-gray-8: hsl(var(--foreground) / 0.85);
+    --mantine-color-gray-9: hsl(var(--foreground));
+    
+    /* Ensure good contrast for filled elements */
+    --mantine-color-default: hsl(var(--muted) / 1.2);
+    --mantine-color-default-hover: hsl(var(--muted) / 1.4);
+}
+
+/* Override Mantine component styles to use our color system */
+[data-mantine-color-scheme="light"] {
+  --mantine-primary-color-filled: hsl(var(--primary));
+  --mantine-primary-color-filled-hover: hsl(var(--primary) / 0.9);
+  --mantine-primary-color-light: hsl(var(--primary) / 0.1);
+  --mantine-primary-color-light-hover: hsl(var(--primary) / 0.15);
+}
+
+[data-mantine-color-scheme="dark"] {
+  --mantine-primary-color-filled: hsl(var(--primary));
+  --mantine-primary-color-filled-hover: hsl(var(--primary) / 0.9);
+  --mantine-primary-color-light: hsl(var(--primary) / 0.2);
+  --mantine-primary-color-light-hover: hsl(var(--primary) / 0.25);
+}
+
+/* Ensure Mantine components respect our border colors */
+.mantine-Card-root,
+.mantine-Modal-root,
+.mantine-Paper-root {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Ensure Mantine text respects our foreground colors */
+.mantine-Text-root[data-variant="dimmed"],
+.mantine-Text-root[data-c="dimmed"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Ensure Mantine badges use proper colors */
+.mantine-Badge-root[data-variant="filled"] {
+  background-color: var(--mantine-color-primary-filled);
+  color: hsl(var(--primary-foreground));
+}
+
+.mantine-Badge-root[data-variant="light"] {
+  background-color: var(--mantine-color-primary-light);
+  color: var(--mantine-color-primary-light-color);
+}
+
+/* Ensure Mantine buttons use proper colors */
+.mantine-Button-root[data-variant="filled"] {
+  background-color: var(--mantine-color-primary-filled);
+  color: hsl(var(--primary-foreground));
+}
+
+.mantine-Button-root[data-variant="filled"]:not(:disabled):hover {
+  background-color: var(--mantine-color-primary-filled-hover);
+}
+
+.mantine-Button-root[data-variant="light"] {
+  background-color: var(--mantine-color-primary-light);
+  color: var(--mantine-color-primary-light-color);
+}
+
+.mantine-Button-root[data-variant="light"]:not(:disabled):hover {
+  background-color: var(--mantine-color-primary-light-hover);
+}
+
+.mantine-Button-root[data-variant="outline"] {
+  border-color: var(--mantine-color-primary-outline);
+  color: var(--mantine-color-primary-outline);
+}
+
+.mantine-Button-root[data-variant="outline"]:not(:disabled):hover {
+  background-color: var(--mantine-color-primary-outline-hover);
+}
+
+/* Ensure Mantine tables use proper colors */
+.mantine-Table-root {
+  border-color: hsl(var(--border));
+}
+
+.mantine-Table-th,
+.mantine-Table-td {
+  border-color: hsl(var(--border));
+}
+
+.mantine-Table-root[data-striped] tbody tr:nth-of-type(odd) {
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+.mantine-Table-root[data-highlight-on-hover] tbody tr:hover {
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+/* Ensure Mantine inputs use proper colors */
+.mantine-Input-input,
+.mantine-NumberInput-input,
+.mantine-TextInput-input,
+.mantine-Select-input {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--input));
+  color: hsl(var(--foreground));
+}
+
+.mantine-Input-input:focus,
+.mantine-NumberInput-input:focus,
+.mantine-TextInput-input:focus,
+.mantine-Select-input:focus {
+  border-color: hsl(var(--ring));
+}
+
+.mantine-Input-input::placeholder,
+.mantine-NumberInput-input::placeholder,
+.mantine-TextInput-input::placeholder,
+.mantine-Select-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Ensure Mantine modals use proper colors */
+.mantine-Modal-content {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.mantine-Modal-header {
+  background-color: hsl(var(--card));
+  border-bottom-color: hsl(var(--border));
+}
+
+.mantine-Modal-title {
+  color: hsl(var(--card-foreground));
+}
+
+/* Ensure Mantine menu/select dropdowns use proper colors */
+.mantine-Menu-dropdown,
+.mantine-Select-dropdown {
+  background-color: hsl(var(--popover));
+  border-color: hsl(var(--border));
+  color: hsl(var(--popover-foreground));
+}
+
+.mantine-Menu-item:hover,
+.mantine-Select-option:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.mantine-Menu-item[data-selected],
+.mantine-Select-option[data-selected] {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+/* Ensure proper scrollbar colors */
+.mantine-ScrollArea-scrollbar {
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+.mantine-ScrollArea-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.mantine-ScrollArea-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* Ensure tabs use proper colors */
+.mantine-Tabs-tab {
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+.mantine-Tabs-tab:hover {
+  background-color: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+.mantine-Tabs-tab[data-active] {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.mantine-Tabs-list {
+  border-color: hsl(var(--border));
+}
+
+/* Ensure collapse/accordion uses proper colors */
+.mantine-Collapse-content {
+  border-color: hsl(var(--border));
+}
+
+/* Ensure action icons use proper colors */
+.mantine-ActionIcon-root {
+  color: hsl(var(--foreground));
+}
+
+.mantine-ActionIcon-root:hover {
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+.mantine-ActionIcon-root[data-variant="filled"] {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.mantine-ActionIcon-root[data-variant="filled"]:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
