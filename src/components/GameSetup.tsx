@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { AlertTriangle, ChevronDown, ChevronUp, Users, Search, Trash2, Play, UserPlus, X, Plus, TrendingUp, TrendingDown, History, Calendar } from "lucide-react";
+import { Button, TextInput, Card, Badge, Text, Collapse, ActionIcon, Stack, Group, Alert } from "@mantine/core";
+import { ChevronDown, ChevronUp, Users, Search, Trash2, Play, X, Plus, History, Calendar } from "lucide-react";
 import { Player, Game, SeatPosition } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";
@@ -192,261 +185,248 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
               <UserProfile />
             </div>
 
-        <Card className="bg-card border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-poker-gold text-lg">Quick Setup</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card border-border">
+          <Stack gap="md">
+            <Text className="text-poker-gold" size="lg" fw={600}>Quick Setup</Text>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <TextInput
+                label="Buy-in Amount"
+                type="text"
+                value={formatInputDisplay(buyInAmount)}
+                onChange={e => {
+                  const parsed = parseIndianNumber(e.target.value);
+                  setBuyInAmount(parsed);
+                }}
+                placeholder="Enter amount"
+                size="sm"
+              />
               <div>
-                <Label htmlFor="buyIn" className="text-xs">Buy-in Amount</Label>
-                <Input 
-                  id="buyIn" 
-                  type="text" 
-                  value={formatInputDisplay(buyInAmount)} 
-                  onChange={e => {
-                    const parsed = parseIndianNumber(e.target.value);
-                    setBuyInAmount(parsed);
-                  }}
-                  className="bg-input border-border h-9"
-                  placeholder="Enter amount"
-                />
-              </div>
-              <div>
-                <Label htmlFor="newPlayer" className="text-xs">Add New Player</Label>
-                <div className="flex gap-1.5">
-                  <Input 
-                    id="newPlayer"
-                    value={newPlayerName} 
-                    onChange={e => setNewPlayerName(e.target.value)} 
-                    placeholder="Player name" 
-                    className="bg-input border-border h-9" 
-                    onKeyPress={e => e.key === 'Enter' && addNewPlayer()} 
-                  />
-                  <Button 
-                    onClick={addNewPlayer} 
-                    disabled={!newPlayerName.trim()} 
-                    className="bg-primary hover:bg-primary/90 h-9 px-3"
+                <Text size="xs" fw={500} mb={4}>Add New Player</Text>
+                <Group gap="xs" wrap="nowrap">
+                  <TextInput
+                    value={newPlayerName}
+                    onChange={e => setNewPlayerName(e.target.value)}
+                    placeholder="Player name"
                     size="sm"
+                    onKeyPress={e => e.key === 'Enter' && addNewPlayer()}
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    onClick={addNewPlayer}
+                    disabled={!newPlayerName.trim()}
+                    size="sm"
+                    px="xs"
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
-                </div>
+                </Group>
               </div>
             </div>
-          </CardContent>
+          </Stack>
         </Card>
 
         {!loading && players.length > 0 && (
-          <Collapsible open={isPreviousPlayersOpen} onOpenChange={setIsPreviousPlayersOpen}>
-            <Card className="bg-card border-border">
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-                  <CardTitle className="text-poker-gold flex items-center justify-between text-base">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Previous Players ({players.length})
-                    </div>
-                    {isPreviousPlayersOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                      <Input
-                        placeholder="Search players..."
-                        value={playerSearchQuery}
-                        onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                        className="pl-8 bg-input border-border h-9 text-sm"
-                      />
-                    </div>
-                    {filteredPlayers.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
-                        {filteredPlayers.map(player => (
-                          <div key={player.id} className="p-2 bg-secondary rounded hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => selectExistingPlayer(player)}>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-sm">{player.name}</span>
-                              <div className="flex items-center gap-1.5">
-                                <Badge variant="outline" className="text-xs h-5 px-1.5">
-                                  {player.total_games}
-                                </Badge>
-                                <Badge variant={player.total_profit >= 0 ? "default" : "destructive"} className="text-xs h-5 px-1.5">
-                                  {player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit))}
-                                </Badge>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-6 w-6 p-0 hover:bg-destructive/20"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeletePlayer(player.id);
-                                  }}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card border-border">
+            <div 
+              className="cursor-pointer hover:bg-muted/50 transition-colors mb-3 -mx-4 -mt-4 px-4 pt-4 pb-3" 
+              onClick={() => setIsPreviousPlayersOpen(!isPreviousPlayersOpen)}
+            >
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <Users className="w-4 h-4 text-poker-gold" />
+                  <Text className="text-poker-gold" size="md" fw={600}>
+                    Previous Players ({players.length})
+                  </Text>
+                </Group>
+                {isPreviousPlayersOpen ? <ChevronUp className="w-4 h-4 text-poker-gold" /> : <ChevronDown className="w-4 h-4 text-poker-gold" />}
+              </Group>
+            </div>
+            <Collapse in={isPreviousPlayersOpen}>
+              <Stack gap="md">
+                <TextInput
+                  placeholder="Search players..."
+                  value={playerSearchQuery}
+                  onChange={(e) => setPlayerSearchQuery(e.target.value)}
+                  leftSection={<Search className="h-3.5 w-3.5" />}
+                  size="sm"
+                />
+                {filteredPlayers.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
+                    {filteredPlayers.map(player => (
+                      <div key={player.id} className="p-2 bg-secondary rounded hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => selectExistingPlayer(player)}>
+                        <Group justify="space-between" wrap="nowrap">
+                          <Text size="sm" fw={500}>{player.name}</Text>
+                          <Group gap="xs" wrap="nowrap">
+                            <Badge variant="outline" size="sm">
+                              {player.total_games}
+                            </Badge>
+                            <Badge color={player.total_profit >= 0 ? "blue" : "red"} size="sm">
+                              {player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit))}
+                            </Badge>
+                            <ActionIcon
+                              variant="subtle"
+                              color="red"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePlayer(player.id);
+                              }}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </ActionIcon>
+                          </Group>
+                        </Group>
                       </div>
-                    ) : (
-                      <p className="text-muted-foreground text-center py-6 text-sm">
-                        {playerSearchQuery ? 'No players found.' : 'No previous players.'}
-                      </p>
-                    )}
+                    ))}
                   </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                ) : (
+                  <Text c="dimmed" ta="center" py="xl" size="sm">
+                    {playerSearchQuery ? 'No players found.' : 'No previous players.'}
+                  </Text>
+                )}
+              </Stack>
+            </Collapse>
+          </Card>
         )}
 
         {selectedPlayers.length > 0 && (
-          <Card className="bg-card border-border">
-            <CardContent className="pt-4 pb-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-muted-foreground">Selected Players</span>
-                <Badge variant="secondary" className="text-xs">{selectedPlayers.length} players</Badge>
-              </div>
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card border-border">
+            <Stack gap="sm">
+              <Group justify="space-between">
+                <Text size="sm" fw={500} c="dimmed">Selected Players</Text>
+                <Badge size="sm">{selectedPlayers.length} players</Badge>
+              </Group>
               <div className="flex flex-wrap gap-1.5">
                 {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                  <Badge 
-                    key={player.id} 
-                    variant="outline" 
-                    className="pl-2.5 pr-1 py-1 text-sm bg-secondary hover:bg-secondary/80 group"
+                  <Badge
+                    key={player.id}
+                    variant="outline"
+                    size="lg"
+                    className="pl-2.5 pr-1 py-1 bg-secondary hover:bg-secondary/80"
+                    rightSection={
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        size="xs"
+                        onClick={() => removeSelectedPlayer(player.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </ActionIcon>
+                    }
                   >
                     <span className="font-medium">{player.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-4 w-4 p-0 ml-1.5 hover:bg-destructive/20"
-                      onClick={() => removeSelectedPlayer(player.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
                   </Badge>
                 ))}
               </div>
-            </CardContent>
+            </Stack>
           </Card>
         )}
 
         {!canCreateGame && (
-          <Card className="bg-destructive/10 border-destructive/20">
-            <CardContent className="pt-6">
-              <p className="text-destructive text-center">
-                You have an incomplete game. Please complete it before starting a new game.
-              </p>
-            </CardContent>
-          </Card>
+          <Alert color="red" title="Incomplete Game" icon={<X />}>
+            You have an incomplete game. Please complete it before starting a new game.
+          </Alert>
         )}
 
         {games.length > 0 && (
-          <Collapsible open={isGameHistoryOpen} onOpenChange={setIsGameHistoryOpen}>
-            <Card className="bg-card border-border">
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <CardTitle className="text-poker-gold flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <History className="w-5 h-5" />
-                      Game History ({games.length})
-                    </div>
-                    {isGameHistoryOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by date (e.g., 12/26/2024)..."
-                        value={gameSearchQuery}
-                        onChange={(e) => setGameSearchQuery(e.target.value)}
-                        className="pl-10 bg-input border-border"
-                      />
-                    </div>
-                    {filteredGames.length > 0 ? (
-                      <div className="space-y-4 max-h-96 overflow-y-auto">
-                        {filteredGames.map((game) => {
-                          const totalBuyIns = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
-                          const totalWins = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
-                          const totalLosses = game.game_players.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
-                          const totalFinalStack = game.game_players.reduce((sum, gp) => sum + gp.final_stack, 0);
+          <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card border-border">
+            <div 
+              className="cursor-pointer hover:bg-muted/50 transition-colors mb-3 -mx-4 -mt-4 px-4 pt-4 pb-3" 
+              onClick={() => setIsGameHistoryOpen(!isGameHistoryOpen)}
+            >
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <History className="w-5 h-5 text-poker-gold" />
+                  <Text className="text-poker-gold" size="md" fw={600}>
+                    Game History ({games.length})
+                  </Text>
+                </Group>
+                {isGameHistoryOpen ? <ChevronUp className="w-5 h-5 text-poker-gold" /> : <ChevronDown className="w-5 h-5 text-poker-gold" />}
+              </Group>
+            </div>
+            <Collapse in={isGameHistoryOpen}>
+              <Stack gap="md">
+                <TextInput
+                  placeholder="Search by date (e.g., 12/26/2024)..."
+                  value={gameSearchQuery}
+                  onChange={(e) => setGameSearchQuery(e.target.value)}
+                  leftSection={<Search className="h-4 w-4" />}
+                />
+                {filteredGames.length > 0 ? (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {filteredGames.map((game) => {
+                      const totalBuyIns = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
+                      const totalWins = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
+                      const totalLosses = game.game_players.reduce((sum, gp) => sum + Math.min(0, gp.net_amount), 0);
+                      const totalFinalStack = game.game_players.reduce((sum, gp) => sum + gp.final_stack, 0);
 
-                          return (
-                            <div key={game.id} className="p-4 bg-secondary rounded-lg">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                                  <span className="font-semibold">
-                                    {new Date(game.date).toLocaleDateString()}
-                                  </span>
-                                  <Badge variant="outline" className="text-xs">
-                                    Buy-in: {formatCurrency(game.buy_in_amount)}
-                                  </Badge>
-                                </div>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleDeleteGame(game.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-3 mb-3 p-3 bg-background rounded">
-                                <div className="text-center">
-                                  <div className="text-xs sm:text-sm text-muted-foreground">Buy-ins</div>
-                                  <div className="text-sm sm:text-base font-semibold text-primary">{formatCurrency(totalBuyIns)}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-xs sm:text-sm text-muted-foreground">Wins</div>
-                                  <div className="text-sm sm:text-base font-semibold text-green-400">{formatCurrency(totalWins)}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-xs sm:text-sm text-muted-foreground">Losses</div>
-                                  <div className="text-sm sm:text-base font-semibold text-red-400">{formatCurrency(Math.abs(totalLosses))}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-xs sm:text-sm text-muted-foreground">Final Stack</div>
-                                  <div className="text-sm sm:text-base font-semibold text-poker-gold">{formatCurrency(totalFinalStack)}</div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 gap-2">
-                                {game.game_players.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
-                                  <div key={gp.id} className="flex flex-col xs:flex-row items-start xs:items-center justify-between p-2 bg-background rounded gap-1">
-                                    <span className="font-medium text-sm sm:text-base">{gp.player.name}</span>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <Badge variant="outline" className="text-xs">
-                                        {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
-                                      </Badge>
-                                      <Badge variant={gp.net_amount >= 0 ? "default" : "destructive"} className="text-xs">
-                                        {gp.net_amount >= 0 ? '+' : ''}{formatCurrency(gp.net_amount)}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
+                      return (
+                        <div key={game.id} className="p-4 bg-secondary rounded-lg">
+                          <Group justify="space-between" mb="sm">
+                            <Group gap="xs">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <Text fw={600}>
+                                {new Date(game.date).toLocaleDateString()}
+                              </Text>
+                              <Badge variant="outline" size="sm">
+                                Buy-in: {formatCurrency(game.buy_in_amount)}
+                              </Badge>
+                            </Group>
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={() => handleDeleteGame(game.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </Group>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3 p-3 bg-background rounded">
+                            <div className="text-center">
+                              <Text size="xs" c="dimmed">Buy-ins</Text>
+                              <Text size="sm" fw={600} className="text-primary">{formatCurrency(totalBuyIns)}</Text>
                             </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-center py-8">
-                        {gameSearchQuery ? 'No games found matching your search.' : 'No completed games yet.'}
-                      </p>
-                    )}
+                            <div className="text-center">
+                              <Text size="xs" c="dimmed">Wins</Text>
+                              <Text size="sm" fw={600} className="text-green-400">{formatCurrency(totalWins)}</Text>
+                            </div>
+                            <div className="text-center">
+                              <Text size="xs" c="dimmed">Losses</Text>
+                              <Text size="sm" fw={600} className="text-red-400">{formatCurrency(Math.abs(totalLosses))}</Text>
+                            </div>
+                            <div className="text-center">
+                              <Text size="xs" c="dimmed">Final Stack</Text>
+                              <Text size="sm" fw={600} className="text-poker-gold">{formatCurrency(totalFinalStack)}</Text>
+                            </div>
+                          </div>
+
+                          <Stack gap="xs">
+                            {game.game_players.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => (
+                              <div key={gp.id} className="flex flex-col xs:flex-row items-start xs:items-center justify-between p-2 bg-background rounded gap-1">
+                                <Text size="sm" fw={500}>{gp.player.name}</Text>
+                                <Group gap="xs">
+                                  <Badge variant="outline" size="sm">
+                                    {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
+                                  </Badge>
+                                  <Badge color={gp.net_amount >= 0 ? "blue" : "red"} size="sm">
+                                    {gp.net_amount >= 0 ? '+' : ''}{formatCurrency(gp.net_amount)}
+                                  </Badge>
+                                </Group>
+                              </div>
+                            ))}
+                          </Stack>
+                        </div>
+                      );
+                    })}
                   </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                ) : (
+                  <Text c="dimmed" ta="center" py="xl">
+                    {gameSearchQuery ? 'No games found matching your search.' : 'No completed games yet.'}
+                  </Text>
+                )}
+              </Stack>
+            </Collapse>
+          </Card>
         )}
 
         {!loading && players.length > 0 && games.length > 0 && (
