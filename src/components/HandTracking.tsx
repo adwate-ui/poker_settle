@@ -54,6 +54,27 @@ const AUTO_ADVANCE_DELAY_MS = 300; // Delay for smooth state transitions when au
 const HAND_SAVE_DELAY_MS = 0; // No delay before saving hand to database after completion
 const MOBILE_BREAKPOINT_PX = 640; // Mobile breakpoint in pixels (matches Tailwind's sm: breakpoint)
 
+// Helper function to open card selector for the appropriate street
+const openCardSelectorForStreet = (
+  stage: HandStage,
+  isMobile: boolean,
+  setCardSelectorType: (type: 'flop' | 'turn' | 'river') => void,
+  setTempCommunityCards: (cards: string) => void,
+  setShowCardSelector: (show: boolean) => void,
+  setShowDesktopCardSelector: (show: boolean) => void
+) => {
+  const cardType = stage === 'flop' ? 'flop' : stage === 'turn' ? 'turn' : stage === 'river' ? 'river' : null;
+  if (!cardType) return;
+  
+  setCardSelectorType(cardType);
+  setTempCommunityCards('');
+  if (isMobile) {
+    setShowCardSelector(true);
+  } else {
+    setShowDesktopCardSelector(true);
+  }
+};
+
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -340,24 +361,27 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     };
   }, []);
 
-  // Auto-open card selector when community cards need to be selected
-  // Only on MOBILE to avoid blocking overlay on desktop
+  // Auto-open card selector when moving to a new street without cards
+  // Opens AFTER betting is complete and street advances
   useEffect(() => {
-    // Only auto-open on mobile devices
-    if (!isMobile) return; // Skip auto-open on desktop
+    // Only auto-open if we're in an active hand
+    if (!currentHand || stage === 'setup' || stage === 'showdown') return;
     
-    if (stage === 'flop' && !flopCards && currentHand) {
-      setCardSelectorType('flop');
-      setTempCommunityCards(''); // Initialize temp with empty
-      setShowCardSelector(true);
-    } else if (stage === 'turn' && !turnCard && flopCards && currentHand) {
-      setCardSelectorType('turn');
-      setTempCommunityCards(''); // Initialize temp with empty
-      setShowCardSelector(true);
-    } else if (stage === 'river' && !riverCard && turnCard && currentHand) {
-      setCardSelectorType('river');
-      setTempCommunityCards(''); // Initialize temp with empty
-      setShowCardSelector(true);
+    // Auto-open card selector when cards need to be selected for current street
+    const shouldOpenSelector = 
+      (stage === 'flop' && !flopCards) ||
+      (stage === 'turn' && !turnCard && flopCards) ||
+      (stage === 'river' && !riverCard && turnCard);
+    
+    if (shouldOpenSelector) {
+      openCardSelectorForStreet(
+        stage,
+        isMobile,
+        setCardSelectorType,
+        setTempCommunityCards,
+        setShowCardSelector,
+        setShowDesktopCardSelector
+      );
     }
   }, [stage, flopCards, turnCard, riverCard, currentHand, isMobile]);
 
@@ -1400,25 +1424,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
   const currentPlayer = activePlayers[currentPlayerIndex];
 
-  // Helper function to check if Call button should be shown
-  const shouldShowCallButton = (): boolean => {
+  // Helper function to check if player can call or check
+  // Returns true for all active players (button shows "Check" or "Call X" based on situation)
+  const canPlayerCallOrCheck = (): boolean => {
     if (!currentPlayer) return false;
     
-    // Calculate call amount for current player
-    const callAmount = getCallAmount(currentPlayer.player_id, currentBet, streetPlayerBets);
-    
-    // Check if current player is BB in preflop
-    const isBBInPreflop = stage === 'preflop' && 
-      getBigBlindPlayer(activePlayers, buttonPlayerId, seatPositions)?.player_id === currentPlayer.player_id;
-    
-    // BB can check in preflop only if currentBet equals BB amount (no one raised)
-    const bbAmount = game.big_blind || 100;
-    const canBBCheck = isBBInPreflop && currentBet === bbAmount;
-    
-    // Show Call button only if:
-    // 1. callAmount > 0 (there's an amount to call), OR
-    // 2. BB in preflop can check (exception case)
-    return callAmount > 0 || canBBCheck;
+    // ALWAYS show Call/Check button for active players
+    // The button will display "Check" when callAmount === 0
+    // and "Call X" when callAmount > 0
+    return true;
   };
 
   // Helper function to get call amount for display
@@ -2087,10 +2101,10 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       {/* Bottom section - Action Buttons - positioned to avoid keyboard overlap */}
       <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 pb-safe">
         {/* Action Buttons */}
-        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
+        {currentPlayer && playersInHand.includes(currentPlayer.player_id) ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              {shouldShowCallButton() && (
+              {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => {
                     recordAction('Call');
@@ -2099,7 +2113,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   }} 
                   variant="outline"
                   size="lg"
-                  disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                   className="h-12 text-sm font-bold hover:bg-green-500/20 hover:border-green-500"
                 >
                   {getCallAmountForDisplay() === 0 ? '✓ Check' : `Call ${getCallAmountForDisplay()}`}
@@ -2113,7 +2126,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 }} 
                 variant="destructive"
                 size="lg"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                 className="h-12 text-sm font-bold"
               >
                 ❌ Fold
@@ -2152,13 +2164,31 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </Button>
             </div>
           </div>
-        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+        ) : currentPlayer && !playersInHand.includes(currentPlayer.player_id) ? (
           <div className="bg-muted/50 p-3 rounded-lg text-center border border-dashed">
             <p className="text-sm text-muted-foreground">🃏 Player has folded</p>
           </div>
         ) : null}
 
-        {/* Street Navigation - Removed Next button in mobile, card selector auto-opens */}
+        {/* Community Cards Button - Always show when cards can be added */}
+        {((stage === 'flop' && !flopCards) || 
+          (stage === 'turn' && !turnCard) || 
+          (stage === 'river' && !riverCard)) && (
+          <Button 
+            onClick={() => openCardSelectorForStreet(
+              stage,
+              isMobile,
+              setCardSelectorType,
+              setTempCommunityCards,
+              setShowCardSelector,
+              setShowDesktopCardSelector
+            )}
+            variant="outline"
+            className="w-full h-10 text-sm font-semibold"
+          >
+            🃏 Add {stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River'} Cards
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -2301,59 +2331,50 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
         )}
 
-        {/* Desktop: Card selector dialog - auto-opens when cards need to be selected */}
-        {(() => {
-          // Determine if card selector should be shown
-          const shouldShowCardSelector = showDesktopCardSelector || 
-            (stage === 'flop' && !flopCards) || 
-            (stage === 'turn' && !turnCard && flopCards) || 
-            (stage === 'river' && !riverCard && turnCard);
-          
-          return (
-            <CardSelector
-              maxCards={stage === 'flop' ? 3 : 1}
-              usedCards={(() => {
-                const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
-                return getUsedCards(editingCards);
-              })()}
-              selectedCards={showDesktopCardSelector && tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
-              onSelect={(cards) => {
-                if (stage === 'flop') {
-                  setFlopCards(cards);
-                  setCardsJustAdded(true);
-                } else if (stage === 'turn') {
-                  setTurnCard(cards);
-                  setCardsJustAdded(true);
-                } else if (stage === 'river') {
-                  setRiverCard(cards);
-                  setCardsJustAdded(true);
-                }
-                setTempCommunityCards('');
+        {/* Desktop: Card selector dialog - only when explicitly opened */}
+        {showDesktopCardSelector && (
+          <CardSelector
+            maxCards={stage === 'flop' ? 3 : 1}
+            usedCards={(() => {
+              const editingCards = tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : [];
+              return getUsedCards(editingCards);
+            })()}
+            selectedCards={tempCommunityCards ? tempCommunityCards.match(/.{1,2}/g) || [] : []}
+            onSelect={(cards) => {
+              if (stage === 'flop') {
+                setFlopCards(cards);
+                setCardsJustAdded(true);
+              } else if (stage === 'turn') {
+                setTurnCard(cards);
+                setCardsJustAdded(true);
+              } else if (stage === 'river') {
+                setRiverCard(cards);
+                setCardsJustAdded(true);
+              }
+              setTempCommunityCards('');
+              setShowDesktopCardSelector(false);
+            }}
+            label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
+            knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
+            open={true}
+            onOpenChange={(isOpen) => {
+              if (!isOpen) {
                 setShowDesktopCardSelector(false);
-              }}
-              label={`Select ${stage === 'flop' ? 'Flop Cards (3)' : stage === 'turn' ? 'Turn Card (1)' : 'River Card (1)'}`}
-              knownHoleCards={Object.values(playerHoleCards).flatMap(cards => parseCardNotationString(cards))}
-              open={shouldShowCardSelector}
-              onOpenChange={(isOpen) => {
-                if (!isOpen) {
-                  setShowDesktopCardSelector(false);
-                  setTempCommunityCards('');
-                }
-              }}
-            />
-          );
-        })()}
+                setTempCommunityCards('');
+              }
+            }}
+          />
+        )}
 
-        {/* Action buttons - COMPACT */}
-        {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
+        {/* Action buttons - COMPACT - Always show for active players */}
+        {currentPlayer && playersInHand.includes(currentPlayer.player_id) ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              {shouldShowCallButton() && (
+              {canPlayerCallOrCheck() && (
                 <Button 
                   onClick={() => recordAction('Call')} 
                   variant="outline"
                   size="default"
-                  disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                   className="h-10 text-sm font-semibold hover:bg-green-500/20 hover:border-green-500 transition-all"
                 >
                   {getCallAmountForDisplay() === 0 
@@ -2366,7 +2387,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 onClick={() => recordAction('Fold')} 
                 variant="destructive"
                 size="default"
-                disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                 className="h-10 text-sm font-semibold hover:bg-red-600 transition-all"
               >
                 ❌ Fold
@@ -2408,12 +2428,11 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   placeholder={currentBet === 0 ? `Bet (min: ${game.big_blind})` : `Min raise: ${currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}`}
                   min={currentBet === 0 ? game.big_blind : currentBet * 2 - (currentPlayer ? streetPlayerBets[currentPlayer.player_id] || 0 : 0)}
                   step={game.small_blind || 50}
-                  disabled={(stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
                   className="flex-1 h-10 text-sm"
                 />
                 <Button 
                   onClick={() => recordAction('Raise')} 
-                  disabled={!betAmount || (stage === 'flop' && !flopCards) || (stage === 'turn' && !turnCard) || (stage === 'river' && !riverCard)}
+                  disabled={!betAmount}
                   size="default"
                   className="h-10 px-4 font-semibold bg-orange-600 hover:bg-orange-700 text-sm"
                 >
@@ -2422,7 +2441,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               </div>
             </div>
           </div>
-        ) : !playersInHand.includes(currentPlayer?.player_id || '') ? (
+        ) : currentPlayer && !playersInHand.includes(currentPlayer.player_id) ? (
           <div className="bg-muted/50 p-3 rounded-lg text-center border-2 border-dashed border-border">
             <p className="text-sm text-muted-foreground font-medium">
               🃏 This player has folded
@@ -2442,7 +2461,28 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           >
             ← Back
           </Button>
-          {/* Only show Next button when it can be clicked */}
+          
+          {/* Add Cards button - show when cards can be added */}
+          {((stage === 'flop' && !flopCards) || 
+            (stage === 'turn' && !turnCard) || 
+            (stage === 'river' && !riverCard)) && (
+            <Button 
+              onClick={() => openCardSelectorForStreet(
+                stage,
+                isMobile,
+                setCardSelectorType,
+                setTempCommunityCards,
+                setShowCardSelector,
+                setShowDesktopCardSelector
+              )}
+              variant="outline"
+              className="flex-1 h-10 text-sm font-semibold"
+            >
+              🃏 Add {stage === 'flop' ? 'Flop' : stage === 'turn' ? 'Turn' : 'River'} Cards
+            </Button>
+          )}
+          
+          {/* Only show Next button when betting is complete and cards are dealt */}
           {canMoveToNextStreet() && (
             <Button 
               onClick={moveToNextStreet} 
