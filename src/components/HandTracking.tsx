@@ -2009,8 +2009,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         </div>
       </div>
 
-      {/* Main content area - 2/3 of remaining space for table view */}
-      <div className="flex-[2] overflow-y-auto min-h-0 bg-background">
+      {/* Main content area - increased by 15% (2 * 1.15 = 2.3) for table view */}
+      <div className="flex-[2.3] overflow-y-auto min-h-0 bg-background">
         <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
           {/* Poker Table - WITHOUT community cards on table for mobile */}
           {activePlayers.length > 0 && (
@@ -2084,8 +2084,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         </div>
       </div>
 
-      {/* Bottom 1/3 - Action Buttons */}
-      <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2">
+      {/* Bottom section - Action Buttons - positioned to avoid keyboard overlap */}
+      <div className="flex-shrink-0 bg-gradient-to-t from-background via-background to-background/95 border-t-2 border-primary/20 p-2 sm:p-3 space-y-2 pb-safe">
         {/* Action Buttons */}
         {!canMoveToNextStreet() && playersInHand.includes(currentPlayer?.player_id || '') ? (
           <div className="space-y-2">
@@ -2175,7 +2175,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           onHandComplete();
         }
       }} modal={true} dismissible={true}>
-        <DrawerContent className="max-h-[95vh] overflow-y-auto">
+        <DrawerContent className="h-screen max-h-screen overflow-y-auto">
           {handTrackingContent}
         </DrawerContent>
       </Drawer>

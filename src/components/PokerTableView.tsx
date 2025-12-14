@@ -204,9 +204,9 @@ const PokerTableView = memo(({
   }, [buttonPlayerId, showPositionLabels, positions, seatPositions]);
 
   return (
-    <div className="relative w-full aspect-square max-w-3xl mx-auto my-2">
+    <div className="relative w-full aspect-square max-w-3xl mx-auto my-2" style={{ aspectRatio: 'auto', paddingBottom: '115%' }}>
       {/* Poker Table - rotated 90 degrees on mobile for portrait mode */}
-      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-150 scale-[1.275]">
+      <div className="absolute inset-0 flex items-center justify-center sm:rotate-0 rotate-90 sm:scale-75 scale-[1.275]">
         <div className="relative w-full h-full">
           {/* Stadium-shaped table */}
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -354,7 +354,7 @@ const PokerTableView = memo(({
                   <div className="relative flex flex-col items-center gap-1" style={{ zIndex: Z_INDEX.PLAYER_UNIT }}>
                     {/* Player avatar - central element */}
                     <div className="relative">
-                      <div className={`bg-card border-2 rounded-full w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
+                      <div className={`bg-card border-2 rounded-full w-8 h-8 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                         isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
                         isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
                       }`}>

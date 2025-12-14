@@ -19,7 +19,7 @@ export const BuyInManagementTable = ({
 }: BuyInManagementTableProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [buyInCount, setBuyInCount] = useState<number | string>(1);
+  const [buyInCount, setBuyInCount] = useState<number | string>('');
   const [isAdding, setIsAdding] = useState(false);
 
   const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
@@ -51,7 +51,7 @@ export const BuyInManagementTable = ({
       toast.success(`Added ${buyInCount} buy-in(s) for ${selectedPlayer.player.name}`);
       setOpened(false);
       setSelectedPlayerId('');
-      setBuyInCount(1);
+      setBuyInCount('');
     } catch (error) {
       console.error('Error adding buy-in:', error);
       toast.error('Failed to add buy-in');
@@ -79,13 +79,13 @@ export const BuyInManagementTable = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <Table striped highlightOnHover withTableBorder withColumnBorders className="bg-card/95">
+        <Table striped highlightOnHover withTableBorder className="bg-card/95">
           <Table.Thead className="bg-primary/10">
             <Table.Tr>
               <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Player</Table.Th>
               <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Buy-ins</Table.Th>
               <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Total</Table.Th>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Action</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700, width: '80px' }}></Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -102,16 +102,17 @@ export const BuyInManagementTable = ({
                 </Table.Td>
                 <Table.Td>
                   <Button
-                    leftSection={<Plus size={16} />}
                     onClick={() => {
                       setSelectedPlayerId(gamePlayer.id);
+                      setBuyInCount('');
                       setOpened(true);
                     }}
                     variant="filled"
                     color="blue"
                     size="xs"
+                    style={{ padding: '0 8px' }}
                   >
-                    Buy-in
+                    <Plus size={16} />
                   </Button>
                 </Table.Td>
               </Table.Tr>
@@ -125,25 +126,17 @@ export const BuyInManagementTable = ({
         onClose={() => {
           setOpened(false);
           setSelectedPlayerId('');
-          setBuyInCount(1);
+          setBuyInCount('');
         }}
         title={<Text fw={700} size="lg">Add Buy-in</Text>}
         centered
         size="md"
       >
         <Stack gap="md">
-          <Select
-            label="Select Player"
-            placeholder="Choose a player"
-            data={sortedPlayers.map(gp => ({
-              value: gp.id,
-              label: gp.player.name
-            }))}
-            value={selectedPlayerId}
-            onChange={(value) => setSelectedPlayerId(value || '')}
-            searchable
-            required
-          />
+          <div>
+            <Text size="sm" fw={500} mb="xs">Player</Text>
+            <Text size="md" fw={600}>{sortedPlayers.find(gp => gp.id === selectedPlayerId)?.player.name}</Text>
+          </div>
 
           <NumberInput
             label="Number of Buy-ins"
@@ -168,7 +161,7 @@ export const BuyInManagementTable = ({
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
-                setBuyInCount(1);
+                setBuyInCount('');
               }}
             >
               Cancel

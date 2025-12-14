@@ -68,12 +68,12 @@ export const FinalStackManagement = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <Table striped highlightOnHover withTableBorder withColumnBorders className="bg-card/95">
+        <Table striped highlightOnHover withTableBorder className="bg-card/95">
           <Table.Thead className="bg-primary/10">
             <Table.Tr>
               <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Player</Table.Th>
               <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Final Stack</Table.Th>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Action</Table.Th>
+              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700, width: '80px' }}></Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -87,13 +87,13 @@ export const FinalStackManagement = ({
                 </Table.Td>
                 <Table.Td>
                   <Button
-                    leftSection={<Edit size={16} />}
                     onClick={() => handleStartEdit(gamePlayer)}
                     variant="filled"
                     color="blue"
                     size="xs"
+                    style={{ padding: '0 8px' }}
                   >
-                    Edit
+                    <Edit size={16} />
                   </Button>
                 </Table.Td>
               </Table.Tr>
