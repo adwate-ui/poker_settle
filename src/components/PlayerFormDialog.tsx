@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { validateUpiId, getPaymentMethodIcon } from "@/utils/playerUtils";
 import { Loader2, Mail, CreditCard, User } from "lucide-react";
 import {

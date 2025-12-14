@@ -1,7 +1,6 @@
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, Card, Text, Stack } from "@mantine/core";
 import { Loader2 } from "lucide-react";
 
 const Auth = () => {
@@ -29,29 +28,22 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to Poker Tracker</CardTitle>
-          <CardDescription>
+      <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: '100%', maxWidth: '28rem' }}>
+        <Stack gap="md" align="center">
+          <Text size="xl" fw={700} ta="center">Welcome to Poker Tracker</Text>
+          <Text size="sm" c="dimmed" ta="center">
             Sign in to track your poker games and manage your player statistics
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </Text>
           <Button 
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            className="w-full bg-gradient-poker hover:opacity-90"
+            fullWidth
+            className="bg-gradient-poker hover:opacity-90"
+            leftSection={isSigningIn ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           >
-            {isSigningIn ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              'Sign in with Google'
-            )}
+            {isSigningIn ? 'Signing in...' : 'Sign in with Google'}
           </Button>
-        </CardContent>
+        </Stack>
       </Card>
     </div>
   );

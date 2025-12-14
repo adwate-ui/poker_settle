@@ -12,7 +12,7 @@ import PlayerCardMantine from "@/components/PlayerCardMantine";
 import { BuyInManagementTable } from "@/components/BuyInManagementTable";
 import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay } from "@/lib/utils";

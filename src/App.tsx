@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MantineProvider, createTheme } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -95,13 +93,10 @@ const App = () => {
       <AuthProvider>
         <ThemeProvider>
           <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <OfflineIndicator />
-              <PWAInstallPrompt />
-              <AppContent />
-            </TooltipProvider>
+            <Notifications position="top-right" />
+            <OfflineIndicator />
+            <PWAInstallPrompt />
+            <AppContent />
           </MantineProvider>
         </ThemeProvider>
       </AuthProvider>
