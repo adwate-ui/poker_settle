@@ -31,7 +31,7 @@ class GameErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div className="max-w-6xl mx-auto mt-8">
-          <Card shadow="sm" padding="lg" radius="md" withBorder style={{ borderColor: 'var(--mantine-color-red-6)' }}>
+          <Card shadow="sm" padding="lg" radius="md" withBorder style={{ borderColor: 'hsl(var(--destructive))' }}>
             <Stack gap="md">
               <Text size="lg" fw={700}>Unable to load game details</Text>
               <Text c="dimmed">
