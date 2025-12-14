@@ -137,8 +137,7 @@ export const GameDetailView = ({
               upi_id
             )
           `)
-          .eq("game_id", gameId)
-          .order("players(name)", { ascending: true }),
+          .eq("game_id", gameId),
         client
           .from("table_positions")
           .select("*")
@@ -172,7 +171,13 @@ export const GameDetailView = ({
       }
 
       setGame(gameData);
-      setGamePlayers(playersData || []);
+      // Sort players by name after fetching
+      const sortedPlayers = (playersData || []).sort((a, b) => {
+        const nameA = (a.players?.name ?? '').toLowerCase();
+        const nameB = (b.players?.name ?? '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      setGamePlayers(sortedPlayers);
 
       const formattedPositions: TablePosition[] = (positionsData || []).map((tp) => ({
         id: tp.id,
