@@ -144,26 +144,49 @@
   color: var(--mantine-color-primary-light-color);
 }
 
-/* Profit badge colors (green) */
-.mantine-Badge-root[data-color="profit"][data-variant="filled"] {
-  background-color: #40c057;
-  color: white;
+/* Profit badge colors (green) - with increased specificity for mobile */
+.mantine-Badge-root[data-color="profit"][data-variant="filled"],
+.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="sm"],
+.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="md"],
+.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="lg"] {
+  background-color: #40c057 !important;
+  color: white !important;
 }
 
-.mantine-Badge-root[data-color="profit"][data-variant="light"] {
-  background-color: #d3f9d8;
-  color: #2b8a3e;
+.mantine-Badge-root[data-color="profit"][data-variant="light"],
+.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="sm"],
+.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="md"],
+.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="lg"] {
+  background-color: #d3f9d8 !important;
+  color: #2b8a3e !important;
 }
 
-/* Loss badge colors (red) */
-.mantine-Badge-root[data-color="loss"][data-variant="filled"] {
-  background-color: #fa5252;
-  color: white;
+/* Loss badge colors (red) - with increased specificity for mobile */
+.mantine-Badge-root[data-color="loss"][data-variant="filled"],
+.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="sm"],
+.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="md"],
+.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="lg"] {
+  background-color: #fa5252 !important;
+  color: white !important;
 }
 
-.mantine-Badge-root[data-color="loss"][data-variant="light"] {
-  background-color: #ffe3e3;
-  color: #c92a2a;
+.mantine-Badge-root[data-color="loss"][data-variant="light"],
+.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="sm"],
+.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="md"],
+.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="lg"] {
+  background-color: #ffe3e3 !important;
+  color: #c92a2a !important;
+}
+
+/* Dark mode specific overrides for profit/loss badges */
+.dark .mantine-Badge-root[data-color="profit"][data-variant="filled"] {
+  background-color: #40c057 !important;
+  color: white !important;
+}
+
+.dark .mantine-Badge-root[data-color="loss"][data-variant="filled"] {
+  background-color: #fa5252 !important;
+  color: white !important;
 }
 
 /* Ensure Mantine buttons use proper colors */
