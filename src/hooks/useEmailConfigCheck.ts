@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Custom hook to check if the user has configured email notifications.
+ * Shows the email configuration modal on first login if not configured.
+ * 
+ * @returns {Object} Object containing:
+ *   - showEmailConfig: boolean - whether to show the email config modal
+ *   - setShowEmailConfig: function - setter to control modal visibility
+ *   - loading: boolean - whether the check is in progress
+ */
 export const useEmailConfigCheck = () => {
   const { user } = useAuth();
   const [showEmailConfig, setShowEmailConfig] = useState(false);

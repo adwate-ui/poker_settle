@@ -14,7 +14,7 @@ BEGIN
     'default'
   )
   ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
+    email = COALESCE(EXCLUDED.email, public.profiles.email),
     full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
     avatar_url = COALESCE(EXCLUDED.avatar_url, public.profiles.avatar_url),
     updated_at = now();
