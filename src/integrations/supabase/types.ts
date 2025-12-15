@@ -301,6 +301,11 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          email_configured: boolean
+          emailjs_public_key: string | null
+          emailjs_service_id: string | null
+          emailjs_template_id: string | null
+          from_email: string | null
           full_name: string | null
           id: string
           theme: string
@@ -310,6 +315,11 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          email_configured?: boolean
+          emailjs_public_key?: string | null
+          emailjs_service_id?: string | null
+          emailjs_template_id?: string | null
+          from_email?: string | null
           full_name?: string | null
           id: string
           theme?: string
@@ -319,6 +329,11 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          email_configured?: boolean
+          emailjs_public_key?: string | null
+          emailjs_service_id?: string | null
+          emailjs_template_id?: string | null
+          from_email?: string | null
           full_name?: string | null
           id?: string
           theme?: string

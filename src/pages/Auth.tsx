@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Card, Text, Stack } from "@mantine/core";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Auth = () => {
   const { signInWithGoogle, loading } = useAuth();
@@ -13,7 +14,7 @@ const Auth = () => {
       await signInWithGoogle();
     } catch (error) {
       console.error('Error signing in:', error);
-    } finally {
+      toast.error('Failed to sign in. Please try again.');
       setIsSigningIn(false);
     }
   };

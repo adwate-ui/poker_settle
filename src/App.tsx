@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import { Toaster } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -116,6 +117,7 @@ const App = () => {
         <ThemeProvider>
           <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
             <Notifications position="top-right" />
+            <Toaster position="top-center" richColors />
             <OfflineIndicator />
             <PWAInstallPrompt />
             <AppContent />

@@ -60,15 +60,16 @@ export const useAuthProvider = () => {
           setLoading(false);
         } else {
           // Set a safety timeout to prevent infinite loading
-          // If onAuthStateChange doesn't fire within 5 seconds, stop loading anyway
+          // If onAuthStateChange doesn't fire within 10 seconds, stop loading anyway
           timeoutId = window.setTimeout(() => {
             if (mounted) {
               console.warn('Auth state change timeout - stopping loading state');
+              console.warn('If you see this repeatedly, check Supabase OAuth configuration and redirect URLs');
               setLoading(false);
               // Clean up hash
               window.history.replaceState(null, '', window.location.pathname);
             }
-          }, 5000);
+          }, 10000);
         }
         // If there is an auth hash, wait for onAuthStateChange to set loading=false
       }
