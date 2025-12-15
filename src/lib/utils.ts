@@ -29,8 +29,11 @@ export function formatInputDisplay(value: number | null | undefined): string {
 }
 
 // Get consistent badge color for profit/loss values
+// NOTE: The return values are swapped because Mantine's color mapping is opposite
+// Negative amounts (losses) should be RED, so we return 'profit' which maps to RED in CSS
+// Positive amounts (gains) should be GREEN, so we return 'loss' which maps to GREEN in CSS
 export function getProfitLossColor(amount: number): 'profit' | 'loss' {
-  return amount >= 0 ? 'profit' : 'loss';
+  return amount >= 0 ? 'loss' : 'profit';
 }
 
 // Get consistent badge variant for profit/loss values (for shadcn badges)
