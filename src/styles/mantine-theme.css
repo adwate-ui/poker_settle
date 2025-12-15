@@ -133,14 +133,37 @@
 }
 
 /* Ensure Mantine badges use proper colors */
-.mantine-Badge-root[data-variant="filled"] {
+/* Only apply default colors to badges without a specific color attribute */
+.mantine-Badge-root[data-variant="filled"]:not([data-color]) {
   background-color: var(--mantine-color-primary-filled);
   color: hsl(var(--primary-foreground));
 }
 
-.mantine-Badge-root[data-variant="light"] {
+.mantine-Badge-root[data-variant="light"]:not([data-color]) {
   background-color: var(--mantine-color-primary-light);
   color: var(--mantine-color-primary-light-color);
+}
+
+/* Profit badge colors (green) */
+.mantine-Badge-root[data-color="profit"][data-variant="filled"] {
+  background-color: #40c057;
+  color: white;
+}
+
+.mantine-Badge-root[data-color="profit"][data-variant="light"] {
+  background-color: #d3f9d8;
+  color: #2b8a3e;
+}
+
+/* Loss badge colors (red) */
+.mantine-Badge-root[data-color="loss"][data-variant="filled"] {
+  background-color: #fa5252;
+  color: white;
+}
+
+.mantine-Badge-root[data-color="loss"][data-variant="light"] {
+  background-color: #ffe3e3;
+  color: #c92a2a;
 }
 
 /* Ensure Mantine buttons use proper colors */
