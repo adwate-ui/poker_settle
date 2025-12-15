@@ -189,6 +189,29 @@
   color: white !important;
 }
 
+/* Mobile-specific overrides to ensure colors work on all screen sizes */
+@media (max-width: 640px) {
+  .mantine-Badge-root[data-color="profit"][data-variant="filled"] {
+    background-color: #40c057 !important;
+    color: white !important;
+  }
+  
+  .mantine-Badge-root[data-color="loss"][data-variant="filled"] {
+    background-color: #fa5252 !important;
+    color: white !important;
+  }
+  
+  /* Ensure text is not transformed on mobile */
+  .mantine-Badge-root {
+    text-transform: none !important;
+  }
+}
+
+/* Ensure text is never transformed in badges (prevent Rs. becoming RS.) */
+.mantine-Badge-root {
+  text-transform: none !important;
+}
+
 /* Ensure Mantine buttons use proper colors */
 .mantine-Button-root[data-variant="filled"] {
   background-color: var(--mantine-color-primary-filled);
