@@ -178,35 +178,6 @@
   color: #c92a2a !important;
 }
 
-/* Dark mode specific overrides for profit/loss badges */
-.dark .mantine-Badge-root[data-color="profit"][data-variant="filled"] {
-  background-color: #40c057 !important;
-  color: white !important;
-}
-
-.dark .mantine-Badge-root[data-color="loss"][data-variant="filled"] {
-  background-color: #fa5252 !important;
-  color: white !important;
-}
-
-/* Mobile-specific overrides to ensure colors work on all screen sizes */
-@media (max-width: 640px) {
-  .mantine-Badge-root[data-color="profit"][data-variant="filled"] {
-    background-color: #40c057 !important;
-    color: white !important;
-  }
-  
-  .mantine-Badge-root[data-color="loss"][data-variant="filled"] {
-    background-color: #fa5252 !important;
-    color: white !important;
-  }
-  
-  /* Ensure text is not transformed on mobile */
-  .mantine-Badge-root {
-    text-transform: none !important;
-  }
-}
-
 /* Ensure text is never transformed in badges (prevent Rs. becoming RS.) */
 .mantine-Badge-root {
   text-transform: none !important;
