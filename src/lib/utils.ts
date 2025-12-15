@@ -29,8 +29,8 @@ export function formatInputDisplay(value: number | null | undefined): string {
 }
 
 // Get consistent badge color for profit/loss values
-export function getProfitLossColor(amount: number): 'green' | 'red' {
-  return amount >= 0 ? 'green' : 'red';
+export function getProfitLossColor(amount: number): 'profit' | 'loss' {
+  return amount >= 0 ? 'profit' : 'loss';
 }
 
 // Get consistent badge variant for profit/loss values (for shadcn badges)
@@ -39,9 +39,9 @@ export function getProfitLossVariant(amount: number): 'success' | 'destructive' 
 }
 
 // Format profit/loss with sign
-// For positive amounts: adds '+' prefix (e.g., "+Rs. 1,000")
-// For negative amounts: adds '-' prefix (e.g., "-Rs. 1,000")
+// For positive amounts: adds '+' after Rs. (e.g., "Rs. +1,000")
+// For negative amounts: adds '-' after Rs. (e.g., "Rs. -1,000")
 export function formatProfitLoss(amount: number): string {
   const sign = amount >= 0 ? '+' : '-';
-  return `${sign}Rs. ${formatIndianNumber(Math.abs(amount))}`;
+  return `Rs. ${sign}${formatIndianNumber(Math.abs(amount))}`;
 }

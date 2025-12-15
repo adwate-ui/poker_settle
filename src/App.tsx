@@ -39,6 +39,31 @@ const mantineTheme = createTheme({
       'var(--mantine-color-primary-8)',
       'var(--mantine-color-primary-9)',
     ],
+    // Define semantic profit/loss colors (using standard green/red for light, darker for dark mode)
+    profit: [
+      '#d3f9d8', // lightest
+      '#b2f2bb',
+      '#8ce99a',
+      '#69db7c',
+      '#51cf66',
+      '#40c057', // base
+      '#37b24d',
+      '#2f9e44',
+      '#2b8a3e',
+      '#247a31', // darkest
+    ],
+    loss: [
+      '#ffe3e3', // lightest
+      '#ffc9c9',
+      '#ffa8a8',
+      '#ff8787',
+      '#ff6b6b',
+      '#fa5252', // base
+      '#f03e3e',
+      '#e03131',
+      '#c92a2a',
+      '#b02525', // darkest
+    ],
   },
   other: {
     // Pass through our color variables for custom usage
