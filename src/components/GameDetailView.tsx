@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card as MantineCard, Badge as MantineBadge, Button as MantineButton, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { Card as MantineCard, Badge as MantineBadge, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
 import { Table as MantineTable } from "@mantine/core";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -357,14 +357,13 @@ export const GameDetailView = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {onBack && (
-        <MantineButton
-          variant="filled"
+        <Button
           onClick={onBack}
           className="mb-4 bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           {backLabel}
-        </MantineButton>
+        </Button>
       )}
 
       <MantineCard shadow="sm" padding="lg" radius="md" withBorder>
@@ -373,16 +372,16 @@ export const GameDetailView = ({
             <Text size="xl" fw={700} className="sm:text-2xl">
               Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
             </Text>
-            <MantineButton
+            <Button
               variant="outline"
               size="sm"
               onClick={() => copyShareLink('game', gameId)}
               disabled={linkLoading}
               className="hover:bg-primary/10 hover:text-primary border-primary/20 w-full sm:w-auto"
             >
-              <Share2 className="h-4 w-4 mr-2" />
+              <Share2 className="h-4 w-4" />
               Share Game
-            </MantineButton>
+            </Button>
           </Group>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className="space-y-0.5 p-3 rounded-lg border">
@@ -793,7 +792,7 @@ export const GameDetailView = ({
             value={newTransferAmount}
             onChange={(e) => setNewTransferAmount(e.target.value)}
           />
-          <Button onClick={addManualTransfer} fullWidth>
+          <Button onClick={addManualTransfer} className="w-full">
             Add Transfer
           </Button>
         </Stack>
