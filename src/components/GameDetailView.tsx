@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, Arr
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossVariant } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -571,7 +571,7 @@ export const GameDetailView = ({
                           </TableCell>
                           <TableCell className="text-left py-2">
                             <Badge 
-                              variant={netAmount >= 0 ? "success" : "destructive"}
+                              variant={getProfitLossVariant(netAmount)}
                               className="font-medium text-xs"
                             >
                               {formatProfitLoss(netAmount)}
