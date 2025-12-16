@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Table, Button, Modal, NumberInput, Group, Text, Select, Stack, ScrollArea } from '@mantine/core';
+import { Button as MantineButton, Modal, NumberInput, Group, Text, Stack, ScrollArea } from '@mantine/core';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
@@ -79,45 +81,47 @@ export const BuyInManagementTable = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <Table striped highlightOnHover withTableBorder className="bg-card/95">
-          <Table.Thead className="bg-primary/10">
-            <Table.Tr>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Player</Table.Th>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Buy-ins</Table.Th>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700 }}>Total</Table.Th>
-              <Table.Th style={{ fontSize: '0.9rem', fontWeight: 700, width: '80px' }}></Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {sortedPlayers.map((gamePlayer) => (
-              <Table.Tr key={gamePlayer.id}>
-                <Table.Td>
-                  <Text fw={600} size="sm">{getDisplayName(gamePlayer.player.name, isMobile)}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text fw={500} size="sm">{gamePlayer.buy_ins}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text fw={600} size="sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
-                </Table.Td>
-                <Table.Td>
+        <Table className="bg-card/95">
+          <TableHeader>
+            <TableRow className="bg-primary/10 hover:bg-primary/15">
+              <TableHead className="text-sm font-bold">Player</TableHead>
+              <TableHead className="text-sm font-bold">Buy-ins</TableHead>
+              <TableHead className="text-sm font-bold">Total</TableHead>
+              <TableHead className="text-sm font-bold w-[80px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedPlayers.map((gamePlayer, index) => (
+              <TableRow 
+                key={gamePlayer.id}
+                className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
+              >
+                <TableCell>
+                  <span className="font-semibold text-sm">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="font-medium text-sm">{gamePlayer.buy_ins}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="font-semibold text-sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+                </TableCell>
+                <TableCell>
                   <Button
                     onClick={() => {
                       setSelectedPlayerId(gamePlayer.id);
                       setBuyInCount('');
                       setOpened(true);
                     }}
-                    variant="filled"
-                    color="gray"
-                    size="xs"
-                    style={{ padding: '0 8px' }}
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 w-7 p-0"
                   >
-                    <Plus size={16} />
+                    <Plus className="h-4 w-4" />
                   </Button>
-                </Table.Td>
-              </Table.Tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </Table.Tbody>
+          </TableBody>
         </Table>
       </div>
 
@@ -153,7 +157,7 @@ export const BuyInManagementTable = ({
           </Text>
 
           <Group justify="flex-end" mt="md">
-            <Button 
+            <MantineButton 
               variant="default" 
               onClick={() => {
                 setOpened(false);
@@ -162,14 +166,14 @@ export const BuyInManagementTable = ({
               }}
             >
               Cancel
-            </Button>
-            <Button 
+            </MantineButton>
+            <MantineButton 
               onClick={handleAddBuyIn}
               loading={isAdding}
               disabled={!selectedPlayerId || !buyInCount}
             >
               Confirm & Add
-            </Button>
+            </MantineButton>
           </Group>
         </Stack>
       </Modal>

@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Button, Select, Table, Collapse, Stack, Group, Text, Box, Badge } from "@mantine/core";
+import { Card, Button as MantineButton, Select, Collapse, Stack, Group, Text, Box, Badge as MantineBadge } from "@mantine/core";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit } from "lucide-react";
@@ -321,12 +323,12 @@ const PlayerDetail = () => {
           
           <Collapse in={isGameHistoryOpen}>
             <Box>
-              <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <Table.Th className="font-bold w-[100px] sm:w-auto">
+              <Table>
+            <TableHeader>
+              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                <TableHead className="font-bold w-[100px] sm:w-auto">
                   <Button
-                    variant="subtle"
+                    variant="ghost"
                     onClick={() => handleSort("date")}
                     className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
@@ -334,10 +336,10 @@ const PlayerDetail = () => {
                     <span className="sm:hidden">Dt</span>
                     {getSortIcon("date")}
                   </Button>
-                </Table.Th>
-                <Table.Th className="font-bold w-[70px] sm:w-auto">
+                </TableHead>
+                <TableHead className="font-bold w-[70px] sm:w-auto">
                   <Button
-                    variant="subtle"
+                    variant="ghost"
                     onClick={() => handleSort("buy_ins")}
                     className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
@@ -345,10 +347,10 @@ const PlayerDetail = () => {
                     <span className="sm:hidden">Buy</span>
                     {getSortIcon("buy_ins")}
                   </Button>
-                </Table.Th>
-                <Table.Th className="font-bold w-[80px] sm:w-auto">
+                </TableHead>
+                <TableHead className="font-bold w-[80px] sm:w-auto">
                   <Button
-                    variant="subtle"
+                    variant="ghost"
                     onClick={() => handleSort("net_amount")}
                     className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
@@ -356,10 +358,10 @@ const PlayerDetail = () => {
                     <span className="sm:hidden">P&L</span>
                     {getSortIcon("net_amount")}
                   </Button>
-                </Table.Th>
-                <Table.Th className="font-bold w-[80px] sm:w-auto">
+                </TableHead>
+                <TableHead className="font-bold w-[80px] sm:w-auto">
                   <Button
-                    variant="subtle"
+                    variant="ghost"
                     onClick={() => handleSort("final_stack")}
                     className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
                   >
@@ -367,15 +369,15 @@ const PlayerDetail = () => {
                     <span className="sm:hidden">Stack</span>
                     {getSortIcon("final_stack")}
                   </Button>
-                </Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {sortedGameHistory.map((game, index) => {
                 const isWin = game.net_amount > 0;
                 
                 return (
-                  <Table.Tr
+                  <TableRow
                     key={game.id}
                     className={`transition-colors ${
                       index % 2 === 0 
@@ -383,18 +385,18 @@ const PlayerDetail = () => {
                         : "hover:bg-primary/10"
                     }`}
                   >
-                    <Table.Td className="font-medium text-primary">
+                    <TableCell className="font-medium text-primary">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         {format(new Date(game.games.date), "MMM d, yyyy")}
                       </div>
-                    </Table.Td>
-                    <Table.Td>
+                    </TableCell>
+                    <TableCell>
                       <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
                         {game.buy_ins}
                       </span>
-                    </Table.Td>
-                    <Table.Td>
+                    </TableCell>
+                    <TableCell>
                       <span className={`px-3 py-1 rounded-full font-bold ${
                         isWin 
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
@@ -402,24 +404,24 @@ const PlayerDetail = () => {
                       }`}>
                         {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
                       </span>
-                    </Table.Td>
-                    <Table.Td className="font-semibold text-accent-foreground">
+                    </TableCell>
+                    <TableCell className="font-semibold text-accent-foreground">
                       Rs. {formatIndianNumber(game.final_stack)}
-                    </Table.Td>
-                    <Table.Td className="text-center">
+                    </TableCell>
+                    <TableCell className="text-center">
                       <Button
-                        variant="subtle"
+                        variant="ghost"
                         size="sm"
                         onClick={() => navigate(`/games/${game.game_id}`)}
                         className="hover:text-primary"
                       >
                         View Game
                       </Button>
-                    </Table.Td>
-                  </Table.Tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </Table.Tbody>
+            </TableBody>
           </Table>
             </Box>
           </Collapse>

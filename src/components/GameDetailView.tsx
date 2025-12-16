@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, Badge, Button, Collapse, Table, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { Card as MantineCard, Badge as MantineBadge, Button as MantineButton, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { Table as MantineTable } from "@mantine/core";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp, Check, X } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossVariant } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -330,9 +336,9 @@ export const GameDetailView = ({
 
   if (!game) {
     return (
-      <Card shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
+      <MantineCard shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
         <Text c="dimmed" ta="center">Game not found</Text>
-      </Card>
+      </MantineCard>
     );
   }
 
@@ -351,23 +357,23 @@ export const GameDetailView = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {onBack && (
-        <Button
+        <MantineButton
           variant="filled"
           onClick={onBack}
           className="mb-4 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {backLabel}
-        </Button>
+        </MantineButton>
       )}
 
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <MantineCard shadow="sm" padding="lg" radius="md" withBorder>
         <Stack gap="md">
           <Group justify="space-between" wrap="wrap">
             <Text size="xl" fw={700} className="sm:text-2xl">
               Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
             </Text>
-            <Button
+            <MantineButton
               variant="outline"
               size="sm"
               onClick={() => copyShareLink('game', gameId)}
@@ -376,7 +382,7 @@ export const GameDetailView = ({
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share Game
-            </Button>
+            </MantineButton>
           </Group>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className="space-y-0.5 p-3 rounded-lg border">
@@ -401,10 +407,10 @@ export const GameDetailView = ({
             </div>
           </div>
         </Stack>
-      </Card>
+      </MantineCard>
 
       {/* Buy-in Logs */}
-      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+      <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
         <div 
           className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
           onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
@@ -419,10 +425,10 @@ export const GameDetailView = ({
             <ConsolidatedBuyInLogs gameId={gameId} token={token} />
           </div>
         </Collapse>
-      </Card>
+      </MantineCard>
 
       {/* Poker Table View */}
-      <Card shadow="sm" padding="md" radius="md" withBorder>
+      <MantineCard shadow="sm" padding="md" radius="md" withBorder>
         <Stack gap="md">
           <Group justify="space-between">
             <button 
@@ -469,125 +475,133 @@ export const GameDetailView = ({
             />
           </Collapse>
         </Stack>
-      </Card>
+      </MantineCard>
 
       {/* Player Results */}
-      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
-        <div 
-          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
-          onClick={() => setPlayerResultsOpen(!playerResultsOpen)}
-        >
-          <Group justify="space-between">
-            <Text className="text-primary" size="lg" fw={600}>Player Results</Text>
-            {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </Group>
-        </div>
-        <Collapse in={playerResultsOpen}>
-          <div className="overflow-x-auto">
-            <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
-                  <Button
-                    variant="subtle"
-                    onClick={() => handleSort("name")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                  >
-                    <span className="hidden sm:inline truncate">Player</span>
-                    <span className="sm:hidden truncate">Plyr</span>
-                    {getSortIcon("name")}
-                  </Button>
-                </Table.Th>
-                <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
-                  <Button
-                    variant="subtle"
-                    onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                  >
-                    <span className="hidden sm:inline truncate">Buy-ins</span>
-                    <span className="sm:hidden truncate">Buy</span>
-                    {getSortIcon("buy_ins")}
-                  </Button>
-                </Table.Th>
-                <Table.Th className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
-                  <Button
-                    variant="subtle"
-                    onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                  >
-                    <span className="hidden sm:inline truncate">Net P&L</span>
-                    <span className="sm:hidden truncate">P&L</span>
-                    {getSortIcon("net_amount")}
-                  </Button>
-                </Table.Th>
-                <Table.Th className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
-                  <Button
-                    variant="subtle"
-                    onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                  >
-                    <span className="hidden sm:inline truncate">Final Stack</span>
-                    <span className="sm:hidden truncate">Stack</span>
-                    {getSortIcon("final_stack")}
-                  </Button>
-                </Table.Th>
-                {showOwnerControls && fetchBuyInHistory && (
-                  <Table.Th className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
-                    <span className="hidden sm:inline truncate">Buy-in Log</span>
-                    <span className="sm:hidden truncate">Log</span>
-                  </Table.Th>
-                )}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {sortedGamePlayers.map((gamePlayer, index) => {
-                const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
-                const netAmount = gamePlayer.net_amount ?? 0;
-                const finalStack = gamePlayer.final_stack ?? 0;
-                
-                return (
-                  <Table.Tr
-                    key={gamePlayer.id}
-                    className={`transition-colors ${
-                      index % 2 === 0 
-                        ? "bg-secondary/5 hover:bg-secondary/20" 
-                        : "hover:bg-primary/10"
-                    }`}
-                  >
-                    <Table.Td className="font-medium text-primary text-left py-2 text-sm">{playerName}</Table.Td>
-                    <Table.Td className="text-left py-2">
-                      <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium text-xs">
-                        {gamePlayer.buy_ins}
-                      </span>
-                    </Table.Td>
-                    <Table.Td className="text-left py-2">
-                      <Badge color={getProfitLossColor(netAmount)} variant="filled" size="sm">
-                        {formatProfitLoss(netAmount)}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td className="font-semibold text-accent-foreground text-left py-2 text-sm">
-                      Rs. {formatIndianNumber(finalStack)}
-                    </Table.Td>
-                    {showOwnerControls && fetchBuyInHistory && (
-                      <Table.Td className="text-left py-2">
-                        <BuyInHistoryDialog
-                          gamePlayerId={gamePlayer.id}
-                          playerName={playerName}
-                          fetchHistory={fetchBuyInHistory}
-                        />
-                      </Table.Td>
-                    )}
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-          </div>
-        </Collapse>
+      <Card className="border-primary/20">
+        <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
+          <CollapsibleTrigger asChild>
+            <div 
+              className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-primary text-lg font-semibold">Player Results</h3>
+                {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </div>
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                      <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("name")}
+                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
+                        >
+                          <span className="hidden sm:inline truncate">Player</span>
+                          <span className="sm:hidden truncate">Plyr</span>
+                          {getSortIcon("name")}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("buy_ins")}
+                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
+                        >
+                          <span className="hidden sm:inline truncate">Buy-ins</span>
+                          <span className="sm:hidden truncate">Buy</span>
+                          {getSortIcon("buy_ins")}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("net_amount")}
+                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
+                        >
+                          <span className="hidden sm:inline truncate">Net P&L</span>
+                          <span className="sm:hidden truncate">P&L</span>
+                          {getSortIcon("net_amount")}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("final_stack")}
+                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
+                        >
+                          <span className="hidden sm:inline truncate">Final Stack</span>
+                          <span className="sm:hidden truncate">Stack</span>
+                          {getSortIcon("final_stack")}
+                        </Button>
+                      </TableHead>
+                      {showOwnerControls && fetchBuyInHistory && (
+                        <TableHead className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
+                          <span className="hidden sm:inline truncate">Buy-in Log</span>
+                          <span className="sm:hidden truncate">Log</span>
+                        </TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedGamePlayers.map((gamePlayer, index) => {
+                      const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
+                      const netAmount = gamePlayer.net_amount ?? 0;
+                      const finalStack = gamePlayer.final_stack ?? 0;
+                      
+                      return (
+                        <TableRow
+                          key={gamePlayer.id}
+                          className={`transition-colors ${
+                            index % 2 === 0 
+                              ? "bg-secondary/5 hover:bg-secondary/20" 
+                              : "hover:bg-primary/10"
+                          }`}
+                        >
+                          <TableCell className="font-medium text-primary text-left py-2 text-sm">{playerName}</TableCell>
+                          <TableCell className="text-left py-2">
+                            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium text-xs">
+                              {gamePlayer.buy_ins}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-left py-2">
+                            <Badge 
+                              variant={getProfitLossVariant(netAmount)}
+                              className="font-medium text-xs"
+                            >
+                              {formatProfitLoss(netAmount)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm">
+                            Rs. {formatIndianNumber(finalStack)}
+                          </TableCell>
+                          {showOwnerControls && fetchBuyInHistory && (
+                            <TableCell className="text-left py-2">
+                              <BuyInHistoryDialog
+                                gamePlayerId={gamePlayer.id}
+                                playerName={playerName}
+                                fetchHistory={fetchBuyInHistory}
+                              />
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       {/* Settlements */}
-      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+      <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
         <div 
           className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
           onClick={() => setSettlementsOpen(!settlementsOpen)}
@@ -654,32 +668,32 @@ export const GameDetailView = ({
           {settlementsWithType.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
-                <Table.Thead>
-                  <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">From</span>
                       <span className="sm:hidden">Fr</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">To</span>
                       <span className="sm:hidden">To</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Amount</span>
                       <span className="sm:hidden">Amt</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Status</span>
                       <span className="sm:hidden">✓</span>
-                    </Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {settlementsWithType.map((settlement, index) => {
                     const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                     
                     return (
-                    <Table.Tr
+                    <TableRow
                       key={`settlement-${index}`}
                       className={`transition-colors ${
                         index % 2 === 0 
@@ -687,19 +701,19 @@ export const GameDetailView = ({
                           : "hover:bg-primary/10"
                       }`}
                     >
-                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.from}
-                      </Table.Td>
-                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      </TableCell>
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.to}
-                      </Table.Td>
-                      <Table.Td className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
                         Rs. {formatIndianNumber(settlement.amount)}
-                      </Table.Td>
-                      <Table.Td className="text-left py-2 sm:py-4">
+                      </TableCell>
+                      <TableCell className="text-left py-2 sm:py-4">
                         {showOwnerControls && confirmation ? (
                           <Button
-                            variant="subtle"
+                            variant="ghost"
                             size="sm"
                             onClick={async () => {
                               if (confirmation.confirmed) {
@@ -729,11 +743,11 @@ export const GameDetailView = ({
                             Pending
                           </Badge>
                         )}
-                      </Table.Td>
-                    </Table.Tr>
+                      </TableCell>
+                    </TableRow>
                   );
                   })}
-                </Table.Tbody>
+                </TableBody>
               </Table>
             </div>
           ) : (
@@ -742,7 +756,7 @@ export const GameDetailView = ({
             </div>
           )}
         </Collapse>
-      </Card>
+      </MantineCard>
 
       {/* Transfer Dialog Modal */}
       <Modal

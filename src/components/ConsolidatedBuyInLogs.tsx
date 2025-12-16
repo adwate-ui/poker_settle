@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { Select, Table, Text, Group } from "@mantine/core";
+import { Select, Text } from "@mantine/core";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Filter constants
 const FILTER_ALL = "all";
@@ -149,42 +150,45 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       ) : (
         <div className="border rounded-lg overflow-hidden">
           <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead style={{ position: 'sticky', top: 0, zIndex: 10 }} className="bg-background">
-                <Table.Tr>
-                  <Table.Th className="text-xs sm:text-sm">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow className="bg-primary/10 hover:bg-primary/15">
+                  <TableHead className="text-xs sm:text-sm font-bold">
                     <span className="hidden sm:inline">Player name</span>
                     <span className="sm:hidden">Player</span>
-                  </Table.Th>
-                  <Table.Th className="text-xs sm:text-sm">
+                  </TableHead>
+                  <TableHead className="text-xs sm:text-sm font-bold">
                     <span className="hidden sm:inline">Incremental buy in</span>
                     <span className="sm:hidden">Buy in</span>
-                  </Table.Th>
-                  <Table.Th className="text-xs sm:text-sm">
+                  </TableHead>
+                  <TableHead className="text-xs sm:text-sm font-bold">
                     <span className="hidden sm:inline">Updated total buy in</span>
                     <span className="sm:hidden">Total</span>
-                  </Table.Th>
-                  <Table.Th className="text-xs sm:text-sm">Time</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {filteredHistory.map((entry) => (
-                  <Table.Tr key={entry.id}>
-                    <Table.Td><Text fw={500} size="sm">{entry.player_name}</Text></Table.Td>
-                    <Table.Td>
-                      <Text fw={600} c={entry.buy_ins_added > 0 ? "green" : "red"} size="sm">
+                  </TableHead>
+                  <TableHead className="text-xs sm:text-sm font-bold">Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredHistory.map((entry, index) => (
+                  <TableRow 
+                    key={entry.id}
+                    className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
+                  >
+                    <TableCell><span className="font-medium text-sm">{entry.player_name}</span></TableCell>
+                    <TableCell>
+                      <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td><Text fw={600} size="sm">{entry.total_buy_ins_after}</Text></Table.Td>
-                    <Table.Td>
-                      <Text size="xs" c="dimmed">
+                      </span>
+                    </TableCell>
+                    <TableCell><span className="font-semibold text-sm">{entry.total_buy_ins_after}</span></TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
+                      </span>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Table.Tbody>
+              </TableBody>
             </Table>
           </div>
         </div>
