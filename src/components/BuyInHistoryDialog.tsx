@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface BuyInHistoryDialogProps {
   gamePlayerId: string;
@@ -16,7 +16,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchHistory(gamePlayerId);
@@ -26,14 +26,13 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchHistory, gamePlayerId]);
 
   useEffect(() => {
     if (open) {
       loadHistory();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, loadHistory]);
 
   return (
     <>
