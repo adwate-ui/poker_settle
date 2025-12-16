@@ -668,32 +668,32 @@ export const GameDetailView = ({
           {settlementsWithType.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
-                <Table.Thead>
-                  <Table.Tr className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">From</span>
                       <span className="sm:hidden">Fr</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">To</span>
                       <span className="sm:hidden">To</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Amount</span>
                       <span className="sm:hidden">Amt</span>
-                    </Table.Th>
-                    <Table.Th className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                    </TableHead>
+                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
                       <span className="hidden sm:inline">Status</span>
                       <span className="sm:hidden">✓</span>
-                    </Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {settlementsWithType.map((settlement, index) => {
                     const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                     
                     return (
-                    <Table.Tr
+                    <TableRow
                       key={`settlement-${index}`}
                       className={`transition-colors ${
                         index % 2 === 0 
@@ -701,19 +701,19 @@ export const GameDetailView = ({
                           : "hover:bg-primary/10"
                       }`}
                     >
-                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.from}
-                      </Table.Td>
-                      <Table.Td className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                      </TableCell>
+                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
                         {settlement.to}
-                      </Table.Td>
-                      <Table.Td className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
                         Rs. {formatIndianNumber(settlement.amount)}
-                      </Table.Td>
-                      <Table.Td className="text-left py-2 sm:py-4">
+                      </TableCell>
+                      <TableCell className="text-left py-2 sm:py-4">
                         {showOwnerControls && confirmation ? (
                           <Button
-                            variant="subtle"
+                            variant="ghost"
                             size="sm"
                             onClick={async () => {
                               if (confirmation.confirmed) {
@@ -743,11 +743,11 @@ export const GameDetailView = ({
                             Pending
                           </Badge>
                         )}
-                      </Table.Td>
-                    </Table.Tr>
+                      </TableCell>
+                    </TableRow>
                   );
                   })}
-                </Table.Tbody>
+                </TableBody>
               </Table>
             </div>
           ) : (

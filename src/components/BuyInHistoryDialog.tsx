@@ -1,4 +1,5 @@
-import { Modal, ActionIcon, ScrollArea, Table, Text, Group } from "@mantine/core";
+import { Modal, ActionIcon, ScrollArea, Text, Group } from "@mantine/core";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { History, TrendingUp, TrendingDown } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
@@ -58,57 +59,58 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
               No buy-in changes recorded yet
             </Text>
           ) : (
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Player</Table.Th>
-                  <Table.Th style={{ textAlign: 'center' }}>Incremental Buy-in</Table.Th>
-                  <Table.Th>Time</Table.Th>
-                  <Table.Th style={{ textAlign: 'right' }}>New Total</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-primary/10 hover:bg-primary/15">
+                  <TableHead className="font-bold">Player</TableHead>
+                  <TableHead className="font-bold text-center">Incremental Buy-in</TableHead>
+                  <TableHead className="font-bold">Time</TableHead>
+                  <TableHead className="font-bold text-right">New Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {/* Initial buy-in row */}
-                <Table.Tr>
-                  <Table.Td><Text fw={500}>{playerName}</Text></Table.Td>
-                  <Table.Td style={{ textAlign: 'center' }}>
-                    <Text fw={600} c="dimmed">-</Text>
-                  </Table.Td>
-                  <Table.Td><Text size="sm" c="dimmed">Initial</Text></Table.Td>
-                  <Table.Td style={{ textAlign: 'right' }}>
-                    <Text fw={600}>1</Text>
-                  </Table.Td>
-                </Table.Tr>
-                {history.map((entry) => (
-                  <Table.Tr key={entry.id}>
-                    <Table.Td><Text fw={500}>{playerName}</Text></Table.Td>
-                    <Table.Td style={{ textAlign: 'center' }}>
-                      <Group gap="xs" justify="center">
+                <TableRow className="bg-secondary/5 hover:bg-secondary/20">
+                  <TableCell><span className="font-medium">{playerName}</span></TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-semibold text-muted-foreground">-</span>
+                  </TableCell>
+                  <TableCell><span className="text-sm text-muted-foreground">Initial</span></TableCell>
+                  <TableCell className="text-right">
+                    <span className="font-semibold">1</span>
+                  </TableCell>
+                </TableRow>
+                {history.map((entry, index) => (
+                  <TableRow 
+                    key={entry.id}
+                    className={(index + 1) % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
+                  >
+                    <TableCell><span className="font-medium">{playerName}</span></TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center gap-1 justify-center">
                         {entry.buy_ins_added > 0 ? (
                           <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         ) : (
                           <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         )}
-                        <Text 
-                          fw={600} 
-                          size="sm" 
-                          c={entry.buy_ins_added > 0 ? "orange" : "blue"}
+                        <span 
+                          className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}
                         >
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                        </Text>
-                      </Group>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" c="dimmed">
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td style={{ textAlign: 'right' }}>
-                      <Text fw={600}>{entry.total_buy_ins_after}</Text>
-                    </Table.Td>
-                  </Table.Tr>
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className="font-semibold">{entry.total_buy_ins_after}</span>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Table.Tbody>
+              </TableBody>
             </Table>
           )}
         </ScrollArea>
