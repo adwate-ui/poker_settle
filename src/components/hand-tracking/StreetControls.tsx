@@ -36,7 +36,7 @@ const StreetControls = memo(({
         <Button
           onClick={onNext}
           disabled={disabled || !canMoveToNext}
-          className="bg-gradient-poker"
+          className="bg-gradient-poker text-primary-foreground"
           rightSection={<ArrowRight className="h-4 w-4" />}
         >
           Next Street
