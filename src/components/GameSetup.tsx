@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextInput, Card, Badge, Text, Collapse, ActionIcon, Stack, Group, Alert } from "@mantine/core";
+import { TextInput, Card, Badge, Text, Collapse, ActionIcon, Stack, Group, Alert } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Users, Search, Trash2, Play, X, Plus, History, Calendar } from "lucide-react";
 import { Player, Game, SeatPosition } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
@@ -214,7 +215,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <Button
                     onClick={addNewPlayer}
                     disabled={!newPlayerName.trim()}
-                    size="xs"
+                    size="sm"
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -372,8 +373,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               </Badge>
                             </Group>
                             <Button
-                              size="xs"
-                              color="red"
+                              size="sm"
+                              variant="destructive"
                               onClick={() => handleDeleteGame(game.id)}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -435,7 +436,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
         <div className="flex flex-col sm:flex-row gap-2">
           {!canCreateGame && (
             <Button onClick={continueGame} className="flex-1 bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold h-11">
-              <Play className="w-4 h-4 mr-2" />
+              <Play className="w-4 h-4" />
               <span className="hidden xs:inline">Continue Current Game</span>
               <span className="xs:hidden">Continue Game</span>
             </Button>
@@ -445,7 +446,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame} 
             className={`${!canCreateGame ? 'flex-1' : 'w-full'} bg-gradient-poker hover:opacity-90 text-primary-foreground font-semibold h-11`}
           >
-            <Play className="w-4 h-4 mr-2" />
+            <Play className="w-4 h-4" />
             Start New Game ({selectedPlayers.length} players)
           </Button>
         </div>

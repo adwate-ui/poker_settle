@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Button as MantineButton, Select, Collapse, Stack, Group, Text, Box, Badge as MantineBadge } from "@mantine/core";
+import { Card, Select, Collapse, Stack, Group, Text, Box, Badge as MantineBadge } from "@mantine/core";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
