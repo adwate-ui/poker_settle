@@ -22,6 +22,13 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
+  // Helper function to get P&L value className
+  const getProfitLossClassName = (amount: number, isMobile: boolean = false) => {
+    const baseClasses = isMobile ? 'font-semibold text-xs' : 'font-semibold';
+    const colorClasses = amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    return `${baseClasses} ${colorClasses}`;
+  };
+
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
     try {
@@ -253,7 +260,7 @@ const PlayersHistory = () => {
                     className="flex items-center justify-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <span className={`font-semibold text-xs ${(player.total_profit || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <span className={getProfitLossClassName(player.total_profit || 0, true)}>
                       {formatProfitLoss(player.total_profit || 0)}
                     </span>
                   </div>
@@ -293,7 +300,7 @@ const PlayersHistory = () => {
                 <div 
                   onClick={() => navigate(`/players/${player.id}`)}
                 >
-                  <span className={`font-semibold ${(player.total_profit || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <span className={getProfitLossClassName(player.total_profit || 0)}>
                     {formatProfitLoss(player.total_profit || 0)}
                   </span>
                 </div>
