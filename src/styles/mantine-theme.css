@@ -144,36 +144,36 @@
   color: var(--mantine-color-primary-light-color);
 }
 
-/* Profit badge colors (green) - with increased specificity for mobile */
-.mantine-Badge-root[data-color="profit"][data-variant="filled"],
-.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="sm"],
-.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="md"],
-.mantine-Badge-root[data-color="profit"][data-variant="filled"][data-size="lg"] {
+/* Green badge colors - used for positive amounts (profit/gain) */
+.mantine-Badge-root[data-color="green"][data-variant="filled"],
+.mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="sm"],
+.mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="md"],
+.mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="lg"] {
   background-color: #40c057 !important;
   color: white !important;
 }
 
-.mantine-Badge-root[data-color="profit"][data-variant="light"],
-.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="sm"],
-.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="md"],
-.mantine-Badge-root[data-color="profit"][data-variant="light"][data-size="lg"] {
+.mantine-Badge-root[data-color="green"][data-variant="light"],
+.mantine-Badge-root[data-color="green"][data-variant="light"][data-size="sm"],
+.mantine-Badge-root[data-color="green"][data-variant="light"][data-size="md"],
+.mantine-Badge-root[data-color="green"][data-variant="light"][data-size="lg"] {
   background-color: #d3f9d8 !important;
   color: #2b8a3e !important;
 }
 
-/* Loss badge colors (red) - with increased specificity for mobile */
-.mantine-Badge-root[data-color="loss"][data-variant="filled"],
-.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="sm"],
-.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="md"],
-.mantine-Badge-root[data-color="loss"][data-variant="filled"][data-size="lg"] {
+/* Red badge colors - used for negative amounts (loss) */
+.mantine-Badge-root[data-color="red"][data-variant="filled"],
+.mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="sm"],
+.mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="md"],
+.mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="lg"] {
   background-color: #fa5252 !important;
   color: white !important;
 }
 
-.mantine-Badge-root[data-color="loss"][data-variant="light"],
-.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="sm"],
-.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="md"],
-.mantine-Badge-root[data-color="loss"][data-variant="light"][data-size="lg"] {
+.mantine-Badge-root[data-color="red"][data-variant="light"],
+.mantine-Badge-root[data-color="red"][data-variant="light"][data-size="sm"],
+.mantine-Badge-root[data-color="red"][data-variant="light"][data-size="md"],
+.mantine-Badge-root[data-color="red"][data-variant="light"][data-size="lg"] {
   background-color: #ffe3e3 !important;
   color: #c92a2a !important;
 }

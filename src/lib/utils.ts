@@ -29,8 +29,9 @@ export function formatInputDisplay(value: number | null | undefined): string {
 }
 
 // Get consistent badge color for profit/loss values
-export function getProfitLossColor(amount: number): 'profit' | 'loss' {
-  return amount >= 0 ? 'profit' : 'loss';
+// Returns 'green' for positive amounts (profit) and 'red' for negative amounts (loss)
+export function getProfitLossColor(amount: number): 'green' | 'red' {
+  return amount >= 0 ? 'green' : 'red';
 }
 
 // Get consistent badge variant for profit/loss values (for shadcn badges)
