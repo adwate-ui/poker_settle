@@ -336,9 +336,9 @@ export const GameDetailView = ({
 
   if (!game) {
     return (
-      <Card shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
+      <MantineCard shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
         <Text c="dimmed" ta="center">Game not found</Text>
-      </Card>
+      </MantineCard>
     );
   }
 
@@ -475,7 +475,7 @@ export const GameDetailView = ({
             />
           </Collapse>
         </Stack>
-      </Card>
+      </MantineCard>
 
       {/* Player Results */}
       <Card className="border-primary/20">
@@ -601,7 +601,7 @@ export const GameDetailView = ({
       </Card>
 
       {/* Settlements */}
-      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
+      <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
         <div 
           className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
           onClick={() => setSettlementsOpen(!settlementsOpen)}
@@ -756,7 +756,7 @@ export const GameDetailView = ({
             </div>
           )}
         </Collapse>
-      </Card>
+      </MantineCard>
 
       {/* Transfer Dialog Modal */}
       <Modal
