@@ -287,6 +287,60 @@
   background-color: var(--mantine-color-primary-outline-hover);
 }
 
+/* Fix default variant buttons - ensure proper contrast */
+.mantine-Button-root[data-variant="default"]:not([data-color]) {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.mantine-Button-root[data-variant="default"]:not([data-color]):not(:disabled):hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Fix gray color buttons - ensure proper contrast in all variants */
+.mantine-Button-root[data-color="gray"][data-variant="filled"] {
+  background-color: hsl(var(--muted-foreground));
+  color: hsl(var(--background));
+}
+
+.mantine-Button-root[data-color="gray"][data-variant="filled"]:not(:disabled):hover {
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+.mantine-Button-root[data-color="gray"][data-variant="light"] {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.mantine-Button-root[data-color="gray"][data-variant="light"]:not(:disabled):hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.mantine-Button-root[data-color="gray"][data-variant="outline"] {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.mantine-Button-root[data-color="gray"][data-variant="outline"]:not(:disabled):hover {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.mantine-Button-root[data-color="gray"]:not([data-variant]) {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.mantine-Button-root[data-color="gray"]:not([data-variant]):not(:disabled):hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
 /* Ensure Mantine tables use proper colors */
 .mantine-Table-root {
   border-color: hsl(var(--border));
