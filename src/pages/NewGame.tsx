@@ -55,6 +55,9 @@ const NewGame = () => {
 
     if (!error && data) {
       setActiveGame(data as Game);
+    } else {
+      // Clear active game if no incomplete games found
+      setActiveGame(null);
     }
   }, [user]);
 
