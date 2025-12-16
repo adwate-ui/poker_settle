@@ -225,7 +225,7 @@
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="sm"],
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="md"],
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="lg"] {
-  background-color: #40c057 !important;
+  background-color: var(--mantine-color-green-filled) !important;
   color: white !important;
 }
 
@@ -233,8 +233,8 @@
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="sm"],
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="md"],
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="lg"] {
-  background-color: #d3f9d8 !important;
-  color: #2b8a3e !important;
+  background-color: var(--mantine-color-green-light) !important;
+  color: var(--mantine-color-green-light-color) !important;
 }
 
 /* Red badge colors - used for negative amounts (loss) */
@@ -242,7 +242,7 @@
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="sm"],
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="md"],
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="lg"] {
-  background-color: #fa5252 !important;
+  background-color: var(--mantine-color-red-filled) !important;
   color: white !important;
 }
 
@@ -250,8 +250,8 @@
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="sm"],
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="md"],
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="lg"] {
-  background-color: #ffe3e3 !important;
-  color: #c92a2a !important;
+  background-color: var(--mantine-color-red-light) !important;
+  color: var(--mantine-color-red-light-color) !important;
 }
 
 /* Ensure text is never transformed in badges (prevent Rs. becoming RS.) */
