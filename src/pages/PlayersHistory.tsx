@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, Button, Badge, Stack, Group, Text, Box, Modal } from "@mantine/core";
+import { Card, Badge, Stack, Group, Text, Box, Modal } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
@@ -262,14 +263,13 @@ const PlayersHistory = () => {
                   </div>
                   <div className="flex items-center justify-center">
                     <Button
-                      variant="subtle"
-                      color="red"
-                      size="xs"
+                      variant="ghost"
+                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         setDeletePlayerId(player.id);
                       }}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -307,8 +307,7 @@ const PlayersHistory = () => {
                 
                 <div className="flex items-center justify-start">
                   <Button
-                    variant="subtle"
-                    color="red"
+                    variant="ghost"
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -335,11 +334,11 @@ const PlayersHistory = () => {
             Are you sure you want to delete this player? This action cannot be undone and will remove all their game history.
           </Text>
           <Group justify="flex-end">
-            <Button variant="default" onClick={() => setDeletePlayerId(null)}>
+            <Button variant="outline" onClick={() => setDeletePlayerId(null)}>
               Cancel
             </Button>
             <Button 
-              color="red"
+              variant="destructive"
               onClick={() => deletePlayerId && handleDeletePlayer(deletePlayerId)}
             >
               Delete

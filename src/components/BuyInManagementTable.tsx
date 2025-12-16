@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button as MantineButton, Modal, NumberInput, Group, Text, Stack, ScrollArea } from '@mantine/core';
+import { Modal, NumberInput, Group, Text, Stack, ScrollArea } from '@mantine/core';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
@@ -172,8 +172,8 @@ export const BuyInManagementTable = ({
           </Text>
 
           <Group justify="flex-end" mt="md">
-            <MantineButton 
-              variant="default" 
+            <Button 
+              variant="outline" 
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
@@ -181,14 +181,14 @@ export const BuyInManagementTable = ({
               }}
             >
               Cancel
-            </MantineButton>
-            <MantineButton 
+            </Button>
+            <Button 
               onClick={handleAddBuyIn}
-              loading={isAdding}
-              disabled={!selectedPlayerId || !buyInCount}
+              disabled={isAdding || !selectedPlayerId || !buyInCount}
             >
+              {isAdding && <Loader2 className="h-4 w-4 animate-spin" />}
               Confirm & Add
-            </MantineButton>
+            </Button>
           </Group>
         </Stack>
       </Modal>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, TextInput, Card, Badge, Collapse, Select, Modal, Tabs, ScrollArea, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { TextInput, Card, Badge, Collapse, Select, Modal, Tabs, ScrollArea, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
@@ -399,7 +400,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               onClick={onBackToSetup}
               className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full sm:w-auto"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4" />
               <span className="hidden xs:inline">Back to Setup</span>
               <span className="xs:hidden">Back</span>
             </Button>
@@ -494,7 +495,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   onClick={handleStartHandTracking}
                   className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
                 >
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="w-4 h-4" />
                   {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
                 </Button>
               </div>
@@ -510,7 +511,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   onClick={() => setShowPositionEditor(true)}
                   className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg"
                 >
-                  <UsersIcon className="w-4 h-4 mr-2" />
+                  <UsersIcon className="w-4 h-4" />
                   Set Table Positions
                 </Button>
               </div>
@@ -611,7 +612,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     className="bg-primary text-primary-foreground hover:bg-primary/90 w-full xs:w-auto"
                     onClick={() => setShowAddPlayer(true)}
                   >
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    <UserPlus className="w-4 h-4" />
                     Add Player
                   </Button>
               <Modal 
@@ -733,14 +734,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <Button
                         onClick={addNewPlayer}
                         disabled={!newPlayerName.trim() || isCreatingPlayer}
-                        fullWidth
+                        className="w-full"
                         size="lg"
                       >
                         {isCreatingPlayer ? (
                           <>Creating...</>
                         ) : (
                           <>
-                            <UserPlus className="h-4 w-4 mr-2" />
+                            <UserPlus className="h-4 w-4" />
                             Create and Add Player
                           </>
                         )}
@@ -791,8 +792,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeManualTransfer(index)}
+                        className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="w-4 h-4 text-destructive" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -842,10 +844,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               <Group gap="sm">
                 <Button onClick={addManualTransfer} className="flex-1">
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4" />
                   Add
                 </Button>
-                <Button onClick={() => setShowManualTransfer(false)} className="flex-1">
+                <Button onClick={() => setShowManualTransfer(false)} className="flex-1" variant="outline">
                   Cancel
                 </Button>
               </Group>
@@ -861,7 +863,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 disabled={!canCompleteGame}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 <span className="hidden xs:inline">Add Manual Transfer</span>
                 <span className="xs:hidden">Manual Transfer</span>
               </Button>
@@ -872,7 +874,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               disabled={!canCompleteGame}
               className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
             >
-              <Calculator className="w-4 h-4 mr-2" />
+              <Calculator className="w-4 h-4" />
               <span className="hidden sm:inline">{settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}</span>
               <span className="sm:hidden">Settlements</span>
             </Button>
@@ -884,7 +886,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             >
               {isCompletingGame ? (
                 <>
-                  <Loader size="xs" className="mr-2" />
+                  <Loader size="xs" />
                   Completing...
                 </>
               ) : (

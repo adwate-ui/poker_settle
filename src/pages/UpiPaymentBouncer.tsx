@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@mantine/core';
+import { Button } from '@/components/ui/button';
 import { isValidUpiId } from '@/utils/upiPaymentLinks';
 
 /**
@@ -93,10 +93,10 @@ const UpiPaymentBouncer = () => {
             Please make sure you have a UPI app installed (Google Pay, PhonePe, Paytm, etc.)
           </p>
           <div className="flex gap-3 mt-4">
-            <Button variant="default" onClick={() => navigate('/')}>
+            <Button variant="outline" onClick={() => navigate('/')}>
               Go Back
             </Button>
-            <Button variant="filled" onClick={() => window.location.reload()}>
+            <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, Badge, Button, Select, Modal, Stack, Text, Group, ActionIcon, Loader } from "@mantine/core";
+import { Card, Badge, Select, Modal, Stack, Text, Group, ActionIcon, Loader } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
@@ -270,37 +271,33 @@ const GamesHistory = () => {
           <div className="hidden md:block rounded-lg overflow-hidden">
             <div className="grid grid-cols-5 gap-2 sm:gap-4 bg-primary text-white p-3 sm:p-4">
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
-                style={{ color: 'white' }}
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10 text-white"
               >
                 Date
                 {getSortIcon("date")}
               </Button>
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
-                style={{ color: 'white' }}
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10 text-white"
               >
                 Buy-in
                 {getSortIcon("buy_in")}
               </Button>
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-2 justify-center font-bold hover:bg-white/10"
-                style={{ color: 'white' }}
+                className="flex items-center gap-2 justify-center font-bold hover:bg-white/10 text-white"
               >
                 # Players
                 {getSortIcon("players")}
               </Button>
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("chips")}
-                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10"
-                style={{ color: 'white' }}
+                className="flex items-center gap-2 justify-start font-bold hover:bg-white/10 text-white"
               >
                 Chips in play
                 {getSortIcon("chips")}
@@ -317,28 +314,25 @@ const GamesHistory = () => {
           <div className="md:hidden rounded-lg overflow-hidden">
             <div className="grid grid-cols-5 gap-1 bg-primary text-white p-2 text-xs">
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("date")}
-                className="flex items-center gap-1 justify-start font-bold hover:bg-white/10 text-xs p-1 h-auto"
-                style={{ color: 'white' }}
+                className="flex items-center gap-1 justify-start font-bold hover:bg-white/10 text-xs p-1 h-auto text-white"
               >
                 Date
                 {getSortIcon("date")}
               </Button>
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("buy_in")}
-                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto"
-                style={{ color: 'white' }}
+                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto text-white"
               >
                 Buy-in
                 {getSortIcon("buy_in")}
               </Button>
               <Button
-                variant="subtle"
+                variant="ghost"
                 onClick={() => handleSort("players")}
-                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto"
-                style={{ color: 'white' }}
+                className="flex items-center gap-1 justify-center font-bold hover:bg-white/10 text-xs p-1 h-auto text-white"
               >
                 Players
                 {getSortIcon("players")}
@@ -456,11 +450,11 @@ const GamesHistory = () => {
             Are you sure you want to delete this game? This action cannot be undone.
           </Text>
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={() => setDeleteGameId(null)}>
+            <Button variant="outline" onClick={() => setDeleteGameId(null)}>
               Cancel
             </Button>
             <Button
-              color="red"
+              variant="destructive"
               onClick={() => deleteGameId && handleDeleteGame(deleteGameId)}
             >
               Delete

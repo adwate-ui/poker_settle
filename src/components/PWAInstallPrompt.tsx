@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Card, Stack, Group, Text, ActionIcon } from '@mantine/core';
+import { Card, Stack, Group, Text, ActionIcon } from '@mantine/core';
+import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 
@@ -60,12 +61,12 @@ export const PWAInstallPrompt = () => {
               onClick={handleInstall}
               disabled={installing}
               size="sm"
-              style={{ flex: 1 }}
+              className="flex-1"
             >
               {installing ? 'Installing...' : 'Install App'}
             </Button>
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
               onClick={handleDismiss}
             >
