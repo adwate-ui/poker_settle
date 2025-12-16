@@ -600,44 +600,46 @@ export const GameDetailView = ({
       </Card>
 
       {/* Settlements */}
-      <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
-        <div 
-          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
-          onClick={() => setSettlementsOpen(!settlementsOpen)}
-        >
-          <Group justify="space-between" wrap="wrap">
-            <Group gap="xs">
-              <span className="text-2xl">💰</span>
-              <Text className="text-primary" size="lg" fw={600}>
-                Settlements
-              </Text>
-            </Group>
-            {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </Group>
-          {showOwnerControls && settlementsOpen && (
-            <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-primary/20 hover:bg-primary/10"
-                onClick={() => setTransferDialogOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Add</span> Transfer
-              </Button>
-              <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={recalculateAndSaveSettlements}
-                  className="border-primary/20 hover:bg-primary/10"
-                >
-                  <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
-                  Redo
-                </Button>
+      <Card className="border-primary/20">
+        <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
+          <CollapsibleTrigger asChild>
+            <div 
+              className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
+            >
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">💰</span>
+                  <h3 className="text-primary text-lg font-semibold">
+                    Settlements
+                  </h3>
+                </div>
+                {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </div>
+              {showOwnerControls && settlementsOpen && (
+                <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-primary/20 hover:bg-primary/10"
+                    onClick={() => setTransferDialogOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">Add</span> Transfer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={recalculateAndSaveSettlements}
+                    className="border-primary/20 hover:bg-primary/10"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
+                    Redo
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <Collapse in={settlementsOpen}>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
           {/* Pending manual transfers */}
           {showOwnerControls && manualTransfers.length > 0 && (
             <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
@@ -665,8 +667,9 @@ export const GameDetailView = ({
           )}
           
           {settlementsWithType.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
                     <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
@@ -749,13 +752,17 @@ export const GameDetailView = ({
                 </TableBody>
               </Table>
             </div>
+            </CardContent>
           ) : (
-            <div className="p-6 text-center text-muted-foreground">
-              No settlements needed - all players are even.
-            </div>
+            <CardContent className="p-0">
+              <div className="p-6 text-center text-muted-foreground">
+                No settlements needed - all players are even.
+              </div>
+            </CardContent>
           )}
-        </Collapse>
-      </MantineCard>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
       {/* Transfer Dialog Modal */}
       <Modal
