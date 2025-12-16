@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from "react";
 import { Player } from "@/types/poker";
-import { Modal, Button, TextInput, Stack, Text, Group, Select } from "@mantine/core";
+import { Modal, TextInput, Stack, Text, Group, Select } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/notifications";
 import { validateUpiId, getPaymentMethodIcon } from "@/utils/playerUtils";
 import { Loader2, Mail, CreditCard, User } from "lucide-react";
@@ -158,8 +159,8 @@ export const PlayerFormDialog = ({
               {email && (
                 <Button
                   type="button"
-                  variant="subtle"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setEmail("")}
                   disabled={isSubmitting}
                 >
@@ -191,8 +192,8 @@ export const PlayerFormDialog = ({
               {upiId && (
                 <Button
                   type="button"
-                  variant="subtle"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setUpiId("")}
                   disabled={isSubmitting}
                 >
@@ -236,7 +237,7 @@ export const PlayerFormDialog = ({
           <Group justify="flex-end" mt="md">
             <Button
               type="button"
-              variant="default"
+              variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
@@ -245,8 +246,8 @@ export const PlayerFormDialog = ({
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              leftSection={isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             >
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {initialData ? "Update" : "Add"} Player
             </Button>
           </Group>

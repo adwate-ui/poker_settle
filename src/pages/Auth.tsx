@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button, Card, Text, Stack } from "@mantine/core";
+import { Card, Text, Stack } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 const Auth = () => {
@@ -37,10 +38,9 @@ const Auth = () => {
           <Button 
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            fullWidth
-            className="bg-gradient-poker text-primary-foreground hover:opacity-90"
-            leftSection={isSigningIn ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            className="w-full bg-gradient-poker text-primary-foreground hover:opacity-90"
           >
+            {isSigningIn && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSigningIn ? 'Signing in...' : 'Sign in with Google'}
           </Button>
         </Stack>

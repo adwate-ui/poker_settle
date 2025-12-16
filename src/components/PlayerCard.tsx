@@ -1,5 +1,6 @@
 import { useState, memo, useCallback, useMemo } from "react";
-import { Card, Button, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@mantine/core";
+import { Card, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
@@ -108,9 +109,9 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
               />
               {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
                 <Button 
-                  size="xs" 
+                  size="sm" 
                   onClick={handleAddBuyIns}
-                  style={{ minWidth: '28px', height: '28px', padding: '0 8px' }}
+                  className="min-w-[28px] h-7 px-2"
                 >
                   +
                 </Button>
@@ -140,9 +141,9 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
               />
               {hasFinalStackChanges && (
                 <Button 
-                  size="xs" 
+                  size="sm" 
                   onClick={confirmFinalStack}
-                  style={{ minWidth: '28px', width: '28px', height: '28px', padding: 0 }}
+                  className="min-w-[28px] w-7 h-7 p-0"
                 >
                   <Check className="w-3 h-3" />
                 </Button>

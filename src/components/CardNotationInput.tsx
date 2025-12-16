@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { TextInput, Button, Text, Alert, Group, Stack } from '@mantine/core';
+import { TextInput, Text, Alert, Group, Stack } from '@mantine/core';
+import { Button } from '@/components/ui/button';
 import PokerCard from './PokerCard';
 import CardSelector from './CardSelector';
 import { AlertCircle, Grid3x3 } from 'lucide-react';
@@ -97,7 +98,8 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           onSelect={handleSelectorSubmit}
           label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
           trigger={
-            <Button variant="default" type="button" leftSection={<Grid3x3 className="w-4 h-4" />}>
+            <Button variant="outline" type="button">
+              <Grid3x3 className="w-4 h-4" />
               Select Cards from Grid
             </Button>
           }

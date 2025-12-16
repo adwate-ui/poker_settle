@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, Button, TextInput, Text, Stack, Box } from "@mantine/core";
+import { Card, TextInput, Text, Stack, Box } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { Game, Player } from "@/types/poker";
@@ -189,8 +190,8 @@ const NewGame = () => {
                   You have an ongoing game. Complete it before starting a new one.
                 </Text>
               </Box>
-              <Button onClick={continueGame} fullWidth size="lg">
-                <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <Button onClick={continueGame} className="w-full" size="lg">
+                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 Continue Game
               </Button>
             </Stack>
@@ -284,17 +285,17 @@ const NewGame = () => {
           <Button 
             onClick={startGame} 
             disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-            fullWidth
+            className="w-full"
             size="lg"
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 Starting Game...
               </>
             ) : (
               <>
-                <Play className="mr-2 h-5 w-5" />
+                <Play className="h-5 w-5" />
                 Start Game
               </>
             )}

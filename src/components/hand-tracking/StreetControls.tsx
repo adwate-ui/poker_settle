@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Button } from '@mantine/core';
+import { Button } from '@/components/ui/button';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface StreetControlsProps {
@@ -24,11 +24,11 @@ const StreetControls = memo(({
     <div className="flex gap-2 justify-end">
       {shouldShowBack && (
         <Button
-          variant="default"
+          variant="outline"
           onClick={onBack}
           disabled={disabled}
-          leftSection={<ArrowLeft className="h-4 w-4" />}
         >
+          <ArrowLeft className="h-4 w-4" />
           Back Street
         </Button>
       )}
@@ -37,9 +37,9 @@ const StreetControls = memo(({
           onClick={onNext}
           disabled={disabled || !canMoveToNext}
           className="bg-gradient-poker text-primary-foreground"
-          rightSection={<ArrowRight className="h-4 w-4" />}
         >
           Next Street
+          <ArrowRight className="h-4 w-4" />
         </Button>
       )}
     </div>

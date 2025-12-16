@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Modal, NumberInput, Group, Text, Button as MantineButton, Stack, ScrollArea } from '@mantine/core';
+import { Modal, NumberInput, Group, Text, Stack, ScrollArea } from '@mantine/core';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
@@ -130,8 +130,8 @@ export const FinalStackManagement = ({
           />
 
           <Group justify="flex-end" mt="md">
-            <MantineButton 
-              variant="default" 
+            <Button 
+              variant="outline" 
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
@@ -139,14 +139,14 @@ export const FinalStackManagement = ({
               }}
             >
               Cancel
-            </MantineButton>
-            <MantineButton 
+            </Button>
+            <Button 
               onClick={handleSaveEdit}
-              loading={isUpdating}
-              disabled={editValue === '' || editValue == null}
+              disabled={isUpdating || editValue === '' || editValue == null}
             >
+              {isUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
               Save
-            </MantineButton>
+            </Button>
           </Group>
         </Stack>
       </Modal>

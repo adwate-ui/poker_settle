@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { Button, TextInput } from '@mantine/core';
+import { TextInput } from '@mantine/core';
+import { Button } from '@/components/ui/button';
 import { X, TrendingUp } from 'lucide-react';
 import { ActionType } from '@/utils/handStateMachine';
 
@@ -26,16 +27,16 @@ const ActionButtons = memo(({
   return (
     <div className="flex gap-1.5">
       <Button
-        color="red"
+        variant="destructive"
         onClick={() => onAction('Fold')}
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
-        leftSection={<X className="h-4 w-4" />}
       >
+        <X className="h-4 w-4" />
         Fold
       </Button>
       <Button
-        color="gray"
+        variant="secondary"
         onClick={() => onAction('Call')}
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
@@ -53,12 +54,11 @@ const ActionButtons = memo(({
         className="flex-1"
       />
       <Button
-        color="gray"
         onClick={() => onAction('Raise')}
         disabled={disabled || !betAmount}
         className="bg-gradient-poker text-primary-foreground flex-1 h-9 px-2 text-xs"
-        leftSection={<TrendingUp className="h-4 w-4" />}
       >
+        <TrendingUp className="h-4 w-4" />
         Raise
       </Button>
     </div>
