@@ -5,19 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
-import { GamePlayer } from "@/types/poker";
+import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { BuyInHistoryDialog } from '@/components/BuyInHistoryDialog';
 
 interface BuyInManagementTableProps {
   gamePlayers: GamePlayer[];
   buyInAmount: number;
   onAddBuyIn: (gamePlayerId: string, buyInsToAdd: number) => Promise<void>;
+  fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
 export const BuyInManagementTable = ({ 
   gamePlayers, 
   buyInAmount,
-  onAddBuyIn 
+  onAddBuyIn,
+  fetchBuyInHistory
 }: BuyInManagementTableProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
@@ -88,6 +91,9 @@ export const BuyInManagementTable = ({
               <TableHead className="text-sm font-bold">Buy-ins</TableHead>
               <TableHead className="text-sm font-bold">Total</TableHead>
               <TableHead className="text-sm font-bold w-[80px]"></TableHead>
+              {fetchBuyInHistory && (
+                <TableHead className="text-sm font-bold w-[50px]"></TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -119,6 +125,15 @@ export const BuyInManagementTable = ({
                     <Plus className="h-4 w-4" />
                   </Button>
                 </TableCell>
+                {fetchBuyInHistory && (
+                  <TableCell>
+                    <BuyInHistoryDialog
+                      gamePlayerId={gamePlayer.id}
+                      playerName={gamePlayer.player.name}
+                      fetchHistory={fetchBuyInHistory}
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

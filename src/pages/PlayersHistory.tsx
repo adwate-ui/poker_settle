@@ -252,7 +252,11 @@ const PlayersHistory = () => {
                     className="flex items-center justify-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <Badge color={getProfitLossColor(player.total_profit || 0)} size="sm">
+                    <Badge 
+                      color={getProfitLossColor(player.total_profit || 0)} 
+                      size="sm"
+                      variant="filled"
+                    >
                       {formatProfitLoss(player.total_profit || 0)}
                     </Badge>
                   </div>
@@ -293,7 +297,10 @@ const PlayersHistory = () => {
                 <div 
                   onClick={() => navigate(`/players/${player.id}`)}
                 >
-                  <Badge color={getProfitLossColor(player.total_profit || 0)}>
+                  <Badge 
+                    color={getProfitLossColor(player.total_profit || 0)}
+                    variant="filled"
+                  >
                     {formatProfitLoss(player.total_profit || 0)}
                   </Badge>
                 </div>

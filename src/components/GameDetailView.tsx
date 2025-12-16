@@ -518,7 +518,7 @@ export const GameDetailView = ({
                           {getSortIcon("buy_ins")}
                         </Button>
                       </TableHead>
-                      <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
+                      <TableHead className="font-bold text-left h-10 py-2 w-[120px] sm:w-auto">
                         <Button
                           variant="ghost"
                           onClick={() => handleSort("net_amount")}
@@ -569,15 +569,15 @@ export const GameDetailView = ({
                               {gamePlayer.buy_ins}
                             </span>
                           </TableCell>
-                          <TableCell className="text-left py-2">
+                          <TableCell className="text-left py-2 whitespace-nowrap">
                             <Badge 
                               variant={getProfitLossVariant(netAmount)}
-                              className="font-medium text-xs"
+                              className="font-medium text-xs whitespace-nowrap"
                             >
                               {formatProfitLoss(netAmount)}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm">
+                          <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm whitespace-nowrap">
                             Rs. {formatIndianNumber(finalStack)}
                           </TableCell>
                           {showOwnerControls && fetchBuyInHistory && (
