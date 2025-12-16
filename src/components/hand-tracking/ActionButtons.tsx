@@ -56,7 +56,7 @@ const ActionButtons = memo(({
         color="gray"
         onClick={() => onAction('Raise')}
         disabled={disabled || !betAmount}
-        className="bg-gradient-poker flex-1 h-9 px-2 text-xs"
+        className="bg-gradient-poker text-primary-foreground flex-1 h-9 px-2 text-xs"
         leftSection={<TrendingUp className="h-4 w-4" />}
       >
         Raise

@@ -397,7 +397,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <Button 
               onClick={onBackToSetup}
-              className="bg-primary hover:bg-primary/90 shadow-lg w-full sm:w-auto"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               <span className="hidden xs:inline">Back to Setup</span>
@@ -492,7 +492,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </Button>
                 <Button
                   onClick={handleStartHandTracking}
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
+                  className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
                 >
                   <Play className="w-4 h-4 mr-2" />
                   {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
@@ -508,7 +508,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 <p className="text-muted-foreground">No table positions set yet</p>
                 <Button
                   onClick={() => setShowPositionEditor(true)}
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                  className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg"
                 >
                   <UsersIcon className="w-4 h-4 mr-2" />
                   Set Table Positions
@@ -608,7 +608,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <Stack gap="md" className="pt-4">
                 <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
                   <Button 
-                    className="bg-primary hover:bg-primary/90 w-full xs:w-auto"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 w-full xs:w-auto"
                     onClick={() => setShowAddPlayer(true)}
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
@@ -859,7 +859,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <Button 
                 onClick={() => setShowManualTransfer(true)}
                 disabled={!canCompleteGame}
-                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 <span className="hidden xs:inline">Add Manual Transfer</span>
@@ -870,7 +870,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <Button 
               onClick={calculateSettlements} 
               disabled={!canCompleteGame}
-              className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
             >
               <Calculator className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">{settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}</span>
