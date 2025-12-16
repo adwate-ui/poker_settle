@@ -38,7 +38,7 @@ const Auth = () => {
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
             fullWidth
-            className="bg-gradient-poker hover:opacity-90"
+            className="bg-gradient-poker text-primary-foreground hover:opacity-90"
             leftSection={isSigningIn ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           >
             {isSigningIn ? 'Signing in...' : 'Sign in with Google'}

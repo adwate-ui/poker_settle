@@ -1622,7 +1622,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             {hasSavedHandState && currentHand && (
               <Button 
                 onClick={continueHand} 
-                className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-amber-600 hover:bg-amber-700"
+                className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-amber-600 text-white hover:bg-amber-700"
                 size="lg"
               >
                 🔄 Continue Hand #{currentHand.hand_number}
@@ -1912,7 +1912,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                 
                 <Button
                   onClick={() => finishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}
-                  className="w-full bg-green-600 hover:bg-green-700 h-9"
+                  className="w-full bg-green-600 text-white hover:bg-green-700 h-9"
                 >
                   Confirm & Complete Hand
                 </Button>
@@ -2514,7 +2514,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           {canMoveToNextStreet() && (
             <Button 
               onClick={moveToNextStreet} 
-              className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
+              className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg"
               variant="default"
               size="default"
             >
@@ -2752,7 +2752,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
               (cardSelectorType === 'turn' && !tempCommunityCards) ||
               (cardSelectorType === 'river' && !tempCommunityCards)
             }
-            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800"
           >
             Confirm Selection
           </Button>
