@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badge Color Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/@mantine/core@7.17.8/styles.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #666; font-size: 18px; margin-bottom: 15px; }
+        .badge-row {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .label { min-width: 100px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Badge Color Test - Mobile & Desktop</h1>
+    <p style="color: #666; margin-bottom: 20px;">
+        This page tests Mantine Badge colors for profit/loss indicators.<br>
+        <strong>Expected:</strong> Green badges for positive, Red badges for negative.
+    </p>
+
+    <div class="test-section">
+        <h2>✅ Positive (Profit) - Should be GREEN</h2>
+        <div class="badge-row">
+            <span class="label">Default:</span>
+            <span class="mantine-Badge-root mantine-Badge-root--filled" data-color="green" data-variant="filled" 
+                  style="padding: 4px 12px; border-radius: 4px; display: inline-block;">
+                Rs. +1,000
+            </span>
+        </div>
+        <div class="badge-row">
+            <span class="label">Small:</span>
+            <span class="mantine-Badge-root" data-color="green" data-variant="filled" data-size="sm"
+                  style="padding: 2px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                Rs. +500
+            </span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>❌ Negative (Loss) - Should be RED</h2>
+        <div class="badge-row">
+            <span class="label">Default:</span>
+            <span class="mantine-Badge-root mantine-Badge-root--filled" data-color="red" data-variant="filled"
+                  style="padding: 4px 12px; border-radius: 4px; display: inline-block;">
+                Rs. -1,000
+            </span>
+        </div>
+        <div class="badge-row">
+            <span class="label">Small:</span>
+            <span class="mantine-Badge-root" data-color="red" data-variant="filled" data-size="sm"
+                  style="padding: 2px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                Rs. -500
+            </span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 In Table (Mobile Scenario)</h2>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 12px; border: 1px solid #dee2e6;">Player</th>
+                    <th style="padding: 12px; border: 1px solid #dee2e6;">P&L</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">Alice</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                        <span class="mantine-Badge-root" data-color="green" data-variant="filled" data-size="sm"
+                              style="padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                            Rs. +2,500
+                        </span>
+                    </td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">Bob</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                        <span class="mantine-Badge-root" data-color="red" data-variant="filled" data-size="sm"
+                              style="padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                            Rs. -1,500
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">Charlie</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                        <span class="mantine-Badge-root" data-color="red" data-variant="filled" data-size="sm"
+                              style="padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                            Rs. -1,000
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Computed Styles Check</h2>
+        <p style="color: #666; margin-bottom: 10px;">Testing if CSS variables are properly defined:</p>
+        <div id="css-check" style="font-family: monospace; font-size: 13px; line-height: 1.8;"></div>
+    </div>
+
+    <script type="module">
+        // Wait for styles to load
+        setTimeout(() => {
+            const checkDiv = document.getElementById('css-check');
+            const vars = [
+                '--mantine-color-red-filled',
+                '--mantine-color-green-filled',
+                '--mantine-color-red-6',
+                '--mantine-color-green-6',
+            ];
+            
+            const redBadge = document.querySelector('[data-color="red"]');
+            const greenBadge = document.querySelector('[data-color="green"]');
+            
+            let html = '<div>';
+            html += '<strong>CSS Variables:</strong><br>';
+            const style = getComputedStyle(document.documentElement);
+            vars.forEach(v => {
+                const value = style.getPropertyValue(v) || '<span style="color: red;">NOT DEFINED</span>';
+                html += `${v}: ${value}<br>`;
+            });
+            
+            html += '<br><strong>Computed Badge Colors:</strong><br>';
+            if (redBadge) {
+                const redBg = getComputedStyle(redBadge).backgroundColor;
+                html += `Red badge background: ${redBg}<br>`;
+            }
+            if (greenBadge) {
+                const greenBg = getComputedStyle(greenBadge).backgroundColor;
+                html += `Green badge background: ${greenBg}<br>`;
+            }
+            html += '</div>';
+            
+            checkDiv.innerHTML = html;
+        }, 100);
+    </script>
+</body>
+</html>
