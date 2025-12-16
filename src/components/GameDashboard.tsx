@@ -552,6 +552,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 gamePlayers={gamePlayers}
                 buyInAmount={game.buy_in_amount}
                 onAddBuyIn={handleAddBuyIn}
+                fetchBuyInHistory={fetchBuyInHistory}
               />
             </div>
           </Collapse>

@@ -69,21 +69,10 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* Initial buy-in row */}
-                <TableRow className="bg-secondary/5 hover:bg-secondary/20">
-                  <TableCell><span className="font-medium">{playerName}</span></TableCell>
-                  <TableCell className="text-center">
-                    <span className="font-semibold text-muted-foreground">-</span>
-                  </TableCell>
-                  <TableCell><span className="text-sm text-muted-foreground">Initial</span></TableCell>
-                  <TableCell className="text-right">
-                    <span className="font-semibold">1</span>
-                  </TableCell>
-                </TableRow>
                 {history.map((entry, index) => (
                   <TableRow 
                     key={entry.id}
-                    className={(index + 1) % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
+                    className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
                   >
                     <TableCell><span className="font-medium">{playerName}</span></TableCell>
                     <TableCell className="text-center">
@@ -110,6 +99,17 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                     </TableCell>
                   </TableRow>
                 ))}
+                {/* Initial buy-in row - shown at bottom since we're in descending order */}
+                <TableRow className={history.length % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}>
+                  <TableCell><span className="font-medium">{playerName}</span></TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-semibold text-muted-foreground">-</span>
+                  </TableCell>
+                  <TableCell><span className="text-sm text-muted-foreground">Initial</span></TableCell>
+                  <TableCell className="text-right">
+                    <span className="font-semibold">1</span>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           )}
