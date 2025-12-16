@@ -40,7 +40,7 @@ const Auth = () => {
             disabled={isSigningIn}
             className="w-full bg-gradient-poker text-primary-foreground hover:opacity-90"
           >
-            {isSigningIn && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isSigningIn && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {isSigningIn ? 'Signing in...' : 'Sign in with Google'}
           </Button>
         </Stack>

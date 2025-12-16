@@ -28,7 +28,7 @@ const StreetControls = memo(({
           onClick={onBack}
           disabled={disabled}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back Street
         </Button>
       )}
@@ -39,7 +39,7 @@ const StreetControls = memo(({
           className="bg-gradient-poker text-primary-foreground"
         >
           Next Street
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       )}
     </div>

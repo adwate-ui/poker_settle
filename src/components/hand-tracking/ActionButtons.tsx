@@ -32,7 +32,7 @@ const ActionButtons = memo(({
         disabled={disabled}
         className="flex-1 h-9 px-2 text-xs"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 mr-2" />
         Fold
       </Button>
       <Button
@@ -58,7 +58,7 @@ const ActionButtons = memo(({
         disabled={disabled || !betAmount}
         className="bg-gradient-poker text-primary-foreground flex-1 h-9 px-2 text-xs"
       >
-        <TrendingUp className="h-4 w-4" />
+        <TrendingUp className="h-4 w-4 mr-2" />
         Raise
       </Button>
     </div>

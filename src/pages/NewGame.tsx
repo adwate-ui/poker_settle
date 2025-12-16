@@ -191,7 +191,7 @@ const NewGame = () => {
                 </Text>
               </Box>
               <Button onClick={continueGame} className="w-full" size="lg">
-                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Continue Game
               </Button>
             </Stack>
@@ -290,12 +290,12 @@ const NewGame = () => {
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 Starting Game...
               </>
             ) : (
               <>
-                <Play className="h-5 w-5" />
+                <Play className="h-5 w-5 mr-2" />
                 Start Game
               </>
             )}
