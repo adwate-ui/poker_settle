@@ -28,16 +28,29 @@ const mantineTheme = createTheme({
   colors: {
     // Define a custom green palette that will sync with our CSS variables
     green: [
-      'var(--mantine-color-primary-0)',
-      'var(--mantine-color-primary-1)',
-      'var(--mantine-color-primary-2)',
-      'var(--mantine-color-primary-3)',
-      'var(--mantine-color-primary-4)',
-      'var(--mantine-color-primary-5)',
-      'var(--mantine-color-primary-6)',
-      'var(--mantine-color-primary-7)',
-      'var(--mantine-color-primary-8)',
-      'var(--mantine-color-primary-9)',
+      'var(--mantine-color-green-0)',
+      'var(--mantine-color-green-1)',
+      'var(--mantine-color-green-2)',
+      'var(--mantine-color-green-3)',
+      'var(--mantine-color-green-4)',
+      'var(--mantine-color-green-5)',
+      'var(--mantine-color-green-6)',
+      'var(--mantine-color-green-7)',
+      'var(--mantine-color-green-8)',
+      'var(--mantine-color-green-9)',
+    ],
+    // Define red palette for negative amounts/losses
+    red: [
+      'var(--mantine-color-red-0)',
+      'var(--mantine-color-red-1)',
+      'var(--mantine-color-red-2)',
+      'var(--mantine-color-red-3)',
+      'var(--mantine-color-red-4)',
+      'var(--mantine-color-red-5)',
+      'var(--mantine-color-red-6)',
+      'var(--mantine-color-red-7)',
+      'var(--mantine-color-red-8)',
+      'var(--mantine-color-red-9)',
     ],
     // Define semantic profit/loss colors (using standard green/red for light, darker for dark mode)
     profit: [

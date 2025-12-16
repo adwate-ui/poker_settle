@@ -61,6 +61,44 @@
     --mantine-color-accent-8: hsl(var(--accent) / 0.75);
     --mantine-color-accent-9: hsl(var(--accent) / 0.65);
     
+    /* Green color scale - for positive amounts/profits */
+    --mantine-color-green-0: #ebfbee;
+    --mantine-color-green-1: #d3f9d8;
+    --mantine-color-green-2: #b2f2bb;
+    --mantine-color-green-3: #8ce99a;
+    --mantine-color-green-4: #69db7c;
+    --mantine-color-green-5: #51cf66;
+    --mantine-color-green-6: #40c057;
+    --mantine-color-green-7: #37b24d;
+    --mantine-color-green-8: #2f9e44;
+    --mantine-color-green-9: #2b8a3e;
+    --mantine-color-green-filled: #40c057;
+    --mantine-color-green-filled-hover: #37b24d;
+    --mantine-color-green-light: #d3f9d8;
+    --mantine-color-green-light-hover: #b2f2bb;
+    --mantine-color-green-light-color: #2b8a3e;
+    --mantine-color-green-outline: #40c057;
+    --mantine-color-green-outline-hover: #ebfbee;
+
+    /* Red color scale - for negative amounts/losses */
+    --mantine-color-red-0: #fff5f5;
+    --mantine-color-red-1: #ffe3e3;
+    --mantine-color-red-2: #ffc9c9;
+    --mantine-color-red-3: #ffa8a8;
+    --mantine-color-red-4: #ff8787;
+    --mantine-color-red-5: #ff6b6b;
+    --mantine-color-red-6: #fa5252;
+    --mantine-color-red-7: #f03e3e;
+    --mantine-color-red-8: #e03131;
+    --mantine-color-red-9: #c92a2a;
+    --mantine-color-red-filled: #fa5252;
+    --mantine-color-red-filled-hover: #f03e3e;
+    --mantine-color-red-light: #ffe3e3;
+    --mantine-color-red-light-hover: #ffc9c9;
+    --mantine-color-red-light-color: #c92a2a;
+    --mantine-color-red-outline: #fa5252;
+    --mantine-color-red-outline-hover: #fff5f5;
+    
     /* Other color mappings */
     --mantine-color-dimmed: hsl(var(--muted-foreground));
     --mantine-color-bright: hsl(var(--foreground));
@@ -98,6 +136,44 @@
     --mantine-color-gray-7: hsl(var(--muted-foreground));
     --mantine-color-gray-8: hsl(var(--foreground) / 0.85);
     --mantine-color-gray-9: hsl(var(--foreground));
+    
+    /* Green color scale - adjusted for dark mode */
+    --mantine-color-green-0: #2b8a3e;
+    --mantine-color-green-1: #2f9e44;
+    --mantine-color-green-2: #37b24d;
+    --mantine-color-green-3: #40c057;
+    --mantine-color-green-4: #51cf66;
+    --mantine-color-green-5: #69db7c;
+    --mantine-color-green-6: #8ce99a;
+    --mantine-color-green-7: #b2f2bb;
+    --mantine-color-green-8: #d3f9d8;
+    --mantine-color-green-9: #ebfbee;
+    --mantine-color-green-filled: #40c057;
+    --mantine-color-green-filled-hover: #51cf66;
+    --mantine-color-green-light: rgba(64, 192, 87, 0.15);
+    --mantine-color-green-light-hover: rgba(64, 192, 87, 0.25);
+    --mantine-color-green-light-color: #8ce99a;
+    --mantine-color-green-outline: #40c057;
+    --mantine-color-green-outline-hover: rgba(64, 192, 87, 0.1);
+
+    /* Red color scale - adjusted for dark mode */
+    --mantine-color-red-0: #c92a2a;
+    --mantine-color-red-1: #e03131;
+    --mantine-color-red-2: #f03e3e;
+    --mantine-color-red-3: #fa5252;
+    --mantine-color-red-4: #ff6b6b;
+    --mantine-color-red-5: #ff8787;
+    --mantine-color-red-6: #ffa8a8;
+    --mantine-color-red-7: #ffc9c9;
+    --mantine-color-red-8: #ffe3e3;
+    --mantine-color-red-9: #fff5f5;
+    --mantine-color-red-filled: #fa5252;
+    --mantine-color-red-filled-hover: #ff6b6b;
+    --mantine-color-red-light: rgba(250, 82, 82, 0.15);
+    --mantine-color-red-light-hover: rgba(250, 82, 82, 0.25);
+    --mantine-color-red-light-color: #ffa8a8;
+    --mantine-color-red-outline: #fa5252;
+    --mantine-color-red-outline-hover: rgba(250, 82, 82, 0.1);
     
     /* Ensure good contrast for filled elements in dark mode */
     --mantine-color-default: hsl(var(--muted));
@@ -149,7 +225,7 @@
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="sm"],
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="md"],
 .mantine-Badge-root[data-color="green"][data-variant="filled"][data-size="lg"] {
-  background-color: #40c057 !important;
+  background-color: var(--mantine-color-green-filled) !important;
   color: white !important;
 }
 
@@ -157,8 +233,8 @@
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="sm"],
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="md"],
 .mantine-Badge-root[data-color="green"][data-variant="light"][data-size="lg"] {
-  background-color: #d3f9d8 !important;
-  color: #2b8a3e !important;
+  background-color: var(--mantine-color-green-light) !important;
+  color: var(--mantine-color-green-light-color) !important;
 }
 
 /* Red badge colors - used for negative amounts (loss) */
@@ -166,7 +242,7 @@
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="sm"],
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="md"],
 .mantine-Badge-root[data-color="red"][data-variant="filled"][data-size="lg"] {
-  background-color: #fa5252 !important;
+  background-color: var(--mantine-color-red-filled) !important;
   color: white !important;
 }
 
@@ -174,8 +250,8 @@
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="sm"],
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="md"],
 .mantine-Badge-root[data-color="red"][data-variant="light"][data-size="lg"] {
-  background-color: #ffe3e3 !important;
-  color: #c92a2a !important;
+  background-color: var(--mantine-color-red-light) !important;
+  color: var(--mantine-color-red-light-color) !important;
 }
 
 /* Ensure text is never transformed in badges (prevent Rs. becoming RS.) */
