@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, Badge, Stack, Group, Text, Box, Modal } from "@mantine/core";
+import { Card, Stack, Group, Text, Box, Modal } from "@mantine/core";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { Loader2, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Player } from "@/types/poker";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, formatProfitLoss } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 
@@ -21,6 +21,13 @@ const PlayersHistory = () => {
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  // Helper function to get P&L value className
+  const getProfitLossClassName = (amount: number, isMobile: boolean = false) => {
+    const baseClasses = isMobile ? 'font-semibold text-xs' : 'font-semibold';
+    const colorClasses = amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    return `${baseClasses} ${colorClasses}`;
+  };
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -253,13 +260,9 @@ const PlayersHistory = () => {
                     className="flex items-center justify-center"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <Badge 
-                      color={getProfitLossColor(player.total_profit || 0)} 
-                      size="sm"
-                      variant="filled"
-                    >
+                    <span className={getProfitLossClassName(player.total_profit || 0, true)}>
                       {formatProfitLoss(player.total_profit || 0)}
-                    </Badge>
+                    </span>
                   </div>
                   <div className="flex items-center justify-center">
                     <Button
@@ -297,12 +300,9 @@ const PlayersHistory = () => {
                 <div 
                   onClick={() => navigate(`/players/${player.id}`)}
                 >
-                  <Badge 
-                    color={getProfitLossColor(player.total_profit || 0)}
-                    variant="filled"
-                  >
+                  <span className={getProfitLossClassName(player.total_profit || 0)}>
                     {formatProfitLoss(player.total_profit || 0)}
-                  </Badge>
+                  </span>
                 </div>
                 
                 <div className="flex items-center justify-start">
