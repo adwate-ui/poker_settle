@@ -10,6 +10,11 @@ export const supabaseAnon = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLIS
 // Create a separate Supabase client for shared views that injects the share token
 export const createSharedClient = (shareToken: string) => {
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
     global: {
       headers: {
         'x-share-token': shareToken,

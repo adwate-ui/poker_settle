@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextInput, Card, Badge, Collapse, Select, Modal, Tabs, ScrollArea, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Search, Check, TrendingUp, TrendingDown, Star } from "lucide-react";
+import { ArrowLeft, Trophy, Calculator, DollarSign, Plus, UserPlus, Trash2, Users as UsersIcon, Play, ChevronDown, ChevronUp, Search, Check, TrendingUp, TrendingDown, Star, Share2 } from "lucide-react";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import PlayerCard from "@/components/PlayerCard";
-import PlayerCardMantine from "@/components/PlayerCardMantine";
+import DashboardPlayerCard from "@/components/DashboardPlayerCard";
 import { BuyInManagementTable } from "@/components/BuyInManagementTable";
 import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
+import { useSharedLink } from "@/hooks/useSharedLink";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
@@ -42,7 +43,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [handTrackingStage, setHandTrackingStage] = useState<'setup' | 'ready' | 'recording'>('setup');
   const [hasSavedHandState, setHasSavedHandState] = useState(false);
   const [isCompletingGame, setIsCompletingGame] = useState(false);
-  
+
   // Collapsible sections state
   const [gameStatsOpen, setGameStatsOpen] = useState(true);
   const [tablePositionOpen, setTablePositionOpen] = useState(true);
@@ -50,14 +51,73 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const [settlementsOpen, setSettlementsOpen] = useState(true);
   const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
   const [finalStackLogsOpen, setFinalStackLogsOpen] = useState(true);
-  
+
   const { players, updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition, getCurrentTablePosition, fetchBuyInHistory } = useGameData();
-  
+
+  const { createOrGetSharedLink, getShortUrl } = useSharedLink();
+
+  const handleShare = useCallback(async () => {
+    try {
+      const linkData = await createOrGetSharedLink('game', game.id);
+      if (linkData) {
+        const url = getShortUrl(linkData.shortCode);
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `Poker Game - ${new Date(game.date).toLocaleDateString()}`,
+              text: 'Check out this poker game!',
+              url: url
+            });
+          } catch (error) {
+            // User cancelled share or other error - fallback to copy
+            console.log('Share API failed or cancelled, falling back to copy', error);
+            await navigator.clipboard.writeText(url);
+            toast.success("Link copied to clipboard");
+          }
+        } else {
+          await navigator.clipboard.writeText(url);
+          toast.success("Link copied to clipboard");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to generate share link");
+    }
+  }, [game.id, game.date, createOrGetSharedLink, getShortUrl]);
+
+
+
+  // Create shared link on mount and update URL to masked public link
+  useEffect(() => {
+    const setupSharedUrl = async () => {
+      try {
+        const linkData = await createOrGetSharedLink('game', game.id);
+        if (linkData) {
+          const shortUrl = getShortUrl(linkData.shortCode);
+          // Only replace state if we're not already on the short URL path (basic check)
+          // We use the shortCode to verify
+          if (!window.location.pathname.includes(`/s/${linkData.shortCode}`)) {
+            // We can't actually replace the path to /s/code directly because that might trigger router issues 
+            // if not handled carefully, but more importantly, we want the Valid URL to be in the bar.
+            // Since our app is an SPA, we CAN replace the history state with the short URL
+            // provided the server/app handles that URL on reload.
+            // ShortLinkRedirect handles /s/:code.
+            window.history.replaceState({ ...window.history.state, as: shortUrl }, "", shortUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Error setting up shared URL:", error);
+      }
+    };
+
+    setupSharedUrl();
+  }, [game.id, createOrGetSharedLink, getShortUrl]);
+
   useEffect(() => {
     const loadTablePosition = async () => {
       const position = await getCurrentTablePosition(game.id);
       setCurrentTablePosition(position);
-      
+
       // Check for saved hand state with error handling
       try {
         const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
@@ -72,13 +132,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         console.error('Error parsing saved hand state:', error);
         setHasSavedHandState(false);
       }
-      
+
       // Set initial stage based on whether table is set
       // Only update stage if we're not currently recording a hand
       setHandTrackingStage(prev => {
         // Don't change stage if we're in the middle of recording
         if (prev === 'recording') return prev;
-        
+
         // Otherwise, set based on whether positions exist
         if (position && position.positions.length > 0) {
           return 'ready';
@@ -93,7 +153,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
     try {
       await updateGamePlayer(gamePlayerId, updates, logBuyIn);
-      setGamePlayers(prev => prev.map(gp => 
+      setGamePlayers(prev => prev.map(gp =>
         gp.id === gamePlayerId ? { ...gp, ...updates } : gp
       ));
     } catch (error) {
@@ -106,7 +166,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     if (!gamePlayer) return;
 
     const newTotal = gamePlayer.buy_ins + buyInsToAdd;
-    await handlePlayerUpdate(gamePlayerId, { 
+    await handlePlayerUpdate(gamePlayerId, {
       buy_ins: newTotal,
       net_amount: (gamePlayer.final_stack || 0) - (newTotal * game.buy_in_amount)
     }, true);
@@ -116,7 +176,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
     if (!gamePlayer) return;
 
-    await handlePlayerUpdate(gamePlayerId, { 
+    await handlePlayerUpdate(gamePlayerId, {
       final_stack: finalStack,
       net_amount: finalStack - (gamePlayer.buy_ins * game.buy_in_amount)
     });
@@ -127,7 +187,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.error("Please enter a player name");
       return;
     }
-    
+
     setIsCreatingPlayer(true);
     try {
       const player = await createOrFindPlayer(newPlayerName.trim());
@@ -206,7 +266,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     manualTransfers.forEach(transfer => {
       const fromPlayer = playerBalances.find(p => p.name === transfer.from);
       const toPlayer = playerBalances.find(p => p.name === transfer.to);
-      
+
       if (fromPlayer && toPlayer) {
         fromPlayer.balance += transfer.amount; // Debtor pays, so their debt reduces
         toPlayer.balance -= transfer.amount; // Creditor receives, so their credit reduces
@@ -215,17 +275,17 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
     const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
     const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
-    
+
     const newSettlements: Settlement[] = [];
     let creditorIndex = 0;
     let debtorIndex = 0;
-    
+
     while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
       const creditor = creditors[creditorIndex];
       const debtor = debtors[debtorIndex];
-      
+
       const amount = Math.min(creditor.balance, -debtor.balance);
-      
+
       if (amount > 0.01) { // Only add if amount is significant
         newSettlements.push({
           from: debtor.name,
@@ -233,22 +293,22 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           amount: amount
         });
       }
-      
+
       creditor.balance -= amount;
       debtor.balance += amount;
-      
+
       if (Math.abs(creditor.balance) < 0.01) creditorIndex++;
       if (Math.abs(debtor.balance) < 0.01) debtorIndex++;
     }
-    
+
     setSettlements(newSettlements);
   }, [gamePlayers, manualTransfers]);
 
   const handleCompleteGame = useCallback(async () => {
     if (isCompletingGame) return; // Prevent double-clicks
-    
+
     setIsCompletingGame(true);
-    
+
     // Calculate remaining settlements
     const playerBalances = gamePlayers.map(gp => ({
       name: gp.player.name,
@@ -259,7 +319,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     manualTransfers.forEach(transfer => {
       const fromPlayer = playerBalances.find(p => p.name === transfer.from);
       const toPlayer = playerBalances.find(p => p.name === transfer.to);
-      
+
       if (fromPlayer && toPlayer) {
         fromPlayer.balance += transfer.amount;
         toPlayer.balance -= transfer.amount;
@@ -268,17 +328,17 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
     const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
     const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
-    
+
     const calculatedSettlements: Settlement[] = [];
     let creditorIndex = 0;
     let debtorIndex = 0;
-    
+
     while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
       const creditor = creditors[creditorIndex];
       const debtor = debtors[debtorIndex];
-      
+
       const amount = Math.min(creditor.balance, -debtor.balance);
-      
+
       if (amount > 0.01) {
         calculatedSettlements.push({
           from: debtor.name,
@@ -286,21 +346,21 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           amount: amount
         });
       }
-      
+
       creditor.balance -= amount;
       debtor.balance += amount;
-      
+
       if (Math.abs(creditor.balance) < 0.01) creditorIndex++;
       if (Math.abs(debtor.balance) < 0.01) debtorIndex++;
     }
 
     // Combine manual and calculated settlements
     const allSettlements = [...manualTransfers, ...calculatedSettlements];
-    
+
     try {
       await completeGame(game.id, allSettlements);
       toast.success("Game completed successfully");
-      
+
       // Navigate immediately to game details
       navigate(`/games/${game.id}`);
     } catch (error) {
@@ -318,7 +378,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setPositionsJustChanged(true);
       setHandTrackingStage('ready'); // Move to ready state after table is set
       toast.success("Table position saved");
-      
+
       // Reset flag after 2 seconds
       setTimeout(() => setPositionsJustChanged(false), 2000);
     } catch (error) {
@@ -334,7 +394,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const handleHandComplete = useCallback(() => {
     setHandTrackingStage('ready');
     setTablePositionOpen(true); // Ensure table positions section is expanded
-    
+
     // Check if saved hand state was cleared
     try {
       const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
@@ -356,37 +416,37 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   }, []);
 
   // Memoize expensive calculations
-  const totalBuyIns = useMemo(() => 
+  const totalBuyIns = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0),
     [gamePlayers, game.buy_in_amount]
   );
-  
-  const totalWinnings = useMemo(() => 
+
+  const totalWinnings = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount || 0), 0),
     [gamePlayers]
   );
-  
-  const totalLosses = useMemo(() => 
+
+  const totalLosses = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount || 0), 0),
     [gamePlayers]
   );
-  
-  const totalFinalStack = useMemo(() => 
+
+  const totalFinalStack = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + (gp.final_stack || 0), 0),
     [gamePlayers]
   );
-  
-  const isBalanced = useMemo(() => 
+
+  const isBalanced = useMemo(() =>
     Math.abs(totalWinnings + totalLosses) < 0.01,
     [totalWinnings, totalLosses]
   );
-  
-  const isStackBalanced = useMemo(() => 
+
+  const isStackBalanced = useMemo(() =>
     Math.abs(totalFinalStack - totalBuyIns) < 0.01,
     [totalFinalStack, totalBuyIns]
   );
-  
-  const canCompleteGame = useMemo(() => 
+
+  const canCompleteGame = useMemo(() =>
     isBalanced && isStackBalanced,
     [isBalanced, isStackBalanced]
   );
@@ -396,7 +456,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-            <Button 
+            <Button
               onClick={onBackToSetup}
               className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full sm:w-auto"
             >
@@ -404,13 +464,24 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <span className="hidden xs:inline">Back to Setup</span>
               <span className="xs:hidden">Back</span>
             </Button>
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-poker-gold to-yellow-500 bg-clip-text text-transparent">
-                Game Dashboard
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
-              </p>
+            <div className="flex-1 flex items-center justify-between gap-2">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-poker-gold to-yellow-500 bg-clip-text text-transparent">
+                  Game Dashboard
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Buy-in: {formatCurrency(game.buy_in_amount)} • {new Date(game.date).toLocaleDateString()}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleShare}
+                className="h-10 w-10 shrink-0 border-primary/20 hover:bg-primary/10 hover:text-primary transition-colors"
+                title="Share Game"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
             </div>
           </div>
           <UserProfile />
@@ -418,7 +489,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Game Summary */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <div 
+          <div
             className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
             onClick={() => setGameStatsOpen(!gameStatsOpen)}
           >
@@ -436,20 +507,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
           <Collapse in={gameStatsOpen}>
             <div className="pt-4 pb-4">
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Buy-ins</p>
-                <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalBuyIns)}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">Buy-ins</p>
+                  <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalBuyIns)}</p>
+                </div>
+                <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">Final Stack</p>
+                  <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalFinalStack)}</p>
+                </div>
+                <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium"># Players</p>
+                  <p className="text-sm sm:text-lg font-bold">{gamePlayers.length}</p>
+                </div>
               </div>
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Final Stack</p>
-                <p className="text-sm sm:text-lg font-bold">{formatCurrency(totalFinalStack)}</p>
-              </div>
-              <div className="space-y-1 p-2 sm:p-3 rounded-lg border-2 border-border">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium"># Players</p>
-                <p className="text-sm sm:text-lg font-bold">{gamePlayers.length}</p>
-              </div>
-            </div>
             </div>
           </Collapse>
         </Card>
@@ -464,7 +535,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           />
         ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
           <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <div 
+            <div
               className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
               onClick={() => setTablePositionOpen(!tablePositionOpen)}
             >
@@ -482,23 +553,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </div>
             <Collapse in={tablePositionOpen}>
               <div className="pt-4">
-              <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
-              <div className="flex gap-2 mt-4">
-                <Button
-                  onClick={() => setShowPositionEditor(true)}
-                  variant="outline"
-                  className="flex-1 border-primary/30 hover:bg-primary/10"
-                >
-                  Change Positions
-                </Button>
-                <Button
-                  onClick={handleStartHandTracking}
-                  className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
-                >
-                  <Play className="w-4 h-4" />
-                  {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
-                </Button>
-              </div>
+                <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={() => setShowPositionEditor(true)}
+                    variant="outline"
+                    className="flex-1 border-primary/30 hover:bg-primary/10"
+                  >
+                    Change Positions
+                  </Button>
+                  <Button
+                    onClick={handleStartHandTracking}
+                    className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg flex-1"
+                  >
+                    <Play className="w-4 h-4" />
+                    {hasSavedHandState ? 'Continue Hand' : 'Start Hand'}
+                  </Button>
+                </div>
               </div>
             </Collapse>
           </Card>
@@ -521,8 +592,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Hand Tracking Section - Show when recording (keeps table positions visible above) */}
         {handTrackingStage === 'recording' && (
-          <HandTracking 
-            game={game} 
+          <HandTracking
+            game={game}
             positionsJustChanged={positionsJustChanged}
             onHandComplete={handleHandComplete}
             initialSeatPositions={currentTablePosition?.positions || []}
@@ -531,7 +602,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Buy-in Logs */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <div 
+          <div
             className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
             onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
           >
@@ -561,7 +632,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Final Stack Logs */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <div 
+          <div
             className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
             onClick={() => setFinalStackLogsOpen(!finalStackLogsOpen)}
           >
@@ -589,7 +660,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {/* Players Section */}
         <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-          <div 
+          <div
             className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
             onClick={() => setPlayersOpen(!playersOpen)}
           >
@@ -607,162 +678,162 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
           <Collapse in={playersOpen}>
             <Stack gap="md" className="pt-4">
-                <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
-                  <Button 
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 w-full xs:w-auto"
-                    onClick={() => setShowAddPlayer(true)}
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Add Player
-                  </Button>
-              <Modal 
-                opened={showAddPlayer} 
-                onClose={() => setShowAddPlayer(false)}
-                title="Add Player to Game"
-                size="xl"
-              >
-                <Text size="sm" c="dimmed" mb="md">
-                  Select from existing players or create a new one
-                </Text>
+              <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
+                <Button
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 w-full xs:w-auto"
+                  onClick={() => setShowAddPlayer(true)}
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Add Player
+                </Button>
+                <Modal
+                  opened={showAddPlayer}
+                  onClose={() => setShowAddPlayer(false)}
+                  title="Add Player to Game"
+                  size="xl"
+                >
+                  <Text size="sm" c="dimmed" mb="md">
+                    Select from existing players or create a new one
+                  </Text>
 
-                <Tabs defaultValue="existing">
-                  <Tabs.List grow>
-                    <Tabs.Tab value="existing">Existing Players</Tabs.Tab>
-                    <Tabs.Tab value="new">New Player</Tabs.Tab>
-                  </Tabs.List>
+                  <Tabs defaultValue="existing">
+                    <Tabs.List grow>
+                      <Tabs.Tab value="existing">Existing Players</Tabs.Tab>
+                      <Tabs.Tab value="new">New Player</Tabs.Tab>
+                    </Tabs.List>
 
-                  {/* Existing Players Tab */}
-                  <Tabs.Panel value="existing" pt="md">
-                    <Stack gap="md">
-                    {/* Search */}
-                    <TextInput
-                      placeholder="Search players by name..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      leftSection={<Search className="h-4 w-4" />}
-                    />
+                    {/* Existing Players Tab */}
+                    <Tabs.Panel value="existing" pt="md">
+                      <Stack gap="md">
+                        {/* Search */}
+                        <TextInput
+                          placeholder="Search players by name..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          leftSection={<Search className="h-4 w-4" />}
+                        />
 
-                    {/* Players List */}
-                    {availablePlayers.length > 0 ? (
-                      <div className="space-y-2">
-                        {searchQuery && (
-                          <h4 className="text-sm font-medium text-muted-foreground">
-                            Search Results ({availablePlayers.length})
-                          </h4>
-                        )}
-                        <ScrollArea h={300} pr="md">
-                          <div className="grid gap-2">
-                            {availablePlayers.map((player) => (
-                              <button
-                                key={player.id}
-                                onClick={() => addExistingPlayer(player)}
-                                className={cn(
-                                  "w-full text-left p-3 rounded-lg border bg-card hover:bg-accent hover:shadow-md transition-all",
-                                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                )}
-                              >
-                                <div className="flex items-center gap-3">
-                                  {/* Avatar */}
-                                  <OptimizedAvatar 
-                                    name={player.name}
-                                    size="sm"
-                                    className="flex-shrink-0"
-                                  />
-
-                                  {/* Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-semibold truncate">{player.name}</span>
-                                      {player.total_games && player.total_games > 10 && (
-                                        <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
-                                      )}
-                                    </div>
-                                    <Group gap="xs" wrap="nowrap">
-                                      <Badge variant="outline" size="sm">
-                                        {player.total_games || 0}
-                                      </Badge>
-                                      {player.total_profit !== undefined && (
-                                        <Badge
-                                          color={getProfitLossColor(player.total_profit)}
-                                          size="sm"
-                                          style={getProfitLossBadgeStyle(player.total_profit)}
-                                        >
-                                          {formatProfitLoss(player.total_profit)}
-                                        </Badge>
-                                      )}
-                                    </Group>
-                                  </div>
-
-                                  {/* Select Icon */}
-                                  <Check className="h-5 w-5 text-primary" />
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        {searchQuery ? (
+                        {/* Players List */}
+                        {availablePlayers.length > 0 ? (
                           <div className="space-y-2">
-                            <p>No players found matching "{searchQuery}"</p>
-                            <p className="text-sm">Try creating a new player instead</p>
+                            {searchQuery && (
+                              <h4 className="text-sm font-medium text-muted-foreground">
+                                Search Results ({availablePlayers.length})
+                              </h4>
+                            )}
+                            <ScrollArea h={300} pr="md">
+                              <div className="grid gap-2">
+                                {availablePlayers.map((player) => (
+                                  <button
+                                    key={player.id}
+                                    onClick={() => addExistingPlayer(player)}
+                                    className={cn(
+                                      "w-full text-left p-3 rounded-lg border bg-card hover:bg-accent hover:shadow-md transition-all",
+                                      "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                    )}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {/* Avatar */}
+                                      <OptimizedAvatar
+                                        name={player.name}
+                                        size="sm"
+                                        className="flex-shrink-0"
+                                      />
+
+                                      {/* Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-semibold truncate">{player.name}</span>
+                                          {player.total_games && player.total_games > 10 && (
+                                            <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                                          )}
+                                        </div>
+                                        <Group gap="xs" wrap="nowrap">
+                                          <Badge variant="outline" size="sm">
+                                            {player.total_games || 0}
+                                          </Badge>
+                                          {player.total_profit !== undefined && (
+                                            <Badge
+                                              color={getProfitLossColor(player.total_profit)}
+                                              size="sm"
+                                              style={getProfitLossBadgeStyle(player.total_profit)}
+                                            >
+                                              {formatProfitLoss(player.total_profit)}
+                                            </Badge>
+                                          )}
+                                        </Group>
+                                      </div>
+
+                                      {/* Select Icon */}
+                                      <Check className="h-5 w-5 text-primary" />
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </ScrollArea>
                           </div>
                         ) : (
-                          <p>All players have been added</p>
+                          <div className="text-center py-8 text-muted-foreground">
+                            {searchQuery ? (
+                              <div className="space-y-2">
+                                <p>No players found matching "{searchQuery}"</p>
+                                <p className="text-sm">Try creating a new player instead</p>
+                              </div>
+                            ) : (
+                              <p>All players have been added</p>
+                            )}
+                          </div>
                         )}
-                      </div>
-                    )}
-                    </Stack>
-                  </Tabs.Panel>
+                      </Stack>
+                    </Tabs.Panel>
 
-                  {/* New Player Tab */}
-                  <Tabs.Panel value="new" pt="md">
-                    <Stack gap="md">
-                      <TextInput
-                        label="Player Name"
-                        placeholder="Enter player name"
-                        value={newPlayerName}
-                        onChange={(e) => setNewPlayerName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !isCreatingPlayer) {
-                            addNewPlayer();
-                          }
-                        }}
-                        autoFocus
-                      />
+                    {/* New Player Tab */}
+                    <Tabs.Panel value="new" pt="md">
+                      <Stack gap="md">
+                        <TextInput
+                          label="Player Name"
+                          placeholder="Enter player name"
+                          value={newPlayerName}
+                          onChange={(e) => setNewPlayerName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isCreatingPlayer) {
+                              addNewPlayer();
+                            }
+                          }}
+                          autoFocus
+                        />
 
-                      <Button
-                        onClick={addNewPlayer}
-                        disabled={!newPlayerName.trim() || isCreatingPlayer}
-                        className="w-full"
-                        size="lg"
-                      >
-                        {isCreatingPlayer ? (
-                          <>Creating...</>
-                        ) : (
-                          <>
-                            <UserPlus className="h-4 w-4" />
-                            Create and Add Player
-                          </>
-                        )}
-                      </Button>
-                    </Stack>
-                  </Tabs.Panel>
-                </Tabs>
-              </Modal>
-          </div>
+                        <Button
+                          onClick={addNewPlayer}
+                          disabled={!newPlayerName.trim() || isCreatingPlayer}
+                          className="w-full"
+                          size="lg"
+                        >
+                          {isCreatingPlayer ? (
+                            <>Creating...</>
+                          ) : (
+                            <>
+                              <UserPlus className="h-4 w-4" />
+                              Create and Add Player
+                            </>
+                          )}
+                        </Button>
+                      </Stack>
+                    </Tabs.Panel>
+                  </Tabs>
+                </Modal>
+              </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
-            <PlayerCardMantine
-              key={gamePlayer.id}
-              gamePlayer={gamePlayer}
-              buyInAmount={game.buy_in_amount}
-              isLiveGame={true}
-            />
-          ))}
-        </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
+                  <DashboardPlayerCard
+                    key={gamePlayer.id}
+                    gamePlayer={gamePlayer}
+                    buyInAmount={game.buy_in_amount}
+                    isLiveGame={true}
+                  />
+                ))}
+              </div>
             </Stack>
           </Collapse>
         </Card>
@@ -816,8 +887,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </Text>
             </Group>
             <Stack gap="md" className="pt-4">
-              <Select 
-                value={newTransferFrom} 
+              <Select
+                value={newTransferFrom}
                 onChange={(value) => setNewTransferFrom(value || '')}
                 placeholder="From Player"
                 data={gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => ({
@@ -826,8 +897,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 }))}
               />
 
-              <Select 
-                value={newTransferTo} 
+              <Select
+                value={newTransferTo}
                 onChange={(value) => setNewTransferTo(value || '')}
                 placeholder="To Player"
                 data={gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map(gp => ({
@@ -859,7 +930,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {!showManualTransfer && (
-              <Button 
+              <Button
                 onClick={() => setShowManualTransfer(true)}
                 disabled={!canCompleteGame}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
@@ -870,8 +941,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </Button>
             )}
 
-            <Button 
-              onClick={calculateSettlements} 
+            <Button
+              onClick={calculateSettlements}
               disabled={!canCompleteGame}
               className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
             >
@@ -879,9 +950,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <span className="hidden sm:inline">{settlements.length > 0 ? 'Recalculate Settlements' : 'Calculate Settlements'}</span>
               <span className="sm:hidden">Settlements</span>
             </Button>
-            
-            <Button 
-              onClick={handleCompleteGame} 
+
+            <Button
+              onClick={handleCompleteGame}
               disabled={!canCompleteGame || isCompletingGame}
               className="bg-gradient-poker hover:opacity-90 text-primary-foreground w-full sm:w-auto"
             >
@@ -898,7 +969,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               )}
             </Button>
           </div>
-          
+
           {(!isBalanced || !isStackBalanced) && (
             <div className="flex flex-col gap-1 text-destructive">
               {!isBalanced && (
@@ -917,7 +988,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {settlements.length > 0 && (
           <Card shadow="sm" padding="md" radius="md" withBorder className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
-            <div 
+            <div
               className="cursor-pointer hover:bg-primary/5 transition-colors -mx-4 -mt-4 px-4 pt-4 pb-3 border-b border-primary/20"
               onClick={() => setSettlementsOpen(!settlementsOpen)}
             >
