@@ -15,13 +15,20 @@ export const useMetaTags = (config: MetaTagsConfig) => {
     // Store original values to restore on cleanup
     const originalCanonical = document.querySelector('link[rel="canonical"]');
     const originalOgUrl = document.querySelector('meta[property="og:url"]');
-    const originalTitle = document.querySelector('meta[property="og:title"]');
-    const originalDescription = document.querySelector('meta[property="og:description"]');
+    const originalOgTitle = document.querySelector('meta[property="og:title"]');
+    const originalOgDescription = document.querySelector('meta[property="og:description"]');
     
     const originalCanonicalHref = originalCanonical?.getAttribute('href');
     const originalOgUrlContent = originalOgUrl?.getAttribute('content');
-    const originalTitleContent = originalTitle?.getAttribute('content');
-    const originalDescriptionContent = originalDescription?.getAttribute('content');
+    const originalOgTitleContent = originalOgTitle?.getAttribute('content');
+    const originalOgDescriptionContent = originalOgDescription?.getAttribute('content');
+    const originalDocumentTitle = document.title;
+
+    // Track which elements we created (vs modified)
+    let createdCanonical = false;
+    let createdOgUrl = false;
+    let createdOgTitle = false;
+    let createdOgDescription = false;
 
     // Update or create canonical link
     if (config.url) {
@@ -30,6 +37,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         canonicalLink = document.createElement('link');
         canonicalLink.rel = 'canonical';
         document.head.appendChild(canonicalLink);
+        createdCanonical = true;
       }
       canonicalLink.href = config.url;
 
@@ -39,6 +47,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         ogUrlMeta = document.createElement('meta');
         ogUrlMeta.setAttribute('property', 'og:url');
         document.head.appendChild(ogUrlMeta);
+        createdOgUrl = true;
       }
       ogUrlMeta.content = config.url;
     }
@@ -52,6 +61,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         ogTitleMeta = document.createElement('meta');
         ogTitleMeta.setAttribute('property', 'og:title');
         document.head.appendChild(ogTitleMeta);
+        createdOgTitle = true;
       }
       ogTitleMeta.content = config.title;
     }
@@ -63,43 +73,57 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         ogDescriptionMeta = document.createElement('meta');
         ogDescriptionMeta.setAttribute('property', 'og:description');
         document.head.appendChild(ogDescriptionMeta);
+        createdOgDescription = true;
       }
       ogDescriptionMeta.content = config.description;
     }
 
     // Cleanup: restore original values when component unmounts
     return () => {
+      // Restore document title
+      if (config.title) {
+        document.title = originalDocumentTitle;
+      }
+
       if (config.url) {
         const canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
         if (canonicalLink) {
-          if (originalCanonicalHref) {
-            canonicalLink.href = originalCanonicalHref;
-          } else {
+          if (createdCanonical) {
             canonicalLink.remove();
+          } else if (originalCanonicalHref) {
+            canonicalLink.href = originalCanonicalHref;
           }
         }
 
         const ogUrlMeta = document.querySelector('meta[property="og:url"]') as HTMLMetaElement;
         if (ogUrlMeta) {
-          if (originalOgUrlContent) {
-            ogUrlMeta.content = originalOgUrlContent;
-          } else {
+          if (createdOgUrl) {
             ogUrlMeta.remove();
+          } else if (originalOgUrlContent) {
+            ogUrlMeta.content = originalOgUrlContent;
           }
         }
       }
 
       if (config.title) {
         const ogTitleMeta = document.querySelector('meta[property="og:title"]') as HTMLMetaElement;
-        if (ogTitleMeta && originalTitleContent) {
-          ogTitleMeta.content = originalTitleContent;
+        if (ogTitleMeta) {
+          if (createdOgTitle) {
+            ogTitleMeta.remove();
+          } else if (originalOgTitleContent) {
+            ogTitleMeta.content = originalOgTitleContent;
+          }
         }
       }
 
       if (config.description) {
         const ogDescriptionMeta = document.querySelector('meta[property="og:description"]') as HTMLMetaElement;
-        if (ogDescriptionMeta && originalDescriptionContent) {
-          ogDescriptionMeta.content = originalDescriptionContent;
+        if (ogDescriptionMeta) {
+          if (createdOgDescription) {
+            ogDescriptionMeta.remove();
+          } else if (originalOgDescriptionContent) {
+            ogDescriptionMeta.content = originalOgDescriptionContent;
+          }
         }
       }
     };
