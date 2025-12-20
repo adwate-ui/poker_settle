@@ -16,9 +16,11 @@ import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import { useMetaTags } from "@/hooks/useMetaTags";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/utils/settlementCalculator";
 import { getPaymentMethodIcon } from "@/utils/playerUtils";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
+import { buildShortUrl } from "@/lib/shareUtils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface GamePlayer {
@@ -77,7 +79,7 @@ export const GameDetailView = ({
   backLabel = "Back",
   fetchBuyInHistory,
 }: GameDetailViewProps) => {
-  const { copyShareLink, loading: linkLoading } = useSharedLink();
+  const { copyShareLink, loading: linkLoading, createOrGetSharedLink } = useSharedLink();
   const { fetchConfirmations, confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
   const [game, setGame] = useState<Game | null>(null);
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
@@ -87,6 +89,7 @@ export const GameDetailView = ({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [confirmations, setConfirmations] = useState<import('@/types/poker').SettlementConfirmation[]>([]);
+  const [shareUrl, setShareUrl] = useState<string | undefined>(undefined);
   
   // Collapsible sections state
   const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
@@ -181,6 +184,32 @@ export const GameDetailView = ({
       fetchGameData();
     }
   }, [gameId, fetchGameData]);
+
+  // Fetch shared link for meta tags (for owner views)
+  useEffect(() => {
+    if (showOwnerControls && gameId) {
+      createOrGetSharedLink('game', gameId)
+        .then((linkData) => {
+          if (linkData) {
+            const shortUrl = buildShortUrl(linkData.shortCode);
+            setShareUrl(shortUrl);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching share link for meta tags:', error);
+        });
+    }
+  }, [showOwnerControls, gameId, createOrGetSharedLink]);
+
+  // Memoize meta tags config to prevent unnecessary re-renders
+  const metaTagsConfig = useMemo(() => ({
+    url: shareUrl,
+    title: game ? `Game Details - ${format(new Date(game.date), "MMMM d, yyyy")}` : undefined,
+    description: game ? `Poker game on ${format(new Date(game.date), "MMMM d, yyyy")} - Buy-in: Rs. ${formatIndianNumber(game.buy_in_amount)}` : undefined,
+  }), [shareUrl, game]);
+
+  // Update meta tags with shared URL for mobile screenshots
+  useMetaTags(metaTagsConfig);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
