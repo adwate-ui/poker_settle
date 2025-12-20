@@ -80,8 +80,8 @@ export const useMetaTags = (config: MetaTagsConfig) => {
 
     // Cleanup: restore original values when component unmounts
     return () => {
-      // Restore document title
-      if (config.title) {
+      // Restore document title only if it was changed
+      if (config.title && originalDocumentTitle !== document.title) {
         document.title = originalDocumentTitle;
       }
 
@@ -90,7 +90,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (canonicalLink) {
           if (createdCanonical) {
             canonicalLink.remove();
-          } else if (originalCanonicalHref) {
+          } else if (originalCanonicalHref && canonicalLink.href !== originalCanonicalHref) {
             canonicalLink.href = originalCanonicalHref;
           }
         }
@@ -99,7 +99,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogUrlMeta) {
           if (createdOgUrl) {
             ogUrlMeta.remove();
-          } else if (originalOgUrlContent) {
+          } else if (originalOgUrlContent && ogUrlMeta.content !== originalOgUrlContent) {
             ogUrlMeta.content = originalOgUrlContent;
           }
         }
@@ -110,7 +110,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogTitleMeta) {
           if (createdOgTitle) {
             ogTitleMeta.remove();
-          } else if (originalOgTitleContent) {
+          } else if (originalOgTitleContent && ogTitleMeta.content !== originalOgTitleContent) {
             ogTitleMeta.content = originalOgTitleContent;
           }
         }
@@ -121,7 +121,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogDescriptionMeta) {
           if (createdOgDescription) {
             ogDescriptionMeta.remove();
-          } else if (originalOgDescriptionContent) {
+          } else if (originalOgDescriptionContent && ogDescriptionMeta.content !== originalOgDescriptionContent) {
             ogDescriptionMeta.content = originalOgDescriptionContent;
           }
         }

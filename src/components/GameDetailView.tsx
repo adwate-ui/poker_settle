@@ -187,28 +187,29 @@ export const GameDetailView = ({
 
   // Fetch shared link for meta tags (for owner views)
   useEffect(() => {
-    const fetchShareLink = async () => {
-      if (showOwnerControls && gameId) {
-        try {
-          const linkData = await createOrGetSharedLink('game', gameId);
+    if (showOwnerControls && gameId) {
+      createOrGetSharedLink('game', gameId)
+        .then((linkData) => {
           if (linkData) {
             const shortUrl = buildShortUrl(linkData.shortCode);
             setShareUrl(shortUrl);
           }
-        } catch (error) {
+        })
+        .catch((error) => {
           console.error('Error fetching share link for meta tags:', error);
-        }
-      }
-    };
-    fetchShareLink();
+        });
+    }
   }, [showOwnerControls, gameId, createOrGetSharedLink]);
 
-  // Update meta tags with shared URL for mobile screenshots
-  useMetaTags({
+  // Memoize meta tags config to prevent unnecessary re-renders
+  const metaTagsConfig = useMemo(() => ({
     url: shareUrl,
     title: game ? `Game Details - ${format(new Date(game.date), "MMMM d, yyyy")}` : undefined,
     description: game ? `Poker game on ${format(new Date(game.date), "MMMM d, yyyy")} - Buy-in: Rs. ${formatIndianNumber(game.buy_in_amount)}` : undefined,
-  });
+  }), [shareUrl, game]);
+
+  // Update meta tags with shared URL for mobile screenshots
+  useMetaTags(metaTagsConfig);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
