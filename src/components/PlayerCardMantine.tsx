@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { Card, Group, Text, Badge, Stack } from '@mantine/core';
 import { GamePlayer } from "@/types/poker";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import OptimizedAvatar from "./OptimizedAvatar";
 
 interface PlayerCardMantineProps {
@@ -76,11 +76,7 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount, isLiveGame = false }:
             color={getProfitLossColor(netAmount)} 
             variant="filled" 
             size="lg"
-            style={{ 
-              fontSize: '0.875rem',
-              backgroundColor: netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-              color: 'white'
-            }}
+            style={{ fontSize: '0.875rem', ...getProfitLossBadgeStyle(netAmount) }}
           >
             {formatProfitLoss(netAmount)}
           </Badge>

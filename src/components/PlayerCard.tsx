@@ -3,7 +3,7 @@ import { Card, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@manti
 import { Button } from "@/components/ui/button";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check } from "lucide-react";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
 
@@ -165,10 +165,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 color={getProfitLossColor(netAmount)}
                 variant="filled"
                 size="sm"
-                style={{
-                  backgroundColor: netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                  color: 'white'
-                }}
+                style={getProfitLossBadgeStyle(netAmount)}
               >
                 {formatProfitLoss(netAmount)}
               </Badge>

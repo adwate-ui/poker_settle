@@ -32,6 +32,7 @@ export function formatInputDisplay(value: number | null | undefined): string {
 // Returns 'green' for positive amounts (profit) and 'red' for negative amounts (loss)
 export function getProfitLossColor(amount: number): 'green' | 'red' {
   // Handle NaN, Infinity, and undefined values
+  // Default to red as invalid calculations typically indicate errors or losses
   if (!isFinite(amount)) {
     return 'red';
   }
@@ -51,4 +52,14 @@ export function getProfitLossVariant(amount: number): 'success' | 'destructive' 
 export function formatProfitLoss(amount: number): string {
   const sign = amount >= 0 ? '+' : '-';
   return `Rs. ${sign}${formatIndianNumber(Math.abs(amount))}`;
+}
+
+// Get inline style for P&L badge to ensure correct background color
+// This ensures negative values always show red, positive show green
+// Used as a workaround for CSS specificity issues on mobile devices
+export function getProfitLossBadgeStyle(amount: number): { backgroundColor: string; color: string } {
+  return {
+    backgroundColor: amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+    color: 'white'
+  };
 }

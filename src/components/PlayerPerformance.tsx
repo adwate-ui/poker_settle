@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Card, Badge, Collapse, Select, Stack, Group, Text, Box } from "@mantine/core";
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, User } from "lucide-react";
 import { Player, Game, TablePosition } from "@/types/poker";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import { useGameData } from "@/hooks/useGameData";
 import PokerTableView from "@/components/PokerTableView";
 
@@ -108,10 +108,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                         color={getProfitLossColor(selectedPlayer.total_profit)} 
                         size="xl"
                         variant="filled"
-                        style={{
-                          backgroundColor: selectedPlayer.total_profit < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                          color: 'white'
-                        }}
+                        style={getProfitLossBadgeStyle(selectedPlayer.total_profit)}
                       >
                         {formatProfitLoss(selectedPlayer.total_profit)}
                       </Badge>
@@ -138,10 +135,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                   <Badge 
                                     color={getProfitLossColor(game.netAmount)} 
                                     size="sm"
-                                    style={{
-                                      backgroundColor: game.netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                                      color: 'white'
-                                    }}
+                                    style={getProfitLossBadgeStyle(game.netAmount)}
                                   >
                                     {formatProfitLoss(game.netAmount)}
                                   </Badge>

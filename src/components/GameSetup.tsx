@@ -7,7 +7,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import TablePositionEditor from "@/components/TablePositionEditor";
 
 interface GameSetupProps {
@@ -263,10 +263,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                             <Badge 
                               color={getProfitLossColor(player.total_profit)} 
                               size="sm"
-                              style={{
-                                backgroundColor: player.total_profit < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                                color: 'white'
-                              }}
+                              style={getProfitLossBadgeStyle(player.total_profit)}
                             >
                               {formatProfitLoss(player.total_profit)}
                             </Badge>
@@ -418,10 +415,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                   <Badge 
                                     color={getProfitLossColor(gp.net_amount)} 
                                     size="sm"
-                                    style={{
-                                      backgroundColor: gp.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                                      color: 'white'
-                                    }}
+                                    style={getProfitLossBadgeStyle(gp.net_amount)}
                                   >
                                     {formatProfitLoss(gp.net_amount)}
                                   </Badge>

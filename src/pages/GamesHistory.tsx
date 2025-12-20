@@ -7,7 +7,7 @@ import { toast } from "@/lib/notifications";
 import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 
 interface GameWithStats {
   id: string;
@@ -380,10 +380,7 @@ const GamesHistory = () => {
                             <Badge 
                               color={getProfitLossColor(playerData.net_amount)} 
                               size="sm"
-                              style={{
-                                backgroundColor: playerData.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                                color: 'white'
-                              }}
+                              style={getProfitLossBadgeStyle(playerData.net_amount)}
                             >
                               {formatProfitLoss(playerData.net_amount)}
                             </Badge>
@@ -423,10 +420,7 @@ const GamesHistory = () => {
                       <div>
                         <Badge 
                           color={getProfitLossColor(playerData.net_amount)}
-                          style={{
-                            backgroundColor: playerData.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-                            color: 'white'
-                          }}
+                          style={getProfitLossBadgeStyle(playerData.net_amount)}
                         >
                           {formatProfitLoss(playerData.net_amount)}
                         </Badge>
