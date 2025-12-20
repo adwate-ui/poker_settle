@@ -76,7 +76,11 @@ const PlayerCardMantine = memo(({ gamePlayer, buyInAmount, isLiveGame = false }:
             color={getProfitLossColor(netAmount)} 
             variant="filled" 
             size="lg"
-            style={{ fontSize: '0.875rem' }}
+            style={{ 
+              fontSize: '0.875rem',
+              backgroundColor: netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+              color: 'white'
+            }}
           >
             {formatProfitLoss(netAmount)}
           </Badge>
