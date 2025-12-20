@@ -80,8 +80,11 @@ export const useMetaTags = (config: MetaTagsConfig) => {
 
     // Cleanup: restore original values when component unmounts
     return () => {
-      // Restore document title only if it was changed
-      if (config.title && originalDocumentTitle !== document.title) {
+      // Always restore to original values to ensure clean state
+      // This is safer than checking current state which may have been modified by other code
+      
+      // Restore document title if we changed it
+      if (config.title) {
         document.title = originalDocumentTitle;
       }
 
@@ -90,7 +93,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (canonicalLink) {
           if (createdCanonical) {
             canonicalLink.remove();
-          } else if (originalCanonicalHref && canonicalLink.href !== originalCanonicalHref) {
+          } else if (originalCanonicalHref) {
             canonicalLink.href = originalCanonicalHref;
           }
         }
@@ -99,7 +102,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogUrlMeta) {
           if (createdOgUrl) {
             ogUrlMeta.remove();
-          } else if (originalOgUrlContent && ogUrlMeta.content !== originalOgUrlContent) {
+          } else if (originalOgUrlContent) {
             ogUrlMeta.content = originalOgUrlContent;
           }
         }
@@ -110,7 +113,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogTitleMeta) {
           if (createdOgTitle) {
             ogTitleMeta.remove();
-          } else if (originalOgTitleContent && ogTitleMeta.content !== originalOgTitleContent) {
+          } else if (originalOgTitleContent) {
             ogTitleMeta.content = originalOgTitleContent;
           }
         }
@@ -121,7 +124,7 @@ export const useMetaTags = (config: MetaTagsConfig) => {
         if (ogDescriptionMeta) {
           if (createdOgDescription) {
             ogDescriptionMeta.remove();
-          } else if (originalOgDescriptionContent && ogDescriptionMeta.content !== originalOgDescriptionContent) {
+          } else if (originalOgDescriptionContent) {
             ogDescriptionMeta.content = originalOgDescriptionContent;
           }
         }
