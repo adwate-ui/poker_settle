@@ -11,7 +11,7 @@ import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
@@ -685,6 +685,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                         <Badge
                                           color={getProfitLossColor(player.total_profit)}
                                           size="sm"
+                                          style={getProfitLossBadgeStyle(player.total_profit)}
                                         >
                                           {formatProfitLoss(player.total_profit)}
                                         </Badge>
