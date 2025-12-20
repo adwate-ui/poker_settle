@@ -58,8 +58,11 @@ export function formatProfitLoss(amount: number): string {
 // This ensures negative values always show red, positive show green
 // Used as a workaround for CSS specificity issues on mobile devices
 export function getProfitLossBadgeStyle(amount: number): { backgroundColor: string; color: string } {
+  // Handle NaN, Infinity, and undefined values - default to red for consistency
+  const isNegative = isFinite(amount) ? amount < 0 : true;
+  
   return {
-    backgroundColor: amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+    backgroundColor: isNegative ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
     color: 'white'
   };
 }
