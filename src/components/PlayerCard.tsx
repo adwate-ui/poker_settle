@@ -165,6 +165,10 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 color={getProfitLossColor(netAmount)}
                 variant="filled"
                 size="sm"
+                style={{
+                  backgroundColor: netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                  color: 'white'
+                }}
               >
                 {formatProfitLoss(netAmount)}
               </Badge>

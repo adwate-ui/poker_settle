@@ -685,6 +685,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                         <Badge
                                           color={getProfitLossColor(player.total_profit)}
                                           size="sm"
+                                          style={{
+                                            backgroundColor: player.total_profit < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                                            color: 'white'
+                                          }}
                                         >
                                           {formatProfitLoss(player.total_profit)}
                                         </Badge>

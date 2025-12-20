@@ -108,6 +108,10 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                         color={getProfitLossColor(selectedPlayer.total_profit)} 
                         size="xl"
                         variant="filled"
+                        style={{
+                          backgroundColor: selectedPlayer.total_profit < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                          color: 'white'
+                        }}
                       >
                         {formatProfitLoss(selectedPlayer.total_profit)}
                       </Badge>
@@ -134,6 +138,10 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                   <Badge 
                                     color={getProfitLossColor(game.netAmount)} 
                                     size="sm"
+                                    style={{
+                                      backgroundColor: game.netAmount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                                      color: 'white'
+                                    }}
                                   >
                                     {formatProfitLoss(game.netAmount)}
                                   </Badge>

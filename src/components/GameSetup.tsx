@@ -260,7 +260,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                             <Badge variant="outline" size="sm">
                               {player.total_games}
                             </Badge>
-                            <Badge color={getProfitLossColor(player.total_profit)} size="sm">
+                            <Badge 
+                              color={getProfitLossColor(player.total_profit)} 
+                              size="sm"
+                              style={{
+                                backgroundColor: player.total_profit < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                                color: 'white'
+                              }}
+                            >
                               {formatProfitLoss(player.total_profit)}
                             </Badge>
                             <ActionIcon
@@ -408,7 +415,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                   <Badge variant="outline" size="sm">
                                     {gp.buy_ins} buy-in{gp.buy_ins > 1 ? 's' : ''}
                                   </Badge>
-                                  <Badge color={getProfitLossColor(gp.net_amount)} size="sm">
+                                  <Badge 
+                                    color={getProfitLossColor(gp.net_amount)} 
+                                    size="sm"
+                                    style={{
+                                      backgroundColor: gp.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                                      color: 'white'
+                                    }}
+                                  >
                                     {formatProfitLoss(gp.net_amount)}
                                   </Badge>
                                 </Group>

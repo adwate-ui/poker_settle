@@ -377,7 +377,14 @@ const GamesHistory = () => {
                       <div className="flex items-center justify-center">
                         {selectedPlayer !== "all" ? (
                           playerData && (
-                            <Badge color={getProfitLossColor(playerData.net_amount)} size="sm">
+                            <Badge 
+                              color={getProfitLossColor(playerData.net_amount)} 
+                              size="sm"
+                              style={{
+                                backgroundColor: playerData.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                                color: 'white'
+                              }}
+                            >
                               {formatProfitLoss(playerData.net_amount)}
                             </Badge>
                           )
@@ -414,7 +421,13 @@ const GamesHistory = () => {
                     </Text>
                     {selectedPlayer !== "all" && playerData ? (
                       <div>
-                        <Badge color={getProfitLossColor(playerData.net_amount)}>
+                        <Badge 
+                          color={getProfitLossColor(playerData.net_amount)}
+                          style={{
+                            backgroundColor: playerData.net_amount < 0 ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
+                            color: 'white'
+                          }}
+                        >
                           {formatProfitLoss(playerData.net_amount)}
                         </Badge>
                       </div>
