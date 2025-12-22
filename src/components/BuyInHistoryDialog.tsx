@@ -11,7 +11,10 @@ interface BuyInHistoryDialogProps {
   fetchHistory: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
+import { useIsMobile } from "@/hooks/useIsMobile";
+
 export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: BuyInHistoryDialogProps) => {
+  const isMobile = useIsMobile();
   const [history, setHistory] = useState<BuyInHistory[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,9 +42,9 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
       <ActionIcon variant="subtle" size="sm" onClick={() => setOpen(true)}>
         <History className="w-3.5 h-3.5" />
       </ActionIcon>
-      
-      <Modal 
-        opened={open} 
+
+      <Modal
+        opened={open}
         onClose={() => setOpen(false)}
         title={
           <Group gap="xs">
@@ -50,6 +53,9 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
           </Group>
         }
         size="lg"
+        centered={!isMobile}
+        yOffset={isMobile ? '5vh' : undefined}
+        scrollAreaComponent={ScrollArea.Autosize}
       >
         <ScrollArea style={{ maxHeight: 400 }}>
           {loading ? (
@@ -70,7 +76,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
               </TableHeader>
               <TableBody>
                 {history.map((entry, index) => (
-                  <TableRow 
+                  <TableRow
                     key={entry.id}
                     className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
                   >
@@ -82,7 +88,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                         ) : (
                           <TrendingDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         )}
-                        <span 
+                        <span
                           className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-orange-600 dark:text-orange-400" : "text-blue-600 dark:text-blue-400"}`}
                         >
                           {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { buildSharedViewUrl } from '@/lib/shareUtils';
 
@@ -37,13 +38,53 @@ export default function ShortLinkRedirect() {
           return;
         }
 
+        // Check if current user is the owner
+        const { data: { session } } = await supabase.auth.getSession();
+        let isOwner = false;
+
+        if (session?.user) {
+          // Check ownership based on resource type
+          if (data.resource_type === 'game') {
+            const { data: game } = await supabase
+              .from('games')
+              .select('user_id')
+              .eq('id', data.resource_id)
+              .single();
+
+            if (game && game.user_id === session.user.id) {
+              isOwner = true;
+            }
+          } else if (data.resource_type === 'player') {
+            const { data: player } = await supabase
+              .from('players')
+              .select('user_id')
+              .eq('id', data.resource_id)
+              .single();
+
+            if (player && player.user_id === session.user.id) {
+              isOwner = true;
+            }
+          }
+        }
+
+        if (isOwner) {
+          // Redirect to owner view
+          if (data.resource_type === 'game') {
+            navigate(`/games/${data.resource_id}`, { replace: true });
+            return;
+          } else if (data.resource_type === 'player') {
+            navigate(`/players/${data.resource_id}`, { replace: true });
+            return;
+          }
+        }
+
         // Redirect to shared view
         const targetUrl = buildSharedViewUrl(
           data.access_token,
           data.resource_type as 'game' | 'player',
           data.resource_id
         );
-        
+
         navigate(targetUrl, { replace: true });
       } catch (err) {
         console.error('[ShortLinkRedirect] Error:', err);
