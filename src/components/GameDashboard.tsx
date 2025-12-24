@@ -851,7 +851,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <div className="pt-4">
               <div className="space-y-2">
                 {manualTransfers.map((transfer, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg border border-primary/20">
                     <span>
                       <span className="font-semibold">{transfer.from}</span> pays{' '}
                       <span className="font-semibold">{transfer.to}</span>
@@ -1012,7 +1012,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </Text>
                 ) : (
                   settlements.map((settlement, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg border border-primary/20">
                       <span>
                         <span className="font-semibold">{settlement.from}</span> pays{' '}
                         <span className="font-semibold">{settlement.to}</span>
