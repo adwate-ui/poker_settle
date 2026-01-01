@@ -61,36 +61,32 @@ serve(async (req) => {
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.
-      Your job is to ACCURATELY count the value of the poker chips in this image.
+      Your job is to ACCURATELY segment and count the poker chips in this image.
 
-      **CRITICAL INSTRUCTION: STRICT SEPARATION OF TASKS**
+      **WORKFLOW:**
 
-      **Phase 1: Visual Detection (Find Stacks)**
+      **Step 1: SEGMENTATION (Vision)**
       - Identify every distinct vertical stack of chips.
+      - **Critical**: Separate touching stacks. If two colors touch, they are TWO different stacks.
+      - Draw a TIGHT bounding box around each stack (excluding shadows/background).
       - Identify the Color of each stack.
-      - **DO NOT COUNT THE CHIPS VISUALLY.** Your visual counting is prone to perspective errors.
-
-      **Phase 2: Geometric Calculation (Count Chips)**
-      - For each identified stack, measure specific dimensions in pixels:
+      
+      **Step 2: COUNTING (Math)**
+      - For each stack found in Step 1, use its bounding box dimensions:
         - W: Width of the stack (chip diameter).
         - H: Height of the stack (total vertical extent).
-      - **Apply this Formula**: Count = (H / W) * 12.
-      - **Rounding Rule**: Round the result to the nearest integer.
-      
-      **Example:**
-      - Stack looks like ~10 chips visually? IGNORE THIS.
-      - Measure: H=100px, W=100px.
-      - Calc: (100/100) * 12 = 12.
-      - **Final Verification**: If Calc is X.7 or higher, ALWAYS round up. (e.g. 7.7 -> 8).
+      - **Formula**: Count = (H / W) * 12.
+      - **Rounding**: Round to the nearest integer.
+      - *Note*: If the math gives a result like 7.8, it means perspective is hiding a chip. Round UP to 8.
 
       **Instructions:**
-      1.  Identify distinct vertical stacks.
-      2.  Ignore loose chips lying flat.
-      3.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
+      1.  List all stacks from Left to Right.
+      2.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
+      3.  Be precise with colors (Red, Blue, Green, Black, White).
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Stack 1 (Red): Found Stack. Color=Red. Measuring Pixels... Height=98, Width=102. Ratio=0.96. Count = 0.96 * 12 = 11.52. Rounding to 12. // Stack 2 (Blue): Found Stack. Color=Blue. Measuring... Height=45, Width=100. Ratio=0.45. Count = 0.45 * 12 = 5.4. Rounding to 5.",
+        "thinking_process": "Segmentation: I see 5 distinct stacks. Left to right: Blue, Black, Red, White, Green. // Stack 1 (Blue): H=45, W=100. Ratio=0.45. Count=5.4 -> 5. // Stack 2 (Black): H=78, W=100. Ratio=0.78. Count=9.36 -> 9.",
         "stacks": [
           { 
             "color": "red", 
