@@ -63,23 +63,23 @@ serve(async (req) => {
       You are an expert Poker Chip Specialist working at a high-stakes casino.
       Your job is to ACCURATELY count the value of the poker chips in this image.
 
-      **CRITICAL INSTRUCTION: PRIORITIZE GEOMETRIC VERIFICATION**
+      **CRITICAL INSTRUCTION: USE "UNIT HEIGHT" CALIBRATION**
+      Visual counting often fails on blurry edges or low stacks. Use the clearest stack to build a ruler.
 
-      **Method 1: Visual Ridge Counting**
-      - Count the distinct lines/ridges.
+      **Step 1: The Anchor Stack**
+      - Find the stack with the **clearest, most distinct side ridges**.
+      - Visually count these ridges carefully (Visual_Count).
+      - Measure the stack's precise vertical height in pixels (Anchor_Height).
+      - Calculate **Avg_Chip_Height = Anchor_Height / Visual_Count**.
 
-      **Method 2: Geometric Ratio (PRIMARY SOURCE OF TRUTH)**
-      - A standard poker chip is ~3.3mm thick and ~39mm wide.
-      - Ratio is roughly 1:12.
-      - Measure the stack width (W) in pixels.
-      - Measure the stack height (H) in pixels.
-      - **Estimated Count = (H / W) * 12**.
+      **Step 2: Measure All Stacks**
+      - For every stack (including the anchor):
+        - Measure its pixel height (Stack_Height).
+        - **Calculated_Count = Stack_Height / Avg_Chip_Height**.
       
-      **CORRECTION LOGIC:**
-      - **Perspective Bias**: Visual counting often MISSES the top or bottom chip due to camera angle.
-      - **Trust Math**: If the Geometric Estimate (e.g., 7.8) is higher than the Visual Count (e.g., 7), **ROUND THE GEOMETRIC ESTIMATE TO THE NEAREST INTEGER AND USE THAT.**
-      - Example: Geometric 7.8 -> Use 8. Geometric 10.8 -> Use 11.
-      - Only use Visual Count if Geometric Count is physically impossible (e.g. stack is obviously not that tall).
+      **Step 3: Verification**
+      - Round the Calculated_Count to the nearest integer.
+      - If Visual Count differs from Calculated Count by more than 1, **Trust the Calculated Count** (Perspective often hides ridges, but height rarely lies).
 
       **Instructions:**
       1.  Identify distinct vertical stacks.
@@ -89,7 +89,7 @@ serve(async (req) => {
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Stack 1 (Red): Visual 10. Geometric: W=100, H=100. Ratio=1. Chips = 1 * 12 = 12.0. Visual (10) is lower than Math (12). Perspective likely hiding chips. Corrected Count: 12. // Stack 2 (Black): Visual 7. Geometric: W=100, H=65. Ratio=0.65. Chips = 0.65 * 12 = 7.8. Rounding 7.8 gives 8. Corrected Count: 8.",
+        "thinking_process": "Anchor: Stack 3 (Red) is clearest. Height=120px. Visual Count=12. Unit Height = 10px/chip. // Stack 1 (Blue): Height=52px. Calc = 5.2 -> 5 chips. Visual looked like 4, but height confirms 5. // Stack 2: Height=80px. Calc=8 chips.",
         "stacks": [
           { 
             "color": "red", 
