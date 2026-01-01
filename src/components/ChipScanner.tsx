@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { Modal, Group, Text, Stack, FileButton, ScrollArea, Alert, Badge, Loader2 } from '@mantine/core';
-import { Camera, Upload, Check, RefreshCw, ScanEye, Layers, AlertTriangle, Eye, Info } from 'lucide-react';
+import { Modal, Group, Text, Stack, FileButton, ScrollArea, Alert, Badge } from '@mantine/core';
+import { Camera, Upload, Check, RefreshCw, ScanEye, Layers, AlertTriangle, Eye, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChipDenomination } from '@/config/chips';
 import { formatIndianNumber } from '@/lib/utils';
