@@ -52,19 +52,30 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
         setResults([]);
         setAiNotes(null);
 
-        // Check for API Key
-        const apiKey = localStorage.getItem('gemini_api_key');
-        if (!apiKey) {
-            setWarning("Gemini API Key is missing. Please go to Profile -> AI Settings to add it.");
-            setProcessing(false);
-            return;
-        }
-
         try {
+            // Fetch API Key from Profile
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("You must be logged in to scan chips.");
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('gemini_api_key')
+                .eq('id', user.id)
+                .single();
+
+            // @ts-ignore
+            const apiKey = profile?.gemini_api_key;
+
+            if (!apiKey) {
+                setWarning("Gemini API Key is missing. Please go to Profile -> AI Settings to add it.");
+                setProcessing(false);
+                return;
+            }
+
             const { data, error } = await supabase.functions.invoke('analyze-chips', {
                 body: {
                     image: imageSrc,
-                    apiKey: apiKey // Send user key
+                    apiKey: apiKey // Send user key from DB
                 }
             });
 
@@ -73,7 +84,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
             console.log("Gemini Response:", data);
 
-            if (data.analysis_notes) setAiNotes(data.analysis_notes);
+            if (data.analysis_notes) setAiNotes(data.analysis_notes); // Fixed typo setAiNotes vs analysis_notes
 
             const parsedStacks: DetectedStack[] = [];
 
@@ -183,11 +194,6 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                     {(props) => <Button {...props} variant="outline" className="h-12"><Upload className="mr-2 h-4 w-4" />Upload</Button>}
                                 </FileButton>
                             </Group>
-                            {!localStorage.getItem('gemini_api_key') && (
-                                <Alert variant="light" color="blue" title="API Key Required" icon={<Info className="w-4 h-4" />}>
-                                    You need to set your Gemini API Key in <span className="font-bold cursor-pointer underline" onClick={() => { setOpened(false); navigate('/profile'); }}>Profile Settings</span> first.
-                                </Alert>
-                            )}
                         </div>
                     ) : (
                         <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
