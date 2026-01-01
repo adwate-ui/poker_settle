@@ -91,7 +91,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
     const [warning, setWarning] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { chips } = useChips();
-    const chipsRef = useRef(chips); // Use ref for closure access in loops if needed, but standard access works fine here
+    const chipsRef = useRef(chips);
 
     useEffect(() => {
         chipsRef.current = chips;
@@ -119,11 +119,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
         startY: number,
         endY: number,
         whitePoint?: { r: number, g: number, b: number }
-    ): ChipDenomination => {
+    ): { chip: ChipDenomination, confidence: number } => {
         const votes: Record<string, number> = {};
         chips.forEach(c => votes[c.color] = 0);
+        let totalVotes = 0;
 
-        // Sample with step to be fast
         for (let y = startY; y < endY; y += 4) {
             for (let x = startX; x < endX; x += 4) {
                 const i = (y * width + x) * 4;
@@ -146,7 +146,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
                     let dist = 0;
                     if (cs < 15 || cl < 15 || cl > 85) {
-                        dist = Math.abs(l - cl) * 1.5 + Math.abs(s - cs) * 0.5;
+                        dist = Math.abs(l - cl) * 2 + Math.abs(s - cs) * 0.5;
                     } else {
                         dist = hDiff * 2 + Math.abs(s - cs) * 0.5 + Math.abs(l - cl) * 0.5; // Hue weighted heavily
                     }
@@ -157,8 +157,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     }
                 }
 
-                if (bestMatchForPixel) {
+                // Stricter Threshold: Pixel must be reasonably close to a known color
+                if (bestMatchForPixel && minDist < 50) {
                     votes[bestMatchForPixel.color]++;
+                    totalVotes++;
                 }
             }
         }
@@ -171,7 +173,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 winner = chip;
             }
         }
-        return winner;
+
+        return {
+            chip: winner,
+            confidence: totalVotes > 0 ? maxVotes / totalVotes : 0
+        };
     };
 
     const processImage = (imageSrc: string) => {
@@ -200,19 +206,16 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             const frameData = ctx.getImageData(0, 0, width, height);
 
             const blurScore = computeLaplacianVariance(frameData.data, width, height);
-            if (blurScore < 80) { // Slightly lower threshold
-                setWarning("Image is blurry. Please keep phone steady.");
-            }
+            if (blurScore < 80) setWarning("Image is blurry. Please keep phone steady.");
 
-            // --- Peak-Based Segmentation ---
-            // 1. Calculate Vertical Energy (Edge Density)
+            // --- Peak & Valley Segmentation ---
+            // 1. Vertical Energy Profile
             const vProfile = new Float32Array(width);
             for (let x = 0; x < width; x++) {
                 let colSum = 0;
                 for (let y = 10; y < height - 10; y += 2) {
                     const i = (y * width + x) * 4;
                     const i_prev = ((y - 2) * width + x) * 4;
-                    // Vertical Gradient
                     const diff = Math.abs(frameData.data[i] - frameData.data[i_prev]);
                     if (diff > 10) colSum += diff;
                 }
@@ -230,27 +233,68 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 smoothedProfile[x] = sum / cnt;
             }
 
-            // 3. Find Towers (Hills)
-            // Use adaptive threshold: Average energy + X
-            let totalE = 0;
-            for (let v of smoothedProfile) totalE += v;
-            const avgE = totalE / width;
-            const noiseFloor = avgE * 0.8; // Lower threshold to detect stacks
+            // 3. Find Valley-Separated Towers
+            const maxVal = Math.max(...smoothedProfile);
+            const noiseFloor = maxVal * 0.15;
 
-            const towers: { start: number, end: number }[] = [];
-            let inHill = false;
-            let start = 0;
-            for (let x = 0; x < width; x++) {
+            // Find all potential peaks
+            const peaks: { pos: number, val: number }[] = [];
+            for (let x = wSize; x < width - wSize; x++) {
                 if (smoothedProfile[x] > noiseFloor) {
-                    if (!inHill) { inHill = true; start = x; }
-                } else {
-                    if (inHill) {
-                        if (x - start > 20) towers.push({ start, end: x });
-                        inHill = false;
+                    if (smoothedProfile[x] >= smoothedProfile[x - 1] && smoothedProfile[x] > smoothedProfile[x + 1]) {
+                        // Check local neighborhood max
+                        let impliesPeak = true;
+                        for (let k = -15; k <= 15; k++) if (smoothedProfile[x + k] > smoothedProfile[x]) impliesPeak = false;
+                        if (impliesPeak) {
+                            if (peaks.length === 0 || x - peaks[peaks.length - 1].pos > 30) {
+                                peaks.push({ pos: x, val: smoothedProfile[x] });
+                            }
+                        }
                     }
                 }
             }
-            if (inHill && width - start > 20) towers.push({ start, end: width });
+
+            // Check valleys between peaks
+            const towers: { start: number, end: number }[] = [];
+
+            if (peaks.length > 0) {
+                if (peaks.length === 1) {
+                    // Single peak logic
+                    let s = peaks[0].pos, e = peaks[0].pos;
+                    while (s > 0 && smoothedProfile[s] > noiseFloor * 0.5) s--;
+                    while (e < width && smoothedProfile[e] > noiseFloor * 0.5) e++;
+                    if (e - s > 20) towers.push({ start: s, end: e });
+                } else {
+                    // Multiple peaks - check valleys
+                    let bounds: number[] = [];
+                    // Start boundary
+                    let s = peaks[0].pos;
+                    while (s > 0 && smoothedProfile[s] > noiseFloor * 0.5) s--;
+                    bounds.push(s);
+
+                    for (let i = 0; i < peaks.length - 1; i++) {
+                        // Find lowest point between peak i and i+1
+                        let minV = Infinity, minPos = peaks[i].pos;
+                        for (let k = peaks[i].pos; k < peaks[i + 1].pos; k++) {
+                            if (smoothedProfile[k] < minV) { minV = smoothedProfile[k]; minPos = k; }
+                        }
+                        bounds.push(minPos);
+                    }
+
+                    // End boundary
+                    let e = peaks[peaks.length - 1].pos;
+                    while (e < width && smoothedProfile[e] > noiseFloor * 0.5) e++;
+                    bounds.push(e);
+
+                    for (let i = 0; i < bounds.length - 1; i++) {
+                        if (bounds[i + 1] - bounds[i] > 20) {
+                            towers.push({ start: bounds[i], end: bounds[i + 1] });
+                        }
+                    }
+                }
+            } else {
+                towers.push({ start: width * 0.25, end: width * 0.75 });
+            }
 
             // 4. White Point
             let whitePoint = { r: 255, g: 255, b: 255 };
@@ -261,7 +305,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     const i = (Math.floor(y) * width + cx) * 4;
                     const r = frameData.data[i], g = frameData.data[i + 1], b = frameData.data[i + 2];
                     const [h, s, l] = rgbToHsl(r, g, b);
-                    if (l > 60 && s < 25 && l > maxLum) {
+                    if (l > 60 && s < 15 && l > maxLum) {
                         maxLum = l;
                         whitePoint = { r, g, b };
                     }
@@ -271,24 +315,21 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             // 5. Detection & Visualization
             const detected: DetectedStack[] = [];
 
-            // Draw Energy Profile for Debug
+            // Draw Energy Profile
             ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgba(0, 255, 255, 0.5)";
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.6)";
             ctx.beginPath();
-            const maxVal = Math.max(...smoothedProfile);
             for (let x = 0; x < width; x++) {
                 const y = height - (smoothedProfile[x] / maxVal) * (height / 4);
                 if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
 
-            // Draw Threshold Line
-            ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-            ctx.beginPath();
-            const threshY = height - (noiseFloor / maxVal) * (height / 4);
-            ctx.moveTo(0, threshY);
-            ctx.lineTo(width, threshY);
-            ctx.stroke();
+            // Draw Peaks/Bounds
+            peaks.forEach(p => {
+                ctx.fillStyle = "rgba(255, 255, 0, 0.5)"; // Yellow peaks
+                ctx.fillRect(p.pos - 2, height - 15, 4, 15);
+            });
 
             towers.forEach((tower, idx) => {
                 const cx = Math.floor((tower.start + tower.end) / 2);
@@ -317,9 +358,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 topY += 10; bottomY -= 10;
                 if (bottomY <= topY) { bottomY = height * 0.8; topY = height * 0.2; }
 
-                const matchedChip = getDominantChipColor(
+                const result = getDominantChipColor(
                     frameData.data, width,
-                    tower.start + w * 0.25, tower.end - w * 0.25,
+                    tower.start + w * 0.3,
+                    tower.end - w * 0.3,
                     topY, bottomY, whitePoint
                 );
 
@@ -330,22 +372,14 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     signal.push((frameData.data[i] + frameData.data[i + 1] + frameData.data[i + 2]) / 3);
                 }
                 const smoothed = [];
-                for (let i = 2; i < signal.length - 2; i++) {
-                    smoothed.push((signal[i - 2] + signal[i - 1] + signal[i] + signal[i + 1] + signal[i + 2]) / 5);
-                }
+                for (let i = 2; i < signal.length - 2; i++) smoothed.push((signal[i - 2] + signal[i - 1] + signal[i] + signal[i + 1] + signal[i + 2]) / 5);
                 const edges = [];
-                for (let i = 1; i < smoothed.length; i++) {
-                    edges.push(Math.abs(smoothed[i] - smoothed[i - 1]));
-                }
+                for (let i = 1; i < smoothed.length; i++) edges.push(Math.abs(smoothed[i] - smoothed[i - 1]));
                 const ac = computeAutocorrelation(edges);
-                let peakLag = 0;
-                let peakVal = 0;
+                let peakLag = 0, peakVal = 0;
                 for (let lag = 8; lag < 65 && lag < ac.length; lag++) {
-                    if (ac[lag] > ac[lag - 1] && ac[lag] > ac[lag + 1]) {
-                        if (ac[lag] > peakVal) {
-                            peakVal = ac[lag];
-                            peakLag = lag;
-                        }
+                    if (ac[lag] > ac[lag - 1] && ac[lag] > ac[lag + 1] && ac[lag] > peakVal) {
+                        peakVal = ac[lag]; peakLag = lag;
                     }
                 }
                 let count = 0;
@@ -359,32 +393,32 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 detected.push({
                     id: idx,
                     count: count,
-                    value: count * matchedChip.value,
-                    chip: matchedChip
+                    value: count * result.chip.value,
+                    chip: result.chip
                 });
 
                 // Draw Box
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = matchedChip.color === 'black' ? '#FFFFFF' : matchedChip.colorClasses?.border || matchedChip.color;
-                // Note: colorClasses not stored in ChipDenomination usually, just use 'color' string
-                // but hex code is cleaner. We use color name for now.
-                if (matchedChip.color === 'white') ctx.strokeStyle = 'gold'; // Visibility
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = result.chip.color === 'black' ? '#FFFFFF' : result.chip.color;
+                if (result.chip.color === 'white') ctx.strokeStyle = 'gold';
 
                 ctx.strokeRect(tower.start, topY - 10, w, (bottomY - topY) + 20);
 
                 // Label
-                ctx.fillStyle = "rgba(0,0,0,0.7)";
-                ctx.fillRect(tower.start, topY - 40, w, 30);
+                ctx.fillStyle = "rgba(0,0,0,0.8)";
+                ctx.fillRect(tower.start, topY - 45, w, 35);
                 ctx.fillStyle = "white";
-                ctx.font = "bold 16px Arial";
-                ctx.fillText(`${count}x ${matchedChip.label}`, tower.start + 5, topY - 20);
+                ctx.font = "bold 14px Arial";
+                ctx.fillText(`${count}x ${result.chip.label}`, tower.start + 5, topY - 25);
+                ctx.font = "10px Arial";
+                ctx.fillText(`Conf: ${(result.confidence * 100).toFixed(0)}%`, tower.start + 5, topY - 12);
             });
 
             setResults(detected);
             setProcessing(false);
-
-            // Ensure visual
             canvas.classList.remove('hidden');
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
         };
     };
 
@@ -446,20 +480,24 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                     </div>
                                     <ScrollArea.Autosize mah={300} type="scroll">
                                         <Stack gap="sm">
-                                            {results.map((stack) => (
-                                                <div key={stack.id} className="flex items-center justify-between p-2 rounded bg-muted/30 border">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-white/20`} style={{ backgroundColor: stack.chip.color === 'white' ? 'gray' : stack.chip.color }}>
-                                                            {stack.chip.label}
+                                            {results.map((stack) => {
+                                                const bgClass = stack.chip.color === 'white' ? 'bg-slate-100 border-slate-300 text-black' : `bg-${stack.chip.color}-600 text-white`;
+                                                return (
+                                                    <div key={stack.id} className="flex items-center justify-between p-2 rounded bg-muted/30 border">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white/20"
+                                                                style={{ backgroundColor: stack.chip.color === 'white' ? '#f0f0f0' : stack.chip.color, color: stack.chip.color === 'white' ? 'black' : 'white' }}>
+                                                                {stack.chip.label}
+                                                            </div>
+                                                            <div>
+                                                                <Text size="sm" fw={600}>{stack.chip.color}</Text>
+                                                                <Text size="xs" c="dimmed">{stack.count} chips</Text>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <Text size="sm" fw={600}>{stack.chip.color}</Text>
-                                                            <Text size="xs" c="dimmed">{stack.count} chips</Text>
-                                                        </div>
+                                                        <Text fw={700} size="sm">Rs. {formatIndianNumber(stack.value)}</Text>
                                                     </div>
-                                                    <Text fw={700} size="sm">Rs. {formatIndianNumber(stack.value)}</Text>
-                                                </div>
-                                            ))}
+                                                )
+                                            })}
                                         </Stack>
                                     </ScrollArea.Autosize>
                                     <div className="mt-auto pt-4 border-t">
