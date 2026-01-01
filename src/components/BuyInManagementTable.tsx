@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Modal, NumberInput, Group, Text, Stack, ScrollArea } from '@mantine/core';
+import { Modal, Group, Text, Stack, ScrollArea } from '@mantine/core';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Minus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
@@ -16,19 +16,19 @@ interface BuyInManagementTableProps {
   fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
 }
 
-export const BuyInManagementTable = ({ 
-  gamePlayers, 
+export const BuyInManagementTable = ({
+  gamePlayers,
   buyInAmount,
   onAddBuyIn,
   fetchBuyInHistory
 }: BuyInManagementTableProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [buyInCount, setBuyInCount] = useState<number | string>('');
+  const [buyInCount, setBuyInCount] = useState<number>(1);
   const [isAdding, setIsAdding] = useState(false);
 
   const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
-    if (!selectedPlayerId || !buyInCount || typeof buyInCount !== 'number' || buyInCount <= 0) {
+    if (!selectedPlayerId || typeof buyInCount !== 'number' || buyInCount === 0) {
       toast.error('Please select a player and enter a valid buy-in count');
       return { valid: false };
     }
@@ -53,19 +53,21 @@ export const BuyInManagementTable = ({
     setIsAdding(true);
     try {
       await onAddBuyIn(selectedPlayerId, buyInCount);
-      toast.success(`Added ${buyInCount} buy-in(s) for ${selectedPlayer.player.name}`);
+      const action = buyInCount > 0 ? 'Added' : 'Removed';
+      const count = Math.abs(buyInCount);
+      toast.success(`${action} ${count} buy-in(s) for ${selectedPlayer.player.name}`);
       setOpened(false);
       setSelectedPlayerId('');
-      setBuyInCount('');
+      setBuyInCount(1);
     } catch (error) {
       console.error('Error adding buy-in:', error);
-      toast.error('Failed to add buy-in');
+      toast.error('Failed to update buy-ins');
     } finally {
       setIsAdding(false);
     }
   };
 
-  const sortedPlayers = [...gamePlayers].sort((a, b) => 
+  const sortedPlayers = [...gamePlayers].sort((a, b) =>
     a.player.name.localeCompare(b.player.name)
   );
 
@@ -76,10 +78,13 @@ export const BuyInManagementTable = ({
     if (!isMobile) return name;
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return name;
-    return parts.map((part, idx) => 
+    return parts.map((part, idx) =>
       idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
     ).join(' ');
   };
+
+  const increment = () => setBuyInCount(prev => prev + 1);
+  const decrement = () => setBuyInCount(prev => prev - 1);
 
   return (
     <>
@@ -98,7 +103,7 @@ export const BuyInManagementTable = ({
           </TableHeader>
           <TableBody>
             {sortedPlayers.map((gamePlayer, index) => (
-              <TableRow 
+              <TableRow
                 key={gamePlayer.id}
                 className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
               >
@@ -115,7 +120,7 @@ export const BuyInManagementTable = ({
                   <Button
                     onClick={() => {
                       setSelectedPlayerId(gamePlayer.id);
-                      setBuyInCount('');
+                      setBuyInCount(1);
                       setOpened(true);
                     }}
                     variant="secondary"
@@ -145,49 +150,84 @@ export const BuyInManagementTable = ({
         onClose={() => {
           setOpened(false);
           setSelectedPlayerId('');
-          setBuyInCount('');
+          setBuyInCount(1);
         }}
-        title={<Text fw={700} size="lg">Add Buy-in</Text>}
+        title={<Text fw={700} size="lg">Modify Buy-ins</Text>}
         centered={!isMobile}
-        yOffset={isMobile ? '5vh' : undefined}
+        yOffset={isMobile ? '20vh' : undefined}
         size="sm"
-        scrollAreaComponent={ScrollArea.Autosize}
+        radius="lg"
       >
-        <Stack gap="md">
-          <NumberInput
-            label="Number of Buy-ins"
-            placeholder="Enter buy-in count"
-            value={buyInCount}
-            onChange={setBuyInCount}
-            min={1}
-            max={10}
-            required
-          />
+        <Stack gap="xl" className="py-2">
+          {/* Custom Stepper UI */}
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center justify-center gap-6 w-full">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-16 w-16 rounded-full border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
+                onClick={decrement}
+              >
+                <Minus className="h-8 w-8 text-primary" />
+              </Button>
 
-          <Text size="sm" c="dimmed">
-            {(() => {
-              const validBuyInCount = typeof buyInCount === 'number' ? buyInCount : 0;
-              return `This will add ${validBuyInCount} buy-in(s) worth Rs. ${formatIndianNumber(validBuyInCount * buyInAmount)}`;
-            })()}
-          </Text>
+              <div className="flex flex-col items-center min-w-[100px]">
+                <span className={`text-4xl font-black tabular-nums tracking-tight ${buyInCount < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                  {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">
+                  {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
+                </span>
+              </div>
 
-          <Group justify="flex-end" mt="md">
-            <Button 
-              variant="outline" 
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-16 w-16 rounded-full border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
+                onClick={increment}
+              >
+                <Plus className="h-8 w-8 text-primary" />
+              </Button>
+            </div>
+
+            {/* Impact Display */}
+            <div className={`p-4 rounded-xl w-full text-center border transition-colors ${buyInCount > 0
+                ? 'bg-primary/5 border-primary/10'
+                : buyInCount < 0
+                  ? 'bg-destructive/5 border-destructive/10'
+                  : 'bg-muted border-border'
+              }`}>
+              <div className="text-sm text-muted-foreground font-medium mb-1">
+                {buyInCount > 0 ? 'Adding Amount' : buyInCount < 0 ? 'Removing Amount' : 'No Change'}
+              </div>
+              <div className={`text-2xl font-bold ${buyInCount > 0 ? 'text-primary' : buyInCount < 0 ? 'text-destructive' : 'text-muted-foreground'
+                }`}>
+                Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
+              </div>
+            </div>
+          </div>
+
+          <Group justify="space-between" mt="md">
+            <Button
+              variant="ghost"
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
-                setBuyInCount('');
+                setBuyInCount(1);
               }}
+              className="text-muted-foreground hover:text-foreground"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleAddBuyIn}
-              disabled={isAdding || !selectedPlayerId || !buyInCount}
+              disabled={isAdding || !selectedPlayerId || buyInCount === 0}
+              size="lg"
+              className={`px-8 font-semibold shadow-lg transition-all ${buyInCount < 0 ? 'bg-destructive hover:bg-destructive/90' : ''
+                }`}
             >
-              {isAdding && <Loader2 className="h-4 w-4 animate-spin" />}
-              Confirm & Add
+              {isAdding && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
+              {buyInCount > 0 ? 'Confirm Add' : 'Confirm Remove'}
             </Button>
           </Group>
         </Stack>

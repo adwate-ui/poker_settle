@@ -56,6 +56,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const { createOrGetSharedLink, getShortUrl } = useSharedLink();
 
+
+  // Manual share handler is kept, but auto-replace effect is removed to prevent URL instability
   const handleShare = useCallback(async () => {
     try {
       const linkData = await createOrGetSharedLink('game', game.id);
@@ -70,7 +72,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               url: url
             });
           } catch (error) {
-            // User cancelled share or other error - fallback to copy
             console.log('Share API failed or cancelled, falling back to copy', error);
             await navigator.clipboard.writeText(url);
             toast.success("Link copied to clipboard");
@@ -84,34 +85,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.error("Failed to generate share link");
     }
   }, [game.id, game.date, createOrGetSharedLink, getShortUrl]);
-
-
-
-  // Create shared link on mount and update URL to masked public link
-  useEffect(() => {
-    const setupSharedUrl = async () => {
-      try {
-        const linkData = await createOrGetSharedLink('game', game.id);
-        if (linkData) {
-          const shortUrl = getShortUrl(linkData.shortCode);
-          // Only replace state if we're not already on the short URL path (basic check)
-          // We use the shortCode to verify
-          if (!window.location.pathname.includes(`/s/${linkData.shortCode}`)) {
-            // We can't actually replace the path to /s/code directly because that might trigger router issues 
-            // if not handled carefully, but more importantly, we want the Valid URL to be in the bar.
-            // Since our app is an SPA, we CAN replace the history state with the short URL
-            // provided the server/app handles that URL on reload.
-            // ShortLinkRedirect handles /s/:code.
-            window.history.replaceState({ ...window.history.state, as: shortUrl }, "", shortUrl);
-          }
-        }
-      } catch (error) {
-        console.error("Error setting up shared URL:", error);
-      }
-    };
-
-    setupSharedUrl();
-  }, [game.id, createOrGetSharedLink, getShortUrl]);
 
   useEffect(() => {
     const loadTablePosition = async () => {
