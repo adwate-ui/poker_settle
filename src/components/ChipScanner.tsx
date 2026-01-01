@@ -97,15 +97,28 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 return;
             }
 
-            const { data, error } = await supabase.functions.invoke('analyze-chips', {
-                body: {
+            // Use raw fetch to debug 500 errors
+            const { data: { session } } = await supabase.auth.getSession();
+            const functionUrl = 'https://xfahfllkbutljcowwxpx.supabase.co/functions/v1/analyze-chips';
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token || apiKey}`, // Use session token or fallback
+                },
+                body: JSON.stringify({
                     image: imageSrc,
-                    apiKey: apiKey // Send user key from DB
-                }
+                    apiKey: apiKey
+                })
             });
 
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("Edge Function Error Body:", data);
+                throw new Error(data.error || data.details || "Unknown Edge Function Error");
+            }
 
             console.log("Gemini Response:", data);
 
