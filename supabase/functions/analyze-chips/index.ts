@@ -22,12 +22,19 @@ serve(async (req) => {
     // Initialize Gemini (User Key takes precedence, fallback to Server Env)
     const apiKey = userApiKey || Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
-      throw new Error('Gemini API Key is missing. Please add it in Profile settings.')
+      console.error("Missing Gemini API Key")
+      return new Response(JSON.stringify({ error: 'Missing Gemini API Key in request body or environment.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      })
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using the specific model requested by the user
+    // Reverting to the user-requested model
     const model = genAI.getGenerativeModel({ model: 'gemini-3.0-pro-preview' })
+
+    // Log image size for debugging
+    console.log(`Processing image. Length: ${image.length} chars`)
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.

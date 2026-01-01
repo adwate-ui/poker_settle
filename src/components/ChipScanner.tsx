@@ -34,12 +34,37 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
     const handleFileChange = (file: File | null) => {
         if (file) {
+            // Compress Image Logic
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (e.target?.result) {
-                    const src = e.target.result as string;
-                    setImage(src);
-                    processWithGemini(src);
+                    const img = new window.Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_DIM = 1000;
+
+                        if (width > height && width > MAX_DIM) {
+                            height *= MAX_DIM / width;
+                            width = MAX_DIM;
+                        } else if (height > MAX_DIM) {
+                            width *= MAX_DIM / height;
+                            height = MAX_DIM;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return;
+
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                        setImage(compressedBase64);
+                        processWithGemini(compressedBase64);
+                    };
+                    img.src = e.target.result as string;
                 }
             };
             reader.readAsDataURL(file);

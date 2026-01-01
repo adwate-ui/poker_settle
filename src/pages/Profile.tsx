@@ -100,16 +100,16 @@ const GameSettingsTab = () => {
 
 const AISettingsTab = () => {
   const [apiKey, setApiKey] = useState('');
-  const [showKey, setShowKey] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-
     const fetchKey = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('gemini_api_key')
         .eq('id', user.id)
@@ -117,8 +117,8 @@ const AISettingsTab = () => {
 
       // @ts-ignore
       if (data?.gemini_api_key) {
-        // @ts-ignore
-        setApiKey(data.gemini_api_key);
+        setApiKey(data.gemini_api_key); // Keep actual key in state but mask UI
+        setIsSaved(true);
       }
       setLoading(false);
     };
@@ -139,8 +139,14 @@ const AISettingsTab = () => {
       toast.error("Failed to save API Key");
       console.error(error);
     } else {
-      toast.success("API Key saved to your profile");
+      toast.success("API Key saved");
+      setIsSaved(true);
     }
+  };
+
+  const handleChange = () => {
+    setApiKey('');
+    setIsSaved(false);
   };
 
   return (
@@ -157,27 +163,22 @@ const AISettingsTab = () => {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Gemini API Key</label>
-          <p className="text-xs text-muted-foreground">Required for the AI-powered chip scanning feature. The key is stored securely in your profile.</p>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
-                type={showKey ? "text" : "password"}
+                type={isSaved && !showKey ? "password" : "text"}
                 placeholder="AIzaSy..."
-                value={apiKey}
+                value={isSaved ? "••••••••••••••••••••••••" : apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                disabled={loading}
+                disabled={isSaved || loading}
+                className={isSaved ? "bg-muted text-muted-foreground" : ""}
               />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
-                onClick={() => setShowKey(!showKey)}
-                disabled={loading}
-              >
-                {showKey ? <Key className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
             </div>
-            <Button onClick={handleSave} disabled={loading}>{loading ? 'Saving...' : 'Save'}</Button>
+            {isSaved ? (
+              <Button onClick={handleChange} variant="outline">Change Key</Button>
+            ) : (
+              <Button onClick={handleSave} disabled={loading}>{loading ? 'Saving...' : 'Save'}</Button>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
             Don't have a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Get one here</a>.
