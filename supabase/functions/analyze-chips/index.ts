@@ -55,23 +55,30 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using gemini-2.0-flash-exp (Latest reliable model as of Dec 2025 context)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    // Using gemini-2.5-pro (Verified GA model from mid-2025)
+    // This model balances the advanced reasoning of 3.0-preview with the stability of 1.5-pro.
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.
       Your job is to ACCURATELY count the value of the poker chips in this image.
 
-      Instructions:
-      1. Identify distinct vertical stacks of chips.
-      2. For each stack, identify the color (red, blue, green, white, black, etc.).
-      3. Count the EXACT number of chips in each stack. Look closely at the side ridges/stripes.
-      4. IGNORE any loose chips lying flat if they are not part of a stack.
-      5. IGNORE reflections or background noise.
-      6. Provide a bounding box [ymin, xmin, ymax, xmax] for each stack (normalized 0-1000).
+      **CRITICAL INSTRUCTION: THINK STEP-BY-STEP**
+      Counting chips in a stack requires looking at the *side ridges/stripes*. 
+      1.  For each stack, zoom in on the side pattern.
+      2.  Count the alternating color stripes that denote individual chips.
+      3.  Verify your count by looking at the height relative to known chip thickness.
+      4.  Identify the color of the stack.
+
+      **Instructions:**
+      1.  Identify distinct vertical stacks.
+      2.  Ignore loose chips lying flat.
+      3.  Ignore reflections.
+      4.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
 
       Output strictly as valid JSON in the following format:
       {
+        "thinking_process": "Stack 1 (Red): I see clear ridges. Counting from bottom up: 1, 2, 3... I count 10 stripes. Stack 2 (Blue): slightly blurry but I see...",
         "stacks": [
           { 
             "color": "red", 
@@ -80,7 +87,7 @@ serve(async (req) => {
             "box_2d": [100, 200, 500, 300] 
           }
         ],
-        "analysis_notes": "Brief comment."
+        "analysis_notes": "Brief summary for the user."
       }
 
       Do not include markdown formatting (like \`\`\`json). Just the raw JSON string.
