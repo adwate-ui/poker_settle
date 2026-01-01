@@ -27,6 +27,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
     const [processing, setProcessing] = useState(false);
     const [results, setResults] = useState<DetectedStack[]>([]);
     const [warning, setWarning] = useState<string | null>(null);
+    const [thinkingProcess, setThinkingProcess] = useState<string | null>(null);
     const [aiNotes, setAiNotes] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { chips } = useChips();
@@ -294,6 +295,14 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                     <Alert variant="light" color="blue" icon={<Eye className="h-4 w-4" />}>
                                         <Text size="xs">{aiNotes}</Text>
                                     </Alert>
+                                )}
+                                {thinkingProcess && (
+                                    <details className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border">
+                                        <summary className="cursor-pointer font-medium hover:text-primary">View AI Thinking Process</summary>
+                                        <div className="mt-2 whitespace-pre-wrap font-mono p-2 bg-black/5 rounded">
+                                            {thinkingProcess}
+                                        </div>
+                                    </details>
                                 )}
                                 <div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-4 flex-1">
                                     <div className="flex items-center justify-between pb-2 border-b">
