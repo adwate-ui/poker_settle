@@ -83,8 +83,17 @@ export const BuyInManagementTable = ({
     ).join(' ');
   };
 
-  const increment = () => setBuyInCount(prev => prev + 1);
-  const decrement = () => setBuyInCount(prev => prev - 1);
+  const selectedPlayerName = gamePlayers.find(gp => gp.id === selectedPlayerId)?.player.name || '';
+
+  const increment = () => setBuyInCount(prev => {
+    const next = prev + 1;
+    return next === 0 ? 1 : next;
+  });
+
+  const decrement = () => setBuyInCount(prev => {
+    const next = prev - 1;
+    return next === 0 ? -1 : next;
+  });
 
   return (
     <>
@@ -95,10 +104,7 @@ export const BuyInManagementTable = ({
               <TableHead className="text-sm font-bold">Player</TableHead>
               <TableHead className="text-sm font-bold">Buy-ins</TableHead>
               <TableHead className="text-sm font-bold">Total</TableHead>
-              <TableHead className="text-sm font-bold w-[80px]"></TableHead>
-              {fetchBuyInHistory && (
-                <TableHead className="text-sm font-bold w-[50px]"></TableHead>
-              )}
+              <TableHead className="text-sm font-bold w-[90px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -117,28 +123,28 @@ export const BuyInManagementTable = ({
                   <span className="font-semibold text-sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => {
-                      setSelectedPlayerId(gamePlayer.id);
-                      setBuyInCount(1);
-                      setOpened(true);
-                    }}
-                    variant="secondary"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={() => {
+                        setSelectedPlayerId(gamePlayer.id);
+                        setBuyInCount(1);
+                        setOpened(true);
+                      }}
+                      variant="secondary"
+                      size="sm"
+                      className="h-8 w-8 p-0 shrink-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    {fetchBuyInHistory && (
+                      <BuyInHistoryDialog
+                        gamePlayerId={gamePlayer.id}
+                        playerName={gamePlayer.player.name}
+                        fetchHistory={fetchBuyInHistory}
+                      />
+                    )}
+                  </div>
                 </TableCell>
-                {fetchBuyInHistory && (
-                  <TableCell>
-                    <BuyInHistoryDialog
-                      gamePlayerId={gamePlayer.id}
-                      playerName={gamePlayer.player.name}
-                      fetchHistory={fetchBuyInHistory}
-                    />
-                  </TableCell>
-                )}
               </TableRow>
             ))}
           </TableBody>
@@ -152,7 +158,7 @@ export const BuyInManagementTable = ({
           setSelectedPlayerId('');
           setBuyInCount(1);
         }}
-        title={<Text fw={700} size="lg">Modify Buy-ins</Text>}
+        title={<Text fw={700} size="lg">Modify Buy-ins - {selectedPlayerName}</Text>}
         centered={!isMobile}
         yOffset={isMobile ? '20vh' : undefined}
         size="sm"
@@ -164,11 +170,10 @@ export const BuyInManagementTable = ({
             <div className="flex items-center justify-center gap-6 w-full">
               <Button
                 variant="outline"
-                size="icon"
-                className="h-16 w-16 rounded-full border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
+                className="h-14 w-14 border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
                 onClick={decrement}
               >
-                <Minus className="h-8 w-8 text-primary" />
+                <Minus className="h-6 w-6 text-primary" />
               </Button>
 
               <div className="flex flex-col items-center min-w-[100px]">
@@ -182,20 +187,19 @@ export const BuyInManagementTable = ({
 
               <Button
                 variant="outline"
-                size="icon"
-                className="h-16 w-16 rounded-full border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
+                className="h-14 w-14 border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
                 onClick={increment}
               >
-                <Plus className="h-8 w-8 text-primary" />
+                <Plus className="h-6 w-6 text-primary" />
               </Button>
             </div>
 
             {/* Impact Display */}
             <div className={`p-4 rounded-xl w-full text-center border transition-colors ${buyInCount > 0
-                ? 'bg-primary/5 border-primary/10'
-                : buyInCount < 0
-                  ? 'bg-destructive/5 border-destructive/10'
-                  : 'bg-muted border-border'
+              ? 'bg-primary/5 border-primary/10'
+              : buyInCount < 0
+                ? 'bg-destructive/5 border-destructive/10'
+                : 'bg-muted border-border'
               }`}>
               <div className="text-sm text-muted-foreground font-medium mb-1">
                 {buyInCount > 0 ? 'Adding Amount' : buyInCount < 0 ? 'Removing Amount' : 'No Change'}
