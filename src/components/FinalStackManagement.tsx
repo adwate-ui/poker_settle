@@ -7,15 +7,16 @@ import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { ChipScanner } from './ChipScanner';
 
 interface FinalStackManagementProps {
   gamePlayers: GamePlayer[];
   onUpdateFinalStack: (gamePlayerId: string, finalStack: number) => Promise<void>;
 }
 
-export const FinalStackManagement = ({ 
+export const FinalStackManagement = ({
   gamePlayers,
-  onUpdateFinalStack 
+  onUpdateFinalStack
 }: FinalStackManagementProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
@@ -49,7 +50,7 @@ export const FinalStackManagement = ({
     }
   };
 
-  const sortedPlayers = [...gamePlayers].sort((a, b) => 
+  const sortedPlayers = [...gamePlayers].sort((a, b) =>
     a.player.name.localeCompare(b.player.name)
   );
 
@@ -60,7 +61,7 @@ export const FinalStackManagement = ({
     if (!isMobile) return name;
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return name;
-    return parts.map((part, idx) => 
+    return parts.map((part, idx) =>
       idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
     ).join(' ');
   };
@@ -75,12 +76,12 @@ export const FinalStackManagement = ({
             <TableRow className="bg-primary/10 hover:bg-primary/15">
               <TableHead className="text-sm font-bold">Player</TableHead>
               <TableHead className="text-sm font-bold">Final Stack</TableHead>
-              <TableHead className="text-sm font-bold w-[80px]"></TableHead>
+              <TableHead className="text-sm font-bold w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedPlayers.map((gamePlayer, index) => (
-              <TableRow 
+              <TableRow
                 key={gamePlayer.id}
                 className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
               >
@@ -91,14 +92,19 @@ export const FinalStackManagement = ({
                   <span className="font-semibold text-sm">Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}</span>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => handleStartEdit(gamePlayer)}
-                    variant="secondary"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      onClick={() => handleStartEdit(gamePlayer)}
+                      variant="secondary"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <ChipScanner
+                      onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -130,8 +136,8 @@ export const FinalStackManagement = ({
           />
 
           <Group justify="flex-end" mt="md">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setOpened(false);
                 setSelectedPlayerId('');
@@ -140,7 +146,7 @@ export const FinalStackManagement = ({
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleSaveEdit}
               disabled={isUpdating || editValue === '' || editValue == null}
             >
