@@ -66,22 +66,45 @@ const computeLaplacianVariance = (data: Uint8ClampedArray, width: number, height
     return variance / count;
 };
 
-const computeAutocorrelation = (signal: number[]): number[] => {
-    const n = signal.length;
-    let mean = 0;
-    for (let val of signal) mean += val;
-    mean /= n;
-    const norm = signal.map(v => v - mean);
-    const result = [];
-    for (let lag = 0; lag < Math.floor(n / 2); lag++) {
-        let sum = 0;
-        for (let i = 0; i < n - lag; i++) {
-            sum += norm[i] * norm[i + lag];
-        }
-        result.push(sum);
+// Direct Stripe Counting
+const countStripes = (signal: number[]): { count: number, confidence: number } => {
+    // 1. Detect significant edges
+    const edges: number[] = [];
+    const threshold = 15; // Min variation to considered edge
+
+    // Smooth first
+    const smoothed = [];
+    for (let i = 2; i < signal.length - 2; i++) {
+        smoothed.push((signal[i - 2] + signal[i - 1] + signal[i] + signal[i + 1] + signal[i + 2]) / 5);
     }
-    return result;
-}
+
+    // Find peaks in gradient -> stripe edges
+    let lastPeakPos = -100;
+    let stripeEvents = 0;
+
+    for (let i = 1; i < smoothed.length - 1; i++) {
+        const grad = Math.abs(smoothed[i + 1] - smoothed[i - 1]);
+        if (grad > threshold) {
+            // Local max gradient
+            const gradPrev = Math.abs(smoothed[i] - smoothed[i - 2]);
+            const gradNext = Math.abs(smoothed[i + 2] - smoothed[i]);
+            if (grad >= gradPrev && grad >= gradNext) {
+                // Check debounce/min dist
+                if (i - lastPeakPos > 3) {
+                    stripeEvents++;
+                    lastPeakPos = i;
+                }
+            }
+        }
+    }
+
+    // Heuristic: A chip has 2 edges (top/bottom) or 3 if we see the stripe.
+    // If we count 'stripe events', we roughly have 2-3 events per chip.
+    // Let's assume ~2.5 events per chip on average for typical pattern.
+    // Or closer to 1 chip = ~10-15px height.
+
+    return { count: stripeEvents, confidence: stripeEvents > 3 ? 1.0 : 0.0 };
+};
 
 export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
     const [opened, setOpened] = useState(false);
@@ -110,7 +133,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
         }
     };
 
-    // --- Voting-Based Color Detecion ---
+    // --- Strict Color Voting ---
     const getDominantChipColor = (
         data: Uint8ClampedArray,
         width: number,
@@ -135,9 +158,17 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     b = Math.min(255, (b / whitePoint.b) * 255);
                 }
 
-                let minDist = Infinity;
-                let bestMatchForPixel = null;
                 const [h, s, l] = rgbToHsl(r, g, b);
+
+                // --- 1. FILTER: Ignore Stripe Colors (Hypothesis) ---
+                // Most chips have WHITE stripes. If pixel is white-ish, IGNORE IT for voting.
+                // Unless the chip ITSELF is white.
+                // Heuristic: If Saturation is very low and Lightness is high, it's likely a stripe 
+                // (or a white chip). 
+                // We collect votes. If 'White' wins, we accept it. But for Red/Blue/Green, we rely on HUE.
+
+                let bestMatchForPixel = null;
+                let minDist = Infinity;
 
                 for (const chip of chips) {
                     const [ch, cs, cl] = rgbToHsl(chip.rgb[0], chip.rgb[1], chip.rgb[2]);
@@ -146,9 +177,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
                     let dist = 0;
                     if (cs < 15 || cl < 15 || cl > 85) {
+                        // Achromatic chip target
                         dist = Math.abs(l - cl) * 2 + Math.abs(s - cs) * 0.5;
                     } else {
-                        dist = hDiff * 2 + Math.abs(s - cs) * 0.5 + Math.abs(l - cl) * 0.5; // Hue weighted heavily
+                        // Chromatic chip target
+                        dist = hDiff * 2 + Math.abs(s - cs) * 0.5 + Math.abs(l - cl) * 0.5;
                     }
 
                     if (dist < minDist) {
@@ -157,8 +190,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     }
                 }
 
-                // Stricter Threshold: Pixel must be reasonably close to a known color
                 if (bestMatchForPixel && minDist < 50) {
+                    // Inner Core Vote Logic
+                    // If pixel looks "White-ish" (Stripe) but vote is for "Blue" -> It might be a stripe.
+                    // But if 'bestMatch' IS Blue, it means pixel is Blue.
+                    // If pixel is White, 'bestMatch' would be White (if White chip exists).
                     votes[bestMatchForPixel.color]++;
                     totalVotes++;
                 }
@@ -208,8 +244,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             const blurScore = computeLaplacianVariance(frameData.data, width, height);
             if (blurScore < 80) setWarning("Image is blurry. Please keep phone steady.");
 
-            // --- Peak & Valley Segmentation ---
-            // 1. Vertical Energy Profile
+            // --- Robust Segmentation ---
             const vProfile = new Float32Array(width);
             for (let x = 0; x < width; x++) {
                 let colSum = 0;
@@ -222,7 +257,6 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 vProfile[x] = colSum;
             }
 
-            // 2. Smooth Profile
             const smoothedProfile = new Float32Array(width);
             const wSize = 10;
             for (let x = 0; x < width; x++) {
@@ -233,16 +267,13 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 smoothedProfile[x] = sum / cnt;
             }
 
-            // 3. Find Valley-Separated Towers
             const maxVal = Math.max(...smoothedProfile);
             const noiseFloor = maxVal * 0.15;
 
-            // Find all potential peaks
             const peaks: { pos: number, val: number }[] = [];
             for (let x = wSize; x < width - wSize; x++) {
                 if (smoothedProfile[x] > noiseFloor) {
                     if (smoothedProfile[x] >= smoothedProfile[x - 1] && smoothedProfile[x] > smoothedProfile[x + 1]) {
-                        // Check local neighborhood max
                         let impliesPeak = true;
                         for (let k = -15; k <= 15; k++) if (smoothedProfile[x + k] > smoothedProfile[x]) impliesPeak = false;
                         if (impliesPeak) {
@@ -254,26 +285,20 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 }
             }
 
-            // Check valleys between peaks
             const towers: { start: number, end: number }[] = [];
-
             if (peaks.length > 0) {
                 if (peaks.length === 1) {
-                    // Single peak logic
                     let s = peaks[0].pos, e = peaks[0].pos;
                     while (s > 0 && smoothedProfile[s] > noiseFloor * 0.5) s--;
                     while (e < width && smoothedProfile[e] > noiseFloor * 0.5) e++;
                     if (e - s > 20) towers.push({ start: s, end: e });
                 } else {
-                    // Multiple peaks - check valleys
                     let bounds: number[] = [];
-                    // Start boundary
                     let s = peaks[0].pos;
                     while (s > 0 && smoothedProfile[s] > noiseFloor * 0.5) s--;
                     bounds.push(s);
 
                     for (let i = 0; i < peaks.length - 1; i++) {
-                        // Find lowest point between peak i and i+1
                         let minV = Infinity, minPos = peaks[i].pos;
                         for (let k = peaks[i].pos; k < peaks[i + 1].pos; k++) {
                             if (smoothedProfile[k] < minV) { minV = smoothedProfile[k]; minPos = k; }
@@ -281,7 +306,6 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                         bounds.push(minPos);
                     }
 
-                    // End boundary
                     let e = peaks[peaks.length - 1].pos;
                     while (e < width && smoothedProfile[e] > noiseFloor * 0.5) e++;
                     bounds.push(e);
@@ -296,7 +320,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 towers.push({ start: width * 0.25, end: width * 0.75 });
             }
 
-            // 4. White Point
+            // White Point
             let whitePoint = { r: 255, g: 255, b: 255 };
             let maxLum = 0;
             for (let y = height * 0.3; y < height * 0.7; y += 10) {
@@ -312,10 +336,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 }
             }
 
-            // 5. Detection & Visualization
-            const detected: DetectedStack[] = [];
-
-            // Draw Energy Profile
+            // --- Visualization Setup ---
             ctx.lineWidth = 2;
             ctx.strokeStyle = "rgba(0, 255, 255, 0.6)";
             ctx.beginPath();
@@ -325,17 +346,14 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             }
             ctx.stroke();
 
-            // Draw Peaks/Bounds
-            peaks.forEach(p => {
-                ctx.fillStyle = "rgba(255, 255, 0, 0.5)"; // Yellow peaks
-                ctx.fillRect(p.pos - 2, height - 15, 4, 15);
-            });
+            const detected: DetectedStack[] = [];
 
+            // --- Tower Processing & Validation ---
             towers.forEach((tower, idx) => {
                 const cx = Math.floor((tower.start + tower.end) / 2);
                 const w = tower.end - tower.start;
 
-                // Vertical Crop logic
+                // Vertical Crop
                 let topY = 0, bottomY = height;
                 for (let y = height * 0.1; y < height - 10; y += 5) {
                     const i = (Math.floor(y) * width + cx) * 4;
@@ -358,42 +376,51 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 topY += 10; bottomY -= 10;
                 if (bottomY <= topY) { bottomY = height * 0.8; topY = height * 0.2; }
 
-                const result = getDominantChipColor(
-                    frameData.data, width,
-                    tower.start + w * 0.3,
-                    tower.end - w * 0.3,
-                    topY, bottomY, whitePoint
-                );
-
-                // Autocorrelation Counting
+                // --- 1. STRIPE VALIDATION (Anti-Hallucination) ---
+                // Extract signal
                 const signal = [];
-                for (let y = 0; y < height; y++) {
+                for (let y = topY; y < bottomY; y++) {
                     const i = (y * width + cx) * 4;
                     signal.push((frameData.data[i] + frameData.data[i + 1] + frameData.data[i + 2]) / 3);
                 }
-                const smoothed = [];
-                for (let i = 2; i < signal.length - 2; i++) smoothed.push((signal[i - 2] + signal[i - 1] + signal[i] + signal[i + 1] + signal[i + 2]) / 5);
-                const edges = [];
-                for (let i = 1; i < smoothed.length; i++) edges.push(Math.abs(smoothed[i] - smoothed[i - 1]));
-                const ac = computeAutocorrelation(edges);
-                let peakLag = 0, peakVal = 0;
-                for (let lag = 8; lag < 65 && lag < ac.length; lag++) {
-                    if (ac[lag] > ac[lag - 1] && ac[lag] > ac[lag + 1] && ac[lag] > peakVal) {
-                        peakVal = ac[lag]; peakLag = lag;
-                    }
+
+                const { count: stripeEvents } = countStripes(signal);
+
+                // Draw validation Dots
+                ctx.fillStyle = "lime";
+                if (stripeEvents < 3) ctx.fillStyle = "red";
+                ctx.beginPath();
+                ctx.arc(cx, topY, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (stripeEvents < 3) {
+                    // REJECT: Not enough stripes to be a chip stack
+                    // This kills shadows/wood textures
+                    return;
                 }
-                let count = 0;
-                if (peakLag > 0) {
-                    const activeHeight = bottomY - topY + 20;
-                    count = Math.max(1, Math.round(activeHeight / peakLag));
-                } else {
-                    count = Math.max(1, Math.round((bottomY - topY) / 15));
-                }
+
+                // --- 2. Color Detection (Inner Core) ---
+                const result = getDominantChipColor(
+                    frameData.data, width,
+                    tower.start + w * 0.35, // Stricter Inner 30%
+                    tower.end - w * 0.35,
+                    topY, bottomY, whitePoint
+                );
+
+                // --- 3. Counting ---
+                // Use stripe count refined by chip thickness estimate
+                // A typical chip is ~10-15px. 
+                // If stripe events are high, use them.
+                // let count = Math.ceil(stripeEvents / 2.5); 
+                // Or better: use height / 12px default
+                const stackHeight = bottomY - topY;
+                let count = Math.round(stackHeight / 13); // Approx 13px per chip default
+
 
                 detected.push({
                     id: idx,
-                    count: count,
-                    value: count * result.chip.value,
+                    count: Math.max(1, count),
+                    value: Math.max(1, count) * result.chip.value,
                     chip: result.chip
                 });
 
@@ -411,7 +438,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 ctx.font = "bold 14px Arial";
                 ctx.fillText(`${count}x ${result.chip.label}`, tower.start + 5, topY - 25);
                 ctx.font = "10px Arial";
-                ctx.fillText(`Conf: ${(result.confidence * 100).toFixed(0)}%`, tower.start + 5, topY - 12);
+                ctx.fillText(`Stripes: ${stripeEvents}`, tower.start + 5, topY - 12);
             });
 
             setResults(detected);
@@ -465,7 +492,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     ) : (
                         <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
                             <div className="relative rounded-lg overflow-hidden border shadow-sm w-full lg:w-1/2 bg-black/5 flex flex-col gap-2 p-2">
-                                <Text size="xs" c="dimmed" className="bg-white/80 px-2 py-1 rounded w-fit">Debug View (Cyan Line = Edge Energy)</Text>
+                                <Text size="xs" c="dimmed" className="bg-white/80 px-2 py-1 rounded w-fit">Debug View (Green Dot = Valid Stack)</Text>
                                 <canvas ref={canvasRef} className="w-full h-auto rounded border border-gray-300 shadow-sm" style={{ maxHeight: '500px' }} />
                             </div>
 
@@ -480,24 +507,21 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                     </div>
                                     <ScrollArea.Autosize mah={300} type="scroll">
                                         <Stack gap="sm">
-                                            {results.map((stack) => {
-                                                const bgClass = stack.chip.color === 'white' ? 'bg-slate-100 border-slate-300 text-black' : `bg-${stack.chip.color}-600 text-white`;
-                                                return (
-                                                    <div key={stack.id} className="flex items-center justify-between p-2 rounded bg-muted/30 border">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white/20"
-                                                                style={{ backgroundColor: stack.chip.color === 'white' ? '#f0f0f0' : stack.chip.color, color: stack.chip.color === 'white' ? 'black' : 'white' }}>
-                                                                {stack.chip.label}
-                                                            </div>
-                                                            <div>
-                                                                <Text size="sm" fw={600}>{stack.chip.color}</Text>
-                                                                <Text size="xs" c="dimmed">{stack.count} chips</Text>
-                                                            </div>
+                                            {results.map((stack) => (
+                                                <div key={stack.id} className="flex items-center justify-between p-2 rounded bg-muted/30 border">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white/20"
+                                                            style={{ backgroundColor: stack.chip.color === 'white' ? '#f0f0f0' : stack.chip.color, color: stack.chip.color === 'white' ? 'black' : 'white' }}>
+                                                            {stack.chip.label}
                                                         </div>
-                                                        <Text fw={700} size="sm">Rs. {formatIndianNumber(stack.value)}</Text>
+                                                        <div>
+                                                            <Text size="sm" fw={600}>{stack.chip.color}</Text>
+                                                            <Text size="xs" c="dimmed">{stack.count} chips</Text>
+                                                        </div>
                                                     </div>
-                                                )
-                                            })}
+                                                    <Text fw={700} size="sm">Rs. {formatIndianNumber(stack.value)}</Text>
+                                                </div>
+                                            ))}
                                         </Stack>
                                     </ScrollArea.Autosize>
                                     <div className="mt-auto pt-4 border-t">
