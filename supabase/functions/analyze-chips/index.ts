@@ -55,20 +55,27 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using gemini-2.5-pro (Verified GA model from mid-2025)
-    // This model balances the advanced reasoning of 3.0-preview with the stability of 1.5-pro.
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
+    // Using gemini-2.0-flash-thinking-exp-1219 (Thinking Model)
+    // This model is specifically fine-tuned for recursive reasoning and self-correction.
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-thinking-exp-1219' })
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.
       Your job is to ACCURATELY count the value of the poker chips in this image.
 
-      **CRITICAL INSTRUCTION: THINK STEP-BY-STEP**
-      Counting chips in a stack requires looking at the *side ridges/stripes*. 
-      1.  For each stack, zoom in on the side pattern.
-      2.  Count the alternating color stripes that denote individual chips.
-      3.  Verify your count by looking at the height relative to known chip thickness.
-      4.  Identify the color of the stack.
+      **CRITICAL INSTRUCTION: USE TWO METHODS TO VERIFY COUNT**
+
+      **Method 1: Visual Ridge Counting**
+      - Zoom in on the side patterns.
+      - Count the distinct lines/ridges.
+
+      **Method 2: Geometric Ratio (Sanity Check)**
+      - A standard poker chip is ~3.3mm thick and ~39mm wide.
+      - Ratio is roughly 1:12.
+      - Measure the stack width (W) in pixels.
+      - Measure the stack height (H) in pixels.
+      - Estimated Count = (H / W) * 12.
+      - *Compare your Visual Count with this Estimate.* If they differ significantly, RE-COUNT.
 
       **Instructions:**
       1.  Identify distinct vertical stacks.
@@ -78,11 +85,11 @@ serve(async (req) => {
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Stack 1 (Red): I see clear ridges. Counting from bottom up: 1, 2, 3... I count 10 stripes. Stack 2 (Blue): slightly blurry but I see...",
+        "thinking_process": "Stack 1 (Red): Visual count shows ~12 ridges. Geometric Check: Width is ~100px, Height is ~100px. Ratio 1:1 implies ~12 chips. Matches. // Stack 2 (Blue): Visual count 8. Geometric: Width 100px, Height 40px. Ratio 0.4 implies ~5 chips. Visual count is likely hallucinated, adjusting to 5.",
         "stacks": [
           { 
             "color": "red", 
-            "count": 10, 
+            "count": 12, 
             "confidence": 0.95,
             "box_2d": [100, 200, 500, 300] 
           }
