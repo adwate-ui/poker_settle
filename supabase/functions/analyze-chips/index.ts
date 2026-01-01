@@ -63,19 +63,23 @@ serve(async (req) => {
       You are an expert Poker Chip Specialist working at a high-stakes casino.
       Your job is to ACCURATELY count the value of the poker chips in this image.
 
-      **CRITICAL INSTRUCTION: USE TWO METHODS TO VERIFY COUNT**
+      **CRITICAL INSTRUCTION: PRIORITIZE GEOMETRIC VERIFICATION**
 
       **Method 1: Visual Ridge Counting**
-      - Zoom in on the side patterns.
       - Count the distinct lines/ridges.
 
-      **Method 2: Geometric Ratio (Sanity Check)**
+      **Method 2: Geometric Ratio (PRIMARY SOURCE OF TRUTH)**
       - A standard poker chip is ~3.3mm thick and ~39mm wide.
       - Ratio is roughly 1:12.
       - Measure the stack width (W) in pixels.
       - Measure the stack height (H) in pixels.
-      - Estimated Count = (H / W) * 12.
-      - *Compare your Visual Count with this Estimate.* If they differ significantly, RE-COUNT.
+      - **Estimated Count = (H / W) * 12**.
+      
+      **CORRECTION LOGIC:**
+      - **Perspective Bias**: Visual counting often MISSES the top or bottom chip due to camera angle.
+      - **Trust Math**: If the Geometric Estimate (e.g., 7.8) is higher than the Visual Count (e.g., 7), **ROUND THE GEOMETRIC ESTIMATE TO THE NEAREST INTEGER AND USE THAT.**
+      - Example: Geometric 7.8 -> Use 8. Geometric 10.8 -> Use 11.
+      - Only use Visual Count if Geometric Count is physically impossible (e.g. stack is obviously not that tall).
 
       **Instructions:**
       1.  Identify distinct vertical stacks.
@@ -85,7 +89,7 @@ serve(async (req) => {
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Stack 1 (Red): Visual count shows ~12 ridges. Geometric Check: Width is ~100px, Height is ~100px. Ratio 1:1 implies ~12 chips. Matches. // Stack 2 (Blue): Visual count 8. Geometric: Width 100px, Height 40px. Ratio 0.4 implies ~5 chips. Visual count is likely hallucinated, adjusting to 5.",
+        "thinking_process": "Stack 1 (Red): Visual 10. Geometric: W=100, H=100. Ratio=1. Chips = 1 * 12 = 12.0. Visual (10) is lower than Math (12). Perspective likely hiding chips. Corrected Count: 12. // Stack 2 (Black): Visual 7. Geometric: W=100, H=65. Ratio=0.65. Chips = 0.65 * 12 = 7.8. Rounding 7.8 gives 8. Corrected Count: 8.",
         "stacks": [
           { 
             "color": "red", 
