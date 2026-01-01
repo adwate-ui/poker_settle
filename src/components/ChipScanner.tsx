@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Modal, Button as MantineButton, Group, Text, Stack, FileButton, Image, ScrollArea } from '@mantine/core';
+import { Modal, Group, Text, Stack, FileButton, ScrollArea } from '@mantine/core';
 import { Camera, Upload, Check, RefreshCw, ScanEye, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChipDenomination } from '@/config/chips';
@@ -69,10 +69,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
 
-            // Resize for performance (height 500px, maintain aspect ratio)
-            const scale = 500 / img.height;
+            // Resize for performance (height 600px, maintain aspect ratio)
+            // Increased resolution for better edge detection
+            const scale = 600 / img.height;
             const width = Math.floor(img.width * scale);
-            const height = 500;
+            const height = 600;
             canvas.width = width;
             canvas.height = height;
 
@@ -87,23 +88,22 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
             for (let x = 0; x < width; x++) {
                 let colEnergy = 0;
-                for (let y = 0; y < height - 1; y += 2) { // Skip pixels for speed
+                for (let y = 0; y < height - 2; y += 2) { // Skip pixels for speed
                     const i = (y * width + x) * 4;
                     const i_next = ((y + 2) * width + x) * 4;
 
-                    // Fast grayscale approx
                     const gray = (frameData.data[i] + frameData.data[i + 1] + frameData.data[i + 2]) / 3;
                     const gray_next = (frameData.data[i_next] + frameData.data[i_next + 1] + frameData.data[i_next + 2]) / 3;
 
-                    colEnergy += Math.abs(gray - gray_next);
+                    const diff = Math.abs(gray - gray_next);
+                    if (diff > 10) colEnergy += diff;
                 }
                 energyProfile[x] = colEnergy;
                 totalEnergy += colEnergy;
             }
 
-            // Determine threshold for "active" columns (chip stacks have high high-freq vertical detail)
             const avgEnergy = totalEnergy / width;
-            const energyThreshold = avgEnergy * 0.6; // Heuristic
+            const energyThreshold = avgEnergy * 0.5; // Lower threshold to capture stacks
 
             // Segment into towers
             const towers: { start: number; end: number }[] = [];
@@ -114,24 +114,24 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                     if (currentStart === -1) currentStart = x;
                 } else {
                     if (currentStart !== -1) {
-                        // End of segment
-                        if (x - currentStart > 20) { // Min width 20px
+                        if (x - currentStart > 30) { // Min width 30px
                             towers.push({ start: currentStart, end: x });
                         }
                         currentStart = -1;
                     }
                 }
             }
-            if (currentStart !== -1 && width - currentStart > 20) {
+            if (currentStart !== -1 && width - currentStart > 30) {
                 towers.push({ start: currentStart, end: width });
             }
 
-            // Merge close towers (gaps < 10px)
+            // Improved Merge Logic: Only merge if gap is very small (< 15px)
+            // This prevents merging distinct stacks
             const mergedTowers: { start: number; end: number }[] = [];
             if (towers.length > 0) {
                 let current = towers[0];
                 for (let i = 1; i < towers.length; i++) {
-                    if (towers[i].start - current.end < 20) {
+                    if (towers[i].start - current.end < 15) {
                         current.end = towers[i].end; // Merge
                     } else {
                         mergedTowers.push(current);
@@ -140,8 +140,8 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 }
                 mergedTowers.push(current);
             } else {
-                // Fallback: Use center 50% if no towers detected
-                mergedTowers.push({ start: Math.floor(width * 0.25), end: Math.floor(width * 0.75) });
+                // Fallback
+                mergedTowers.push({ start: Math.floor(width * 0.2), end: Math.floor(width * 0.8) });
             }
 
             const detectedStacks: DetectedStack[] = [];
@@ -151,10 +151,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 const towerWidth = tower.end - tower.start;
                 const centerX = Math.floor(tower.start + towerWidth / 2);
 
-                // A. Color Detection (Sample middle 50% of tower width)
+                // A. Color Detection (Sample narrow central strip 20%)
                 let rSum = 0, gSum = 0, bSum = 0, count = 0;
-                const sampleStart = Math.floor(tower.start + towerWidth * 0.25);
-                const sampleEnd = Math.floor(tower.end - towerWidth * 0.25);
+                const sampleStart = Math.floor(tower.start + towerWidth * 0.4);
+                const sampleEnd = Math.floor(tower.end - towerWidth * 0.4);
 
                 for (let y = 0; y < height; y += 4) {
                     for (let x = sampleStart; x < sampleEnd; x += 2) {
@@ -168,32 +168,56 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
                 const closestChip = findClosestChip(rSum / count, gSum / count, bSum / count);
 
-                // B. Stripe Detection (Scanline at centerX)
+                // B. Stripe Detection (Scanline at centerX) using Median Edge Distance
                 const gradients = [];
-                for (let y = 1; y < height - 1; y++) {
+                for (let y = 2; y < height - 2; y++) {
                     const i_prev = ((y - 1) * width + centerX) * 4;
                     const i_next = ((y + 1) * width + centerX) * 4;
                     const gray_prev = (frameData.data[i_prev] + frameData.data[i_prev + 1] + frameData.data[i_prev + 2]) / 3;
                     const gray_next = (frameData.data[i_next] + frameData.data[i_next + 1] + frameData.data[i_next + 2]) / 3;
-                    gradients.push(Math.abs(gray_next - gray_prev));
+
+                    const grad = Math.abs(gray_next - gray_prev);
+                    if (grad > 15) gradients.push({ y, strength: grad });
                 }
 
-                let stripes = 0;
-                const gradientThreshold = 25;
-                for (let j = 1; j < gradients.length - 1; j++) {
-                    if (gradients[j] > gradientThreshold && gradients[j] > gradients[j - 1] && gradients[j] > gradients[j + 1]) {
-                        stripes++;
-                        j += 3; // Min distance
+                // Find peaks
+                const peaks: number[] = [];
+                for (let i = 1; i < gradients.length - 1; i++) {
+                    if (gradients[i].strength > gradients[i - 1].strength && gradients[i].strength > gradients[i + 1].strength) {
+                        if (peaks.length === 0 || (gradients[i].y - peaks[peaks.length - 1] > 3)) {
+                            peaks.push(gradients[i].y);
+                        }
                     }
                 }
 
-                const spotsPerChip = 3;
-                const estimatedChips = Math.max(1, Math.round(stripes / spotsPerChip));
+                // Calculate chip thickness (median distance between edges)
+                const distances: number[] = [];
+                for (let i = 1; i < peaks.length; i++) {
+                    distances.push(peaks[i] - peaks[i - 1]);
+                }
+                distances.sort((a, b) => a - b);
+
+                let estimatedChips = 0;
+                let medianThickness = 0;
+
+                if (distances.length > 0) {
+                    medianThickness = distances[Math.floor(distances.length / 2)];
+                    // Valid chip thickness range check (5px - 50px)
+                    if (medianThickness > 5 && medianThickness < 50) {
+                        const stackHeight = peaks[peaks.length - 1] - peaks[0];
+                        estimatedChips = Math.round(stackHeight / medianThickness);
+                    }
+                }
+
+                // Fallback if structure not clear
+                if (estimatedChips === 0) {
+                    estimatedChips = Math.max(1, Math.round(peaks.length / 2));
+                }
 
                 detectedStacks.push({
                     id: idx,
-                    count: estimatedChips,
-                    value: estimatedChips * closestChip.value,
+                    count: Math.max(1, estimatedChips),
+                    value: Math.max(1, estimatedChips) * closestChip.value,
                     chip: closestChip
                 });
             });
@@ -305,7 +329,6 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                         )}
                                         <Stack gap="sm">
                                             {results.map((stack) => {
-                                                // Dynamic class mapping for background colors
                                                 const colorClasses: Record<string, string> = {
                                                     blue: 'bg-blue-600',
                                                     white: 'bg-slate-100 text-slate-900 border-slate-300',
