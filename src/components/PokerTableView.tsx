@@ -2,7 +2,7 @@ import { SeatPosition } from "@/types/poker";
 import { useState, memo, useCallback, useMemo } from "react";
 import { getPositionForPlayer } from "@/utils/pokerPositions";
 import PokerCard from "./PokerCard";
-import ChipStack from "./ChipStack";
+import { ChipStack } from "./ChipStack";
 import { GamePlayer } from "@/types/poker";
 import OptimizedAvatar from "./OptimizedAvatar";
 
@@ -40,10 +40,10 @@ interface PokerTableViewProps {
   showPotChips?: boolean; // Whether to show physical chips in pot (default true)
 }
 
-const PokerTableView = memo(({ 
-  positions, 
-  totalSeats, 
-  onPositionsChange, 
+const PokerTableView = memo(({
+  positions,
+  totalSeats,
+  onPositionsChange,
   enableDragDrop = false,
   buttonPlayerId,
   seatPositions = {},
@@ -83,7 +83,7 @@ const PokerTableView = memo(({
     const radians = (angle * Math.PI) / 180;
     const radiusX = 38; // Horizontal radius - reduced to keep elements within bounds
     const radiusY = 28; // Vertical radius - reduced to keep elements within bounds
-    
+
     return {
       x: TABLE_CENTER_X + radiusX * Math.cos(radians),
       y: TABLE_CENTER_Y + radiusY * Math.sin(radians),
@@ -126,7 +126,7 @@ const PokerTableView = memo(({
 
     // Sort by seat number to maintain order
     newPositions.sort((a, b) => a.seat - b.seat);
-    
+
     onPositionsChange(newPositions);
     cleanupDragState();
   }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
@@ -141,13 +141,13 @@ const PokerTableView = memo(({
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!enableDragDrop || draggedIndex === null) return;
-    
+
     // Prevent default to stop scrolling while dragging
     e.preventDefault();
-    
+
     const touch = e.touches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    
+
     // Find which player position element we're over
     const playerElement = element?.closest('[data-player-index]');
     if (playerElement) {
@@ -160,15 +160,15 @@ const PokerTableView = memo(({
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!enableDragDrop || draggedIndex === null) return;
-    
+
     const touch = e.changedTouches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    
+
     // Find which player position element we're over
     const playerElement = element?.closest('[data-player-index]');
     if (playerElement && onPositionsChange) {
       const dropIndex = parseInt(playerElement.getAttribute('data-player-index') || '-1');
-      
+
       if (dropIndex >= 0 && dropIndex !== draggedIndex) {
         const newPositions = [...positions];
         const draggedPosition = newPositions[draggedIndex];
@@ -181,11 +181,11 @@ const PokerTableView = memo(({
 
         // Sort by seat number to maintain order
         newPositions.sort((a, b) => a.seat - b.seat);
-        
+
         onPositionsChange(newPositions);
       }
     }
-    
+
     cleanupDragState();
   }, [enableDragDrop, draggedIndex, positions, onPositionsChange, cleanupDragState]);
 
@@ -268,36 +268,35 @@ const PokerTableView = memo(({
               {communityCards && (
                 <div className="flex gap-1 sm:gap-1.5 animate-fade-in">
                   {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                    <PokerCard 
-                      key={idx} 
-                      card={card} 
+                    <PokerCard
+                      key={idx}
+                      card={card}
                       size="xs"
                       className="sm:hidden"
                     />
                   ))}
                   {communityCards.match(/.{1,2}/g)?.map((card, idx) => (
-                    <PokerCard 
-                      key={`sm-${idx}`} 
-                      card={card} 
+                    <PokerCard
+                      key={`sm-${idx}`}
+                      card={card}
                       size="sm"
                       className="hidden sm:block"
                     />
                   ))}
                 </div>
               )}
-              
+
               {/* Pot display with optimized layout */}
               {potSize > 0 && (
-                <div className={`flex items-center gap-2 transition-all duration-500 ${
-                  animateChipsToPot ? 'scale-110' : animateChipsToWinner ? 'opacity-0 scale-0' : 'scale-100'
-                }`}>
+                <div className={`flex items-center gap-2 transition-all duration-500 ${animateChipsToPot ? 'scale-110' : animateChipsToWinner ? 'opacity-0 scale-0' : 'scale-100'
+                  }`}>
                   <div className="bg-gradient-to-br from-amber-600 to-amber-800 text-white px-2 py-1 rounded-lg shadow-xl border-2 border-amber-400 text-xs font-semibold whitespace-nowrap">
                     POT
                   </div>
                   <div className="bg-white dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 whitespace-nowrap">
                     Rs. {potSize.toLocaleString('en-IN')}
                   </div>
-                  {showPotChips && <ChipStack amount={potSize} size="sm" showLabel={false} />}
+                  {showPotChips && <ChipStack amount={potSize} size="sm" showAmount={false} />}
                 </div>
               )}
             </div>
@@ -317,7 +316,7 @@ const PokerTableView = memo(({
             const isActive = activePlayerId === position.player_id;
             const hasKnownCards = playerHoleCards && playerHoleCards[position.player_id];
             const shouldShowCards = hasKnownCards || (showAllPlayerCards && !isMucked);
-            
+
             return (
               <div
                 key={position.player_id}
@@ -332,11 +331,9 @@ const PokerTableView = memo(({
                 onTouchEnd={handleTouchEnd}
                 onContextMenu={(e) => enableDragDrop && e.preventDefault()}
                 onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 sm:rotate-0 -rotate-90 ${
-                  enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
-                } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${
-                  isFolded ? 'opacity-50 grayscale' : ''
-                }`}
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 sm:rotate-0 -rotate-90 ${enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
+                  } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${isFolded ? 'opacity-50 grayscale' : ''
+                  }`}
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
@@ -349,16 +346,15 @@ const PokerTableView = memo(({
                       {positionLabel}
                     </div>
                   )}
-                  
+
                   {/* Player unit: avatar, name, and hole cards as one cohesive unit */}
                   <div className="relative flex flex-col items-center gap-1" style={{ zIndex: Z_INDEX.PLAYER_UNIT }}>
                     {/* Player avatar - central element */}
                     <div className="relative">
-                      <div className={`bg-card border-2 rounded-full w-8 h-8 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center shadow-lg transition-all overflow-hidden ${
-                        isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' : 
+                      <div className={`bg-card border-2 rounded-full w-8 h-8 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center shadow-lg transition-all overflow-hidden ${isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' :
                         isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                      }`}>
-                        <OptimizedAvatar 
+                        }`}>
+                        <OptimizedAvatar
                           name={position.player_name}
                           size="md"
                           className="w-full h-full"
@@ -372,7 +368,7 @@ const PokerTableView = memo(({
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Player name and stack - directly below avatar */}
                     <div className="bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[80px] max-w-[120px]">
                       <span className="text-xs xs:text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-center" title={position.player_name}>
@@ -384,13 +380,12 @@ const PokerTableView = memo(({
                         </span>
                       )}
                     </div>
-                    
+
                     {/* Player hole cards - positioned to the side for better visibility, hidden on mobile */}
                     {(hasKnownCards || shouldShowCards) && (
-                      <div 
-                        className={`absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out ${
-                          isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                        } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
+                      <div
+                        className={`absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out ${isFolded ? 'opacity-30 grayscale' : 'opacity-100'
+                          } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
                         style={{
                           top: '50%',
                           transform: 'translateY(-50%)',
@@ -400,9 +395,9 @@ const PokerTableView = memo(({
                         {hasKnownCards ? (
                           // Show known cards face-up
                           playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                            <PokerCard 
-                              key={idx} 
-                              card={card} 
+                            <PokerCard
+                              key={idx}
+                              card={card}
                               size="xs"
                             />
                           ))
@@ -416,17 +411,17 @@ const PokerTableView = memo(({
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Enhanced chip stack display - positioned intelligently based on player location */}
                   {playerBet > 0 && !isFolded && (() => {
                     // Check if chips should animate for this player
                     const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
-                    
+
                     // Calculate intelligent chip position based on player location
                     // Note: Uses window.innerWidth at render time - doesn't update on resize
                     // This is acceptable since table layout doesn't change during a hand
                     const isMobileView = window.innerWidth < 640; // Tailwind 'sm' breakpoint
-                    
+
                     // Position chips AWAY from table center
                     let chipTop, chipLeft;
                     if (pos.y < 35) {
@@ -439,7 +434,7 @@ const PokerTableView = memo(({
                       // Middle players - chips to the side, slightly below
                       chipTop = isMobileView ? '45px' : '55px';
                     }
-                    
+
                     if (pos.x < 35) {
                       // Left side - chips to the left
                       chipLeft = isMobileView ? '-35px' : '-45px';
@@ -450,28 +445,27 @@ const PokerTableView = memo(({
                       // Center - chips slightly to the side based on y position
                       chipLeft = pos.y > 50 ? (isMobileView ? '30px' : '40px') : (isMobileView ? '-30px' : '-40px');
                     }
-                    
+
                     return (
-                      <div 
-                        className={`absolute transition-all duration-500 ease-in-out ${
-                          shouldAnimate
-                            ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]' 
-                            : 'opacity-100 scale-100'
-                        }`}
+                      <div
+                        className={`absolute transition-all duration-500 ease-in-out ${shouldAnimate
+                          ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]'
+                          : 'opacity-100 scale-100'
+                          }`}
                         style={{
                           top: chipTop,
                           left: chipLeft,
                           zIndex: Z_INDEX.CHIP_STACK,
                         }}
                       >
-                        <ChipStack amount={playerBet} size="sm" showLabel={true} />
+                        <ChipStack amount={playerBet} size="sm" showAmount={true} />
                       </div>
                     );
                   })()}
-                  
+
                   {/* Winner chip animation - shows pot chips coming to winner */}
                   {isWinner && (
-                    <div 
+                    <div
                       className="absolute animate-in fade-in zoom-in duration-700"
                       style={{
                         top: pos.y > 50 ? '-60px' : '80px',

@@ -27,35 +27,23 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
   const getChipDistribution = (total: number) => {
     // Determine the sort order: check if any denomination is < 20 (e.g. 5 or 10)
     // If we have custom small chips, we want larger values first (descending).
-    // The previous hardcoded array was descending: 5000, 1000, 500, 100, 20.
-    // Let's ensure descending sort by value so we use fewer chips.
     const sortedDenominations = [...CHIP_DENOMINATIONS].sort((a, b) => b.value - a.value);
 
     let remaining = total;
-    const chips: { color: string; count: number; value: number }[] = [];
+    const chips: { color: string; count: number; value: number; label: string }[] = [];
 
     sortedDenominations.forEach(denom => {
+      // Prevent infinite loops if value is invalid
+      if (denom.value <= 0) return;
+
       const count = Math.floor(remaining / denom.value);
       if (count > 0) {
-        chips.push({ color: denom.color, count, value: denom.value });
+        chips.push({ color: denom.color, count, value: denom.value, label: denom.label });
         remaining -= count * denom.value;
       }
     });
 
-    return chips.reverse(); // Stack from bottom up (largest values usually at bottom, or smallest? Usually largest at bottom is best stability, but here we stack visually.)
-    // Wait, physically usually bottom chips are handled first in code if we render bottom-up?
-    // Actually, visually: 
-    // If we render a list, the first item is usually "top" unless we position absolute.
-    // The original code was:
-    /*
-        <div className="relative flex flex-col-reverse items-center justify-end h-full w-full pointer-events-none" 
-             style={{ paddingBottom: `${totalChips * config.chipHeight}px` }}> 
-           {distribution.map(...)}
-        </div>
-    */
-    // flex-col-reverse means the first DOM element is at the BOTTOM.
-    // So if we reverse() here, we put the first calculated element (largest denom) at the BOTTOM.
-    // Yes, usually in poker you put largest chips at the bottom of the stack.
+    return chips.reverse(); // Stack from bottom up
   };
 
   const distribution = getChipDistribution(amount);
@@ -64,10 +52,10 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
 
   // Flatten chip array for rendering individual chips
   const renderChips = () => {
-    let chipsToRender: { color: string, index: number }[] = [];
+    let chipsToRender: { color: string, index: number, label: string }[] = [];
     distribution.forEach(group => {
       for (let i = 0; i < group.count; i++) {
-        chipsToRender.push({ color: group.color, index: i });
+        chipsToRender.push({ color: group.color, index: i, label: group.label });
       }
     });
 
@@ -79,7 +67,7 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
     return chipsToRender.map((chip, idx) => (
       <div
         key={idx}
-        className="absolute transition-all duration-500 ease-out-bounce"
+        className="absolute transition-all duration-500 ease-out-bounce drop-shadow-sm"
         style={{
           bottom: `${idx * config.chipHeight}px`,
           zIndex: idx,
@@ -87,10 +75,9 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
         }}
       >
         <PokerChipSVG
+          value={chip.label}
           color={chip.color}
-          width={config.width}
-          height={config.height}
-          className="drop-shadow-sm"
+          size={config.width}
         />
       </div>
     ));

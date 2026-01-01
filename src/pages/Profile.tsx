@@ -27,8 +27,10 @@ const GameSettingsTab = () => {
     const cleanVal = val.replace(/[^0-9]/g, '');
     const numVal = parseInt(cleanVal);
 
-    if (!isNaN(numVal)) {
+    if (!isNaN(numVal) && numVal > 0) {
       setLocalChips(prev => prev.map(c => c.color === color ? { ...c, value: numVal } : c));
+    } else if (cleanVal === '') {
+      // Allow empty intermediate state while typing, but don't update if 0
     }
   };
 
@@ -51,8 +53,19 @@ const GameSettingsTab = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           {localChips.map((chip) => (
             <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
-              <div className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center font-bold text-white bg-${chip.color === 'white' || chip.color === 'black' ? chip.color : chip.color + '-600'} border-2 border-white/20 ring-1 ring-border`}
-                style={{ backgroundColor: chip.color === 'white' ? '#f3f4f6' : chip.color === 'black' ? '#1a1a1a' : undefined, color: chip.color === 'white' ? '#1f2937' : 'white' }}>
+              <div
+                className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center font-bold text-white border-2 border-white/20 ring-1 ring-border ${chip.color === 'blue' ? 'bg-blue-600' :
+                  chip.color === 'white' ? 'bg-slate-100 text-slate-900 border-slate-300' :
+                    chip.color === 'green' ? 'bg-green-600' :
+                      chip.color === 'black' ? 'bg-black' :
+                        chip.color === 'red' ? 'bg-red-600' :
+                          chip.color === 'yellow' ? 'bg-yellow-500' : 'bg-gray-500'
+                  }`}
+                style={{
+                  backgroundColor: chip.color === 'white' ? '#f3f4f6' : chip.color === 'black' ? '#1a1a1a' : undefined,
+                  color: chip.color === 'white' ? '#1f2937' : 'white'
+                }}
+              >
                 {chip.label}
               </div>
               <div className="flex-1">
