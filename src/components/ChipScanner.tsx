@@ -1,24 +1,27 @@
-import { useState, useRef, useEffect } from 'react';
-import { Modal, Button as MantineButton, Group, Text, Stack, FileButton, Image, ActionIcon } from '@mantine/core';
-import { Camera, Upload, Check, RefreshCw, X, ScanEye } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Modal, Button as MantineButton, Group, Text, Stack, FileButton, Image, ScrollArea } from '@mantine/core';
+import { Camera, Upload, Check, RefreshCw, ScanEye, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { findClosestChip, ChipDenomination } from '@/config/chips';
 import { formatIndianNumber } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface ChipScannerProps {
     onScanComplete: (value: number) => void;
+}
+
+interface DetectedStack {
+    id: number;
+    count: number;
+    value: number;
+    chip: ChipDenomination;
 }
 
 export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
     const [opened, setOpened] = useState(false);
     const [image, setImage] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
-    const [result, setResult] = useState<{ count: number; value: number; chip: ChipDenomination } | null>(null);
-    const fileInputRef = useRef<HTMLButtonElement>(null);
+    const [results, setResults] = useState<DetectedStack[]>([]);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const isMobile = useIsMobile();
 
     const handleFileChange = (file: File | null) => {
         if (file) {
@@ -47,7 +50,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
             // Resize for performance (height 500px, maintain aspect ratio)
             const scale = 500 / img.height;
-            const width = img.width * scale;
+            const width = Math.floor(img.width * scale);
             const height = 500;
             canvas.width = width;
             canvas.height = height;
@@ -56,109 +59,133 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
             const frameData = ctx.getImageData(0, 0, width, height);
 
-            // 1. Color Detection (Sample center column)
-            // We assume the chips are stacked vertically in the center
-            // Sample a region in the middle
-            const centerX = Math.floor(width / 2);
-            const sampleWidth = 20;
-            const sampleHeight = height; // Sample full height
+            // 1. Tower Detection (Horizontal Energy Scan)
+            // Calculate "Vertical Gradient Energy" for each column
+            const energyProfile = new Float32Array(width);
+            let totalEnergy = 0;
 
-            let rSum = 0, gSum = 0, bSum = 0, count = 0;
-
-            // Sample colors from the center strip
-            for (let y = 0; y < height; y += 5) {
-                for (let x = centerX - 10; x < centerX + 10; x++) {
+            for (let x = 0; x < width; x++) {
+                let colEnergy = 0;
+                for (let y = 0; y < height - 1; y += 2) { // Skip pixels for speed
                     const i = (y * width + x) * 4;
-                    rSum += frameData.data[i];
-                    gSum += frameData.data[i + 1];
-                    bSum += frameData.data[i + 2];
-                    count++;
+                    const i_next = ((y + 2) * width + x) * 4;
+
+                    // Fast grayscale approx
+                    const gray = (frameData.data[i] + frameData.data[i + 1] + frameData.data[i + 2]) / 3;
+                    const gray_next = (frameData.data[i_next] + frameData.data[i_next + 1] + frameData.data[i_next + 2]) / 3;
+
+                    colEnergy += Math.abs(gray - gray_next);
                 }
+                energyProfile[x] = colEnergy;
+                totalEnergy += colEnergy;
             }
 
-            const avgR = rSum / count;
-            const avgG = gSum / count;
-            const avgB = bSum / count;
+            // Determine threshold for "active" columns (chip stacks have high high-freq vertical detail)
+            const avgEnergy = totalEnergy / width;
+            const energyThreshold = avgEnergy * 0.6; // Heuristic
 
-            const closestChip = findClosestChip(avgR, avgG, avgB);
+            // Segment into towers
+            const towers: { start: number; end: number }[] = [];
+            let currentStart = -1;
 
-            // 2. Stripe Detection (Scanline down the center)
-            // Convert center strip to grayscale and look for high contrast edges
-            let edges = 0;
-            let previousGray = -1;
-            const threshold = 30; // Contrast threshold
-
-            // Use Canny-like logic: straightforward vertical scan for intensity changes
-            // We are looking for the dark/light pattern of stacked chips
-            // The edge of a chip usually has a highlight or shadow
-
-            // Smoothing/Blurring slightly might help reduce noise, but simple scan first
-
-            const scanX = centerX;
-            let crossings = 0;
-
-            for (let y = 0; y < height; y++) {
-                const i = (y * width + scanX) * 4;
-                // Grayscale conversion
-                const gray = 0.299 * frameData.data[i] + 0.587 * frameData.data[i + 1] + 0.114 * frameData.data[i + 2];
-
-                if (previousGray !== -1) {
-                    const diff = Math.abs(gray - previousGray);
-                    if (diff > threshold) {
-                        crossings++;
-                        // Skip a few pixels to avoid multiple triggers on the same edge (thickness of edge)
-                        y += 2;
+            for (let x = 0; x < width; x++) {
+                if (energyProfile[x] > energyThreshold) {
+                    if (currentStart === -1) currentStart = x;
+                } else {
+                    if (currentStart !== -1) {
+                        // End of segment
+                        if (x - currentStart > 20) { // Min width 20px
+                            towers.push({ start: currentStart, end: x });
+                        }
+                        currentStart = -1;
                     }
                 }
-                previousGray = gray;
+            }
+            if (currentStart !== -1 && width - currentStart > 20) {
+                towers.push({ start: currentStart, end: width });
             }
 
-            // Logic: Total Chips = Detected Stripes / Spots-Per-Chip
-            // A chip usually has 1 main edge if viewed perfectly side-on, 
-            // but patterns ("stripes") might add more.
-            // User Logic: "Total Chips = Detected Stripes / Spots-Per-Chip. Use 3 spots-per-chip"
-
-            // Canny Edge detection would actually give us binary edges. 
-            // The "crossings" above approximates finding high gradient points.
-            // Let's refine this to be more like "peaks" in gradient.
-
-            // Re-implementing a simple peak detector on the vertical gradient
-            const gradients = [];
-            for (let y = 1; y < height - 1; y++) {
-                const i_prev = ((y - 1) * width + scanX) * 4;
-                const i_next = ((y + 1) * width + scanX) * 4;
-                const gray_prev = 0.299 * frameData.data[i_prev] + 0.587 * frameData.data[i_prev + 1] + 0.114 * frameData.data[i_prev + 2];
-                const gray_next = 0.299 * frameData.data[i_next] + 0.587 * frameData.data[i_next + 1] + 0.114 * frameData.data[i_next + 2];
-                gradients.push(Math.abs(gray_next - gray_prev));
-            }
-
-            // Count peaks in gradient > threshold
-            let stripes = 0;
-            for (let j = 1; j < gradients.length - 1; j++) {
-                if (gradients[j] > threshold && gradients[j] > gradients[j - 1] && gradients[j] > gradients[j + 1]) {
-                    stripes++;
-                    // Enforce min distance between stripes (min chip thickness in px approx)
-                    j += 3;
+            // Merge close towers (gaps < 10px)
+            const mergedTowers: { start: number; end: number }[] = [];
+            if (towers.length > 0) {
+                let current = towers[0];
+                for (let i = 1; i < towers.length; i++) {
+                    if (towers[i].start - current.end < 20) {
+                        current.end = towers[i].end; // Merge
+                    } else {
+                        mergedTowers.push(current);
+                        current = towers[i];
+                    }
                 }
+                mergedTowers.push(current);
+            } else {
+                // Fallback: Use center 50% if no towers detected
+                mergedTowers.push({ start: Math.floor(width * 0.25), end: Math.floor(width * 0.75) });
             }
 
-            const spotsPerChip = 3;
-            // User said "Detected Stripes / Spots-Per-Chip".
-            // Let's ensure we don't get 0.
-            const estimatedChips = Math.max(1, Math.round(stripes / spotsPerChip));
+            const detectedStacks: DetectedStack[] = [];
 
-            setResult({
-                count: estimatedChips,
-                value: estimatedChips * closestChip.value,
-                chip: closestChip
+            // 2. Process Each Tower
+            mergedTowers.forEach((tower, idx) => {
+                const towerWidth = tower.end - tower.start;
+                const centerX = Math.floor(tower.start + towerWidth / 2);
+
+                // A. Color Detection (Sample middle 50% of tower width)
+                let rSum = 0, gSum = 0, bSum = 0, count = 0;
+                const sampleStart = Math.floor(tower.start + towerWidth * 0.25);
+                const sampleEnd = Math.floor(tower.end - towerWidth * 0.25);
+
+                for (let y = 0; y < height; y += 4) {
+                    for (let x = sampleStart; x < sampleEnd; x += 2) {
+                        const i = (y * width + x) * 4;
+                        rSum += frameData.data[i];
+                        gSum += frameData.data[i + 1];
+                        bSum += frameData.data[i + 2];
+                        count++;
+                    }
+                }
+
+                const closestChip = findClosestChip(rSum / count, gSum / count, bSum / count);
+
+                // B. Stripe Detection (Scanline at centerX)
+                const gradients = [];
+                for (let y = 1; y < height - 1; y++) {
+                    const i_prev = ((y - 1) * width + centerX) * 4;
+                    const i_next = ((y + 1) * width + centerX) * 4;
+                    const gray_prev = (frameData.data[i_prev] + frameData.data[i_prev + 1] + frameData.data[i_prev + 2]) / 3;
+                    const gray_next = (frameData.data[i_next] + frameData.data[i_next + 1] + frameData.data[i_next + 2]) / 3;
+                    gradients.push(Math.abs(gray_next - gray_prev));
+                }
+
+                let stripes = 0;
+                const gradientThreshold = 25;
+                for (let j = 1; j < gradients.length - 1; j++) {
+                    if (gradients[j] > gradientThreshold && gradients[j] > gradients[j - 1] && gradients[j] > gradients[j + 1]) {
+                        stripes++;
+                        j += 3; // Min distance
+                    }
+                }
+
+                const spotsPerChip = 3;
+                const estimatedChips = Math.max(1, Math.round(stripes / spotsPerChip));
+
+                detectedStacks.push({
+                    id: idx,
+                    count: estimatedChips,
+                    value: estimatedChips * closestChip.value,
+                    chip: closestChip
+                });
             });
+
+            setResults(detectedStacks);
             setProcessing(false);
         };
     };
 
     const handleConfirm = () => {
-        if (result) {
-            onScanComplete(result.value);
+        const totalValue = results.reduce((sum, stack) => sum + stack.value, 0);
+        if (totalValue > 0) {
+            onScanComplete(totalValue);
             setOpened(false);
             reset();
         }
@@ -166,8 +193,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
     const reset = () => {
         setImage(null);
-        setResult(null);
+        setResults([]);
     };
+
+    const totalValue = results.reduce((sum, stack) => sum + stack.value, 0);
 
     return (
         <>
@@ -184,20 +213,20 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             <Modal
                 opened={opened}
                 onClose={() => setOpened(false)}
-                title={<Text fw={700}>Scan Chip Stack</Text>}
+                title={<Text fw={700}>Scan Chip Stacks</Text>}
                 centered
-                size="md"
+                size="lg"
                 padding="lg"
             >
                 <Stack align="center" gap="lg">
                     {!image ? (
                         <div className="flex flex-col gap-4 w-full">
-                            <div className="p-8 border-2 border-dashed border-muted-foreground/30 rounded-xl flex flex-col items-center justify-center text-center gap-4 bg-muted/10">
-                                <ScanEye className="w-12 h-12 text-muted-foreground" />
+                            <div className="p-8 border-2 border-dashed border-muted-foreground/30 rounded-xl flex flex-col items-center justify-center text-center gap-4 bg-muted/10 h-[300px]">
+                                <Layers className="w-12 h-12 text-muted-foreground" />
                                 <Text size="sm" c="dimmed">
-                                    Take a clear photo of a <b>Vertical Stack</b> of chips.
+                                    Take a photo of <b>Vertical Towers</b> of chips.
                                     <br />
-                                    Ensure good lighting and a plain background.
+                                    Supports multiple towers side-by-side.
                                 </Text>
                             </div>
 
@@ -222,54 +251,87 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                             </Group>
                         </div>
                     ) : (
-                        <div className="relative w-full flex flex-col items-center gap-4">
-                            <div className="relative rounded-lg overflow-hidden border shadow-sm max-h-[300px] w-auto">
-                                <img src={image} alt="Taken" className="max-h-[300px] w-auto object-contain" />
+                        <div className="flex flex-col md:flex-row gap-6 w-full items-start">
+                            {/* Image Preview */}
+                            <div className="relative rounded-lg overflow-hidden border shadow-sm w-full md:w-1/2 bg-black/5 flex items-center justify-center">
+                                <img src={image} alt="Taken" className="max-h-[400px] w-auto object-contain" />
                                 {processing && (
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
                                         <Stack align="center" gap="xs">
                                             <RefreshCw className="animate-spin text-white w-8 h-8" />
-                                            <Text c="white" size="sm" fw={500}>Processing Stack...</Text>
+                                            <Text c="white" size="sm" fw={500}>Analyzing Towers...</Text>
                                         </Stack>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Hidden Canvas for Processing */}
+                            {/* Hidden Canvas */}
                             <canvas ref={canvasRef} className="hidden" />
 
-                            {result && !processing && (
-                                <div className="w-full bg-card border rounded-xl p-4 shadow-sm animate-in fade-in slide-in-from-bottom-4">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <Text size="sm" c="dimmed" fw={600} tt="uppercase">Detection Result</Text>
-                                        <div className={`px-2 py-0.5 rounded text-xs font-bold text-white bg-${result.chip.color}-600 capitalize`}>
-                                            {result.chip.color} Chips
-                                        </div>
+                            {/* Results Panel */}
+                            <div className="w-full md:w-1/2 flex flex-col gap-4 h-full">
+                                <div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-4 flex-1">
+                                    <div className="flex items-center justify-between pb-2 border-b">
+                                        <Text size="sm" c="dimmed" fw={600} tt="uppercase">Detected Stacks</Text>
+                                        <Text size="xs" c="dimmed">{results.length} found</Text>
                                     </div>
 
-                                    <div className="flex items-end justify-between">
-                                        <div>
-                                            <Text size="xs" c="dimmed">Estimated Count</Text>
-                                            <Text size="xl" fw={800} className="leading-none">{result.count} <span className="text-sm font-normal text-muted-foreground">chips</span></Text>
-                                        </div>
-                                        <div className="text-right">
-                                            <Text size="xs" c="dimmed">Total Value</Text>
-                                            <Text size="xl" fw={800} c="primary" className="leading-none">Rs. {formatIndianNumber(result.value)}</Text>
-                                        </div>
-                                    </div>
+                                    <ScrollArea.Autosize mah={300} type="scroll">
+                                        {results.length === 0 && !processing && (
+                                            <div className="py-8 text-center text-muted-foreground italic text-sm">
+                                                No distinct chip towers detected.
+                                            </div>
+                                        )}
+                                        <Stack gap="sm">
+                                            {results.map((stack) => {
+                                                // Dynamic class mapping for background colors
+                                                const colorClasses: Record<string, string> = {
+                                                    blue: 'bg-blue-600',
+                                                    white: 'bg-slate-100 text-slate-900 border-slate-300',
+                                                    green: 'bg-green-600',
+                                                    black: 'bg-black',
+                                                    red: 'bg-red-600',
+                                                    yellow: 'bg-yellow-500',
+                                                };
+                                                const bgClass = colorClasses[stack.chip.color] || 'bg-gray-500';
 
-                                    <div className="mt-4 pt-4 border-t flex gap-2">
-                                        <Button variant="ghost" className="flex-1" onClick={reset}>
-                                            <RefreshCw className="mr-2 h-4 w-4" />
-                                            Retake
-                                        </Button>
-                                        <Button className="flex-1" onClick={handleConfirm}>
-                                            <Check className="mr-2 h-4 w-4" />
-                                            Confirm
-                                        </Button>
+                                                return (
+                                                    <div key={stack.id} className="flex items-center justify-between p-2 rounded bg-muted/30 border border-transparent hover:border-border transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-8 h-8 rounded-full shadow-sm flex items-center justify-center text-[10px] font-bold text-white border-2 border-white/20 ${bgClass}`}>
+                                                                {stack.chip.label}
+                                                            </div>
+                                                            <div className="flex flex-col leading-tight">
+                                                                <Text size="sm" fw={600}>{stack.chip.color.charAt(0).toUpperCase() + stack.chip.color.slice(1)}</Text>
+                                                                <Text size="xs" c="dimmed">{stack.count} chips</Text>
+                                                            </div>
+                                                        </div>
+                                                        <Text fw={700} size="sm">Rs. {formatIndianNumber(stack.value)}</Text>
+                                                    </div>
+                                                );
+                                            })}
+                                        </Stack>
+                                    </ScrollArea.Autosize>
+
+                                    <div className="mt-auto pt-4 border-t">
+                                        <div className="flex items-end justify-between mb-4">
+                                            <Text size="sm" c="dimmed">Total Estimate</Text>
+                                            <Text size="xl" fw={800} c="primary">Rs. {formatIndianNumber(totalValue)}</Text>
+                                        </div>
+
+                                        <Group grow>
+                                            <Button variant="ghost" onClick={reset}>
+                                                <RefreshCw className="mr-2 h-4 w-4" />
+                                                Retake
+                                            </Button>
+                                            <Button onClick={handleConfirm} disabled={totalValue === 0}>
+                                                <Check className="mr-2 h-4 w-4" />
+                                                Confirm
+                                            </Button>
+                                        </Group>
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     )}
                 </Stack>
