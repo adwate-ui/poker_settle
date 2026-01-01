@@ -63,11 +63,17 @@ serve(async (req) => {
 
       Constraint: The Width-to-Height ratio of a single chip is exactly 12:1.
 
+      **CRITICAL: BOUNDARY DEFINITION**
+      To measure Height (H) accurately, you must identify the exact pixels:
+      - **Bottom Edge:** The line where the lowest chip touches the table surface (Ignore reflection).
+      - **Top Edge:** The top line of the *side profile* of the highest chip.
+      - **Perspective Warning:** Do NOT include the elliptical "top face" of the stack in your height measurement. Measure only the vertical side stack.
+
       **Execution Steps:**
 
       1. **Calibration**: Measure the pixel width of the top-most chip in the a stack. Divide this width by 12 to establish the Standard Chip Height (px).
 
-      2. **Vertical Measurement**: Measure the total pixel height of each stack (from table surface to top edge).
+      2. **Vertical Measurement**: Measure the distance between the Bottom Edge and Top Edge defined above.
 
       3. **Mathematical Calculation**: Divide the Total Stack Height by Standard Chip Height. Round to the nearest whole number to derive the count.
 
