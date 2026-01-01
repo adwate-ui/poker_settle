@@ -63,33 +63,34 @@ serve(async (req) => {
       You are an expert Poker Chip Specialist working at a high-stakes casino.
       Your job is to ACCURATELY count the value of the poker chips in this image.
 
-      **CRITICAL INSTRUCTION: USE "UNIT HEIGHT" CALIBRATION**
-      Visual counting often fails on blurry edges or low stacks. Use the clearest stack to build a ruler.
+      **CRITICAL INSTRUCTION: STRICT SEPARATION OF TASKS**
 
-      **Step 1: The Anchor Stack**
-      - Find the stack with the **clearest, most distinct side ridges**.
-      - Visually count these ridges carefully (Visual_Count).
-      - Measure the stack's precise vertical height in pixels (Anchor_Height).
-      - Calculate **Avg_Chip_Height = Anchor_Height / Visual_Count**.
+      **Phase 1: Visual Detection (Find Stacks)**
+      - Identify every distinct vertical stack of chips.
+      - Identify the Color of each stack.
+      - **DO NOT COUNT THE CHIPS VISUALLY.** Your visual counting is prone to perspective errors.
 
-      **Step 2: Measure All Stacks**
-      - For every stack (including the anchor):
-        - Measure its pixel height (Stack_Height).
-        - **Calculated_Count = Stack_Height / Avg_Chip_Height**.
+      **Phase 2: Geometric Calculation (Count Chips)**
+      - For each identified stack, measure specific dimensions in pixels:
+        - W: Width of the stack (chip diameter).
+        - H: Height of the stack (total vertical extent).
+      - **Apply this Formula**: Count = (H / W) * 12.
+      - **Rounding Rule**: Round the result to the nearest integer.
       
-      **Step 3: Verification**
-      - Round the Calculated_Count to the nearest integer.
-      - If Visual Count differs from Calculated Count by more than 1, **Trust the Calculated Count** (Perspective often hides ridges, but height rarely lies).
+      **Example:**
+      - Stack looks like ~10 chips visually? IGNORE THIS.
+      - Measure: H=100px, W=100px.
+      - Calc: (100/100) * 12 = 12.
+      - **Final Verification**: If Calc is X.7 or higher, ALWAYS round up. (e.g. 7.7 -> 8).
 
       **Instructions:**
       1.  Identify distinct vertical stacks.
       2.  Ignore loose chips lying flat.
-      3.  Ignore reflections.
-      4.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
+      3.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Anchor: Stack 3 (Red) is clearest. Height=120px. Visual Count=12. Unit Height = 10px/chip. // Stack 1 (Blue): Height=52px. Calc = 5.2 -> 5 chips. Visual looked like 4, but height confirms 5. // Stack 2: Height=80px. Calc=8 chips.",
+        "thinking_process": "Stack 1 (Red): Found Stack. Color=Red. Measuring Pixels... Height=98, Width=102. Ratio=0.96. Count = 0.96 * 12 = 11.52. Rounding to 12. // Stack 2 (Blue): Found Stack. Color=Blue. Measuring... Height=45, Width=100. Ratio=0.45. Count = 0.45 * 12 = 5.4. Rounding to 5.",
         "stacks": [
           { 
             "color": "red", 
