@@ -1,94 +1,118 @@
-import { memo, useMemo } from "react";
-import { PokerChipSVG } from "./PokerAssets";
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { useChips } from '@/contexts/ChipContext';
+import { PokerChipSVG } from './PokerAssets';
 
 interface ChipStackProps {
   amount: number;
   size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
+  showAmount?: boolean;
 }
 
-import { CHIP_DENOMINATIONS } from "@/config/chips";
+export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackProps) => {
+  const { chips: CHIP_DENOMINATIONS } = useChips();
 
-// Configuration for chip stack display
-const MAX_CHIPS_PER_STACK = 5; // Maximum chips to show visually per denomination
-const MAX_CHIP_DENOMINATIONS = 2; // Maximum different denominations to show
+  if (amount === 0) return null;
 
-const ChipStack = memo(({ amount, size = 'md', showLabel = true }: ChipStackProps) => {
-  // Calculate the chip breakdown - show multiple denominations like real poker apps
-  const chipBreakdown = useMemo(() => {
-    if (amount === 0) return [];
-
-    const breakdown: Array<{ color: string; label: string; count: number; value: number }> = [];
-    let remaining = amount;
-
-    // Break down amount into different denominations
-    for (const denom of CHIP_DENOMINATIONS) {
-      const count = Math.floor(remaining / denom.value);
-      if (count > 0) {
-        breakdown.push({
-          ...denom,
-          count: Math.min(count, MAX_CHIPS_PER_STACK) // Show max chips per denomination for visual clarity
-        });
-        remaining -= count * denom.value;
-      }
-      // Only show up to MAX_CHIP_DENOMINATIONS different denominations for simplicity
-      if (breakdown.length >= MAX_CHIP_DENOMINATIONS) break;
-    }
-
-    return breakdown;
-  }, [amount]);
-
-  const sizeMaps = {
-    sm: 28,
-    md: 36,
-    lg: 44,
+  // Configuration for stack rendering
+  const stackConfig = {
+    sm: { chipHeight: 2, scale: 0.8, text: 'text-xs', width: 24, height: 24 },
+    md: { chipHeight: 4, scale: 1, text: 'text-sm', width: 32, height: 32 },
+    lg: { chipHeight: 6, scale: 1.25, text: 'text-base', width: 40, height: 40 }
   };
 
-  const chipSize = sizeMaps[size];
+  const config = stackConfig[size];
 
-  if (chipBreakdown.length === 0) {
-    return showLabel ? (
-      <div className="text-xs text-muted-foreground">Rs. 0</div>
-    ) : null;
-  }
+  // Calculate chip distribution
+  const getChipDistribution = (total: number) => {
+    // Determine the sort order: check if any denomination is < 20 (e.g. 5 or 10)
+    // If we have custom small chips, we want larger values first (descending).
+    // The previous hardcoded array was descending: 5000, 1000, 500, 100, 20.
+    // Let's ensure descending sort by value so we use fewer chips.
+    const sortedDenominations = [...CHIP_DENOMINATIONS].sort((a, b) => b.value - a.value);
+
+    let remaining = total;
+    const chips: { color: string; count: number; value: number }[] = [];
+
+    sortedDenominations.forEach(denom => {
+      const count = Math.floor(remaining / denom.value);
+      if (count > 0) {
+        chips.push({ color: denom.color, count, value: denom.value });
+        remaining -= count * denom.value;
+      }
+    });
+
+    return chips.reverse(); // Stack from bottom up (largest values usually at bottom, or smallest? Usually largest at bottom is best stability, but here we stack visually.)
+    // Wait, physically usually bottom chips are handled first in code if we render bottom-up?
+    // Actually, visually: 
+    // If we render a list, the first item is usually "top" unless we position absolute.
+    // The original code was:
+    /*
+        <div className="relative flex flex-col-reverse items-center justify-end h-full w-full pointer-events-none" 
+             style={{ paddingBottom: `${totalChips * config.chipHeight}px` }}> 
+           {distribution.map(...)}
+        </div>
+    */
+    // flex-col-reverse means the first DOM element is at the BOTTOM.
+    // So if we reverse() here, we put the first calculated element (largest denom) at the BOTTOM.
+    // Yes, usually in poker you put largest chips at the bottom of the stack.
+  };
+
+  const distribution = getChipDistribution(amount);
+  const totalChips = distribution.reduce((acc, curr) => acc + curr.count, 0);
+  const maxVisualChips = 20; // Cap visual stack height for performance/layout
+
+  // Flatten chip array for rendering individual chips
+  const renderChips = () => {
+    let chipsToRender: { color: string, index: number }[] = [];
+    distribution.forEach(group => {
+      for (let i = 0; i < group.count; i++) {
+        chipsToRender.push({ color: group.color, index: i });
+      }
+    });
+
+    // Cap rendering
+    if (chipsToRender.length > maxVisualChips) {
+      chipsToRender = chipsToRender.slice(0, maxVisualChips);
+    }
+
+    return chipsToRender.map((chip, idx) => (
+      <div
+        key={idx}
+        className="absolute transition-all duration-500 ease-out-bounce"
+        style={{
+          bottom: `${idx * config.chipHeight}px`,
+          zIndex: idx,
+          transform: `translateY(${idx * -1}px)`, // Slight offset for 3D feel
+        }}
+      >
+        <PokerChipSVG
+          color={chip.color}
+          width={config.width}
+          height={config.height}
+          className="drop-shadow-sm"
+        />
+      </div>
+    ));
+  };
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      {/* Multiple chip stacks horizontally aligned and touching */}
-      <div className="flex flex-row items-end" style={{ gap: '2px' }}>
-        {chipBreakdown.map((chip, stackIndex) => (
-          <div key={stackIndex} className="relative flex flex-col items-center">
-            {/* Stack of chips (show actual count up to 5) */}
-            <div className="relative" style={{ height: `${chip.count * 4 + chipSize}px` }}>
-              {Array.from({ length: chip.count }).map((_, chipIdx) => (
-                <div
-                  key={chipIdx}
-                  className="absolute left-0"
-                  style={{
-                    bottom: `${chipIdx * 4}px`,
-                    zIndex: chipIdx,
-                  }}
-                >
-                  <PokerChipSVG value={chip.label} color={chip.color} size={chipSize} />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+    <div className={cn("flex flex-col items-center gap-1", size === 'lg' ? 'min-w-[50px]' : 'min-w-[40px]')}>
+      <div
+        className="relative flex items-end justify-center"
+        style={{
+          height: `${Math.min(totalChips, maxVisualChips) * (config.chipHeight + 1) + config.height}px`,
+          width: `${config.width}px`
+        }}
+      >
+        {renderChips()}
       </div>
 
-      {/* Amount label - Full Tilt style with size adaptation */}
-      {showLabel && (
-        <div className="bg-gradient-to-br from-gray-900 to-black text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-xl border border-poker-gold/60 max-w-[100px] sm:max-w-none">
-          <div className="text-xs sm:text-sm font-bold text-poker-gold drop-shadow-md text-center truncate">
-            Rs. {amount.toLocaleString('en-IN')}
-          </div>
-        </div>
+      {showAmount && (
+        <span className={cn("font-bold tabular-nums text-foreground/90 whitespace-nowrap", config.text)}>
+          {amount.toLocaleString()}
+        </span>
       )}
     </div>
   );
-});
-
-ChipStack.displayName = 'ChipStack';
-
-export default ChipStack;
+};

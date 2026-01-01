@@ -2,8 +2,9 @@ import { useState, useRef } from 'react';
 import { Modal, Button as MantineButton, Group, Text, Stack, FileButton, Image, ScrollArea } from '@mantine/core';
 import { Camera, Upload, Check, RefreshCw, ScanEye, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { findClosestChip, ChipDenomination } from '@/config/chips';
+import { ChipDenomination } from '@/config/chips';
 import { formatIndianNumber } from '@/lib/utils';
+import { useChips } from '@/contexts/ChipContext';
 
 interface ChipScannerProps {
     onScanComplete: (value: number) => void;
@@ -22,6 +23,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
     const [processing, setProcessing] = useState(false);
     const [results, setResults] = useState<DetectedStack[]>([]);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const { chips } = useChips();
 
     const handleFileChange = (file: File | null) => {
         if (file) {
@@ -34,6 +36,25 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const findClosestChip = (r: number, g: number, b: number): ChipDenomination => {
+        let minDistance = Infinity;
+        let closest = chips[0];
+
+        for (const chip of chips) {
+            const distance = Math.sqrt(
+                Math.pow(chip.rgb[0] - r, 2) +
+                Math.pow(chip.rgb[1] - g, 2) +
+                Math.pow(chip.rgb[2] - b, 2)
+            );
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = chip;
+            }
+        }
+        return closest;
     };
 
     const processImage = (imageSrc: string) => {

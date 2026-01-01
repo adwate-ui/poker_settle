@@ -11,6 +11,77 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { themes, ThemeName } from '@/config/themes';
 import { toast } from 'sonner';
 import { getCharacterImage } from '@/config/characterImages';
+import { useChips } from '@/contexts/ChipContext';
+import { Input } from '@/components/ui/input';
+import { RefreshCw } from 'lucide-react';
+
+const GameSettingsTab = () => {
+  const { chips, updateChipValue, resetDefaults } = useChips();
+  const [localChips, setLocalChips] = useState(chips);
+
+  useEffect(() => {
+    setLocalChips(chips);
+  }, [chips]);
+
+  const handleValueChange = (color: string, val: string) => {
+    const cleanVal = val.replace(/[^0-9]/g, '');
+    const numVal = parseInt(cleanVal);
+
+    if (!isNaN(numVal)) {
+      setLocalChips(prev => prev.map(c => c.color === color ? { ...c, value: numVal } : c));
+    }
+  };
+
+  const handleBlur = (color: string, val: number) => {
+    updateChipValue(color, val);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-primary" />
+          <div>
+            <CardTitle>Chip Values</CardTitle>
+            <CardDescription>Customize the monetary value of each chip color.</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {localChips.map((chip) => (
+            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+              <div className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center font-bold text-white bg-${chip.color === 'white' || chip.color === 'black' ? chip.color : chip.color + '-600'} border-2 border-white/20 ring-1 ring-border`}
+                style={{ backgroundColor: chip.color === 'white' ? '#f3f4f6' : chip.color === 'black' ? '#1a1a1a' : undefined, color: chip.color === 'white' ? '#1f2937' : 'white' }}>
+                {chip.label}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
+                <p className="text-xs text-muted-foreground">Default: {chip.label}</p>
+              </div>
+              <div className="w-24">
+                <Input
+                  type="text"
+                  value={chip.value}
+                  onChange={(e) => handleValueChange(chip.color, e.target.value)}
+                  onBlur={() => handleBlur(chip.color, chip.value)}
+                  className="text-right font-mono"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-4 border-t flex justify-end">
+          <Button variant="outline" size="sm" onClick={resetDefaults}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Reset to Defaults
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -63,7 +134,7 @@ const Profile = () => {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Profile
@@ -71,6 +142,10 @@ const Profile = () => {
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
               Theme
+            </TabsTrigger>
+            <TabsTrigger value="game-settings">
+              <div className={`w-4 h-4 rounded-full mr-2 bg-primary/20 border-2 border-primary`} />
+              Chips
             </TabsTrigger>
             <TabsTrigger value="storage">
               <Database className="h-4 w-4 mr-2" />
@@ -102,6 +177,10 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="game-settings">
+            <GameSettingsTab />
+          </TabsContent>
+
           <TabsContent value="theme">
             <Card>
               <CardHeader>
@@ -131,8 +210,8 @@ const Profile = () => {
                           disabled={changingTheme || isActive}
                           className={`
                             p-4 rounded-lg border-2 text-left transition-all
-                            ${isActive 
-                              ? 'border-primary bg-primary/10' 
+                            ${isActive
+                              ? 'border-primary bg-primary/10'
                               : 'border-border hover:border-primary/50 hover:bg-accent'
                             }
                             ${changingTheme ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ChipProvider } from "@/contexts/ChipContext";
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useAuth } from "@/hooks/useAuth";
@@ -152,12 +153,14 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
-            <Notifications position="top-right" />
-            <OfflineIndicator />
-            <PWAInstallPrompt />
-            <AppContent />
-          </MantineProvider>
+          <ChipProvider>
+            <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
+              <Notifications position="top-right" />
+              <OfflineIndicator />
+              <PWAInstallPrompt />
+              <AppContent />
+            </MantineProvider>
+          </ChipProvider>
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
