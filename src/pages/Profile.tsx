@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User, Database, Palette } from 'lucide-react';
+import { ArrowLeft, User, Database, Palette, Bot, Eye, Key } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { RefreshCw } from 'lucide-react';
 
 const GameSettingsTab = () => {
+  // ... existing GameSettingsTab content ...
   const { chips, updateChipValue, resetDefaults } = useChips();
   const [localChips, setLocalChips] = useState(chips);
 
@@ -30,7 +31,7 @@ const GameSettingsTab = () => {
     if (!isNaN(numVal) && numVal > 0) {
       setLocalChips(prev => prev.map(c => c.color === color ? { ...c, value: numVal } : c));
     } else if (cleanVal === '') {
-      // Allow empty intermediate state while typing, but don't update if 0
+      // Allow empty
     }
   };
 
@@ -96,6 +97,63 @@ const GameSettingsTab = () => {
   );
 };
 
+const AISettingsTab = () => {
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('gemini_api_key');
+    if (stored) setApiKey(stored);
+  }, []);
+
+  const handleSave = () => {
+    localStorage.setItem('gemini_api_key', apiKey);
+    toast.success("API Key saved");
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <Bot className="h-6 w-6 text-primary" />
+          <div>
+            <CardTitle>AI Configuration</CardTitle>
+            <CardDescription>Configure settings for the AI Chip Scanner.</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Gemini API Key</label>
+          <p className="text-xs text-muted-foreground">Required for the AI-powered chip scanning feature. The key is stored locally on your device.</p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                type={showKey ? "text" : "password"}
+                placeholder="AIzaSy..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowKey(!showKey)}
+              >
+                {showKey ? <User className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            <Button onClick={handleSave}>Save</Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Don't have a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Get one here</a>.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -147,22 +205,26 @@ const Profile = () => {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
-              Profile
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
-              Theme
+              <span className="hidden sm:inline">Theme</span>
             </TabsTrigger>
             <TabsTrigger value="game-settings">
               <div className={`w-4 h-4 rounded-full mr-2 bg-primary/20 border-2 border-primary`} />
-              Chips
+              <span className="hidden sm:inline">Chips</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai">
+              <Bot className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">AI</span>
             </TabsTrigger>
             <TabsTrigger value="storage">
               <Database className="h-4 w-4 mr-2" />
-              Storage
+              <span className="hidden sm:inline">Storage</span>
             </TabsTrigger>
           </TabsList>
 
@@ -192,6 +254,10 @@ const Profile = () => {
 
           <TabsContent value="game-settings">
             <GameSettingsTab />
+          </TabsContent>
+
+          <TabsContent value="ai">
+            <AISettingsTab />
           </TabsContent>
 
           <TabsContent value="theme">
