@@ -55,9 +55,9 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using gemini-2.0-flash-thinking-exp-1219 (Thinking Model)
-    // This model is specifically fine-tuned for recursive reasoning and self-correction.
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-thinking-exp-1219' })
+    // Using gemini-2.5-pro as explicitly requested by user.
+    // Prompt includes Geometric Ratio verification for accuracy.
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.
