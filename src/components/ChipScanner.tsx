@@ -462,9 +462,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                         </div>
                     ) : (
                         <div className="flex flex-col md:flex-row gap-6 w-full items-start">
-                            {/* Image Preview */}
-                            <div className="relative rounded-lg overflow-hidden border shadow-sm w-full md:w-1/2 bg-black/5 flex items-center justify-center">
-                                <img src={image} alt="Taken" className="max-h-[400px] w-auto object-contain" />
+                            {/* Image Preview / Debug Canvas Container */}
+                            <div className="relative rounded-lg overflow-hidden border shadow-sm w-full md:w-1/2 bg-black/5 flex flex-col items-center justify-center gap-2">
+                                <Text size="xs" c="dimmed" className="absolute top-2 left-2 bg-white/80 px-2 py-1 rounded z-10">
+                                    Debug View (Verify Boxes & Colors)
+                                </Text>
                                 {processing && (
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
                                         <Stack align="center" gap="xs">
@@ -475,8 +477,8 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                 )}
                             </div>
 
-                            {/* Hidden Canvas */}
-                            <canvas ref={canvasRef} className="hidden" />
+                            {/* Debug Canvas - Visible */}
+                            <canvas ref={canvasRef} className="w-full h-auto border-2 border-dashed border-yellow-400 rounded-lg shadow-inner" style={{ maxHeight: '400px' }} />
 
                             {/* Results Panel */}
                             <div className="w-full md:w-1/2 flex flex-col gap-4 h-full">
