@@ -179,6 +179,30 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
         }
     };
 
+    const handlePing = async () => {
+        try {
+            const { data, error } = await supabase.functions.invoke('analyze-chips', {
+                body: { ping: true }
+            });
+
+            if (error) {
+                // Try to parse the error body if available
+                console.error("Ping Error Object:", error);
+                throw error;
+            }
+
+            if (data?.error) throw new Error(data.error);
+
+            console.log("Ping success:", data);
+            alert(`Connection Successful! Model: ${data.model || 'Unknown'}`);
+        } catch (e: any) {
+            console.error(e);
+            // If it's a FunctionsHttpError, the body isn't easily accessible via the error object in older clients
+            // But we can try to guess or just show the message.
+            alert(`Connection Failed: ${e.message || e}`);
+        }
+    };
+
     const handleConfirm = () => {
         const totalValue = results.reduce((sum, stack) => sum + stack.value, 0);
         if (totalValue > 0) {
@@ -203,7 +227,22 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                 <ScanEye className="h-4 w-4 text-primary" />
             </Button>
 
-            <Modal opened={opened} onClose={() => setOpened(false)} title={<Text fw={700}>AI Chip Scanner (Gemini 3.0)</Text>} centered size="xl" padding="lg">
+            <Modal
+                opened={opened}
+                onClose={() => setOpened(false)}
+                title={
+                    <div className="flex items-center gap-2">
+                        <ScanEye className="w-5 h-5 text-primary" />
+                        <Text fw={700}>AI Chip Scanner (Gemini 3.0)</Text>
+                        <Button variant="ghost" size="sm" onClick={handlePing} className="ml-4 h-6 px-2 text-xs text-muted-foreground border">
+                            Test Connection
+                        </Button>
+                    </div>
+                }
+                centered
+                size="xl"
+                padding="lg"
+            >
                 <Stack align="center" gap="lg">
                     {!image ? (
                         <div className="flex flex-col gap-4 w-full h-[300px] justify-center">
