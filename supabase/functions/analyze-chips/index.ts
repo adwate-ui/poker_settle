@@ -55,8 +55,8 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using gemini-3.0-pro-preview as requested.
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.0-pro-preview' })
+    // Using gemini-2.0-flash-exp (Latest reliable model as of Dec 2025 context)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
 
     const prompt = `
       You are an expert Poker Chip Specialist working at a high-stakes casino.
