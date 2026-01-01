@@ -55,38 +55,34 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Using gemini-2.5-pro as explicitly requested by user.
-    // Prompt includes Geometric Ratio verification for accuracy.
+    // Using gemini-2.5-pro as explicitly requested.
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
     const prompt = `
-      You are an expert Poker Chip Specialist working at a high-stakes casino.
-      Your job is to ACCURATELY segment and count the poker chips in this image.
+      Act as an Optical Metrology Expert. Perform a precise count of the poker chips in this image using the following geometric constraint:
 
-      **WORKFLOW:**
+      Constraint: The Width-to-Height ratio of a single chip is exactly 12:1.
 
-      **Step 1: SEGMENTATION (Vision)**
-      - Identify every distinct vertical stack of chips.
-      - **Critical**: Separate touching stacks. If two colors touch, they are TWO different stacks.
-      - Draw a TIGHT bounding box around each stack (excluding shadows/background).
-      - Identify the Color of each stack.
-      
-      **Step 2: COUNTING (Math)**
-      - For each stack found in Step 1, use its bounding box dimensions:
-        - W: Width of the stack (chip diameter).
-        - H: Height of the stack (total vertical extent).
-      - **Formula**: Count = (H / W) * 12.
-      - **Rounding**: Round to the nearest integer.
-      - *Note*: If the math gives a result like 7.8, it means perspective is hiding a chip. Round UP to 8.
+      **Execution Steps:**
+
+      1. **Calibration**: Measure the pixel width of the top-most chip in the a stack. Divide this width by 12 to establish the Standard Chip Height (px).
+
+      2. **Vertical Measurement**: Measure the total pixel height of each stack (from table surface to top edge).
+
+      3. **Mathematical Calculation**: Divide the Total Stack Height by Standard Chip Height. Round to the nearest whole number to derive the count.
+
+      4. **Visual Verification**: Cross-check the calculated number against the visible horizontal ridges (edges) on the side of the chips.
+
+      5. **Relative Logic Check**: Ensure the counts align with visual comparisons (e.g., if Stack B is physically taller than Stack A, its count must be higher).
 
       **Instructions:**
-      1.  List all stacks from Left to Right.
-      2.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
-      3.  Be precise with colors (Red, Blue, Green, Black, White).
+      1.  Identify distinct vertical stacks.
+      2.  Ignore loose chips lying flat.
+      3.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
 
       Output strictly as valid JSON in the following format:
       {
-        "thinking_process": "Segmentation: I see 5 distinct stacks. Left to right: Blue, Black, Red, White, Green. // Stack 1 (Blue): H=45, W=100. Ratio=0.45. Count=5.4 -> 5. // Stack 2 (Black): H=78, W=100. Ratio=0.78. Count=9.36 -> 9.",
+        "thinking_process": "Calibration: Stack 1 Width 102px -> StdHeight = 8.5px. Stack 1 Height 98px -> 98/8.5 = 11.5 -> 12 chips. Visual check confirms ridges match.",
         "stacks": [
           { 
             "color": "red", 
