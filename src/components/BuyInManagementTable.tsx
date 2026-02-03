@@ -1,13 +1,20 @@
 import { useState } from 'react';
-import { Modal, Group, Text, Stack, ScrollArea } from '@mantine/core';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Minus, X } from 'lucide-react';
+import { Plus, Loader2, Minus, X, User, Coins, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber } from '@/lib/utils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { BuyInHistoryDialog } from '@/components/BuyInHistoryDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface BuyInManagementTableProps {
   gamePlayers: GamePlayer[];
@@ -29,13 +36,13 @@ export const BuyInManagementTable = ({
 
   const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
     if (!selectedPlayerId || typeof buyInCount !== 'number' || buyInCount === 0) {
-      toast.error('Please select a player and enter a valid buy-in count');
+      toast.error('Please select a participant and valid variance');
       return { valid: false };
     }
 
     const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
     if (!selectedPlayer) {
-      toast.error('Player not found');
+      toast.error('Participant not found');
       return { valid: false };
     }
 
@@ -53,15 +60,15 @@ export const BuyInManagementTable = ({
     setIsAdding(true);
     try {
       await onAddBuyIn(selectedPlayerId, buyInCount);
-      const action = buyInCount > 0 ? 'Added' : 'Removed';
+      const action = buyInCount > 0 ? 'Authenticated' : 'Amended';
       const count = Math.abs(buyInCount);
-      toast.success(`${action} ${count} buy-in(s) for ${selectedPlayer.player.name}`);
+      toast.success(`${action} ${count} buy-in unit(s) for ${selectedPlayer.player.name}`);
       setOpened(false);
       setSelectedPlayerId('');
       setBuyInCount(1);
     } catch (error) {
-      console.error('Error adding buy-in:', error);
-      toast.error('Failed to update buy-ins');
+      console.error('Error updating buy-ins:', error);
+      toast.error('Protocol failed to update archives');
     } finally {
       setIsAdding(false);
     }
@@ -83,7 +90,7 @@ export const BuyInManagementTable = ({
     ).join(' ');
   };
 
-  const selectedPlayerName = gamePlayers.find(gp => gp.id === selectedPlayerId)?.player.name || '';
+  const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
 
   const increment = () => setBuyInCount(prev => {
     const next = prev + 1;
@@ -97,145 +104,160 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <Table className="bg-card/95">
-          <TableHeader>
-            <TableRow className="bg-primary/10 hover:bg-primary/15">
-              <TableHead className="text-sm font-bold">Player</TableHead>
-              <TableHead className="text-sm font-bold">Buy-ins</TableHead>
-              <TableHead className="text-sm font-bold">Total</TableHead>
-              <TableHead className="text-sm font-bold w-[90px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedPlayers.map((gamePlayer, index) => (
-              <TableRow
-                key={gamePlayer.id}
-                className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
-              >
-                <TableCell>
-                  <span className="font-semibold text-sm">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium text-sm">{gamePlayer.buy_ins}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="font-semibold text-sm">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      onClick={() => {
-                        setSelectedPlayerId(gamePlayer.id);
-                        setBuyInCount(1);
-                        setOpened(true);
-                      }}
-                      variant="secondary"
-                      size="sm"
-                      className="h-8 w-8 p-0 shrink-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    {fetchBuyInHistory && (
-                      <BuyInHistoryDialog
-                        gamePlayerId={gamePlayer.id}
-                        playerName={gamePlayer.player.name}
-                        fetchHistory={fetchBuyInHistory}
-                      />
-                    )}
-                  </div>
-                </TableCell>
+      <div className="rounded-xl border border-white/10 overflow-hidden bg-black/20 shadow-inner">
+        <div className="overflow-x-auto custom-scrollbar">
+          <Table>
+            <TableHeader className="bg-white/5 border-b border-white/10">
+              <TableRow className="hover:bg-transparent border-0 h-12">
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6">Participant</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Holdings</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Valuation</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody className="divide-y divide-white/5">
+              {sortedPlayers.map((gamePlayer) => (
+                <TableRow
+                  key={gamePlayer.id}
+                  className="h-16 hover:bg-gold-500/5 border-0 transition-colors group"
+                >
+                  <TableCell className="pl-6">
+                    <div className="flex items-center gap-3">
+                      <User className="h-3.5 w-3.5 text-gold-500/30 group-hover:text-gold-500/60 transition-colors" />
+                      <span className="font-luxury text-sm text-gold-100 uppercase tracking-widest">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Coins className="h-3 w-3 text-gold-500/40" />
+                      <span className="font-numbers text-base text-gold-200/80">{gamePlayer.buy_ins}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+                  </TableCell>
+                  <TableCell className="text-right pr-6">
+                    <div className="flex items-center justify-end gap-3">
+                      <Button
+                        onClick={() => {
+                          setSelectedPlayerId(gamePlayer.id);
+                          setBuyInCount(1);
+                          setOpened(true);
+                        }}
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-gold-500/40 hover:text-gold-500 hover:bg-gold-500/10 rounded-lg transition-all border border-transparent hover:border-gold-500/20"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      {fetchBuyInHistory && (
+                        <BuyInHistoryDialog
+                          gamePlayerId={gamePlayer.id}
+                          playerName={gamePlayer.player.name}
+                          fetchHistory={fetchBuyInHistory}
+                        />
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <Modal
-        opened={opened}
-        onClose={() => {
+      <Dialog open={opened} onOpenChange={(open) => {
+        if (!open) {
           setOpened(false);
           setSelectedPlayerId('');
           setBuyInCount(1);
-        }}
-        title={<Text fw={700} size="lg">Modify Buy-ins - {selectedPlayerName}</Text>}
-        centered={!isMobile}
-        yOffset={isMobile ? '20vh' : undefined}
-        size="sm"
-        radius="lg"
-      >
-        <Stack gap="xl" className="py-2">
-          {/* Custom Stepper UI */}
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex items-center justify-center gap-6 w-full">
-              <Button
-                variant="outline"
-                className="h-14 w-14 border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
-                onClick={decrement}
-              >
-                <Minus className="h-6 w-6 text-primary" />
-              </Button>
-
-              <div className="flex flex-col items-center min-w-[100px]">
-                <span className={`text-4xl font-black tabular-nums tracking-tight ${buyInCount < 0 ? 'text-destructive' : 'text-foreground'}`}>
-                  {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
-                </span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">
-                  {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
-                </span>
+        }
+      }}>
+        <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
+                <TrendingUp className="w-5 h-5 text-gold-500" />
               </div>
-
-              <Button
-                variant="outline"
-                className="h-14 w-14 border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm active:scale-95"
-                onClick={increment}
-              >
-                <Plus className="h-6 w-6 text-primary" />
-              </Button>
+              <div>
+                <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Adjust Stake Variance</DialogTitle>
+                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Participant: {selectedPlayer?.player.name}</DialogDescription>
+              </div>
             </div>
+          </DialogHeader>
 
-            {/* Impact Display */}
-            <div className={`p-4 rounded-xl w-full text-center border transition-colors ${buyInCount > 0
-              ? 'bg-primary/5 border-primary/10'
-              : buyInCount < 0
-                ? 'bg-destructive/5 border-destructive/10'
-                : 'bg-muted border-border'
-              }`}>
-              <div className="text-sm text-muted-foreground font-medium mb-1">
-                {buyInCount > 0 ? 'Adding Amount' : buyInCount < 0 ? 'Removing Amount' : 'No Change'}
+          <div className="py-10 space-y-8">
+            <div className="flex flex-col items-center gap-8">
+              <div className="flex items-center justify-center gap-8 w-full">
+                <Button
+                  variant="ghost"
+                  onClick={decrement}
+                  className="h-16 w-16 border border-white/10 hover:border-gold-500/30 hover:bg-gold-500/10 rounded-2xl group transition-all"
+                >
+                  <Minus className="h-7 w-7 text-gold-500 group-hover:scale-110 transition-transform" />
+                </Button>
+
+                <div className="flex flex-col items-center min-w-[120px]">
+                  <span className={cn(
+                    "text-5xl font-numbers tracking-tight transition-colors",
+                    buyInCount < 0 ? 'text-red-400' : 'text-gold-200'
+                  )}>
+                    {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
+                  </span>
+                  <span className="text-[10px] font-luxury uppercase tracking-[0.3em] text-gold-500/40 mt-2">
+                    {Math.abs(buyInCount) === 1 ? 'Unit Increment' : 'Unit Increments'}
+                  </span>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  onClick={increment}
+                  className="h-16 w-16 border border-white/10 hover:border-gold-500/30 hover:bg-gold-500/10 rounded-2xl group transition-all"
+                >
+                  <Plus className="h-7 w-7 text-gold-500 group-hover:scale-110 transition-transform" />
+                </Button>
               </div>
-              <div className={`text-2xl font-bold ${buyInCount > 0 ? 'text-primary' : buyInCount < 0 ? 'text-destructive' : 'text-muted-foreground'
-                }`}>
-                Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
+
+              <div className={cn(
+                "p-6 rounded-2xl w-full text-center border transition-all duration-500 backdrop-blur-md",
+                buyInCount > 0
+                  ? 'bg-gold-500/5 border-gold-500/20 shadow-[0_0_30px_rgba(212,184,60,0.05)]'
+                  : 'bg-red-500/5 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.05)]'
+              )}>
+                <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-white/30 mb-2">Protocol Valuation Impact</p>
+                <p className={cn(
+                  "text-3xl font-numbers",
+                  buyInCount > 0 ? 'text-gold-100' : 'text-red-100'
+                )}>
+                  Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
+                </p>
               </div>
             </div>
           </div>
 
-          <Group justify="space-between" mt="md">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
               variant="ghost"
-              onClick={() => {
-                setOpened(false);
-                setSelectedPlayerId('');
-                setBuyInCount(1);
-              }}
-              className="text-muted-foreground hover:text-foreground"
+              onClick={() => setOpened(false)}
+              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
             >
-              Cancel
+              Abort Protocol
             </Button>
             <Button
               onClick={handleAddBuyIn}
               disabled={isAdding || !selectedPlayerId || buyInCount === 0}
-              size="lg"
-              className={`px-8 font-semibold shadow-lg transition-all ${buyInCount < 0 ? 'bg-destructive hover:bg-destructive/90' : ''
-                }`}
+              className={cn(
+                "font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-0 shadow-lg rounded-lg flex-1 transition-all",
+                buyInCount < 0
+                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/10'
+                  : 'bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-gold-900/10'
+              )}
             >
-              {isAdding && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
-              {buyInCount > 0 ? 'Confirm Add' : 'Confirm Remove'}
+              {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Execute {buyInCount > 0 ? 'Asset Entry' : 'Manual Audit'}</span>}
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

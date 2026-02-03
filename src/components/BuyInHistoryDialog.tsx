@@ -1,10 +1,21 @@
-import { Modal, ActionIcon, ScrollArea, Group, Text, Stack } from "@mantine/core";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { History, TrendingUp, TrendingDown, Clock, Wallet } from "lucide-react";
+import { History, TrendingUp, TrendingDown, Wallet, Clock, User, ShieldCheck, X } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
 import { useState, useEffect, useCallback } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface BuyInHistoryDialogProps {
   gamePlayerId: string;
@@ -37,131 +48,124 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
   }, [open, loadHistory]);
 
   return (
-    <>
-      <ActionIcon
-        variant="subtle"
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <History className="w-4 h-4" />
-      </ActionIcon>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 text-gold-500/40 hover:text-gold-500 hover:bg-gold-500/10 rounded-lg transition-all border border-transparent hover:border-gold-500/20"
+        >
+          <History className="w-4.5 h-4.5" />
+        </Button>
+      </DialogTrigger>
 
-      <Modal
-        opened={open}
-        onClose={() => setOpen(false)}
-        title={
-          <Group gap="sm">
-            <div className="p-2 bg-primary/10 rounded-full">
-              <History className="w-5 h-5 text-primary" />
+      <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="p-6 border-b border-white/5 bg-white/2">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20 shadow-[0_0_15px_rgba(212,184,60,0.1)]">
+              <History className="w-5 h-5 text-gold-500" />
             </div>
-            <div className="flex flex-col">
-              <Text fw={700} size="lg" lh={1.2}>Buy-in History</Text>
-              <Text size="xs" c="dimmed" fw={500}>{playerName}</Text>
+            <div>
+              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Buy-In Audit Log</DialogTitle>
+              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury flex items-center gap-1.5">
+                <User className="h-3 w-3" />
+                Participant: {playerName}
+              </DialogDescription>
             </div>
-          </Group>
-        }
-        size="lg"
-        centered={!isMobile}
-        yOffset={isMobile ? '5vh' : undefined}
-        padding={0}
-        radius="lg"
-        classNames={{
-          header: "px-6 py-4 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50",
-          body: "bg-card",
-          title: "w-full"
-        }}
-      >
-        <div className="flex flex-col max-h-[70vh] min-h-[300px] bg-card">
-          <ScrollArea.Autosize mah="70vh" type="scroll" offsetScrollbars>
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-                <div className="animate-spin text-primary">
-                  <History className="w-8 h-8" />
-                </div>
-                <Text size="sm">Loading history...</Text>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-hidden min-h-[300px]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-full py-20 text-gold-500/40 gap-4">
+              <div className="animate-spin duration-700">
+                <History className="w-10 h-10 opacity-30" />
               </div>
-            ) : history.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-                <div className="p-4 bg-muted rounded-full">
-                  <History className="w-8 h-8 opacity-50" />
-                </div>
-                <Text size="sm">No buy-in changes recorded yet</Text>
+              <p className="text-[10px] font-luxury uppercase tracking-[0.3em] animate-pulse">Scanning Archives...</p>
+            </div>
+          ) : history.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full py-24 text-gold-500/20 gap-4">
+              <div className="p-5 bg-white/2 rounded-full border border-dashed border-white/10">
+                <ShieldCheck className="w-8 h-8 opacity-20" />
               </div>
-            ) : (
+              <p className="text-[10px] font-luxury uppercase tracking-[0.2em]">No fluctuations identified in ledger.</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-full">
               <Table>
-                <TableHeader className="bg-card sticky top-0 z-40 shadow-sm after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-border">
-                  <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground pl-6 h-12 bg-card">Time</TableHead>
-                    <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground text-center h-12 bg-card">Change</TableHead>
-                    <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground text-right pr-6 h-12 bg-card">Total</TableHead>
+                <TableHeader className="sticky top-0 z-10 bg-[#0a0a0a]/90 backdrop-blur-md">
+                  <TableRow className="hover:bg-transparent border-b border-white/5 h-12">
+                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 pl-8">Temporal Sync</TableHead>
+                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-center">Variance</TableHead>
+                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-right pr-8">Accumulated Assets</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {history.map((entry, index) => (
+                <TableBody className="divide-y divide-white/5">
+                  {history.map((entry) => (
                     <TableRow
                       key={entry.id}
-                      className="hover:bg-muted/50 transition-colors border-b border-border/50"
+                      className="h-16 hover:bg-gold-500/5 border-0 transition-colors"
                     >
-                      <TableCell className="pl-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-sm text-foreground">
+                      <TableCell className="pl-8">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-numbers text-sm text-gold-100">
                             {format(new Date(entry.timestamp), "h:mm a")}
                           </span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(entry.timestamp), "MMM d")}
+                          <span className="text-[9px] font-luxury uppercase tracking-widest text-white/20">
+                            {format(new Date(entry.timestamp), "MMM d, yyyy")}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center py-4">
-                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${entry.buy_ins_added > 0
-                            ? "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400"
-                            : "bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400"
-                          }`}>
+                      <TableCell className="text-center">
+                        <div className={cn(
+                          "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-bold border transition-all shadow-sm",
+                          entry.buy_ins_added > 0
+                            ? "bg-green-500/10 text-green-400 border-green-500/20 shadow-green-500/5"
+                            : "bg-red-500/10 text-red-400 border-red-500/20 shadow-red-500/5"
+                        )}>
                           {entry.buy_ins_added > 0 ? (
-                            <TrendingUp className="w-3 h-3" />
+                            <TrendingUp className="w-3.5 h-3.5" />
                           ) : (
-                            <TrendingDown className="w-3 h-3" />
+                            <TrendingDown className="w-3.5 h-3.5" />
                           )}
-                          <span>
+                          <span className="font-numbers">
                             {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right pr-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <span className="font-bold text-sm tabular-nums text-foreground">
+                      <TableCell className="text-right pr-8">
+                        <div className="flex items-center justify-end gap-2.5">
+                          <span className="font-numbers text-base text-gold-100/80">
                             {entry.total_buy_ins_after}
                           </span>
-                          <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                          <Wallet className="w-4 h-4 text-gold-500/30" />
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {/* Initial buy-in row */}
-                  <TableRow className="bg-muted/30 hover:bg-muted/50 border-none">
-                    <TableCell className="pl-6 py-4">
+                  {/* Genesis state */}
+                  <TableRow className="bg-white/2 border-0 h-16 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all">
+                    <TableCell className="pl-8">
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm text-muted-foreground">Start</span>
-                        <span className="text-xs text-muted-foreground opacity-50">-</span>
+                        <span className="font-luxury text-[10px] uppercase tracking-[0.2em] text-gold-500/60">Genesis Initiation</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center py-4">
-                      <span className="text-xs font-medium text-muted-foreground px-2 py-1 rounded bg-muted">Initial</span>
+                    <TableCell className="text-center">
+                      <Badge variant="ghost" className="bg-white/5 text-[9px] font-luxury uppercase tracking-widest text-white/40">Initial State</Badge>
                     </TableCell>
-                    <TableCell className="text-right pr-6 py-4">
-                      <div className="flex items-center justify-end gap-2 text-muted-foreground">
-                        <span className="font-bold text-sm tabular-nums">1</span>
-                        <Wallet className="w-3.5 h-3.5 opacity-50" />
+                    <TableCell className="text-right pr-8">
+                      <div className="flex items-center justify-end gap-2.5">
+                        <span className="font-numbers text-sm">1</span>
+                        <ShieldCheck className="w-4 h-4 text-white/20" />
                       </div>
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
-            )}
-          </ScrollArea.Autosize>
+            </ScrollArea>
+          )}
         </div>
-      </Modal>
-    </>
+      </DialogContent>
+    </Dialog>
   );
 };

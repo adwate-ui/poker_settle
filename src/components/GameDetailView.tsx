@@ -1,15 +1,31 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card as MantineCard, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, ChevronUp, Check, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossVariant } from "@/lib/utils";
+import { formatIndianNumber, formatProfitLoss, getProfitLossVariant, cn } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -40,12 +56,6 @@ interface Game {
   date: string;
   buy_in_amount: number;
   settlements: Settlement[];
-}
-
-interface TablePosition {
-  id: string;
-  snapshot_timestamp: string;
-  positions: SeatPosition[];
 }
 
 interface Settlement {
@@ -125,14 +135,12 @@ export const GameDetailView = ({
     }
   }, [showOwnerControls, gameId, createOrGetSharedLink]);
 
-  // Memoize meta tags config to prevent unnecessary re-renders
   const metaTagsConfig = useMemo(() => ({
     url: shareUrl,
     title: game ? `Game Details - ${format(new Date(game.date), "MMMM d, yyyy")}` : undefined,
     description: game ? `Poker game on ${format(new Date(game.date), "MMMM d, yyyy")} - Buy-in: Rs. ${formatIndianNumber(game.buy_in_amount)}` : undefined,
   }), [shareUrl, game]);
 
-  // Update meta tags with shared URL for mobile screenshots
   useMetaTags(metaTagsConfig);
 
   const handleSort = (field: SortField) => {
@@ -149,14 +157,14 @@ export const GameDetailView = ({
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4" />;
-    return <ArrowDown className="h-4 w-4" />;
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 opacity-30" />;
+    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4 text-gold-500" />;
+    return <ArrowDown className="h-4 w-4 text-gold-500" />;
   };
 
   const sortedGamePlayers = useMemo(() => {
     return [...gamePlayers].sort((a, b) => {
-      let aVal: number, bVal: number;
+      let aVal: number | string, bVal: number | string;
 
       switch (sortField) {
         case "name": {
@@ -181,9 +189,7 @@ export const GameDetailView = ({
           return 0;
       }
 
-      if (aVal === undefined || bVal === undefined) return 0;
-
-      return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+      return sortOrder === "asc" ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
     });
   }, [gamePlayers, sortField, sortOrder]);
 
@@ -218,7 +224,7 @@ export const GameDetailView = ({
     setNewTransferTo("");
     setNewTransferAmount("");
     setTransferDialogOpen(false);
-    toast.success("Manual transfer added");
+    toast.success("Manual transfer added to buffer");
   };
 
   const removeManualTransfer = (index: number) => {
@@ -240,7 +246,7 @@ export const GameDetailView = ({
     } else {
       await refetchGameDetail();
       setManualTransfers([]);
-      toast.success("Settlements recalculated and saved");
+      toast.success("Settlements recalculated and archived");
     }
   };
 
@@ -255,37 +261,32 @@ export const GameDetailView = ({
     const manualSettlements: SettlementWithType[] = [];
     const calculatedSettlements: SettlementWithType[] = [];
 
-    savedSettlements.forEach(settlement => {
-      if (savedSettlements.indexOf(settlement) < savedSettlements.length - allCalculatedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
-        manualSettlements.push({ ...settlement, isManual: true });
-      } else {
-        calculatedSettlements.push({ ...settlement, isManual: false });
-      }
-    });
+    // The order in calculateSettlements logic typically puts manual ones first if we saved them that way
+    // or we can detect based on count if the structure is simple
+    const numManual = savedSettlements.length - allCalculatedSettlements.length;
 
-    if (manualSettlements.length === 0 && calculatedSettlements.length === savedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
-      const numManual = savedSettlements.length - allCalculatedSettlements.length;
-      return savedSettlements.map((s, i) => ({ ...s, isManual: i < numManual }));
-    }
-
-    return [...manualSettlements, ...calculatedSettlements];
+    return savedSettlements.map((s, i) => ({
+      ...s,
+      isManual: i < numManual && numManual > 0
+    }));
   }, [savedSettlements, allCalculatedSettlements]);
 
   const settlementsWithType = useMemo(() => getSettlementsWithType(), [getSettlementsWithType]);
 
   if (queryLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader size="lg" />
+      <div className="flex flex-col justify-center items-center py-20 gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Decrypting Game Archives...</p>
       </div>
     );
   }
 
   if (!game) {
     return (
-      <MantineCard shadow="sm" padding="lg" radius="md" withBorder className="max-w-4xl mx-auto">
-        <Text c="dimmed" ta="center">Game not found</Text>
-      </MantineCard>
+      <Card className="max-w-4xl mx-auto border-white/10 bg-black/40 backdrop-blur-xl p-10 text-center">
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase">Game record not found in ledger.</p>
+      </Card>
     );
   }
 
@@ -302,448 +303,484 @@ export const GameDetailView = ({
     }));
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
       {onBack && (
         <Button
+          variant="ghost"
           onClick={onBack}
-          className="mb-4 bg-primary text-primary-foreground hover:bg-primary/90"
+          className="mb-4 hover:bg-gold-500/10 text-gold-500 hover:text-gold-400 font-luxury uppercase tracking-widest text-xs"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           {backLabel}
         </Button>
       )}
 
-      <MantineCard shadow="sm" padding="lg" radius="md" withBorder>
-        <Stack gap="md">
-          <Group justify="space-between" wrap="wrap">
-            <Text size="xl" fw={700} className="sm:text-2xl">
-              Game Details - {format(new Date(game.date), "MMMM d, yyyy")}
-            </Text>
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-8 border-b border-white/5 bg-white/2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20">
+                <ShieldCheck className="h-6 w-6 text-gold-500" />
+              </div>
+              <div>
+                <CardTitle className="text-3xl font-luxury text-gold-100">
+                  Game Log — {format(new Date(game.date), "MMMM d, yyyy")}
+                </CardTitle>
+                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Official Session Archive</CardDescription>
+              </div>
+            </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => copyShareLink('game', gameId)}
               disabled={linkLoading}
-              className="hover:bg-primary/10 hover:text-primary border-primary/20 w-full sm:w-auto"
+              className="h-10 px-6 rounded-full bg-white/5 border-white/10 hover:bg-gold-500/10 hover:border-gold-500/30 text-gold-200 font-luxury uppercase tracking-widest text-[10px]"
             >
-              <Share2 className="h-4 w-4" />
-              Share Game
+              <Share2 className="h-3.5 w-3.5 mr-2 text-gold-500" />
+              Export Archive
             </Button>
-          </Group>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="space-y-0.5 p-3 rounded-lg border">
-              <p className="text-xs text-muted-foreground font-medium">Buy-in</p>
-              <p className="text-sm sm:text-base font-bold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Base Stake</p>
+              <p className="text-2xl font-numbers text-gold-100">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg border">
-              <p className="text-xs text-muted-foreground font-medium">Players</p>
-              <p className="text-sm sm:text-base font-bold">{gamePlayers.length}</p>
+            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Participants</p>
+              <p className="text-2xl font-numbers text-gold-100">{gamePlayers.length}</p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg border">
-              <p className="text-xs text-muted-foreground font-medium">Chips in play</p>
-              <p className="text-sm sm:text-base font-bold">
+            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Assets in Play</p>
+              <p className="text-2xl font-numbers text-gold-500">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="space-y-0.5 p-3 rounded-lg border">
-              <p className="text-xs text-muted-foreground font-medium">Total P&L</p>
-              <p className="text-sm sm:text-base font-bold text-green-500">
+            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Gross Returns</p>
+              <p className="text-2xl font-numbers text-green-400">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
               </p>
             </div>
           </div>
-        </Stack>
-      </MantineCard>
+        </CardContent>
+      </Card>
 
-      {/* Buy-in Logs */}
-      <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
-        <div
-          className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
-          onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
-        >
-          <Group justify="space-between">
-            <Text className="text-primary" size="lg" fw={600}>Buy-in Logs</Text>
-            {buyInLogsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </Group>
-        </div>
-        <Collapse in={buyInLogsOpen}>
-          <div>
-            <ConsolidatedBuyInLogs gameId={gameId} token={token} />
-          </div>
-        </Collapse>
-      </MantineCard>
+      {/* Buy-in Logs Section */}
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
+          <CollapsibleTrigger asChild>
+            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center gap-3">
+                <History className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Buy-in Audit</h3>
+              </div>
+              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+              <ConsolidatedBuyInLogs gameId={gameId} token={token} />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      {/* Poker Table View */}
-      <MantineCard shadow="sm" padding="md" radius="md" withBorder>
-        <Stack gap="md">
-          <Group justify="space-between">
-            <button
-              className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => setTablePositionsOpen(!tablePositionsOpen)}
-            >
-              <Text className="text-primary" size="lg" fw={600}>Table Positions</Text>
-              {tablePositionsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-            </button>
-            {tablePositions.length > 1 && tablePositionsOpen && (
-              <Group gap="md">
-                <span className="text-sm font-semibold text-accent-foreground px-3 py-1 rounded-full bg-accent/20">
-                  {format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm")} IST
-                </span>
-                <Group gap="xs">
-                  <ActionIcon
-                    variant="outline"
-                    onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
-                    disabled={currentPositionIndex === 0}
-                    className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </ActionIcon>
-                  <Text size="sm" c="dimmed" fw={500}>
-                    {currentPositionIndex + 1} / {tablePositions.length}
-                  </Text>
-                  <ActionIcon
-                    variant="outline"
-                    onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
-                    disabled={currentPositionIndex === tablePositions.length - 1}
-                    className="border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </ActionIcon>
-                </Group>
-              </Group>
-            )}
-          </Group>
-          <Collapse in={tablePositionsOpen}>
-            <PokerTableView
-              positions={playersWithSeats}
-              totalSeats={playersWithSeats.length}
-              enableDragDrop={false}
-              gameId={gameId}
-            />
-          </Collapse>
-        </Stack>
-      </MantineCard>
+      {/* Table Positions Section */}
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
+          <CollapsibleTrigger asChild>
+            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center gap-3">
+                <User className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Table Formation</h3>
+              </div>
+              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", tablePositionsOpen && "rotate-180")} />
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-8 animate-in slide-in-from-top-2 duration-300">
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] uppercase tracking-widest font-numbers text-gold-500/60 bg-gold-500/5 px-3 py-1 rounded-full border border-gold-500/10">
+                    Snapshot: {tablePositions.length > 0 ? format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm") : "--:--"} IST
+                  </span>
+                </div>
+                {tablePositions.length > 1 && (
+                  <div className="flex items-center gap-4 bg-white/5 rounded-full p-1 border border-white/10">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
+                      disabled={currentPositionIndex === 0}
+                      className="h-8 w-8 rounded-full text-gold-500 disabled:opacity-20"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-[10px] font-numbers text-gold-100/60 px-2 min-w-[40px] text-center">
+                      {currentPositionIndex + 1} / {tablePositions.length}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
+                      disabled={currentPositionIndex === tablePositions.length - 1}
+                      className="h-8 w-8 rounded-full text-gold-500 disabled:opacity-20"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gold-500/5 blur-3xl rounded-full" />
+                <PokerTableView
+                  positions={playersWithSeats}
+                  totalSeats={playersWithSeats.length}
+                  enableDragDrop={false}
+                  gameId={gameId}
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      {/* Player Results */}
-      <Card className="border-primary/20">
+      {/* Player Results Ledger */}
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
           <CollapsibleTrigger asChild>
-            <div
-              className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-primary text-lg font-semibold">Player Results</h3>
-                {playerResultsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Performance Ledger</h3>
+              </div>
+              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", playerResultsOpen && "rotate-180")} />
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="animate-in slide-in-from-top-2 duration-300 overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-white/5 border-b border-white/10">
+                  <TableRow className="hover:bg-transparent border-0 h-14">
+                    <TableHead className="pl-8">
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort("name")}
+                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      >
+                        Participant {getSortIcon("name")}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort("buy_ins")}
+                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      >
+                        Stakes {getSortIcon("buy_ins")}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort("net_amount")}
+                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      >
+                        Net Outcome {getSortIcon("net_amount")}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort("final_stack")}
+                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      >
+                        Terminal Stack {getSortIcon("final_stack")}
+                      </Button>
+                    </TableHead>
+                    {showOwnerControls && fetchBuyInHistory && (
+                      <TableHead className="text-right pr-8">
+                        <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-500/60">Log Audit</span>
+                      </TableHead>
+                    )}
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-white/5">
+                  {sortedGamePlayers.map((gamePlayer) => {
+                    const playerName = gamePlayer.players?.name ?? "--";
+                    const netAmount = gamePlayer.net_amount ?? 0;
+                    const finalStack = gamePlayer.final_stack ?? 0;
+                    const isWin = netAmount > 0;
+
+                    return (
+                      <TableRow key={gamePlayer.id} className="h-20 border-white/5 hover:bg-gold-500/5 transition-colors">
+                        <TableCell className="pl-8 font-luxury text-[13px] text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1">
+                            {gamePlayer.buy_ins} Stacks
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={cn(
+                              "px-4 py-1.5 font-numbers tracking-widest border-0",
+                              isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                            )}
+                          >
+                            {formatProfitLoss(netAmount)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-numbers text-base text-gold-100/60">
+                          Rs. {formatIndianNumber(finalStack)}
+                        </TableCell>
+                        {showOwnerControls && fetchBuyInHistory && (
+                          <TableCell className="text-right pr-8">
+                            <BuyInHistoryDialog
+                              gamePlayerId={gamePlayer.id}
+                              playerName={playerName}
+                              fetchHistory={fetchBuyInHistory}
+                            />
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      {/* Settlement Orchestration Section */}
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
+          <CollapsibleTrigger asChild>
+            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center gap-3">
+                <Coins className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Settlement Protocols</h3>
+              </div>
+              <div className="flex items-center gap-4">
+                {showOwnerControls && settlementsOpen && (
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setTransferDialogOpen(true)}
+                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Add Manual
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={recalculateAndSaveSettlements}
+                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Finalize
+                    </Button>
+                  </div>
+                )}
+                <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", settlementsOpen && "rotate-180")} />
               </div>
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="p-0">
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              {showOwnerControls && manualTransfers.length > 0 && (
+                <div className="p-6 border-b border-gold-500/10 bg-gold-500/5">
+                  <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-gold-500/60 mb-4 flex items-center gap-2">
+                    <ShieldCheck className="h-3 w-3" /> Buffered Transactions (Awaiting Finalization)
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {manualTransfers.map((transfer, index) => (
+                      <div key={index} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-white/5 group">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="text-xs font-luxury text-gold-100/80 truncate">
+                            <span className="text-white/40">{transfer.from}</span>
+                            <ArrowRight className="inline h-3 w-3 mx-2 text-gold-500/40" />
+                            <span className="text-white/40">{transfer.to}</span>
+                          </div>
+                          <span className="font-numbers text-sm text-gold-500">₹{formatIndianNumber(transfer.amount)}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeManualTransfer(index)}
+                          className="h-8 w-8 text-red-500/20 hover:text-red-500 transition-all rounded-full"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                      <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleSort("name")}
-                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                        >
-                          <span className="hidden sm:inline truncate">Player</span>
-                          <span className="sm:hidden truncate">Plyr</span>
-                          {getSortIcon("name")}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="font-bold text-left h-10 py-2 w-[70px] sm:w-auto">
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleSort("buy_ins")}
-                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                        >
-                          <span className="hidden sm:inline truncate">Buy-ins</span>
-                          <span className="sm:hidden truncate">Buy</span>
-                          {getSortIcon("buy_ins")}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="font-bold text-left h-10 py-2 w-[120px] sm:w-auto">
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleSort("net_amount")}
-                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                        >
-                          <span className="hidden sm:inline truncate">Net P&L</span>
-                          <span className="sm:hidden truncate">P&L</span>
-                          {getSortIcon("net_amount")}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="font-bold text-left h-10 py-2 w-[80px] sm:w-auto">
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleSort("final_stack")}
-                          className="flex items-center gap-1 hover:text-primary font-bold justify-start h-8 px-2 text-sm truncate max-w-full"
-                        >
-                          <span className="hidden sm:inline truncate">Final Stack</span>
-                          <span className="sm:hidden truncate">Stack</span>
-                          {getSortIcon("final_stack")}
-                        </Button>
-                      </TableHead>
-                      {showOwnerControls && fetchBuyInHistory && (
-                        <TableHead className="font-bold text-left h-10 py-2 text-sm w-[70px] sm:w-auto">
-                          <span className="hidden sm:inline truncate">Buy-in Log</span>
-                          <span className="sm:hidden truncate">Log</span>
-                        </TableHead>
-                      )}
+                  <TableHeader className="bg-white/5 border-b border-white/10">
+                    <TableRow className="hover:bg-transparent border-0 h-14">
+                      <TableHead className="pl-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Payer</TableHead>
+                      <TableHead className="font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Recipient</TableHead>
+                      <TableHead className="font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Amount</TableHead>
+                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Clearance</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {sortedGamePlayers.map((gamePlayer, index) => {
-                      const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
-                      const netAmount = gamePlayer.net_amount ?? 0;
-                      const finalStack = gamePlayer.final_stack ?? 0;
-
+                  <TableBody className="divide-y divide-white/5">
+                    {settlementsWithType.map((settlement, index) => {
+                      const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                       return (
-                        <TableRow
-                          key={gamePlayer.id}
-                          className={`transition-colors ${index % 2 === 0
-                            ? "bg-secondary/5 hover:bg-secondary/20"
-                            : "hover:bg-primary/10"
-                            }`}
-                        >
-                          <TableCell className="font-medium text-primary text-left py-2 text-sm">{playerName}</TableCell>
-                          <TableCell className="text-left py-2">
-                            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium text-xs">
-                              {gamePlayer.buy_ins}
-                            </span>
+                        <TableRow key={`settlement-${index}`} className="h-20 border-white/5 hover:bg-gold-500/5 transition-colors group">
+                          <TableCell className="pl-8">
+                            <div className="flex items-center gap-3">
+                              <User className="h-3 w-3 text-gold-500/40" />
+                              <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.from}</span>
+                            </div>
                           </TableCell>
-                          <TableCell className="text-left py-2 whitespace-nowrap">
-                            <Badge
-                              variant={getProfitLossVariant(netAmount)}
-                              className="font-medium text-xs whitespace-nowrap"
-                            >
-                              {formatProfitLoss(netAmount)}
-                            </Badge>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <CreditCard className="h-3 w-3 text-gold-500/40" />
+                              <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.to}</span>
+                            </div>
                           </TableCell>
-                          <TableCell className="font-semibold text-accent-foreground text-left py-2 text-sm whitespace-nowrap">
-                            Rs. {formatIndianNumber(finalStack)}
+                          <TableCell>
+                            <span className="font-numbers text-base text-gold-500">Rs. {formatIndianNumber(settlement.amount)}</span>
+                            {settlement.isManual && (
+                              <span className="ml-3 text-[9px] font-luxury uppercase tracking-widest text-gold-500/30 px-2 py-0.5 border border-gold-500/10 rounded-full">Manual</span>
+                            )}
                           </TableCell>
-                          {showOwnerControls && fetchBuyInHistory && (
-                            <TableCell className="text-left py-2">
-                              <BuyInHistoryDialog
-                                gamePlayerId={gamePlayer.id}
-                                playerName={playerName}
-                                fetchHistory={fetchBuyInHistory}
-                              />
-                            </TableCell>
-                          )}
+                          <TableCell className="text-right pr-8">
+                            {showOwnerControls && confirmation ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={async () => {
+                                  if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
+                                  else await confirmSettlement(confirmation.id);
+                                  await refetchGameDetail();
+                                }}
+                                className={cn(
+                                  "h-10 px-6 rounded-full font-luxury uppercase tracking-widest text-[10px] border transition-all",
+                                  confirmation.confirmed
+                                    ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
+                                    : "bg-white/5 border-white/10 text-white/30 hover:bg-white/10"
+                                )}
+                              >
+                                {confirmation.confirmed ? <Check className="h-3.5 w-3.5 mr-2" /> : <X className="h-3.5 w-3.5 mr-2" />}
+                                {confirmation.confirmed ? "Authorized" : "Confirm"}
+                              </Button>
+                            ) : (
+                              <Badge className={cn(
+                                "h-9 px-5 rounded-full font-luxury uppercase tracking-widest text-[9px] border-0",
+                                confirmation?.confirmed ? "bg-green-500/20 text-green-400" : "bg-gold-500/10 text-gold-500/40"
+                              )}>
+                                {confirmation?.confirmed ? <Check className="h-3 w-3 mr-2" /> : <History className="h-3 w-3 mr-2" />}
+                                {confirmation?.confirmed ? "Settled" : "Pending"}
+                              </Badge>
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
-
-      {/* Settlements */}
-      <Card className="border-primary/20">
-        <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
-          <CollapsibleTrigger asChild>
-            <div
-              className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
-            >
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">💰</span>
-                  <h3 className="text-primary text-lg font-semibold">
-                    Settlements
-                  </h3>
-                </div>
-                {settlementsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </div>
-              {showOwnerControls && settlementsOpen && (
-                <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-primary/20 hover:bg-primary/10"
-                    onClick={() => setTransferDialogOpen(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                    <span className="hidden xs:inline">Add</span> Transfer
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={recalculateAndSaveSettlements}
-                    className="border-primary/20 hover:bg-primary/10"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
-                    Redo
-                  </Button>
-                </div>
-              )}
             </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            {/* Pending manual transfers */}
-            {showOwnerControls && manualTransfers.length > 0 && (
-              <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
-                <p className="text-xs sm:text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
-                  Pending Manual Transfers (click Redo to apply):
-                </p>
-                <div className="space-y-2">
-                  {manualTransfers.map((transfer, index) => (
-                    <div key={index} className="flex items-center justify-between bg-background rounded-md px-2 sm:px-3 py-2 border gap-2">
-                      <span className="text-xs sm:text-sm truncate">
-                        {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeManualTransfer(index)}
-                        className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {settlementsWithType.length > 0 ? (
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                          <span className="hidden sm:inline">From</span>
-                          <span className="sm:hidden">Fr</span>
-                        </TableHead>
-                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                          <span className="hidden sm:inline">To</span>
-                          <span className="sm:hidden">To</span>
-                        </TableHead>
-                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                          <span className="hidden sm:inline">Amount</span>
-                          <span className="sm:hidden">Amt</span>
-                        </TableHead>
-                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                          <span className="hidden sm:inline">Status</span>
-                          <span className="sm:hidden">✓</span>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {settlementsWithType.map((settlement, index) => {
-                        const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
-
-                        return (
-                          <TableRow
-                            key={`settlement-${index}`}
-                            className={`transition-colors ${index % 2 === 0
-                              ? "bg-secondary/5 hover:bg-secondary/20"
-                              : "hover:bg-primary/10"
-                              }`}
-                          >
-                            <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
-                              {settlement.from}
-                            </TableCell>
-                            <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
-                              {settlement.to}
-                            </TableCell>
-                            <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
-                              Rs. {formatIndianNumber(settlement.amount)}
-                            </TableCell>
-                            <TableCell className="text-left py-2 sm:py-4">
-                              {showOwnerControls && confirmation ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={async () => {
-                                    if (confirmation.confirmed) {
-                                      await unconfirmSettlement(confirmation.id);
-                                    } else {
-                                      await confirmSettlement(confirmation.id);
-                                    }
-                                    // Refresh game detail
-                                    await refetchGameDetail();
-                                  }}
-                                  className={confirmation.confirmed ? "text-green-600 hover:text-green-700" : "text-gray-400 hover:text-gray-600"}
-                                >
-                                  {confirmation.confirmed ? (
-                                    <Check className="h-4 w-4" />
-                                  ) : (
-                                    <X className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              ) : confirmation?.confirmed ? (
-                                <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                                  <Check className="h-3 w-3 mr-1" />
-                                  Paid
-                                </Badge>
-                              ) : (
-                                <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 text-xs">
-                                  Pending
-                                </Badge>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            ) : (
-              <CardContent className="p-0">
-                <div className="p-6 text-center text-muted-foreground">
-                  No settlements needed - all players are even.
-                </div>
-              </CardContent>
-            )}
           </CollapsibleContent>
         </Collapsible>
       </Card>
 
-      {/* Transfer Dialog Modal */}
-      <Modal
-        opened={transferDialogOpen}
-        onClose={() => setTransferDialogOpen(false)}
-        title="Add Manual Transfer"
-        centered
-      >
-        <Stack gap="md">
-          <Select
-            label="From (Payer)"
-            placeholder="Select player"
-            data={gamePlayers.map(gp => ({ value: gp.players?.name || '', label: gp.players?.name || '' }))}
-            value={newTransferFrom}
-            onChange={(value) => setNewTransferFrom(value || "")}
-          />
-          <Select
-            label="To (Receiver)"
-            placeholder="Select player"
-            data={gamePlayers.map(gp => ({ value: gp.players?.name || '', label: gp.players?.name || '' }))}
-            value={newTransferTo}
-            onChange={(value) => setNewTransferTo(value || "")}
-          />
-          <TextInput
-            label="Amount (Rs.)"
-            placeholder="Enter amount"
-            type="number"
-            value={newTransferAmount}
-            onChange={(e) => setNewTransferAmount(e.target.value)}
-          />
-          <Group justify="flex-end" mt="md">
-            <Button variant="outline" onClick={() => setTransferDialogOpen(false)}>Cancel</Button>
-            <Button onClick={addManualTransfer}>Add Transfer</Button>
-          </Group>
-        </Stack>
-      </Modal>
+      {/* Manual Transfer Dialog */}
+      <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+        <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
+                <Plus className="w-5 h-5 text-gold-500" />
+              </div>
+              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Add Manual Protocol</DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="py-6 space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Payer (From)</Label>
+                <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
+                  <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
+                    <SelectValue placeholder="Select Origin" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                    {gamePlayers.map(gp => (
+                      <SelectItem key={gp.players?.name} value={gp.players?.name || ''} className="font-luxury uppercase text-[10px] tracking-widest">{gp.players?.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Recipient (To)</Label>
+                <Select value={newTransferTo} onValueChange={setNewTransferTo}>
+                  <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-left">
+                    <SelectValue placeholder="Select Destination" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                    {gamePlayers.map(gp => (
+                      <SelectItem key={gp.players?.name} value={gp.players?.name || ''} className="font-luxury uppercase text-[10px] tracking-widest">{gp.players?.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Amount (INR)</Label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={newTransferAmount}
+                  onChange={(e) => setNewTransferAmount(e.target.value)}
+                  className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-lg text-gold-100 placeholder:text-white/10"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
+            <Button variant="ghost" onClick={() => setTransferDialogOpen(false)} className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1">
+              Abort
+            </Button>
+            <Button
+              onClick={addManualTransfer}
+              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 bg-gold-500/10 border border-gold-500/20 hover:bg-gold-500/20 text-gold-100 rounded-lg flex-1"
+            >
+              Queue Protocol
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+const ArrowRight = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}
+  >
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+);

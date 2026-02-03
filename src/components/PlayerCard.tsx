@@ -1,12 +1,14 @@
 import { useState, memo, useCallback, useMemo } from "react";
-import { TextInput, Text, Badge, Stack, Group, Divider } from "@mantine/core";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
-import { Check } from "lucide-react";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
+import { Check, Plus, History, User, Coins, TrendingUp } from "lucide-react";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss, cn } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
 import { GlassCard } from "./ui/GlassCard";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
@@ -58,135 +60,116 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
     setHasFinalStackChanges(false);
   }, [gamePlayer.id, gamePlayer.buy_ins, localFinalStack, buyInAmount, onUpdatePlayer]);
 
-  const profitLossBadgeColor = netAmount > 0
-    ? "bg-green-500/20 text-[#00ff88] border-[#00ff88]/30"
-    : netAmount < 0
-      ? "bg-red-500/20 text-[#ff4d4d] border-[#ff4d4d]/30"
-      : "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <GlassCard className="p-3 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5">
-      <Stack gap="xs">
+    <GlassCard className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
+      {/* Status accent */}
+      <div className={cn(
+        "absolute top-0 left-0 w-1 h-full opacity-30",
+        profitLossStatus === 'profit' ? 'bg-green-500' : profitLossStatus === 'loss' ? 'bg-red-500' : 'bg-gold-500/20'
+      )} />
+
+      <div className="space-y-4">
         {/* Header: Avatar, Player Name, Buy-ins Badge, and History Button */}
-        <Group justify="space-between" gap="xs" wrap="nowrap">
-          <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <OptimizedAvatar
               name={gamePlayer.player.name}
               size="sm"
-              className="flex-shrink-0"
+              className="flex-shrink-0 border border-white/10"
             />
-            <Text className="font-luxury tracking-wide" size="sm" fw={700} truncate style={{ flex: 1 }}>
-              {gamePlayer.player.name}
-            </Text>
-          </Group>
+            <div className="min-w-0">
+              <h4 className="font-luxury text-sm font-bold text-gold-100 uppercase tracking-widest truncate">
+                {gamePlayer.player.name}
+              </h4>
+              <p className="text-[9px] font-luxury text-gold-500/40 uppercase tracking-tighter">Verified Participant</p>
+            </div>
+          </div>
 
-          <Group gap={4} wrap="nowrap">
-            <Badge size="xs" variant="filled" className="bg-gold-500/20 text-gold-400 font-numbers border border-gold-500/30">
-              {gamePlayer.buy_ins} buy-in{gamePlayer.buy_ins !== 1 ? 's' : ''}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Badge variant="outline" className="bg-gold-500/5 text-gold-400 font-numbers border-gold-500/20 h-6 px-2 text-[10px]">
+              {gamePlayer.buy_ins} UNIT{gamePlayer.buy_ins !== 1 ? 'S' : ''}
             </Badge>
             <BuyInHistoryDialog
               gamePlayerId={gamePlayer.id}
               playerName={gamePlayer.player.name}
               fetchHistory={fetchBuyInHistory}
             />
-          </Group>
-        </Group>
+          </div>
+        </div>
 
-        {/* Buy-ins and Final Stack Row */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Buy-ins Input */}
-          <Stack gap={4}>
-            <Text size="xs" fw={700} className="text-gold-200/60 uppercase tracking-tighter" style={{ fontSize: '9px' }}>
-              Add Buy-ins
-            </Text>
-            <Group gap={4} wrap="nowrap">
-              <TextInput
+        {/* Action Row: Buy-ins and Final Stack */}
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
+          {/* Add Buy-ins Area */}
+          <div className="space-y-2">
+            <Label className="text-[9px] uppercase font-luxury tracking-[0.2em] text-white/30 ml-0.5">Increment Stake</Label>
+            <div className="flex gap-1.5 h-9">
+              <Input
                 type="number"
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
-                size="xs"
                 placeholder="0"
-                className="flex-1"
-                styles={{
-                  input: {
-                    textAlign: 'center',
-                    fontFamily: 'var(--font-numbers)',
-                    fontSize: '13px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    color: 'white',
-                    height: '32px'
-                  }
-                }}
+                className="flex-1 bg-white/5 border-0 border-b border-white/10 rounded-none h-full text-center font-numbers text-sm text-gold-100 focus-visible:ring-0 focus-visible:border-gold-500 transition-all"
               />
               {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
                 <Button
-                  size="sm"
+                  size="icon"
                   onClick={handleAddBuyIns}
-                  className="min-w-[32px] h-8 px-0 bg-gold-600 hover:bg-gold-500 text-black font-bold"
+                  className="w-9 h-9 bg-gold-600 hover:bg-gold-500 text-black border-0 rounded-md shrink-0 transition-transform active:scale-90"
                 >
-                  +
+                  <Plus className="w-4 h-4" />
                 </Button>
               )}
-            </Group>
-          </Stack>
+            </div>
+          </div>
 
-          {/* Final Stack Input */}
-          <Stack gap={4}>
-            <Text size="xs" fw={700} className="text-gold-200/60 uppercase tracking-tighter" style={{ fontSize: '9px' }}>
-              Final Stack
-            </Text>
-            <Group gap={4} wrap="nowrap">
-              <TextInput
+          {/* Final Stack Area */}
+          <div className="space-y-2">
+            <Label className="text-[9px] uppercase font-luxury tracking-[0.2em] text-white/30 ml-0.5">Final Liquidity</Label>
+            <div className="flex gap-1.5 h-9">
+              <Input
                 type="text"
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
-                size="xs"
                 placeholder="0"
-                className="flex-1"
-                styles={{
-                  input: {
-                    textAlign: 'center',
-                    fontFamily: 'var(--font-numbers)',
-                    fontSize: '13px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    color: 'white',
-                    height: '32px'
-                  }
-                }}
+                className="flex-1 bg-white/5 border-0 border-b border-white/10 rounded-none h-full text-center font-numbers text-sm text-gold-100 focus-visible:ring-0 focus-visible:border-gold-500 transition-all"
               />
               {hasFinalStackChanges && (
                 <Button
-                  size="sm"
+                  size="icon"
                   onClick={confirmFinalStack}
-                  className="min-w-[32px] w-8 h-8 p-0 bg-green-600 hover:bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]"
+                  className="w-9 h-9 bg-green-600 hover:bg-green-500 text-white border-0 shadow-lg shadow-green-900/20 rounded-md shrink-0 transition-transform animate-in zoom-in-50 duration-200"
                 >
                   <Check className="w-4 h-4" />
                 </Button>
               )}
-            </Group>
-          </Stack>
+            </div>
+          </div>
         </div>
 
-        {/* Summary Row */}
-        <div className="pt-2 border-t border-white/5 space-y-1.5">
-          <Group justify="space-between">
-            <Text size="xs" className="text-white/40 font-medium">Total Buy-ins:</Text>
-            <Text size="xs" className="font-numbers text-white/80">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
-          </Group>
-          <Group justify="space-between">
-            <Text size="xs" className="text-white/40 font-medium">Net P&L:</Text>
+        {/* Valuation Summary */}
+        <div className="pt-3 border-t border-white/5 flex flex-col gap-2">
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Archive Commitment</span>
+            <span className="font-numbers text-[11px] text-white/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+          </div>
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Protocol Valuation</span>
             <Badge
-              className={`font-numbers px-2 py-0.5 border h-auto ${profitLossBadgeColor}`}
               variant="outline"
-              size="sm"
+              className={cn(
+                "font-numbers px-2.5 py-0.5 border-0 border-b-2 rounded-none h-auto text-[11px]",
+                profitLossStatus === 'profit' ? 'text-green-400 border-green-500/30 bg-green-500/5' :
+                  profitLossStatus === 'loss' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
+                    'text-gray-400 border-gray-500/30 bg-gray-500/5'
+              )}
             >
               {formatProfitLoss(netAmount)}
             </Badge>
-          </Group>
+          </div>
         </div>
-      </Stack>
+      </div>
     </GlassCard>
   );
 });

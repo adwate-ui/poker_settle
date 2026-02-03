@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { TextInput, Text, Alert, Group, Stack } from '@mantine/core';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PokerCard from './PokerCard';
 import CardSelector from './CardSelector';
 import { AlertCircle, Grid3x3 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 
 interface CardNotationInputProps {
   label: string;
@@ -20,7 +21,7 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
   const validateCards = (notation: string): boolean => {
     // Remove spaces and convert to uppercase
     const cleaned = notation.replace(/\s+/g, '').toUpperCase();
-    
+
     // Check if length is correct (2 chars per card)
     if (cleaned.length !== expectedCards * 2) {
       setError(`Please enter exactly ${expectedCards} card${expectedCards > 1 ? 's' : ''}`);
@@ -65,13 +66,6 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
     return cards;
   };
 
-  const handleSubmit = () => {
-    if (validateCards(input)) {
-      onSubmit(input.replace(/\s+/g, '').toUpperCase());
-      setInput('');
-    }
-  };
-
   const handleSelectorSubmit = (cards: string) => {
     setInput(cards);
     if (validateCards(cards)) {
@@ -83,14 +77,11 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
   // Only parse cards if input is complete enough
   const cleaned = input.replace(/\s+/g, '').toUpperCase();
   const cards = cleaned.length >= 2 && cleaned.length % 2 === 0 ? parseCards(input) : [];
-  
-  // Check if input is complete without triggering validation errors
-  const isComplete = cleaned.length === expectedCards * 2;
 
   return (
-    <Stack gap="sm">
-      <Group justify="space-between" align="center">
-        <Text size="sm" fw={500}>{label}</Text>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-luxury tracking-widest text-gold-500/60 uppercase">{label}</Label>
         <CardSelector
           maxCards={expectedCards}
           usedCards={usedCards}
@@ -98,28 +89,29 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           onSelect={handleSelectorSubmit}
           label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
           trigger={
-            <Button variant="outline" type="button">
-              <Grid3x3 className="w-4 h-4" />
-              Select Cards from Grid
+            <Button variant="outline" type="button" className="h-9 bg-white/5 border-white/10 hover:bg-gold-500/10 text-gold-200 font-luxury text-[10px] uppercase tracking-widest rounded-full">
+              <Grid3x3 className="w-3.5 h-3.5 mr-2 text-gold-500" />
+              Grid Selection
             </Button>
           }
         />
-      </Group>
+      </div>
 
       {error && (
-        <Alert color="red" icon={<AlertCircle className="h-4 w-4" />}>
-          {error}
+        <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-xs uppercase tracking-wider font-luxury">{error}</AlertDescription>
         </Alert>
       )}
 
       {cards.length > 0 && !error && (
-        <Group gap="xs" justify="center" className="p-4 bg-gradient-to-br from-green-700 to-green-900 rounded-lg">
+        <div className="flex items-center justify-center gap-3 p-6 bg-gradient-to-br from-green-900/40 to-green-950/60 border border-green-500/20 rounded-xl shadow-inner">
           {cards.map((card, idx) => (
             <PokerCard key={idx} card={card} size="md" />
           ))}
-        </Group>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 };
 

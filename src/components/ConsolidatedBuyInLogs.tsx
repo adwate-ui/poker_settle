@@ -2,13 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
-import { Select, Text } from "@mantine/core";
+import { Loader2, User, Filter, Calendar, History } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Filter constants
 const FILTER_ALL = "all";
-const FILTER_NONE = "";
 
 interface BuyInHistoryEntry {
   id: string;
@@ -27,14 +32,14 @@ interface ConsolidatedBuyInLogsProps {
 export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsProps) => {
   const [history, setHistory] = useState<BuyInHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterName, setFilterName] = useState<string>(FILTER_NONE);
+  const [filterName, setFilterName] = useState<string>(FILTER_ALL);
 
   const fetchAllBuyInHistory = useCallback(async () => {
     setLoading(true);
     try {
       // Use shared client if token is provided, otherwise use regular authenticated client
       const client = token ? createSharedClient(token) : supabase;
-      
+
       const { data, error } = await client
         .from("buy_in_history")
         .select(`
@@ -83,12 +88,10 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   useEffect(() => {
     // Fetch initial data
     fetchAllBuyInHistory();
-    
+
     // Set up real-time subscription for buy-in history updates
-    // Note: fetchAllBuyInHistory is stable (memoized with useCallback)
-    // and only changes when gameId or token changes, which is when we want to re-run this effect
     const client = token ? createSharedClient(token) : supabase;
-    
+
     const channel = client
       .channel(`buy_in_history_changes_${gameId}`)
       .on(
@@ -104,87 +107,90 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         }
       )
       .subscribe();
-    
+
     return () => {
       channel.unsubscribe();
     };
   }, [gameId, token, fetchAllBuyInHistory]);
 
-  const filteredHistory = history.filter(entry => 
-    filterName === FILTER_NONE || filterName === FILTER_ALL || entry.player_name === filterName
+  const filteredHistory = history.filter(entry =>
+    filterName === FILTER_ALL || entry.player_name === filterName
   );
 
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Player Name Filter - Dropdown */}
       {!loading && history.length > 0 && (
-        <div className="mb-4">
-          <Select
-            value={filterName || FILTER_ALL}
-            onChange={(value) => setFilterName(value || FILTER_ALL)}
-            data={[
-              { value: FILTER_ALL, label: 'All Players' },
-              ...uniquePlayerNames.map(name => ({ value: name, label: name }))
-            ]}
-            placeholder="Filter by player"
-            style={{ width: '100%', maxWidth: '250px' }}
-          />
+        <div className="max-w-[250px]">
+          <Select value={filterName} onValueChange={setFilterName}>
+            <SelectTrigger className="h-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
+              <Filter className="mr-2 h-3.5 w-3.5 text-gold-500/40" />
+              <SelectValue placeholder="All Participants" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+              <SelectItem value={FILTER_ALL} className="font-luxury uppercase text-[10px] tracking-widest">All Participants</SelectItem>
+              {uniquePlayerNames.map(name => (
+                <SelectItem key={name} value={name} className="font-luxury uppercase text-[10px] tracking-widest">{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
-      
+
       {/* Table with fixed height and scroll */}
       {loading ? (
-        <div className="flex justify-center items-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="flex flex-col justify-center items-center py-12 gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-gold-500/40" />
+          <p className="text-[10px] font-luxury uppercase tracking-widest text-gold-500/20">Fetching Ledger History...</p>
         </div>
       ) : history.length === 0 ? (
-        <Text ta="center" py="xl" c="dimmed">
-          No buy-in changes recorded
-        </Text>
+        <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
+          <History className="h-10 w-10 mx-auto mb-4 text-white/5" />
+          <p className="text-[11px] font-luxury uppercase tracking-[0.2em] text-white/20">No buy-in fluctuations recorded.</p>
+        </div>
       ) : filteredHistory.length === 0 ? (
-        <Text ta="center" py="xl" c="dimmed">
-          No buy-in changes found for "{filterName}"
-        </Text>
+        <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
+          <p className="text-[11px] font-luxury uppercase tracking-[0.2em] text-white/20">No logs found for "{filterName}" in this archive.</p>
+        </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+        <div className="rounded-xl border border-white/10 overflow-hidden bg-black/20 shadow-inner">
+          <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow className="bg-primary/10 hover:bg-primary/15">
-                  <TableHead className="text-xs sm:text-sm font-bold">
-                    <span className="hidden sm:inline">Player name</span>
-                    <span className="sm:hidden">Player</span>
-                  </TableHead>
-                  <TableHead className="text-xs sm:text-sm font-bold">
-                    <span className="hidden sm:inline">Incremental buy in</span>
-                    <span className="sm:hidden">Buy in</span>
-                  </TableHead>
-                  <TableHead className="text-xs sm:text-sm font-bold">
-                    <span className="hidden sm:inline">Updated total buy in</span>
-                    <span className="sm:hidden">Total</span>
-                  </TableHead>
-                  <TableHead className="text-xs sm:text-sm font-bold">Time</TableHead>
+              <TableHeader className="sticky top-0 z-10 bg-[#0a0a0a] border-b border-white/10">
+                <TableRow className="hover:bg-transparent border-0 h-12">
+                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 pl-6">Participant</TableHead>
+                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60">Incremental</TableHead>
+                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60">Amended Total</TableHead>
+                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-right pr-6">Audit Time</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {filteredHistory.map((entry, index) => (
-                  <TableRow 
+              <TableBody className="divide-y divide-white/5">
+                {filteredHistory.map((entry) => (
+                  <TableRow
                     key={entry.id}
-                    className={index % 2 === 0 ? "bg-secondary/5 hover:bg-secondary/20" : "hover:bg-muted/50"}
+                    className="h-14 hover:bg-gold-500/5 border-0 transition-colors"
                   >
-                    <TableCell><span className="font-medium text-sm">{entry.player_name}</span></TableCell>
+                    <TableCell className="pl-6">
+                      <div className="flex items-center gap-3">
+                        <User className="h-3 w-3 text-gold-500/40" />
+                        <span className="font-luxury text-[11px] text-gold-100 uppercase tracking-widest">{entry.player_name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
-                      <span className={`font-semibold text-sm ${entry.buy_ins_added > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      <span className={`font-numbers text-sm ${entry.buy_ins_added > 0 ? "text-green-400" : "text-red-400"}`}>
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                       </span>
                     </TableCell>
-                    <TableCell><span className="font-semibold text-sm">{entry.total_buy_ins_after}</span></TableCell>
                     <TableCell>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="font-numbers text-sm text-gold-100/60">{entry.total_buy_ins_after}</span>
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="flex items-center justify-end gap-2 text-white/30 font-numbers text-[10px] uppercase">
+                        <Calendar className="h-3 w-3 opacity-30" />
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                      </span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -193,6 +199,6 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };

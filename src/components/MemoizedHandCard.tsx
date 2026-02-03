@@ -1,11 +1,15 @@
-import React, { memo } from 'react';
+import * as React from 'react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Badge, Group, Stack, Text } from '@mantine/core';
-import { Trophy } from 'lucide-react';
+import { Trophy, Calendar, User, Wallet, History, ChevronRight, Layers } from 'lucide-react';
 import PokerCard from '@/components/PokerCard';
 import { HandWithDetails } from '@/hooks/useHandsHistory';
 import { PlayerAction } from '@/types/poker';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn, formatIndianNumber } from '@/lib/utils';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface MemoizedHandCardProps {
   hand: HandWithDetails;
@@ -41,146 +45,101 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
       })
   ).values());
 
-  // Desktop view - original layout
-  if (!isMobile) {
-    return (
-      <Card shadow="sm" padding="md" radius="md" withBorder className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/hands/${hand.id}`)}>
-        <Stack gap="sm">
-          <div className="flex items-center justify-between gap-4">
-            <Stack gap="xs" className="flex-1">
-              <Group gap="xs" wrap="wrap">
-                <Text fw={600}>Hand #{hand.hand_number}</Text>
-                <Badge variant="outline" size="sm">
-                  {hand.hero_position}
-                </Badge>
-                <Badge variant="outline" size="sm">
-                  {hand.final_stage}
-                </Badge>
-                {hand.is_split ? (
-                  <Badge color="yellow" size="sm">
-                    Split
-                  </Badge>
-                ) : hand.is_hero_win === true ? (
-                  <Badge color="green" size="sm" leftSection={<Trophy className="h-3 w-3" />}>
-                    Won
-                  </Badge>
-                ) : hand.is_hero_win === false ? (
-                  <Badge color="red" size="sm">
-                    Lost
-                  </Badge>
-                ) : null}
-              </Group>
-              <Text size="sm" c="dimmed">
-                {formatDate(hand.game_date)} • Button: {hand.button_player_name}
-                {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
-              </Text>
-            </Stack>
+  const resultStatus = hand.is_split ? 'split' : hand.is_hero_win === true ? 'win' : hand.is_hero_win === false ? 'loss' : 'neutral';
 
-            <Group gap="md">
-              {communityCardArray && (
-                <Group gap="xs">
-                  {communityCardArray.map((card, idx) => (
-                    <PokerCard key={`desktop-${idx}`} card={card} size="sm" />
-                  ))}
-                </Group>
-              )}
-              <Stack gap={0} align="flex-end">
-                <Text size="lg" fw={700} className="text-poker-gold">
-                  Rs. {hand.pot_size?.toLocaleString('en-IN') || 0}
-                </Text>
-                <Text size="xs" c="dimmed">Pot</Text>
-              </Stack>
-            </Group>
-          </div>
-          
-          {/* Players in Hand */}
-          <div className="pt-2 border-t">
-            <Text size="xs" c="dimmed" mb="xs">Players in Hand:</Text>
-            <Group gap="xs">
-              {playersInHand.map((player, idx) => (
-                <Badge key={idx} variant="outline" size="sm">
-                  {player.name} ({player.position})
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        </Stack>
-      </Card>
-    );
-  }
-
-  // Mobile view - redesigned layout
   return (
-    <Card shadow="sm" padding="md" radius="md" withBorder className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/hands/${hand.id}`)}>
-      <Stack gap="sm">
-        {/* First row: Hand number, result badge, date, button, winner, and pot size */}
-        <div className="flex items-start justify-between gap-2">
-          <Stack gap="xs" className="flex-1">
-            <Group gap="xs" wrap="wrap">
-              <Text fw={600} size="sm">Hand #{hand.hand_number}</Text>
-              {hand.is_split ? (
-                <Badge color="yellow" size="sm">
-                  Split
-                </Badge>
-              ) : hand.is_hero_win === true ? (
-                <Badge color="green" size="sm" leftSection={<Trophy className="h-3 w-3" />}>
-                  Won
-                </Badge>
-              ) : hand.is_hero_win === false ? (
-                <Badge color="red" size="sm">
-                  Lost
-                </Badge>
-              ) : null}
-            </Group>
-            <Text size="xs" c="dimmed">
-              {formatDate(hand.game_date)}
-            </Text>
-            <Text size="xs" c="dimmed">
-              Button: {hand.button_player_name}
-              {hand.winner_player_name && ` • Winner: ${hand.winner_player_name}`}
-            </Text>
-          </Stack>
+    <Card
+      onClick={() => navigate(`/hands/${hand.id}`)}
+      className="group cursor-pointer border-white/5 bg-black/40 backdrop-blur-xl hover:bg-white/5 transition-all duration-300 overflow-hidden relative"
+    >
+      {/* Status indicator line */}
+      <div className={cn(
+        "absolute top-0 left-0 w-full h-[1px] opacity-50",
+        resultStatus === 'win' ? 'bg-gradient-to-r from-green-500 to-transparent' :
+          resultStatus === 'loss' ? 'bg-gradient-to-r from-red-500 to-transparent' :
+            resultStatus === 'split' ? 'bg-gradient-to-r from-gold-500 to-transparent' : 'bg-white/10'
+      )} />
 
-          <Stack gap={0} align="flex-end">
-            <Text size="md" fw={700} className="text-poker-gold">
-              Rs. {hand.pot_size?.toLocaleString('en-IN') || 0}
-            </Text>
-            <Text size="xs" c="dimmed">Pot</Text>
-          </Stack>
-        </div>
+      <CardContent className="p-0">
+        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-white/5">
+          {/* Primary Info */}
+          <div className="p-5 lg:p-6 flex-1 space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-luxury text-gold-100 font-bold tracking-widest text-[11px] uppercase">Sequence #{hand.hand_number}</span>
+                  <div className="flex gap-1.5">
+                    <Badge variant="outline" className="bg-black/40 border-white/10 text-[9px] font-luxury tracking-widest h-5 px-1.5 text-white/40">{hand.hero_position}</Badge>
+                    <Badge variant="outline" className="bg-black/40 border-white/10 text-[9px] font-luxury tracking-widest h-5 px-1.5 text-white/40">{hand.final_stage}</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] uppercase font-luxury tracking-[0.2em] text-white/20">
+                  <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {formatDate(hand.game_date)}</span>
+                  <span className="h-1 w-1 bg-white/10 rounded-full" />
+                  <span>BTN: {hand.button_player_name}</span>
+                </div>
+              </div>
 
-        {/* Second row: Community cards */}
-        {communityCardArray && (
-          <div className="flex items-center gap-1 pt-2 border-t">
-            <Text size="xs" c="dimmed" className="mr-2">Community:</Text>
-            <Group gap="xs">
-              {communityCardArray.map((card, idx) => (
-                <PokerCard key={`mobile-${idx}`} card={card} size="xs" />
-              ))}
-            </Group>
+              <div className="flex flex-col items-end">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "px-3 py-1 font-numbers text-[11px] border-0 border-b-2 rounded-none h-auto",
+                    resultStatus === 'win' ? 'text-green-400 border-green-500/30 bg-green-500/5' :
+                      resultStatus === 'loss' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
+                        resultStatus === 'split' ? 'text-gold-400 border-gold-500/30 bg-gold-500/5' :
+                          'text-white/20 border-white/10'
+                  )}
+                >
+                  {resultStatus === 'win' && <Trophy className="h-3 w-3 mr-1.5" />}
+                  {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'PROTOCOL'}
+                </Badge>
+              </div>
+            </div>
+
+            {communityCardArray && (
+              <div className="flex items-center gap-0.5 animate-in fade-in duration-500">
+                {communityCardArray.map((card, idx) => (
+                  <div key={idx} className="scale-90 origin-left hover:scale-100 transition-transform duration-300">
+                    <PokerCard card={card} size={isMobile ? "xs" : "sm"} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-        
-        {/* Players in Hand */}
-        <div className="pt-2 border-t">
-          <Text size="xs" c="dimmed" mb="xs">Players in Hand:</Text>
-          <Group gap="xs">
-            {playersInHand.map((player, idx) => (
-              <Badge key={idx} variant="outline" size="sm">
-                {player.name} ({player.position})
-              </Badge>
-            ))}
-          </Group>
+
+          {/* Secondary Metadata */}
+          <div className="p-5 lg:p-6 lg:w-72 bg-white/2 flex flex-col justify-between gap-6">
+            <div className="space-y-3">
+              <p className="text-[9px] font-luxury uppercase tracking-[0.3em] text-white/20 ml-0.5">Participating Identities</p>
+              <div className="flex flex-wrap gap-1.5">
+                {playersInHand.map((player, idx) => (
+                  <Badge key={idx} variant="outline" className="bg-black/20 text-white/40 text-[9px] font-luxury tracking-widest px-2 h-5 border border-white/5 group-hover:border-gold-500/20 transition-colors">
+                    {player.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-luxury uppercase tracking-[0.2em] text-gold-500/40">Aggregated Pot</p>
+                <p className="font-numbers text-xl text-gold-100">₹{formatIndianNumber(hand.pot_size || 0)}</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(212,184,60,0.1)]">
+                <ChevronRight className="h-4 w-4 text-gold-500" />
+              </div>
+            </div>
+          </div>
         </div>
-      </Stack>
+      </CardContent>
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for better memoization
   return prevProps.hand.id === nextProps.hand.id &&
-         prevProps.hand.pot_size === nextProps.hand.pot_size &&
-         prevProps.hand.is_hero_win === nextProps.hand.is_hero_win &&
-         prevProps.hand.is_split === nextProps.hand.is_split;
+    prevProps.hand.pot_size === nextProps.hand.pot_size &&
+    prevProps.hand.is_hero_win === nextProps.hand.is_hero_win &&
+    prevProps.hand.is_split === nextProps.hand.is_split;
 });
 
 MemoizedHandCard.displayName = 'MemoizedHandCard';

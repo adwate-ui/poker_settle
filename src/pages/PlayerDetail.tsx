@@ -1,18 +1,26 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Select, Collapse, Stack, Group, Text, Box, Badge as MantineBadge } from "@mantine/core";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers } from "lucide-react";
 import { format } from "date-fns";
-import { formatIndianNumber } from "@/lib/utils";
+import { formatIndianNumber, cn } from "@/lib/utils";
 import { Player } from "@/types/poker";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
+import { Badge } from "@/components/ui/badge";
 
 interface GameHistory {
   id: string;
@@ -86,13 +94,12 @@ const PlayerDetail = () => {
 
   const handleUpdatePlayer = async (playerData: Partial<PlayerFormData>) => {
     if (!playerId) return;
-    
+
     try {
       const updatedPlayer = await updatePlayer(playerId, playerData);
       setPlayer(updatedPlayer);
       toast.success("Player details updated successfully");
     } catch (error) {
-      // Error is already handled by usePlayerManagement hook
       throw error;
     }
   };
@@ -111,9 +118,9 @@ const PlayerDetail = () => {
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4" />;
-    return <ArrowDown className="h-4 w-4" />;
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 opacity-30" />;
+    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4 text-gold-500" />;
+    return <ArrowDown className="h-4 w-4 text-gold-500" />;
   };
 
   const uniqueMonthYears = useMemo(() => {
@@ -133,7 +140,7 @@ const PlayerDetail = () => {
     return [...filteredGameHistory].sort((a, b) => {
       let aVal: number;
       let bVal: number;
-      
+
       switch (sortField) {
         case "date":
           aVal = new Date(a.games.date).getTime();
@@ -152,290 +159,283 @@ const PlayerDetail = () => {
           bVal = b.net_amount;
           break;
       }
-      
+
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
     });
   }, [filteredGameHistory, sortField, sortOrder]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col justify-center items-center py-20 gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Analyzing Participant Portfolio...</p>
       </div>
     );
   }
 
   if (!player) {
     return (
-      <Card shadow="sm" padding="md" radius="md" withBorder className="max-w-4xl mx-auto">
-        <Text ta="center" c="dimmed">Player not found</Text>
+      <Card className="max-w-4xl mx-auto border-white/10 bg-black/40 backdrop-blur-xl p-10 text-center">
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase">Participant record not located.</p>
       </Card>
     );
   }
 
-  const avgPerGame = player.total_games > 0 
-    ? (player.total_profit || 0) / player.total_games 
-    : 0;
   const isProfit = (player.total_profit || 0) >= 0;
   const winRate = filteredGameHistory.length > 0
     ? (filteredGameHistory.filter(gh => gh.net_amount > 0).length / filteredGameHistory.length) * 100
     : 0;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8">
       <Button
         variant="ghost"
         onClick={() => navigate("/players")}
-        className="mb-4 hover:text-primary"
+        className="mb-4 hover:bg-gold-500/10 text-gold-500 hover:text-gold-400 font-luxury uppercase tracking-widest text-xs"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Players History
+        Back to Matrix
       </Button>
 
-      <Card shadow="sm" padding="md" radius="md" withBorder>
-        <Stack gap="md">
-          <Box 
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-6 border-b border-white/5 bg-white/2">
+          <div
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            style={{ cursor: 'pointer' }}
+            className="flex items-center justify-between cursor-pointer group"
           >
-            <Group justify="space-between">
-              <Group gap="sm">
-                <OptimizedAvatar name={player.name} size="md" />
-                <Text size="xl" fw={700}>{player.name}</Text>
-              </Group>
-              <ChevronDown className={`h-5 w-5 transition-transform ${isStatsOpen ? 'transform rotate-180' : ''}`} />
-            </Group>
-          </Box>
-          
-          <Collapse in={isStatsOpen}>
-            <Stack gap="md">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg border">
-                  <p className="text-sm text-muted-foreground">Total Games</p>
-                  <p className="text-lg font-semibold">{player.total_games || 0}</p>
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                <OptimizedAvatar name={player.name} size="lg" className="border-gold-500/30 group-hover:border-gold-500 transition-colors" />
+                <div className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(212,184,60,0.2)] animate-pulse" />
+              </div>
+              <div>
+                <CardTitle className="text-3xl font-luxury text-gold-100">{player.name}</CardTitle>
+                <CardDescription className="text-xs uppercase tracking-[.3em] text-gold-500/50 font-luxury flex items-center gap-2">
+                  <User className="h-3 w-3" /> Participant Profile
+                </CardDescription>
+              </div>
+            </div>
+            <ChevronDown className={cn("h-6 w-6 text-gold-500/40 group-hover:text-gold-500 transition-all duration-300", isStatsOpen && "transform rotate-180")} />
+          </div>
+        </CardHeader>
+
+        {isStatsOpen && (
+          <CardContent className="pt-8 space-y-10 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Sessions</p>
+                <p className="text-3xl font-numbers text-gold-100">{player.total_games || 0}</p>
+              </div>
+              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Legacy P&L</p>
+                <p className={cn(
+                  "text-3xl font-numbers",
+                  isProfit ? "text-green-400" : "text-red-400"
+                )}>
+                  {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                </p>
+              </div>
+              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2 sm:col-span-2 lg:col-span-1">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Success Ratio</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-numbers text-gold-500">{winRate.toFixed(1)}%</p>
+                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-2">
+                    <div className="h-full bg-gold-500/50" style={{ width: `${winRate}%` }} />
+                  </div>
                 </div>
-                <div className="p-4 rounded-lg border">
-                  <p className="text-sm text-muted-foreground">Total P&L</p>
-                  <p className={`text-lg font-semibold ${
-                    isProfit 
-                      ? "text-green-600 dark:text-green-400" 
-                      : "text-red-600 dark:text-red-400"
-                  }`}>
-                    {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
-                  </p>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-luxury text-gold-100">Settlement Profiles</h3>
+                  <p className="text-xs uppercase tracking-widest text-gold-500/40 font-luxury mt-1">Contact and payment orchestration</p>
                 </div>
-                <div className="p-4 rounded-lg border">
-                  <p className="text-sm text-muted-foreground">Win Rate</p>
-                  <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                    {winRate.toFixed(1)}%
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg border flex flex-col items-center justify-center">
+                <div className="flex gap-3">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => copyShareLink('player', playerId!)}
                     disabled={linkLoading}
-                    className="w-full hover:bg-primary/10 hover:text-primary border-primary/20"
+                    className="h-10 px-5 hover:bg-gold-500/10 text-gold-500 font-luxury uppercase tracking-widest text-xs rounded-full border border-gold-500/20"
                   >
                     <Share2 className="h-4 w-4 mr-2" />
-                    Share Player
+                    Export
                   </Button>
-                </div>
-              </div>
-              
-              {/* Player Details Section */}
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Contact & Payment Details</h3>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowEditDialog(true)}
-                    className="hover:bg-primary/10 hover:text-primary border-primary/20"
+                    className="h-10 px-5 bg-white/5 border-white/10 hover:bg-white/10 text-gold-200 font-luxury uppercase tracking-widest text-xs rounded-full"
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Details
+                    <Edit className="h-4 w-4 mr-2 text-gold-500" />
+                    Amend
                   </Button>
                 </div>
-                {(player.email || player.upi_id || player.payment_preference) ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {player.email && (
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground mb-1">Email Address</p>
-                        <p className="text-base font-medium">{player.email}</p>
-                      </div>
-                    )}
-                    {player.upi_id && (
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground mb-1">UPI ID</p>
-                        <p className="text-base font-medium">{player.upi_id}</p>
-                      </div>
-                    )}
-                    {player.payment_preference && (
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground mb-1">Preferred Mode</p>
-                        <p className="text-base font-medium capitalize">{player.payment_preference === 'upi' ? 'UPI' : 'Cash'}</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-lg border bg-muted/30 text-center">
-                    <p className="text-sm text-muted-foreground">No contact or payment details added yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click "Edit Details" to add email and UPI ID</p>
-                  </div>
-                )}
               </div>
-            </Stack>
-          </Collapse>
-        </Stack>
-      </Card>
 
-      {/* Game History */}
-      <Card shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
-        <Stack gap="md">
-          <Box 
-            onClick={() => setIsGameHistoryOpen(!isGameHistoryOpen)}
-            style={{ cursor: 'pointer' }}
-            className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10"
-            p="sm"
-          >
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <Group gap="xs">
-                <Text size="lg" fw={700} className="text-primary">Game History</Text>
-                <ChevronDown className={`h-5 w-5 transition-transform ${isGameHistoryOpen ? 'transform rotate-180' : ''}`} />
-              </Group>
-              <Select
-                value={selectedMonthYear}
-                onChange={(value) => setSelectedMonthYear(value || "all")}
-                data={[
-                  { value: "all", label: "All Months" },
-                  ...uniqueMonthYears.map((monthYear) => ({
-                    value: monthYear,
-                    label: monthYear
-                  }))
-                ]}
-                className="w-full md:w-64"
-                onClick={(e) => e.stopPropagation()}
-              />
+              {(player.email || player.upi_id || player.payment_preference) ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                      <Mail className="h-3 w-3" /> Communication
+                    </div>
+                    <p className="text-sm text-gold-100 font-medium truncate">{player.email || "Not Disclosed"}</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                      <CreditCard className="h-3 w-3" /> Financial ID
+                    </div>
+                    <p className="text-sm text-gold-100 font-medium truncate">{player.upi_id || "Not Linked"}</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                      <Layers className="h-3 w-3" /> Preference
+                    </div>
+                    <p className="text-sm text-gold-100 font-medium capitalize">{player.payment_preference ? (player.payment_preference === 'upi' ? 'Digital (UPI)' : 'Physical (Cash)') : "Unspecified"}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 rounded-xl border border-dashed border-white/10 bg-white/2 text-center">
+                  <p className="text-sm font-luxury text-white/30 tracking-widest uppercase">No metadata associated with this participant.</p>
+                </div>
+              )}
             </div>
-          </Box>
-          
-          <Collapse in={isGameHistoryOpen}>
-            <Box>
-              <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                <TableHead className="font-bold w-[100px] sm:w-auto">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("date")}
-                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
-                  >
-                    <span className="hidden sm:inline">Date</span>
-                    <span className="sm:hidden">Dt</span>
-                    {getSortIcon("date")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold w-[70px] sm:w-auto">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("buy_ins")}
-                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
-                  >
-                    <span className="hidden sm:inline">Buy-ins</span>
-                    <span className="sm:hidden">Buy</span>
-                    {getSortIcon("buy_ins")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold w-[80px] sm:w-auto">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("net_amount")}
-                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
-                  >
-                    <span className="hidden sm:inline">Net P&L</span>
-                    <span className="sm:hidden">P&L</span>
-                    {getSortIcon("net_amount")}
-                  </Button>
-                </TableHead>
-                <TableHead className="font-bold w-[80px] sm:w-auto">
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("final_stack")}
-                    className="flex items-center gap-1 hover:text-primary font-bold text-xs sm:text-sm truncate"
-                  >
-                    <span className="hidden sm:inline">Final Stack</span>
-                    <span className="sm:hidden">Stack</span>
-                    {getSortIcon("final_stack")}
-                  </Button>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedGameHistory.map((game, index) => {
-                const isWin = game.net_amount > 0;
-                
-                return (
-                  <TableRow
-                    key={game.id}
-                    className={`transition-colors ${
-                      index % 2 === 0 
-                        ? "bg-secondary/5 hover:bg-secondary/20" 
-                        : "hover:bg-primary/10"
-                    }`}
-                  >
-                    <TableCell className="font-medium text-primary">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {format(new Date(game.games.date), "MMM d, yyyy")}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
-                        {game.buy_ins}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-3 py-1 rounded-full font-bold ${
-                        isWin 
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}>
-                        {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-semibold text-accent-foreground">
-                      Rs. {formatIndianNumber(game.final_stack)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/games/${game.game_id}`)}
-                        className="hover:text-primary"
-                      >
-                        View Game
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-            </Box>
-          </Collapse>
-        </Stack>
+          </CardContent>
+        )}
       </Card>
 
-      {/* Edit Player Dialog */}
+      {/* Game History Ledger */}
+      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-4 border-b border-white/5 bg-white/2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
+                <History className="h-5 w-5 text-gold-500" />
+              </div>
+              <CardTitle className="text-2xl font-luxury text-gold-100">Audit Trail</CardTitle>
+            </div>
+            <div className="min-w-[200px]">
+              <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+                <SelectTrigger className="h-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
+                  <Calendar className="mr-2 h-3.5 w-3.5 text-gold-500/40" />
+                  <SelectValue placeholder="Period Filter" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                  <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest">Full Archive</SelectItem>
+                  {uniqueMonthYears.map((monthYear) => (
+                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest">
+                      {monthYear}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="border-b-white/10 hover:bg-transparent">
+                  <TableHead className="h-14">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("date")}
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                    >
+                      Session Date {getSortIcon("date")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="h-14">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("buy_ins")}
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                    >
+                      Buy-ins {getSortIcon("buy_ins")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="h-14">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("net_amount")}
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                    >
+                      Net Outcome {getSortIcon("net_amount")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="h-14">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("final_stack")}
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                    >
+                      Terminal Stack {getSortIcon("final_stack")}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="h-14 text-right pr-8">
+                    <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-500/60">Operation</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-white/5">
+                {sortedGameHistory.map((game) => {
+                  const isWin = game.net_amount > 0;
+                  return (
+                    <TableRow key={game.id} className="h-20 border-white/5 group hover:bg-gold-500/5 transition-colors">
+                      <TableCell className="font-luxury text-sm text-gold-100/80 pl-8">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-3.5 w-3.5 text-gold-500/40" />
+                          {format(new Date(game.games.date), "MMM d, yyyy")}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1 text-sm">
+                          {game.buy_ins} Stacks
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={cn(
+                            "px-4 py-1.5 font-numbers tracking-widest border-0 text-sm",
+                            isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                          )}
+                        >
+                          {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-numbers text-base text-gold-100/60">
+                        Rs. {formatIndianNumber(game.final_stack)}
+                      </TableCell>
+                      <TableCell className="text-right pr-8">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/games/${game.game_id}`)}
+                          className="font-luxury uppercase tracking-widest text-[10px] hover:bg-gold-500/10 text-gold-500 px-4 h-9 rounded-full border border-gold-500/10"
+                        >
+                          Examine
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
       <PlayerFormDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         onSave={handleUpdatePlayer}
         initialData={player || undefined}
-        title="Edit Player Details"
-        description="Update player's contact information and payment preferences"
+        title="Amend Participant Metadata"
+        description="Edit the communication and financial parameters for this participant."
       />
     </div>
   );

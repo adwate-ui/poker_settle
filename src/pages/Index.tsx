@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { Tabs } from "@mantine/core";
+import { TabsContent } from "@/components/ui/tabs";
 import TabLayout from "@/components/TabLayout";
 import NewGame from "./NewGame";
 import GamesHistory from "./GamesHistory";
@@ -17,18 +17,18 @@ const Index = () => {
 
   return (
     <TabLayout>
-      <Tabs.Panel value="new-game">
+      <TabsContent value="new-game" className="mt-0">
         <NewGame />
-      </Tabs.Panel>
-      <Tabs.Panel value="games-history">
+      </TabsContent>
+      <TabsContent value="games-history" className="mt-0">
         {isGameDetail ? <GameDetail /> : <GamesHistory />}
-      </Tabs.Panel>
-      <Tabs.Panel value="players-history">
+      </TabsContent>
+      <TabsContent value="players-history" className="mt-0">
         {isPlayerDetail ? <PlayerDetail /> : <PlayersHistory />}
-      </Tabs.Panel>
-      <Tabs.Panel value="hands-history">
+      </TabsContent>
+      <TabsContent value="hands-history" className="mt-0">
         {isHandDetail ? <HandDetail /> : <HandsHistory />}
-      </Tabs.Panel>
+      </TabsContent>
     </TabLayout>
   );
 };

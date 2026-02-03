@@ -1,9 +1,10 @@
 import { memo, useMemo } from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
-import { formatIndianNumber, formatProfitLoss } from "@/lib/utils";
+import { formatIndianNumber, formatProfitLoss, cn } from "@/lib/utils";
 import OptimizedAvatar from "./OptimizedAvatar";
+import { GlassCard } from "./ui/GlassCard";
+import { User, Wallet, Coins } from "lucide-react";
 
 interface DashboardPlayerCardProps {
   gamePlayer: GamePlayer;
@@ -12,69 +13,72 @@ interface DashboardPlayerCardProps {
 }
 
 const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false }: DashboardPlayerCardProps) => {
-  const netAmount = useMemo(() => 
+  const netAmount = useMemo(() =>
     (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
     [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
   );
   const totalBuyIns = gamePlayer.buy_ins * buyInAmount;
   const finalStack = gamePlayer.final_stack || 0;
 
-  // Determine profit/loss color class
-  const getProfitLossClass = (amount: number) => {
-    if (!Number.isFinite(amount)) return "bg-red-600 hover:bg-red-700 text-white border-transparent";
-    return amount >= 0 
-      ? "bg-green-600 hover:bg-green-700 text-white border-transparent" 
-      : "bg-red-600 hover:bg-red-700 text-white border-transparent";
-  };
+  const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <Card className="shadow-sm p-4 h-full border-2 border-gray-200 dark:border-gray-800">
-      <div className="flex flex-col gap-3">
-        {/* Player Header */}
-        <div className="flex justify-between flex-nowrap">
-          <div className="flex gap-3 flex-1 min-w-0 items-center">
-            <div className="flex-shrink-0">
-              <OptimizedAvatar 
-                name={gamePlayer.player.name}
-                size="sm"
-              />
+    <GlassCard className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
+      <div className={cn(
+        "absolute top-0 left-0 w-1 h-full opacity-30",
+        profitLossStatus === 'profit' ? 'bg-green-500' : profitLossStatus === 'loss' ? 'bg-red-500' : 'bg-gold-500/20'
+      )} />
+
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <OptimizedAvatar
+              name={gamePlayer.player.name}
+              size="sm"
+              className="flex-shrink-0 border border-white/10"
+            />
+            <div className="min-w-0">
+              <h4 className="font-luxury text-sm font-bold text-gold-100 uppercase tracking-widest truncate">
+                {gamePlayer.player.name}
+              </h4>
+              <p className="text-[9px] font-luxury text-gold-500/40 uppercase tracking-tighter">Participant Portfolio</p>
             </div>
-            <span 
-              className="font-bold text-base overflow-hidden text-ellipsis whitespace-nowrap text-foreground"
-            >
-              {gamePlayer.player.name}
-            </span>
+          </div>
+          <Badge variant="outline" className="bg-gold-500/5 text-gold-400 font-numbers border-gold-500/20 h-6 px-2 text-[10px]">
+            {gamePlayer.buy_ins} UNIT{gamePlayer.buy_ins !== 1 ? 'S' : ''}
+          </Badge>
+        </div>
+
+        {/* Asset Details */}
+        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+          <div className="space-y-1">
+            <p className="text-[9px] uppercase font-luxury tracking-widest text-white/20 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Stake</p>
+            <p className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(totalBuyIns)}</p>
+          </div>
+          <div className="space-y-1 text-right">
+            <p className="text-[9px] uppercase font-luxury tracking-widest text-white/20 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Total Assets</p>
+            <p className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(finalStack)}</p>
           </div>
         </div>
 
-        {/* Buy-ins Info */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Total Buy-ins</span>
-          <div className="flex gap-2 items-center">
-            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 border-0">
-              {gamePlayer.buy_ins}
-            </Badge>
-            <span className="font-semibold text-sm">Rs. {formatIndianNumber(totalBuyIns)}</span>
-          </div>
-        </div>
-
-        {/* Final Stack */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Total Stack</span>
-          <span className="font-semibold text-sm">Rs. {formatIndianNumber(finalStack)}</span>
-        </div>
-
-        {/* Net P&L */}
-        <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-1">
-          <span className="text-sm font-semibold">Final P&L</span>
-          <Badge 
-            className={`${getProfitLossClass(netAmount)} text-sm px-2.5 py-0.5`}
+        {/* P&L Result */}
+        <div className="pt-3 border-t border-white/5 flex justify-between items-center px-1">
+          <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Executive P&L</span>
+          <Badge
+            variant="outline"
+            className={cn(
+              "font-numbers px-2.5 py-0.5 border-0 border-b-2 rounded-none h-auto text-[11px]",
+              profitLossStatus === 'profit' ? 'text-green-400 border-green-500/30 bg-green-500/5' :
+                profitLossStatus === 'loss' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
+                  'text-gray-400 border-gray-500/30 bg-gray-500/5'
+            )}
           >
             {formatProfitLoss(netAmount)}
           </Badge>
         </div>
       </div>
-    </Card>
+    </GlassCard>
   );
 });
 
