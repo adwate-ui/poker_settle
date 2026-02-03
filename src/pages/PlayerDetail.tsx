@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers, History } from "lucide-react";
 import { format } from "date-fns";
 import { formatIndianNumber, cn } from "@/lib/utils";
 import { Player } from "@/types/poker";
@@ -175,8 +175,8 @@ const PlayerDetail = () => {
 
   if (!player) {
     return (
-      <Card className="max-w-4xl mx-auto border-white/10 bg-black/40 backdrop-blur-xl p-10 text-center">
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase">Participant record not located.</p>
+      <Card className="max-w-4xl mx-auto border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl p-10 text-center">
+        <p className="text-gold-900/60 dark:text-gold-200/60 font-luxury tracking-widest uppercase">Participant record not located.</p>
       </Card>
     );
   }
@@ -197,8 +197,8 @@ const PlayerDetail = () => {
         Back to Matrix
       </Button>
 
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-6 border-b border-white/5 bg-white/2">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
           <div
             onClick={() => setIsStatsOpen(!isStatsOpen)}
             className="flex items-center justify-between cursor-pointer group"
@@ -209,8 +209,8 @@ const PlayerDetail = () => {
                 <div className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(212,184,60,0.2)] animate-pulse" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-luxury text-gold-100">{player.name}</CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[.3em] text-gold-500/50 font-luxury flex items-center gap-2">
+                <CardTitle className="text-3xl font-luxury text-gold-900 dark:text-gold-100">{player.name}</CardTitle>
+                <CardDescription className="text-xs uppercase tracking-[.3em] text-gold-600 dark:text-gold-500/50 font-luxury flex items-center gap-2">
                   <User className="h-3 w-3" /> Participant Profile
                 </CardDescription>
               </div>
@@ -222,12 +222,12 @@ const PlayerDetail = () => {
         {isStatsOpen && (
           <CardContent className="pt-8 space-y-10 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Sessions</p>
-                <p className="text-3xl font-numbers text-gold-100">{player.total_games || 0}</p>
+              <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Sessions</p>
+                <p className="text-3xl font-numbers text-luxury-primary">{player.total_games || 0}</p>
               </div>
-              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Legacy P&L</p>
+              <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Legacy P&L</p>
                 <p className={cn(
                   "text-3xl font-numbers",
                   isProfit ? "text-green-400" : "text-red-400"
@@ -235,8 +235,8 @@ const PlayerDetail = () => {
                   {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2 sm:col-span-2 lg:col-span-1">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Success Ratio</p>
+              <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2 sm:col-span-2 lg:col-span-1">
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Success Ratio</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-numbers text-gold-500">{winRate.toFixed(1)}%</p>
                   <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-2">
@@ -246,11 +246,11 @@ const PlayerDetail = () => {
               </div>
             </div>
 
-            <div className="space-y-6 pt-6 border-t border-white/5">
+            <div className="space-y-6 pt-6 border-t border-black/10 dark:border-white/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-luxury text-gold-100">Settlement Profiles</h3>
-                  <p className="text-xs uppercase tracking-widest text-gold-500/40 font-luxury mt-1">Contact and payment orchestration</p>
+                  <h3 className="text-lg font-luxury text-luxury-primary">Settlement Profiles</h3>
+                  <p className="text-xs uppercase tracking-widest text-gold-900/40 dark:text-gold-500/40 font-luxury mt-1">Contact and payment orchestration</p>
                 </div>
                 <div className="flex gap-3">
                   <Button
@@ -267,9 +267,9 @@ const PlayerDetail = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowEditDialog(true)}
-                    className="h-10 px-5 bg-white/5 border-white/10 hover:bg-white/10 text-gold-200 font-luxury uppercase tracking-widest text-xs rounded-full"
+                    className="h-10 px-5 bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 hover:bg-gold-500/10 text-gold-900 dark:text-gold-200 font-luxury uppercase tracking-widest text-xs rounded-full"
                   >
-                    <Edit className="h-4 w-4 mr-2 text-gold-500" />
+                    <Edit className="h-4 w-4 mr-2 text-gold-600 dark:text-gold-500" />
                     Amend
                   </Button>
                 </div>
@@ -277,28 +277,28 @@ const PlayerDetail = () => {
 
               {(player.email || player.upi_id || player.payment_preference) ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                  <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
                       <Mail className="h-3 w-3" /> Communication
                     </div>
-                    <p className="text-sm text-gold-100 font-medium truncate">{player.email || "Not Disclosed"}</p>
+                    <p className="text-sm text-gold-900 dark:text-gold-100 font-medium truncate">{player.email || "Not Disclosed"}</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                  <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
                       <CreditCard className="h-3 w-3" /> Financial ID
                     </div>
-                    <p className="text-sm text-gold-100 font-medium truncate">{player.upi_id || "Not Linked"}</p>
+                    <p className="text-sm text-gold-900 dark:text-gold-100 font-medium truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-white/5 bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">
+                  <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
                       <Layers className="h-3 w-3" /> Preference
                     </div>
-                    <p className="text-sm text-gold-100 font-medium capitalize">{player.payment_preference ? (player.payment_preference === 'upi' ? 'Digital (UPI)' : 'Physical (Cash)') : "Unspecified"}</p>
+                    <p className="text-sm text-gold-900 dark:text-gold-100 font-medium capitalize">{player.payment_preference ? (player.payment_preference === 'upi' ? 'Digital (UPI)' : 'Physical (Cash)') : "Unspecified"}</p>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 rounded-xl border border-dashed border-white/10 bg-white/2 text-center">
-                  <p className="text-sm font-luxury text-white/30 tracking-widest uppercase">No metadata associated with this participant.</p>
+                <div className="p-8 rounded-xl border border-dashed border-gold-900/10 dark:border-white/10 bg-black/5 dark:bg-white/2 text-center">
+                  <p className="text-sm font-luxury text-gold-900/30 dark:text-white/30 tracking-widest uppercase">No metadata associated with this participant.</p>
                 </div>
               )}
             </div>
@@ -307,25 +307,25 @@ const PlayerDetail = () => {
       </Card>
 
       {/* Game History Ledger */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/2">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-4 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
                 <History className="h-5 w-5 text-gold-500" />
               </div>
-              <CardTitle className="text-2xl font-luxury text-gold-100">Audit Trail</CardTitle>
+              <CardTitle className="text-2xl font-luxury text-luxury-primary">Audit Trail</CardTitle>
             </div>
             <div className="min-w-[200px]">
               <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-                <SelectTrigger className="h-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
-                  <Calendar className="mr-2 h-3.5 w-3.5 text-gold-500/40" />
+                <SelectTrigger className="h-10 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase text-gold-900 dark:text-white">
+                  <Calendar className="mr-2 h-3.5 w-3.5 text-gold-600 dark:text-gold-500/40" />
                   <SelectValue placeholder="Period Filter" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
-                  <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest">Full Archive</SelectItem>
+                <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
+                  <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">Full Archive</SelectItem>
                   {uniqueMonthYears.map((monthYear) => (
-                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest">
+                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">
                       {monthYear}
                     </SelectItem>
                   ))}
@@ -338,13 +338,13 @@ const PlayerDetail = () => {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-white/5">
-                <TableRow className="border-b-white/10 hover:bg-transparent">
+              <TableHeader className="bg-black/5 dark:bg-white/5">
+                <TableRow className="border-b-gold-900/10 dark:border-b-white/10 hover:bg-transparent">
                   <TableHead className="h-14">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("date")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Session Date {getSortIcon("date")}
                     </Button>
@@ -353,7 +353,7 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("buy_ins")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Buy-ins {getSortIcon("buy_ins")}
                     </Button>
@@ -362,7 +362,7 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("net_amount")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Net Outcome {getSortIcon("net_amount")}
                     </Button>
@@ -371,29 +371,29 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("final_stack")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Terminal Stack {getSortIcon("final_stack")}
                     </Button>
                   </TableHead>
                   <TableHead className="h-14 text-right pr-8">
-                    <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-500/60">Operation</span>
+                    <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60">Operation</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-white/5">
+              <TableBody className="divide-y divide-black/10 dark:divide-white/5">
                 {sortedGameHistory.map((game) => {
                   const isWin = game.net_amount > 0;
                   return (
-                    <TableRow key={game.id} className="h-20 border-white/5 group hover:bg-gold-500/5 transition-colors">
-                      <TableCell className="font-luxury text-sm text-gold-100/80 pl-8">
+                    <TableRow key={game.id} className="h-20 border-black/10 dark:border-white/5 group hover:bg-gold-500/5 transition-colors">
+                      <TableCell className="font-luxury text-sm text-gold-900/80 dark:text-gold-100/80 pl-8">
                         <div className="flex items-center gap-3">
-                          <Calendar className="h-3.5 w-3.5 text-gold-500/40" />
+                          <Calendar className="h-3.5 w-3.5 text-gold-600 dark:text-gold-500/40" />
                           {format(new Date(game.games.date), "MMM d, yyyy")}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1 text-sm">
+                        <Badge variant="outline" className="bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-gold-900/60 dark:text-gold-200/60 font-numbers px-3 py-1 text-sm">
                           {game.buy_ins} Stacks
                         </Badge>
                       </TableCell>
@@ -407,7 +407,7 @@ const PlayerDetail = () => {
                           {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-numbers text-base text-gold-100/60">
+                      <TableCell className="font-numbers text-base text-gold-900/60 dark:text-gold-100/60">
                         Rs. {formatIndianNumber(game.final_stack)}
                       </TableCell>
                       <TableCell className="text-right pr-8">
@@ -415,7 +415,7 @@ const PlayerDetail = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => navigate(`/games/${game.game_id}`)}
-                          className="font-luxury uppercase tracking-widest text-[10px] hover:bg-gold-500/10 text-gold-500 px-4 h-9 rounded-full border border-gold-500/10"
+                          className="font-luxury uppercase tracking-widest text-[10px] hover:bg-gold-500/10 text-gold-600 dark:text-gold-500 px-4 h-9 rounded-full border border-gold-500/10"
                         >
                           Examine
                         </Button>

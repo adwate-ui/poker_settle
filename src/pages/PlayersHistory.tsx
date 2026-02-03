@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { Loader2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserGroup, Trophy, History, User as UserIcon } from "lucide-react";
+import { Loader2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Users, Trophy, History, User as UserIcon } from "lucide-react";
 import { Player } from "@/types/poker";
 import { formatIndianNumber, formatProfitLoss, getProfitLossVariant } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -130,12 +130,12 @@ const PlayersHistory = () => {
 
   if (players.length === 0) {
     return (
-      <Card className="max-w-4xl mx-auto border-white/10 overflow-hidden bg-black/40 backdrop-blur-xl">
+      <Card className="max-w-4xl mx-auto border-gold-900/10 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-black/40 backdrop-blur-xl">
         <CardHeader className="text-center py-10">
           <div className="mx-auto w-16 h-16 rounded-full bg-gold-500/10 border border-gold-500/20 flex items-center justify-center mb-6">
             <UserIcon className="h-8 w-8 text-gold-500/40" />
           </div>
-          <CardTitle className="text-3xl font-luxury text-gold-100 mb-2">Empty Roster</CardTitle>
+          <CardTitle className="text-3xl font-luxury text-luxury-primary mb-2">Empty Roster</CardTitle>
           <CardDescription className="text-gray-400 max-w-sm mx-auto">
             You haven't registered any participants in your ledger. Add players during game setup to track their lifelong performance.
           </CardDescription>
@@ -146,25 +146,25 @@ const PlayersHistory = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
               <Trophy className="h-5 w-5 text-gold-500" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-luxury text-gold-100">Participant Matrix</CardTitle>
+              <CardTitle className="text-2xl font-luxury text-luxury-primary">Participant Matrix</CardTitle>
               <CardDescription className="text-xs uppercase tracking-widest text-gold-500/40 font-luxury">Lifelong performance metrics across the table</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Participants</p>
-              <p className="text-3xl font-numbers text-gold-100">{players.length}</p>
+            <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Participants</p>
+              <p className="text-3xl font-numbers text-luxury-primary">{players.length}</p>
             </div>
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
+            <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
               <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Winning Ratio</p>
               <div className="flex items-baseline gap-2">
                 <p className="text-3xl font-numbers text-green-400">
@@ -173,9 +173,9 @@ const PlayersHistory = () => {
                 <p className="text-sm text-white/30 font-luxury uppercase tracking-widest">Active Gains</p>
               </div>
             </div>
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2 hidden lg:block">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Collective Sessions</p>
-              <p className="text-3xl font-numbers text-gold-500">
+            <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2 hidden lg:block">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Collective Sessions</p>
+              <p className="text-3xl font-numbers text-luxury-primary">
                 {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
               </p>
             </div>
@@ -183,7 +183,7 @@ const PlayersHistory = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <CardContent className="p-0">
           <div className="space-y-0">
             {/* Desktop Header */}
@@ -252,7 +252,7 @@ const PlayersHistory = () => {
                           <OptimizedAvatar name={player.name} size="md" className="border-gold-500/20 group-hover/name:border-gold-500/50 transition-colors" />
                           <div className="absolute inset-0 rounded-full bg-gold-500/0 group-hover/name:bg-gold-500/5 transition-colors" />
                         </div>
-                        <p className="text-base font-luxury text-gold-100/80 group-hover/name:text-gold-50 transition-colors">
+                        <p className="text-base font-luxury text-luxury-primary group-hover/name:text-gold-600 dark:group-hover/name:text-gold-50 transition-colors">
                           {player.name}
                         </p>
                       </div>
@@ -299,7 +299,7 @@ const PlayersHistory = () => {
                         onClick={() => navigate(`/players/${player.id}`)}
                       >
                         <OptimizedAvatar name={player.name} size="sm" className="border-gold-500/10" />
-                        <span className="text-[11px] font-luxury text-gold-100 truncate">{player.name}</span>
+                        <span className="text-[11px] font-luxury text-luxury-primary truncate">{player.name}</span>
                       </div>
                       <div
                         className="flex items-center justify-center font-numbers text-[12px] text-gold-500/70"
@@ -344,13 +344,13 @@ const PlayersHistory = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deletePlayerId} onOpenChange={(open) => !open && setDeletePlayerId(null)}>
-        <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+        <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/20 dark:border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-full bg-red-500/10 border border-red-500/20">
                 <Trash2 className="h-5 w-5 text-red-500" />
               </div>
-              <DialogTitle className="text-xl font-luxury text-gold-100">Expunge Participant?</DialogTitle>
+              <DialogTitle className="text-xl font-luxury text-luxury-primary">Expunge Participant?</DialogTitle>
             </div>
             <DialogDescription className="text-gray-400 text-sm">
               This action will permanently purge this player and all their historic sessions from the ledger. This operation is irreversible.

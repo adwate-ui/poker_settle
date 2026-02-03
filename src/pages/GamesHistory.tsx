@@ -229,12 +229,12 @@ const GamesHistory = () => {
 
   if (games.length === 0) {
     return (
-      <Card className="max-w-4xl mx-auto border-white/10 overflow-hidden bg-black/40 backdrop-blur-xl">
+      <Card className="max-w-4xl mx-auto border-gold-900/10 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-black/40 backdrop-blur-xl">
         <CardHeader className="text-center py-10">
           <div className="mx-auto w-16 h-16 rounded-full bg-gold-500/10 border border-gold-500/20 flex items-center justify-center mb-6">
             <History className="h-8 w-8 text-gold-500/40" />
           </div>
-          <CardTitle className="text-3xl font-luxury text-gold-100 mb-2">Pristine Ledger</CardTitle>
+          <CardTitle className="text-3xl font-luxury text-luxury-primary mb-2">Pristine Ledger</CardTitle>
           <CardDescription className="text-gray-400 max-w-sm mx-auto">
             You haven't recorded any completed sessions yet. Once you finalize a game, it will be immortalized here.
           </CardDescription>
@@ -251,14 +251,14 @@ const GamesHistory = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Search & Filter Section */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
               <Filter className="h-5 w-5 text-gold-500" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-luxury text-gold-100">Archive Filters</CardTitle>
+              <CardTitle className="text-2xl font-luxury text-luxury-primary">Archive Filters</CardTitle>
               <CardDescription className="text-xs uppercase tracking-widest text-gold-500/40 font-luxury">Narrow your search within the vaults</CardDescription>
             </div>
           </div>
@@ -272,10 +272,10 @@ const GamesHistory = () => {
                   <Calendar className="mr-2 h-4 w-4 text-gold-500/40" />
                   <SelectValue placeholder="All Dates" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
                   <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest">All Dates</SelectItem>
                   {uniqueDates.map((date) => (
-                    <SelectItem key={date} value={date} className="font-luxury uppercase text-[10px] tracking-widest">
+                    <SelectItem key={date} value={date} className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">
                       {date}
                     </SelectItem>
                   ))}
@@ -290,10 +290,10 @@ const GamesHistory = () => {
                   <Filter className="mr-2 h-4 w-4 text-gold-500/40" />
                   <SelectValue placeholder="All Months" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
                   <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest">All Months</SelectItem>
                   {uniqueMonthYears.map((monthYear) => (
-                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest">
+                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">
                       {monthYear}
                     </SelectItem>
                   ))}
@@ -308,10 +308,10 @@ const GamesHistory = () => {
                   <UserIcon className="mr-2 h-4 w-4 text-gold-500/40" />
                   <SelectValue placeholder="All Players" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
                   <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest">All Players</SelectItem>
                   {uniquePlayers.map((player) => (
-                    <SelectItem key={player} value={player} className="font-luxury uppercase text-[10px] tracking-widest">
+                    <SelectItem key={player} value={player} className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">
                       {player}
                     </SelectItem>
                   ))}
@@ -323,7 +323,7 @@ const GamesHistory = () => {
       </Card>
 
       {/* History Ledger Card */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <CardContent className="p-0">
           <div className="space-y-0">
             {/* Desktop Header */}
@@ -400,7 +400,7 @@ const GamesHistory = () => {
                   >
                     {/* Desktop Layout Row */}
                     <div className="hidden lg:grid grid-cols-5 gap-4 items-center p-6 h-14">
-                      <p className="text-sm font-luxury text-gold-100/80 group-hover:text-gold-50 transition-colors">
+                      <p className="text-sm font-luxury text-luxury-primary group-hover:text-gold-600 dark:group-hover:text-gold-50 transition-colors">
                         {format(new Date(game.date), "MMM d, yyyy")}
                       </p>
                       <p className="text-base font-numbers text-gold-500/80 group-hover:text-gold-400 transition-colors">
@@ -443,7 +443,7 @@ const GamesHistory = () => {
                     {/* Mobile Layout Row */}
                     <div className="lg:hidden grid grid-cols-4 gap-1 items-center p-4">
                       <div className="flex flex-col">
-                        <span className="text-[11px] font-luxury text-gold-100 truncate">{format(new Date(game.date), "MMM d, yy")}</span>
+                        <span className="text-[11px] font-luxury text-luxury-primary truncate">{format(new Date(game.date), "MMM d, yy")}</span>
                         <span className="text-[10px] text-white/30 truncate">{game.player_count} Players</span>
                       </div>
                       <div className="flex items-center justify-center font-numbers text-[12px] text-gold-500/70">
@@ -489,13 +489,13 @@ const GamesHistory = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteGameId} onOpenChange={(open) => !open && setDeleteGameId(null)}>
-        <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+        <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/20 dark:border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-full bg-red-500/10 border border-red-500/20">
                 <Trash2 className="h-5 w-5 text-red-500" />
               </div>
-              <DialogTitle className="text-xl font-luxury text-gold-100">Expunge Ledger Record?</DialogTitle>
+              <DialogTitle className="text-xl font-luxury text-luxury-primary">Expunge Ledger Record?</DialogTitle>
             </div>
             <DialogDescription className="text-gray-400 text-sm">
               This action will permanently purge this session from the archives. The accounting for all participants will be irreversibly lost.

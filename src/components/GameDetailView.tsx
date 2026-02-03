@@ -284,8 +284,8 @@ export const GameDetailView = ({
 
   if (!game) {
     return (
-      <Card className="max-w-4xl mx-auto border-white/10 bg-black/40 backdrop-blur-xl p-10 text-center">
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase">Game record not found in ledger.</p>
+      <Card className="max-w-4xl mx-auto border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl p-10 text-center">
+        <p className="text-gold-900/60 dark:text-gold-200/60 font-luxury tracking-widest uppercase">Game record not found in ledger.</p>
       </Card>
     );
   }
@@ -315,18 +315,18 @@ export const GameDetailView = ({
         </Button>
       )}
 
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-8 border-b border-white/5 bg-white/2">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <CardHeader className="pb-8 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20">
-                <ShieldCheck className="h-6 w-6 text-gold-500" />
+                <ShieldCheck className="h-6 w-6 text-gold-600 dark:text-gold-500" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-luxury text-gold-100">
+                <CardTitle className="text-3xl font-luxury text-luxury-primary">
                   Session Ledger — {format(new Date(game.date), "MMMM d, yyyy")}
                 </CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Official Sequence Archive</CardDescription>
+                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-900/40 dark:text-gold-500/40 font-luxury">Official Sequence Archive</CardDescription>
               </div>
             </div>
             <Button
@@ -334,32 +334,32 @@ export const GameDetailView = ({
               size="sm"
               onClick={() => copyShareLink('game', gameId)}
               disabled={linkLoading}
-              className="h-10 px-6 rounded-full bg-white/5 border-white/10 hover:bg-gold-500/10 hover:border-gold-500/30 text-gold-200 font-luxury uppercase tracking-widest text-[10px]"
+              className="h-10 px-6 rounded-full bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 hover:bg-gold-500/10 hover:border-gold-500/30 text-gold-800 dark:text-gold-200 font-luxury uppercase tracking-widest text-[10px]"
             >
-              <Share2 className="h-3.5 w-3.5 mr-2 text-gold-500" />
+              <Share2 className="h-3.5 w-3.5 mr-2 text-gold-600 dark:text-gold-500" />
               Export Archive
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-8">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Blind Level / Unit</p>
-              <p className="text-2xl font-numbers text-gold-100">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Blind Level / Unit</p>
+              <p className="text-2xl font-numbers text-gold-900 dark:text-gold-100">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">The Lineup</p>
-              <p className="text-2xl font-numbers text-gold-100">{gamePlayers.length}</p>
+            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">The Lineup</p>
+              <p className="text-2xl font-numbers text-luxury-primary">{gamePlayers.length}</p>
             </div>
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Liquidity</p>
-              <p className="text-2xl font-numbers text-gold-500">
+            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Liquidity</p>
+              <p className="text-2xl font-numbers text-gold-600 dark:text-gold-500">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Pot Action</p>
-              <p className="text-2xl font-numbers text-green-400">
+            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Pot Action</p>
+              <p className="text-2xl font-numbers text-green-600 dark:text-green-400">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
               </p>
             </div>
@@ -368,15 +368,15 @@ export const GameDetailView = ({
       </Card>
 
       {/* Buy-in Logs Section */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+            <div className="p-6 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
-                <History className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Stack Rebuys</h3>
+                <History className="h-5 w-5 text-gold-900/40 dark:text-gold-500/40 group-hover:text-gold-600 dark:group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-luxury-primary uppercase tracking-widest">Stack Rebuys</h3>
               </div>
-              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
+              <ChevronDown className={cn("h-5 w-5 text-black/20 dark:text-white/20 transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -388,37 +388,37 @@ export const GameDetailView = ({
       </Card>
 
       {/* Table Positions Section */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+            <div className="p-6 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Seat Draw</h3>
+                <User className="h-5 w-5 text-gold-900/40 dark:text-gold-500/40 group-hover:text-gold-600 dark:group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-luxury-primary uppercase tracking-widest">Seat Draw</h3>
               </div>
-              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", tablePositionsOpen && "rotate-180")} />
+              <ChevronDown className={cn("h-5 w-5 text-black/20 dark:text-white/20 transition-transform duration-300", tablePositionsOpen && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className="p-8 animate-in slide-in-from-top-2 duration-300">
               <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] uppercase tracking-widest font-numbers text-gold-500/60 bg-gold-500/5 px-3 py-1 rounded-full border border-gold-500/10">
+                  <span className="text-[10px] uppercase tracking-widest font-numbers text-gold-900/60 dark:text-gold-500/60 bg-gold-500/5 px-3 py-1 rounded-full border border-gold-500/10">
                     Snapshot: {tablePositions.length > 0 ? format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm") : "--:--"} IST
                   </span>
                 </div>
                 {tablePositions.length > 1 && (
-                  <div className="flex items-center gap-4 bg-white/5 rounded-full p-1 border border-white/10">
+                  <div className="flex items-center gap-4 bg-black/5 dark:bg-white/5 rounded-full p-1 border border-gold-900/10 dark:border-white/10">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
                       disabled={currentPositionIndex === 0}
-                      className="h-8 w-8 rounded-full text-gold-500 disabled:opacity-20"
+                      className="h-8 w-8 rounded-full text-gold-600 dark:text-gold-500 disabled:opacity-20"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-[10px] font-numbers text-gold-100/60 px-2 min-w-[40px] text-center">
+                    <span className="text-[10px] font-numbers text-gold-800 dark:text-gold-100/60 px-2 min-w-[40px] text-center">
                       {currentPositionIndex + 1} / {tablePositions.length}
                     </span>
                     <Button
@@ -426,7 +426,7 @@ export const GameDetailView = ({
                       size="icon"
                       onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
                       disabled={currentPositionIndex === tablePositions.length - 1}
-                      className="h-8 w-8 rounded-full text-gold-500 disabled:opacity-20"
+                      className="h-8 w-8 rounded-full text-gold-600 dark:text-gold-500 disabled:opacity-20"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -448,27 +448,27 @@ export const GameDetailView = ({
       </Card>
 
       {/* Player Results Ledger */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+            <div className="p-6 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Session P&L</h3>
+                <TrendingUp className="h-5 w-5 text-gold-900/40 dark:text-gold-500/40 group-hover:text-gold-600 dark:group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-luxury-primary uppercase tracking-widest">Session P&L</h3>
               </div>
-              <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", playerResultsOpen && "rotate-180")} />
+              <ChevronDown className={cn("h-5 w-5 text-black/20 dark:text-white/20 transition-transform duration-300", playerResultsOpen && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className="animate-in slide-in-from-top-2 duration-300 overflow-x-auto">
               <Table>
-                <TableHeader className="bg-white/5 border-b border-white/10">
+                <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-gold-900/10 dark:border-white/10">
                   <TableRow className="hover:bg-transparent border-0 h-14">
                     <TableHead className="pl-8">
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("name")}
-                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Player {getSortIcon("name")}
                       </Button>
@@ -477,7 +477,7 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("buy_ins")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Buy-ins {getSortIcon("buy_ins")}
                       </Button>
@@ -486,7 +486,7 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("net_amount")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         P&L {getSortIcon("net_amount")}
                       </Button>
@@ -495,19 +495,19 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("final_stack")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Cashout Stack {getSortIcon("final_stack")}
                       </Button>
                     </TableHead>
                     {showOwnerControls && fetchBuyInHistory && (
                       <TableHead className="text-right pr-8">
-                        <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-500/60">Log Audit</span>
+                        <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60">Log Audit</span>
                       </TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-white/5">
+                <TableBody className="divide-y divide-black/10 dark:divide-white/5">
                   {sortedGamePlayers.map((gamePlayer) => {
                     const playerName = gamePlayer.players?.name ?? "--";
                     const netAmount = gamePlayer.net_amount ?? 0;
@@ -515,11 +515,11 @@ export const GameDetailView = ({
                     const isWin = netAmount > 0;
 
                     return (
-                      <TableRow key={gamePlayer.id} className="h-12 sm:h-16 border-white/5 hover:bg-gold-500/5 transition-colors">
-                        <TableCell className="pl-4 sm:pl-8 text-left font-luxury text-[13px] text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
+                      <TableRow key={gamePlayer.id} className="h-12 sm:h-16 border-black/5 dark:border-white/5 hover:bg-gold-500/5 transition-colors">
+                        <TableCell className="pl-4 sm:pl-8 text-left font-luxury text-[13px] text-gold-800 dark:text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex justify-center">
-                            <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1">
+                            <Badge variant="outline" className="bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-gold-700/60 dark:text-gold-200/60 font-numbers px-3 py-1">
                               {gamePlayer.buy_ins} Stacks
                             </Badge>
                           </div>
@@ -529,14 +529,14 @@ export const GameDetailView = ({
                             <Badge
                               className={cn(
                                 "px-4 py-1.5 font-numbers tracking-widest border-0",
-                                isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                                isWin ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-red-500/20 text-red-600 dark:text-red-400"
                               )}
                             >
                               {formatProfitLoss(netAmount)}
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-numbers text-base text-gold-100/60">
+                        <TableCell className="text-center font-numbers text-base text-gold-800 dark:text-gold-100/60">
                           Rs. {formatIndianNumber(finalStack)}
                         </TableCell>
                         {showOwnerControls && fetchBuyInHistory && (
@@ -559,13 +559,13 @@ export const GameDetailView = ({
       </Card>
 
       {/* Settlement Orchestration Section */}
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
         <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+            <div className="p-6 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
-                <Coins className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Debt Settlement</h3>
+                <Coins className="h-5 w-5 text-gold-900/40 dark:text-gold-500/40 group-hover:text-gold-600 dark:group-hover:text-gold-500 transition-colors" />
+                <h3 className="text-lg font-luxury text-luxury-primary uppercase tracking-widest">Debt Settlement</h3>
               </div>
               <div className="flex items-center gap-4">
                 {showOwnerControls && settlementsOpen && (
@@ -574,7 +574,7 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setTransferDialogOpen(true)}
-                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
+                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-600 dark:text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
                     >
                       <Plus className="h-3 w-3 mr-1" /> Add Manual
                     </Button>
@@ -582,13 +582,13 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="sm"
                       onClick={recalculateAndSaveSettlements}
-                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
+                      className="h-8 rounded-full border border-gold-500/10 hover:bg-gold-500/10 text-gold-600 dark:text-gold-500 font-luxury uppercase tracking-widest text-[9px]"
                     >
                       <RefreshCw className="h-3 w-3 mr-1" /> Finalize
                     </Button>
                   </div>
                 )}
-                <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", settlementsOpen && "rotate-180")} />
+                <ChevronDown className={cn("h-5 w-5 text-black/20 dark:text-white/20 transition-transform duration-300", settlementsOpen && "rotate-180")} />
               </div>
             </div>
           </CollapsibleTrigger>
@@ -596,19 +596,19 @@ export const GameDetailView = ({
             <div className="animate-in slide-in-from-top-2 duration-300">
               {showOwnerControls && manualTransfers.length > 0 && (
                 <div className="p-6 border-b border-gold-500/10 bg-gold-500/5">
-                  <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-gold-500/60 mb-4 flex items-center gap-2">
+                  <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 mb-4 flex items-center gap-2">
                     <ShieldCheck className="h-3 w-3" /> Buffered Transactions (Awaiting Finalization)
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {manualTransfers.map((transfer, index) => (
-                      <div key={index} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-white/5 group">
+                      <div key={index} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-gold-900/10 dark:border-white/5 group">
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className="text-xs font-luxury text-gold-100/80 truncate">
-                            <span className="text-white/40">{transfer.from}</span>
-                            <ArrowRight className="inline h-3 w-3 mx-2 text-gold-500/40" />
-                            <span className="text-white/40">{transfer.to}</span>
+                          <div className="text-xs font-luxury text-gold-900/80 dark:text-gold-100/80 truncate">
+                            <span className="text-black/40 dark:text-white/40">{transfer.from}</span>
+                            <ArrowRight className="inline h-3 w-3 mx-2 text-gold-600/40 dark:text-gold-500/40" />
+                            <span className="text-black/40 dark:text-white/40">{transfer.to}</span>
                           </div>
-                          <span className="font-numbers text-sm text-gold-500">₹{formatIndianNumber(transfer.amount)}</span>
+                          <span className="font-numbers text-sm text-gold-600 dark:text-gold-500">₹{formatIndianNumber(transfer.amount)}</span>
                         </div>
                         <Button
                           variant="ghost"
@@ -626,35 +626,35 @@ export const GameDetailView = ({
 
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-white/5 border-b border-white/10">
+                  <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-gold-900/10 dark:border-white/10">
                     <TableRow className="hover:bg-transparent border-0 h-14">
-                      <TableHead className="pl-8 text-left font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Debtor</TableHead>
-                      <TableHead className="text-left font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Creditor</TableHead>
-                      <TableHead className="text-center font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Amount</TableHead>
-                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Status</TableHead>
+                      <TableHead className="pl-8 text-left font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Debtor</TableHead>
+                      <TableHead className="text-left font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Creditor</TableHead>
+                      <TableHead className="text-center font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Amount</TableHead>
+                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Status</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="divide-y divide-white/5">
+                  <TableBody className="divide-y divide-black/10 dark:divide-white/5">
                     {settlementsWithType.map((settlement, index) => {
                       const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                       return (
-                        <TableRow key={`settlement-${index}`} className="h-12 sm:h-16 border-white/5 hover:bg-gold-500/5 transition-colors group">
+                        <TableRow key={`settlement-${index}`} className="h-12 sm:h-16 border-black/5 dark:border-white/5 hover:bg-gold-500/5 transition-colors group">
                           <TableCell className="pl-4 sm:pl-8">
                             <div className="flex items-center gap-3">
-                              <User className="h-3 w-3 text-gold-500/40" />
-                              <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.from}</span>
+                              <User className="h-3 w-3 text-gold-900/40 dark:text-gold-500/40" />
+                              <span className="font-luxury text-[12px] text-gold-800 dark:text-gold-100/80 uppercase tracking-widest">{settlement.from}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <CreditCard className="h-3 w-3 text-gold-500/40" />
-                              <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.to}</span>
+                              <CreditCard className="h-3 w-3 text-gold-900/40 dark:text-gold-500/40" />
+                              <span className="font-luxury text-[12px] text-gold-800 dark:text-gold-100/80 uppercase tracking-widest">{settlement.to}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <span className="font-numbers text-base text-gold-500">Rs. {formatIndianNumber(settlement.amount)}</span>
+                            <span className="font-numbers text-base text-gold-600 dark:text-gold-500">Rs. {formatIndianNumber(settlement.amount)}</span>
                             {settlement.isManual && (
-                              <span className="ml-3 text-[9px] font-luxury uppercase tracking-widest text-gold-500/30 px-2 py-0.5 border border-gold-500/10 rounded-full">Manual</span>
+                              <span className="ml-3 text-[9px] font-luxury uppercase tracking-widest text-gold-900/30 dark:text-gold-500/30 px-2 py-0.5 border border-gold-900/10 dark:border-gold-500/10 rounded-full">Manual</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right pr-8">
@@ -670,8 +670,8 @@ export const GameDetailView = ({
                                 className={cn(
                                   "h-10 px-6 rounded-full font-luxury uppercase tracking-widest text-[10px] border transition-all",
                                   confirmation.confirmed
-                                    ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
-                                    : "bg-white/5 border-white/10 text-white/30 hover:bg-white/10"
+                                    ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
+                                    : "bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-black/30 dark:text-white/30 hover:bg-black/10 dark:hover:bg-white/10"
                                 )}
                               >
                                 {confirmation.confirmed ? <Check className="h-3.5 w-3.5 mr-2" /> : <X className="h-3.5 w-3.5 mr-2" />}
@@ -680,7 +680,7 @@ export const GameDetailView = ({
                             ) : (
                               <Badge className={cn(
                                 "h-9 px-5 rounded-full font-luxury uppercase tracking-widest text-[9px] border-0",
-                                confirmation?.confirmed ? "bg-green-500/20 text-green-400" : "bg-gold-500/10 text-gold-500/40"
+                                confirmation?.confirmed ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-gold-500/10 text-gold-900/40 dark:text-gold-500/40"
                               )}>
                                 {confirmation?.confirmed ? <Check className="h-3 w-3 mr-2" /> : <History className="h-3 w-3 mr-2" />}
                                 {confirmation?.confirmed ? "Settled" : "Pending"}
@@ -700,25 +700,25 @@ export const GameDetailView = ({
 
       {/* Manual Transfer Dialog */}
       <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
-        <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+        <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
-                <Plus className="w-5 h-5 text-gold-500" />
+                <Plus className="w-5 h-5 text-gold-600 dark:text-gold-500" />
               </div>
-              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Manual Settlement Protocol</DialogTitle>
+              <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Settlement Protocol</DialogTitle>
             </div>
           </DialogHeader>
 
           <div className="py-6 space-y-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Payer (From)</Label>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 ml-1 mb-2 block text-left">Payer (From)</Label>
                 <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                  <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
+                  <SelectTrigger className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
                     <SelectValue placeholder="Select Origin" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                  <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
                     {gamePlayers.map(gp => (
                       <SelectItem key={gp.players?.name} value={gp.players?.name || ''} className="font-luxury uppercase text-[10px] tracking-widest">{gp.players?.name}</SelectItem>
                     ))}
@@ -727,12 +727,12 @@ export const GameDetailView = ({
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Recipient (To)</Label>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 ml-1 mb-2 block text-left">Recipient (To)</Label>
                 <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                  <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-left">
+                  <SelectTrigger className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-left">
                     <SelectValue placeholder="Select Destination" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                  <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
                     {gamePlayers.map(gp => (
                       <SelectItem key={gp.players?.name} value={gp.players?.name || ''} className="font-luxury uppercase text-[10px] tracking-widest">{gp.players?.name}</SelectItem>
                     ))}
@@ -741,25 +741,25 @@ export const GameDetailView = ({
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1 mb-2 block text-left">Amount (INR)</Label>
+                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 ml-1 mb-2 block text-left">Amount (INR)</Label>
                 <Input
                   type="number"
                   placeholder="0.00"
                   value={newTransferAmount}
                   onChange={(e) => setNewTransferAmount(e.target.value)}
-                  className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-lg text-gold-100 placeholder:text-white/10"
+                  className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-lg text-gold-900 dark:text-gold-100 placeholder:text-black/10 dark:placeholder:text-white/10"
                 />
               </div>
             </div>
           </div>
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
-            <Button variant="ghost" onClick={() => setTransferDialogOpen(false)} className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1">
+            <Button variant="ghost" onClick={() => setTransferDialogOpen(false)} className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 transition-colors rounded-lg flex-1">
               Abort
             </Button>
             <Button
               onClick={addManualTransfer}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 bg-gold-500/10 border border-gold-500/20 hover:bg-gold-500/20 text-gold-100 rounded-lg flex-1"
+              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 bg-gold-500/10 border border-gold-500/20 hover:bg-gold-500/20 text-gold-900 dark:text-gold-100 rounded-lg flex-1"
             >
               Queue Protocol
             </Button>

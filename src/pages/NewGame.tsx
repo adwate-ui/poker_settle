@@ -175,16 +175,16 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card className="max-w-4xl mx-auto relative overflow-hidden border-white/10">
+    <Card className="max-w-4xl mx-auto relative overflow-hidden border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-[#0a0a0a]/90 border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
+          <Card className="w-full max-w-md bg-[#f9f4df]/90 dark:bg-[#0a0a0a]/90 border-gold-900/20 dark:border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-full bg-gold-500/10 border border-gold-500/20">
                   <Play className="h-5 w-5 text-gold-500" />
                 </div>
-                <CardTitle className="text-2xl font-luxury bg-clip-text text-transparent bg-gradient-to-r from-gold-200 to-gold-500">
+                <CardTitle className="text-2xl font-luxury text-luxury-primary">
                   Active Game
                 </CardTitle>
               </div>
@@ -202,7 +202,7 @@ const NewGame = () => {
       )}
 
       <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-luxury text-transparent bg-clip-text bg-gradient-to-r from-gold-200 to-gold-500">
+        <CardTitle className="text-3xl font-luxury text-luxury-primary uppercase tracking-widest">
           Start New Ledger
         </CardTitle>
         <CardDescription className="text-gray-400">
@@ -231,7 +231,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
               <div className="absolute right-0 bottom-3 text-gold-500/30 group-focus-within:text-gold-500 transition-colors">
                 <Info className="h-4 w-4" />
@@ -258,7 +258,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -278,7 +278,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
           </div>

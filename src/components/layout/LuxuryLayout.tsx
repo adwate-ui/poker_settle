@@ -1,4 +1,5 @@
 import React from 'react';
+import ThemeToggle from '../ThemeToggle';
 
 interface LuxuryLayoutProps {
     children: React.ReactNode;
@@ -22,6 +23,8 @@ const LuxuryLayout: React.FC<LuxuryLayoutProps> = ({ children }) => {
 
             {/* Subtle bottom glow */}
             <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full h-[30vh] bg-gold-900/5 dark:bg-gold-900/10 blur-[120px] pointer-events-none z-[0]" />
+
+            <ThemeToggle />
         </div>
     );
 };

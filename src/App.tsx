@@ -1,4 +1,5 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import * as React from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -13,7 +14,13 @@ import LuxuryLayout from "@/components/layout/LuxuryLayout";
 
 // Lazy load all pages for optimal bundle size
 const Index = lazy(() => import("./pages/Index"));
+const NewGame = lazy(() => import("./pages/NewGame"));
+const GamesHistory = lazy(() => import("./pages/GamesHistory"));
 const GameDetail = lazy(() => import("./pages/GameDetail"));
+const PlayersHistory = lazy(() => import("./pages/PlayersHistory"));
+const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
+const HandsHistory = lazy(() => import("./pages/HandsHistory"));
+const HandDetail = lazy(() => import("./pages/HandDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SharedView = lazy(() => import("./pages/SharedView"));
@@ -51,12 +58,12 @@ const AppContent = () => {
       }>
         <Routes>
           <Route path="/" element={user ? <Index /> : <Auth />} />
-          <Route path="/games" element={user ? <Index /> : <Auth />} />
-          <Route path="/games/:gameId" element={user ? <Index /> : <Auth />} />
-          <Route path="/players" element={user ? <Index /> : <Auth />} />
-          <Route path="/players/:playerId" element={user ? <Index /> : <Auth />} />
-          <Route path="/hands" element={user ? <Index /> : <Auth />} />
-          <Route path="/hands/:handId" element={user ? <Index /> : <Auth />} />
+          <Route path="/games" element={user ? <GamesHistory /> : <Auth />} />
+          <Route path="/games/:gameId" element={user ? <GameDetail /> : <Auth />} />
+          <Route path="/players" element={user ? <PlayersHistory /> : <Auth />} />
+          <Route path="/players/:playerId" element={user ? <PlayerDetail /> : <Auth />} />
+          <Route path="/hands" element={user ? <HandsHistory /> : <Auth />} />
+          <Route path="/hands/:handId" element={user ? <HandDetail /> : <Auth />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={user ? <Profile /> : <Auth />} />
           <Route path="/s/:shortCode" element={<ShortLinkRedirect />} />

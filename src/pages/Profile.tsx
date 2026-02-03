@@ -13,6 +13,7 @@ import { useChips } from '@/contexts/ChipContext';
 import { Input } from '@/components/ui/input';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatIndianNumber, cn } from "@/lib/utils";
 import LuxuryLayout from '../components/layout/LuxuryLayout';
 
 const GameSettingsTab = () => {
@@ -40,22 +41,22 @@ const GameSettingsTab = () => {
   };
 
   return (
-    <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
+    <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-xl">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-primary" />
           <div>
-            <CardTitle>Chip Values</CardTitle>
-            <CardDescription>Customize the monetary value of each chip color.</CardDescription>
+            <CardTitle className="text-gold-900 dark:text-gold-100">Chip Values</CardTitle>
+            <CardDescription className="text-gold-900/60 dark:text-gold-500/60">Customize the monetary value of each chip color.</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           {localChips.map((chip) => (
-            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border border-gold-900/5 dark:border-white/5 bg-black/5 dark:bg-white/5 hover:bg-gold-500/5 transition-colors">
               <div
-                className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center font-bold text-white border-2 border-white/20 ring-1 ring-border ${chip.color === 'blue' ? 'bg-blue-600' :
+                className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center font-bold text-white border-2 border-white/20 ring-1 ring-border/20 ${chip.color === 'blue' ? 'bg-blue-600' :
                   chip.color === 'white' ? 'bg-slate-100 text-slate-900 border-slate-300' :
                     chip.color === 'green' ? 'bg-green-600' :
                       chip.color === 'black' ? 'bg-black' :
@@ -70,8 +71,8 @@ const GameSettingsTab = () => {
                 {chip.label}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
-                <p className="text-xs text-muted-foreground">Default: {chip.label}</p>
+                <p className="text-sm font-medium capitalize text-luxury-primary">{chip.color} Chip</p>
+                <p className="text-xs text-gold-900/40 dark:text-muted-foreground">Default: {chip.label}</p>
               </div>
               <div className="w-24">
                 <Input
@@ -79,15 +80,15 @@ const GameSettingsTab = () => {
                   value={chip.value}
                   onChange={(e) => handleValueChange(chip.color, e.target.value)}
                   onBlur={() => handleBlur(chip.color, chip.value)}
-                  className="text-right font-mono"
+                  className="text-right font-mono bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-gold-900 dark:text-gold-100"
                 />
               </div>
             </div>
           ))}
         </div>
 
-        <div className="pt-4 border-t flex justify-end">
-          <Button variant="outline" size="sm" onClick={resetDefaults}>
+        <div className="pt-4 border-t border-gold-900/10 dark:border-white/10 flex justify-end">
+          <Button variant="outline" size="sm" onClick={resetDefaults} className="border-gold-900/10 dark:border-white/10 text-gold-900 dark:text-gold-200 hover:bg-gold-500/10">
             <RefreshCw className="mr-2 h-4 w-4" />
             Reset to Defaults
           </Button>
@@ -149,19 +150,19 @@ const AISettingsTab = () => {
   };
 
   return (
-    <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
+    <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-xl">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Bot className="h-6 w-6 text-primary" />
+          <Bot className="h-6 w-6 text-gold-600 dark:text-gold-500" />
           <div>
-            <CardTitle>AI Configuration</CardTitle>
-            <CardDescription>Configure settings for the AI Chip Scanner.</CardDescription>
+            <CardTitle className="text-gold-900 dark:text-gold-100">AI Configuration</CardTitle>
+            <CardDescription className="text-gold-900/60 dark:text-gold-500/60">Configure settings for the AI Chip Scanner.</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Gemini API Key</label>
+          <label className="text-sm font-medium text-gold-900/70 dark:text-gold-200/70 uppercase tracking-widest text-[10px]">Gemini API Key</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
@@ -170,17 +171,20 @@ const AISettingsTab = () => {
                 value={isSaved ? "••••••••••••••••••••••••" : apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 disabled={isSaved || loading}
-                className={isSaved ? "bg-white/5 border-white/10 text-gold-200/40" : ""}
+                className={cn(
+                  "bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-luxury-primary",
+                  isSaved && "opacity-50"
+                )}
               />
             </div>
             {isSaved ? (
-              <Button onClick={handleChange} variant="outline">Change Key</Button>
+              <Button onClick={handleChange} variant="outline" className="border-gold-900/10 dark:border-white/10 text-gold-900 dark:text-gold-200 hover:bg-gold-500/10">Change Key</Button>
             ) : (
-              <Button onClick={handleSave} disabled={loading}>{loading ? 'Saving...' : 'Save'}</Button>
+              <Button onClick={handleSave} disabled={loading} className="bg-gold-500 hover:bg-gold-600 text-black font-luxury uppercase tracking-widest text-xs">{loading ? 'Saving...' : 'Save'}</Button>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Don't have a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Get one here</a>.
+          <p className="text-xs text-gold-900/40 dark:text-muted-foreground">
+            Don't have a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-gold-600 dark:text-gold-500 hover:underline">Get one here</a>.
           </p>
         </div>
       </CardContent>
@@ -217,51 +221,51 @@ const Profile = () => {
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-4 text-gold-500 hover:text-gold-400 hover:bg-white/5"
+          className="mb-4 text-gold-600 dark:text-gold-500 hover:text-gold-700 dark:hover:text-gold-400 hover:bg-gold-500/5 font-luxury uppercase tracking-widest text-xs"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-black/20 border border-white/10 p-1">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
+          <TabsList className="grid w-full grid-cols-4 bg-black/5 dark:bg-black/20 border border-gold-900/10 dark:border-white/10 p-1 rounded-xl">
+            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
               <User className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Profile</span>
+              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="game-settings" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
-              <div className={`w-4 h-4 rounded-full mr-2 bg-primary/20 border-2 border-primary`} />
-              <span className="hidden sm:inline">Chips</span>
+            <TabsTrigger value="game-settings" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
+              <div className={`w-4 h-4 rounded-full mr-2 bg-gold-500/20 border-2 border-gold-500`} />
+              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Chips</span>
             </TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
+            <TabsTrigger value="ai" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
               <Bot className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">AI</span>
+              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">AI</span>
             </TabsTrigger>
-            <TabsTrigger value="storage" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
+            <TabsTrigger value="storage" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
               <Database className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Storage</span>
+              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Storage</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
+            <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-xl">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <User className="h-6 w-6 text-primary" />
+                  <User className="h-6 w-6 text-gold-600 dark:text-gold-500" />
                   <div>
-                    <CardTitle>Profile</CardTitle>
-                    <CardDescription className="text-gold-500/60">Your account information</CardDescription>
+                    <CardTitle className="text-gold-900 dark:text-gold-100">Profile</CardTitle>
+                    <CardDescription className="text-gold-900/60 dark:text-gold-500/60">Your account information</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gold-500/40 uppercase tracking-widest">Email</label>
-                  <p className="text-lg text-gold-100">{user.email}</p>
+                  <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">Email</label>
+                  <p className="text-lg text-luxury-primary">{user.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gold-500/40 uppercase tracking-widest">User ID</label>
-                  <p className="text-sm text-gold-200/60 font-numbers">{user.id}</p>
+                  <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">User ID</label>
+                  <p className="text-sm text-gold-900/60 dark:text-gold-200/60 font-numbers">{user.id}</p>
                 </div>
               </CardContent>
             </Card>

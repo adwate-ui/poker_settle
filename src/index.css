@@ -10,6 +10,10 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
+  .text-luxury-primary {
+    @apply text-gold-900 dark:text-gold-100 transition-colors duration-300;
+  }
+
   .font-numbers {
     font-family: 'Space Mono', monospace;
   }
@@ -25,7 +29,7 @@ All colors MUST be HSL.
     --background: 45 30% 96%;
     --foreground: 158 10% 10%;
 
-    --card: 45 30% 94%;
+    --card: 45 30% 90%;
     --card-foreground: 158 10% 10%;
 
     --popover: 45 30% 94%;
@@ -39,7 +43,7 @@ All colors MUST be HSL.
     --secondary: 45 100% 51%;
     --secondary-foreground: 158 10% 10%;
 
-    --muted: 45 20% 90%;
+    --muted: 45 20% 85%;
     --muted-foreground: 158 8% 45%;
 
     --accent: 45 95% 92%;
@@ -48,7 +52,7 @@ All colors MUST be HSL.
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 20% 85%;
+    --border: 45 20% 80%;
     --input: 45 20% 85%;
     --ring: 158 64% 42%;
 
