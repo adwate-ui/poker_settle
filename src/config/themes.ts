@@ -21,12 +21,12 @@ export interface ThemeColors {
   border: string;
   input: string;
   ring: string;
-  
+
   // Poker specific
   pokerGreen: string;
   pokerGold: string;
   pokerFelt: string;
-  
+
   // Custom gradients
   gradientPoker: string;
   gradientGold: string;
@@ -107,65 +107,65 @@ export const themes: Record<ThemeName, Theme> = {
     },
     characters: [], // Uses default dicebear avatars
   },
-  
+
   one_piece: {
     name: 'one_piece',
     displayName: 'One Piece',
     description: 'Adventure on the Grand Line with vibrant ocean colors',
     colors: {
       light: {
-        background: '200 25% 97%',
-        foreground: '210 50% 12%',
-        card: '200 20% 98%',
-        cardForeground: '210 50% 12%',
-        popover: '200 20% 98%',
-        popoverForeground: '210 50% 12%',
-        primary: '200 85% 42%',
-        primaryForeground: '0 0% 100%',
-        secondary: '30 85% 52%',
+        background: '205 25% 97%',
+        foreground: '215 40% 12%',
+        card: '205 20% 98%',
+        cardForeground: '215 40% 12%',
+        popover: '205 20% 98%',
+        popoverForeground: '215 40% 12%',
+        primary: '215 50% 25%', // Deep Oceanic Navy
+        primaryForeground: '45 30% 90%', // Antique Gold foreground
+        secondary: '45 60% 50%', // Antique Gold
         secondaryForeground: '0 0% 100%',
-        accent: '0 80% 58%',
+        accent: '0 50% 45%', // Muted Crimson
         accentForeground: '0 0% 100%',
-        muted: '200 20% 90%',
-        mutedForeground: '200 15% 35%',
-        destructive: '0 70% 50%',
+        muted: '205 20% 90%',
+        mutedForeground: '205 15% 35%',
+        destructive: '0 60% 45%',
         destructiveForeground: '0 0% 100%',
-        border: '200 20% 85%',
-        input: '200 20% 85%',
-        ring: '200 85% 42%',
-        pokerGreen: '200 85% 42%',
-        pokerGold: '30 85% 52%',
-        pokerFelt: '200 55% 32%',
-        gradientPoker: 'linear-gradient(135deg, hsl(200, 85%, 42%) 0%, hsl(210, 80%, 32%) 100%)',
-        gradientGold: 'linear-gradient(135deg, hsl(30, 85%, 52%) 0%, hsl(35, 80%, 48%) 100%)',
-        gradientDark: 'linear-gradient(180deg, hsl(210, 50%, 20%) 0%, hsl(210, 50%, 12%) 100%)',
+        border: '205 20% 88%',
+        input: '205 20% 85%',
+        ring: '215 50% 25%',
+        pokerGreen: '215 50% 25%',
+        pokerGold: '45 60% 50%',
+        pokerFelt: '215 45% 20%', // Deep Sea Felt
+        gradientPoker: 'linear-gradient(135deg, hsl(215, 50%, 25%) 0%, hsl(215, 60%, 15%) 100%)',
+        gradientGold: 'linear-gradient(135deg, #D4AF37 0%, #C5A028 100%)',
+        gradientDark: 'linear-gradient(180deg, hsl(215, 40%, 15%) 0%, hsl(215, 50%, 8%) 100%)',
       },
       dark: {
-        background: '210 50% 6%',
-        foreground: '200 15% 96%',
-        card: '210 40% 10%',
-        cardForeground: '200 15% 96%',
-        popover: '210 40% 10%',
-        popoverForeground: '200 15% 96%',
-        primary: '200 85% 50%',
-        primaryForeground: '210 50% 6%',
-        secondary: '30 85% 58%',
-        secondaryForeground: '210 50% 6%',
-        accent: '0 80% 62%',
-        accentForeground: '210 50% 6%',
-        muted: '210 30% 16%',
-        mutedForeground: '200 15% 68%',
-        destructive: '0 70% 60%',
+        background: '215 50% 4%', // Nearly Black Navy
+        foreground: '45 20% 95%',
+        card: '215 40% 8%',
+        cardForeground: '45 20% 95%',
+        popover: '215 40% 8%',
+        popoverForeground: '45 20% 95%',
+        primary: '215 50% 30%',
+        primaryForeground: '45 30% 95%',
+        secondary: '45 60% 55%', // Gilded Antique Gold
+        secondaryForeground: '215 50% 4%',
+        accent: '0 50% 50%',
+        accentForeground: '215 50% 4%',
+        muted: '215 30% 14%',
+        mutedForeground: '215 15% 65%',
+        destructive: '0 60% 55%',
         destructiveForeground: '0 0% 100%',
-        border: '210 30% 20%',
-        input: '210 30% 14%',
-        ring: '200 85% 50%',
-        pokerGreen: '200 85% 50%',
-        pokerGold: '30 85% 58%',
-        pokerFelt: '200 55% 22%',
-        gradientPoker: 'linear-gradient(135deg, hsl(200, 85%, 50%) 0%, hsl(210, 80%, 28%) 100%)',
-        gradientGold: 'linear-gradient(135deg, hsl(30, 85%, 58%) 0%, hsl(35, 80%, 52%) 100%)',
-        gradientDark: 'linear-gradient(180deg, hsl(210, 50%, 12%) 0%, hsl(210, 50%, 6%) 100%)',
+        border: '215 30% 18%',
+        input: '215 30% 14%',
+        ring: '215 50% 30%',
+        pokerGreen: '215 50% 30%',
+        pokerGold: '45 60% 55%',
+        pokerFelt: '215 55% 15%',
+        gradientPoker: 'linear-gradient(135deg, hsl(215, 50%, 30%) 0%, hsl(215, 60%, 12%) 100%)',
+        gradientGold: 'linear-gradient(135deg, #D4AF37 0%, #B8962E 100%)',
+        gradientDark: 'linear-gradient(180deg, hsl(215, 40%, 10%) 0%, hsl(215, 50% , 4%) 100%)',
       },
     },
     characters: [
@@ -174,7 +174,7 @@ export const themes: Record<ThemeName, Theme> = {
       'Whitebeard', 'Kaido', 'Big Mom', 'Blackbeard', 'Boa Hancock', 'Jinbei', 'Yamato', 'Buggy'
     ],
   },
-  
+
   bleach: {
     name: 'bleach',
     displayName: 'Bleach',
@@ -241,65 +241,65 @@ export const themes: Record<ThemeName, Theme> = {
       'Shinji', 'Shunsui', 'Jushiro', 'Yamamoto', 'Mayuri', 'Nelliel', 'Stark', 'Barragan', 'Halibel'
     ],
   },
-  
+
   naruto: {
     name: 'naruto',
     displayName: 'Naruto',
     description: 'Hidden Leaf ninja with energetic orange and blue tones',
     colors: {
       light: {
-        background: '210 20% 97%',
-        foreground: '220 35% 12%',
-        card: '210 18% 98%',
-        cardForeground: '220 35% 12%',
-        popover: '210 18% 98%',
-        popoverForeground: '220 35% 12%',
-        primary: '25 95% 52%',
+        background: '35 15% 97%',
+        foreground: '35 40% 10%',
+        card: '35 12% 98%',
+        cardForeground: '35 40% 10%',
+        popover: '35 12% 98%',
+        popoverForeground: '35 40% 10%',
+        primary: '25 80% 40%', // Gilded Burnt Orange
         primaryForeground: '0 0% 100%',
-        secondary: '210 80% 52%',
+        secondary: '35 30% 25%', // Charcoal Stone
         secondaryForeground: '0 0% 100%',
-        accent: '55 90% 58%',
-        accentForeground: '220 35% 12%',
-        muted: '210 18% 90%',
-        mutedForeground: '220 12% 38%',
-        destructive: '0 70% 50%',
+        accent: '45 60% 50%', // Dull Gold
+        accentForeground: '35 40% 10%',
+        muted: '35 15% 90%',
+        mutedForeground: '35 10% 45%',
+        destructive: '0 60% 45%',
         destructiveForeground: '0 0% 100%',
-        border: '210 18% 85%',
-        input: '210 18% 85%',
-        ring: '25 95% 52%',
-        pokerGreen: '25 95% 52%',
-        pokerGold: '55 90% 58%',
-        pokerFelt: '210 80% 42%',
-        gradientPoker: 'linear-gradient(135deg, hsl(25, 95%, 52%) 0%, hsl(210, 80%, 42%) 100%)',
-        gradientGold: 'linear-gradient(135deg, hsl(55, 90%, 58%) 0%, hsl(25, 95%, 52%) 100%)',
-        gradientDark: 'linear-gradient(180deg, hsl(220, 35%, 22%) 0%, hsl(220, 35%, 12%) 100%)',
+        border: '35 15% 88%',
+        input: '35 15% 85%',
+        ring: '25 80% 40%',
+        pokerGreen: '25 80% 40%',
+        pokerGold: '45 60% 50%',
+        pokerFelt: '35 25% 22%',
+        gradientPoker: 'linear-gradient(135deg, hsl(25, 80%, 40%) 0%, hsl(35, 30%, 22%) 100%)',
+        gradientGold: 'linear-gradient(135deg, #CC5500 0%, #A04400 100%)',
+        gradientDark: 'linear-gradient(180deg, hsl(35, 40%, 15%) 0%, hsl(35, 40%, 10%) 100%)',
       },
       dark: {
-        background: '220 35% 7%',
-        foreground: '210 12% 96%',
-        card: '220 28% 11%',
-        cardForeground: '210 12% 96%',
-        popover: '220 28% 11%',
-        popoverForeground: '210 12% 96%',
-        primary: '25 95% 58%',
-        primaryForeground: '220 35% 7%',
-        secondary: '210 80% 58%',
-        secondaryForeground: '220 35% 7%',
-        accent: '55 90% 62%',
-        accentForeground: '220 35% 7%',
-        muted: '220 22% 17%',
-        mutedForeground: '220 10% 68%',
-        destructive: '0 70% 60%',
+        background: '35 20% 5%', // Dark Charcoal
+        foreground: '35 15% 95%',
+        card: '35 25% 9%',
+        cardForeground: '35 15% 95%',
+        popover: '35 25% 9%',
+        popoverForeground: '35 15% 95%',
+        primary: '25 85% 45%', // Gilded Burnt Orange
+        primaryForeground: '35 20% 5%',
+        secondary: '35 25% 20%', // Charcoal
+        secondaryForeground: '35 15% 95%',
+        accent: '45 70% 55%', // Gilded Antique Gold
+        accentForeground: '35 20% 5%',
+        muted: '35 30% 13%',
+        mutedForeground: '35 15% 65%',
+        destructive: '0 60% 55%',
         destructiveForeground: '0 0% 100%',
-        border: '220 22% 21%',
-        input: '220 22% 15%',
-        ring: '25 95% 58%',
-        pokerGreen: '25 95% 58%',
-        pokerGold: '55 90% 62%',
-        pokerFelt: '210 80% 32%',
-        gradientPoker: 'linear-gradient(135deg, hsl(25, 95%, 58%) 0%, hsl(210, 80%, 32%) 100%)',
-        gradientGold: 'linear-gradient(135deg, hsl(55, 90%, 62%) 0%, hsl(25, 95%, 58%) 100%)',
-        gradientDark: 'linear-gradient(180deg, hsl(220, 35%, 14%) 0%, hsl(220, 35%, 7%) 100%)',
+        border: '35 30% 18%',
+        input: '35 30% 12%',
+        ring: '25 85% 45%',
+        pokerGreen: '25 85% 45%',
+        pokerGold: '45 70% 55%',
+        pokerFelt: '35 35% 12%',
+        gradientPoker: 'linear-gradient(135deg, hsl(25, 85%, 45%) 0%, hsl(35, 25%, 15%) 100%)',
+        gradientGold: 'linear-gradient(135deg, #CC5500 0%, #8A3A00 100%)',
+        gradientDark: 'linear-gradient(180deg, hsl(35, 30% , 8%) 0%, hsl(35, 20% , 4%) 100%)',
       },
     },
     characters: [
@@ -308,7 +308,7 @@ export const themes: Record<ThemeName, Theme> = {
       'Pain', 'Konan', 'Killer B', 'Might Guy', 'Asuma', 'Kiba', 'Shino', 'Ino', 'Temari'
     ],
   },
-  
+
   dandadan: {
     name: 'dandadan',
     displayName: 'Dandadan',
@@ -384,7 +384,7 @@ export const getTheme = (themeName: ThemeName): Theme => {
 export const getCharacterForPlayer = (themeName: ThemeName, playerName: string): string | null => {
   const theme = getTheme(themeName);
   if (theme.characters.length === 0) return null;
-  
+
   // Use a simple hash of the player name to consistently assign the same character
   let hash = 0;
   for (let i = 0; i < playerName.length; i++) {
@@ -411,19 +411,19 @@ export const getCharacterForPlayer = (themeName: ThemeName, playerName: string):
  * // Returns 'Luffy' (first character in sorted order)
  */
 export const getUniqueCharacterForPlayer = (
-  themeName: ThemeName, 
-  playerName: string, 
+  themeName: ThemeName,
+  playerName: string,
   allPlayerNames: string[]
 ): string | null => {
   const theme = getTheme(themeName);
   if (theme.characters.length === 0) return null;
-  
+
   // Sort player names to ensure consistent assignment
   const sortedPlayers = [...allPlayerNames].sort();
   const playerIndex = sortedPlayers.indexOf(playerName);
-  
+
   if (playerIndex === -1) return getCharacterForPlayer(themeName, playerName);
-  
+
   // Assign characters sequentially based on sorted player order
   // Use modulo to handle cases where there are more players than characters
   const characterIndex = playerIndex % theme.characters.length;

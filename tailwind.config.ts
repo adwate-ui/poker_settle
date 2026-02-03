@@ -79,15 +79,13 @@ export default {
         },
         // Ultimate Luxury Design System
         gold: {
-          100: "#F9F4DF",
-          200: "#F1E6B9",
-          300: "#E9D893",
-          400: "#E1CA6D",
-          500: "#D4B83C",
-          600: "#BCA334",
-          700: "#A48E2C",
-          800: "#8C7924",
-          900: "#74641C",
+          100: "#F7E7CE", // Champagne (Highlight)
+          200: "#F3E1B9",
+          400: "#E6BE8A", // Pale Gold (Base)
+          500: "#D4AF37", // Metallic Gold (Mid)
+          600: "#B8962E",
+          800: "#CD7F32", // Bronze (Shadow)
+          900: "#4B3621", // Deep Oak (Text)
         },
         felt: {
           DEFAULT: "#1e3a2d",
@@ -100,7 +98,8 @@ export default {
         'gradient-gold': 'var(--gradient-gold)',
         'gradient-dark': 'var(--gradient-dark)',
         'luxury-gradient': 'linear-gradient(to bottom right, #000000, #1a1a2e)',
-        'gold-sheen': 'linear-gradient(45deg, #D4B83C 0%, #F1E6B9 50%, #D4B83C 100%)',
+        'gold-sheen': 'linear-gradient(45deg, #D4AF37 0%, #F7E7CE 50%, #D4AF37 100%)',
+        'specular-gold': 'linear-gradient(135deg, #4B3621 0%, #CD7F32 25%, #F7E7CE 50%, #E6BE8A 55%, #D4AF37 100%)',
         'glass-panel': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
       },
       boxShadow: {
@@ -109,7 +108,7 @@ export default {
       },
       fontFamily: {
         luxury: ['Playfair Display', 'serif'],
-        numbers: ['Space Mono', 'monospace'],
+        numbers: ['Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       borderRadius: {

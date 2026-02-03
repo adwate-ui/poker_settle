@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChips } from '@/contexts/ChipContext';
 import { PokerChipSVG } from './PokerAssets';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface ChipStackProps {
   amount: number;
@@ -67,35 +67,58 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
       chipsToRender = chipsToRender.slice(0, maxVisualChips);
     }
 
+    const containerVariants = {
+      animate: {
+        transition: {
+          staggerChildren: 0.03, // Trailing effect
+        }
+      }
+    };
+
+    const chipVariants = {
+      initial: { scale: 0, y: -20, opacity: 0 },
+      animate: {
+        scale: 1,
+        y: 0,
+        opacity: 1,
+        transition: {
+          type: "spring" as const,
+          stiffness: 200,
+          damping: 20,
+          mass: 1.5
+        }
+      },
+      exit: { scale: 0, opacity: 0 }
+    };
+
     return (
       <AnimatePresence mode="popLayout">
-        {chipsToRender.map((chip, idx) => (
-          <motion.div
-            key={`${chip.label}-${chip.index}`}
-            layout
-            initial={{ scale: 0, y: -50, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20,
-              mass: 1.2 // Heavier feel
-            }}
-            className="absolute drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] filter brightness-95"
-            style={{
-              bottom: `${idx * config.chipHeight}px`,
-              zIndex: idx,
-              transform: `translateY(${idx * -1}px)`,
-            }}
-          >
-            <PokerChipSVG
-              value={chip.label}
-              color={chip.color}
-              size={config.width}
-            />
-          </motion.div>
-        ))}
+        <motion.div
+          variants={containerVariants}
+          initial="initial"
+          animate="animate"
+          className="relative w-full h-full"
+        >
+          {chipsToRender.map((chip, idx) => (
+            <motion.div
+              key={`${chip.label}-${chip.index}`}
+              variants={chipVariants}
+              layout
+              className="absolute drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] filter brightness-95"
+              style={{
+                bottom: `${idx * config.chipHeight}px`,
+                zIndex: idx,
+                transform: `translateY(${idx * -1}px)`,
+              }}
+            >
+              <PokerChipSVG
+                value={chip.label}
+                color={chip.color}
+                size={config.width}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </AnimatePresence>
     );
   };
