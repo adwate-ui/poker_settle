@@ -1,32 +1,25 @@
-import { notifications } from '@mantine/notifications';
+import { toast as sonnerToast } from "sonner";
 
-// Helper to migrate from sonner toast to Mantine notifications
+// High-end notification helper utility mapping to sonner
 export const toast = {
   success: (message: string) => {
-    notifications.show({
-      title: 'Success',
-      message,
-      color: 'green',
+    sonnerToast.success(message, {
+      className: "border-gold-500/20 bg-[#0a0a0a]/95 text-gold-50 font-luxury",
     });
   },
   error: (message: string) => {
-    notifications.show({
-      title: 'Error',
-      message,
-      color: 'red',
+    sonnerToast.error(message, {
+      className: "border-red-500/20 bg-[#0a0a0a]/95 text-red-400 font-luxury",
     });
   },
   info: (message: string) => {
-    notifications.show({
-      message,
-      color: 'blue',
+    sonnerToast.info(message, {
+      className: "border-blue-500/20 bg-[#0a0a0a]/95 text-blue-400 font-luxury",
     });
   },
   warning: (message: string) => {
-    notifications.show({
-      title: 'Warning',
-      message,
-      color: 'yellow',
+    sonnerToast.warning(message, {
+      className: "border-yellow-500/20 bg-[#0a0a0a]/95 text-yellow-400 font-luxury",
     });
   },
 };

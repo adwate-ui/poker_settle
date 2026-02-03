@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, TextInput, Text, Stack, Box } from "@mantine/core";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Play } from "lucide-react";
+import { Loader2, Play, Info } from "lucide-react";
 import GameDashboard from "@/components/GameDashboard";
 import PlayerSelector from "@/components/PlayerSelector";
 import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
+import { cn } from "@/lib/utils";
 
 const NewGame = () => {
   const { user } = useAuth();
@@ -56,7 +59,6 @@ const NewGame = () => {
     if (!error && data) {
       setActiveGame(data as Game);
     } else {
-      // Clear active game if no incomplete games found
       setActiveGame(null);
     }
   }, [user]);
@@ -70,8 +72,7 @@ const NewGame = () => {
 
   const addNewPlayer = async (name: string): Promise<Player> => {
     const player = await createOrFindPlayerByName(name);
-    
-    // Add to players list if not already there
+
     if (!players.find(p => p.id === player.id)) {
       setPlayers([...players, player]);
     }
@@ -80,8 +81,6 @@ const NewGame = () => {
 
   const addNewPlayerWithDetails = async (playerData: import('@/components/PlayerFormDialog').PlayerFormData): Promise<Player> => {
     const player = await createPlayer(playerData);
-    
-    // Add to players list
     setPlayers([...players, player]);
     return player;
   };
@@ -122,17 +121,12 @@ const NewGame = () => {
 
       if (gameError) throw gameError;
 
-      const gameWithPlayers: Game = {
-        ...game,
-        game_players: []
-      };
-
-      const gamePlayersData = gamePlayers.map((player, index) => ({
+      const gamePlayersData = gamePlayers.map((player) => ({
         game_id: game.id,
         player_id: player.id,
         buy_ins: 1,
         final_stack: 0,
-        net_amount: -buyInAmount, // Final stack (0) - total buy-in (1 * buyInAmount) = -buyInAmount
+        net_amount: -parsedAmount,
       }));
 
       const { error: playersError } = await supabase
@@ -141,7 +135,6 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
-      // Fetch the complete game with players
       const { data: completeGame, error: fetchError } = await supabase
         .from("games")
         .select(`
@@ -182,97 +175,117 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card shadow="sm" padding="md" radius="md" withBorder className="max-w-4xl mx-auto relative">
+    <Card className="max-w-4xl mx-auto relative overflow-hidden border-white/10">
       {hasActiveGame && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg p-3">
-          <Card shadow="md" padding="md" radius="md" withBorder className="w-full max-w-md">
-            <Stack gap="md">
-              <Box>
-                <Text size="lg" fw={700} mb="xs">Active Game in Progress</Text>
-                <Text size="sm" c="dimmed">
-                  You have an ongoing game. Complete it before starting a new one.
-                </Text>
-              </Box>
-              <Button onClick={continueGame} className="w-full" size="lg">
-                <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Continue Game
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md bg-[#0a0a0a]/90 border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-full bg-gold-500/10 border border-gold-500/20">
+                  <Play className="h-5 w-5 text-gold-500" />
+                </div>
+                <CardTitle className="text-2xl font-luxury bg-clip-text text-transparent bg-gradient-to-r from-gold-200 to-gold-500">
+                  Active Game
+                </CardTitle>
+              </div>
+              <CardDescription className="text-gray-400">
+                You have an ongoing session in progress. Please complete your current accounting before initiating a new ledger.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <Button onClick={continueGame} className="w-full h-12 text-base font-luxury tracking-widest uppercase hover:scale-[1.02] transition-transform shadow-lg shadow-gold-500/10" variant="default">
+                Resume Active Ledger
               </Button>
-            </Stack>
+            </CardContent>
           </Card>
         </div>
       )}
-      
-      <Stack gap="md">
-        <Box>
-          <Text size="xl" fw={700} mb={4}>Start New Game</Text>
-          <Text size="sm" c="dimmed">Set up your poker game with buy-in and players</Text>
-        </Box>
 
-        <Stack gap="md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-3xl font-luxury text-transparent bg-clip-text bg-gradient-to-r from-gold-200 to-gold-500">
+          Start New Ledger
+        </CardTitle>
+        <CardDescription className="text-gray-400">
+          Configure game parameters and invite participants to the table.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-10">
+        <div className="space-y-8">
           {/* Buy-in Section */}
-          <TextInput
-            label="Buy-in Amount (Rs.)"
-            id="buyin"
-            type="text"
-            placeholder="Enter buy-in amount"
-            value={buyInAmount}
-            onChange={(e) => {
-              const value = e.target.value.replace(/,/g, '');
-              if (value === '' || !isNaN(Number(value))) {
-                const formatted = value === '' ? '' : formatIndianNumber(Number(value));
-                setBuyInAmount(formatted);
-              }
-            }}
-            disabled={hasActiveGame}
-            styles={{
-              label: { fontSize: '14px' }
-            }}
-          />
+          <div className="space-y-3">
+            <Label htmlFor="buyin" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+              Initial Buy-in (Rs.)
+            </Label>
+            <div className="relative group">
+              <Input
+                id="buyin"
+                type="text"
+                placeholder="2,000"
+                value={buyInAmount}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/,/g, '');
+                  if (value === '' || !isNaN(Number(value))) {
+                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    setBuyInAmount(formatted);
+                  }
+                }}
+                disabled={hasActiveGame}
+                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+              />
+              <div className="absolute right-0 bottom-3 text-gold-500/30 group-focus-within:text-gold-500 transition-colors">
+                <Info className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
 
           {/* Blinds Section */}
-          <div className="grid grid-cols-2 gap-3">
-            <TextInput
-              label="Small Blind (Rs.)"
-              id="smallblind"
-              type="text"
-              placeholder="Small blind"
-              value={smallBlind}
-              onChange={(e) => {
-                const value = e.target.value.replace(/,/g, '');
-                if (value === '' || !isNaN(Number(value))) {
-                  const formatted = value === '' ? '' : formatIndianNumber(Number(value));
-                  setSmallBlind(formatted);
-                }
-              }}
-              disabled={hasActiveGame}
-              styles={{
-                label: { fontSize: '14px' }
-              }}
-            />
-            <TextInput
-              label="Big Blind (Rs.)"
-              id="bigblind"
-              type="text"
-              placeholder="Big blind"
-              value={bigBlind}
-              onChange={(e) => {
-                const value = e.target.value.replace(/,/g, '');
-                if (value === '' || !isNaN(Number(value))) {
-                  const formatted = value === '' ? '' : formatIndianNumber(Number(value));
-                  setBigBlind(formatted);
-                }
-              }}
-              disabled={hasActiveGame}
-              styles={{
-                label: { fontSize: '14px' }
-              }}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <Label htmlFor="smallblind" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+                Small Blind (Rs.)
+              </Label>
+              <Input
+                id="smallblind"
+                type="text"
+                placeholder="20"
+                value={smallBlind}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/,/g, '');
+                  if (value === '' || !isNaN(Number(value))) {
+                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    setSmallBlind(formatted);
+                  }
+                }}
+                disabled={hasActiveGame}
+                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+              />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="bigblind" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+                Big Blind (Rs.)
+              </Label>
+              <Input
+                id="bigblind"
+                type="text"
+                placeholder="40"
+                value={bigBlind}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/,/g, '');
+                  if (value === '' || !isNaN(Number(value))) {
+                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    setBigBlind(formatted);
+                  }
+                }}
+                disabled={hasActiveGame}
+                className="h-12 bg-white/5 border-0 border-b border-white/20 px-0 rounded-none text-xl font-numbers text-gold-100 placeholder:text-white/10 focus:border-gold-500 focus:bg-white/10 transition-all duration-300 ease-out"
+              />
+            </div>
           </div>
 
           {/* Add Players Section */}
-          <Stack gap="sm">
-            <Text size="md" fw={600}>Players</Text>
-            
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            <h3 className="text-base font-luxury uppercase tracking-widest text-gold-400">Invite Participants</h3>
             <PlayerSelector
               allPlayers={players}
               selectedPlayers={gamePlayers}
@@ -282,29 +295,30 @@ const NewGame = () => {
               onCreateNewPlayerWithDetails={addNewPlayerWithDetails}
               disabled={hasActiveGame}
             />
-          </Stack>
+          </div>
+        </div>
+      </CardContent>
 
-          {/* Start Game Button */}
-          <Button 
-            onClick={startGame} 
-            disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-            className="w-full"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                Starting Game...
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5 mr-2" />
-                Start Game
-              </>
-            )}
-          </Button>
-        </Stack>
-      </Stack>
+      <CardFooter className="pt-4 pb-8 px-8 border-t border-white/5 bg-white/2">
+        <Button
+          onClick={startGame}
+          disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
+          className="w-full h-14 text-lg font-luxury tracking-[0.2em] uppercase shadow-[0_4px_20px_rgba(212,184,60,0.15)] group relative overflow-hidden active:scale-95 transition-all duration-300"
+          variant="default"
+        >
+          {loading ? (
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-gold-200" />
+              <span>Authenticating Table...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Play className="h-6 w-6 translate-y-[-1px] group-hover:text-gold-200 transition-colors" />
+              <span>Open Table</span>
+            </div>
+          )}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

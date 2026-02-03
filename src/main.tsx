@@ -1,9 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import './styles/mantine-theme.css';
 import { registerSW } from 'virtual:pwa-register';
 
 // Add network status monitoring
