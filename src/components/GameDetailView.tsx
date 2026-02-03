@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card as MantineCard, Badge as MantineBadge, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
-import { Table as MantineTable } from "@mantine/core";
+import { Card as MantineCard, Collapse, Modal, Select, TextInput, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,10 +17,10 @@ import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/utils/settlementCalculator";
-import { getPaymentMethodIcon } from "@/utils/playerUtils";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { buildShortUrl } from "@/lib/shareUtils";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useGameDetail } from "@/features/game/hooks/useGameDetail";
 
 interface GamePlayer {
   id: string;
@@ -31,6 +30,8 @@ interface GamePlayer {
   net_amount: number | null;
   players: {
     name: string | null;
+    payment_preference?: string;
+    upi_id?: string;
   } | null;
 }
 
@@ -81,22 +82,21 @@ export const GameDetailView = ({
 }: GameDetailViewProps) => {
   const { copyShareLink, loading: linkLoading, createOrGetSharedLink } = useSharedLink();
   const { fetchConfirmations, confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
-  const [game, setGame] = useState<Game | null>(null);
-  const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
-  const [tablePositions, setTablePositions] = useState<TablePosition[]>([]);
+
+  // Use TanStack Query hook
+  const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId);
+
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [confirmations, setConfirmations] = useState<import('@/types/poker').SettlementConfirmation[]>([]);
   const [shareUrl, setShareUrl] = useState<string | undefined>(undefined);
-  
+
   // Collapsible sections state
   const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
   const [tablePositionsOpen, setTablePositionsOpen] = useState(true);
   const [playerResultsOpen, setPlayerResultsOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
-  
+
   // Manual transfer state
   const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
@@ -104,86 +104,10 @@ export const GameDetailView = ({
   const [newTransferTo, setNewTransferTo] = useState("");
   const [newTransferAmount, setNewTransferAmount] = useState("");
 
-  const fetchGameData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [gameResult, playersResult, positionsResult] = await Promise.all([
-        client.from("games").select("*").eq("id", gameId).maybeSingle(),
-        client
-          .from("game_players")
-          .select(`
-            *,
-            players (
-              name,
-              payment_preference,
-              upi_id
-            )
-          `)
-          .eq("game_id", gameId),
-        client
-          .from("table_positions")
-          .select("*")
-          .eq("game_id", gameId)
-          .order("snapshot_timestamp", { ascending: true }),
-      ]);
-
-      const { data: gameData, error: gameError } = gameResult;
-
-      if (gameError) {
-        console.error("Error fetching game:", gameError);
-        throw gameError;
-      }
-
-      if (!gameData) {
-        console.error("Game not found or no access");
-        setGame(null);
-        setLoading(false);
-        return;
-      }
-
-      const { data: playersData, error: playersError} = playersResult;
-      const { data: positionsData, error: positionsError } = positionsResult;
-
-      if (playersError) {
-        console.error("Error fetching game players:", playersError);
-      }
-
-      if (positionsError) {
-        console.error("Error fetching table positions:", positionsError);
-      }
-
-      setGame(gameData);
-      // Sort players by name after fetching
-      const sortedPlayers = (playersData || []).sort((a, b) => {
-        const nameA = (a.players?.name ?? '').toLowerCase();
-        const nameB = (b.players?.name ?? '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-      setGamePlayers(sortedPlayers);
-
-      const formattedPositions: TablePosition[] = (positionsData || []).map((tp) => ({
-        id: tp.id,
-        snapshot_timestamp: tp.snapshot_timestamp,
-        positions: tp.positions as unknown as SeatPosition[],
-      }));
-
-      setTablePositions(formattedPositions);
-
-      // Fetch settlement confirmations
-      const confirmationsData = await fetchConfirmations(gameId);
-      setConfirmations(confirmationsData);
-    } catch (error) {
-      console.error("Error fetching game details:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [gameId, client, fetchConfirmations]);
-
-  useEffect(() => {
-    if (gameId) {
-      fetchGameData();
-    }
-  }, [gameId, fetchGameData]);
+  const game = gameDetail?.game as Game | undefined;
+  const gamePlayers = (gameDetail?.gamePlayers || []) as unknown as GamePlayer[];
+  const tablePositions = gameDetail?.tablePositions || [];
+  const confirmations = gameDetail?.confirmations || [];
 
   // Fetch shared link for meta tags (for owner views)
   useEffect(() => {
@@ -233,7 +157,7 @@ export const GameDetailView = ({
   const sortedGamePlayers = useMemo(() => {
     return [...gamePlayers].sort((a, b) => {
       let aVal: number, bVal: number;
-      
+
       switch (sortField) {
         case "name": {
           const aName = (a.players?.name ?? "").toLowerCase();
@@ -256,30 +180,24 @@ export const GameDetailView = ({
         default:
           return 0;
       }
-      
+
       if (aVal === undefined || bVal === undefined) return 0;
-      
+
       return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
     });
   }, [gamePlayers, sortField, sortOrder]);
 
-  // Calculate settlements with manual transfers taken into account
-  // Uses optimized algorithm that prioritizes cash players
   const calculateSettlements = useCallback((transfers: Settlement[] = []): Settlement[] => {
-    // Build player balances with payment preferences
     const playerBalances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
       name: gp.players?.name ?? "",
       amount: gp.net_amount ?? 0,
       paymentPreference: (gp.players as any)?.payment_preference || 'upi',
     }));
 
-    // Use optimized settlement calculation
     const settlements = calculateOptimizedSettlements(playerBalances, transfers);
-    
-    // Return settlements without the involvesCashPlayer flag for backward compatibility
     return settlements.map(({ from, to, amount }) => ({ from, to, amount }));
   }, [sortedGamePlayers]);
-  
+
   const addManualTransfer = () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount) {
       toast.error("Please fill all fields");
@@ -294,7 +212,7 @@ export const GameDetailView = ({
       toast.error("Amount must be a positive number");
       return;
     }
-    
+
     setManualTransfers(prev => [...prev, { from: newTransferFrom, to: newTransferTo, amount }]);
     setNewTransferFrom("");
     setNewTransferTo("");
@@ -302,25 +220,25 @@ export const GameDetailView = ({
     setTransferDialogOpen(false);
     toast.success("Manual transfer added");
   };
-  
+
   const removeManualTransfer = (index: number) => {
     setManualTransfers(prev => prev.filter((_, i) => i !== index));
     toast.success("Transfer removed");
   };
-  
+
   const recalculateAndSaveSettlements = async () => {
     const newSettlements = calculateSettlements(manualTransfers);
     const allSettlements = [...manualTransfers.map(t => ({ ...t, isManual: true })), ...newSettlements];
-    
+
     const { error } = await client
       .from("games")
       .update({ settlements: allSettlements })
       .eq("id", gameId);
-      
+
     if (error) {
       toast.error("Failed to save settlements");
     } else {
-      setGame(prev => prev ? { ...prev, settlements: allSettlements } : null);
+      await refetchGameDetail();
       setManualTransfers([]);
       toast.success("Settlements recalculated and saved");
     }
@@ -328,15 +246,15 @@ export const GameDetailView = ({
 
   const savedSettlements: Settlement[] = game?.settlements || [];
   const allCalculatedSettlements = useMemo(() => calculateSettlements(), [calculateSettlements]);
-  
+
   const getSettlementsWithType = useCallback((): SettlementWithType[] => {
     if (savedSettlements.length === 0) {
       return allCalculatedSettlements.map(s => ({ ...s, isManual: false }));
     }
-    
+
     const manualSettlements: SettlementWithType[] = [];
     const calculatedSettlements: SettlementWithType[] = [];
-    
+
     savedSettlements.forEach(settlement => {
       if (savedSettlements.indexOf(settlement) < savedSettlements.length - allCalculatedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
         manualSettlements.push({ ...settlement, isManual: true });
@@ -344,18 +262,18 @@ export const GameDetailView = ({
         calculatedSettlements.push({ ...settlement, isManual: false });
       }
     });
-    
+
     if (manualSettlements.length === 0 && calculatedSettlements.length === savedSettlements.length && savedSettlements.length > allCalculatedSettlements.length) {
       const numManual = savedSettlements.length - allCalculatedSettlements.length;
       return savedSettlements.map((s, i) => ({ ...s, isManual: i < numManual }));
     }
-    
+
     return [...manualSettlements, ...calculatedSettlements];
   }, [savedSettlements, allCalculatedSettlements]);
 
   const settlementsWithType = useMemo(() => getSettlementsWithType(), [getSettlementsWithType]);
 
-  if (loading) {
+  if (queryLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <Loader size="lg" />
@@ -371,17 +289,17 @@ export const GameDetailView = ({
     );
   }
 
-  const currentTablePosition = tablePositions.length > 0 
+  const currentTablePosition = tablePositions.length > 0
     ? tablePositions[currentPositionIndex]
     : null;
 
   const playersWithSeats: SeatPosition[] = currentTablePosition
     ? currentTablePosition.positions
     : gamePlayers.map((gp, index) => ({
-        seat: index + 1,
-        player_id: gp.player_id,
-        player_name: gp.players?.name ?? `Player ${index + 1}`,
-      }));
+      seat: index + 1,
+      player_id: gp.player_id,
+      player_name: gp.players?.name ?? `Player ${index + 1}`,
+    }));
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -439,7 +357,7 @@ export const GameDetailView = ({
 
       {/* Buy-in Logs */}
       <MantineCard shadow="sm" padding="md" radius="md" withBorder className="border-primary/20">
-        <div 
+        <div
           className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 -mx-4 -mt-4 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors"
           onClick={() => setBuyInLogsOpen(!buyInLogsOpen)}
         >
@@ -459,7 +377,7 @@ export const GameDetailView = ({
       <MantineCard shadow="sm" padding="md" radius="md" withBorder>
         <Stack gap="md">
           <Group justify="space-between">
-            <button 
+            <button
               className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setTablePositionsOpen(!tablePositionsOpen)}
             >
@@ -496,10 +414,11 @@ export const GameDetailView = ({
             )}
           </Group>
           <Collapse in={tablePositionsOpen}>
-            <PokerTableView 
+            <PokerTableView
               positions={playersWithSeats}
               totalSeats={playersWithSeats.length}
               enableDragDrop={false}
+              gameId={gameId}
             />
           </Collapse>
         </Stack>
@@ -509,7 +428,7 @@ export const GameDetailView = ({
       <Card className="border-primary/20">
         <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
           <CollapsibleTrigger asChild>
-            <div 
+            <div
               className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
             >
               <div className="flex items-center justify-between">
@@ -581,15 +500,14 @@ export const GameDetailView = ({
                       const playerName = gamePlayer.players?.name ?? `Player ${index + 1}`;
                       const netAmount = gamePlayer.net_amount ?? 0;
                       const finalStack = gamePlayer.final_stack ?? 0;
-                      
+
                       return (
                         <TableRow
                           key={gamePlayer.id}
-                          className={`transition-colors ${
-                            index % 2 === 0 
-                              ? "bg-secondary/5 hover:bg-secondary/20" 
-                              : "hover:bg-primary/10"
-                          }`}
+                          className={`transition-colors ${index % 2 === 0
+                            ? "bg-secondary/5 hover:bg-secondary/20"
+                            : "hover:bg-primary/10"
+                            }`}
                         >
                           <TableCell className="font-medium text-primary text-left py-2 text-sm">{playerName}</TableCell>
                           <TableCell className="text-left py-2">
@@ -598,7 +516,7 @@ export const GameDetailView = ({
                             </span>
                           </TableCell>
                           <TableCell className="text-left py-2 whitespace-nowrap">
-                            <Badge 
+                            <Badge
                               variant={getProfitLossVariant(netAmount)}
                               className="font-medium text-xs whitespace-nowrap"
                             >
@@ -632,7 +550,7 @@ export const GameDetailView = ({
       <Card className="border-primary/20">
         <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
           <CollapsibleTrigger asChild>
-            <div 
+            <div
               className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-4 pt-4 pb-3 cursor-pointer hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15 transition-colors rounded-t-lg"
             >
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -646,9 +564,9 @@ export const GameDetailView = ({
               </div>
               {showOwnerControls && settlementsOpen && (
                 <div className="flex items-center gap-2 flex-wrap mt-3" onClick={(e) => e.stopPropagation()}>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="border-primary/20 hover:bg-primary/10"
                     onClick={() => setTransferDialogOpen(true)}
                   >
@@ -669,126 +587,124 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-          {/* Pending manual transfers */}
-          {showOwnerControls && manualTransfers.length > 0 && (
-            <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
-              <p className="text-xs sm:text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
-                Pending Manual Transfers (click Redo to apply):
-              </p>
-              <div className="space-y-2">
-                {manualTransfers.map((transfer, index) => (
-                  <div key={index} className="flex items-center justify-between bg-background rounded-md px-2 sm:px-3 py-2 border gap-2">
-                    <span className="text-xs sm:text-sm truncate">
-                      {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
-                    </span>
-                    <Button
-                      variant="subtle"
-                      size="icon"
-                      onClick={() => removeManualTransfer(index)}
-                      className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+            {/* Pending manual transfers */}
+            {showOwnerControls && manualTransfers.length > 0 && (
+              <div className="p-3 sm:p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
+                <p className="text-xs sm:text-sm font-medium mb-2 text-blue-700 dark:text-blue-400">
+                  Pending Manual Transfers (click Redo to apply):
+                </p>
+                <div className="space-y-2">
+                  {manualTransfers.map((transfer, index) => (
+                    <div key={index} className="flex items-center justify-between bg-background rounded-md px-2 sm:px-3 py-2 border gap-2">
+                      <span className="text-xs sm:text-sm truncate">
+                        {transfer.from} → {transfer.to}: Rs. {formatIndianNumber(transfer.amount)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeManualTransfer(index)}
+                        className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          
-          {settlementsWithType.length > 0 ? (
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                      <span className="hidden sm:inline">From</span>
-                      <span className="sm:hidden">Fr</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                      <span className="hidden sm:inline">To</span>
-                      <span className="sm:hidden">To</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                      <span className="hidden sm:inline">Amount</span>
-                      <span className="sm:hidden">Amt</span>
-                    </TableHead>
-                    <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
-                      <span className="hidden sm:inline">Status</span>
-                      <span className="sm:hidden">✓</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {settlementsWithType.map((settlement, index) => {
-                    const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
-                    
-                    return (
-                    <TableRow
-                      key={`settlement-${index}`}
-                      className={`transition-colors ${
-                        index % 2 === 0 
-                          ? "bg-secondary/5 hover:bg-secondary/20" 
-                          : "hover:bg-primary/10"
-                      }`}
-                    >
-                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
-                        {settlement.from}
-                      </TableCell>
-                      <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
-                        {settlement.to}
-                      </TableCell>
-                      <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
-                        Rs. {formatIndianNumber(settlement.amount)}
-                      </TableCell>
-                      <TableCell className="text-left py-2 sm:py-4">
-                        {showOwnerControls && confirmation ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={async () => {
-                              if (confirmation.confirmed) {
-                                await unconfirmSettlement(confirmation.id);
-                              } else {
-                                await confirmSettlement(confirmation.id);
-                              }
-                              // Refresh confirmations
-                              const updatedConfirmations = await fetchConfirmations(gameId);
-                              setConfirmations(updatedConfirmations);
-                            }}
-                            className={confirmation.confirmed ? "text-green-600 hover:text-green-700" : "text-gray-400 hover:text-gray-600"}
+            )}
+
+            {settlementsWithType.length > 0 ? (
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 hover:from-primary/15 hover:via-primary/10 hover:to-secondary/15">
+                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                          <span className="hidden sm:inline">From</span>
+                          <span className="sm:hidden">Fr</span>
+                        </TableHead>
+                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                          <span className="hidden sm:inline">To</span>
+                          <span className="sm:hidden">To</span>
+                        </TableHead>
+                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                          <span className="hidden sm:inline">Amount</span>
+                          <span className="sm:hidden">Amt</span>
+                        </TableHead>
+                        <TableHead className="font-bold text-left text-xs sm:text-sm whitespace-nowrap">
+                          <span className="hidden sm:inline">Status</span>
+                          <span className="sm:hidden">✓</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {settlementsWithType.map((settlement, index) => {
+                        const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
+
+                        return (
+                          <TableRow
+                            key={`settlement-${index}`}
+                            className={`transition-colors ${index % 2 === 0
+                              ? "bg-secondary/5 hover:bg-secondary/20"
+                              : "hover:bg-primary/10"
+                              }`}
                           >
-                            {confirmation.confirmed ? (
-                              <Check className="h-4 w-4" />
-                            ) : (
-                              <X className="h-4 w-4" />
-                            )}
-                          </Button>
-                        ) : confirmation?.confirmed ? (
-                          <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                            <Check className="h-3 w-3 mr-1" />
-                            Paid
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 text-xs">
-                            Pending
-                          </Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-            </CardContent>
-          ) : (
-            <CardContent className="p-0">
-              <div className="p-6 text-center text-muted-foreground">
-                No settlements needed - all players are even.
-              </div>
-            </CardContent>
-          )}
+                            <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                              {settlement.from}
+                            </TableCell>
+                            <TableCell className="font-medium text-primary text-left text-xs sm:text-sm py-2 sm:py-4">
+                              {settlement.to}
+                            </TableCell>
+                            <TableCell className="font-semibold text-accent-foreground text-left text-xs sm:text-sm py-2 sm:py-4 whitespace-nowrap">
+                              Rs. {formatIndianNumber(settlement.amount)}
+                            </TableCell>
+                            <TableCell className="text-left py-2 sm:py-4">
+                              {showOwnerControls && confirmation ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={async () => {
+                                    if (confirmation.confirmed) {
+                                      await unconfirmSettlement(confirmation.id);
+                                    } else {
+                                      await confirmSettlement(confirmation.id);
+                                    }
+                                    // Refresh game detail
+                                    await refetchGameDetail();
+                                  }}
+                                  className={confirmation.confirmed ? "text-green-600 hover:text-green-700" : "text-gray-400 hover:text-gray-600"}
+                                >
+                                  {confirmation.confirmed ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <X className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              ) : confirmation?.confirmed ? (
+                                <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Paid
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 text-xs">
+                                  Pending
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            ) : (
+              <CardContent className="p-0">
+                <div className="p-6 text-center text-muted-foreground">
+                  No settlements needed - all players are even.
+                </div>
+              </CardContent>
+            )}
           </CollapsibleContent>
         </Collapsible>
       </Card>
@@ -803,34 +719,29 @@ export const GameDetailView = ({
         <Stack gap="md">
           <Select
             label="From (Payer)"
-            value={newTransferFrom}
-            onChange={(value) => setNewTransferFrom(value || '')}
             placeholder="Select player"
-            data={gamePlayers.map(gp => ({
-              value: gp.players?.name ?? "",
-              label: gp.players?.name ?? "Unknown"
-            }))}
+            data={gamePlayers.map(gp => ({ value: gp.players?.name || '', label: gp.players?.name || '' }))}
+            value={newTransferFrom}
+            onChange={(value) => setNewTransferFrom(value || "")}
           />
           <Select
             label="To (Receiver)"
-            value={newTransferTo}
-            onChange={(value) => setNewTransferTo(value || '')}
             placeholder="Select player"
-            data={gamePlayers.map(gp => ({
-              value: gp.players?.name ?? "",
-              label: gp.players?.name ?? "Unknown"
-            }))}
+            data={gamePlayers.map(gp => ({ value: gp.players?.name || '', label: gp.players?.name || '' }))}
+            value={newTransferTo}
+            onChange={(value) => setNewTransferTo(value || "")}
           />
           <TextInput
-            label="Amount"
-            type="number"
+            label="Amount (Rs.)"
             placeholder="Enter amount"
+            type="number"
             value={newTransferAmount}
             onChange={(e) => setNewTransferAmount(e.target.value)}
           />
-          <Button onClick={addManualTransfer} className="w-full">
-            Add Transfer
-          </Button>
+          <Group justify="flex-end" mt="md">
+            <Button variant="outline" onClick={() => setTransferDialogOpen(false)}>Cancel</Button>
+            <Button onClick={addManualTransfer}>Add Transfer</Button>
+          </Group>
         </Stack>
       </Modal>
     </div>

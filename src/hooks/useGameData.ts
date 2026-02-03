@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
-import { fetchPlayers as apiFetchPlayers, createOrFindPlayer as apiCreateOrFindPlayer } from "@/features/players/api/playerApi";
-import { fetchGames as apiFetchGames, createGame as apiCreateGame, completeGameApi } from "@/features/game/api/gameApi";
+import { createOrFindPlayer as apiCreateOrFindPlayer } from "@/features/players/api/playerApi";
+import { createGame as apiCreateGame, completeGameApi } from "@/features/game/api/gameApi";
+import { useGames } from "@/features/game/hooks/useGames";
+import { usePlayers } from "@/features/players/hooks/usePlayers";
+import { useUpdateGamePlayer } from "@/features/game/hooks/useGameMutations";
 
 // Keep local schemas for simple updates not yet moved
 const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed ₹1,00,00,000");
@@ -15,20 +18,13 @@ const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(1
 export const useGameData = () => {
   const { user } = useAuth();
   const { createConfirmations } = useSettlementConfirmations();
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  const fetchPlayers = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await apiFetchPlayers(user.id);
-      setPlayers(data);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+  // React Query hooks
+  const { data: games = [], isLoading: gamesLoading, refetch: fetchGames } = useGames(user?.id);
+  const { data: players = [], isLoading: playersLoading, refetch: fetchPlayers } = usePlayers(user?.id);
+  const { mutateAsync: updatePlayerMutation } = useUpdateGamePlayer();
+
+  const loading = gamesLoading || playersLoading;
 
   const createOrFindPlayer = async (name: string): Promise<Player> => {
     if (!user) throw new Error("User not authenticated");
@@ -39,7 +35,9 @@ export const useGameData = () => {
 
   const createGame = async (buyInAmount: number, selectedPlayers: Player[]): Promise<Game> => {
     if (!user) throw new Error("User not authenticated");
-    return apiCreateGame(user.id, buyInAmount, selectedPlayers);
+    const newGame = await apiCreateGame(user.id, buyInAmount, selectedPlayers);
+    await fetchGames();
+    return newGame;
   };
 
   const updateGamePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
@@ -66,12 +64,15 @@ export const useGameData = () => {
       }
     }
 
+    // Capture gameId for cache invalidation if possible
+    let gameId: string | undefined;
+
     // If buy_ins are being updated and logging is requested, create a history entry
     if (updates.buy_ins !== undefined && logBuyIn) {
       // First get the current buy_ins
       const { data: currentData, error: fetchError } = await supabase
         .from("game_players")
-        .select("buy_ins")
+        .select("buy_ins, game_id")
         .eq("id", gamePlayerId)
         .single();
 
@@ -81,6 +82,7 @@ export const useGameData = () => {
       }
 
       if (currentData) {
+        gameId = currentData.game_id;
         const buyInsAdded = updates.buy_ins - currentData.buy_ins;
 
         // Only log if there's an actual change
@@ -100,14 +102,19 @@ export const useGameData = () => {
           }
         }
       }
+    } else if (!gameId) {
+      // We still occasionally need the gameId for the optimistic update 
+      // to know which query cache to invalidate/update.
+      const { data } = await supabase
+        .from("game_players")
+        .select("game_id")
+        .eq("id", gamePlayerId)
+        .single();
+      gameId = data?.game_id;
     }
 
-    const { error } = await supabase
-      .from("game_players")
-      .update(updates)
-      .eq("id", gamePlayerId);
-
-    if (error) throw error;
+    // Use the mutation for optimistic updates
+    await updatePlayerMutation({ playerGameId: gamePlayerId, updates, gameId });
   };
 
   const fetchBuyInHistory = async (gamePlayerId: string): Promise<BuyInHistory[]> => {
@@ -135,17 +142,6 @@ export const useGameData = () => {
     if (error) throw error;
     await fetchPlayers();
   };
-
-  const fetchGames = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await apiFetchGames(user.id);
-      setGames(data);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
 
   const addPlayerToGame = async (gameId: string, player: Player): Promise<GamePlayer> => {
     // Fetch game to get buy_in_amount
@@ -205,6 +201,9 @@ export const useGameData = () => {
       } else {
         toast.success('Game completed!');
       }
+
+      // Refresh games list
+      await fetchGames();
     } catch (error: any) {
       if (error.message.includes('email notifications failed')) {
         toast.warning('Game completed! But email notifications failed to send.');
@@ -271,16 +270,9 @@ export const useGameData = () => {
         .eq("is_complete", false)
         .eq("user_id", user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned
-          return null;
-        }
-        throw error;
-      }
-
+      if (error) throw error;
       return data;
     } catch (error) {
       console.error("Error fetching incomplete game:", error);
@@ -358,27 +350,30 @@ export const useGameData = () => {
 
   const getTablePositionWithMostPlayers = async (gameId: string): Promise<TablePosition | null> => {
     try {
-      const positions = await fetchTablePositions(gameId);
-      if (positions.length === 0) return null;
+      const { data: positions, error } = await supabase
+        .from("table_positions")
+        .select("*")
+        .eq("game_id", gameId);
+
+      if (error) throw error;
+      if (!positions || positions.length === 0) return null;
 
       // Find the position with the most players
-      return positions.reduce((max, current) => {
+      const bestPosition = positions.reduce((max, current) => {
         const maxPlayers = Array.isArray(max.positions) ? max.positions.length : 0;
         const currentPlayers = Array.isArray(current.positions) ? current.positions.length : 0;
         return currentPlayers > maxPlayers ? current : max;
       });
+
+      return {
+        ...bestPosition,
+        positions: bestPosition.positions as unknown as SeatPosition[]
+      };
     } catch (error) {
       console.error("Error finding table position with most players:", error);
       return null;
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      fetchPlayers();
-      fetchGames();
-    }
-  }, [user, fetchPlayers, fetchGames]);
 
   return {
     players,

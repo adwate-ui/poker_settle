@@ -10,8 +10,8 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-  react(),
-  VitePWA({
+    react(),
+    VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['**/*.{png,jpg,jpeg,svg,ico,woff,woff2}'],
       workbox: {
@@ -126,6 +126,7 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
     minify: 'esbuild',
+    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],

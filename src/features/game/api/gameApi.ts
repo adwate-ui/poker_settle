@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Game, Player, GamePlayer, Settlement } from "@/types/poker";
+import { Game, Player, GamePlayer, Settlement, SeatPosition } from "@/types/poker";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { z } from "zod";
 import { generateShortCode } from "@/lib/shareUtils";
@@ -194,4 +195,57 @@ export const completeGameApi = async (
         console.error('Failed to send email notifications:', notificationError);
         throw notificationError;
     }
+};
+
+export const updateGamePlayerApi = async (playerGameId: string, updates: Partial<GamePlayer>): Promise<void> => {
+    const { error } = await supabase
+        .from("game_players")
+        .update(updates)
+        .eq("id", playerGameId);
+
+    if (error) throw error;
+};
+
+export const fetchGameDetail = async (client: SupabaseClient, gameId: string) => {
+    const [gameResult, playersResult, positionsResult, confirmationsResult] = await Promise.all([
+        client.from("games").select("*").eq("id", gameId).maybeSingle(),
+        client
+            .from("game_players")
+            .select(`
+            *,
+            players (
+              name,
+              payment_preference,
+              upi_id
+            )
+          `)
+            .eq("game_id", gameId),
+        client
+            .from("table_positions")
+            .select("*")
+            .eq("game_id", gameId)
+            .order("snapshot_timestamp", { ascending: true }),
+        client
+            .from("settlement_confirmations")
+            .select("*")
+            .eq("game_id", gameId)
+    ]);
+
+    if (gameResult.error) throw gameResult.error;
+    if (!gameResult.data) throw new Error("Game not found");
+
+    return {
+        game: gameResult.data,
+        gamePlayers: (playersResult.data || []).sort((a, b) => {
+            const nameA = (a.players?.name ?? '').toLowerCase();
+            const nameB = (b.players?.name ?? '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        }),
+        tablePositions: (positionsResult.data || []).map((tp) => ({
+            id: tp.id,
+            snapshot_timestamp: tp.snapshot_timestamp,
+            positions: tp.positions as unknown as SeatPosition[],
+        })),
+        confirmations: confirmationsResult.data || []
+    };
 };

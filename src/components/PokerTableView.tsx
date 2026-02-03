@@ -8,6 +8,7 @@ import OptimizedAvatar from "./OptimizedAvatar";
 import { motion, AnimatePresence } from "framer-motion";
 import * as confetti from 'canvas-confetti';
 import { cn } from "@/lib/utils";
+import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 
 // Z-index constants for proper layering
 const Z_INDEX = {
@@ -43,7 +44,262 @@ interface PokerTableViewProps {
   muckedPlayers?: string[];
   playerStacks?: Record<string, number>;
   showPotChips?: boolean;
+  gameId?: string;
 }
+
+interface PokerSeatProps {
+  index: number;
+  position: SeatPosition;
+  pos: { x: number; y: number };
+  isDragging: boolean;
+  isDragOver: boolean;
+  draggedIndex: number | null;
+  positionLabel: string | null;
+  playerBet: number;
+  isButton: boolean;
+  isFolded: boolean;
+  isMucked: boolean;
+  isWinner: boolean;
+  isActive: boolean;
+  hasKnownCards: string | boolean;
+  shouldShowCards: boolean;
+  playerHoleCards: Record<string, string>;
+  playerStacks: Record<string, number>;
+  animateChipsToPot: boolean;
+  animatingPlayerId: string | null;
+  potSize: number;
+  allPlayerNames: string[];
+  enableDragDrop: boolean;
+  onPlayerClick?: (playerId: string) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onTouchStart: (e: React.TouchEvent) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: (e: React.TouchEvent) => void;
+}
+
+const PokerSeat = memo(({
+  index,
+  position,
+  pos,
+  isDragging,
+  isDragOver,
+  draggedIndex,
+  positionLabel,
+  playerBet,
+  isButton,
+  isFolded,
+  isMucked,
+  isWinner,
+  isActive,
+  hasKnownCards,
+  shouldShowCards,
+  playerHoleCards,
+  playerStacks,
+  animateChipsToPot,
+  animatingPlayerId,
+  potSize,
+  allPlayerNames,
+  enableDragDrop,
+  onPlayerClick,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+}: PokerSeatProps) => {
+  const TABLE_CENTER_X = 50;
+
+  return (
+    <div
+      data-player-index={index}
+      draggable={enableDragDrop}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onContextMenu={(e) => enableDragDrop && e.preventDefault()}
+      onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
+      className={cn(
+        "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 sm:rotate-0 -rotate-90",
+        enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : '',
+        isDragging ? 'opacity-50 scale-95' : '',
+        isDragOver && draggedIndex !== null ? 'scale-110' : '',
+        isFolded ? 'opacity-50 grayscale' : ''
+      )}
+      style={{
+        left: `${pos.x}%`,
+        top: `${pos.y}%`,
+        zIndex: isWinner ? Z_INDEX.WINNER_CELEBRATION : Z_INDEX.PLAYER_UNIT
+      }}
+    >
+      <div className="relative flex flex-col items-center gap-1">
+        {/* Spotlight glow for winner */}
+        {isWinner && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1.2 }}
+            className="absolute inset-0 bg-gold-500/20 blur-2xl rounded-full z-[-1]"
+          />
+        )}
+
+        {positionLabel && (
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md whitespace-nowrap" style={{ zIndex: Z_INDEX.POSITION_LABEL }}>
+            {positionLabel}
+          </div>
+        )}
+
+        <div className="relative flex flex-col items-center gap-1">
+          <div className="relative">
+            <div className={cn(
+              "bg-card border-2 rounded-full w-8 h-8 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center shadow-lg transition-all overflow-hidden",
+              isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' :
+                isWinner ? 'border-gold-400 ring-8 ring-gold-500/30 scale-110' :
+                  isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
+            )}>
+              <OptimizedAvatar
+                name={position.player_name}
+                size="md"
+                className="w-full h-full"
+                allPlayerNames={allPlayerNames}
+              />
+            </div>
+            {isButton && (
+              <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg" style={{ zIndex: Z_INDEX.BUTTON_BADGE }}>
+                D
+              </div>
+            )}
+          </div>
+
+          <div className={cn(
+            "bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[80px] max-w-[120px] transition-all",
+            isWinner ? "border-gold-500/50 bg-gold-900/40" : ""
+          )}>
+            <span className={cn(
+              "text-xs xs:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center",
+              isWinner ? "text-gold-200 font-luxury" : "text-foreground"
+            )} title={position.player_name}>
+              {position.player_name}
+            </span>
+            {playerStacks[position.player_id] !== undefined && (
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+              </span>
+            )}
+          </div>
+
+          {(hasKnownCards || shouldShowCards) && (
+            <div
+              className={cn(
+                "absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out",
+                isFolded ? 'opacity-30 grayscale' : 'opacity-100',
+                pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'
+              )}
+              style={{
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: Z_INDEX.HOLE_CARDS,
+              }}
+            >
+              {typeof hasKnownCards === 'string' ? (
+                hasKnownCards.match(/.{1,2}/g)?.map((card, idx) => (
+                  <PokerCard
+                    key={idx}
+                    card={card}
+                    size="xs"
+                  />
+                ))
+              ) : shouldShowCards ? (
+                <>
+                  <PokerCard card="back" size="xs" />
+                  <PokerCard card="back" size="xs" />
+                </>
+              ) : null}
+            </div>
+          )}
+        </div>
+
+        {/* Chip stacks for betting or winning */}
+        {playerBet > 0 && !isFolded && (
+          <div
+            className={cn(
+              "absolute transition-all duration-500 ease-in-out",
+              animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id)
+                ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]'
+                : 'opacity-100 scale-100'
+            )}
+            style={{
+              top: pos.y < 35 ? (typeof window !== 'undefined' && window.innerWidth < 640 ? '-40px' : '-50px') :
+                pos.y > 65 ? (typeof window !== 'undefined' && window.innerWidth < 640 ? '60px' : '70px') :
+                  (typeof window !== 'undefined' && window.innerWidth < 640 ? '45px' : '55px'),
+              left: pos.x < 35 ? (typeof window !== 'undefined' && window.innerWidth < 640 ? '-35px' : '-45px') :
+                pos.x > 65 ? (typeof window !== 'undefined' && window.innerWidth < 640 ? '35px' : '45px') :
+                  (pos.y > 50 ? (typeof window !== 'undefined' && window.innerWidth < 640 ? '30px' : '40px') : (typeof window !== 'undefined' && window.innerWidth < 640 ? '-30px' : '-40px')),
+              zIndex: Z_INDEX.CHIP_STACK,
+            }}
+          >
+            <ChipStack amount={playerBet} size="sm" showAmount={true} />
+          </div>
+        )}
+
+        {/* Winner chip physics - animate pot to player */}
+        <AnimatePresence>
+          {isWinner && potSize > 0 && (
+            <motion.div
+              initial={{ left: "50%", top: "50%", opacity: 0, scale: 0.5, x: "-50%", y: "-50%" }}
+              animate={{
+                left: "50%",
+                top: "-40px",
+                opacity: 1,
+                scale: 1,
+                transition: {
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                  delay: 0.5
+                }
+              }}
+              className="absolute z-[40]"
+            >
+              <ChipStack amount={potSize} size="sm" showAmount={false} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {isWinner && (
+          <div
+            className="absolute animate-in fade-in zoom-in duration-700"
+            style={{
+              top: pos.y > 50 ? '-100px' : '100px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: Z_INDEX.WINNER_CELEBRATION,
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
+              >
+                <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+PokerSeat.displayName = 'PokerSeat';
 
 const PokerTableView = memo(({
   positions,
@@ -66,8 +322,12 @@ const PokerTableView = memo(({
   showAllPlayerCards = false,
   muckedPlayers = [],
   playerStacks = {},
-  showPotChips = true
+  showPotChips = true,
+  gameId
 }: PokerTableViewProps) => {
+  // Integrate live synchronization
+  useGameRealtime(gameId);
+
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -324,10 +584,31 @@ const PokerTableView = memo(({
               const shouldShowCards = hasKnownCards || (showAllPlayerCards && !isMucked);
 
               return (
-                <div
+                <PokerSeat
                   key={position.player_id}
-                  data-player-index={index}
-                  draggable={enableDragDrop}
+                  index={index}
+                  position={position}
+                  pos={pos}
+                  isDragging={isDragging}
+                  isDragOver={isDragOver}
+                  draggedIndex={draggedIndex}
+                  positionLabel={positionLabel}
+                  playerBet={playerBet}
+                  isButton={isButton}
+                  isFolded={isFolded}
+                  isMucked={isMucked}
+                  isWinner={isWinner}
+                  isActive={isActive}
+                  hasKnownCards={typeof hasKnownCards === 'string' ? hasKnownCards : (hasKnownCards ? true : false)}
+                  shouldShowCards={shouldShowCards}
+                  playerHoleCards={playerHoleCards}
+                  playerStacks={playerStacks}
+                  animateChipsToPot={animateChipsToPot}
+                  animatingPlayerId={animatingPlayerId}
+                  potSize={potSize}
+                  allPlayerNames={allPlayerNames}
+                  enableDragDrop={enableDragDrop}
+                  onPlayerClick={onPlayerClick}
                   onDragStart={() => handleDragStart(index)}
                   onDragEnd={handleDragEnd}
                   onDragOver={(e) => handleDragOver(e, index)}
@@ -335,178 +616,7 @@ const PokerTableView = memo(({
                   onTouchStart={(e) => handleTouchStart(e, index)}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
-                  onContextMenu={(e) => enableDragDrop && e.preventDefault()}
-                  onClick={() => onPlayerClick && onPlayerClick(position.player_id)}
-                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 sm:rotate-0 -rotate-90 ${enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : ''
-                    } ${isDragging ? 'opacity-50 scale-95' : ''} ${isDragOver && draggedIndex !== null ? 'scale-110' : ''} ${isFolded ? 'opacity-50 grayscale' : ''
-                    }`}
-                  style={{
-                    left: `${pos.x}%`,
-                    top: `${pos.y}%`,
-                    zIndex: isWinner ? Z_INDEX.WINNER_CELEBRATION : Z_INDEX.PLAYER_UNIT
-                  }}
-                >
-                  <div className="relative flex flex-col items-center gap-1">
-                    {/* Spotlight glow for winner */}
-                    {isWinner && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1.2 }}
-                        className="absolute inset-0 bg-gold-500/20 blur-2xl rounded-full z-[-1]"
-                      />
-                    )}
-
-                    {positionLabel && (
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold shadow-md whitespace-nowrap" style={{ zIndex: Z_INDEX.POSITION_LABEL }}>
-                        {positionLabel}
-                      </div>
-                    )}
-
-                    <div className="relative flex flex-col items-center gap-1">
-                      <div className="relative">
-                        <div className={cn(
-                          "bg-card border-2 rounded-full w-8 h-8 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center shadow-lg transition-all overflow-hidden",
-                          isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/50 animate-pulse' :
-                            isWinner ? 'border-gold-400 ring-8 ring-gold-500/30 scale-110' :
-                              isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary'
-                        )}>
-                          <OptimizedAvatar
-                            name={position.player_name}
-                            size="md"
-                            className="w-full h-full"
-                            allPlayerNames={allPlayerNames}
-                          />
-                        </div>
-                        {isButton && (
-                          <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border-2 border-black shadow-lg" style={{ zIndex: Z_INDEX.BUTTON_BADGE }}>
-                            D
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={cn(
-                        "bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-md border border-border flex flex-col items-center gap-0 min-w-[80px] max-w-[120px] transition-all",
-                        isWinner ? "border-gold-500/50 bg-gold-900/40" : ""
-                      )}>
-                        <span className={cn(
-                          "text-xs xs:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center",
-                          isWinner ? "text-gold-200 font-luxury" : "text-foreground"
-                        )} title={position.player_name}>
-                          {position.player_name}
-                        </span>
-                        {playerStacks[position.player_id] !== undefined && (
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                            Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
-                          </span>
-                        )}
-                      </div>
-
-                      {(hasKnownCards || shouldShowCards) && (
-                        <div
-                          className={`absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out ${isFolded ? 'opacity-30 grayscale' : 'opacity-100'
-                            } ${pos.x > TABLE_CENTER_X ? 'right-full mr-1' : 'left-full ml-1'}`}
-                          style={{
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            zIndex: Z_INDEX.HOLE_CARDS,
-                          }}
-                        >
-                          {hasKnownCards ? (
-                            playerHoleCards[position.player_id].match(/.{1,2}/g)?.map((card, idx) => (
-                              <PokerCard
-                                key={idx}
-                                card={card}
-                                size="xs"
-                              />
-                            ))
-                          ) : shouldShowCards ? (
-                            <>
-                              <PokerCard card="back" size="xs" />
-                              <PokerCard card="back" size="xs" />
-                            </>
-                          ) : null}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Chip stacks for betting or winning */}
-                    {playerBet > 0 && !isFolded && (() => {
-                      const shouldAnimate = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
-                      const isMobileView = window.innerWidth < 640;
-
-                      let chipTop, chipLeft;
-                      if (pos.y < 35) chipTop = isMobileView ? '-40px' : '-50px';
-                      else if (pos.y > 65) chipTop = isMobileView ? '60px' : '70px';
-                      else chipTop = isMobileView ? '45px' : '55px';
-
-                      if (pos.x < 35) chipLeft = isMobileView ? '-35px' : '-45px';
-                      else if (pos.x > 65) chipLeft = isMobileView ? '35px' : '45px';
-                      else chipLeft = pos.y > 50 ? (isMobileView ? '30px' : '40px') : (isMobileView ? '-30px' : '-40px');
-
-                      return (
-                        <div
-                          className={`absolute transition-all duration-500 ease-in-out ${shouldAnimate
-                            ? 'opacity-0 scale-0 translate-x-0 translate-y-[-150px]'
-                            : 'opacity-100 scale-100'
-                            }`}
-                          style={{
-                            top: chipTop,
-                            left: chipLeft,
-                            zIndex: Z_INDEX.CHIP_STACK,
-                          }}
-                        >
-                          <ChipStack amount={playerBet} size="sm" showAmount={true} />
-                        </div>
-                      );
-                    })()}
-
-                    {/* Winner chip physics - animate pot to player */}
-                    <AnimatePresence>
-                      {isWinner && potSize > 0 && (
-                        <motion.div
-                          initial={{ left: "50%", top: "50%", opacity: 0, scale: 0.5, x: "-50%", y: "-50%" }}
-                          animate={{
-                            left: "50%",
-                            top: "-40px",
-                            opacity: 1,
-                            scale: 1,
-                            transition: {
-                              type: "spring",
-                              stiffness: 200,
-                              damping: 20,
-                              delay: 0.5
-                            }
-                          }}
-                          className="absolute z-[40]"
-                        >
-                          <ChipStack amount={potSize} size="sm" showAmount={false} />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {isWinner && (
-                      <div
-                        className="absolute animate-in fade-in zoom-in duration-700"
-                        style={{
-                          top: pos.y > 50 ? '-100px' : '100px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          zIndex: Z_INDEX.WINNER_CELEBRATION,
-                        }}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
-                          >
-                            <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
-                          </motion.div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                />
               );
             })}
           </div>

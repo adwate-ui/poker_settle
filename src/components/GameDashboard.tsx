@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextInput, Badge, Collapse, Select, Modal, Tabs, ScrollArea, ActionIcon, Stack, Group, Text, Loader } from "@mantine/core";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import HandTracking from "@/components/HandTracking";
 import { cn } from "@/lib/utils";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 
 interface GameDashboardProps {
   game: Game;
@@ -28,7 +29,6 @@ interface GameDashboardProps {
 const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const navigate = useNavigate();
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>(game.game_players);
-  const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -229,120 +229,36 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     setManualTransfers(manualTransfers.filter((_, i) => i !== index));
   }, [manualTransfers]);
 
-  const calculateSettlements = useCallback(() => {
-    // Start with player balances
-    const playerBalances = gamePlayers.map(gp => ({
+  // Memoize settlements calculation
+  const settlements = useMemo(() => {
+    if (!gamePlayers.length) return [];
+
+    const balances: PlayerBalance[] = gamePlayers.map(gp => ({
       name: gp.player.name,
-      balance: gp.net_amount || 0
+      amount: gp.net_amount || 0,
+      paymentPreference: gp.player.payment_preference || 'upi'
     }));
 
-    // Apply manual transfers to adjust balances
-    manualTransfers.forEach(transfer => {
-      const fromPlayer = playerBalances.find(p => p.name === transfer.from);
-      const toPlayer = playerBalances.find(p => p.name === transfer.to);
-
-      if (fromPlayer && toPlayer) {
-        fromPlayer.balance += transfer.amount; // Debtor pays, so their debt reduces
-        toPlayer.balance -= transfer.amount; // Creditor receives, so their credit reduces
-      }
-    });
-
-    const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
-    const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
-
-    const newSettlements: Settlement[] = [];
-    let creditorIndex = 0;
-    let debtorIndex = 0;
-
-    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
-      const creditor = creditors[creditorIndex];
-      const debtor = debtors[debtorIndex];
-
-      const amount = Math.min(creditor.balance, -debtor.balance);
-
-      if (amount > 0.01) { // Only add if amount is significant
-        newSettlements.push({
-          from: debtor.name,
-          to: creditor.name,
-          amount: amount
-        });
-      }
-
-      creditor.balance -= amount;
-      debtor.balance += amount;
-
-      if (Math.abs(creditor.balance) < 0.01) creditorIndex++;
-      if (Math.abs(debtor.balance) < 0.01) debtorIndex++;
-    }
-
-    setSettlements(newSettlements);
+    return calculateOptimizedSettlements(balances, manualTransfers);
   }, [gamePlayers, manualTransfers]);
 
   const handleCompleteGame = useCallback(async () => {
-    if (isCompletingGame) return; // Prevent double-clicks
+    if (isCompletingGame) return;
 
     setIsCompletingGame(true);
 
-    // Calculate remaining settlements
-    const playerBalances = gamePlayers.map(gp => ({
-      name: gp.player.name,
-      balance: gp.net_amount || 0
-    }));
-
-    // Apply manual transfers to adjust balances
-    manualTransfers.forEach(transfer => {
-      const fromPlayer = playerBalances.find(p => p.name === transfer.from);
-      const toPlayer = playerBalances.find(p => p.name === transfer.to);
-
-      if (fromPlayer && toPlayer) {
-        fromPlayer.balance += transfer.amount;
-        toPlayer.balance -= transfer.amount;
-      }
-    });
-
-    const creditors = playerBalances.filter(p => p.balance > 0).sort((a, b) => b.balance - a.balance);
-    const debtors = playerBalances.filter(p => p.balance < 0).sort((a, b) => a.balance - b.balance);
-
-    const calculatedSettlements: Settlement[] = [];
-    let creditorIndex = 0;
-    let debtorIndex = 0;
-
-    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
-      const creditor = creditors[creditorIndex];
-      const debtor = debtors[debtorIndex];
-
-      const amount = Math.min(creditor.balance, -debtor.balance);
-
-      if (amount > 0.01) {
-        calculatedSettlements.push({
-          from: debtor.name,
-          to: creditor.name,
-          amount: amount
-        });
-      }
-
-      creditor.balance -= amount;
-      debtor.balance += amount;
-
-      if (Math.abs(creditor.balance) < 0.01) creditorIndex++;
-      if (Math.abs(debtor.balance) < 0.01) debtorIndex++;
-    }
-
-    // Combine manual and calculated settlements
-    const allSettlements = [...manualTransfers, ...calculatedSettlements];
+    // Combine manual transfers and the optimized settlements to get the full picture
+    const allSettlements = [...manualTransfers, ...settlements];
 
     try {
       await completeGame(game.id, allSettlements);
       toast.success("Game completed successfully");
-
-      // Navigate immediately to game details
       navigate(`/games/${game.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to complete game");
-      setIsCompletingGame(false); // Reset on error
+      setIsCompletingGame(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gamePlayers, manualTransfers, completeGame, game.id, navigate]);
+  }, [game.id, manualTransfers, settlements, completeGame, navigate, isCompletingGame]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {
@@ -350,10 +266,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setCurrentTablePosition(savedPosition);
       setShowPositionEditor(false);
       setPositionsJustChanged(true);
-      setHandTrackingStage('ready'); // Move to ready state after table is set
+      setHandTrackingStage('ready');
       toast.success("Table position saved");
 
-      // Reset flag after 2 seconds
       setTimeout(() => setPositionsJustChanged(false), 2000);
     } catch (error) {
       toast.error("Failed to save table position");
@@ -362,14 +277,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const handleStartHandTracking = useCallback(() => {
     setHandTrackingStage('recording');
-    setTablePositionOpen(false); // Auto-collapse table positions when starting hand tracking
+    setTablePositionOpen(false);
   }, []);
 
   const handleHandComplete = useCallback(() => {
     setHandTrackingStage('ready');
-    setTablePositionOpen(true); // Ensure table positions section is expanded
+    setTablePositionOpen(true);
 
-    // Check if saved hand state was cleared
     try {
       const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
       if (savedHandState) {
@@ -389,7 +303,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     return `Rs. ${formatIndianNumber(amount)}`;
   }, []);
 
-  // Memoize expensive calculations
   const totalBuyIns = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0),
     [gamePlayers, game.buy_in_amount]
@@ -548,7 +461,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 <Collapse in={tablePositionOpen}>
                   <div className="pt-6">
                     <div className="relative rounded-3xl overflow-hidden bg-black/20 border border-white/5 p-8">
-                      <PokerTableView positions={currentTablePosition.positions} totalSeats={gamePlayers.length} />
+                      <PokerTableView
+                        positions={currentTablePosition.positions}
+                        totalSeats={gamePlayers.length}
+                        gameId={game.id}
+                      />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 mt-8">
                       <Button
@@ -911,14 +828,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </Button>
                 )}
 
-                <Button
-                  onClick={calculateSettlements}
-                  disabled={!canCompleteGame}
-                  className="w-full h-14 bg-white/5 border border-white/10 text-gold-100 hover:bg-white/10 font-bold transition-all"
-                >
-                  <Calculator className="w-5 h-5 mr-3" />
-                  {settlements.length > 0 ? 'Recalculate Table' : 'Settle Accounts'}
-                </Button>
+                <div className="p-4 rounded-xl bg-gold-500/5 border border-gold-500/10 text-center">
+                  <p className="text-xs text-gold-400/50 uppercase tracking-widest font-bold">Planned Transfers</p>
+                  <p className="text-xl font-numbers text-gold-200 mt-1">{settlements.length}</p>
+                </div>
 
                 <Button
                   onClick={handleCompleteGame}

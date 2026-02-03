@@ -8,6 +8,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatIndianNumber, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
+import { usePrefetchGame } from "@/hooks/usePrefetch";
 
 interface GameWithStats {
   id: string;
@@ -36,6 +37,7 @@ const GamesHistory = () => {
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const { prefetch } = usePrefetchGame();
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
@@ -159,11 +161,11 @@ const GamesHistory = () => {
     let filtered = games.filter((game) => {
       const gameDate = format(new Date(game.date), "MMM d, yyyy");
       const monthYear = format(new Date(game.date), "MMM yyyy");
-      
+
       if (selectedDate !== "all" && gameDate !== selectedDate) return false;
       if (selectedMonthYear !== "all" && monthYear !== selectedMonthYear) return false;
       if (selectedPlayer !== "all" && !game.player_names.includes(selectedPlayer)) return false;
-      
+
       return true;
     });
 
@@ -171,7 +173,7 @@ const GamesHistory = () => {
       filtered = [...filtered].sort((a, b) => {
         let aVal: number | string;
         let bVal: number | string;
-        
+
         switch (sortField) {
           case "date":
             aVal = new Date(a.date).getTime();
@@ -190,7 +192,7 @@ const GamesHistory = () => {
             bVal = b.total_pot;
             break;
         }
-        
+
         return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
       });
     }
@@ -346,103 +348,105 @@ const GamesHistory = () => {
             </div>
           </div>
 
-            {filteredAndSortedGames.map((game, index) => {
-              const playerData = game.game_players.find(
-                (gp) => gp.player_name === selectedPlayer
-              );
-              
-              return (
-                <Card
-                  key={game.id}
-                  shadow="sm"
-                  padding="sm"
-                  radius="md"
-                  withBorder
-                  className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => navigate(`/games/${game.id}`)}
-                >
-                  {/* Mobile Layout - Grid to match header */}
-                  <div className="md:hidden">
-                    <div className="grid grid-cols-5 gap-1 items-center text-xs">
-                      <Text fw={500} size="xs" truncate>{format(new Date(game.date), "MMM d")}</Text>
-                      <div className="flex items-center justify-center">
-                        <Text fw={600} size="xs" ta="center">{formatIndianNumber(game.buy_in_amount)}</Text>
-                      </div>
-                      <div className="flex items-center justify-center">
-                        <Text fw={500} size="xs" ta="center">{game.player_count}</Text>
-                      </div>
-                      <div className="flex items-center justify-center">
-                        <Text fw={600} size="xs" ta="center">{formatIndianNumber(game.total_pot)}</Text>
-                      </div>
-                      <div className="flex items-center justify-center">
-                        {selectedPlayer !== "all" ? (
-                          playerData && (
-                            <Badge 
-                              color={getProfitLossColor(playerData.net_amount)} 
-                              size="sm"
-                              style={getProfitLossBadgeStyle(playerData.net_amount)}
-                            >
-                              {formatProfitLoss(playerData.net_amount)}
-                            </Badge>
-                          )
-                        ) : (
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteGameId(game.id);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </ActionIcon>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+          {filteredAndSortedGames.map((game, index) => {
+            const playerData = game.game_players.find(
+              (gp) => gp.player_name === selectedPlayer
+            );
 
-                  {/* Desktop Layout */}
-                  <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm h-12">
-                    <Text fw={500}>
-                      {format(new Date(game.date), "MMM d, yyyy")}
-                    </Text>
-                    <Text fw={600}>
-                      Rs. {formatIndianNumber(game.buy_in_amount)}
-                    </Text>
+            return (
+              <Card
+                key={game.id}
+                shadow="sm"
+                padding="sm"
+                radius="md"
+                withBorder
+                className="cursor-pointer transition-colors hover:bg-muted/50"
+                onClick={() => navigate(`/games/${game.id}`)}
+                onMouseEnter={() => prefetch(game.id)}
+                onTouchStart={() => prefetch(game.id)}
+              >
+                {/* Mobile Layout - Grid to match header */}
+                <div className="md:hidden">
+                  <div className="grid grid-cols-5 gap-1 items-center text-xs">
+                    <Text fw={500} size="xs" truncate>{format(new Date(game.date), "MMM d")}</Text>
                     <div className="flex items-center justify-center">
-                      <Text fw={500}>{game.player_count}</Text>
+                      <Text fw={600} size="xs" ta="center">{formatIndianNumber(game.buy_in_amount)}</Text>
                     </div>
-                    <Text fw={600}>
-                      Rs. {formatIndianNumber(game.total_pot)}
-                    </Text>
-                    {selectedPlayer !== "all" && playerData ? (
-                      <div>
-                        <Badge 
-                          color={getProfitLossColor(playerData.net_amount)}
-                          style={getProfitLossBadgeStyle(playerData.net_amount)}
-                        >
-                          {formatProfitLoss(playerData.net_amount)}
-                        </Badge>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-start">
+                    <div className="flex items-center justify-center">
+                      <Text fw={500} size="xs" ta="center">{game.player_count}</Text>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <Text fw={600} size="xs" ta="center">{formatIndianNumber(game.total_pot)}</Text>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      {selectedPlayer !== "all" ? (
+                        playerData && (
+                          <Badge
+                            color={getProfitLossColor(playerData.net_amount)}
+                            size="sm"
+                            style={getProfitLossBadgeStyle(playerData.net_amount)}
+                          >
+                            {formatProfitLoss(playerData.net_amount)}
+                          </Badge>
+                        )
+                      ) : (
                         <ActionIcon
                           variant="subtle"
                           color="red"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteGameId(game.id);
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </ActionIcon>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </Card>
-              );
-            })}
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:grid grid-cols-5 gap-4 items-center text-sm h-12">
+                  <Text fw={500}>
+                    {format(new Date(game.date), "MMM d, yyyy")}
+                  </Text>
+                  <Text fw={600}>
+                    Rs. {formatIndianNumber(game.buy_in_amount)}
+                  </Text>
+                  <div className="flex items-center justify-center">
+                    <Text fw={500}>{game.player_count}</Text>
+                  </div>
+                  <Text fw={600}>
+                    Rs. {formatIndianNumber(game.total_pot)}
+                  </Text>
+                  {selectedPlayer !== "all" && playerData ? (
+                    <div>
+                      <Badge
+                        color={getProfitLossColor(playerData.net_amount)}
+                        style={getProfitLossBadgeStyle(playerData.net_amount)}
+                      >
+                        {formatProfitLoss(playerData.net_amount)}
+                      </Badge>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-start">
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteGameId(game.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </ActionIcon>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </Card>
 
