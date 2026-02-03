@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatIndianNumber, cn } from "@/lib/utils";
-import LuxuryLayout from '../components/layout/LuxuryLayout';
 
 const GameSettingsTab = () => {
   // ... existing GameSettingsTab content ...
@@ -204,87 +203,83 @@ const Profile = () => {
 
   if (authLoading) {
     return (
-      <LuxuryLayout>
-        <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-48 bg-white/5" />
-          <Skeleton className="h-64 w-full bg-white/5" />
-        </div>
-      </LuxuryLayout>
+      <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+        <Skeleton className="h-12 w-48 bg-white/5" />
+        <Skeleton className="h-64 w-full bg-white/5" />
+      </div>
     );
   }
 
   if (!user) return null;
 
   return (
-    <LuxuryLayout>
-      <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="mb-4 text-gold-600 dark:text-gold-500 hover:text-gold-700 dark:hover:text-gold-400 hover:bg-gold-500/5 font-luxury uppercase tracking-widest text-xs"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
-        </Button>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/')}
+        className="mb-4 text-gold-600 dark:text-gold-500 hover:text-gold-700 dark:hover:text-gold-400 hover:bg-gold-500/5 font-luxury uppercase tracking-widest text-xs"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-black/5 dark:bg-black/20 border border-gold-900/10 dark:border-white/10 p-1 rounded-xl">
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
-              <User className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Profile</span>
-            </TabsTrigger>
-            <TabsTrigger value="game-settings" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
-              <div className={`w-4 h-4 rounded-full mr-2 bg-gold-500/20 border-2 border-gold-500`} />
-              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Chips</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
-              <Bot className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">AI</span>
-            </TabsTrigger>
-            <TabsTrigger value="storage" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
-              <Database className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Storage</span>
-            </TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 bg-black/5 dark:bg-black/20 border border-gold-900/10 dark:border-white/10 p-1 rounded-xl">
+          <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
+            <User className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Profile</span>
+          </TabsTrigger>
+          <TabsTrigger value="game-settings" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
+            <div className={`w-4 h-4 rounded-full mr-2 bg-gold-500/20 border-2 border-gold-500`} />
+            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Chips</span>
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
+            <Bot className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">AI</span>
+          </TabsTrigger>
+          <TabsTrigger value="storage" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
+            <Database className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Storage</span>
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="profile">
-            <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <User className="h-6 w-6 text-gold-600 dark:text-gold-500" />
-                  <div>
-                    <CardTitle className="text-gold-900 dark:text-gold-100">Profile</CardTitle>
-                    <CardDescription className="text-gold-900/60 dark:text-gold-500/60">Your account information</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        <TabsContent value="profile">
+          <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-xl">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <User className="h-6 w-6 text-gold-600 dark:text-gold-500" />
                 <div>
-                  <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">Email</label>
-                  <p className="text-lg text-luxury-primary">{user.email}</p>
+                  <CardTitle className="text-gold-900 dark:text-gold-100">Profile</CardTitle>
+                  <CardDescription className="text-gold-900/60 dark:text-gold-500/60">Your account information</CardDescription>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">User ID</label>
-                  <p className="text-sm text-gold-900/60 dark:text-gold-200/60 font-numbers">{user.id}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">Email</label>
+                <p className="text-lg text-luxury-primary">{user.email}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">User ID</label>
+                <p className="text-sm text-gold-900/60 dark:text-gold-200/60 font-numbers">{user.id}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="game-settings">
-            <GameSettingsTab />
-          </TabsContent>
+        <TabsContent value="game-settings">
+          <GameSettingsTab />
+        </TabsContent>
 
-          <TabsContent value="ai">
-            <AISettingsTab />
-          </TabsContent>
+        <TabsContent value="ai">
+          <AISettingsTab />
+        </TabsContent>
 
-          <TabsContent value="storage">
-            <CacheManager />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </LuxuryLayout>
+        <TabsContent value="storage">
+          <CacheManager />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

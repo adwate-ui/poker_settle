@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss, cn } from "@/lib/utils";
+import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";

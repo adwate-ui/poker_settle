@@ -50,7 +50,7 @@ const HandsHistory = () => {
     });
   }, []);
 
-  const hasActiveFilters = useMemo(() => 
+  const hasActiveFilters = useMemo(() =>
     Object.keys(filters).some(key => {
       const value = filters[key as keyof typeof filters];
       return value && value !== 'all';
@@ -354,7 +354,7 @@ const HandsHistory = () => {
           ) : (
             <div className="space-y-3">
               {currentHands.map((hand) => (
-                <MemoizedHandCard 
+                <MemoizedHandCard
                   key={hand.id}
                   hand={hand}
                   formatDate={formatDate}

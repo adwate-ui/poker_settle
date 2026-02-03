@@ -32,6 +32,14 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
+import { Outlet, Navigate } from "react-router-dom";
+
+const AppLayout = () => (
+  <LuxuryLayout>
+    <Outlet />
+  </LuxuryLayout>
+);
+
 const AppContent = () => {
   const { user, loading } = useAuth();
 
@@ -57,21 +65,27 @@ const AppContent = () => {
         </div>
       }>
         <Routes>
-          <Route path="/" element={user ? <Index /> : <Auth />} />
-          <Route path="/games" element={user ? <GamesHistory /> : <Auth />} />
-          <Route path="/games/:gameId" element={user ? <GameDetail /> : <Auth />} />
-          <Route path="/players" element={user ? <PlayersHistory /> : <Auth />} />
-          <Route path="/players/:playerId" element={user ? <PlayerDetail /> : <Auth />} />
-          <Route path="/hands" element={user ? <HandsHistory /> : <Auth />} />
-          <Route path="/hands/:handId" element={user ? <HandDetail /> : <Auth />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/profile" element={user ? <Profile /> : <Auth />} />
+
+          {/* Protected Routes wrapped in Layout */}
+          <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/games" element={<GamesHistory />} />
+            <Route path="/games/:gameId" element={<GameDetail />} />
+            <Route path="/players" element={<PlayersHistory />} />
+            <Route path="/players/:playerId" element={<PlayerDetail />} />
+            <Route path="/hands" element={<HandsHistory />} />
+            <Route path="/hands/:handId" element={<HandDetail />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Public Routes */}
           <Route path="/s/:shortCode" element={<ShortLinkRedirect />} />
           <Route path="/upi-pay" element={<UpiPaymentBouncer />} />
           <Route path="/shared/:token" element={<SharedView />} />
           <Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />
           <Route path="/shared/:token/player/:playerId" element={<SharedPlayerDetail />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
@@ -88,9 +102,7 @@ const App = () => {
             <OfflineIndicator />
             <PWAInstallPrompt />
             <Toaster />
-            <LuxuryLayout>
-              <AppContent />
-            </LuxuryLayout>
+            <AppContent />
           </ChipProvider>
         </ThemeProvider>
       </AuthProvider>

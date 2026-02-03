@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { GameDetailView } from "@/components/GameDetailView";
 import { BuyInHistory } from "@/types/poker";
 import GameErrorBoundary from "@/components/GameErrorBoundary";
-import LuxuryLayout from "../components/layout/LuxuryLayout";
 
 const GameDetail = () => {
   const { gameId } = useParams();
@@ -30,20 +29,18 @@ const GameDetail = () => {
   }
 
   return (
-    <LuxuryLayout>
-      <div className="p-4 md:p-8">
-        <GameErrorBoundary>
-          <GameDetailView
-            gameId={gameId}
-            client={supabase}
-            showOwnerControls={true}
-            onBack={() => navigate("/games")}
-            backLabel="Back to Games History"
-            fetchBuyInHistory={fetchBuyInHistory}
-          />
-        </GameErrorBoundary>
-      </div>
-    </LuxuryLayout>
+    <div className="p-4 md:p-8">
+      <GameErrorBoundary>
+        <GameDetailView
+          gameId={gameId}
+          client={supabase}
+          showOwnerControls={true}
+          onBack={() => navigate("/games")}
+          backLabel="Back to Games History"
+          fetchBuyInHistory={fetchBuyInHistory}
+        />
+      </GameErrorBoundary>
+    </div>
   );
 };
 
