@@ -18,7 +18,6 @@ import {
   Check,
   TrendingUp,
   Star,
-  Share2,
   Loader2,
   History,
   ShieldCheck,
@@ -407,17 +406,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="h-11 w-11 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-gold-500/10 text-gold-600 dark:text-gold-400 hover:text-gold-500 dark:hover:text-gold-200 transition-all rounded-lg"
-            >
-              <Share2 className="h-4.5 w-4.5" />
-            </Button>
-            <UserProfile />
-          </div>
         </div>
 
         {/* Main 2-Column Layout */}
@@ -580,6 +568,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <FinalStackManagement
                       gamePlayers={gamePlayers}
                       onUpdateFinalStack={handleUpdateFinalStack}
+                      smallBlind={game.small_blind}
                     />
                   </div>
                 </CollapsibleContent>

@@ -110,10 +110,10 @@ export const BuyInManagementTable = ({
           <Table>
             <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10">
               <TableRow className="hover:bg-transparent border-0 h-12">
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6">Player</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Buy-ins</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Amount</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6">Actions</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6 align-middle w-full">Player</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 align-middle">Buy-ins</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 align-middle">Amount</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6 align-middle">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-white/5">

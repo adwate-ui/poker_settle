@@ -7,7 +7,7 @@ interface LuxuryLayoutProps {
 
 const LuxuryLayout: React.FC<LuxuryLayoutProps> = ({ children }) => {
     return (
-        <div className="relative min-h-screen w-full bg-[linear-gradient(to_bottom_right,#F9F4DF,#F1E6B9)] dark:bg-luxury-gradient overflow-x-hidden selection:bg-gold-500/30 selection:text-gold-200">
+        <div className="relative min-h-screen w-full bg-[linear-gradient(to_bottom_right,#F9F4DF,#F1E6B9)] dark:bg-luxury-gradient overflow-x-hidden selection:bg-gold-500/30 selection:text-gold-200 pt-safe pb-safe">
             {/* Noise Texture Overlay */}
             <div
                 className="fixed inset-0 pointer-events-none opacity-[0.03] z-[1]"
@@ -22,7 +22,7 @@ const LuxuryLayout: React.FC<LuxuryLayoutProps> = ({ children }) => {
             </div>
 
             {/* Subtle bottom glow */}
-            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full h-[30vh] bg-gold-900/5 dark:bg-gold-900/10 blur-[120px] pointer-events-none z-[0]" />
+            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full h-[30vh] bg-gold-900/5 dark:bg-gold-900/10 blur-[80px] sm:blur-[120px] pointer-events-none z-[0] transition-all duration-1000" />
 
             <ThemeToggle />
         </div>

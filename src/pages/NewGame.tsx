@@ -175,7 +175,7 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card className="max-w-4xl mx-auto relative overflow-hidden border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/40 backdrop-blur-xl">
+    <Card className="max-w-4xl mx-auto relative overflow-hidden border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/40 backdrop-blur-xl mb-24 sm:mb-0">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
           <Card className="w-full max-w-md bg-white/90 dark:bg-[#0a0a0a]/90 border-black/20 dark:border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
@@ -231,7 +231,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
               <div className="absolute right-0 bottom-3 text-gold-500/30 group-focus-within:text-gold-500 transition-colors">
                 <Info className="h-4 w-4" />
@@ -258,7 +258,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -278,7 +278,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
           </div>

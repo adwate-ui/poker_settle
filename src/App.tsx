@@ -15,12 +15,6 @@ import LuxuryLayout from "@/components/layout/LuxuryLayout";
 // Lazy load all pages for optimal bundle size
 const Index = lazy(() => import("./pages/Index"));
 const NewGame = lazy(() => import("./pages/NewGame"));
-const GamesHistory = lazy(() => import("./pages/GamesHistory"));
-const GameDetail = lazy(() => import("./pages/GameDetail"));
-const PlayersHistory = lazy(() => import("./pages/PlayersHistory"));
-const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
-const HandsHistory = lazy(() => import("./pages/HandsHistory"));
-const HandDetail = lazy(() => import("./pages/HandDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SharedView = lazy(() => import("./pages/SharedView"));
@@ -48,7 +42,7 @@ const AppContent = () => {
       <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-[0_0_15px_rgba(212,184,60,0.5)]" />
-          <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Initializing Poker Settle...</p>
+          <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Starting up...</p>
         </div>
       </div>
     );
@@ -60,7 +54,7 @@ const AppContent = () => {
         <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-[0_0_15px_rgba(212,184,60,0.5)]" />
-            <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Loading Luxury Experience...</p>
+            <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Loading...</p>
           </div>
         </div>
       }>
@@ -70,12 +64,12 @@ const AppContent = () => {
           {/* Protected Routes wrapped in Layout */}
           <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
             <Route path="/" element={<Index />} />
-            <Route path="/games" element={<GamesHistory />} />
-            <Route path="/games/:gameId" element={<GameDetail />} />
-            <Route path="/players" element={<PlayersHistory />} />
-            <Route path="/players/:playerId" element={<PlayerDetail />} />
-            <Route path="/hands" element={<HandsHistory />} />
-            <Route path="/hands/:handId" element={<HandDetail />} />
+            <Route path="/games" element={<Index />} />
+            <Route path="/games/:gameId" element={<Index />} />
+            <Route path="/players" element={<Index />} />
+            <Route path="/players/:playerId" element={<Index />} />
+            <Route path="/hands" element={<Index />} />
+            <Route path="/hands/:handId" element={<Index />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
 

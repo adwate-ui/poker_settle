@@ -105,7 +105,7 @@ export const PlayerSelector = ({
           </h4>
           <div className="grid gap-2">
             {selectedPlayers.map((player) => (
-              <Card key={player.id} className="group hover:shadow-md transition-all">
+              <Card key={player.id} className="group hover:shadow-md transition-all border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
@@ -307,7 +307,7 @@ export const PlayerSelector = ({
                     </Button>
                   )}
                 </div>
-                
+
                 {onCreateNewPlayerWithDetails && (
                   <p className="text-xs text-muted-foreground text-center">
                     Use "Add with Details" to include WhatsApp number and UPI ID
@@ -343,8 +343,8 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
     <button
       onClick={() => onSelect(player)}
       className={cn(
-        "group w-full text-left p-3 rounded-lg border bg-card hover:bg-accent hover:shadow-md transition-all",
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        "w-full text-left p-4 rounded-2xl border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-gold-500/5 hover:border-gold-500/20 transition-all group",
+        "focus:outline-none focus:ring-2 focus:ring-gold-500/50"
       )}
     >
       <div className="flex items-center gap-3">
@@ -385,7 +385,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
               </Badge>
             )}
             {player.payment_preference && (
-              <Badge 
+              <Badge
                 variant={player.payment_preference === 'cash' ? 'secondary' : 'default'}
                 className="text-[10px] h-5 px-1.5"
               >

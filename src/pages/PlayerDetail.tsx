@@ -168,7 +168,7 @@ const PlayerDetail = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Analyzing Participant Portfolio...</p>
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Player Profile...</p>
       </div>
     );
   }
@@ -176,7 +176,7 @@ const PlayerDetail = () => {
   if (!player) {
     return (
       <Card className="max-w-4xl mx-auto border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl p-10 text-center">
-        <p className="text-gold-900/60 dark:text-gold-200/60 font-luxury tracking-widest uppercase">Participant record not located.</p>
+        <p className="text-gold-900/60 dark:text-gold-200/60 font-luxury tracking-widest uppercase">Player not found.</p>
       </Card>
     );
   }
@@ -211,7 +211,7 @@ const PlayerDetail = () => {
               <div>
                 <CardTitle className="text-3xl font-luxury text-gold-900 dark:text-gold-100">{player.name}</CardTitle>
                 <CardDescription className="text-xs uppercase tracking-[.3em] text-gold-600 dark:text-gold-500/50 font-luxury flex items-center gap-2">
-                  <User className="h-3 w-3" /> Participant Profile
+                  <User className="h-3 w-3" /> Player Profile
                 </CardDescription>
               </div>
             </div>
@@ -223,11 +223,11 @@ const PlayerDetail = () => {
           <CardContent className="pt-8 space-y-10 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Sessions</p>
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Games</p>
                 <p className="text-3xl font-numbers text-luxury-primary">{player.total_games || 0}</p>
               </div>
               <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Legacy P&L</p>
+                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Profit/Loss</p>
                 <p className={cn(
                   "text-3xl font-numbers",
                   isProfit ? "text-green-400" : "text-red-400"
@@ -249,8 +249,8 @@ const PlayerDetail = () => {
             <div className="space-y-6 pt-6 border-t border-black/10 dark:border-white/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-luxury text-luxury-primary">Settlement Profiles</h3>
-                  <p className="text-xs uppercase tracking-widest text-gold-900/40 dark:text-gold-500/40 font-luxury mt-1">Contact and payment orchestration</p>
+                  <h3 className="text-lg font-luxury text-luxury-primary">Player Details</h3>
+                  <p className="text-xs uppercase tracking-widest text-gold-900/40 dark:text-gold-500/40 font-luxury mt-1">Contact and payment info</p>
                 </div>
                 <div className="flex gap-3">
                   <Button
@@ -270,7 +270,7 @@ const PlayerDetail = () => {
                     className="h-10 px-5 bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 hover:bg-gold-500/10 text-gold-900 dark:text-gold-200 font-luxury uppercase tracking-widest text-xs rounded-full"
                   >
                     <Edit className="h-4 w-4 mr-2 text-gold-600 dark:text-gold-500" />
-                    Amend
+                    Edit
                   </Button>
                 </div>
               </div>
@@ -285,7 +285,7 @@ const PlayerDetail = () => {
                   </div>
                   <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
                     <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
-                      <CreditCard className="h-3 w-3" /> Financial ID
+                      <CreditCard className="h-3 w-3" /> UPI ID
                     </div>
                     <p className="text-sm text-gold-900 dark:text-gold-100 font-medium truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
@@ -298,7 +298,7 @@ const PlayerDetail = () => {
                 </div>
               ) : (
                 <div className="p-8 rounded-xl border border-dashed border-gold-900/10 dark:border-white/10 bg-black/5 dark:bg-white/2 text-center">
-                  <p className="text-sm font-luxury text-gold-900/30 dark:text-white/30 tracking-widest uppercase">No metadata associated with this participant.</p>
+                  <p className="text-sm font-luxury text-gold-900/30 dark:text-white/30 tracking-widest uppercase">No data associated with this player.</p>
                 </div>
               )}
             </div>
@@ -314,7 +314,7 @@ const PlayerDetail = () => {
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
                 <History className="h-5 w-5 text-gold-500" />
               </div>
-              <CardTitle className="text-2xl font-luxury text-luxury-primary">Audit Trail</CardTitle>
+              <CardTitle className="text-2xl font-luxury text-luxury-primary">Game History</CardTitle>
             </div>
             <div className="min-w-[200px]">
               <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
@@ -339,8 +339,8 @@ const PlayerDetail = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-black/5 dark:bg-white/5">
-                <TableRow className="border-b-gold-900/10 dark:border-b-white/10 hover:bg-transparent">
-                  <TableHead className="h-14">
+                <TableRow className="border-b-gold-900/10 dark:border-b-white/10 hover:bg-transparent items-center">
+                  <TableHead className="h-14 align-middle">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("date")}
@@ -349,7 +349,7 @@ const PlayerDetail = () => {
                       Session Date {getSortIcon("date")}
                     </Button>
                   </TableHead>
-                  <TableHead className="h-14">
+                  <TableHead className="h-14 align-middle">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("buy_ins")}
@@ -358,22 +358,22 @@ const PlayerDetail = () => {
                       Buy-ins {getSortIcon("buy_ins")}
                     </Button>
                   </TableHead>
-                  <TableHead className="h-14">
+                  <TableHead className="h-14 align-middle">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("net_amount")}
                       className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
-                      Net Outcome {getSortIcon("net_amount")}
+                      Net P&L {getSortIcon("net_amount")}
                     </Button>
                   </TableHead>
-                  <TableHead className="h-14">
+                  <TableHead className="h-14 align-middle">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("final_stack")}
                       className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
-                      Terminal Stack {getSortIcon("final_stack")}
+                      Final Stack {getSortIcon("final_stack")}
                     </Button>
                   </TableHead>
                   <TableHead className="h-14 text-right pr-8">
@@ -434,8 +434,8 @@ const PlayerDetail = () => {
         onOpenChange={setShowEditDialog}
         onSave={handleUpdatePlayer}
         initialData={player || undefined}
-        title="Amend Participant Metadata"
-        description="Edit the communication and financial parameters for this participant."
+        title="Edit Player Details"
+        description="Edit the communication and financial parameters for this player."
       />
     </div>
   );

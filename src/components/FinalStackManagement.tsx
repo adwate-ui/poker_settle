@@ -21,11 +21,13 @@ import { Label } from "@/components/ui/label";
 interface FinalStackManagementProps {
   gamePlayers: GamePlayer[];
   onUpdateFinalStack: (gamePlayerId: string, finalStack: number) => Promise<void>;
+  smallBlind?: number;
 }
 
 export const FinalStackManagement = ({
   gamePlayers,
-  onUpdateFinalStack
+  onUpdateFinalStack,
+  smallBlind
 }: FinalStackManagementProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
@@ -42,6 +44,11 @@ export const FinalStackManagement = ({
     const value = typeof editValue === 'string' ? parseFloat(editValue) : editValue;
     if (isNaN(value) || value < 0) {
       toast.error('Please enter a valid stack amount');
+      return;
+    }
+
+    if (smallBlind && smallBlind > 0 && value % smallBlind !== 0) {
+      toast.error(`Final stack must be a multiple of the small blind (Rs. ${smallBlind})`);
       return;
     }
 
@@ -85,9 +92,9 @@ export const FinalStackManagement = ({
           <Table>
             <TableHeader className="bg-white/5 border-b border-white/10">
               <TableRow className="hover:bg-transparent border-0 h-12">
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6">Participant</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Terminal Stack</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6">Authentication</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6 align-middle w-full">Player</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 align-middle">Final Stack</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6 align-middle">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-white/5">
@@ -141,8 +148,8 @@ export const FinalStackManagement = ({
                 <Coins className="w-5 h-5 text-gold-500" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Adjust Terminal Stack</DialogTitle>
-                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Participant: {selectedPlayer?.player.name}</DialogDescription>
+                <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Edit Final Stack</DialogTitle>
+                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Player: {selectedPlayer?.player.name}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -171,7 +178,7 @@ export const FinalStackManagement = ({
               onClick={() => setOpened(false)}
               className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
             >
-              Abort
+              Cancel
             </Button>
             <Button
               onClick={handleSaveEdit}
@@ -179,7 +186,7 @@ export const FinalStackManagement = ({
               className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black border-0 shadow-lg shadow-gold-900/10 rounded-lg flex-1"
             >
               {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Commit Stack
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>
