@@ -413,25 +413,13 @@ const PokerTableView = memo(({
     const angle = index * (360 / numPlayers) + angleOffset;
     const radians = (angle * Math.PI) / 180;
 
-    // Radius values respond to aspect ratio and orientation
-    const horizontalMargin = isVertical ? 24 : (aspectRatio > 1.5 ? 20 : 15);
-    const verticalMargin = isVertical ? 15 : 18;
+    // For "Outside Seating", we place players at a high radius
+    // while the visual table below is smaller (inset by ~15%).
+    const horizontalMargin = isVertical ? 8 : 12;
+    const verticalMargin = isVertical ? 12 : 8;
 
-    const baseRadiusX = 45 - horizontalMargin;
-    const baseRadiusY = 45 - verticalMargin;
-
-    // Major/Minor axis swap for vertical mode
-    let radiusX = baseRadiusX;
-    let radiusY = baseRadiusY;
-
-    if (isVertical) {
-      // Squash it horizontally, stretch vertically
-      radiusX = 35; // Narrower for vertical pill
-      radiusY = 42;
-    } else {
-      radiusX = aspectRatio > 1.2 ? baseRadiusX * 1.1 : baseRadiusX;
-      radiusY = baseRadiusY;
-    }
+    const radiusX = 50 - horizontalMargin;
+    const radiusY = 50 - verticalMargin;
 
     return {
       x: TABLE_CENTER_X + radiusX * Math.cos(radians),
@@ -576,18 +564,18 @@ const PokerTableView = memo(({
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className={cn(
           "relative transition-all duration-500",
-          isVertical ? "w-[85%] h-full max-w-[400px]" : "w-full h-full max-w-[900px] max-h-[600px]"
+          isVertical ? "w-[90%] h-full max-w-[420px]" : "w-full h-full max-w-[900px] max-h-[600px]"
         )}>
-          {/* External Table Border: Becomes pill-shaped in vertical mode */}
+          {/* External Table Border: Becomes pill-shaped in vertical mode. Inset increased to seat players outside. */}
           <div className={cn(
-            "absolute inset-0 border-[16px] border-[#1a1a1a] shadow-[0_40px_100px_rgba(0,0,0,0.9),inset_0_2px_10px_rgba(255,255,255,0.15)] z-0 transition-all duration-500",
-            isVertical ? "rounded-[100px]" : "rounded-[200px]"
+            "absolute inset-[15%] border-[16px] border-[#1a1a1a] shadow-[0_40px_100px_rgba(0,0,0,0.9),inset_0_2px_10px_rgba(255,255,255,0.15)] z-0 transition-all duration-500",
+            isVertical ? "rounded-[80px]" : "rounded-[160px]"
           )} />
 
           {/* Inner Felt Boundary */}
           <div className={cn(
-            "absolute inset-[10px] bg-felt-dark overflow-hidden flex items-center justify-center z-0 shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-500",
-            isVertical ? "rounded-[90px]" : "rounded-[190px]"
+            "absolute inset-[15%] mt-[4px] ml-[4px] mr-[4px] mb-[4px] bg-felt-dark overflow-hidden flex items-center justify-center z-0 shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-500",
+            isVertical ? "rounded-[70px]" : "rounded-[150px]"
           )}>
             {/* Table Texture and Branding */}
             <div

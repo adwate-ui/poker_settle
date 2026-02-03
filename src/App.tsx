@@ -22,6 +22,7 @@ const SharedGameDetail = lazy(() => import("./pages/SharedGameDetail"));
 const SharedPlayerDetail = lazy(() => import("./pages/SharedPlayerDetail"));
 const ShortLinkRedirect = lazy(() => import("./pages/ShortLinkRedirect"));
 const UpiPaymentBouncer = lazy(() => import("./pages/UpiPaymentBouncer"));
+const GameDetail = lazy(() => import("./pages/GameDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -65,7 +66,7 @@ const AppContent = () => {
           <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
             <Route path="/" element={<Index />} />
             <Route path="/games" element={<Index />} />
-            <Route path="/games/:gameId" element={<Index />} />
+            <Route path="/games/:gameId" element={<GameDetail />} />
             <Route path="/players" element={<Index />} />
             <Route path="/players/:playerId" element={<Index />} />
             <Route path="/hands" element={<Index />} />
