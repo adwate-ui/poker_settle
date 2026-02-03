@@ -4,11 +4,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ChipProvider } from "@/contexts/ChipContext";
-import { MantineProvider, createTheme } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { Toaster } from "@/components/ui/toaster";
+import { Loader2 } from "lucide-react";
+import LuxuryLayout from "@/components/layout/LuxuryLayout";
+
 // Lazy load all pages for optimal bundle size
 const Index = lazy(() => import("./pages/Index"));
 const GameDetail = lazy(() => import("./pages/GameDetail"));
@@ -20,78 +22,6 @@ const SharedPlayerDetail = lazy(() => import("./pages/SharedPlayerDetail"));
 const ShortLinkRedirect = lazy(() => import("./pages/ShortLinkRedirect"));
 const UpiPaymentBouncer = lazy(() => import("./pages/UpiPaymentBouncer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-import { Loader2 } from "lucide-react";
-
-// Mantine theme configuration that syncs with app's dark mode and color system
-const mantineTheme = createTheme({
-  primaryColor: 'green',
-  fontFamily: 'inherit',
-  defaultRadius: 'md',
-  colors: {
-    // Define a custom green palette that will sync with our CSS variables
-    green: [
-      'var(--mantine-color-green-0)',
-      'var(--mantine-color-green-1)',
-      'var(--mantine-color-green-2)',
-      'var(--mantine-color-green-3)',
-      'var(--mantine-color-green-4)',
-      'var(--mantine-color-green-5)',
-      'var(--mantine-color-green-6)',
-      'var(--mantine-color-green-7)',
-      'var(--mantine-color-green-8)',
-      'var(--mantine-color-green-9)',
-    ],
-    // Define red palette for negative amounts/losses
-    red: [
-      'var(--mantine-color-red-0)',
-      'var(--mantine-color-red-1)',
-      'var(--mantine-color-red-2)',
-      'var(--mantine-color-red-3)',
-      'var(--mantine-color-red-4)',
-      'var(--mantine-color-red-5)',
-      'var(--mantine-color-red-6)',
-      'var(--mantine-color-red-7)',
-      'var(--mantine-color-red-8)',
-      'var(--mantine-color-red-9)',
-    ],
-    // Define semantic profit/loss colors (using standard green/red for light, darker for dark mode)
-    profit: [
-      '#d3f9d8', // lightest
-      '#b2f2bb',
-      '#8ce99a',
-      '#69db7c',
-      '#51cf66',
-      '#40c057', // base
-      '#37b24d',
-      '#2f9e44',
-      '#2b8a3e',
-      '#247a31', // darkest
-    ],
-    loss: [
-      '#ffe3e3', // lightest
-      '#ffc9c9',
-      '#ffa8a8',
-      '#ff8787',
-      '#ff6b6b',
-      '#fa5252', // base
-      '#f03e3e',
-      '#e03131',
-      '#c92a2a',
-      '#b02525', // darkest
-    ],
-  },
-  other: {
-    // Pass through our color variables for custom usage
-    background: 'hsl(var(--background))',
-    foreground: 'hsl(var(--foreground))',
-    primary: 'hsl(var(--primary))',
-    secondary: 'hsl(var(--secondary))',
-    muted: 'hsl(var(--muted))',
-    accent: 'hsl(var(--accent))',
-  },
-});
-
-import LuxuryLayout from "@/components/layout/LuxuryLayout";
 
 const queryClient = new QueryClient();
 
@@ -143,37 +73,17 @@ const AppContent = () => {
 };
 
 const App = () => {
-  // Track dark mode for Mantine
-  const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains('dark')
-  );
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
           <ChipProvider>
-            <MantineProvider theme={mantineTheme} forceColorScheme={isDark ? 'dark' : 'light'}>
-              <Notifications position="top-right" />
-              <OfflineIndicator />
-              <PWAInstallPrompt />
-              <LuxuryLayout>
-                <AppContent />
-              </LuxuryLayout>
-            </MantineProvider>
+            <OfflineIndicator />
+            <PWAInstallPrompt />
+            <Toaster />
+            <LuxuryLayout>
+              <AppContent />
+            </LuxuryLayout>
           </ChipProvider>
         </ThemeProvider>
       </AuthProvider>
