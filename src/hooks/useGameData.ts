@@ -4,14 +4,11 @@ import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Se
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { sendCombinedGameSettlementNotifications } from "@/services/emailNotifications";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
-import { formatMessageDate } from "@/services/messageTemplates";
-import { generateShortCode } from "@/lib/shareUtils";
+import { fetchPlayers as apiFetchPlayers, createOrFindPlayer as apiCreateOrFindPlayer } from "@/features/players/api/playerApi";
+import { fetchGames as apiFetchGames, createGame as apiCreateGame, completeGameApi } from "@/features/game/api/gameApi";
 
-// Input validation schemas
-const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
-const buyInAmountSchema = z.number().min(1, "Buy-in must be at least ₹1").max(1000000, "Buy-in cannot exceed ₹10,00,000");
+// Keep local schemas for simple updates not yet moved
 const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed ₹1,00,00,000");
 const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(100, "Buy-ins cannot exceed 100");
 
@@ -24,130 +21,25 @@ export const useGameData = () => {
 
   const fetchPlayers = useCallback(async () => {
     if (!user) return;
-    
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("name");
-
-      if (error) throw error;
-      setPlayers(data || []);
-    } catch (error) {
-      console.error("Error fetching players:", error);
-      toast.error("Failed to fetch players");
+      const data = await apiFetchPlayers(user.id);
+      setPlayers(data);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
   const createOrFindPlayer = async (name: string): Promise<Player> => {
     if (!user) throw new Error("User not authenticated");
-    
-    // Validate player name
-    try {
-      playerNameSchema.parse(name);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw new Error(error.errors[0].message);
-      }
-      throw error;
-    }
-    
-    try {
-      // First check if player already exists for this user
-      const { data: existingPlayers, error: searchError } = await supabase
-        .from("players")
-        .select("*")
-        .eq("name", name.trim())
-        .eq("user_id", user.id)
-        .limit(1);
-
-      if (searchError) throw searchError;
-
-      if (existingPlayers && existingPlayers.length > 0) {
-        return existingPlayers[0];
-      }
-
-      // If player doesn't exist, create new one
-      const { data, error } = await supabase
-        .from("players")
-        .insert([{ name: name.trim(), user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      await fetchPlayers(); // Refresh the players list
-      return data;
-    } catch (error) {
-      console.error("Error creating/finding player:", error);
-      throw error;
-    }
+    const player = await apiCreateOrFindPlayer(user.id, name);
+    await fetchPlayers();
+    return player;
   };
 
   const createGame = async (buyInAmount: number, selectedPlayers: Player[]): Promise<Game> => {
     if (!user) throw new Error("User not authenticated");
-    
-    // Validate buy-in amount
-    try {
-      buyInAmountSchema.parse(buyInAmount);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw new Error(error.errors[0].message);
-      }
-      throw error;
-    }
-    
-    try {
-      // Create the game
-      const { data: gameData, error: gameError } = await supabase
-        .from("games")
-        .insert([{
-          buy_in_amount: buyInAmount,
-          date: new Date().toISOString(),
-          is_complete: false,
-          user_id: user.id
-        }])
-        .select()
-        .single();
-
-      if (gameError) throw gameError;
-
-      // Create game_players entries for each selected player
-      const gamePlayersData = selectedPlayers.map(player => ({
-        game_id: gameData.id,
-        player_id: player.id,
-        buy_ins: 1,
-        final_stack: 0, // Start with final_stack at 0 (not cashed out yet)
-        net_amount: -buyInAmount // Net is negative initially (final_stack - buy_ins * buyInAmount = 0 - 1 * buyInAmount = -buyInAmount)
-      }));
-
-      const { error: gamePlayersError } = await supabase
-        .from("game_players")
-        .insert(gamePlayersData);
-
-      if (gamePlayersError) throw gamePlayersError;
-
-      // Fetch the complete game with players
-      const { data: completeGame, error: fetchError } = await supabase
-        .from("games")
-        .select(`
-          *,
-          game_players (
-            *,
-            player:players (*)
-          )
-        `)
-        .eq("id", gameData.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      return completeGame;
-    } catch (error) {
-      console.error("Error creating game:", error);
-      throw error;
-    }
+    return apiCreateGame(user.id, buyInAmount, selectedPlayers);
   };
 
   const updateGamePlayer = async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
@@ -190,7 +82,7 @@ export const useGameData = () => {
 
       if (currentData) {
         const buyInsAdded = updates.buy_ins - currentData.buy_ins;
-        
+
         // Only log if there's an actual change
         if (buyInsAdded !== 0) {
           const { error: insertError } = await supabase
@@ -201,7 +93,7 @@ export const useGameData = () => {
               total_buy_ins_after: updates.buy_ins,
               timestamp: new Date().toISOString()
             });
-          
+
           if (insertError) {
             console.error("Error inserting buy-in history:", insertError);
             throw insertError;
@@ -246,26 +138,12 @@ export const useGameData = () => {
 
   const fetchGames = useCallback(async () => {
     if (!user) return;
-    
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("games")
-        .select(`
-          *,
-          game_players (
-            *,
-            player:players (*)
-          )
-        `)
-        .eq("is_complete", true)
-        .eq("user_id", user.id)
-        .order("date", { ascending: false });
-
-      if (error) throw error;
-      setGames(data || []);
-    } catch (error) {
-      console.error("Error fetching games:", error);
-      toast.error("Failed to fetch games");
+      const data = await apiFetchGames(user.id);
+      setGames(data);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
@@ -304,107 +182,19 @@ export const useGameData = () => {
   };
 
   const completeGame = async (gameId: string, settlements: Settlement[] = []) => {
-    // Fetch the latest game data to ensure we have all players including those added later
-      const { data: gameData, error: gameError } = await supabase
-        .from("games")
-        .select(`
-          *,
-          game_players(
-            *,
-            player:players(*)
-          )
-        `)
-        .eq("id", gameId)
-        .single();
+    if (!user) throw new Error("User not authenticated");
 
-    if (gameError) throw gameError;
-
-    const allGamePlayers = gameData.game_players;
-    
-    // Check if total net amounts of ALL players (including those added later) sum to zero
-    const totalNet = allGamePlayers.reduce((sum: number, gp: GamePlayer) => sum + (gp.net_amount || 0), 0);
-    if (Math.abs(totalNet) > 0.01) { // Allow for small floating point errors
-      throw new Error("Total winnings and losses must sum to zero before completing the game");
-    }
-
-    const { error } = await supabase
-      .from("games")
-      .update({ 
-        is_complete: true,
-        settlements: settlements 
-      })
-      .eq("id", gameId);
-
-    if (error) throw error;
-
-    // Create settlement confirmation records
     try {
-      await createConfirmations(gameId, settlements);
-    } catch (confirmationError) {
-      console.error('Failed to create settlement confirmations:', confirmationError);
-      // Don't fail the game completion if confirmation creation fails
-    }
-
-    // Send email notifications to all players
-    try {
-      // Create or get shared link for the game
-      let gameToken = '';
-      
-      if (user) {
-        // Check for existing shared link
-        const { data: existingLink, error: fetchError } = await supabase
-          .from('shared_links')
-          .select('access_token')
-          .eq('user_id', user.id)
-          .eq('resource_type', 'game')
-          .eq('resource_id', gameId)
-          .maybeSingle();
-
-        if (fetchError) {
-          console.error('Error fetching shared link:', fetchError);
-        }
-
-        if (existingLink) {
-          gameToken = existingLink.access_token;
-        } else {
-          // Create new shared link with short code using utility function
-          const shortCode = generateShortCode();
-          const { data: newLink, error: createError } = await supabase
-            .from('shared_links')
-            .insert({
-              user_id: user.id,
-              resource_type: 'game',
-              resource_id: gameId,
-              short_code: shortCode,
-            })
-            .select('access_token')
-            .single();
-
-          if (createError) {
-            console.error('Error creating shared link:', createError);
-          } else if (newLink) {
-            gameToken = newLink.access_token;
-          }
-        }
-      }
-
-      // Send notifications even if we couldn't get a token
-      // (the notifications can still work without the game link)
-      
-      // Send combined game completion and settlement notifications
-      const notificationResult = await sendCombinedGameSettlementNotifications(
-        allGamePlayers,
-        settlements,
+      const notificationResult = await completeGameApi(
+        user.id,
         gameId,
-        gameData.date,
-        gameData.buy_in_amount,
-        gameToken
+        settlements,
+        createConfirmations
       );
 
       if (notificationResult.sent > 0) {
         toast.success(`Game completed! ${notificationResult.sent} email notifications sent.`);
       } else if (notificationResult.failed > 0 && notificationResult.errors.length > 0) {
-        // Only show warning if all failed and there are actual errors (not just missing emails)
         const actualErrors = notificationResult.errors.filter(e => !e.includes('No email address'));
         if (actualErrors.length > 0) {
           console.warn('Some email notifications failed:', actualErrors);
@@ -415,10 +205,14 @@ export const useGameData = () => {
       } else {
         toast.success('Game completed!');
       }
-    } catch (notificationError) {
-      // Don't fail the game completion if notifications fail
-      console.error('Failed to send email notifications:', notificationError);
-      toast.warning('Game completed! But email notifications failed to send.');
+    } catch (error: any) {
+      if (error.message.includes('email notifications failed')) {
+        toast.warning('Game completed! But email notifications failed to send.');
+      } else {
+        console.error('Error completing game:', error);
+        toast.error(error.message || 'Failed to complete game');
+        throw error;
+      }
     }
   };
 
@@ -438,13 +232,13 @@ export const useGameData = () => {
       .eq("id", gameId);
 
     if (gameError) throw gameError;
-    
+
     await fetchGames();
   };
 
   const hasIncompleteGame = async (): Promise<boolean> => {
     if (!user) return false;
-    
+
     try {
       const { data, error } = await supabase
         .from("games")
@@ -463,7 +257,7 @@ export const useGameData = () => {
 
   const getIncompleteGame = async (): Promise<Game | null> => {
     if (!user) return null;
-    
+
     try {
       const { data, error } = await supabase
         .from("games")
@@ -486,7 +280,7 @@ export const useGameData = () => {
         }
         throw error;
       }
-      
+
       return data;
     } catch (error) {
       console.error("Error fetching incomplete game:", error);
@@ -496,7 +290,7 @@ export const useGameData = () => {
 
   const saveTablePosition = async (gameId: string, positions: SeatPosition[]): Promise<TablePosition> => {
     try {
-      const { data, error} = await supabase
+      const { data, error } = await supabase
         .from("table_positions")
         .insert([{
           game_id: gameId,
@@ -507,7 +301,7 @@ export const useGameData = () => {
         .single();
 
       if (error) throw error;
-      
+
       return {
         ...data,
         positions: data.positions as unknown as SeatPosition[]
@@ -527,7 +321,7 @@ export const useGameData = () => {
         .order("snapshot_timestamp", { ascending: false });
 
       if (error) throw error;
-      
+
       return (data || []).map(row => ({
         ...row,
         positions: row.positions as unknown as SeatPosition[]
@@ -549,9 +343,9 @@ export const useGameData = () => {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (!data) return null;
-      
+
       return {
         ...data,
         positions: data.positions as unknown as SeatPosition[]

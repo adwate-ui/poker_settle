@@ -1,11 +1,12 @@
 import { useState, memo, useCallback, useMemo } from "react";
-import { Card, TextInput, Text, Badge, Stack, Group, Box, Divider } from "@mantine/core";
+import { TextInput, Text, Badge, Stack, Group, Divider } from "@mantine/core";
 import { Button } from "@/components/ui/button";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
+import { GlassCard } from "./ui/GlassCard";
 
 interface PlayerCardProps {
   gamePlayer: GamePlayer;
@@ -18,8 +19,8 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   const [localFinalStack, setLocalFinalStack] = useState(gamePlayer.final_stack || 0);
   const [addBuyInsAmount, setAddBuyInsAmount] = useState<string>('');
   const [hasFinalStackChanges, setHasFinalStackChanges] = useState(false);
-  
-  const netAmount = useMemo(() => 
+
+  const netAmount = useMemo(() =>
     (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
     [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
   );
@@ -36,8 +37,8 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
     if (Math.abs(numToAdd) > 50) {
       return;
     }
-    
-    onUpdatePlayer(gamePlayer.id, { 
+
+    onUpdatePlayer(gamePlayer.id, {
       buy_ins: newTotal,
       net_amount: (gamePlayer.final_stack || 0) - (newTotal * buyInAmount)
     }, true); // Log this change
@@ -50,34 +51,40 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   }, [gamePlayer.final_stack]);
 
   const confirmFinalStack = useCallback(() => {
-    onUpdatePlayer(gamePlayer.id, { 
+    onUpdatePlayer(gamePlayer.id, {
       final_stack: localFinalStack,
       net_amount: localFinalStack - (gamePlayer.buy_ins * buyInAmount)
     });
     setHasFinalStackChanges(false);
   }, [gamePlayer.id, gamePlayer.buy_ins, localFinalStack, buyInAmount, onUpdatePlayer]);
 
+  const profitLossBadgeColor = netAmount > 0
+    ? "bg-green-500/20 text-[#00ff88] border-[#00ff88]/30"
+    : netAmount < 0
+      ? "bg-red-500/20 text-[#ff4d4d] border-[#ff4d4d]/30"
+      : "bg-gray-500/20 text-gray-400 border-gray-500/30";
+
   return (
-    <Card shadow="sm" padding="xs" radius="md" withBorder className="hover:border-primary/50 transition-colors touch-manipulation">
+    <GlassCard className="p-3 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5">
       <Stack gap="xs">
         {/* Header: Avatar, Player Name, Buy-ins Badge, and History Button */}
         <Group justify="space-between" gap="xs" wrap="nowrap">
           <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
-            <OptimizedAvatar 
+            <OptimizedAvatar
               name={gamePlayer.player.name}
               size="sm"
               className="flex-shrink-0"
             />
-            <Text size="sm" fw={700} truncate style={{ flex: 1 }}>
+            <Text className="font-luxury tracking-wide" size="sm" fw={700} truncate style={{ flex: 1 }}>
               {gamePlayer.player.name}
             </Text>
           </Group>
-          
+
           <Group gap={4} wrap="nowrap">
-            <Badge size="xs" variant="light">
+            <Badge size="xs" variant="filled" className="bg-gold-500/20 text-gold-400 font-numbers border border-gold-500/30">
               {gamePlayer.buy_ins} buy-in{gamePlayer.buy_ins !== 1 ? 's' : ''}
             </Badge>
-            <BuyInHistoryDialog 
+            <BuyInHistoryDialog
               gamePlayerId={gamePlayer.id}
               playerName={gamePlayer.player.name}
               fetchHistory={fetchBuyInHistory}
@@ -86,10 +93,10 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         </Group>
 
         {/* Buy-ins and Final Stack Row */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {/* Buy-ins Input */}
           <Stack gap={4}>
-            <Text size="xs" fw={600} c="dimmed" style={{ fontSize: '10px' }}>
+            <Text size="xs" fw={700} className="text-gold-200/60 uppercase tracking-tighter" style={{ fontSize: '9px' }}>
               Add Buy-ins
             </Text>
             <Group gap={4} wrap="nowrap">
@@ -99,19 +106,24 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
                 size="xs"
                 placeholder="0"
+                className="flex-1"
                 styles={{
                   input: {
                     textAlign: 'center',
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
+                    fontFamily: 'var(--font-numbers)',
+                    fontSize: '13px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    color: 'white',
+                    height: '32px'
                   }
                 }}
               />
               {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={handleAddBuyIns}
-                  className="min-w-[28px] h-7 px-2"
+                  className="min-w-[32px] h-8 px-0 bg-gold-600 hover:bg-gold-500 text-black font-bold"
                 >
                   +
                 </Button>
@@ -121,8 +133,8 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
 
           {/* Final Stack Input */}
           <Stack gap={4}>
-            <Text size="xs" fw={600} c="dimmed" style={{ fontSize: '10px' }}>
-              Final Stack (Rs.)
+            <Text size="xs" fw={700} className="text-gold-200/60 uppercase tracking-tighter" style={{ fontSize: '9px' }}>
+              Final Stack
             </Text>
             <Group gap={4} wrap="nowrap">
               <TextInput
@@ -131,21 +143,26 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
                 size="xs"
                 placeholder="0"
+                className="flex-1"
                 styles={{
                   input: {
                     textAlign: 'center',
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
+                    fontFamily: 'var(--font-numbers)',
+                    fontSize: '13px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    color: 'white',
+                    height: '32px'
                   }
                 }}
               />
               {hasFinalStackChanges && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={confirmFinalStack}
-                  className="min-w-[28px] w-7 h-7 p-0"
+                  className="min-w-[32px] w-8 h-8 p-0 bg-green-600 hover:bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]"
                 >
-                  <Check className="w-3 h-3" />
+                  <Check className="w-4 h-4" />
                 </Button>
               )}
             </Group>
@@ -153,27 +170,24 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         </div>
 
         {/* Summary Row */}
-        <Box pt="xs" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
-          <Stack gap={4}>
-            <Group justify="space-between">
-              <Text size="xs" c="dimmed" fw={500}>Total Buy-ins:</Text>
-              <Text size="xs" fw={600}>Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
-            </Group>
-            <Group justify="space-between">
-              <Text size="xs" c="dimmed" fw={500}>Net P&L:</Text>
-              <Badge 
-                color={getProfitLossColor(netAmount)}
-                variant="filled"
-                size="sm"
-                style={getProfitLossBadgeStyle(netAmount)}
-              >
-                {formatProfitLoss(netAmount)}
-              </Badge>
-            </Group>
-          </Stack>
-        </Box>
+        <div className="pt-2 border-t border-white/5 space-y-1.5">
+          <Group justify="space-between">
+            <Text size="xs" className="text-white/40 font-medium">Total Buy-ins:</Text>
+            <Text size="xs" className="font-numbers text-white/80">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</Text>
+          </Group>
+          <Group justify="space-between">
+            <Text size="xs" className="text-white/40 font-medium">Net P&L:</Text>
+            <Badge
+              className={`font-numbers px-2 py-0.5 border h-auto ${profitLossBadgeColor}`}
+              variant="outline"
+              size="sm"
+            >
+              {formatProfitLoss(netAmount)}
+            </Badge>
+          </Group>
+        </div>
       </Stack>
-    </Card>
+    </GlassCard>
   );
 });
 

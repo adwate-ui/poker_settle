@@ -77,11 +77,40 @@ export default {
           green: "hsl(var(--money-green))",
           red: "hsl(var(--money-red))",
         },
+        // Ultimate Luxury Design System
+        gold: {
+          100: "#F9F4DF",
+          200: "#F1E6B9",
+          300: "#E9D893",
+          400: "#E1CA6D",
+          500: "#D4B83C",
+          600: "#BCA334",
+          700: "#A48E2C",
+          800: "#8C7924",
+          900: "#74641C",
+        },
+        felt: {
+          DEFAULT: "#1e3a2d",
+          dark: "#1e3a2d",
+          texture: "radial-gradient(circle, #244a39 0%, #1e3a2d 100%)",
+        },
       },
       backgroundImage: {
         'gradient-poker': 'var(--gradient-poker)',
         'gradient-gold': 'var(--gradient-gold)',
         'gradient-dark': 'var(--gradient-dark)',
+        'luxury-gradient': 'linear-gradient(to bottom right, #000000, #1a1a2e)',
+        'gold-sheen': 'linear-gradient(45deg, #D4B83C 0%, #F1E6B9 50%, #D4B83C 100%)',
+        'glass-panel': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+      },
+      boxShadow: {
+        'glow-gold': '0 0 20px rgba(212, 184, 60, 0.4)',
+        'chip-depth': '0 6px 0 rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.3)',
+      },
+      fontFamily: {
+        luxury: ['Playfair Display', 'serif'],
+        numbers: ['Space Mono', 'monospace'],
+        body: ['Inter', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

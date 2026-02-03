@@ -90,6 +90,8 @@ const mantineTheme = createTheme({
   },
 });
 
+import LuxuryLayout from "@/components/layout/LuxuryLayout";
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -97,10 +99,10 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary" />
-          <p className="text-sm sm:text-base text-muted-foreground">Loading...</p>
+          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-[0_0_15px_rgba(212,184,60,0.5)]" />
+          <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Initializing Poker Settle...</p>
         </div>
       </div>
     );
@@ -158,7 +160,9 @@ const App = () => {
               <Notifications position="top-right" />
               <OfflineIndicator />
               <PWAInstallPrompt />
-              <AppContent />
+              <LuxuryLayout>
+                <AppContent />
+              </LuxuryLayout>
             </MantineProvider>
           </ChipProvider>
         </ThemeProvider>
