@@ -44,8 +44,8 @@ export const PlayerFormDialog = ({
   onOpenChange,
   onSave,
   initialData,
-  title = "Authenticate Participant",
-  description = "Complete the identification protocol for the participant ledger.",
+  title = "Add Player",
+  description = "Enter player details.",
 }: PlayerFormDialogProps) => {
   const [name, setName] = useState(initialData?.name || "");
   const [email, setEmail] = useState(initialData?.email || "");
@@ -108,7 +108,7 @@ export const PlayerFormDialog = ({
       setUpiId("");
       setPaymentPreference('upi');
       onOpenChange(false);
-      toast.success(initialData ? "Identity archives updated" : "New participant authenticated");
+      toast.success(initialData ? "Player updated" : "New player added");
     } catch (error) {
       console.error("Error saving participant:", error);
     } finally {
@@ -187,7 +187,7 @@ export const PlayerFormDialog = ({
                   </div>
                   <Input
                     type="email"
-                    placeholder="endpoint@protocol.com"
+                    placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isSubmitting}
@@ -213,7 +213,7 @@ export const PlayerFormDialog = ({
                     <CreditCard className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
                   </div>
                   <Input
-                    placeholder="user@bank-protocol"
+                    placeholder="user@bank"
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     disabled={isSubmitting}
@@ -225,7 +225,7 @@ export const PlayerFormDialog = ({
 
             {/* Protocol Preference */}
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Preferred Settlement Protocol</Label>
+              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Preferred Payment Method</Label>
               <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value as 'upi' | 'cash')}>
                 <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
                   <div className="flex items-center gap-3">
@@ -249,14 +249,14 @@ export const PlayerFormDialog = ({
               disabled={isSubmitting}
               className="font-luxury uppercase tracking-[0.2em] text-[10px] h-12 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
             >
-              Abort Protocol
+              Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || !name.trim()}
               className="font-luxury uppercase tracking-[0.2em] text-[10px] h-12 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black border-0 shadow-lg shadow-gold-900/10 rounded-lg flex-1 transition-all"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <div className="flex items-center gap-2"><Check className="h-4 w-4" /> <span>{initialData ? "Apply Amendments" : "Authenticate Identity"}</span></div>}
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <div className="flex items-center gap-2"><Check className="h-4 w-4" /> <span>{initialData ? "Save Changes" : "Add Player"}</span></div>}
             </Button>
           </DialogFooter>
         </form>

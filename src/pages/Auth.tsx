@@ -61,7 +61,7 @@ const Auth = () => {
         <CardContent className="px-10 pb-12 space-y-8">
           <div className="space-y-4 text-center">
             <p className="text-gray-400 text-sm leading-relaxed max-w-[280px] mx-auto">
-              Please authenticate to access your private high-stakes archives and performance analytics.
+              Please sign in to access your games and performance analytics.
             </p>
           </div>
 

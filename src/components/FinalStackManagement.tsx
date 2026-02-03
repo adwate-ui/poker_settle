@@ -48,7 +48,7 @@ export const FinalStackManagement = ({
     setIsUpdating(true);
     try {
       await onUpdateFinalStack(selectedPlayerId, value);
-      toast.success('Final stack authenticated');
+      toast.success('Final stack saved');
       setOpened(false);
       setSelectedPlayerId('');
       setEditValue('');
@@ -149,7 +149,7 @@ export const FinalStackManagement = ({
 
           <div className="py-8 space-y-6">
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase font-luxury tracking-[0.3em] text-gold-500/60 ml-1">Stack Valuation (INR)</Label>
+              <Label className="text-[10px] uppercase font-luxury tracking-[0.3em] text-gold-500/60 ml-1">Final Stack (INR)</Label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <span className="text-gold-500 font-numbers text-sm opacity-50">₹</span>

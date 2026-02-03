@@ -175,26 +175,26 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card className="max-w-4xl mx-auto relative overflow-hidden border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl">
+    <Card className="max-w-4xl mx-auto relative overflow-hidden border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/40 backdrop-blur-xl">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-[#f9f4df]/90 dark:bg-[#0a0a0a]/90 border-gold-900/20 dark:border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
+          <Card className="w-full max-w-md bg-white/90 dark:bg-[#0a0a0a]/90 border-black/20 dark:border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-full bg-gold-500/10 border border-gold-500/20">
                   <Play className="h-5 w-5 text-gold-500" />
                 </div>
-                <CardTitle className="text-2xl font-luxury text-luxury-primary">
+                <CardTitle className="text-2xl font-luxury text-gold-900 dark:text-gold-100">
                   Active Game
                 </CardTitle>
               </div>
               <CardDescription className="text-gray-400">
-                You have an ongoing session in progress. Please complete your current accounting before initiating a new ledger.
+                You have a game in progress. Please complete the current game before starting a new one.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
               <Button onClick={continueGame} className="w-full h-12 text-base font-luxury tracking-widest uppercase hover:scale-[1.02] transition-transform shadow-lg shadow-gold-500/10" variant="default">
-                Resume Active Ledger
+                Resume Active Game
               </Button>
             </CardContent>
           </Card>
@@ -202,11 +202,11 @@ const NewGame = () => {
       )}
 
       <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-luxury text-luxury-primary uppercase tracking-widest">
-          Start New Ledger
+        <CardTitle className="text-3xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">
+          Start New Game
         </CardTitle>
         <CardDescription className="text-gray-400">
-          Configure game parameters and invite participants to the table.
+          Configure game settings and add players.
         </CardDescription>
       </CardHeader>
 
@@ -231,7 +231,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
               <div className="absolute right-0 bottom-3 text-gold-500/30 group-focus-within:text-gold-500 transition-colors">
                 <Info className="h-4 w-4" />
@@ -258,7 +258,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -278,14 +278,14 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-luxury-primary placeholder:text-gold-900/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-0 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
               />
             </div>
           </div>
 
           {/* Add Players Section */}
           <div className="space-y-4 pt-4 border-t border-white/5">
-            <h3 className="text-base font-luxury uppercase tracking-widest text-gold-400">Invite Participants</h3>
+            <h3 className="text-base font-luxury uppercase tracking-widest text-gold-400">Add Players</h3>
             <PlayerSelector
               allPlayers={players}
               selectedPlayers={gamePlayers}
@@ -299,7 +299,7 @@ const NewGame = () => {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-4 pb-8 px-8 border-t border-white/5 bg-white/2">
+      <CardFooter className="pt-4 pb-8 px-8 border-t border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2">
         <Button
           onClick={startGame}
           disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
@@ -309,12 +309,12 @@ const NewGame = () => {
           {loading ? (
             <div className="flex items-center gap-3">
               <Loader2 className="h-6 w-6 animate-spin text-gold-200" />
-              <span>Authenticating Table...</span>
+              <span>Starting Game...</span>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <Play className="h-6 w-6 translate-y-[-1px] group-hover:text-gold-200 transition-colors" />
-              <span>Open Table</span>
+              <span>Start Game</span>
             </div>
           )}
         </Button>

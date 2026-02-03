@@ -165,7 +165,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
-                <h1 className="text-3xl font-luxury text-gold-100 uppercase tracking-widest mb-1">Establish Table Protocol</h1>
+                <h1 className="text-3xl font-luxury text-gold-100 uppercase tracking-widest mb-1">Setup Table</h1>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Assigning initial seat identifiers</p>
               </div>
               <Button
@@ -204,13 +204,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <CardHeader className="p-6 border-b border-white/5 bg-white/2">
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="h-5 w-5 text-gold-500/40" />
-                      <CardTitle className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Base Protocol</CardTitle>
+                      <CardTitle className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Game Settings</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-8 space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Stake Valuation (INR)</Label>
+                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Buy-in Amount (INR)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <span className="text-gold-500 font-numbers text-sm opacity-50">₹</span>
@@ -226,7 +226,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       </div>
 
                       <div className="space-y-3">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Authenticate New Participant</Label>
+                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Add New Player</Label>
                         <div className="relative group flex gap-3">
                           <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -254,7 +254,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     {selectedPlayers.length > 0 && (
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/40">Authenticated Participants</p>
+                          <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/40">Added Players</p>
                           <Badge className="bg-gold-500/10 text-gold-500 border border-gold-500/20 font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -281,7 +281,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       <div className="space-y-1">
                         <AlertTitle className="font-luxury uppercase tracking-widest text-sm">Suspended Sequence Detected</AlertTitle>
                         <AlertDescription className="text-xs text-white/40 uppercase tracking-widest leading-relaxed">
-                          An incomplete session remains active in the ledger. Finalize or terminate the current sequence before initiating a new initiation protocol.
+                          An incomplete game is active. Finish the current game before starting a new one.
                         </AlertDescription>
                       </div>
                     </div>
@@ -304,7 +304,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     )}
                   >
                     <Play className="w-4 h-4 mr-3 fill-current" />
-                    Initiate Protocol — {selectedPlayers.length} Units
+                    Start Game — {selectedPlayers.length} Players
                   </Button>
                 </div>
 
@@ -322,7 +322,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
                           <div className="flex items-center gap-3">
                             <Users className="h-4 w-4 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                            <h3 className="text-sm font-luxury text-gold-100/80 uppercase tracking-[0.2em]">Archive Registry</h3>
+                            <h3 className="text-sm font-luxury text-gold-100/80 uppercase tracking-[0.2em]">Saved Players</h3>
                           </div>
                           <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", isPreviousPlayersOpen && "rotate-180")} />
                         </div>
@@ -394,7 +394,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               <Search className="h-3.5 w-3.5 text-white/20 group-focus-within:text-gold-500 transition-colors" />
                             </div>
                             <Input
-                              placeholder="Archive Search..."
+                              placeholder="Search players..."
                               value={gameSearchQuery}
                               onChange={(e) => setGameSearchQuery(e.target.value)}
                               className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[10px] uppercase text-gold-100/60 placeholder:text-white/10"

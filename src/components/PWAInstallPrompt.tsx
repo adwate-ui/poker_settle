@@ -46,7 +46,7 @@ export const PWAInstallPrompt = () => {
               <div className="space-y-1">
                 <h4 className="font-luxury text-sm font-bold text-gold-100 uppercase tracking-widest leading-none">Luxury Suite Key</h4>
                 <p className="text-[10px] font-luxury text-gold-500/40 uppercase tracking-[0.2em] leading-relaxed">
-                  Install for instant archive access and premium offline protocol.
+                  Install for instant access and premium offline experience.
                 </p>
               </div>
             </div>

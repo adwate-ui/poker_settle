@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2, Minus, X, User, Coins, TrendingUp } from 'lucide-react';
@@ -36,13 +37,13 @@ export const BuyInManagementTable = ({
 
   const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
     if (!selectedPlayerId || typeof buyInCount !== 'number' || buyInCount === 0) {
-      toast.error('Please select a participant and valid variance');
+      toast.error('Please select a player and valid amount');
       return { valid: false };
     }
 
     const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
     if (!selectedPlayer) {
-      toast.error('Participant not found');
+      toast.error('Player not found');
       return { valid: false };
     }
 
@@ -60,15 +61,15 @@ export const BuyInManagementTable = ({
     setIsAdding(true);
     try {
       await onAddBuyIn(selectedPlayerId, buyInCount);
-      const action = buyInCount > 0 ? 'Authenticated' : 'Amended';
+      const action = buyInCount > 0 ? 'Added' : 'Removed';
       const count = Math.abs(buyInCount);
-      toast.success(`${action} ${count} buy-in unit(s) for ${selectedPlayer.player.name}`);
+      toast.success(`${action} ${count} buy-in(s) for ${selectedPlayer.player.name}`);
       setOpened(false);
       setSelectedPlayerId('');
       setBuyInCount(1);
     } catch (error) {
       console.error('Error updating buy-ins:', error);
-      toast.error('Protocol failed to update archives');
+      toast.error('Failed to update buy-ins');
     } finally {
       setIsAdding(false);
     }
@@ -104,14 +105,14 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <div className="rounded-xl border border-white/10 overflow-hidden bg-black/20 shadow-inner">
+      <div className="rounded-xl border border-black/10 dark:border-white/10 overflow-hidden bg-black/5 dark:bg-black/20 shadow-inner">
         <div className="overflow-x-auto custom-scrollbar">
           <Table>
-            <TableHeader className="bg-white/5 border-b border-white/10">
+            <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10">
               <TableRow className="hover:bg-transparent border-0 h-12">
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6">Participant</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Holdings</TableHead>
-                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Valuation</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 pl-6">Player</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Buy-ins</TableHead>
+                <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60">Amount</TableHead>
                 <TableHead className="font-luxury uppercase tracking-[0.2em] text-[10px] text-gold-500/60 text-right pr-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -124,17 +125,17 @@ export const BuyInManagementTable = ({
                   <TableCell className="pl-6">
                     <div className="flex items-center gap-3">
                       <User className="h-3.5 w-3.5 text-gold-500/30 group-hover:text-gold-500/60 transition-colors" />
-                      <span className="font-luxury text-sm text-gold-100 uppercase tracking-widest">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
+                      <span className="font-luxury text-sm text-gold-900 dark:text-gold-100 uppercase tracking-widest">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Coins className="h-3 w-3 text-gold-500/40" />
-                      <span className="font-numbers text-base text-gold-200/80">{gamePlayer.buy_ins}</span>
+                      <span className="font-numbers text-base text-gold-800 dark:text-gold-200/80">{gamePlayer.buy_ins}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+                    <span className="font-numbers text-sm text-gold-900/60 dark:text-gold-100/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
                   </TableCell>
                   <TableCell className="text-right pr-6">
                     <div className="flex items-center justify-end gap-3">
@@ -180,8 +181,8 @@ export const BuyInManagementTable = ({
                 <TrendingUp className="w-5 h-5 text-gold-500" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Adjust Stake Variance</DialogTitle>
-                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Participant: {selectedPlayer?.player.name}</DialogDescription>
+                <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manage Buy-ins</DialogTitle>
+                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Player: {selectedPlayer?.player.name}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -200,12 +201,12 @@ export const BuyInManagementTable = ({
                 <div className="flex flex-col items-center min-w-[120px]">
                   <span className={cn(
                     "text-5xl font-numbers tracking-tight transition-colors",
-                    buyInCount < 0 ? 'text-red-400' : 'text-gold-200'
+                    buyInCount < 0 ? 'text-red-400' : 'text-gold-800 dark:text-gold-200'
                   )}>
                     {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
                   </span>
                   <span className="text-[10px] font-luxury uppercase tracking-[0.3em] text-gold-500/40 mt-2">
-                    {Math.abs(buyInCount) === 1 ? 'Unit Increment' : 'Unit Increments'}
+                    {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
                   </span>
                 </div>
 
@@ -224,10 +225,10 @@ export const BuyInManagementTable = ({
                   ? 'bg-gold-500/5 border-gold-500/20 shadow-[0_0_30px_rgba(212,184,60,0.05)]'
                   : 'bg-red-500/5 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.05)]'
               )}>
-                <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-white/30 mb-2">Protocol Valuation Impact</p>
+                <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-white/30 mb-2">Cost Impact</p>
                 <p className={cn(
                   "text-3xl font-numbers",
-                  buyInCount > 0 ? 'text-gold-100' : 'text-red-100'
+                  buyInCount > 0 ? 'text-gold-900 dark:text-gold-100' : 'text-red-600 dark:text-red-100'
                 )}>
                   Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
                 </p>
@@ -239,9 +240,9 @@ export const BuyInManagementTable = ({
             <Button
               variant="ghost"
               onClick={() => setOpened(false)}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
+              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 transition-colors rounded-lg flex-1"
             >
-              Abort Protocol
+              Cancel
             </Button>
             <Button
               onClick={handleAddBuyIn}
@@ -253,7 +254,7 @@ export const BuyInManagementTable = ({
                   : 'bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-gold-900/10'
               )}
             >
-              {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Execute {buyInCount > 0 ? 'Asset Entry' : 'Manual Audit'}</span>}
+              {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>{buyInCount > 0 ? 'Add Buy-in' : 'Remove Buy-in'}</span>}
             </Button>
           </DialogFooter>
         </DialogContent>

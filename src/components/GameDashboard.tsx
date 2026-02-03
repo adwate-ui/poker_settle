@@ -202,7 +202,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const addNewPlayer = useCallback(async () => {
     if (!newPlayerName.trim()) {
-      toast.error("Please enter a participant identity");
+      toast.error("Please enter a player name");
       return;
     }
 
@@ -213,9 +213,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setGamePlayers([...gamePlayers, gamePlayer]);
       setNewPlayerName('');
       setShowAddPlayer(false);
-      toast.success(`${player.name} authenticated into session`);
+      toast.success(`${player.name} added to game`);
     } catch (error) {
-      toast.error("Protocol failed to enroll participant");
+      toast.error("Failed to add player");
     } finally {
       setIsCreatingPlayer(false);
     }
@@ -227,9 +227,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
       setSearchQuery('');
-      toast.success(`${player.name} integrated into session`);
+      toast.success(`${player.name} added to game`);
     } catch (error) {
-      toast.error("Protocol failed to integrate participant");
+      toast.error("Failed to add player");
     }
   }, [game.id, addPlayerToGame, gamePlayers]);
 
@@ -245,12 +245,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const addManualTransfer = useCallback(() => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
-      toast.error("Incomplete transfer parameters");
+      toast.error("Incomplete transfer details");
       return;
     }
 
     if (newTransferFrom === newTransferTo) {
-      toast.error("Recursive transfer sequence identified");
+      toast.error("Cannot transfer to self");
       return;
     }
 
@@ -265,12 +265,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     setNewTransferTo('');
     setNewTransferAmount('');
     setShowManualTransfer(false);
-    toast.success("Manual variance amendment added");
+    toast.success("Manual adjustment added");
   }, [newTransferFrom, newTransferTo, newTransferAmount, manualTransfers]);
 
   const removeManualTransfer = useCallback((index: number) => {
     setManualTransfers(manualTransfers.filter((_, i) => i !== index));
-    toast.info("Transfer amendment retracted");
+    toast.info("Adjustment removed");
   }, [manualTransfers]);
 
   const settlements = useMemo(() => {
@@ -293,10 +293,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
     try {
       await completeGame(game.id, allSettlements);
-      toast.success("Sequence finalized successfully");
+      toast.success("Game finalized successfully");
       navigate(`/games/${game.id}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Protocol breach: Failed to finalize sequence");
+      toast.error(error instanceof Error ? error.message : "Failed to finalize game");
       setIsCompletingGame(false);
     }
   }, [game.id, manualTransfers, settlements, completeGame, navigate, isCompletingGame]);
@@ -308,11 +308,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setShowPositionEditor(false);
       setPositionsJustChanged(true);
       setHandTrackingStage('ready');
-      toast.success("Table identifiers synchronized");
+      toast.success("Seating saved");
 
       setTimeout(() => setPositionsJustChanged(false), 2000);
     } catch (error) {
-      toast.error("Failed to synchronize table protocol");
+      toast.error("Failed to save seating");
     }
   }, [game.id, saveTablePosition]);
 
@@ -388,19 +388,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <Button
               onClick={onBackToSetup}
               variant="ghost"
-              className="h-11 px-5 border border-white/5 bg-white/2 hover:bg-white/5 text-white/40 font-luxury uppercase tracking-widest text-[10px] rounded-lg transition-all"
+              className="h-11 px-5 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 text-gold-900/40 dark:text-white/40 font-luxury uppercase tracking-widest text-[10px] rounded-lg transition-all"
             >
               <ArrowLeft className="w-3.5 h-3.5 mr-2" />
-              Reset Protocol
+              Reset Game
             </Button>
 
             <div className="flex-1">
-              <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-gold-100 mb-1">
-                Executive Console
+              <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-gold-900 dark:text-gold-100 mb-1">
+                Game Dashboard
               </h1>
               <p className="text-gold-400/60 font-numbers text-[11px] tracking-[0.3em] uppercase flex items-center gap-3">
                 <ShieldCheck className="h-3 w-3" />
-                <span>Base Unit: {formatCurrency(game.buy_in_amount)}</span>
+                <span>Buy-in: {formatCurrency(game.buy_in_amount)}</span>
                 <span className="w-1 h-1 rounded-full bg-gold-500/30" />
                 <span>{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
               </p>
@@ -412,7 +412,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               variant="ghost"
               size="icon"
               onClick={handleShare}
-              className="h-11 w-11 border border-white/5 bg-white/2 hover:bg-gold-500/10 text-gold-400 hover:text-gold-200 transition-all rounded-lg"
+              className="h-11 w-11 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-gold-500/10 text-gold-600 dark:text-gold-400 hover:text-gold-500 dark:hover:text-gold-200 transition-all rounded-lg"
             >
               <Share2 className="h-4.5 w-4.5" />
             </Button>
@@ -429,27 +429,27 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <GlassCard className="p-0 overflow-hidden">
               <Collapsible open={gameStatsOpen} onOpenChange={setGameStatsOpen}>
                 <CollapsibleTrigger asChild>
-                  <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                  <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       <LayoutDashboard className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                      <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Sequence Pulse</h3>
+                      <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Game Stats</h3>
                     </div>
                     <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", gameStatsOpen && "rotate-180")} />
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="p-8 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in slide-in-from-top-2 duration-300">
-                    <div className="space-y-2 p-5 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold-500/20 transition-all">
-                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Aggregated Pot</p>
-                      <p className="text-2xl font-numbers text-gold-200">{formatCurrency(totalBuyIns)}</p>
+                    <div className="space-y-2 p-5 rounded-2xl bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/5 group hover:border-gold-500/20 transition-all">
+                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Total Buy-ins</p>
+                      <p className="text-2xl font-numbers text-gold-800 dark:text-gold-200">{formatCurrency(totalBuyIns)}</p>
                     </div>
-                    <div className="space-y-2 p-5 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold-500/20 transition-all">
-                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Active Liquidity</p>
-                      <p className="text-2xl font-numbers text-gold-200">{formatCurrency(totalFinalStack)}</p>
+                    <div className="space-y-2 p-5 rounded-2xl bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/5 group hover:border-gold-500/20 transition-all">
+                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Chips in Play</p>
+                      <p className="text-2xl font-numbers text-gold-800 dark:text-gold-200">{formatCurrency(totalFinalStack)}</p>
                     </div>
-                    <div className="space-y-2 p-5 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold-500/20 transition-all">
-                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Authenticated Units</p>
-                      <p className="text-2xl font-numbers text-gold-200">{gamePlayers.length}</p>
+                    <div className="space-y-2 p-5 rounded-2xl bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/5 group hover:border-gold-500/20 transition-all">
+                      <p className="text-[10px] text-gold-500/40 font-luxury tracking-[0.2em] uppercase">Players</p>
+                      <p className="text-2xl font-numbers text-gold-800 dark:text-gold-200">{gamePlayers.length}</p>
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -470,10 +470,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               <GlassCard className="p-0 overflow-hidden">
                 <Collapsible open={tablePositionOpen} onOpenChange={setTablePositionOpen}>
                   <CollapsibleTrigger asChild>
-                    <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                    <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
                       <div className="flex items-center gap-3">
                         <UsersIcon className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                        <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Table Protocol</h3>
+                        <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Seating</h3>
                       </div>
                       <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", tablePositionOpen && "rotate-180")} />
                     </div>
@@ -491,16 +491,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         <Button
                           onClick={() => setShowPositionEditor(true)}
                           variant="ghost"
-                          className="flex-1 h-14 border border-white/5 bg-white/2 hover:bg-white/5 text-white/40 font-luxury uppercase tracking-widest text-[11px] rounded-xl transition-all"
+                          className="flex-1 h-14 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 text-gold-900/40 dark:text-white/40 font-luxury uppercase tracking-widest text-[11px] rounded-xl transition-all"
                         >
-                          Amend Identifiers
+                          Edit Seating
                         </Button>
                         <Button
                           onClick={handleStartHandTracking}
                           className="flex-1 h-14 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black font-luxury uppercase tracking-widest text-[11px] rounded-xl shadow-xl shadow-gold-900/10 transition-all"
                         >
                           <Play className="w-4 h-4 mr-3 fill-current" />
-                          {hasSavedHandState ? 'Resume Sequence' : 'Commence Hand'}
+                          {hasSavedHandState ? 'Resume Hand' : 'Start Hand'}
                         </Button>
                       </div>
                     </div>
@@ -508,21 +508,21 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </Collapsible>
               </GlassCard>
             ) : (
-              <GlassCard className="p-12 border-dashed border-white/10 bg-white/2">
+              <GlassCard className="p-12 border-dashed border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/2">
                 <div className="text-center space-y-8">
                   <div className="mx-auto w-24 h-24 bg-gold-500/10 rounded-full flex items-center justify-center border border-gold-500/20 shadow-inner">
                     <UsersIcon className="w-10 h-10 text-gold-500/20" />
                   </div>
                   <div className="space-y-3">
-                    <h3 className="text-2xl font-luxury text-gold-100 uppercase tracking-widest leading-none">Initialize Seat IDs</h3>
-                    <p className="text-[11px] font-luxury text-white/20 uppercase tracking-[0.2em] max-w-xs mx-auto">Establish the table protocol to begin recording session metadata.</p>
+                    <h3 className="text-2xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest leading-none">Setup Seating</h3>
+                    <p className="text-[11px] font-luxury text-black/20 dark:text-white/20 uppercase tracking-[0.2em] max-w-xs mx-auto">Establish the table arrangement to begin.</p>
                   </div>
                   <Button
                     onClick={() => setShowPositionEditor(true)}
-                    className="h-14 px-10 bg-white/5 border border-white/10 hover:bg-gold-500/10 text-gold-400 font-luxury uppercase tracking-[.2em] text-xs transition-all rounded-xl"
+                    className="h-14 px-10 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-gold-500/10 text-gold-600 dark:text-gold-400 font-luxury uppercase tracking-[.2em] text-xs transition-all rounded-xl"
                   >
                     <UsersIcon className="w-4 h-4 mr-3" />
-                    Synchronize Seats
+                    Save Seating
                   </Button>
                 </div>
               </GlassCard>
@@ -542,10 +542,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <GlassCard className="p-0 overflow-hidden">
               <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
                 <CollapsibleTrigger asChild>
-                  <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                  <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       <Plus className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                      <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Stake Amendments</h3>
+                      <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Buy-ins</h3>
                     </div>
                     <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
                   </div>
@@ -567,10 +567,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <GlassCard className="p-0 overflow-hidden">
               <Collapsible open={finalStackLogsOpen} onOpenChange={setFinalStackLogsOpen}>
                 <CollapsibleTrigger asChild>
-                  <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                  <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       <DollarSign className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                      <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Terminal Liquidity</h3>
+                      <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Final Stacks</h3>
                     </div>
                     <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", finalStackLogsOpen && "rotate-180")} />
                   </div>
@@ -594,10 +594,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <GlassCard className="p-0 overflow-hidden">
               <Collapsible open={playersOpen} onOpenChange={setPlayersOpen}>
                 <CollapsibleTrigger asChild>
-                  <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                  <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       <UsersIcon className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                      <h3 className="text-sm font-luxury text-gold-100 uppercase tracking-widest">Registry ({gamePlayers.length})</h3>
+                      <h3 className="text-sm font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Players ({gamePlayers.length})</h3>
                     </div>
                     <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", playersOpen && "rotate-180")} />
                   </div>
@@ -607,23 +607,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
                       <DialogTrigger asChild>
                         <Button
-                          className="w-full h-12 bg-white/5 border border-white/10 hover:bg-gold-500/10 text-gold-200 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all"
+                          className="w-full h-12 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-gold-500/10 text-gold-900 dark:text-gold-200 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all"
                         >
                           <UserPlus className="w-3.5 h-3.5 mr-2.5 text-gold-500" />
-                          Enroll Identity
+                          Add Player
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
-                        <DialogHeader className="p-8 border-b border-white/5 bg-white/2">
-                          <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Identify & Enroll Participant</DialogTitle>
-                          <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury mt-1">Select from the registry or authenticate a new profile.</DialogDescription>
+                        <DialogHeader className="p-8 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
+                          <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Add New Player</DialogTitle>
+                          <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury mt-1">Select existing or add new.</DialogDescription>
                         </DialogHeader>
 
                         <div className="p-8">
                           <Tabs defaultValue="existing" className="space-y-8">
-                            <TabsList className="bg-white/5 border border-white/10 p-1 h-12 rounded-xl grid grid-cols-2">
-                              <TabsTrigger value="existing" className="font-luxury uppercase tracking-widest text-[10px] data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">Registry Search</TabsTrigger>
-                              <TabsTrigger value="new" className="font-luxury uppercase tracking-widest text-[10px] data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">New Authentication</TabsTrigger>
+                            <TabsList className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-1 h-12 rounded-xl grid grid-cols-2">
+                              <TabsTrigger value="existing" className="font-luxury uppercase tracking-widest text-[10px] data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">Search Existing</TabsTrigger>
+                              <TabsTrigger value="new" className="font-luxury uppercase tracking-widest text-[10px] data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">New Player</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="existing" className="space-y-6 animate-in fade-in duration-300">
@@ -632,10 +632,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                   <Search className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
                                 </div>
                                 <Input
-                                  placeholder="FILTER ARCHIVE REGISTRY..."
+                                  placeholder="Search players..."
                                   value={searchQuery}
                                   onChange={(e) => setSearchQuery(e.target.value)}
-                                  className="h-12 pl-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[11px] uppercase text-gold-100 placeholder:text-white/10"
+                                  className="h-12 pl-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[11px] uppercase text-black dark:text-gold-100 placeholder:text-black/10 dark:placeholder:text-white/10"
                                 />
                               </div>
 
@@ -646,12 +646,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                       <button
                                         key={player.id}
                                         onClick={() => addExistingPlayer(player)}
-                                        className="w-full text-left p-4 rounded-2xl border border-white/5 bg-white/2 hover:bg-gold-500/5 hover:border-gold-500/20 transition-all group flex items-center gap-4"
+                                        className="w-full text-left p-4 rounded-2xl border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-gold-500/5 hover:border-gold-500/20 transition-all group flex items-center gap-4"
                                       >
                                         <OptimizedAvatar name={player.name} size="md" className="ring-1 ring-gold-500/20" />
                                         <div className="flex-1 min-w-0">
                                           <div className="flex items-center gap-2">
-                                            <span className="font-luxury text-sm font-bold text-gold-100 uppercase tracking-widest truncate">{player.name}</span>
+                                            <span className="font-luxury text-sm font-bold text-gold-900 dark:text-gold-100 uppercase tracking-widest truncate">{player.name}</span>
                                             {player.total_games && player.total_games > 10 && <Star className="h-3 w-3 text-gold-500 fill-current" />}
                                           </div>
                                           <div className="flex gap-2.5 mt-1.5">
@@ -669,8 +669,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                       </button>
                                     ))
                                   ) : (
-                                    <div className="py-20 text-center border border-dashed border-white/10 rounded-2xl bg-white/2">
-                                      <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-white/20">Archive entry not found.</p>
+                                    <div className="py-20 text-center border border-dashed border-black/10 dark:border-white/10 rounded-2xl bg-black/5 dark:bg-white/2">
+                                      <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-black/20 dark:text-white/20">No players found.</p>
                                     </div>
                                   )}
                                 </div>
@@ -679,12 +679,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                             <TabsContent value="new" className="space-y-8 animate-in fade-in duration-300">
                               <div className="space-y-3">
-                                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Participant Identity (Full Name)</Label>
+                                <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Player Name</Label>
                                 <Input
-                                  placeholder="ENTER AUTHENTICATION NAME"
+                                  placeholder="Enter name"
                                   value={newPlayerName}
                                   onChange={(e) => setNewPlayerName(e.target.value)}
-                                  className="h-14 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[13px] uppercase text-gold-100 placeholder:text-white/10"
+                                  className="h-14 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[13px] uppercase text-black dark:text-gold-100 placeholder:text-black/10 dark:placeholder:text-white/10"
                                   onKeyPress={(e) => e.key === 'Enter' && !isCreatingPlayer && addNewPlayer()}
                                   autoFocus
                                 />
@@ -694,7 +694,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                 disabled={!newPlayerName.trim() || isCreatingPlayer}
                                 className="w-full h-14 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black font-luxury uppercase tracking-widest text-[11px] rounded-xl shadow-xl shadow-gold-900/10 transition-all"
                               >
-                                {isCreatingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Authenticate & Enroll'}
+                                {isCreatingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Player'}
                               </Button>
                             </TabsContent>
                           </Tabs>
@@ -720,23 +720,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             {/* Manual Transfers */}
             {manualTransfers.length > 0 && (
               <GlassCard className="p-0 overflow-hidden">
-                <div className="p-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
+                <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <History className="h-5 w-5 text-gold-500/40" />
-                    <h3 className="text-sm font-luxury text-gold-100 uppercase tracking-widest">Variance Amendments</h3>
+                    <h3 className="text-sm font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Adjustments</h3>
                   </div>
                 </div>
                 <div className="p-6 space-y-3">
                   {manualTransfers.map((transfer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-white/2 rounded-2xl border border-white/5 group hover:border-gold-500/20 transition-all">
+                    <div key={index} className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/2 rounded-2xl border border-black/10 dark:border-white/5 group hover:border-gold-500/20 transition-all">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[9px] font-luxury uppercase tracking-widest text-gold-500/40">Manual Variance</span>
-                        <span className="text-xs font-luxury text-gold-100 uppercase tracking-widest">
+                        <span className="text-[9px] font-luxury uppercase tracking-widest text-gold-500/40">Adjustment</span>
+                        <span className="text-xs font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">
                           {transfer.from} <span className="opacity-30 inline-block px-1">→</span> {transfer.to}
                         </span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="font-numbers text-sm text-gold-200">
+                        <span className="font-numbers text-sm text-gold-800 dark:text-gold-200">
                           {formatCurrency(transfer.amount)}
                         </span>
                         <button
@@ -755,18 +755,18 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             {/* Add Manual Transfer Form */}
             {showManualTransfer && (
               <GlassCard className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500 border-gold-500/30">
-                <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3 border-b border-black/10 dark:border-white/5 pb-4">
                   <ShieldCheck className="h-5 w-5 text-gold-500" />
-                  <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Amendment Protocol</h3>
+                  <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Adjustment</h3>
                 </div>
 
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Origin Unit</Label>
+                      <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">From Player</Label>
                       <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                        <SelectTrigger className="h-11 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
-                          <SelectValue placeholder="Identify From..." />
+                        <SelectTrigger className="h-11 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase text-black dark:text-white">
+                          <SelectValue placeholder="Select Player..." />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
                           {gamePlayers.map(gp => (
@@ -778,10 +778,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Destination Unit</Label>
+                      <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">To Player</Label>
                       <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                        <SelectTrigger className="h-11 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
-                          <SelectValue placeholder="Identify To..." />
+                        <SelectTrigger className="h-11 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase text-black dark:text-white">
+                          <SelectValue placeholder="Select Player..." />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
                           {gamePlayers.map(gp => (
@@ -795,20 +795,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Variance Amount (INR)</Label>
+                    <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Amount (INR)</Label>
                     <Input
                       type="text"
                       placeholder="0.00"
                       value={newTransferAmount}
                       onChange={(e) => setNewTransferAmount(e.target.value)}
-                      className="h-14 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-xl text-gold-100 placeholder:text-white/10"
+                      className="h-14 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-xl text-black dark:text-gold-100 placeholder:text-black/10 dark:placeholder:text-white/10"
                     />
                   </div>
                 </div>
 
                 <div className="flex gap-4">
-                  <Button onClick={() => setShowManualTransfer(false)} variant="ghost" className="flex-1 h-12 border border-white/5 bg-white/2 hover:bg-white/5 text-white/30 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all">Abort</Button>
-                  <Button onClick={addManualTransfer} className="flex-1 h-12 bg-gold-600 hover:bg-gold-500 text-black font-luxury uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-gold-900/10 transition-all">Authorize</Button>
+                  <Button onClick={() => setShowManualTransfer(false)} variant="ghost" className="flex-1 h-12 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 text-gold-900/30 dark:text-white/30 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all">Cancel</Button>
+                  <Button onClick={addManualTransfer} className="flex-1 h-12 bg-gold-600 hover:bg-gold-500 text-black font-luxury uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-gold-900/10 transition-all">Save</Button>
                 </div>
               </GlassCard>
             )}
@@ -821,16 +821,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     onClick={() => setShowManualTransfer(true)}
                     disabled={!canCompleteGame}
                     variant="ghost"
-                    className="w-full h-12 border border-white/5 bg-white/2 hover:bg-white/5 text-gold-500/40 hover:text-gold-200 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all"
+                    className="w-full h-12 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 text-gold-500/40 hover:text-gold-200 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all"
                   >
                     <Plus className="w-3.5 h-3.5 mr-2.5" />
-                    Manually Amend Variance
+                    Add Manual Adjustment
                   </Button>
                 )}
 
                 <div className="p-6 rounded-2xl bg-gold-500/5 border border-gold-500/10 text-center space-y-1">
-                  <p className="text-[10px] text-gold-500/40 font-luxury uppercase tracking-[0.3em] font-bold">Planned Settlements</p>
-                  <p className="text-2xl font-numbers text-gold-200">{settlements.length}</p>
+                  <p className="text-[10px] text-gold-500/40 font-luxury uppercase tracking-[0.3em] font-bold">Settlements</p>
+                  <p className="text-2xl font-numbers text-gold-800 dark:text-gold-200">{settlements.length}</p>
                 </div>
 
                 <Button
@@ -840,13 +840,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     "w-full h-20 text-black font-black text-xl tracking-tighter rounded-2xl transition-all relative overflow-hidden group",
                     canCompleteGame && !isCompletingGame
                       ? 'bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 bg-[length:200%_100%] animate-shimmer hover:shadow-[0_0_50px_rgba(212,184,60,0.3)] active:scale-95'
-                      : 'bg-white/5 text-white/10 opacity-50'
+                      : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
                   )}
                 >
                   {isCompletingGame ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
                     <div className="flex items-center justify-center gap-4">
                       <Trophy className="w-7 h-7 fill-current" />
-                      <span className="font-luxury uppercase tracking-[0.2em] text-lg">Finalize Sequence</span>
+                      <span className="font-luxury uppercase tracking-[0.2em] text-lg">End Game</span>
                     </div>
                   )}
                 </Button>
@@ -858,13 +858,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     {!isBalanced && (
                       <div className="flex items-center gap-3">
                         <ShieldCheck className="h-4 w-4 text-red-500" />
-                        <p className="text-[10px] font-luxury uppercase tracking-widest text-red-400">Ledger Imbalance: {formatCurrency(totalWinnings + totalLosses)}</p>
+                        <p className="text-[10px] font-luxury uppercase tracking-widest text-red-400">Imbalance: {formatCurrency(totalWinnings + totalLosses)}</p>
                       </div>
                     )}
                     {!isStackBalanced && (
                       <div className="flex items-center gap-3">
                         <ShieldCheck className="h-4 w-4 text-red-500" />
-                        <p className="text-[10px] font-luxury uppercase tracking-widest text-red-400">Archival Deviation: {formatCurrency(totalFinalStack - totalBuyIns)}</p>
+                        <p className="text-[10px] font-luxury uppercase tracking-widest text-red-400">Stack Deviation: {formatCurrency(totalFinalStack - totalBuyIns)}</p>
                       </div>
                     )}
                   </div>
@@ -880,7 +880,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <div className="p-6 border-b border-gold-500/20 bg-gold-500/5 cursor-pointer flex items-center justify-between group">
                       <div className="flex items-center gap-3">
                         <Trophy className="h-5 w-5 text-gold-500 group-hover:scale-110 transition-transform" />
-                        <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Clearance Protocol</h3>
+                        <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Settlements</h3>
                       </div>
                       <ChevronDown className={cn("h-5 w-5 text-gold-500 transition-transform duration-300", settlementsOpen && "rotate-180")} />
                     </div>
@@ -890,13 +890,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       {settlements.map((settlement, index) => (
                         <div key={index} className="flex items-center justify-between p-4 bg-gold-500/5 rounded-2xl border border-gold-500/10 hover:border-gold-500/30 transition-colors group">
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] font-luxury uppercase tracking-widest text-gold-500/40">Transfer Order</span>
-                            <span className="text-xs font-luxury text-gold-100 uppercase tracking-widest">
+                            <span className="text-[9px] font-luxury uppercase tracking-widest text-gold-500/40">Payment</span>
+                            <span className="text-xs font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">
                               {settlement.from} <span className="opacity-30 inline-block px-1">pays</span> {settlement.to}
                             </span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="font-numbers text-base text-gold-200">
+                            <span className="font-numbers text-base text-gold-800 dark:text-gold-200">
                               {formatCurrency(settlement.amount)}
                             </span>
                           </div>

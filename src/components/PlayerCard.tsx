@@ -151,11 +151,11 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         {/* Valuation Summary */}
         <div className="pt-3 border-t border-white/5 flex flex-col gap-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Archive Commitment</span>
+            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Total Buy-ins</span>
             <span className="font-numbers text-[11px] text-white/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex justify-between items-center px-1">
-            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Protocol Valuation</span>
+            <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Amount</span>
             <Badge
               variant="outline"
               className={cn(

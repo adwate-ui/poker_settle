@@ -246,7 +246,7 @@ export const GameDetailView = ({
     } else {
       await refetchGameDetail();
       setManualTransfers([]);
-      toast.success("Settlements recalculated and archived");
+      toast.success("Settlements saved");
     }
   };
 
@@ -277,7 +277,7 @@ export const GameDetailView = ({
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Decrypting Game Archives...</p>
+        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Game Data...</p>
       </div>
     );
   }
@@ -326,7 +326,7 @@ export const GameDetailView = ({
                 <CardTitle className="text-3xl font-luxury text-luxury-primary">
                   Session Ledger — {format(new Date(game.date), "MMMM d, yyyy")}
                 </CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-900/40 dark:text-gold-500/40 font-luxury">Official Sequence Archive</CardDescription>
+                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-900/40 dark:text-gold-500/40 font-luxury">Game Record</CardDescription>
               </div>
             </div>
             <Button
@@ -337,7 +337,7 @@ export const GameDetailView = ({
               className="h-10 px-6 rounded-full bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 hover:bg-gold-500/10 hover:border-gold-500/30 text-gold-800 dark:text-gold-200 font-luxury uppercase tracking-widest text-[10px]"
             >
               <Share2 className="h-3.5 w-3.5 mr-2 text-gold-600 dark:text-gold-500" />
-              Export Archive
+              Export Game
             </Button>
           </div>
         </CardHeader>
@@ -706,7 +706,7 @@ export const GameDetailView = ({
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
                 <Plus className="w-5 h-5 text-gold-600 dark:text-gold-500" />
               </div>
-              <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Settlement Protocol</DialogTitle>
+              <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Settlement</DialogTitle>
             </div>
           </DialogHeader>
 
