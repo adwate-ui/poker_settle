@@ -324,9 +324,9 @@ export const GameDetailView = ({
               </div>
               <div>
                 <CardTitle className="text-3xl font-luxury text-gold-100">
-                  Game Log — {format(new Date(game.date), "MMMM d, yyyy")}
+                  Session Ledger — {format(new Date(game.date), "MMMM d, yyyy")}
                 </CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Official Session Archive</CardDescription>
+                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Official Sequence Archive</CardDescription>
               </div>
             </div>
             <Button
@@ -342,23 +342,23 @@ export const GameDetailView = ({
           </div>
         </CardHeader>
         <CardContent className="pt-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Base Stake</p>
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Blind Level / Unit</p>
               <p className="text-2xl font-numbers text-gold-100">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
             <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Participants</p>
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">The Lineup</p>
               <p className="text-2xl font-numbers text-gold-100">{gamePlayers.length}</p>
             </div>
             <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Assets in Play</p>
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Liquidity</p>
               <p className="text-2xl font-numbers text-gold-500">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
             <div className="p-6 rounded-xl border border-white/5 bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Gross Returns</p>
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60">Total Pot Action</p>
               <p className="text-2xl font-numbers text-green-400">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
               </p>
@@ -374,7 +374,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Buy-in Audit</h3>
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Stack Rebuys</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
             </div>
@@ -394,7 +394,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Table Formation</h3>
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Seat Draw</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", tablePositionsOpen && "rotate-180")} />
             </div>
@@ -454,7 +454,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Performance Ledger</h3>
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Session P&L</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-white/20 transition-transform duration-300", playerResultsOpen && "rotate-180")} />
             </div>
@@ -470,34 +470,34 @@ export const GameDetailView = ({
                         onClick={() => handleSort("name")}
                         className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
                       >
-                        Participant {getSortIcon("name")}
+                        Player {getSortIcon("name")}
                       </Button>
                     </TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("buy_ins")}
-                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
                       >
-                        Stakes {getSortIcon("buy_ins")}
+                        Buy-ins {getSortIcon("buy_ins")}
                       </Button>
                     </TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("net_amount")}
-                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
                       >
-                        Net Outcome {getSortIcon("net_amount")}
+                        P&L {getSortIcon("net_amount")}
                       </Button>
                     </TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("final_stack")}
-                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
+                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-500/60 hover:text-gold-200"
                       >
-                        Terminal Stack {getSortIcon("final_stack")}
+                        Cashout Stack {getSortIcon("final_stack")}
                       </Button>
                     </TableHead>
                     {showOwnerControls && fetchBuyInHistory && (
@@ -515,24 +515,28 @@ export const GameDetailView = ({
                     const isWin = netAmount > 0;
 
                     return (
-                      <TableRow key={gamePlayer.id} className="h-20 border-white/5 hover:bg-gold-500/5 transition-colors">
-                        <TableCell className="pl-8 font-luxury text-[13px] text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1">
-                            {gamePlayer.buy_ins} Stacks
-                          </Badge>
+                      <TableRow key={gamePlayer.id} className="h-12 sm:h-16 border-white/5 hover:bg-gold-500/5 transition-colors">
+                        <TableCell className="pl-4 sm:pl-8 text-left font-luxury text-[13px] text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center">
+                            <Badge variant="outline" className="bg-white/5 border-white/10 text-gold-200/60 font-numbers px-3 py-1">
+                              {gamePlayer.buy_ins} Stacks
+                            </Badge>
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={cn(
-                              "px-4 py-1.5 font-numbers tracking-widest border-0",
-                              isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                            )}
-                          >
-                            {formatProfitLoss(netAmount)}
-                          </Badge>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center">
+                            <Badge
+                              className={cn(
+                                "px-4 py-1.5 font-numbers tracking-widest border-0",
+                                isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                              )}
+                            >
+                              {formatProfitLoss(netAmount)}
+                            </Badge>
+                          </div>
                         </TableCell>
-                        <TableCell className="font-numbers text-base text-gold-100/60">
+                        <TableCell className="text-center font-numbers text-base text-gold-100/60">
                           Rs. {formatIndianNumber(finalStack)}
                         </TableCell>
                         {showOwnerControls && fetchBuyInHistory && (
@@ -561,7 +565,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <Coins className="h-5 w-5 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Settlement Protocols</h3>
+                <h3 className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Debt Settlement</h3>
               </div>
               <div className="flex items-center gap-4">
                 {showOwnerControls && settlementsOpen && (
@@ -624,18 +628,18 @@ export const GameDetailView = ({
                 <Table>
                   <TableHeader className="bg-white/5 border-b border-white/10">
                     <TableRow className="hover:bg-transparent border-0 h-14">
-                      <TableHead className="pl-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Payer</TableHead>
-                      <TableHead className="font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Recipient</TableHead>
-                      <TableHead className="font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Amount</TableHead>
-                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Clearance</TableHead>
+                      <TableHead className="pl-8 text-left font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Debtor</TableHead>
+                      <TableHead className="text-left font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Creditor</TableHead>
+                      <TableHead className="text-center font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Amount</TableHead>
+                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-500/60">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-white/5">
                     {settlementsWithType.map((settlement, index) => {
                       const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                       return (
-                        <TableRow key={`settlement-${index}`} className="h-20 border-white/5 hover:bg-gold-500/5 transition-colors group">
-                          <TableCell className="pl-8">
+                        <TableRow key={`settlement-${index}`} className="h-12 sm:h-16 border-white/5 hover:bg-gold-500/5 transition-colors group">
+                          <TableCell className="pl-4 sm:pl-8">
                             <div className="flex items-center gap-3">
                               <User className="h-3 w-3 text-gold-500/40" />
                               <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.from}</span>
@@ -647,7 +651,7 @@ export const GameDetailView = ({
                               <span className="font-luxury text-[12px] text-gold-100/80 uppercase tracking-widest">{settlement.to}</span>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             <span className="font-numbers text-base text-gold-500">Rs. {formatIndianNumber(settlement.amount)}</span>
                             {settlement.isManual && (
                               <span className="ml-3 text-[9px] font-luxury uppercase tracking-widest text-gold-500/30 px-2 py-0.5 border border-gold-500/10 rounded-full">Manual</span>
@@ -702,7 +706,7 @@ export const GameDetailView = ({
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
                 <Plus className="w-5 h-5 text-gold-500" />
               </div>
-              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Add Manual Protocol</DialogTitle>
+              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Manual Settlement Protocol</DialogTitle>
             </div>
           </DialogHeader>
 

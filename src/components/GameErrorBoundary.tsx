@@ -1,10 +1,11 @@
-import React from "react";
+import * as React from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertCircle, RefreshCw, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GameErrorBoundaryProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface GameErrorBoundaryState {
@@ -12,7 +13,7 @@ interface GameErrorBoundaryState {
   error?: Error;
 }
 
-class GameErrorBoundary extends React.Component<
+class GameErrorBoundary extends Component<
   GameErrorBoundaryProps,
   GameErrorBoundaryState
 > {

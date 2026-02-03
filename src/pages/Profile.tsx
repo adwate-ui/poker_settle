@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, User, Database, Palette, Bot, Eye, Key } from 'lucide-react';
+import { ArrowLeft, User, Database, Bot, Eye, Key } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTheme } from '@/contexts/ThemeContext';
-import { themes, ThemeName } from '@/config/themes';
 import { toast } from 'sonner';
-import { getCharacterImage } from '@/config/characterImages';
 import { useChips } from '@/contexts/ChipContext';
 import { Input } from '@/components/ui/input';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import LuxuryLayout from '../components/layout/LuxuryLayout';
 
 const GameSettingsTab = () => {
   // ... existing GameSettingsTab content ...
@@ -41,7 +40,7 @@ const GameSettingsTab = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-primary" />
@@ -54,7 +53,7 @@ const GameSettingsTab = () => {
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           {localChips.map((chip) => (
-            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
               <div
                 className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center font-bold text-white border-2 border-white/20 ring-1 ring-border ${chip.color === 'blue' ? 'bg-blue-600' :
                   chip.color === 'white' ? 'bg-slate-100 text-slate-900 border-slate-300' :
@@ -150,7 +149,7 @@ const AISettingsTab = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
       <CardHeader>
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-primary" />
@@ -171,7 +170,7 @@ const AISettingsTab = () => {
                 value={isSaved ? "••••••••••••••••••••••••" : apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 disabled={isSaved || loading}
-                className={isSaved ? "bg-muted text-muted-foreground" : ""}
+                className={isSaved ? "bg-white/5 border-white/10 text-gold-200/40" : ""}
               />
             </div>
             {isSaved ? (
@@ -192,8 +191,6 @@ const AISettingsTab = () => {
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { currentTheme, setTheme, loading: themeLoading } = useTheme();
-  const [changingTheme, setChangingTheme] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -203,85 +200,68 @@ const Profile = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background p-4 sm:p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-48" />
-          <Skeleton className="h-64 w-full" />
+      <LuxuryLayout>
+        <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+          <Skeleton className="h-12 w-48 bg-white/5" />
+          <Skeleton className="h-64 w-full bg-white/5" />
         </div>
-      </div>
+      </LuxuryLayout>
     );
   }
 
   if (!user) return null;
 
-  const handleThemeChange = async (themeName: ThemeName) => {
-    setChangingTheme(true);
-    try {
-      await setTheme(themeName);
-      toast.success(`Theme changed to ${themes[themeName].displayName}`);
-    } catch (error) {
-      toast.error('Failed to change theme');
-      console.error('Error changing theme:', error);
-    } finally {
-      setChangingTheme(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <LuxuryLayout>
+      <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-4"
+          className="mb-4 text-gold-500 hover:text-gold-400 hover:bg-white/5"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile">
+          <TabsList className="grid w-full grid-cols-4 bg-black/20 border border-white/10 p-1">
+            <TabsTrigger value="profile" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
               <User className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="theme">
-              <Palette className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Theme</span>
-            </TabsTrigger>
-            <TabsTrigger value="game-settings">
+            <TabsTrigger value="game-settings" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
               <div className={`w-4 h-4 rounded-full mr-2 bg-primary/20 border-2 border-primary`} />
               <span className="hidden sm:inline">Chips</span>
             </TabsTrigger>
-            <TabsTrigger value="ai">
+            <TabsTrigger value="ai" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
               <Bot className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">AI</span>
             </TabsTrigger>
-            <TabsTrigger value="storage">
+            <TabsTrigger value="storage" className="data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-200">
               <Database className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Storage</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <Card>
+            <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <User className="h-6 w-6 text-primary" />
                   <div>
                     <CardTitle>Profile</CardTitle>
-                    <CardDescription>Your account information</CardDescription>
+                    <CardDescription className="text-gold-500/60">Your account information</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="text-lg">{user.email}</p>
+                  <label className="text-sm font-medium text-gold-500/40 uppercase tracking-widest">Email</label>
+                  <p className="text-lg text-gold-100">{user.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">User ID</label>
-                  <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
+                  <label className="text-sm font-medium text-gold-500/40 uppercase tracking-widest">User ID</label>
+                  <p className="text-sm text-gold-200/60 font-numbers">{user.id}</p>
                 </div>
               </CardContent>
             </Card>
@@ -295,100 +275,12 @@ const Profile = () => {
             <AISettingsTab />
           </TabsContent>
 
-          <TabsContent value="theme">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Palette className="h-6 w-6 text-primary" />
-                  <div>
-                    <CardTitle>Theme Selection</CardTitle>
-                    <CardDescription>Choose an anime theme to customize colors and player icons</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {themeLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {Object.entries(themes).map(([key, theme]) => {
-                      const isActive = currentTheme === key;
-                      return (
-                        <button
-                          key={key}
-                          onClick={() => handleThemeChange(key as ThemeName)}
-                          disabled={changingTheme || isActive}
-                          className={`
-                            p-4 rounded-lg border-2 text-left transition-all
-                            ${isActive
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border hover:border-primary/50 hover:bg-accent'
-                            }
-                            ${changingTheme ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                          `}
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-lg">{theme.displayName}</h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {theme.description}
-                              </p>
-                              {theme.characters.length > 0 && (
-                                <>
-                                  <p className="text-xs text-muted-foreground mt-2">
-                                    {theme.characters.length} characters available
-                                  </p>
-                                  <div className="flex gap-1 mt-2 flex-wrap">
-                                    {theme.characters.slice(0, 6).map((charName) => {
-                                      const charImage = getCharacterImage(charName);
-                                      return charImage ? (
-                                        <img
-                                          key={charName}
-                                          src={charImage}
-                                          alt={charName}
-                                          title={charName}
-                                          className="w-8 h-8 rounded-full object-cover border-2 border-border"
-                                          onError={(e) => {
-                                            // Fallback to initials if image fails to load
-                                            e.currentTarget.style.display = 'none';
-                                          }}
-                                        />
-                                      ) : null;
-                                    })}
-                                    {theme.characters.length > 6 && (
-                                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-border">
-                                        +{theme.characters.length - 6}
-                                      </div>
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                            {isActive && (
-                              <div className="flex items-center gap-2 text-primary flex-shrink-0 self-start">
-                                <span className="text-sm font-medium whitespace-nowrap">Active</span>
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="storage">
             <CacheManager />
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </LuxuryLayout>
   );
 };
 

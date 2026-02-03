@@ -15,7 +15,7 @@ const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttribut
   ({ className, ...props }, ref) => (
     <thead
       ref={ref}
-      className={cn("border-b border-gold-500/30 bg-black/40 backdrop-blur-sm [&_tr]:border-b-0", className)}
+      className={cn("border-b border-gold-500/30 bg-white/40 dark:bg-black/40 backdrop-blur-sm [&_tr]:border-b-0", className)}
       {...props}
     />
   ),
@@ -41,7 +41,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
     <tr
       ref={ref}
       className={cn(
-        "group border-b border-white/5 transition-colors duration-200 data-[state=selected]:bg-gold-500/10 hover:bg-gradient-to-r hover:from-gold-500/5 hover:to-transparent",
+        "group border-b border-black/5 dark:border-white/5 transition-colors duration-200 data-[state=selected]:bg-gold-500/10 hover:bg-gradient-to-r hover:from-gold-500/5 hover:to-transparent",
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<
     <th
       ref={ref}
       className={cn(
-        "h-10 sm:h-14 px-2 sm:px-6 text-left align-bottom pb-2 sm:pb-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-gold-500/60 transition-colors [&:has([role=checkbox])]:pr-0",
+        "h-10 sm:h-14 px-2 sm:px-4 text-left align-bottom pb-2 sm:pb-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-gold-500/60 transition-colors [&:has([role=checkbox])]:pr-0",
         className,
       )}
       {...props}
@@ -69,7 +69,7 @@ const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<
     <td
       ref={ref}
       className={cn(
-        "p-2 sm:py-5 sm:px-6 align-middle text-gray-300 font-medium [&:has([role=checkbox])]:pr-0 [&:has(.font-numbers)]:tabular-nums [&:has(.font-numbers)]:font-numbers",
+        "p-2 sm:p-4 h-12 sm:h-16 align-middle text-gray-900 dark:text-gray-300 font-medium [&:has([role=checkbox])]:pr-0 [&:has(.font-numbers)]:tabular-nums [&:has(.font-numbers)]:font-numbers",
         className
       )}
       {...props}

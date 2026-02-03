@@ -1,7 +1,5 @@
 import { memo, useState, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getCharacterForPlayer, getUniqueCharacterForPlayer } from '@/config/themes';
-import { getCharacterImage } from '@/config/characterImages';
 
 // Global cache to track loaded image URLs for sync decoding
 const loadedImageCache = new Set<string>();
@@ -14,7 +12,6 @@ interface OptimizedAvatarProps {
 }
 
 const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerNames }: OptimizedAvatarProps) => {
-  const { currentTheme } = useTheme();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -35,25 +32,9 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
     lg: 'w-16 h-16',
   };
 
-  // Helper function to get character name based on context
-  const getCharacterName = (): string | null => {
-    if (currentTheme === 'default') return null;
-
-    // If we have all player names, use unique assignment
-    if (allPlayerNames && allPlayerNames.length > 0) {
-      return getUniqueCharacterForPlayer(currentTheme, name, allPlayerNames);
-    }
-
-    // Otherwise, use hash-based assignment
-    return getCharacterForPlayer(currentTheme, name);
-  };
-
-  const characterName = getCharacterName();
-  const characterImage = characterName ? getCharacterImage(characterName) : null;
-
   // Use smaller size for dicebear avatars to reduce load time
   const dicebearSize = size === 'sm' ? 40 : size === 'md' ? 48 : 64;
-  const avatarUrl = characterImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&size=${dicebearSize}&backgroundColor=transparent`;
+  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&size=${dicebearSize}&backgroundColor=transparent`;
 
   // Check if image is already cached globally
   const isCached = loadedImageCache.has(avatarUrl);
@@ -73,7 +54,7 @@ const OptimizedAvatar = memo(({ name, size = 'md', className = '', allPlayerName
   };
 
   // If error or on mobile with dicebear (external API), show initials
-  if (imageError || (isMobile && !characterImage)) {
+  if (imageError || isMobile) {
     return (
       <div
         className={`${sizeClasses[size]} rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold ${className}`}

@@ -7,9 +7,9 @@
 @layer components {
   .luxury-text {
     font-family: 'Playfair Display', serif;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
-  
+
   .font-numbers {
     font-family: 'Space Mono', monospace;
   }
@@ -21,15 +21,15 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light theme - Material Design poker palette */
-    --background: 0 0% 100%;
-    --foreground: 158 10% 15%;
+    /* Luxury Light Mode - Cream & Gold palette */
+    --background: 45 30% 96%;
+    --foreground: 158 10% 10%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 158 10% 15%;
+    --card: 45 30% 94%;
+    --card-foreground: 158 10% 10%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 158 10% 15%;
+    --popover: 45 30% 94%;
+    --popover-foreground: 158 10% 10%;
 
     /* Material Design Green as primary */
     --primary: 158 64% 42%;
@@ -37,20 +37,23 @@ All colors MUST be HSL.
 
     /* Gold as secondary */
     --secondary: 45 100% 51%;
-    --secondary-foreground: 158 10% 15%;
+    --secondary-foreground: 158 10% 10%;
 
-    --muted: 158 10% 95%;
+    --muted: 45 20% 90%;
     --muted-foreground: 158 8% 45%;
 
     --accent: 45 95% 92%;
-    --accent-foreground: 158 10% 15%;
+    --accent-foreground: 158 10% 10%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 158 15% 88%;
-    --input: 158 15% 88%;
+    --border: 45 20% 85%;
+    --input: 45 20% 85%;
     --ring: 158 64% 42%;
+
+    /* Darker Gold for readability on light bg */
+    --gold-text: 45 100% 35%;
 
     /* Custom poker theme tokens */
     --poker-green: 158 64% 42%;
@@ -64,17 +67,17 @@ All colors MUST be HSL.
     /* Gradients */
     --gradient-poker: linear-gradient(135deg, hsl(158 64% 42%), hsl(158 50% 30%));
     --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 100% 45%));
-    --gradient-dark: linear-gradient(180deg, hsl(158 10% 20%), hsl(158 10% 15%));
+    --gradient-dark: linear-gradient(180deg, hsl(45 30% 96%), hsl(45 30% 92%));
 
     --radius: 0.5rem;
 
-    --sidebar-background: 158 15% 98%;
+    --sidebar-background: 45 30% 98%;
     --sidebar-foreground: 158 10% 20%;
     --sidebar-primary: 158 64% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 45 90% 95%;
-    --sidebar-accent-foreground: 158 10% 15%;
-    --sidebar-border: 158 15% 88%;
+    --sidebar-accent-foreground: 158 10% 10%;
+    --sidebar-border: 45 20% 85%;
     --sidebar-ring: 158 64% 42%;
   }
 
@@ -146,46 +149,51 @@ All colors MUST be HSL.
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  
+
   /* Touch optimization for mobile */
-  button, a, [role="button"] {
+  button,
+  a,
+  [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-  
+
   /* Prevent text selection on buttons */
-  button, [role="button"] {
+  button,
+  [role="button"] {
     -webkit-user-select: none;
     user-select: none;
   }
-  
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Optimize for mobile performance */
   @media (max-width: 640px) {
     * {
       -webkit-overflow-scrolling: touch;
     }
   }
-  
+
   /* Poker table container - 15% taller on mobile, square on desktop */
   .poker-table-container {
     position: relative;
     width: 100%;
   }
-  
+
   .poker-table-container::before {
     content: "";
     display: block;
-    padding-bottom: 115%; /* 15% taller than square on mobile */
+    padding-bottom: 115%;
+    /* 15% taller than square on mobile */
   }
-  
+
   @media (min-width: 640px) {
     .poker-table-container::before {
-      padding-bottom: 100%; /* Square on desktop */
+      padding-bottom: 100%;
+      /* Square on desktop */
     }
   }
 }
