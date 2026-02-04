@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Copy, Check, Share2, Link as LinkIcon } from "lucide-react";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { ShareResourceType, buildShortUrl } from "@/lib/shareUtils";
-import { toast } from "sonner"; // Assuming sonner is used as per useSharedLink
+import { toast } from "sonner";
+import { ErrorMessages } from "@/lib/errorUtils";
 
 interface ShareDialogProps {
     open: boolean;
@@ -48,7 +49,7 @@ export const ShareDialog = ({
                     }
                 } catch (error) {
                     console.error("Failed to generate link:", error);
-                    toast.error("Failed to generate share link");
+                    toast.error(ErrorMessages.share.generate(error));
                 } finally {
                     setInternalLoading(false);
                 }

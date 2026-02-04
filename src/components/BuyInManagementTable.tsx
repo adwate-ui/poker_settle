@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2, Minus, X, User, Coins, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { ErrorMessages } from '@/lib/errorUtils';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -69,7 +70,7 @@ export const BuyInManagementTable = ({
       setBuyInCount(1);
     } catch (error) {
       console.error('Error updating buy-ins:', error);
-      toast.error('Failed to update buy-ins');
+      toast.error(ErrorMessages.buyIn.update(error));
     } finally {
       setIsAdding(false);
     }

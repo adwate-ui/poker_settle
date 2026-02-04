@@ -26,6 +26,8 @@ const ShortLinkRedirect = lazy(() => import("./pages/ShortLinkRedirect"));
 const UpiPaymentBouncer = lazy(() => import("./pages/UpiPaymentBouncer"));
 const GameDetail = lazy(() => import("./pages/GameDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,8 @@ const AppContent = () => {
       }>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Routes wrapped in Layout */}
           <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
@@ -73,6 +77,7 @@ const AppContent = () => {
             <Route path="/players/:playerId" element={<Index />} />
             <Route path="/hands" element={<Index />} />
             <Route path="/hands/:handId" element={<Index />} />
+            <Route path="/analytics" element={<Index />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
 

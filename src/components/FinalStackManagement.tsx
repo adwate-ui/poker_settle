@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ErrorMessages } from '@/lib/errorUtils';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { CurrencyConfig } from '@/config/localization';
@@ -63,7 +64,7 @@ export const FinalStackManagement = ({
       setEditValue('');
     } catch (error) {
       console.error('Error updating final stack:', error);
-      toast.error('Failed to update final stack');
+      toast.error(ErrorMessages.finalStack.update(error));
     } finally {
       setIsUpdating(false);
     }

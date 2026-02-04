@@ -23,7 +23,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2, Download, FileText, Printer } from "lucide-react";
+import { exportGameDetailsToCSV, printGameReport } from "@/lib/exportUtils";
+import { Game as GameType } from "@/types/poker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -158,6 +166,14 @@ export const GameDetailView = ({
     });
   }, [gamePlayers]);
 
+  const playerBalances = useMemo((): PlayerBalance[] => {
+    return sortedGamePlayers.map(gp => ({
+      name: gp.players?.name ?? "",
+      amount: gp.net_amount ?? 0,
+      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
+    }));
+  }, [sortedGamePlayers]);
+
 
   const addManualTransfer = async () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount) {
@@ -189,15 +205,8 @@ export const GameDetailView = ({
     // 3. Combine all manual transfers
     const allManuals = [...existingManuals, newManualTransfer];
 
-    // 4. Get player balances
-    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
-      name: gp.players?.name ?? "",
-      amount: gp.net_amount ?? 0,
-      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
-    }));
-
-    // 5. Calculate new auto-settlements with all manual transfers
-    const newAutoSettlements = calculateOptimizedSettlements(balances, allManuals);
+    // 4. Calculate new auto-settlements with all manual transfers
+    const newAutoSettlements = calculateOptimizedSettlements(playerBalances, allManuals);
     const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
       from,
       to,
@@ -205,7 +214,7 @@ export const GameDetailView = ({
       isManual: false
     }));
 
-    // 6. Merge: manuals first, then autos
+    // 5. Merge: manuals first, then autos
     const finalSettlements = [...allManuals, ...autoSettlementsWithFlag];
 
     const { error } = await client
@@ -234,15 +243,8 @@ export const GameDetailView = ({
     // 2. Remove the target transfer by index
     const remainingManuals = manualTransfers.filter((_, i) => i !== index);
 
-    // 3. Get player balances
-    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
-      name: gp.players?.name ?? "",
-      amount: gp.net_amount ?? 0,
-      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
-    }));
-
-    // 4. Recalculate auto-settlements with remaining manual transfers
-    const newAutoSettlements = calculateOptimizedSettlements(balances, remainingManuals);
+    // 3. Recalculate auto-settlements with remaining manual transfers
+    const newAutoSettlements = calculateOptimizedSettlements(playerBalances, remainingManuals);
     const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
       from,
       to,
@@ -250,7 +252,7 @@ export const GameDetailView = ({
       isManual: false
     }));
 
-    // 5. Merge and save
+    // 4. Merge and save
     const finalSettlements = [...remainingManuals, ...autoSettlementsWithFlag];
 
     const { error } = await client
@@ -269,12 +271,21 @@ export const GameDetailView = ({
   const savedSettlements: SettlementWithType[] = (game?.settlements || []) as unknown as SettlementWithType[];
 
   const settlementsWithType = useMemo(() => {
-    // Storage-first: return saved settlements directly, ensuring isManual property exists
-    return savedSettlements.map(s => ({
+    // If settlements exist in DB (even if just manual ones), use them
+    if (savedSettlements && savedSettlements.length > 0) {
+      return savedSettlements.map(s => ({
+        ...s,
+        isManual: s.isManual ?? false
+      }));
+    }
+
+    // Fallback: Calculate optimized settlements on the fly if none are saved
+    const calculated = calculateOptimizedSettlements(playerBalances, []);
+    return calculated.map(s => ({
       ...s,
-      isManual: s.isManual ?? false  // Default to false if not set
+      isManual: false
     }));
-  }, [savedSettlements]);
+  }, [savedSettlements, playerBalances]);
 
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -342,15 +353,81 @@ export const GameDetailView = ({
                 <CardDescription>Game Record</CardDescription>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShareDialogOpen(true)}
-              className="rounded-full"
-            >
-              <Share2 className="h-3.5 w-3.5 mr-2" />
-              Share
-            </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-full">
+                    <Download className="h-3.5 w-3.5 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => {
+                    const gameForExport: GameType = {
+                      id: game.id,
+                      date: game.date,
+                      buy_in_amount: game.buy_in_amount,
+                      is_complete: true,
+                      settlements: game.settlements,
+                      game_players: gamePlayers.map(gp => ({
+                        id: gp.id,
+                        game_id: game.id,
+                        player_id: gp.player_id,
+                        buy_ins: gp.buy_ins,
+                        final_stack: gp.final_stack || 0,
+                        net_amount: gp.net_amount || 0,
+                        player: {
+                          id: gp.player_id,
+                          name: gp.players?.name || 'Unknown',
+                          total_games: 0,
+                          total_profit: 0,
+                        }
+                      }))
+                    };
+                    exportGameDetailsToCSV(gameForExport);
+                  }}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    const gameForPrint: GameType = {
+                      id: game.id,
+                      date: game.date,
+                      buy_in_amount: game.buy_in_amount,
+                      is_complete: true,
+                      settlements: game.settlements,
+                      game_players: gamePlayers.map(gp => ({
+                        id: gp.id,
+                        game_id: game.id,
+                        player_id: gp.player_id,
+                        buy_ins: gp.buy_ins,
+                        final_stack: gp.final_stack || 0,
+                        net_amount: gp.net_amount || 0,
+                        player: {
+                          id: gp.player_id,
+                          name: gp.players?.name || 'Unknown',
+                          total_games: 0,
+                          total_profit: 0,
+                        }
+                      }))
+                    };
+                    printGameReport(gameForPrint);
+                  }}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShareDialogOpen(true)}
+                className="rounded-full"
+              >
+                <Share2 className="h-3.5 w-3.5 mr-2" />
+                Share
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="pt-8">

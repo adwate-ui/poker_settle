@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserProfile } from "./UserProfile";
 import { cn } from "@/lib/utils";
-import { Play, History, Users, Hand } from "lucide-react";
+import { Play, History, Users, Hand, BarChart3 } from "lucide-react";
 
 interface TabLayoutProps {
   children: React.ReactNode;
@@ -19,13 +19,15 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
     : location.pathname === "/games" ? "games-history"
       : location.pathname.startsWith("/players") ? "players-history"
         : location.pathname.startsWith("/hands") ? "hands-history"
-          : defaultTab;
+          : location.pathname === "/analytics" ? "analytics"
+            : defaultTab;
 
   const handleTabChange = (value: string) => {
     if (value === "new-game") navigate("/");
     else if (value === "games-history") navigate("/games");
     else if (value === "players-history") navigate("/players");
     else if (value === "hands-history") navigate("/hands");
+    else if (value === "analytics") navigate("/analytics");
   };
 
   if (isLiveGame) {
@@ -120,6 +122,9 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
             <TabsTrigger value="hands-history" className="flex-1 sm:flex-none">
               Hands Tracking
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1 sm:flex-none">
+              Analytics
+            </TabsTrigger>
           </TabsList>
 
           <div className="mt-2 pb-24 sm:pb-0">
@@ -133,54 +138,67 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
             <button
               onClick={() => handleTabChange("new-game")}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
                 currentTab === "new-game" ? "text-gold-400" : "text-gray-500"
               )}
             >
               {currentTab === "new-game" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
               )}
-              <Play className={cn("h-5 w-5", currentTab === "new-game" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">New</span>
+              <Play className={cn("h-4 w-4", currentTab === "new-game" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[8px] font-luxury uppercase tracking-wider">New</span>
             </button>
             <button
               onClick={() => handleTabChange("games-history")}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
                 currentTab === "games-history" ? "text-gold-400" : "text-gray-500"
               )}
             >
               {currentTab === "games-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
               )}
-              <History className={cn("h-5 w-5", currentTab === "games-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Games</span>
+              <History className={cn("h-4 w-4", currentTab === "games-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[8px] font-luxury uppercase tracking-wider">Games</span>
             </button>
             <button
               onClick={() => handleTabChange("players-history")}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
                 currentTab === "players-history" ? "text-gold-400" : "text-gray-500"
               )}
             >
               {currentTab === "players-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
               )}
-              <Users className={cn("h-5 w-5", currentTab === "players-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Players</span>
+              <Users className={cn("h-4 w-4", currentTab === "players-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[8px] font-luxury uppercase tracking-wider">Players</span>
             </button>
             <button
               onClick={() => handleTabChange("hands-history")}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
                 currentTab === "hands-history" ? "text-gold-400" : "text-gray-500"
               )}
             >
               {currentTab === "hands-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
               )}
-              <Hand className={cn("h-5 w-5", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Hands</span>
+              <Hand className={cn("h-4 w-4", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[8px] font-luxury uppercase tracking-wider">Hands</span>
+            </button>
+            <button
+              onClick={() => handleTabChange("analytics")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
+                currentTab === "analytics" ? "text-gold-400" : "text-gray-500"
+              )}
+            >
+              {currentTab === "analytics" && (
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              )}
+              <BarChart3 className={cn("h-4 w-4", currentTab === "analytics" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[8px] font-luxury uppercase tracking-wider">Stats</span>
             </button>
           </div>
         </div>

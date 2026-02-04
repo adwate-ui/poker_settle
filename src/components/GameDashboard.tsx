@@ -41,6 +41,7 @@ import { useGameData } from "@/hooks/useGameData";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
+import { ErrorMessages } from "@/lib/errorUtils";
 import { UserProfile } from "@/components/UserProfile";
 import { parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
@@ -164,7 +165,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         }
       }
     } catch (error) {
-      toast.error("Failed to generate share link");
+      toast.error(ErrorMessages.share.generate(error));
     }
   }, [currentGame.id, currentGame.date, createOrGetSharedLink, getShortUrl]);
 
@@ -246,7 +247,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setShowAddPlayer(false);
       toast.success(`${player.name} added to game`);
     } catch (error) {
-      toast.error("Failed to add player");
+      toast.error(ErrorMessages.player.addToGame(error, newPlayerName.trim()));
     } finally {
       setIsCreatingPlayer(false);
     }
@@ -260,7 +261,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       setSearchQuery('');
       toast.success(`${player.name} added to game`);
     } catch (error) {
-      toast.error("Failed to add player");
+      toast.error(ErrorMessages.player.addToGame(error, player.name));
     }
   }, [currentGame.id, addPlayerToGame, gamePlayers]);
 
@@ -276,12 +277,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const addManualTransfer = useCallback(async () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
-      toast.error("Incomplete transfer details");
+      toast.error("Please fill in sender, recipient, and a valid amount for the transfer.");
       return;
     }
 
     if (newTransferFrom === newTransferTo) {
-      toast.error("Cannot transfer to self");
+      toast.error("Please select different players for sender and recipient.");
       return;
     }
 
@@ -299,7 +300,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       .eq('id', currentGame.id);
 
     if (error) {
-      toast.error("Failed to save adjustment");
+      toast.error(ErrorMessages.transfer.save(error));
       return;
     }
 
@@ -320,7 +321,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       .eq('id', currentGame.id);
 
     if (error) {
-      toast.error("Failed to remove adjustment");
+      toast.error(ErrorMessages.transfer.delete(error));
       return;
     }
 
@@ -351,7 +352,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.success("Game finalized successfully");
       navigate(`/games/${currentGame.id}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to finalize game");
+      toast.error(ErrorMessages.game.complete(error));
       setIsCompletingGame(false);
     }
   }, [currentGame, settlements, completeGame, navigate, isCompletingGame]);

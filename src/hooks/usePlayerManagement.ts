@@ -6,6 +6,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Player } from "@/types/poker";
 import { toast } from "sonner";
+import { ErrorMessages } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { PlayerFormData } from "@/components/PlayerFormDialog";
 import { sendPlayerWelcomeNotification } from "@/services/emailNotifications";
@@ -94,11 +95,7 @@ export const usePlayerManagement = () => {
         return data;
       } catch (error) {
         console.error("Error creating player:", error);
-        if (error instanceof Error) {
-          toast.error(`Failed to create player: ${error.message}`);
-        } else {
-          toast.error("Failed to create player");
-        }
+        toast.error(ErrorMessages.player.create(error));
         throw error;
       } finally {
         setLoading(false);
@@ -188,11 +185,7 @@ export const usePlayerManagement = () => {
         return data;
       } catch (error) {
         console.error("Error updating player:", error);
-        if (error instanceof Error) {
-          toast.error(`Failed to update player: ${error.message}`);
-        } else {
-          toast.error("Failed to update player");
-        }
+        toast.error(ErrorMessages.player.update(error));
         throw error;
       } finally {
         setLoading(false);

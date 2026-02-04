@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement, Json, TablePositionInsert } from "@/types/poker";
 import { toast } from "sonner";
+import { ErrorMessages } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
@@ -209,11 +210,11 @@ export const useGameData = () => {
       // Refresh games list
       await fetchGames();
     } catch (error: any) {
-      if (error.message.includes('email notifications failed')) {
+      if (error.message?.includes('email notifications failed')) {
         toast.warning('Game completed! But email notifications failed to send.');
       } else {
         console.error('Error completing game:', error);
-        toast.error(error.message || 'Failed to complete game');
+        toast.error(ErrorMessages.game.complete(error));
         throw error;
       }
     }

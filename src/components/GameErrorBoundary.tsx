@@ -42,15 +42,15 @@ class GameErrorBoundary extends Component<
                   <AlertCircle className="h-8 w-8 text-red-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold uppercase tracking-widest leading-tight text-destructive-foreground">Archive Integrity Breach</CardTitle>
-                  <CardDescription className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">System level exception caught in ledger view</CardDescription>
+                  <CardTitle className="text-2xl font-bold uppercase tracking-widest leading-tight text-destructive-foreground">Something Went Wrong</CardTitle>
+                  <CardDescription className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">We encountered an unexpected error</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="py-10 space-y-8">
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground leading-relaxed uppercase tracking-wider">
-                  The protocol encountered a critical anomaly while decrypting game archives. Data persistence remains intact, but visual rendering has been suspended for security.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We're sorry, but we couldn't load this game view. Your data is safe and hasn't been affected. You can try refreshing the page or go back to view other games.
                 </p>
                 {this.state.error && (
                   <div className="p-4 bg-white/2 border border-white/5 rounded-xl font-mono text-[11px] text-red-400/60 break-words opacity-50">
@@ -66,14 +66,14 @@ class GameErrorBoundary extends Component<
                   className="flex-1 h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 text-label transition-all"
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-2" />
-                  Attempt Re-Scan
+                  Refresh Page
                 </Button>
                 <Button
                   onClick={() => window.history.back()}
                   className="flex-1 h-12 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-label transition-all"
                 >
                   <ChevronLeft className="h-3.5 w-3.5 mr-2" />
-                  Back to Terminal
+                  Go Back
                 </Button>
               </div>
             </CardContent>

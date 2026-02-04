@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
+import { ErrorMessages } from "@/lib/errorUtils";
 import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Play, Info } from "lucide-react";
@@ -39,7 +40,7 @@ const NewGame = () => {
       .order("name");
 
     if (error) {
-      toast.error("Failed to load players");
+      toast.error(ErrorMessages.generic.load(error));
       return;
     }
     setPlayers(data || []);
@@ -163,7 +164,7 @@ const NewGame = () => {
       setActiveGame(placeholderGame);
       setShowActiveGame(true);
     } catch (error) {
-      toast.error("Failed to start game");
+      toast.error(ErrorMessages.game.create(error));
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, HelpCircle, Sparkles, Info, Database, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { useOnboarding, OnboardingWizard } from '@/components/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +18,8 @@ import { formatCurrency } from "@/utils/currencyUtils";
 import { CurrencyConfig } from "@/config/localization";
 
 import { ProceduralChip } from '@/components/ProceduralChip';
+import { loadDemoData, clearDemoData, hasDemoData } from '@/lib/demoData';
+import { useQueryClient } from '@tanstack/react-query';
 
 const COLOR_MAP: Record<string, string> = {
   black: '#18181b',
@@ -83,6 +86,62 @@ const GameSettingsTab = () => {
   );
 };
 
+const HelpTab = () => {
+  const { resetOnboarding } = useOnboarding();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const handleReplayOnboarding = () => {
+    resetOnboarding();
+    setShowOnboarding(true);
+  };
+
+  return (
+    <>
+      {showOnboarding && <OnboardingWizard forceShow onComplete={() => setShowOnboarding(false)} />}
+      <Card>
+        <CardHeader>
+          <CardTitle>Help & Support</CardTitle>
+          <CardDescription>Get help with using Poker Settle</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1">App Tutorial</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  New to Poker Settle? Replay the onboarding tutorial to learn about all the features.
+                </p>
+                <Button variant="outline" size="sm" onClick={handleReplayOnboarding}>
+                  <HelpCircle className="mr-2 h-4 w-4" />
+                  Replay Tutorial
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Info className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1">About Poker Settle</h3>
+                <p className="text-sm text-muted-foreground">
+                  Version 1.0.0 - Your premium poker game management companion.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Track buy-ins, calculate settlements, and keep everyone honest.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+};
+
 const AISettingsTab = () => {
   const [apiKey, setApiKey] = useState('');
   const [isSaved, setIsSaved] = useState(false);
@@ -134,6 +193,147 @@ const AISettingsTab = () => {
   )
 }
 
+const DemoDataTab = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasDemo, setHasDemo] = useState(false);
+  const [checkingDemo, setCheckingDemo] = useState(true);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!user) return;
+    const checkDemo = async () => {
+      setCheckingDemo(true);
+      const result = await hasDemoData(user.id);
+      setHasDemo(result);
+      setCheckingDemo(false);
+    };
+    checkDemo();
+  }, [user]);
+
+  const handleLoadDemo = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    const result = await loadDemoData(user.id);
+    setIsLoading(false);
+    if (result.success) {
+      toast.success(result.message);
+      setHasDemo(true);
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
+    } else {
+      toast.error(result.message);
+    }
+  };
+
+  const handleClearDemo = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    const result = await clearDemoData(user.id);
+    setIsLoading(false);
+    if (result.success) {
+      toast.success(result.message);
+      setHasDemo(false);
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
+    } else {
+      toast.error(result.message);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Demo Data</CardTitle>
+        <CardDescription>Load sample data to explore app features or showcase to others.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {checkingDemo ? (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Checking for demo data...</span>
+          </div>
+        ) : hasDemo ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-green-500/10 border-green-500/20">
+              <div className="p-2 rounded-lg bg-green-500/20">
+                <Database className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1 text-green-600 dark:text-green-400">Demo Data Loaded</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your account has sample players and games. Explore the Games, Players, and Analytics tabs to see the app in action.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-destructive/5 border-destructive/20">
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1">Clear Demo Data</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Remove all demo players and their games. This won't affect any real data you've created.
+                </p>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleClearDemo}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-4 w-4" />
+                  )}
+                  Clear Demo Data
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Database className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1">Try the App with Sample Data</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Load realistic demo data including 6 players and 6 completed games with settlements. Perfect for exploring features or demonstrating to others.
+                </p>
+                <Button
+                  onClick={handleLoadDemo}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Database className="mr-2 h-4 w-4" />
+                  )}
+                  Load Demo Data
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-xs text-muted-foreground">
+              <strong>What's included:</strong>
+              <ul className="mt-2 space-y-1 list-disc list-inside">
+                <li>6 sample players with realistic names</li>
+                <li>6 completed poker games over the past 5 months</li>
+                <li>Various buy-in amounts (₹50, ₹100, ₹200)</li>
+                <li>Settlements and payment statuses</li>
+                <li>Full analytics and history data</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -151,11 +351,13 @@ const Profile = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="game-settings">Chips</TabsTrigger>
           <TabsTrigger value="ai">AI</TabsTrigger>
+          <TabsTrigger value="demo">Demo</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
+          <TabsTrigger value="help">Help</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
@@ -172,7 +374,9 @@ const Profile = () => {
         </TabsContent>
         <TabsContent value="game-settings"><GameSettingsTab /></TabsContent>
         <TabsContent value="ai"><AISettingsTab /></TabsContent>
+        <TabsContent value="demo"><DemoDataTab /></TabsContent>
         <TabsContent value="storage"><CacheManager /></TabsContent>
+        <TabsContent value="help"><HelpTab /></TabsContent>
       </Tabs>
     </div>
   );

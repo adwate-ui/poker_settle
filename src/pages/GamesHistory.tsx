@@ -20,7 +20,16 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Gamepad2 } from "lucide-react";
+import { ErrorMessages } from "@/lib/errorUtils";
+import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
+import { exportGamesToCSV } from "@/lib/exportUtils";
+import { Game } from "@/types/poker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { GameCardSkeletonList } from "@/components/skeletons";
 import { EmptyState } from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
@@ -109,7 +118,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       refetch();
     } catch (error) {
       console.error("Error deleting game:", error);
-      toast.error("Failed to delete game");
+      toast.error(ErrorMessages.game.delete(error));
     } finally {
       setDeleteGameId(null);
     }
@@ -235,14 +244,32 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
     <div className="max-w-6xl mx-auto space-y-6">
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Filter className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Filter className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Filters</CardTitle>
+                <CardDescription>Filter game history</CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle>Filters</CardTitle>
-              <CardDescription>Filter game history</CardDescription>
-            </div>
+            {!readOnly && games.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => exportGamesToCSV(gamesData as Game[])}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </CardHeader>
         <CardContent>

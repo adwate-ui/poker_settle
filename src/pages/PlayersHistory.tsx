@@ -5,7 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { Trash2, ArrowUpDown, Users, Trophy, User as UserIcon, UserPlus } from "lucide-react";
+import { ErrorMessages } from "@/lib/errorUtils";
+import { Trash2, ArrowUpDown, Users, Trophy, User as UserIcon, UserPlus, Download, FileText, Printer } from "lucide-react";
+import { exportPlayersToCSV, printPlayersReport } from "@/lib/exportUtils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PlayerCardSkeletonList } from "@/components/skeletons";
 import { EmptyState } from "@/components/EmptyState";
 import { Player } from "@/types/poker";
@@ -57,7 +65,7 @@ const PlayersHistory = () => {
 
     } catch (error) {
       console.error("Error fetching player history data:", error);
-      toast.error("Failed to load player statistics");
+      toast.error(ErrorMessages.generic.load(error));
     } finally {
       setLoading(false);
     }
@@ -71,7 +79,7 @@ const PlayersHistory = () => {
       fetchPlayers();
     } catch (error) {
       console.error("Error deleting player:", error);
-      toast.error("Failed to delete player");
+      toast.error(ErrorMessages.player.delete(error));
     } finally {
       setDeletePlayerId(null);
     }
@@ -142,14 +150,36 @@ const PlayersHistory = () => {
     <div className="max-w-6xl mx-auto space-y-6">
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Trophy className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Trophy className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Player Statistics</CardTitle>
+                <CardDescription>Overall player performance</CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle>Player Statistics</CardTitle>
-              <CardDescription>Overall player performance</CardDescription>
-            </div>
+            {players.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => exportPlayersToCSV(players)}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => printPlayersReport(players)}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </CardHeader>
         <CardContent>
