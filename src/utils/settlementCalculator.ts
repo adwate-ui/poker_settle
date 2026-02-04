@@ -86,10 +86,10 @@ export function calculateOptimizedSettlements(
 
   settleGroup(digitalWinners, digitalLosers, settlements, false);
 
-  // Phase 3: Settle between cash and digital players (remaining balances)
-  // Re-filter for anyone that still has an outstanding balance
-  const remainingWinners = [...cashWinners, ...digitalWinners].filter(w => w.amount > 0.01);
-  const remainingLosers = [...cashLosers, ...digitalLosers].filter(l => l.amount > 0.01);
+  // Phase 3: Cross-Method Settle (Minimize Transactions)
+  // Re-filter for anyone that still has an outstanding balance from the original pools
+  const remainingWinners = winners.filter(w => w.amount > 0.01);
+  const remainingLosers = losers.filter(l => l.amount > 0.01);
 
   settleGroup(remainingWinners, remainingLosers, settlements, true);
 
