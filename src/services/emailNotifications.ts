@@ -178,7 +178,7 @@ export async function sendSettlementNotifications(
         .from("settlement_confirmations")
         .select("id, settlement_from, settlement_to")
         .eq("game_id", gameId);
-      
+
       if (confirmations) {
         confirmations.forEach((conf) => {
           const key = `${conf.settlement_from}-${conf.settlement_to}`;
@@ -192,10 +192,10 @@ export async function sendSettlementNotifications(
   }
 
   // Group settlements by player and enrich with recipient UPI IDs and confirmation IDs
-  const playerSettlements = new Map<string, { 
-    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>; 
-    isWinner: boolean; 
-    total: number 
+  const playerSettlements = new Map<string, {
+    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>;
+    isWinner: boolean;
+    total: number
   }>();
 
   settlements.forEach((settlement) => {
@@ -238,49 +238,57 @@ export async function sendSettlementNotifications(
   });
 
   // Send notifications
+  // Send notifications
   for (const [playerName, data] of playerSettlements.entries()) {
-    const player = playersMap.get(playerName);
+    try {
+      const player = playersMap.get(playerName);
 
-    if (!player) {
+      if (!player) {
+        results.failed++;
+        results.errors.push(`${playerName}: Player not found`);
+        continue;
+      }
+
+      // Validate email exists and is not empty
+      if (!player.email || !player.email.trim()) {
+        results.failed++;
+        results.errors.push(`${playerName}: No email address`);
+        continue;
+      }
+
+      const message = generateSettlementMessage({
+        playerName,
+        settlements: data.settlements,
+        isWinner: data.isWinner,
+        totalAmount: data.total,
+        paymentPreference: player.payment_preference,
+        upiId: player.upi_id,
+        gameDate,
+      });
+
+      const result = await emailService.sendEmail({
+        to_email: player.email,
+        to_name: player.name,
+        subject: `Settlement Details - Poker Game ${data.isWinner ? '💰' : '💳'}`,
+        message,
+      });
+
+      if (result.success) {
+        results.sent++;
+      } else {
+        results.failed++;
+        results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
+        results.success = false;
+      }
+    } catch (error: any) {
+      console.error(`❌ Error processing settlement notification for ${playerName}:`, error);
       results.failed++;
-      results.errors.push(`${playerName}: Player not found`);
-      continue;
-    }
-
-    // Validate email exists and is not empty
-    if (!player.email || !player.email.trim()) {
-      results.failed++;
-      results.errors.push(`${playerName}: No email address`);
-      continue;
-    }
-
-    const message = generateSettlementMessage({
-      playerName,
-      settlements: data.settlements,
-      isWinner: data.isWinner,
-      totalAmount: data.total,
-      paymentPreference: player.payment_preference,
-      upiId: player.upi_id,
-      gameDate,
-    });
-
-    const result = await emailService.sendEmail({
-      to_email: player.email,
-      to_name: player.name,
-      subject: `Settlement Details - Poker Game ${data.isWinner ? '💰' : '💳'}`,
-      message,
-    });
-
-    if (result.success) {
-      results.sent++;
-    } else {
-      results.failed++;
-      results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
+      results.errors.push(`${playerName}: ${error.message || "Internal error"}`);
       results.success = false;
+    } finally {
+      // Small delay between messages
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-
-    // Small delay between messages
-    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   return results;
@@ -339,7 +347,7 @@ export async function sendCombinedGameSettlementNotifications(
       .from("settlement_confirmations")
       .select("id, settlement_from, settlement_to")
       .eq("game_id", gameId);
-    
+
     if (confirmations) {
       confirmations.forEach((conf) => {
         const key = `${conf.settlement_from}-${conf.settlement_to}`;
@@ -352,10 +360,10 @@ export async function sendCombinedGameSettlementNotifications(
   }
 
   // Group settlements by player and enrich with recipient UPI IDs and confirmation IDs
-  const playerSettlements = new Map<string, { 
-    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>; 
-    isWinner: boolean; 
-    total: number 
+  const playerSettlements = new Map<string, {
+    settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>;
+    isWinner: boolean;
+    total: number
   }>();
 
   settlements.forEach((settlement) => {
@@ -398,53 +406,67 @@ export async function sendCombinedGameSettlementNotifications(
   });
 
   for (const gamePlayer of gamePlayers) {
-    const player = gamePlayer.player;
-
-    // Validate email exists and is not empty
-    if (!player.email || !player.email.trim()) {
+    // Safety check for null player
+    if (!gamePlayer.player) {
       results.failed++;
-      results.errors.push(`${player.name}: No email address`);
+      results.errors.push("Missing player reference in gamePlayers list");
       continue;
     }
 
-    // Get settlement data for this player
-    const settlementData = playerSettlements.get(player.name) || {
-      settlements: [],
-      isWinner: false,
-      total: 0,
-    };
+    const player = gamePlayer.player;
 
-    const message = generateCombinedGameSettlementMessage({
-      playerName: player.name,
-      gameDate: formatMessageDate(gameDate),
-      buyInAmount: buyInAmount,
-      finalStack: gamePlayer.final_stack,
-      netAmount: gamePlayer.net_amount,
-      gameLink,
-      settlements: settlementData.settlements,
-      isWinner: settlementData.isWinner,
-      totalAmount: settlementData.total,
-      paymentPreference: player.payment_preference,
-      upiId: player.upi_id,
-    });
+    try {
+      // Validate email exists and is not empty
+      if (!player.email || !player.email.trim()) {
+        results.failed++;
+        results.errors.push(`${player.name}: No email address`);
+        continue;
+      }
 
-    const result = await emailService.sendEmail({
-      to_email: player.email,
-      to_name: player.name,
-      subject: `Poker Game Settlement - ${formatMessageDate(gameDate)} ${settlementData.isWinner ? '💰' : '💳'}`,
-      message,
-    });
+      // Get settlement data for this player
+      const settlementData = playerSettlements.get(player.name) || {
+        settlements: [],
+        isWinner: false,
+        total: 0,
+      };
 
-    if (result.success) {
-      results.sent++;
-    } else {
+      const message = generateCombinedGameSettlementMessage({
+        playerName: player.name,
+        gameDate: formatMessageDate(gameDate),
+        buyInAmount: buyInAmount,
+        finalStack: gamePlayer.final_stack,
+        netAmount: gamePlayer.net_amount,
+        gameLink,
+        settlements: settlementData.settlements,
+        isWinner: settlementData.isWinner,
+        totalAmount: settlementData.total,
+        paymentPreference: player.payment_preference,
+        upiId: player.upi_id,
+      });
+
+      const result = await emailService.sendEmail({
+        to_email: player.email,
+        to_name: player.name,
+        subject: `Poker Game Settlement - ${formatMessageDate(gameDate)} ${settlementData.isWinner ? '💰' : '💳'}`,
+        message,
+      });
+
+      if (result.success) {
+        results.sent++;
+      } else {
+        results.failed++;
+        results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
+        results.success = false;
+      }
+    } catch (error: any) {
+      console.error(`❌ Error processing combined notification for ${player.name}:`, error);
       results.failed++;
-      results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
+      results.errors.push(`${player.name}: ${error.message || "Internal error"}`);
       results.success = false;
+    } finally {
+      // Small delay between messages
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-
-    // Small delay between messages
-    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   return results;

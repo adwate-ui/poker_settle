@@ -50,6 +50,7 @@ import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { buildShortUrl } from "@/lib/shareUtils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useGameDetail } from "@/features/game/hooks/useGameDetail";
+import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface GamePlayer {
@@ -110,6 +111,7 @@ export const GameDetailView = ({
   // Use TanStack Query hook
   const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId);
   const isMobile = useIsMobile();
+  useGameRealtime(gameId);
 
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [sortField, setSortField] = useState<SortField>("name");
@@ -528,9 +530,7 @@ export const GameDetailView = ({
                 <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
                 <PokerTableView
                   positions={playersWithSeats}
-                  totalSeats={playersWithSeats.length}
                   enableDragDrop={false}
-                  gameId={gameId}
                 />
               </div>
             </div>

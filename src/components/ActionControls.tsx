@@ -1,0 +1,103 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Undo2 } from 'lucide-react';
+
+interface ActionControlsProps {
+    currentPlayerId?: string;
+    playersInHand: string[];
+    currentBet: number;
+    betAmount: string;
+    setBetAmount: (amount: string) => void;
+    onAction: (type: string, amount?: number) => void;
+    onUndo: () => void;
+    onNextStreet: () => void;
+    canUndo: boolean;
+    canMoveToNextStreet: boolean;
+    stage: string;
+}
+
+const ActionControls = ({
+    currentPlayerId,
+    playersInHand,
+    currentBet,
+    betAmount,
+    setBetAmount,
+    onAction,
+    onUndo,
+    onNextStreet,
+    canUndo,
+    canMoveToNextStreet,
+    stage
+}: ActionControlsProps) => {
+    const isPlayerActive = currentPlayerId && playersInHand.includes(currentPlayerId);
+
+    return (
+        <div className="space-y-3">
+            {isPlayerActive ? (
+                <>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="h-12 font-bold"
+                            onClick={() => onAction(currentBet === 0 ? 'Check' : 'Call', currentBet)}
+                        >
+                            {currentBet === 0 ? 'Check' : `Call ${currentBet}`}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="lg"
+                            className="h-12 font-bold"
+                            onClick={() => onAction('Fold')}
+                        >
+                            Fold
+                        </Button>
+                    </div>
+                    <div className="flex gap-2">
+                        <Input
+                            type="number"
+                            value={betAmount}
+                            onChange={e => setBetAmount(e.target.value)}
+                            placeholder="Amount"
+                            className="h-12 text-lg"
+                        />
+                        <Button
+                            variant="warning"
+                            className="h-12 px-8 font-bold"
+                            onClick={() => onAction('Raise', parseFloat(betAmount))}
+                            disabled={!betAmount}
+                        >
+                            Raise
+                        </Button>
+                    </div>
+                </>
+            ) : (
+                <div className="bg-muted/50 p-4 rounded-lg text-center border-dashed border-2">
+                    Player Folded
+                </div>
+            )}
+
+            <div className="flex gap-2">
+                <Button
+                    variant="outline"
+                    className="h-10"
+                    onClick={onUndo}
+                    disabled={!canUndo}
+                >
+                    <Undo2 className="w-4 h-4 mr-2" /> Undo
+                </Button>
+                {canMoveToNextStreet && (
+                    <Button
+                        variant="success"
+                        className="flex-1 h-10 font-bold"
+                        onClick={onNextStreet}
+                    >
+                        {stage === 'river' ? '🏆 Showdown' : 'Next Street →'}
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ActionControls;

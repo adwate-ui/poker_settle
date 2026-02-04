@@ -9,13 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
-import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 
 // Z-index management is now handled via Tailwind semantic tokens (z-player-unit, z-winner-celebration, etc.)
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
-  totalSeats?: number;
   onPositionsChange?: (positions: SeatPosition[]) => void;
   enableDragDrop?: boolean;
   buttonPlayerId?: string;
@@ -313,7 +311,6 @@ const BettingChipsLayer = memo(({
 
 const PokerTableView = memo(({
   positions,
-  totalSeats,
   onPositionsChange,
   enableDragDrop = false,
   buttonPlayerId,
@@ -333,9 +330,7 @@ const PokerTableView = memo(({
   muckedPlayers = [],
   playerStacks = {},
   showPotChips = true,
-  gameId
 }: PokerTableViewProps) => {
-  useGameRealtime(gameId);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [aspectRatio, setAspectRatio] = useState(1);

@@ -50,6 +50,7 @@ import HandTracking from "@/components/HandTracking";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
+import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 import {
   Table,
   TableBody,
@@ -130,6 +131,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const isMobile = useIsMobile();
   const [api, setApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useGameRealtime(currentGame.id);
 
   useEffect(() => {
     if (!api) return;
@@ -568,8 +571,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             {currentTablePosition && currentTablePosition.positions.length > 0 ? (
                               <PokerTableView
                                 positions={currentTablePosition.positions}
-                                totalSeats={gamePlayers.length}
-                                gameId={currentGame.id}
                               />
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center p-8">
@@ -849,8 +850,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         <div className="relative rounded-3xl overflow-hidden bg-white/40 dark:bg-black/40 border border-gold-900/10 dark:border-white/5 p-10 pt-12 shadow-inner">
                           <PokerTableView
                             positions={currentTablePosition.positions}
-                            totalSeats={gamePlayers.length}
-                            gameId={currentGame.id}
                           />
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4">

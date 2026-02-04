@@ -5,24 +5,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp, Sparkles, Undo2, Eye } from 'lucide-react';
+import { Play, TrendingUp, Trophy, X } from 'lucide-react';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
 import { determineWinner, parseCardNotationString } from '@/utils/pokerHandEvaluator';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { SeatPosition } from '@/types/poker';
 import { useHandPersistence } from '@/hooks/useHandPersistence';
 import { usePokerEngine } from '@/hooks/usePokerEngine';
 import { formatCurrency } from '@/utils/currencyUtils';
-import { cn } from '@/lib/utils';
+import ActionControls from './ActionControls';
+import CommunityCards from './CommunityCards';
 
 interface HandTrackingProps {
   game: Game;
@@ -32,7 +32,6 @@ interface HandTrackingProps {
 }
 
 const MOBILE_BREAKPOINT_PX = 640;
-const AUTO_ADVANCE_DELAY_MS = 300;
 
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
@@ -59,7 +58,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const [selectedPlayerForHole, setSelectedPlayerForHole] = useState<string>('');
   const [showPlayerActionDialog, setShowPlayerActionDialog] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [isActionHistoryOpen, setIsActionHistoryOpen] = useState(true);
   const [showCardSelector, setShowCardSelector] = useState(false);
   const [cardSelectorType, setCardSelectorType] = useState<'flop' | 'turn' | 'river'>('flop');
   const [cardsJustAdded, setCardsJustAdded] = useState(false);
@@ -138,7 +136,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     const shouldOpen = (engine.stage === 'flop' && !engine.flopCards) ||
       (engine.stage === 'turn' && !engine.turnCard && engine.flopCards) ||
       (engine.stage === 'river' && !engine.riverCard && engine.turnCard);
-    if (shouldOpen) openCardSelector(engine.stage);
+    if (shouldOpen) openCardSelector(engine.stage as any);
   }, [engine.stage, engine.flopCards, engine.turnCard, engine.riverCard, engine.currentHand, isMobile]);
 
   // Swipe logic
@@ -207,6 +205,15 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     return determineWinner(remaining.map(p => ({ playerId: p.player_id, playerName: p.player.name, holeCards: engine.playerHoleCards[p.player_id] })), community);
   }, [engine.stage, engine.activePlayers, engine.playersInHand, engine.playerHoleCards, engine.flopCards, engine.turnCard, engine.riverCard]);
 
+  // Helper to get presentational table positions
+  const getTablePositions = (players: any[]) => {
+    return players.map(p => ({
+      seat: seatPositions[p.player_id ?? p.id] ?? 0,
+      player_id: p.player_id ?? p.id,
+      player_name: p.player?.name ?? p.name
+    }));
+  };
+
   // Render Setup
   if (engine.stage === 'setup') {
     const selectedPlayer = selectedPlayerId ? game.game_players.find(gp => gp.player_id === selectedPlayerId) : null;
@@ -222,7 +229,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           <CardContent className="pt-6 space-y-6">
             <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-4 rounded-xl border border-green-700/30">
               <PokerTableView
-                positions={game.game_players.sort((a, b) => (seatPositions[a.player_id] ?? 999) - (seatPositions[b.player_id] ?? 999)).map(gp => ({ seat: seatPositions[gp.player_id] ?? 0, player_id: gp.player_id, player_name: gp.player.name }))}
+                positions={getTablePositions(game.game_players.sort((a, b) => (seatPositions[a.player_id] ?? 999) - (seatPositions[b.player_id] ?? 999)))}
                 buttonPlayerId={engine.buttonPlayerId}
                 seatPositions={seatPositions}
                 foldedPlayers={engine.dealtOutPlayers}
@@ -349,58 +356,36 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     );
   }
 
-  // Common UI components for Mobile/Desktop
-  const CommunityCardsDisplay = (
-    <div className="bg-green-900/20 p-3 rounded-xl border border-green-700/30 flex justify-between items-center">
-      <div className="flex gap-2 items-center overflow-x-auto">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-muted-foreground">FLOP</span>
-          <div className="flex gap-0.5 min-w-[70px]">
-            {parseCardNotationString(engine.flopCards).map((c, i) => <PokerCard key={i} card={c} size="sm" />)}
-          </div>
-        </div>
-        {engine.flopCards && <div className="w-px h-8 bg-white/10" />}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-muted-foreground">TURN</span>
-          <div className="min-w-[24px]">{engine.turnCard && <PokerCard card={engine.turnCard} size="sm" />}</div>
-        </div>
-        {engine.turnCard && <div className="w-px h-8 bg-white/10" />}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-muted-foreground">RIVER</span>
-          <div className="min-w-[24px]">{engine.riverCard && <PokerCard card={engine.riverCard} size="sm" />}</div>
-        </div>
-      </div>
-      <Button variant="ghost" size="sm" onClick={handleEditCards}><Sparkles className="w-4 h-4" /></Button>
-    </div>
-  );
+  const commonTableProps = {
+    positions: getTablePositions(engine.activePlayers),
+    buttonPlayerId: engine.buttonPlayerId,
+    seatPositions: seatPositions,
+    playerBets: engine.streetPlayerBets,
+    potSize: engine.visualPotSize,
+    activePlayerId: engine.currentPlayer?.player_id,
+    foldedPlayers: engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)
+  };
 
-  const ActionControls = (
-    <div className="space-y-3">
-      {engine.currentPlayer && engine.playersInHand.includes(engine.currentPlayer.player_id) ? (
-        <>
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="lg" className="h-12 font-bold" onClick={() => handleAction(engine.currentBet === 0 ? 'Check' : 'Call', engine.currentBet)}>
-              {engine.currentBet === 0 ? 'Check' : `Call ${engine.currentBet}`}
-            </Button>
-            <Button variant="destructive" size="lg" className="h-12 font-bold" onClick={() => handleAction('Fold')}>Fold</Button>
-          </div>
-          <div className="flex gap-2">
-            <Input type="number" value={betAmount} onChange={e => setBetAmount(e.target.value)} placeholder="Amount" className="h-12 text-lg" />
-            <Button variant="warning" className="h-12 px-8 font-bold" onClick={() => handleAction('Raise', parseFloat(betAmount))} disabled={!betAmount}>Raise</Button>
-          </div>
-        </>
-      ) : <div className="bg-muted/50 p-4 rounded-lg text-center border-dashed border-2">Player Folded</div>}
+  const actionControlsProps = {
+    currentPlayerId: engine.currentPlayer?.player_id,
+    playersInHand: engine.playersInHand,
+    currentBet: engine.currentBet,
+    betAmount,
+    setBetAmount,
+    onAction: handleAction,
+    onUndo: engine.undoLastAction,
+    onNextStreet: engine.moveToNextStreet,
+    canUndo: engine.actionHistory.length > 0,
+    canMoveToNextStreet: engine.canMoveToNextStreet(),
+    stage: engine.stage
+  };
 
-      <div className="flex gap-2">
-        <Button variant="outline" className="h-10" onClick={engine.undoLastAction} disabled={engine.actionHistory.length === 0}><Undo2 className="w-4 h-4 mr-2" /> Undo</Button>
-        {engine.canMoveToNextStreet() && (
-          <Button variant="success" className="flex-1 h-10 font-bold" onClick={engine.moveToNextStreet}>
-            {engine.stage === 'river' ? '🏆 Showdown' : 'Next Street →'}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  const communityCardsProps = {
+    flopCards: engine.flopCards,
+    turnCard: engine.turnCard,
+    riverCard: engine.riverCard,
+    onEdit: handleEditCards
+  };
 
   // Main Return
   return (
@@ -440,18 +425,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
                   </div>
                 </div>
                 <div className="flex-[2] overflow-hidden rounded-xl border bg-green-900/10">
-                  <PokerTableView
-                    positions={engine.activePlayers.map(p => ({ seat: seatPositions[p.player_id] ?? 0, player_id: p.player_id, player_name: p.player.name }))}
-                    buttonPlayerId={engine.buttonPlayerId}
-                    seatPositions={seatPositions}
-                    playerBets={engine.streetPlayerBets}
-                    potSize={engine.visualPotSize}
-                    activePlayerId={engine.currentPlayer?.player_id}
-                    foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
-                  />
+                  <PokerTableView {...commonTableProps} />
                 </div>
-                {CommunityCardsDisplay}
-                <div className="pb-safe">{ActionControls}</div>
+                <CommunityCards {...communityCardsProps} />
+                <div className="pb-safe">
+                  <ActionControls {...actionControlsProps} />
+                </div>
               </div>
             </DrawerContent>
           </Drawer>
@@ -472,18 +451,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="rounded-2xl border-2 border-border/50 bg-green-950/5 overflow-hidden">
-              <PokerTableView
-                positions={engine.activePlayers.map(p => ({ seat: seatPositions[p.player_id] ?? 0, player_id: p.player_id, player_name: p.player.name }))}
-                buttonPlayerId={engine.buttonPlayerId}
-                seatPositions={seatPositions}
-                playerBets={engine.streetPlayerBets}
-                potSize={engine.visualPotSize}
-                activePlayerId={engine.currentPlayer?.player_id}
-                foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
-              />
+              <PokerTableView {...commonTableProps} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">{CommunityCardsDisplay}{ActionControls}</div>
+              <div className="space-y-4">
+                <CommunityCards {...communityCardsProps} />
+                <ActionControls {...actionControlsProps} />
+              </div>
               <div className="bg-muted/30 rounded-2xl p-4 border space-y-4 overflow-hidden">
                 <div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Action History</span><Badge>{engine.allHandActions.length}</Badge></div>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">

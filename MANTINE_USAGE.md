@@ -134,11 +134,10 @@ The following components already use Mantine:
 As of the latest update, Mantine components are fully integrated with the app's theme system:
 
 - **Unified Colors**: Mantine now uses the same color variables as shadcn/ui components
-- **Theme Sync**: All five themes (default, One Piece, Bleach, Naruto, Dandadan) apply to Mantine components
+- **Theme Sync**: UI themes apply consistently to Mantine components
 - **Dark Mode**: Seamless dark mode support that syncs automatically
 - **CSS Bridge**: A CSS bridge file (`src/styles/mantine-theme.css`) maps Mantine's color system to our app's CSS variables
 
-See `COLOR_SCHEME_IMPLEMENTATION.md` for full details.
 
 ## Best Practices
 
