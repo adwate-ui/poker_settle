@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Loader2, ArrowUpDown, Calendar } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
 import { formatIndianNumber } from '@/lib/utils';
@@ -23,10 +23,6 @@ interface GameWithStats {
   player_count: number;
   total_pot: number;
   player_names: string[];
-  game_players: Array<{
-    player_name: string;
-    net_amount: number;
-  }>;
 }
 
 type SortField = 'date' | 'buy_in' | 'players' | 'chips';
@@ -56,40 +52,18 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
           date,
           buy_in_amount,
           is_complete,
-          game_players (
-            id,
-            buy_ins,
-            net_amount,
-            player:players (
-              name
-            )
-          )
+          game_players (buy_ins, player:players(name))
         `)
         .eq('is_complete', true)
         .order('date', { ascending: false });
 
       if (error) throw error;
 
-      interface GameData {
-        id: string;
-        date: string;
-        buy_in_amount: number;
-        game_players?: Array<{
-          buy_ins?: number;
-          net_amount?: number;
-          player?: { name?: string };
-        }>;
-      }
-
-      const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: GameData) => {
+      const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: any) => {
         const playerCount = game.game_players?.length || 0;
-        const totalBuyIns = game.game_players?.reduce((sum: number, gp) => sum + (gp.buy_ins || 0), 0) || 0;
+        const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
         const totalPot = totalBuyIns * game.buy_in_amount;
-        const playerNames = game.game_players?.map((gp) => gp.player?.name || '').filter(Boolean) || [];
-        const gamePlayers = game.game_players?.map((gp) => ({
-          player_name: gp.player?.name || '',
-          net_amount: gp.net_amount || 0,
-        })) || [];
+        const playerNames = game.game_players?.map((gp: any) => gp.player?.name || '').filter(Boolean) || [];
 
         return {
           id: game.id,
@@ -98,7 +72,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
           player_count: playerCount,
           total_pot: totalPot,
           player_names: playerNames,
-          game_players: gamePlayers,
+          game_players: [], // Not needed for summary
         };
       });
 
@@ -110,240 +84,92 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchGames();
-  }, [fetchGames]);
+  useEffect(() => { fetchGames(); }, [fetchGames]);
 
-  const uniqueDates = useMemo(() => {
-    const dates = games.map((game) => format(new Date(game.date), 'MMM d, yyyy'));
-    return Array.from(new Set(dates)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-  }, [games]);
-
-  const uniqueMonthYears = useMemo(() => {
-    const monthYears = games.map((game) => format(new Date(game.date), 'MMM yyyy'));
-    return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-  }, [games]);
+  const uniqueDates = useMemo(() => Array.from(new Set(games.map(g => format(new Date(g.date), 'MMM d, yyyy')))), [games]);
+  const uniqueMonthYears = useMemo(() => Array.from(new Set(games.map(g => format(new Date(g.date), 'MMM yyyy')))), [games]);
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      if (sortOrder === 'asc') setSortOrder('desc');
-      else if (sortOrder === 'desc') {
-        setSortField(null);
-        setSortOrder(null);
-      }
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    if (sortOrder === 'asc') return <ArrowUp className="h-4 w-4" />;
-    return <ArrowDown className="h-4 w-4" />;
+    if (sortField === field) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortOrder('asc'); }
   };
 
   const filteredAndSortedGames = useMemo(() => {
     let filtered = games.filter((game) => {
       const gameDate = format(new Date(game.date), 'MMM d, yyyy');
       const monthYear = format(new Date(game.date), 'MMM yyyy');
-      
       if (selectedDate !== 'all' && gameDate !== selectedDate) return false;
       if (selectedMonthYear !== 'all' && monthYear !== selectedMonthYear) return false;
-      
       return true;
     });
 
     if (sortField && sortOrder) {
       filtered = [...filtered].sort((a, b) => {
-        let aVal: number, bVal: number;
-        
+        let valA = 0, valB = 0;
         switch (sortField) {
-          case 'date':
-            aVal = new Date(a.date).getTime();
-            bVal = new Date(b.date).getTime();
-            break;
-          case 'buy_in':
-            aVal = a.buy_in_amount;
-            bVal = b.buy_in_amount;
-            break;
-          case 'players':
-            aVal = a.player_count;
-            bVal = b.player_count;
-            break;
-          case 'chips':
-            aVal = a.total_pot;
-            bVal = b.total_pot;
-            break;
-          default:
-            return 0;
+          case 'date': valA = new Date(a.date).getTime(); valB = new Date(b.date).getTime(); break;
+          case 'buy_in': valA = a.buy_in_amount; valB = b.buy_in_amount; break;
+          case 'players': valA = a.player_count; valB = b.player_count; break;
+          case 'chips': valA = a.total_pot; valB = b.total_pot; break;
         }
-        
-        return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+        return sortOrder === 'asc' ? (valA > valB ? 1 : -1) : (valB > valA ? 1 : -1);
       });
     }
-
     return filtered;
   }, [games, selectedDate, selectedMonthYear, sortField, sortOrder]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (games.length === 0) {
-    return (
-      <Card className="max-w-6xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl">Games History</CardTitle>
-          <CardDescription>No completed games yet</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            No games found
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-4">
+    <div className="max-w-6xl mx-auto space-y-6">
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl sm:text-2xl">Games History</CardTitle>
-          <CardDescription className="text-sm">View all completed poker games</CardDescription>
+        <CardHeader>
+          <CardTitle>Games History</CardTitle>
+          <CardDescription>View all completed poker games</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Select value={selectedDate} onValueChange={setSelectedDate}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by date" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Dates</SelectItem>
-                {uniqueDates.map((date) => (
-                  <SelectItem key={date} value={date}>
-                    {date}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by month-year" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="all">All Months</SelectItem>
-                {uniqueMonthYears.map((monthYear) => (
-                  <SelectItem key={monthYear} value={monthYear}>
-                    {monthYear}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Select value={selectedDate} onValueChange={setSelectedDate}>
+            <SelectTrigger><SelectValue placeholder="Filter by date" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Dates</SelectItem>
+              {uniqueDates.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+            <SelectTrigger><SelectValue placeholder="Filter by month" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {uniqueMonthYears.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="space-y-2 sm:space-y-3 p-3 sm:p-4">
-            <div className="hidden md:block rounded-lg p-3 sm:p-4 border">
-              <div className="grid grid-cols-4 gap-2 sm:gap-4 font-bold text-xs sm:text-sm">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('date')}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Date
-                  {getSortIcon('date')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('buy_in')}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Buy-in
-                  {getSortIcon('buy_in')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('players')}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Players
-                  {getSortIcon('players')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('chips')}
-                  className="flex items-center gap-2 justify-start font-bold"
-                >
-                  Chips in play
-                  {getSortIcon('chips')}
-                </Button>
-              </div>
-            </div>
-
-            {filteredAndSortedGames.map((game) => {
-              
-              return (
-                <Card
-                  key={game.id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)}
-                >
-                  <CardContent className="p-4">
-                    {/* Mobile Layout */}
-                    <div className="md:hidden space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Date</p>
-                          <p className="font-medium">{format(new Date(game.date), 'MMM d, yyyy')}</p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Buy-in</p>
-                          <p className="font-semibold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Players</p>
-                          <Badge variant="info">{game.player_count}</Badge>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Chips in play</p>
-                          <p className="font-semibold">Rs. {formatIndianNumber(game.total_pot)}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-4 gap-4 items-center text-sm">
-                      <div className="font-medium">
-                        {format(new Date(game.date), 'MMM d, yyyy')}
-                      </div>
-                      <div className="font-semibold">
-                        Rs. {formatIndianNumber(game.buy_in_amount)}
-                      </div>
-                      <div>
-                        <Badge variant="info">{game.player_count}</Badge>
-                      </div>
-                      <div className="font-semibold">
-                        Rs. {formatIndianNumber(game.total_pot)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </CardContent>
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead onClick={() => handleSort('date')} className="cursor-pointer hover:text-primary"><span className="flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('buy_in')} className="text-right cursor-pointer hover:text-primary"><span className="flex items-center justify-end gap-1">Buy-in <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('players')} className="text-center cursor-pointer hover:text-primary"><span className="flex items-center justify-center gap-1">Players <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('chips')} className="text-right cursor-pointer hover:text-primary"><span className="flex items-center justify-end gap-1">Pot <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAndSortedGames.length === 0 ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No games found</TableCell></TableRow>
+            ) : (
+              filteredAndSortedGames.map((game) => (
+                <TableRow key={game.id} onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)} className="cursor-pointer">
+                  <TableCell className="font-medium flex items-center gap-2"><Calendar className="h-4 w-4 opacity-50" /> {format(new Date(game.date), 'MMM d, yyyy')}</TableCell>
+                  <TableCell className="text-right">Rs. {formatIndianNumber(game.buy_in_amount)}</TableCell>
+                  <TableCell className="text-center"><Badge variant="secondary">{game.player_count}</Badge></TableCell>
+                  <TableCell className="text-right font-bold text-primary">Rs. {formatIndianNumber(game.total_pot)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );

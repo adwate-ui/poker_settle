@@ -7,24 +7,25 @@ interface LuxuryLayoutProps {
 
 const LuxuryLayout: React.FC<LuxuryLayoutProps> = ({ children }) => {
     return (
-        <div className="relative min-h-screen w-full bg-[linear-gradient(to_bottom_right,#F9F4DF,#F1E6B9)] dark:bg-luxury-gradient overflow-x-hidden selection:bg-gold-500/30 selection:text-gold-200 pt-safe pb-safe">
-            {/* Noise Texture Overlay */}
+        // Replaced hardcoded hex gradient with global CSS variables
+        <div className="relative min-h-screen w-full bg-background text-foreground overflow-x-hidden pt-safe pb-safe transition-colors duration-300">
+
+            {/* Unified Noise Texture */}
             <div
-                className="fixed inset-0 pointer-events-none opacity-[0.03] z-[1]"
+                className="fixed inset-0 pointer-events-none opacity-[0.03] z-[1] mix-blend-overlay"
                 style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
                 }}
             />
 
-            {/* Content */}
-            <div className="relative z-[2]">
-                {children}
+            <div className="relative z-10 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+                <header className="flex justify-end mb-6">
+                    <ThemeToggle />
+                </header>
+                <main className="animate-in fade-in zoom-in-95 duration-500">
+                    {children}
+                </main>
             </div>
-
-            {/* Subtle bottom glow */}
-            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full h-[30vh] bg-gold-900/5 dark:bg-gold-900/10 blur-[80px] sm:blur-[120px] pointer-events-none z-[0] transition-all duration-1000" />
-
-            <ThemeToggle />
         </div>
     );
 };
