@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { CardBackSVG } from './PokerAssets';
 import { useCardBackDesign } from '@/hooks/useCardBackDesign';
 import { cn } from '@/lib/utils';
-import { Crown } from 'lucide-react';
 
 interface PokerCardProps {
   card: string; // Format: 'Ah' (Ace of hearts), 'Kd' (King of diamonds), 'back', or '??'
@@ -19,36 +18,8 @@ const SUIT_PATHS = {
   c: "M12 2c-1.657 0-3 1.343-3 3 0 .762.284 1.455.75 1.987C7.306 7.6 5 10 5 13c0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346C10.244 17.545 10 18.682 10 20c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 .762.284 1.455.75 1.987-2.444.613-4.75 3.013-4.75 6.013 0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346-.372.891-.616 2.028-.616 3.346 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3z",
 };
 
-// Add gradients definitions
-const SuitGradientDefs = () => (
-  <svg width="0" height="0" className="absolute w-0 h-0 pointer-events-none">
-    <defs>
-      <linearGradient id="grad-hearts" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ef4444" />
-        <stop offset="100%" stopColor="#991b1b" />
-      </linearGradient>
-      <linearGradient id="grad-spades" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#374151" />
-        <stop offset="100%" stopColor="#111827" />
-      </linearGradient>
-      <linearGradient id="grad-diamonds" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#3b82f6" />
-        <stop offset="100%" stopColor="#1e40af" />
-      </linearGradient>
-      <linearGradient id="grad-clubs" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#22c55e" />
-        <stop offset="100%" stopColor="#15803d" />
-      </linearGradient>
-      <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#fbbf24" />
-        <stop offset="45%" stopColor="#d97706" />
-        <stop offset="100%" stopColor="#b45309" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
 
-const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, className?: string, fourColor?: boolean }) => {
+const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }: { suit: string, className?: string, fourColor?: boolean, applyDepth?: boolean }) => {
   const getFill = (suit: string) => {
     if (!fourColor) {
       if (suit === 'd' || suit === 'h') return "url(#grad-hearts)";
@@ -69,10 +40,14 @@ const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, cl
   return (
     <svg
       viewBox="0 0 24 24"
-      className={cn(className, "drop-shadow-sm")}
+      className={cn(className)}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d={path} fill={getFill(suit)} />
+      <path
+        d={path}
+        fill={getFill(suit)}
+        filter={applyDepth ? "url(#ink-depth)" : undefined}
+      />
     </svg>
   );
 };
@@ -80,7 +55,6 @@ const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, cl
 const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }: PokerCardProps) => {
   const { design } = useCardBackDesign();
 
-  // Handle card back - use SVG for better quality
   if (!card || card === 'back' || card === '??') {
     const sizeMap = {
       xxs: { width: 32, height: 46 },
@@ -91,7 +65,7 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     };
 
     return (
-      <div className={cn(className, "rounded-lg shadow-md overflow-hidden border border-gray-400/30")}>
+      <div className={cn(className, "rounded-lg shadow-md overflow-hidden border border-gray-400/30 ring-1 ring-black/5")}>
         <CardBackSVG {...sizeMap[size]} design={design} />
       </div>
     );
@@ -106,47 +80,47 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
   const isAce = rank === 'A';
 
   const containerSizes = {
-    xxs: 'w-8 aspect-[2.5/3.5]',
-    xs: 'w-10 aspect-[2.5/3.5]',
-    sm: 'w-14 aspect-[2.5/3.5]',
-    md: 'w-20 aspect-[2.5/3.5]',
-    lg: 'w-24 aspect-[2.5/3.5]',
+    xxs: 'w-8 aspect-[2.5/3.5] rounded-[3px]',
+    xs: 'w-10 aspect-[2.5/3.5] rounded-[4px]',
+    sm: 'w-14 aspect-[2.5/3.5] rounded-[6px]',
+    md: 'w-20 aspect-[2.5/3.5] rounded-[8px]',
+    lg: 'w-24 aspect-[2.5/3.5] rounded-[10px]',
   };
 
   const rankSizes = {
-    xxs: 'text-[10px]',
-    xs: 'text-[12px]',
-    sm: 'text-[16px]',
-    md: 'text-[22px]',
-    lg: 'text-[26px]',
+    xxs: 'text-[9px]',
+    xs: 'text-[8px]',
+    sm: 'text-[13px]',
+    md: 'text-[21px]',
+    lg: 'text-[25px]',
   };
 
   const suitIconSizes = {
-    xxs: 'w-2 h-2',
-    xs: 'w-2.5 h-2.5',
-    sm: 'w-3.5 h-3.5',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    xxs: 'w-1.5 h-1.5',
+    xs: 'w-2 h-2',
+    sm: 'w-3 h-3',
+    md: 'w-4.5 h-4.5',
+    lg: 'w-5.5 h-5.5',
   };
 
   const cornerPadding = {
-    xxs: 'p-0.5',
-    xs: 'p-0.5',
-    sm: 'p-1',
+    xxs: 'p-0',
+    xs: 'p-0',
+    sm: 'p-0.5',
     md: 'p-1.5',
     lg: 'p-2',
   };
 
   const getRankColor = (s: string) => {
     if (!fourColor) {
-      if (s === 'd' || s === 'h') return "text-red-700";
-      return "text-slate-900";
+      if (s === 'd' || s === 'h') return "text-[#ef4444]";
+      return "text-[#111827]";
     }
     switch (s) {
-      case 'h': return "text-red-700";
-      case 's': return "text-slate-900";
-      case 'd': return "text-blue-700";
-      case 'c': return "text-green-700";
+      case 'h': return "text-[#ef4444]";
+      case 's': return "text-[#111827]";
+      case 'd': return "text-[#3b82f6]";
+      case 'c': return "text-[#22c55e]";
       default: return "text-gray-900";
     }
   };
@@ -157,19 +131,26 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     <div className={cn(
       containerSizes[size],
       className,
-      "relative rounded-[8px] select-none overflow-hidden",
-      "bg-gradient-to-br from-white to-[#f8f8f8]", // Luxury paper feel
-      "shadow-[0_2px_5px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.1)]"
+      "relative select-none overflow-hidden border border-black/10",
+      "bg-white",
+      "shadow-[0_4px_10px_rgba(0,0,0,0.2),0_1px_2px_rgba(0,0,0,0.1)]",
+      "group"
     )}>
-      {/* Required Definitions */}
-      <SuitGradientDefs />
 
-      {/* Inner Pinstripe Border - Premium Print Detail */}
-      <div className="absolute inset-[3px] border border-gray-200/60 rounded-[5px] pointer-events-none" />
+      {/* 1. Linen Texture Overlay (Filter-based) */}
+      <div className="absolute inset-0 pointer-events-none opacity-40 bg-transparent" style={{ filter: 'url(#linen-texture-filter)' }} />
+
+      {/* 2. Inner Glow/Coating */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/40 pointer-events-none" />
+      <div className="absolute inset-0 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] pointer-events-none" />
 
       {/* Top-left corner index */}
       <div className={cn("absolute top-0 left-0 flex flex-col items-center leading-none z-10", cornerPadding[size])}>
-        <div className={cn(rankSizes[size], "font-luxury font-bold tracking-tighter", rankColor)}>
+        <div className={cn(
+          rankSizes[size],
+          "font-serif font-bold tracking-tight mb-[1px]",
+          rankColor
+        )} style={{ fontFamily: '"Playfair Display", "Bodoni MT", serif' }}>
           {rank}
         </div>
         <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
@@ -179,48 +160,66 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {isFaceCard ? (
           <div className="relative w-full h-full flex items-center justify-center">
-            {/* Royal Frame and Watermark */}
+            {/* Royal Gold Frame */}
             <div className={cn(
-              "absolute border-2 border-[url(#grad-gold)] rounded-full opacity-30",
-              size === 'lg' ? 'w-16 h-16' : size === 'md' ? 'w-14 h-14' : 'w-8 h-8 hidden'
-            )} style={{ borderColor: 'url(#grad-gold)' }} />
+              "absolute border-[1px] rounded-[2px] opacity-40",
+              size === 'lg' ? 'w-[78%] h-[82%]' : size === 'md' ? 'w-[75%] h-[80%]' : 'w-[70%] h-[75%]'
+            )} style={{
+              borderImage: 'linear-gradient(to bottom right, #fbbf24, #d97706, #b45309) 1',
+              borderStyle: 'solid'
+            }} />
 
+            {/* Background Monogram */}
             <span className={cn(
-              "absolute font-luxury font-black opacity-[0.03] scale-[2.5]",
-              rankColor
-            )}>
+              "absolute font-serif italic font-black opacity-[0.05] select-none",
+              rankColor,
+              size === 'lg' ? 'text-[60px]' : size === 'md' ? 'text-[50px]' : 'text-[30px]'
+            )} style={{ fontFamily: '"Playfair Display", serif' }}>
               {rank}
             </span>
 
-            <SuitIcon suit={suit} fourColor={fourColor} className={cn(
-              "drop-shadow-md",
+            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
+              "relative z-10",
               size === 'lg' ? 'w-12 h-12' :
                 size === 'md' ? 'w-10 h-10' :
                   size === 'sm' ? 'w-6 h-6' : 'w-4 h-4'
             )} />
           </div>
+        ) : isAce ? (
+          <div className="relative flex items-center justify-center">
+            {/* Sunburst/Halo Effect */}
+            <div className={cn(
+              "absolute rounded-full bg-gradient-to-r from-transparent via-primary/5 to-transparent blur-xl animate-pulse",
+              size === 'lg' ? 'w-24 h-24' : size === 'md' ? 'w-20 h-20' : 'w-12 h-12'
+            )} />
+
+            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
+              "relative z-10",
+              size === 'lg' ? 'w-20 h-20' :
+                size === 'md' ? 'w-16 h-16' :
+                  size === 'sm' ? 'w-12 h-12' : 'w-8 h-8'
+            )} />
+          </div>
         ) : (
-          <SuitIcon suit={suit} fourColor={fourColor} className={cn(
-            "drop-shadow-md",
+          <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
             size === 'lg' ? 'w-14 h-14' :
               size === 'md' ? 'w-12 h-12' :
-                size === 'sm' ? 'w-8 h-8' : 'w-5 h-5',
-            // Small cards need center suit hidden or smaller logic if desirable, 
-            // but for single massive icon style this works well
+                size === 'sm' ? 'w-8 h-8' : 'w-5 h-5'
           )} />
         )}
       </div>
 
       {/* Bottom-right corner index (rotated) */}
       <div className={cn("absolute bottom-0 right-0 flex flex-col items-center leading-none z-10 rotate-180", cornerPadding[size])}>
-        <div className={cn(rankSizes[size], "font-luxury font-bold tracking-tighter", rankColor)}>
+        <div className={cn(
+          rankSizes[size],
+          "font-serif font-bold tracking-tight mb-[1px]",
+          rankColor
+        )} style={{ fontFamily: '"Playfair Display", "Bodoni MT", serif' }}>
           {rank}
         </div>
         <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
       </div>
-
-      {/* Shine/Gloss for high-end finish */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 pointer-events-none" />
     </div>
   );
 });

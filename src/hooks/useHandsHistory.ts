@@ -25,6 +25,7 @@ export interface HandWithDetails extends PokerHand {
 }
 
 export interface HandFilters {
+  heroName?: string;
   heroPosition?: string;
   gameId?: string;
   result?: 'win' | 'loss' | 'split' | 'all';
@@ -50,7 +51,7 @@ export const useHandsHistory = () => {
   const fetchHands = useCallback(async (pageNum: number = 1, shouldAppend: boolean = false) => {
     try {
       setLoading(true);
-      
+
       const from = (pageNum - 1) * HANDS_PER_PAGE;
       const to = from + HANDS_PER_PAGE - 1;
 
@@ -69,7 +70,7 @@ export const useHandsHistory = () => {
       if (handsError) throw handsError;
 
       const handIds = handsData?.map(h => h.id) || [];
-      
+
       if (handIds.length < HANDS_PER_PAGE) {
         setHasMore(false);
       }
@@ -93,6 +94,13 @@ export const useHandsHistory = () => {
 
       if (cardsError) throw cardsError;
 
+      // Build player ID to Name map
+      const playerMap = new Map<string, string>();
+      actionsData?.forEach(a => {
+        const name = (a as ActionWithPlayer).player?.name;
+        if (name) playerMap.set(a.player_id, name);
+      });
+
       // Combine data
       const enrichedHands: HandWithDetails[] = (handsData || []).map(hand => ({
         id: hand.id,
@@ -110,7 +118,7 @@ export const useHandsHistory = () => {
         updated_at: hand.updated_at,
         button_player_name: hand.button_player?.name || 'Unknown',
         winner_player_name: hand.winner_player?.name || null,
-        winner_player_names: [],
+        winner_player_names: (hand.winner_player_ids || []).map((id: string) => playerMap.get(id) || 'Unknown'),
         game_date: hand.game?.date || '',
         game_buy_in: hand.game?.buy_in_amount || 0,
         actions: (actionsData?.filter(a => a.hand_id === hand.id) || []) as PlayerAction[],
@@ -145,78 +153,104 @@ export const useHandsHistory = () => {
 
   // Apply filters with memoization
   const filteredHands = useMemo(() => {
-    let filtered = [...hands];
+    let rawFiltered = [...hands];
 
+    // 1. Dynamic Perspective & Participation Filter
+    // If a hero name is selected, we project the hand data from their perspective
+    const isHeroSet = !!filters.heroName;
+    const heroName = filters.heroName || 'Adwate';
+
+    if (isHeroSet) {
+      // Only include hands where the selected hero participated
+      rawFiltered = rawFiltered.filter(h =>
+        h.actions.some(a => (a as ActionWithPlayer).player?.name === filters.heroName)
+      );
+    }
+
+    // Project hands based on the selected hero
+    let projectedHands = rawFiltered.map(h => {
+      if (!isHeroSet) return h;
+
+      // Find hero's specifics in this hand
+      const heroActions = h.actions.filter(a => (a as ActionWithPlayer).player?.name === filters.heroName);
+      const firstHeroAction = heroActions[0];
+
+      const isWin = h.winner_player_names.includes(filters.heroName!) || h.winner_player_name === filters.heroName;
+
+      return {
+        ...h,
+        hero_position: firstHeroAction?.position || h.hero_position,
+        is_hero_win: isWin,
+        // is_split is preserved from original db as it's a global property of the hand
+      };
+    });
+
+    // 2. Apply common filters
     if (filters.heroPosition) {
-      filtered = filtered.filter(h => h.hero_position === filters.heroPosition);
+      projectedHands = projectedHands.filter(h => h.hero_position === filters.heroPosition);
     }
 
     if (filters.gameId) {
-      filtered = filtered.filter(h => h.game_id === filters.gameId);
+      projectedHands = projectedHands.filter(h => h.game_id === filters.gameId);
     }
 
     if (filters.result && filters.result !== 'all') {
       if (filters.result === 'win') {
-        filtered = filtered.filter(h => h.is_hero_win === true && !h.is_split);
+        projectedHands = projectedHands.filter(h => h.is_hero_win === true && !h.is_split);
       } else if (filters.result === 'loss') {
-        filtered = filtered.filter(h => h.is_hero_win === false && !h.is_split);
+        projectedHands = projectedHands.filter(h => h.is_hero_win === false && !h.is_split);
       } else if (filters.result === 'split') {
-        filtered = filtered.filter(h => h.is_split === true);
+        projectedHands = projectedHands.filter(h => h.is_split === true);
       }
     }
 
     if (filters.showdown && filters.showdown !== 'all') {
       if (filters.showdown === 'yes') {
-        filtered = filtered.filter(h => h.final_stage === 'Showdown');
+        projectedHands = projectedHands.filter(h => h.final_stage === 'Showdown');
       } else {
-        filtered = filtered.filter(h => h.final_stage !== 'Showdown');
+        projectedHands = projectedHands.filter(h => h.final_stage !== 'Showdown');
       }
     }
 
     if (filters.finalStage) {
-      filtered = filtered.filter(h => h.final_stage === filters.finalStage);
+      projectedHands = projectedHands.filter(h => h.final_stage === filters.finalStage);
     }
 
-    // Handle villain filters - if both name and position are set, check for both together
+    // Handle villain filters
     if (filters.villainName && filters.villainPosition) {
-      filtered = filtered.filter(h => {
-        // Check if any action has both the villain name AND position
+      projectedHands = projectedHands.filter(h => {
         return h.actions.some(action => {
           const playerData = (action as ActionWithPlayer).player;
           return playerData?.name === filters.villainName && action.position === filters.villainPosition;
         });
       });
     } else if (filters.villainName) {
-      filtered = filtered.filter(h => {
-        // Check if any action in the hand is from the villain (any position)
+      projectedHands = projectedHands.filter(h => {
         return h.actions.some(action => {
           const playerData = (action as ActionWithPlayer).player;
           return playerData?.name === filters.villainName;
         });
       });
     } else if (filters.villainPosition) {
-      filtered = filtered.filter(h => {
-        // Check if any action in the hand is from a player in the villain position (any player)
+      projectedHands = projectedHands.filter(h => {
         return h.actions.some(action => action.position === filters.villainPosition);
       });
     }
 
-    // Filter by hero hole cards (Hero = Adwate)
+    // Filter by hero hole cards (Hero is dynamic)
     if (filters.heroHoleCards && filters.heroHoleCards !== 'all') {
-      filtered = filtered.filter(h => {
-        // Find hero's hole cards (player named Adwate)
+      projectedHands = projectedHands.filter(h => {
         const heroAction = h.actions.find(action => {
           const playerData = (action as ActionWithPlayer).player;
-          return playerData?.name?.toLowerCase() === 'adwate' && action.hole_cards;
+          return playerData?.name === heroName && action.hole_cards;
         });
         return heroAction?.hole_cards && matchesHoleCardFilter(heroAction.hole_cards, filters.heroHoleCards!);
       });
     }
 
-    // Filter by villain hole cards (anyone except Adwate, optionally filtered by villain name)
+    // Filter by villain hole cards (anyone except current hero)
     if (filters.villainHoleCards && filters.villainHoleCards !== 'all') {
-      filtered = filtered.filter(h => {
-        // If villain name is specified, check only that villain's hole cards
+      projectedHands = projectedHands.filter(h => {
         if (filters.villainName) {
           const villainAction = h.actions.find(action => {
             const playerData = (action as ActionWithPlayer).player;
@@ -224,17 +258,16 @@ export const useHandsHistory = () => {
           });
           return villainAction?.hole_cards && matchesHoleCardFilter(villainAction.hole_cards, filters.villainHoleCards!);
         } else {
-          // Check if any non-Adwate player matches the filter
           return h.actions.some(action => {
             const playerData = (action as ActionWithPlayer).player;
-            const isNotHero = playerData?.name?.toLowerCase() !== 'adwate';
+            const isNotHero = playerData?.name !== heroName;
             return isNotHero && action.hole_cards && matchesHoleCardFilter(action.hole_cards, filters.villainHoleCards!);
           });
         }
       });
     }
 
-    return filtered;
+    return projectedHands;
   }, [hands, filters]);
 
   // Debounced filter update
@@ -276,7 +309,7 @@ export const useHandsHistory = () => {
     return Array.from(positions).sort();
   }, [hands]);
 
-  const getUniqueVillainNames = useMemo(() => {
+  const getUniquePlayerNames = useMemo(() => {
     const names = new Set<string>();
     hands.forEach(hand => {
       hand.actions.forEach(action => {
@@ -286,6 +319,8 @@ export const useHandsHistory = () => {
     });
     return Array.from(names).sort();
   }, [hands]);
+
+  const getUniqueVillainNames = getUniquePlayerNames;
 
   const getUniqueVillainPositions = useMemo(() => {
     const positions = new Set<string>();
@@ -326,6 +361,7 @@ export const useHandsHistory = () => {
     clearFilters,
     getUniqueGames,
     getUniqueHeroPositions,
+    getUniquePlayerNames,
     getUniqueVillainNames,
     getUniqueVillainPositions,
     getStatistics,

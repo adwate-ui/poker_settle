@@ -12,7 +12,7 @@ import { usePlayers } from "@/features/players/hooks/usePlayers";
 import { useUpdateGamePlayer } from "@/features/game/hooks/useGameMutations";
 
 // Keep local schemas for simple updates not yet moved
-const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed ₹1,00,00,000");
+const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed Rs. 1,00,00,000");
 const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(100, "Buy-ins cannot exceed 100");
 
 export const useGameData = () => {

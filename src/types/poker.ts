@@ -26,6 +26,7 @@ export interface Game {
   small_blind?: number;
   big_blind?: number;
   game_players: GamePlayer[];
+  settlements?: Settlement[];
 }
 
 export interface Settlement {

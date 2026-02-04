@@ -6,7 +6,7 @@ import { z } from "zod";
 import { generateShortCode } from "@/lib/shareUtils";
 import { sendCombinedGameSettlementNotifications } from "@/services/emailNotifications";
 
-const buyInAmountSchema = z.number().min(1, "Buy-in must be at least ₹1").max(1000000, "Buy-in cannot exceed ₹10,00,000");
+const buyInAmountSchema = z.number().min(1, "Buy-in must be at least Rs. 1").max(1000000, "Buy-in cannot exceed Rs. 10,00,000");
 
 export const fetchGames = async (userId: string, client?: SupabaseClient): Promise<Game[]> => {
     try {
@@ -89,7 +89,7 @@ export const createGame = async (userId: string, buyInAmount: number, selectedPl
 
         if (fetchError) throw fetchError;
 
-        return completeGame;
+        return completeGame as any;
     } catch (error) {
         console.error("Error creating game:", error);
         throw error;
@@ -129,7 +129,7 @@ export const completeGameApi = async (
         .from("games")
         .update({
             is_complete: true,
-            settlements: settlements
+            settlements: settlements as any
         })
         .eq("id", gameId);
 

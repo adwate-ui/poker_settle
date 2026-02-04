@@ -32,16 +32,28 @@ const PlayersHistory = () => {
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
     try {
+      // Fetch players
       const { data, error } = await supabase.from("players").select("*").eq("user_id", user?.id);
       if (error) throw error;
       setPlayers(data || []);
+
+      // Fetch unique games count
+      const { count, error: countError } = await supabase
+        .from("games")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user?.id);
+
+      if (countError) throw countError;
+      setTotalUniqueGames(count || 0);
+
     } catch (error) {
-      console.error("Error fetching players:", error);
-      toast.error("Failed to load players");
+      console.error("Error fetching player history data:", error);
+      toast.error("Failed to load player statistics");
     } finally {
       setLoading(false);
     }
@@ -153,7 +165,7 @@ const PlayersHistory = () => {
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2 hidden lg:block">
               <p className="text-label text-muted-foreground">Total Games</p>
               <p className="text-3xl font-numbers text-primary">
-                {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
+                {totalUniqueGames}
               </p>
             </div>
           </div>

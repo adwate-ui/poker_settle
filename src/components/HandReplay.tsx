@@ -561,7 +561,7 @@ const HandReplay = ({
                   {flopCards.length > 0 && (
                     <div className="flex flex-col gap-1">
                       <span className="text-label text-muted-foreground/60">Flop</span>
-                      <div className="flex gap-0.5">
+                      <div className="flex gap-1.5">
                         {flopCards.map((card, idx) => (
                           <React.Fragment key={`flop-${idx}`}>
                             <PokerCard card={card} size="sm" className="sm:hidden" />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,7 @@ import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
 import { BuyInHistoryDialog } from "@/components/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import { ShareDialog } from "@/components/ShareDialog";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/utils/settlementCalculator";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
@@ -91,7 +93,7 @@ export const GameDetailView = ({
   backLabel = "Back",
   fetchBuyInHistory,
 }: GameDetailViewProps) => {
-  const { copyShareLink, loading: linkLoading, createOrGetSharedLink } = useSharedLink();
+  const { createOrGetSharedLink } = useSharedLink();
   const { fetchConfirmations, confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
 
   // Use TanStack Query hook
@@ -101,6 +103,7 @@ export const GameDetailView = ({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [shareUrl, setShareUrl] = useState<string | undefined>(undefined);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Collapsible sections state
   const [buyInLogsOpen, setBuyInLogsOpen] = useState(true);
@@ -108,8 +111,7 @@ export const GameDetailView = ({
   const [playerResultsOpen, setPlayerResultsOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
 
-  // Manual transfer state
-  const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
+  // Manual transfer state removed to rely on game.settlements
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const [newTransferFrom, setNewTransferFrom] = useState("");
   const [newTransferTo, setNewTransferTo] = useState("");
@@ -152,18 +154,8 @@ export const GameDetailView = ({
     });
   }, [gamePlayers]);
 
-  const calculateSettlements = useCallback((transfers: Settlement[] = []): Settlement[] => {
-    const playerBalances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
-      name: gp.players?.name ?? "",
-      amount: gp.net_amount ?? 0,
-      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
-    }));
 
-    const settlements = calculateOptimizedSettlements(playerBalances, transfers);
-    return settlements.map(({ from, to, amount }) => ({ from, to, amount }));
-  }, [sortedGamePlayers]);
-
-  const addManualTransfer = () => {
+  const addManualTransfer = async () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount) {
       toast.error("Please fill all fields");
       return;
@@ -178,59 +170,73 @@ export const GameDetailView = ({
       return;
     }
 
-    setManualTransfers(prev => [...prev, { from: newTransferFrom, to: newTransferTo, amount }]);
-    setNewTransferFrom("");
-    setNewTransferTo("");
-    setNewTransferAmount("");
-    setTransferDialogOpen(false);
-    toast.success("Manual transfer added to buffer");
-  };
+    const newTransfer: Settlement = { from: newTransferFrom, to: newTransferTo, amount };
+    const existingSettlements = game?.settlements || [];
 
-  const removeManualTransfer = (index: number) => {
-    setManualTransfers(prev => prev.filter((_, i) => i !== index));
-    toast.success("Transfer removed");
-  };
+    // We want to keep the manual ones identified. 
+    // In our simplified logic, we store all of them, but we need to ensure we don't duplicate logic.
+    // The user wants immediate persistence. 
 
-  const recalculateAndSaveSettlements = async () => {
-    const newSettlements = calculateSettlements(manualTransfers);
-    const allSettlements = [...manualTransfers.map(t => ({ ...t, isManual: true })), ...newSettlements];
+    // First, get all current settlements from DB to be safe (or use game.settlements if we trust it's fresh)
+    const updatedSettlements = [...existingSettlements, { ...newTransfer, isManual: true }];
 
     const { error } = await client
       .from("games")
-      .update({ settlements: allSettlements })
+      .update({ settlements: updatedSettlements as any })
       .eq("id", gameId);
 
     if (error) {
-      toast.error("Failed to save settlements");
+      toast.error("Failed to save manual adjustment");
     } else {
       await refetchGameDetail();
-      setManualTransfers([]);
-      toast.success("Settlements saved");
+      setNewTransferFrom("");
+      setNewTransferTo("");
+      setNewTransferAmount("");
+      setTransferDialogOpen(false);
+      toast.success("Manual adjustment saved to ledger");
     }
   };
 
-  const savedSettlements: Settlement[] = game?.settlements || [];
-  const allCalculatedSettlements = useMemo(() => calculateSettlements(), [calculateSettlements]);
+  const handleDeleteManualTransfer = async (index: number) => {
+    const existingSettlements = game?.settlements || [];
+    const updatedSettlements = existingSettlements.filter((_, i) => i !== index);
 
-  const getSettlementsWithType = useCallback((): SettlementWithType[] => {
-    if (savedSettlements.length === 0) {
-      return allCalculatedSettlements.map(s => ({ ...s, isManual: false }));
+    const { error } = await client
+      .from("games")
+      .update({ settlements: updatedSettlements as any })
+      .eq("id", gameId);
+
+    if (error) {
+      toast.error("Failed to remove adjustment");
+    } else {
+      await refetchGameDetail();
+      toast.success("Adjustment removed");
     }
+  };
 
-    const manualSettlements: SettlementWithType[] = [];
-    const calculatedSettlements: SettlementWithType[] = [];
+  const savedSettlements: SettlementWithType[] = (game?.settlements || []) as unknown as SettlementWithType[];
 
-    // The order in calculateSettlements logic typically puts manual ones first if we saved them that way
-    // or we can detect based on count if the structure is simple
-    const numManual = savedSettlements.length - allCalculatedSettlements.length;
+  const settlementsWithType = useMemo(() => {
+    // Separate manual ones from auto-calculated ones
+    const manualOnes = savedSettlements.filter(s => s.isManual);
 
-    return savedSettlements.map((s, i) => ({
-      ...s,
-      isManual: i < numManual && numManual > 0
+    // Calculate auto-settlements based on manual adjustments
+    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
+      name: gp.players?.name ?? "",
+      amount: gp.net_amount ?? 0,
+      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
     }));
-  }, [savedSettlements, allCalculatedSettlements]);
 
-  const settlementsWithType = useMemo(() => getSettlementsWithType(), [getSettlementsWithType]);
+    const optimized = calculateOptimizedSettlements(balances, manualOnes);
+    const calculatedOnes = optimized.map(({ from, to, amount }) => ({
+      from,
+      to,
+      amount,
+      isManual: false
+    }));
+
+    return [...manualOnes, ...calculatedOnes];
+  }, [savedSettlements, sortedGamePlayers]);
 
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -301,12 +307,11 @@ export const GameDetailView = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => copyShareLink('game', gameId)}
-              disabled={linkLoading}
+              onClick={() => setShareDialogOpen(true)}
               className="rounded-full"
             >
               <Share2 className="h-3.5 w-3.5 mr-2" />
-              Export Game
+              Share
             </Button>
           </div>
         </CardHeader>
@@ -513,14 +518,6 @@ export const GameDetailView = ({
                     >
                       <Plus className="h-3 w-3 mr-1" /> Add Manual
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={recalculateAndSaveSettlements}
-                      className="h-8 rounded-full border text-[10px] tracking-widest uppercase"
-                    >
-                      <RefreshCw className="h-3 w-3 mr-1" /> Finalize
-                    </Button>
                   </div>
                 )}
                 <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", settlementsOpen && "rotate-180")} />
@@ -529,35 +526,6 @@ export const GameDetailView = ({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className="animate-in slide-in-from-top-2 duration-300">
-              {showOwnerControls && manualTransfers.length > 0 && (
-                <div className="p-6 border-b bg-muted/30">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
-                    <ShieldCheck className="h-3 w-3" /> Buffered Transactions (Awaiting Finalization)
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {manualTransfers.map((transfer, index) => (
-                      <div key={index} className="flex items-center justify-between bg-card rounded-xl p-4 border group">
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="text-xs text-foreground truncate">
-                            <span className="text-muted-foreground">{transfer.from}</span>
-                            <ArrowRight className="inline h-3 w-3 mx-2 text-muted-foreground/40" />
-                            <span className="text-muted-foreground">{transfer.to}</span>
-                          </div>
-                          <span className="font-bold text-sm text-primary">₹{formatIndianNumber(transfer.amount)}</span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeManualTransfer(index)}
-                          className="h-8 w-8 text-red-500/20 hover:text-red-500 transition-all rounded-full"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div className="overflow-x-auto max-h-[600px]">
                 <Table>
@@ -603,34 +571,46 @@ export const GameDetailView = ({
                             )}
                           </TableCell>
                           <TableCell className="text-right pr-8">
-                            {showOwnerControls && confirmation ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={async () => {
-                                  if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
-                                  else await confirmSettlement(confirmation.id);
-                                  await refetchGameDetail();
-                                }}
-                                className={cn(
-                                  "h-8 px-4 rounded-full text-xs border transition-all",
-                                  confirmation.confirmed
-                                    ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
-                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                )}
-                              >
-                                {confirmation.confirmed ? <Check className="h-3.5 w-3.5 mr-2" /> : <X className="h-3.5 w-3.5 mr-2" />}
-                                {confirmation.confirmed ? "Authorized" : "Confirm"}
-                              </Button>
-                            ) : (
-                              <Badge className={cn(
-                                "h-7 px-3 rounded-full text-[10px] border-0",
-                                confirmation?.confirmed ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-muted text-muted-foreground"
-                              )}>
-                                {confirmation?.confirmed ? <Check className="h-3 w-3 mr-2" /> : <History className="h-3 w-3 mr-2" />}
-                                {confirmation?.confirmed ? "Settled" : "Pending"}
-                              </Badge>
-                            )}
+                            <div className="flex items-center justify-end gap-2">
+                              {settlement.isManual && showOwnerControls && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteManualTransfer(index)}
+                                  className="h-8 w-8 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              {showOwnerControls && confirmation ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={async () => {
+                                    if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
+                                    else await confirmSettlement(confirmation.id);
+                                    await refetchGameDetail();
+                                  }}
+                                  className={cn(
+                                    "h-8 px-4 rounded-full text-xs border transition-all",
+                                    confirmation.confirmed
+                                      ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
+                                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                  )}
+                                >
+                                  {confirmation.confirmed ? <Check className="h-3.5 w-3.5 mr-2" /> : <X className="h-3.5 w-3.5 mr-2" />}
+                                  {confirmation.confirmed ? "Authorized" : "Confirm"}
+                                </Button>
+                              ) : (
+                                <Badge className={cn(
+                                  "h-7 px-3 rounded-full text-[10px] border-0",
+                                  confirmation?.confirmed ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-muted text-muted-foreground"
+                                )}>
+                                  {confirmation?.confirmed ? <Check className="h-3 w-3 mr-2" /> : <History className="h-3 w-3 mr-2" />}
+                                  {confirmation?.confirmed ? "Settled" : "Pending"}
+                                </Badge>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -642,6 +622,15 @@ export const GameDetailView = ({
           </CollapsibleContent>
         </Collapsible>
       </Card>
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        resourceType="game"
+        resourceId={gameId}
+        title={`Game Session - ${format(new Date(game.date), "MMM d, yyyy")}`}
+        description={`Poker session result for ${format(new Date(game.date), "MMMM d, yyyy")}.`}
+      />
 
       {/* Manual Transfer Dialog */}
       <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
@@ -706,7 +695,7 @@ export const GameDetailView = ({
               onClick={addManualTransfer}
               className="rounded-lg flex-1"
             >
-              Queue Protocol
+              Commit Adjustment
             </Button>
           </DialogFooter>
         </DialogContent>

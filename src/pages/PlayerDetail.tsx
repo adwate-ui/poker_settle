@@ -16,7 +16,7 @@ import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, Ar
 import { format } from "date-fns";
 import { formatIndianNumber, cn } from "@/lib/utils";
 import { Player } from "@/types/poker";
-import { useSharedLink } from "@/hooks/useSharedLink";
+import { ShareDialog } from "@/components/ShareDialog";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
@@ -52,7 +52,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
   // If prop provided, use it, otherwise use param
   const playerId = propPlayerId || params.playerId;
 
-  const { copyShareLink, loading: linkLoading } = useSharedLink();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [player, setPlayer] = useState<Player | null>(null);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -307,12 +307,11 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyShareLink('player', playerId!)}
-                      disabled={linkLoading}
+                      onClick={() => setShareDialogOpen(true)}
                       className="h-10 px-5 hover:bg-accent/10 text-primary font-luxury uppercase tracking-widest text-xs rounded-full border border-primary/20"
                     >
                       <Share2 className="h-4 w-4 mr-2" />
-                      Export
+                      Share
                     </Button>
                     <Button
                       variant="outline"
@@ -480,6 +479,15 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
           </div>
         </CardContent>
       </Card>
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        resourceType="player"
+        resourceId={playerId!}
+        title={`Player Profile - ${player.name}`}
+        description={`Poker statistics and session history for ${player.name}.`}
+      />
 
       {!readOnly && (
         <PlayerFormDialog

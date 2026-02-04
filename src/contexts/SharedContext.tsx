@@ -49,15 +49,14 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
                     return;
                 }
 
-                // 2. Fetch link details to determine scope
+                // 2. Fetch link details to determine scope via RPC (avoids RLS)
+                // @ts-ignore - RPC not yet typed
                 const { data: linkData, error: linkError } = await supabase
-                    .from('shared_links')
-                    .select('resource_type, resource_id')
-                    .eq('access_token', token)
-                    .single();
+                    .rpc('validate_share_token', { _token: token })
+                    .maybeSingle();
 
                 if (linkError || !linkData) {
-                    console.error('Link not found:', linkError);
+                    console.error('Link not found or invalid:', linkError);
                     setIsValid(false);
                     setIsLoading(false);
                     return;

@@ -19,6 +19,7 @@ const HandsHistory = () => {
     clearFilters,
     getUniqueGames,
     getUniqueHeroPositions,
+    getUniquePlayerNames,
     getUniqueVillainNames,
     getUniqueVillainPositions,
     getStatistics,
@@ -33,6 +34,7 @@ const HandsHistory = () => {
   const stats = getStatistics;
   const uniqueGames = getUniqueGames;
   const uniquePositions = getUniqueHeroPositions;
+  const uniquePlayerNames = getUniquePlayerNames;
   const uniqueVillainNames = getUniqueVillainNames;
   const uniqueVillainPositions = getUniqueVillainPositions;
 
@@ -146,6 +148,25 @@ const HandsHistory = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero Name</label>
+              <Select
+                value={filters.heroName || 'all'}
+                onValueChange={(value) =>
+                  updateFilters({ heroName: value === 'all' ? undefined : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Hero (Default: Adwate)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Default (Adwate)</SelectItem>
+                  {uniquePlayerNames.map(name => (
+                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero Position</label>
               <Select
@@ -290,7 +311,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero's Hole Cards (Adwate)</label>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero's Hole Cards</label>
               <Select
                 value={filters.heroHoleCards || 'all'}
                 onValueChange={(value) =>

@@ -51,7 +51,7 @@ export interface CombinedGameSettlementMessageData {
  */
 export function generatePlayerWelcomeMessage(data: PlayerWelcomeMessageData): string {
   const appName = data.appName || "Poker Settle";
-  
+
   return `🎮 *Welcome to ${appName}!*
 
 Hi ${data.playerName}! 👋
@@ -72,7 +72,7 @@ Good luck at the tables! 🃏`;
 export function generateGameCompletionMessage(data: GameCompletionMessageData): string {
   const profitLoss = data.netAmount >= 0 ? "profit" : "loss";
   const emoji = data.netAmount >= 0 ? "🎉" : "📉";
-  
+
   return `${emoji} *Game Completed!*
 
 Hi ${data.playerName}!
@@ -80,9 +80,9 @@ Hi ${data.playerName}!
 The poker game from ${data.gameDate} has been completed.
 
 💰 *Your Results:*
-• Buy-in: ₹${formatIndianNumber(data.buyInAmount)}
-• Final Stack: ₹${formatIndianNumber(data.finalStack)}
-• Net ${profitLoss.charAt(0).toUpperCase() + profitLoss.slice(1)}: ₹${formatIndianNumber(Math.abs(data.netAmount))}
+• Buy-in: Rs. ${formatIndianNumber(data.buyInAmount)}
+• Final Stack: Rs. ${formatIndianNumber(data.finalStack)}
+• Net ${profitLoss.charAt(0).toUpperCase() + profitLoss.slice(1)}: Rs. ${formatIndianNumber(Math.abs(data.netAmount))}
 
 📊 *Game Details:*
 ${data.gameLink}
@@ -95,7 +95,7 @@ View the complete game summary and settlement details using the link above.`;
  */
 export function generateSettlementMessage(data: SettlementMessageData): string {
   const paymentMethod = data.paymentPreference === 'cash' ? '💵 Cash' : '📱 UPI';
-  
+
   let message = `💳 *Settlement Details*
 
 Hi ${data.playerName}!
@@ -105,26 +105,26 @@ Here are your settlement details:
 `;
 
   if (data.isWinner) {
-    message += `✅ *You will receive: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `✅ *You will receive: Rs. ${formatIndianNumber(data.totalAmount)}*\n\n`;
     message += `*Payments from:*\n`;
-    
+
     data.settlements.forEach((settlement, index) => {
-      message += `${index + 1}. ${settlement.from}: ₹${formatIndianNumber(settlement.amount)}\n`;
+      message += `${index + 1}. ${settlement.from}: Rs. ${formatIndianNumber(settlement.amount)}\n`;
     });
-    
+
     message += `\n*Your Payment Method:* ${paymentMethod}\n`;
-    
+
     if (data.paymentPreference === 'upi' && data.upiId) {
       message += `*Your UPI ID:* ${data.upiId}\n`;
       message += `\nℹ️ Share your UPI ID with the payers above for easy payment.\n`;
     }
   } else {
-    message += `❌ *You need to pay: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `❌ *You need to pay: Rs. ${formatIndianNumber(data.totalAmount)}*\n\n`;
     message += `*Payments to:*\n\n`;
-    
+
     data.settlements.forEach((settlement, index) => {
-      message += `${index + 1}. *${settlement.to}*: ₹${formatIndianNumber(settlement.amount)}\n`;
-      
+      message += `${index + 1}. *${settlement.to}*: Rs. ${formatIndianNumber(settlement.amount)}\n`;
+
       // Add UPI payment link if recipient has UPI ID
       if (settlement.toUpiId) {
         const upiLink = generateUpiPaymentLink(
@@ -143,16 +143,16 @@ Here are your settlement details:
       }
       message += `\n`;
     });
-    
+
     message += `*Your Payment Method:* ${paymentMethod}\n`;
-    
+
     if (data.settlements.some(s => s.toUpiId)) {
       message += `\n💡 *How to Pay:*\n`;
       message += `• *On Android/Mobile:* Tap the blue "Tap to Pay via UPI" button above - it will open your UPI app (Google Pay, PhonePe, Paytm, etc.) directly with pre-filled details!\n`;
       message += `• *If button doesn't work:* Copy the UPI ID shown below the button and use it in your UPI app's "Pay to UPI ID" option\n`;
       message += `• *On Desktop:* Copy the UPI link or UPI ID and use it in your mobile UPI app\n`;
     }
-    
+
     // Add confirmation instruction for payers
     message += `\n⚠️ *IMPORTANT:* After making the payment, please reply with:\n`;
     message += `*PAID*\n`;
@@ -169,11 +169,11 @@ Here are your settlement details:
  */
 export function generateCustomMessage(playerName: string, message: string, gameLink?: string): string {
   let fullMessage = `Hi ${playerName}!\n\n${message}`;
-  
+
   if (gameLink) {
     fullMessage += `\n\n📊 *Game Link:*\n${gameLink}`;
   }
-  
+
   return fullMessage;
 }
 
@@ -203,7 +203,7 @@ export function generateCombinedGameSettlementMessage(data: CombinedGameSettleme
   const profitLoss = data.netAmount >= 0 ? "profit" : "loss";
   const emoji = data.netAmount >= 0 ? "🎉" : "📉";
   const paymentMethod = data.paymentPreference === 'cash' ? '💵 Cash' : '📱 UPI';
-  
+
   let message = `${emoji} *Game Completed - Settlement Details*
 
 Hi ${data.playerName}!
@@ -211,9 +211,9 @@ Hi ${data.playerName}!
 The poker game from ${data.gameDate} has been completed.
 
 💰 *Your Results:*
-• Buy-in: ₹${formatIndianNumber(data.buyInAmount)}
-• Final Stack: ₹${formatIndianNumber(data.finalStack)}
-• Net ${profitLoss.charAt(0).toUpperCase() + profitLoss.slice(1)}: ₹${formatIndianNumber(Math.abs(data.netAmount))}
+• Buy-in: Rs. ${formatIndianNumber(data.buyInAmount)}
+• Final Stack: Rs. ${formatIndianNumber(data.finalStack)}
+• Net ${profitLoss.charAt(0).toUpperCase() + profitLoss.slice(1)}: Rs. ${formatIndianNumber(Math.abs(data.netAmount))}
 
 📊 *Game Details:*
 ${data.gameLink}
@@ -222,28 +222,28 @@ ${data.gameLink}
 
   // Add settlement details
   message += `💳 *Settlement Details:*\n\n`;
-  
+
   if (data.isWinner) {
-    message += `✅ *You will receive: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `✅ *You will receive: Rs. ${formatIndianNumber(data.totalAmount)}*\n\n`;
     message += `*Payments from:*\n`;
-    
+
     data.settlements.forEach((settlement, index) => {
-      message += `${index + 1}. ${settlement.from}: ₹${formatIndianNumber(settlement.amount)}\n`;
+      message += `${index + 1}. ${settlement.from}: Rs. ${formatIndianNumber(settlement.amount)}\n`;
     });
-    
+
     message += `\n*Your Payment Method:* ${paymentMethod}\n`;
-    
+
     if (data.paymentPreference === 'upi' && data.upiId) {
       message += `*Your UPI ID:* ${data.upiId}\n`;
       message += `\nℹ️ Share your UPI ID with the payers above for easy payment.\n`;
     }
   } else {
-    message += `❌ *You need to pay: ₹${formatIndianNumber(data.totalAmount)}*\n\n`;
+    message += `❌ *You need to pay: Rs. ${formatIndianNumber(data.totalAmount)}*\n\n`;
     message += `*Payments to:*\n\n`;
-    
+
     data.settlements.forEach((settlement, index) => {
-      message += `${index + 1}. *${settlement.to}*: ₹${formatIndianNumber(settlement.amount)}\n`;
-      
+      message += `${index + 1}. *${settlement.to}*: Rs. ${formatIndianNumber(settlement.amount)}\n`;
+
       // Add UPI payment link if recipient has UPI ID
       if (settlement.toUpiId) {
         const upiLink = generateUpiPaymentLink(
@@ -262,16 +262,16 @@ ${data.gameLink}
       }
       message += `\n`;
     });
-    
+
     message += `*Your Payment Method:* ${paymentMethod}\n`;
-    
+
     if (data.settlements.some(s => s.toUpiId)) {
       message += `\n💡 *How to Pay:*\n`;
       message += `• *On Android/Mobile:* Tap the blue "Tap to Pay via UPI" button above - it will open your UPI app (Google Pay, PhonePe, Paytm, etc.) directly with pre-filled details!\n`;
       message += `• *If button doesn't work:* Copy the UPI ID shown below the button and use it in your UPI app's "Pay to UPI ID" option\n`;
       message += `• *On Desktop:* Copy the UPI link or UPI ID and use it in your mobile UPI app\n`;
     }
-    
+
     // Add confirmation instruction for payers
     message += `\n⚠️ *IMPORTANT:* After making the payment, please reply with:\n`;
     message += `*PAID*\n`;
@@ -279,7 +279,7 @@ ${data.gameLink}
   }
 
   message += `\nPlease settle at your earliest convenience. Thank you! 🙏`;
-  
+
   return message;
 }
 

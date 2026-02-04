@@ -14,7 +14,8 @@ I have completed the refactoring of the sharing system to implement "Owner-Centr
 
 ### 2. Shared Context & Client Injection
 - Created `src/contexts/SharedContext.tsx`.
-  - Validates token via `get_shared_link_owner`.
+  - Validates token via `get_shared_link_owner` RPC.
+  - Retrieves resource details via `validate_share_token` RPC (avoiding direct table access).
   - Determines scope (`game` or `player`).
   - Creates a `SupabaseClient` instance with the `x-share-token` header.
 - Updated `gameApi.ts` and `playerApi.ts` to accept an optional `SupabaseClient`.
@@ -104,3 +105,4 @@ Run the following checks (if environment allows):
 - `src/pages/SharedView.tsx` (Deleted/Replaced)
 - `src/utils/pokerPositions.ts`
 - `src/utils/handStateMachine.ts`
+- `src/components/ShareDialog.tsx` (New)

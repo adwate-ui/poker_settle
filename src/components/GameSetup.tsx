@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -213,7 +214,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (INR)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <span className="text-primary font-numbers text-sm opacity-50">₹</span>
+                            <span className="text-primary font-luxury text-[10px] opacity-70">Rs. </span>
                           </div>
                           <Input
                             type="text"
@@ -259,9 +260,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                            <div key={player.id} className="inline-flex items-center gap-2 px-4 py-2 bg-accent/5 border border-border rounded-full group hover:border-primary/30 transition-all">
+                            <div key={player.id} className="inline-flex items-center gap-3 px-3 py-1.5 bg-accent/5 border border-border rounded-full group hover:border-primary/30 transition-all">
+                              <OptimizedAvatar name={player.name} size="xs" />
                               <span className="font-luxury text-[11px] uppercase tracking-widest text-foreground/80">{player.name}</span>
-                              <button onClick={() => removeSelectedPlayer(player.id)} className="text-muted-foreground hover:text-red-400 transition-colors">
+                              <button onClick={() => removeSelectedPlayer(player.id)} className="text-muted-foreground hover:text-red-400 transition-colors ml-1">
                                 <X className="h-3 w-3" />
                               </button>
                             </div>
@@ -346,10 +348,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               {filteredPlayers.map(player => (
                                 <div
                                   key={player.id}
-                                  className="p-4 bg-accent/2 border border-border rounded-xl hover:bg-accent/5 hover:border-primary/20 transition-all cursor-pointer group flex items-center justify-between"
+                                  className="p-4 bg-accent/2 border border-border rounded-xl hover:bg-accent/5 hover:border-primary/20 transition-all cursor-pointer group flex items-center gap-4"
                                   onClick={() => selectExistingPlayer(player)}
                                 >
-                                  <div className="min-w-0">
+                                  <OptimizedAvatar name={player.name} size="sm" />
+                                  <div className="min-w-0 flex-1">
                                     <p className="font-luxury text-xs text-foreground uppercase tracking-widest truncate">{player.name}</p>
                                     <p className="font-numbers text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
                                   </div>
@@ -420,11 +423,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
                                         <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Asset Flow</p>
-                                        <p className="text-[11px] font-numbers text-foreground">₹{formatIndianNumber(totalBuyIns)}</p>
+                                        <p className="text-[11px] font-luxury text-foreground">Rs. {formatIndianNumber(totalBuyIns)}</p>
                                       </div>
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
                                         <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
-                                        <p className="text-[11px] font-numbers text-green-400">₹{formatIndianNumber(totalWins)}</p>
+                                        <p className="text-[11px] font-luxury text-green-400">Rs. {formatIndianNumber(totalWins)}</p>
                                       </div>
                                     </div>
                                   </div>

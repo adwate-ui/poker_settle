@@ -32,6 +32,7 @@ import { BuyInManagementTable } from "@/components/BuyInManagementTable";
 import { FinalStackManagement } from "@/components/FinalStackManagement";
 import { useGameData } from "@/hooks/useGameData";
 import { useSharedLink } from "@/hooks/useSharedLink";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/utils";
@@ -88,12 +89,12 @@ interface GameDashboardProps {
 
 const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   const navigate = useNavigate();
+  const [currentGame, setCurrentGame] = useState<Game>(game);
   const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>(game.game_players);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
-  const [manualTransfers, setManualTransfers] = useState<Settlement[]>([]);
   const [showManualTransfer, setShowManualTransfer] = useState(false);
   const [newTransferFrom, setNewTransferFrom] = useState('');
   const [newTransferTo, setNewTransferTo] = useState('');
@@ -122,14 +123,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   // Manual share handler is kept, but auto-replace effect is removed to prevent URL instability
   const handleShare = useCallback(async () => {
     try {
-      const linkData = await createOrGetSharedLink('game', game.id);
+      const linkData = await createOrGetSharedLink('game', currentGame.id);
       if (linkData) {
         const url = getShortUrl(linkData.shortCode);
 
         if (navigator.share) {
           try {
             await navigator.share({
-              title: `Poker Game - ${new Date(game.date).toLocaleDateString()}`,
+              title: `Poker Game - ${new Date(currentGame.date).toLocaleDateString()}`,
               text: 'Check out this poker game!',
               url: url
             });
@@ -146,15 +147,15 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to generate share link");
     }
-  }, [game.id, game.date, createOrGetSharedLink, getShortUrl]);
+  }, [currentGame.id, currentGame.date, createOrGetSharedLink, getShortUrl]);
 
   useEffect(() => {
     const loadTablePosition = async () => {
-      const position = await getCurrentTablePosition(game.id);
+      const position = await getCurrentTablePosition(currentGame.id);
       setCurrentTablePosition(position);
 
       try {
-        const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
+        const savedHandState = localStorage.getItem(`poker_hand_state_${currentGame.id}`);
         if (savedHandState) {
           const parsedState = JSON.parse(savedHandState);
           const hasSaved = parsedState && parsedState.stage !== 'setup';
@@ -177,7 +178,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       });
     };
     loadTablePosition();
-  }, [game.id, getCurrentTablePosition]);
+  }, [currentGame.id, getCurrentTablePosition]);
 
   const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
     try {
@@ -197,9 +198,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     const newTotal = gamePlayer.buy_ins + buyInsToAdd;
     await handlePlayerUpdate(gamePlayerId, {
       buy_ins: newTotal,
-      net_amount: (gamePlayer.final_stack || 0) - (newTotal * game.buy_in_amount)
+      net_amount: (gamePlayer.final_stack || 0) - (newTotal * currentGame.buy_in_amount)
     }, true);
-  }, [gamePlayers, game.buy_in_amount, handlePlayerUpdate]);
+  }, [gamePlayers, currentGame.buy_in_amount, handlePlayerUpdate]);
 
   const handleUpdateFinalStack = useCallback(async (gamePlayerId: string, finalStack: number) => {
     const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
@@ -207,9 +208,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
     await handlePlayerUpdate(gamePlayerId, {
       final_stack: finalStack,
-      net_amount: finalStack - (gamePlayer.buy_ins * game.buy_in_amount)
+      net_amount: finalStack - (gamePlayer.buy_ins * currentGame.buy_in_amount)
     });
-  }, [gamePlayers, game.buy_in_amount, handlePlayerUpdate]);
+  }, [gamePlayers, currentGame.buy_in_amount, handlePlayerUpdate]);
 
   const addNewPlayer = useCallback(async () => {
     if (!newPlayerName.trim()) {
@@ -220,7 +221,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     setIsCreatingPlayer(true);
     try {
       const player = await createOrFindPlayer(newPlayerName.trim());
-      const gamePlayer = await addPlayerToGame(game.id, player);
+      const gamePlayer = await addPlayerToGame(currentGame.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
       setNewPlayerName('');
       setShowAddPlayer(false);
@@ -230,11 +231,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } finally {
       setIsCreatingPlayer(false);
     }
-  }, [newPlayerName, createOrFindPlayer, game.id, addPlayerToGame, gamePlayers]);
+  }, [newPlayerName, createOrFindPlayer, currentGame.id, addPlayerToGame, gamePlayers]);
 
   const addExistingPlayer = useCallback(async (player: Player) => {
     try {
-      const gamePlayer = await addPlayerToGame(game.id, player);
+      const gamePlayer = await addPlayerToGame(currentGame.id, player);
       setGamePlayers([...gamePlayers, gamePlayer]);
       setShowAddPlayer(false);
       setSearchQuery('');
@@ -242,7 +243,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to add player");
     }
-  }, [game.id, addPlayerToGame, gamePlayers]);
+  }, [currentGame.id, addPlayerToGame, gamePlayers]);
 
   const availablePlayers = useMemo(() => {
     return players
@@ -254,7 +255,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       });
   }, [players, gamePlayers, searchQuery]);
 
-  const addManualTransfer = useCallback(() => {
+  const addManualTransfer = useCallback(async () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
       toast.error("Incomplete transfer details");
       return;
@@ -271,18 +272,42 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       amount: parseFloat(newTransferAmount)
     };
 
-    setManualTransfers([...manualTransfers, newTransfer]);
+    const updatedSettlements = [...(currentGame.settlements || []), newTransfer];
+
+    const { error } = await supabase
+      .from('games')
+      .update({ settlements: updatedSettlements as any })
+      .eq('id', currentGame.id);
+
+    if (error) {
+      toast.error("Failed to save adjustment");
+      return;
+    }
+
+    setCurrentGame(prev => ({ ...prev, settlements: updatedSettlements }));
     setNewTransferFrom('');
     setNewTransferTo('');
     setNewTransferAmount('');
     setShowManualTransfer(false);
-    toast.success("Manual adjustment added");
-  }, [newTransferFrom, newTransferTo, newTransferAmount, manualTransfers]);
+    toast.success("Manual adjustment saved");
+  }, [newTransferFrom, newTransferTo, newTransferAmount, currentGame]);
 
-  const removeManualTransfer = useCallback((index: number) => {
-    setManualTransfers(manualTransfers.filter((_, i) => i !== index));
+  const handleDeleteManualTransfer = useCallback(async (index: number) => {
+    const updatedSettlements = (currentGame.settlements || []).filter((_, i) => i !== index);
+
+    const { error } = await supabase
+      .from('games')
+      .update({ settlements: updatedSettlements as any })
+      .eq('id', currentGame.id);
+
+    if (error) {
+      toast.error("Failed to remove adjustment");
+      return;
+    }
+
+    setCurrentGame(prev => ({ ...prev, settlements: updatedSettlements }));
     toast.info("Adjustment removed");
-  }, [manualTransfers]);
+  }, [currentGame]);
 
   const settlements = useMemo(() => {
     if (!gamePlayers.length) return [];
@@ -293,28 +318,28 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       paymentPreference: gp.player.payment_preference || 'upi'
     }));
 
-    return calculateOptimizedSettlements(balances, manualTransfers);
-  }, [gamePlayers, manualTransfers]);
+    return calculateOptimizedSettlements(balances, currentGame.settlements || []);
+  }, [gamePlayers, currentGame.settlements]);
 
   const handleCompleteGame = useCallback(async () => {
     if (isCompletingGame) return;
 
     setIsCompletingGame(true);
-    const allSettlements = [...manualTransfers, ...settlements];
+    const allSettlements = [...(currentGame.settlements || []), ...settlements];
 
     try {
-      await completeGame(game.id, allSettlements);
+      await completeGame(currentGame.id, allSettlements);
       toast.success("Game finalized successfully");
-      navigate(`/games/${game.id}`);
+      navigate(`/games/${currentGame.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to finalize game");
       setIsCompletingGame(false);
     }
-  }, [game.id, manualTransfers, settlements, completeGame, navigate, isCompletingGame]);
+  }, [currentGame, settlements, completeGame, navigate, isCompletingGame]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {
-      const savedPosition = await saveTablePosition(game.id, positions);
+      const savedPosition = await saveTablePosition(currentGame.id, positions);
       setCurrentTablePosition(savedPosition);
       setShowPositionEditor(false);
       setPositionsJustChanged(true);
@@ -325,7 +350,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     } catch (error) {
       toast.error("Failed to save seating");
     }
-  }, [game.id, saveTablePosition]);
+  }, [currentGame.id, saveTablePosition]);
 
   const handleStartHandTracking = useCallback(() => {
     setHandTrackingStage('recording');
@@ -337,7 +362,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     setTablePositionOpen(true);
 
     try {
-      const savedHandState = localStorage.getItem(`poker_hand_state_${game.id}`);
+      const savedHandState = localStorage.getItem(`poker_hand_state_${currentGame.id}`);
       if (savedHandState) {
         const parsedState = JSON.parse(savedHandState);
         const hasSaved = parsedState && parsedState.stage !== 'setup';
@@ -349,15 +374,15 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       console.error('Error checking archive state:', error);
       setHasSavedHandState(false);
     }
-  }, [game.id]);
+  }, [currentGame.id]);
 
   const formatCurrency = useCallback((amount: number) => {
     return `Rs. ${formatIndianNumber(amount)}`;
   }, []);
 
   const totalBuyIns = useMemo(() =>
-    gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0),
-    [gamePlayers, game.buy_in_amount]
+    gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * currentGame.buy_in_amount), 0),
+    [gamePlayers, currentGame.buy_in_amount]
   );
 
   const totalWinnings = useMemo(() =>
@@ -423,9 +448,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </h1>
                 <p className="text-muted-foreground font-numbers text-[11px] tracking-[0.3em] uppercase flex items-center gap-3">
                   <ShieldCheck className="h-3 w-3" />
-                  <span>Buy-in: {formatCurrency(game.buy_in_amount)}</span>
+                  <span>Buy-in: {formatCurrency(currentGame.buy_in_amount)}</span>
                   <span className="w-1 h-1 rounded-full bg-gold-500/30" />
-                  <span>{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span>{new Date(currentGame.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </p>
               </div>
             </div>
@@ -473,7 +498,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <PokerTableView
                         positions={currentTablePosition.positions}
                         totalSeats={gamePlayers.length}
-                        gameId={game.id}
+                        gameId={currentGame.id}
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center p-8">
@@ -511,7 +536,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <TabsContent value="actions" className="mt-0 p-4 space-y-6 pb-24">
               <BuyInManagementTable
                 gamePlayers={gamePlayers}
-                buyInAmount={game.buy_in_amount}
+                buyInAmount={currentGame.buy_in_amount}
                 onAddBuyIn={handleAddBuyIn}
                 fetchBuyInHistory={fetchBuyInHistory}
               />
@@ -519,7 +544,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 <FinalStackManagement
                   gamePlayers={gamePlayers}
                   onUpdateFinalStack={handleUpdateFinalStack}
-                  smallBlind={game.small_blind}
+                  smallBlind={currentGame.small_blind}
                 />
               </div>
             </TabsContent>
@@ -541,23 +566,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   <DashboardPlayerCard
                     key={gamePlayer.id}
                     gamePlayer={gamePlayer}
-                    buyInAmount={game.buy_in_amount}
+                    buyInAmount={currentGame.buy_in_amount}
                     isLiveGame={true}
                   />
                 ))}
               </div>
 
-              {manualTransfers.length > 0 && (
+              {currentGame.settlements && currentGame.settlements.length > 0 && (
                 <div className="space-y-3 pt-6 border-t border-border">
                   <h3 className="text-sm font-luxury text-muted-foreground uppercase tracking-widest">Manual Adjustments</h3>
-                  {manualTransfers.map((transfer, index) => (
+                  {currentGame.settlements.map((transfer, index) => (
                     <div key={index} className="flex items-center justify-between p-4 bg-accent/2 rounded-2xl border border-border">
                       <span className="text-[11px] font-luxury text-foreground uppercase">
                         {transfer.from} pays {transfer.to}
                       </span>
                       <div className="flex items-center gap-3">
                         <span className="font-numbers text-sm text-foreground">{formatCurrency(transfer.amount)}</span>
-                        <Button onClick={() => removeManualTransfer(index)} variant="ghost" size="icon" className="h-8 w-8 text-red-500/50 hover:text-red-500">
+                        <Button onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-8 w-8 text-red-500/50 hover:text-red-500">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -735,7 +760,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                           <PokerTableView
                             positions={currentTablePosition.positions}
                             totalSeats={gamePlayers.length}
-                            gameId={game.id}
+                            gameId={currentGame.id}
                           />
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -795,7 +820,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <div className="p-6 animate-in slide-in-from-top-2 duration-300">
                       <BuyInManagementTable
                         gamePlayers={gamePlayers}
-                        buyInAmount={game.buy_in_amount}
+                        buyInAmount={currentGame.buy_in_amount}
                         onAddBuyIn={handleAddBuyIn}
                         fetchBuyInHistory={fetchBuyInHistory}
                       />
@@ -821,7 +846,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <FinalStackManagement
                         gamePlayers={gamePlayers}
                         onUpdateFinalStack={handleUpdateFinalStack}
-                        smallBlind={game.small_blind}
+                        smallBlind={currentGame.small_blind}
                       />
                     </div>
                   </CollapsibleContent>
@@ -949,7 +974,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                           <DashboardPlayerCard
                             key={gamePlayer.id}
                             gamePlayer={gamePlayer}
-                            buyInAmount={game.buy_in_amount}
+                            buyInAmount={currentGame.buy_in_amount}
                             isLiveGame={true}
                           />
                         ))}
@@ -960,7 +985,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </Card>
 
               {/* Manual Transfers */}
-              {manualTransfers.length > 0 && (
+              {currentGame.settlements && currentGame.settlements.length > 0 && (
                 <Card className="p-0 overflow-hidden">
                   <div className="p-6 border-b border-border/50 bg-accent/2 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -969,7 +994,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </div>
                   <div className="p-6 space-y-3">
-                    {manualTransfers.map((transfer, index) => (
+                    {currentGame.settlements.map((transfer, index) => (
                       <div key={index} className="flex items-center justify-between p-4 bg-accent/2 rounded-2xl border border-border group hover:border-primary/20 transition-all">
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[9px] font-luxury uppercase tracking-widest text-muted-foreground">Adjustment</span>
@@ -982,7 +1007,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             {formatCurrency(transfer.amount)}
                           </span>
                           <button
-                            onClick={() => removeManualTransfer(index)}
+                            onClick={() => handleDeleteManualTransfer(index)}
                             className="p-2 hover:bg-red-500/10 rounded-xl text-red-500/20 hover:text-red-500 transition-all"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1049,7 +1074,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                   <div className="flex gap-4">
                     <Button variant="outline" onClick={() => setShowManualTransfer(false)} className="flex-1">Cancel</Button>
-                    <Button onClick={addManualTransfer} className="flex-1">Save</Button>
+                    <Button onClick={addManualTransfer} className="flex-1">Add Adjustment</Button>
                   </div>
                 </Card>
               )}
