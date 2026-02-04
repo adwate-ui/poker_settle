@@ -59,6 +59,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -72,12 +78,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -201,15 +201,43 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   }, [currentGame.id, getCurrentTablePosition]);
 
   const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
+    // 1. Immediate Optimistic Update
+    setGamePlayers(prev => prev.map(gp =>
+      gp.id === gamePlayerId ? { ...gp, ...updates } : gp
+    ));
+
     try {
-      await updateGamePlayer(gamePlayerId, updates, logBuyIn);
-      setGamePlayers(prev => prev.map(gp =>
-        gp.id === gamePlayerId ? { ...gp, ...updates } : gp
-      ));
+      let resolvedId = gamePlayerId;
+
+      // 2. Smart ID Resolution (The Fix)
+      if (gamePlayerId.startsWith("temp-")) {
+        const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
+        if (gamePlayer) {
+          // Fetch the real UUID from the database
+          const { data, error } = await supabase
+            .from("game_players")
+            .select("id")
+            .eq("game_id", currentGame.id)
+            .eq("player_id", gamePlayer.player_id)
+            .maybeSingle();
+
+          if (data?.id) {
+            resolvedId = data.id;
+            // 3. Self-Correction: Replace temp ID with real ID in local state
+            setGamePlayers(prev => prev.map(gp =>
+              gp.id === gamePlayerId ? { ...gp, id: resolvedId } : gp
+            ));
+          }
+        }
+      }
+
+      // 4. Execute Update with valid UUID
+      await updateGamePlayer(resolvedId, updates, logBuyIn);
     } catch (error) {
       console.error('Error updating player:', error);
+      toast.error("Failed to sync player data");
     }
-  }, [updateGamePlayer]);
+  }, [updateGamePlayer, gamePlayers, currentGame.id]);
 
   const handleAddBuyIn = useCallback(async (gamePlayerId: string, buyInsToAdd: number) => {
     const gamePlayer = gamePlayers.find(gp => gp.id === gamePlayerId);
@@ -1048,36 +1076,45 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               {/* Manual Transfers */}
               {currentGame.settlements && currentGame.settlements.length > 0 && (
-                <Card className="p-0 overflow-hidden">
-                  <div className="p-6 border-b border-border/50 bg-accent/2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <History className="h-5 w-5 text-muted-foreground" />
-                      <h3 className="text-sm font-luxury text-foreground uppercase tracking-widest">Manual Adjustments</h3>
+                <Card className="p-0 overflow-hidden bg-background">
+                  <div className="p-4 border-b border-white/10 bg-accent/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <History className="h-4 w-4 text-gold-500" />
+                      <h3 className="text-[10px] font-luxury text-foreground uppercase tracking-[0.2em]">Manual Adjustments</h3>
                     </div>
                   </div>
-                  <div className="p-6 space-y-3">
-                    {currentGame.settlements.map((transfer, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-accent/2 rounded-2xl border border-border group hover:border-primary/20 transition-all">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[9px] font-luxury uppercase tracking-widest text-muted-foreground">Adjustment</span>
-                          <span className="text-xs font-luxury text-foreground uppercase tracking-widest">
-                            {transfer.from} <span className="opacity-30 inline-block px-1">→</span> {transfer.to}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="font-numbers text-sm text-foreground">
-                            {formatCurrency(transfer.amount)}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteManualTransfer(index)}
-                            className="p-2 hover:bg-red-500/10 rounded-xl text-red-500/20 hover:text-red-500 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <Table className="table-fixed w-full text-left border-collapse">
+                    <TableHeader>
+                      <TableRow className="border-b border-white/10 hover:bg-transparent">
+                        <TableHead className="w-[35%] pl-4 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">From</TableHead>
+                        <TableHead className="w-[35%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
+                        <TableHead className="w-[30%] pr-4 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amt</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {currentGame.settlements.map((transfer, index) => (
+                        <TableRow key={index} className="border-b border-white/5 hover:bg-white/5 h-11">
+                          <TableCell className="pl-4 py-1 font-medium text-[11px] truncate text-foreground">
+                            {transfer.from}
+                          </TableCell>
+                          <TableCell className="px-1 py-1 font-medium text-[11px] truncate text-muted-foreground">
+                            {transfer.to}
+                          </TableCell>
+                          <TableCell className="pr-4 py-1 text-right font-numbers text-[11px] whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-2">
+                              <span className="text-foreground">{formatCurrency(transfer.amount)}</span>
+                              <button
+                                onClick={() => handleDeleteManualTransfer(index)}
+                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500/20 hover:text-red-500 transition-all"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </Card>
               )}
 

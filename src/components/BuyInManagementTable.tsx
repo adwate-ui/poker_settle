@@ -119,19 +119,25 @@ export const BuyInManagementTable = ({
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
         <div className="overflow-x-auto w-full">
-          <Table className="table-fixed w-full">
+          <Table className="table-fixed w-full text-left border-collapse">
             <TableHeader className="sticky top-0 z-10 bg-card">
-              <TableRow>
-                <TableHead className={cn("pl-6 w-[40%]", isMobile && "pl-2 text-mobile-compact uppercase font-bold")}>
+              <TableRow className="border-b border-white/10 hover:bg-transparent">
+                <TableHead className={cn(
+                  "w-[40%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                  isMobile ? "pl-2" : "pl-6"
+                )}>
                   {isMobile ? "Plyr" : "Player"}
                 </TableHead>
-                <TableHead className={cn("w-[20%]", isMobile && "px-1 text-mobile-compact uppercase font-bold text-center")}>
+                <TableHead className="w-[20%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
                   {isMobile ? "Buys" : "Buy-ins"}
                 </TableHead>
-                <TableHead className={cn("w-[20%]", isMobile && "px-1 text-mobile-compact uppercase font-bold")}>
+                <TableHead className="w-[20%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
                   {isMobile ? "Amt" : "Amount"}
                 </TableHead>
-                <TableHead className={cn("text-right pr-6 w-[20%]", isMobile && "px-2 text-mobile-compact uppercase font-bold")}>
+                <TableHead className={cn(
+                  "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                  isMobile ? "w-[20%] pr-2" : "pr-6"
+                )}>
                   {isMobile ? "Act" : "Actions"}
                 </TableHead>
               </TableRow>
@@ -140,39 +146,26 @@ export const BuyInManagementTable = ({
               {sortedPlayers.map((gamePlayer) => (
                 <TableRow
                   key={gamePlayer.id}
-                  className={cn("group", isMobile && "h-10")}
+                  className={cn("border-b border-white/5 hover:bg-white/5", isMobile ? "h-11" : "group")}
                 >
-                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "pl-6")}>
+                  <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-6")}>
                     <div className="flex items-center gap-2">
                       {!isMobile && <User className="h-4 w-4 text-muted-foreground/50" />}
-                      <span className={cn(
-                        "font-medium truncate",
-                        isMobile ? "text-mobile-compact" : ""
-                      )}>
+                      <span className="truncate">
                         {getDisplayName(gamePlayer.player.name, isMobile)}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "")}>
-                    <div className="flex items-center gap-1">
+                  <TableCell className={cn("py-2.5 px-1 text-center font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
+                    <div className="flex items-center justify-center gap-1">
                       {!isMobile && <Coins className="h-4 w-4 text-muted-foreground/50" />}
-                      <span className={cn(
-                        "font-medium",
-                        isMobile ? "text-mobile-compact" : ""
-                      )}>
-                        {gamePlayer.buy_ins}
-                      </span>
+                      <span>{gamePlayer.buy_ins}</span>
                     </div>
                   </TableCell>
-                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "")}>
-                    <span className={cn(
-                      "text-muted-foreground",
-                      isMobile ? "text-mobile-compact" : "text-sm"
-                    )}>
-                      {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
-                    </span>
+                  <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
+                    {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
                   </TableCell>
-                  <TableCell className={cn(isMobile ? "table-cell-mobile text-right" : "text-right pr-6")}>
+                  <TableCell className={cn("text-right py-1", isMobile ? "pr-2 pl-1" : "pr-6")}>
                     <div className="flex items-center justify-end gap-1 sm:gap-3">
                       <Button
                         onClick={() => {
@@ -183,7 +176,7 @@ export const BuyInManagementTable = ({
                         variant="ghost"
                         size={isMobile ? "icon-sm" : "icon"}
                         aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                        className={cn(isMobile && "h-7 w-7")}
+                        className={cn("bg-transparent", isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")}
                       >
                         <Plus className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                       </Button>
@@ -194,7 +187,7 @@ export const BuyInManagementTable = ({
                           fetchHistory={fetchBuyInHistory}
                           triggerProps={{
                             size: isMobile ? "icon-sm" : "icon",
-                            className: cn(isMobile && "h-7 w-7")
+                            className: cn(isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")
                           }}
                         />
                       )}

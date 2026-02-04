@@ -102,16 +102,22 @@ export const FinalStackManagement = ({
   return (
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
-        <Table className="table-fixed w-full">
+        <Table className="table-fixed w-full text-left border-collapse">
           <TableHeader className="sticky top-0 z-10 bg-card">
-            <TableRow>
-              <TableHead className={cn("pl-6 w-[45%]", isMobile && "pl-2 text-mobile-compact uppercase font-bold")}>
+            <TableRow className="border-b border-white/10 hover:bg-transparent">
+              <TableHead className={cn(
+                "w-[45%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                isMobile ? "pl-2" : "pl-6"
+              )}>
                 {isMobile ? "Plyr" : "Player"}
               </TableHead>
-              <TableHead className={cn("w-[30%]", isMobile && "px-1 text-mobile-compact uppercase font-bold")}>
+              <TableHead className="w-[30%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
                 {isMobile ? "Stack" : "Final Stack"}
               </TableHead>
-              <TableHead className={cn("text-right pr-6 w-[25%]", isMobile && "px-2 text-mobile-compact uppercase font-bold")}>
+              <TableHead className={cn(
+                "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                isMobile ? "w-[25%] pr-2" : "pr-6"
+              )}>
                 {isMobile ? "Act" : "Actions"}
               </TableHead>
             </TableRow>
@@ -120,22 +126,22 @@ export const FinalStackManagement = ({
             {sortedPlayers.map((gamePlayer) => (
               <TableRow
                 key={gamePlayer.id}
-                className={cn(isMobile && "h-10")}
+                className={cn("border-b border-white/5 hover:bg-white/5", isMobile ? "h-11" : "")}
               >
-                <TableCell className={cn("font-medium", isMobile ? "table-cell-mobile text-mobile-compact truncate" : "pl-6")}>
+                <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-6")}>
                   {getDisplayName(gamePlayer.player.name, isMobile)}
                 </TableCell>
-                <TableCell className={cn(isMobile ? "table-cell-mobile text-mobile-compact" : "")}>
+                <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
                   {formatCurrency(gamePlayer.final_stack || 0)}
                 </TableCell>
-                <TableCell className={cn(isMobile ? "table-cell-mobile text-right" : "text-right pr-6")}>
+                <TableCell className={cn("text-right py-1", isMobile ? "pr-2 pl-1" : "pr-6")}>
                   <div className="flex items-center justify-end gap-1 sm:gap-2">
                     <Button
                       onClick={() => handleStartEdit(gamePlayer)}
                       variant="outline"
                       size={isMobile ? "icon-sm" : "icon"}
                       aria-label={`Edit final stack for ${gamePlayer.player.name}`}
-                      className={cn("bg-transparent border-border hover:border-gold-500/50", isMobile && "h-7 w-7")}
+                      className={cn("bg-transparent border-white/10 hover:border-gold-500/50", isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")}
                     >
                       <Edit className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                     </Button>
@@ -143,7 +149,7 @@ export const FinalStackManagement = ({
                       onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
                       triggerProps={{
                         size: isMobile ? "icon-sm" : "icon",
-                        className: cn(isMobile && "h-7 w-7")
+                        className: cn(isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")
                       }}
                     />
                   </div>
