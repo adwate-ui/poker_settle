@@ -157,7 +157,7 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
                   className="flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="p-1 rounded-full bg-green-500/20 text-green-500 mt-0.5">
+                  <div className="p-1 rounded-full bg-state-success/20 text-state-success mt-0.5">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <span className="text-sm text-foreground/90">{feature}</span>
@@ -182,8 +182,8 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
                     index === currentStep
                       ? "bg-primary w-4"
                       : index < currentStep
-                      ? "bg-primary/50"
-                      : "bg-muted-foreground/30"
+                        ? "bg-primary/50"
+                        : "bg-muted-foreground/30"
                   )}
                 />
               ))}

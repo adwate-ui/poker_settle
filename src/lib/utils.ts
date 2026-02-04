@@ -96,7 +96,7 @@ export function stringToColor(str: string): string {
 
 // Get consistent badge style classes for profit/loss values
 export function getProfitLossBadgeStyle(amount: number): string {
-  if (amount > 0) return "bg-green-500/10 text-green-400 border-green-500/20";
-  if (amount < 0) return "bg-red-500/10 text-red-400 border-red-500/20";
+  if (amount > 0) return "bg-state-success/10 text-state-success border-state-success/20";
+  if (amount < 0) return "bg-state-error/10 text-state-error border-state-error/20";
   return "bg-muted text-muted-foreground border-border";
 }

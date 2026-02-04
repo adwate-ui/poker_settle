@@ -640,7 +640,7 @@ const HandReplay = ({
             <div className="text-2xl sm:text-3xl font-bold text-amber-600 dark:text-amber-400 mb-2">
               {winnerPlayerName} Wins!
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
+            <div className="text-xl sm:text-2xl font-bold text-state-success mt-3">
               Winnings: {formatCurrency(winningAmount)}
             </div>
             <div className="text-sm text-muted-foreground mt-2 italic">

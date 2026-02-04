@@ -64,8 +64,8 @@ const ForgotPassword = () => {
           {emailSent ? (
             <div className="space-y-6">
               <div className="flex flex-col items-center gap-4 py-6">
-                <div className="p-4 rounded-full bg-green-500/10 border border-green-500/20">
-                  <CheckCircle2 className="h-12 w-12 text-green-500" />
+                <div className="p-4 rounded-full bg-state-success/10 border border-state-success/20">
+                  <CheckCircle2 className="h-12 w-12 text-state-success" />
                 </div>
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">

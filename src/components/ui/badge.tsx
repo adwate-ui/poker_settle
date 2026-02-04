@@ -16,6 +16,12 @@ const badgeVariants = cva(
         profit: "border-transparent bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
         loss: "border-transparent bg-rose-600 text-white hover:bg-rose-700 shadow-md",
         luxury: "bg-primary/10 border-primary/20 text-primary font-luxury uppercase tracking-widest text-[10px] px-3 py-1",
+        // Semantic state variants
+        info: "border-transparent bg-state-info/10 text-state-info hover:bg-state-info/20",
+        warning: "border-transparent bg-state-warning/10 text-state-warning hover:bg-state-warning/20",
+        success: "border-transparent bg-state-success/10 text-state-success hover:bg-state-success/20",
+        error: "border-transparent bg-state-error/10 text-state-error hover:bg-state-error/20",
+        neutral: "border-transparent bg-state-neutral/10 text-state-neutral hover:bg-state-neutral/20",
       },
     },
     defaultVariants: {

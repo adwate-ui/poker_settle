@@ -87,6 +87,29 @@ export default {
           green: "hsl(var(--money-green))",
           red: "hsl(var(--money-red))",
         },
+        // Semantic State Colors
+        state: {
+          success: {
+            DEFAULT: "hsl(var(--state-success))",
+            foreground: "hsl(var(--state-success-foreground))",
+          },
+          warning: {
+            DEFAULT: "hsl(var(--state-warning))",
+            foreground: "hsl(var(--state-warning-foreground))",
+          },
+          error: {
+            DEFAULT: "hsl(var(--state-error))",
+            foreground: "hsl(var(--state-error-foreground))",
+          },
+          info: {
+            DEFAULT: "hsl(var(--state-info))",
+            foreground: "hsl(var(--state-info-foreground))",
+          },
+          neutral: {
+            DEFAULT: "hsl(var(--state-neutral))",
+            foreground: "hsl(var(--state-neutral-foreground))",
+          },
+        },
         // Ultimate Luxury Design System
         gold: {
           100: "#F7E7CE", // Champagne (Highlight)

@@ -112,7 +112,7 @@ const ResetPassword = () => {
 
     if (strength <= 2) return { level: 1, text: "Weak", color: "bg-destructive" };
     if (strength <= 4) return { level: 2, text: "Medium", color: "bg-yellow-500" };
-    return { level: 3, text: "Strong", color: "bg-green-500" };
+    return { level: 3, text: "Strong", color: "bg-state-success" };
   };
 
   const strength = passwordStrength();
@@ -146,8 +146,8 @@ const ResetPassword = () => {
         <CardContent className="px-10 pb-12 space-y-6">
           {isSuccess ? (
             <div className="flex flex-col items-center gap-6 py-6">
-              <div className="p-4 rounded-full bg-green-500/10 border border-green-500/20">
-                <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <div className="p-4 rounded-full bg-state-success/10 border border-state-success/20">
+                <CheckCircle2 className="h-12 w-12 text-state-success" />
               </div>
               <p className="text-sm text-muted-foreground text-center">
                 Redirecting you to the dashboard...
@@ -191,9 +191,8 @@ const ResetPassword = () => {
                       {[1, 2, 3].map((level) => (
                         <div
                           key={level}
-                          className={`h-1 flex-1 rounded-full transition-colors ${
-                            level <= strength.level ? strength.color : "bg-muted"
-                          }`}
+                          className={`h-1 flex-1 rounded-full transition-colors ${level <= strength.level ? strength.color : "bg-muted"
+                            }`}
                         />
                       ))}
                     </div>
@@ -233,7 +232,7 @@ const ResetPassword = () => {
                   </p>
                 )}
                 {confirmPassword && !errors.confirmPassword && (
-                  <p className="text-xs text-green-500 flex items-center gap-1">
+                  <p className="text-xs text-state-success flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
                     Passwords match
                   </p>
@@ -243,10 +242,10 @@ const ResetPassword = () => {
               <div className="text-xs text-muted-foreground space-y-1">
                 <p className="font-medium">Password requirements:</p>
                 <ul className="list-disc list-inside space-y-0.5 ml-1">
-                  <li className={password.length >= 8 ? "text-green-500" : ""}>At least 8 characters</li>
-                  <li className={/[A-Z]/.test(password) ? "text-green-500" : ""}>One uppercase letter</li>
-                  <li className={/[a-z]/.test(password) ? "text-green-500" : ""}>One lowercase letter</li>
-                  <li className={/[0-9]/.test(password) ? "text-green-500" : ""}>One number</li>
+                  <li className={password.length >= 8 ? "text-state-success" : ""}>At least 8 characters</li>
+                  <li className={/[A-Z]/.test(password) ? "text-state-success" : ""}>One uppercase letter</li>
+                  <li className={/[a-z]/.test(password) ? "text-state-success" : ""}>One lowercase letter</li>
+                  <li className={/[0-9]/.test(password) ? "text-state-success" : ""}>One number</li>
                 </ul>
               </div>
 

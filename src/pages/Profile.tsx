@@ -122,8 +122,8 @@ const HelpTab = () => {
             </div>
 
             <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Info className="h-5 w-5 text-blue-500" />
+              <div className="p-2 rounded-lg bg-state-info/10">
+                <Info className="h-5 w-5 text-state-info" />
               </div>
               <div className="flex-1">
                 <h3 className="font-medium mb-1">About Poker Settle</h3>
@@ -255,12 +255,12 @@ const DemoDataTab = () => {
           </div>
         ) : hasDemo ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4 rounded-lg border bg-green-500/10 border-green-500/20">
-              <div className="p-2 rounded-lg bg-green-500/20">
-                <Database className="h-5 w-5 text-green-500" />
+            <div className="flex items-start gap-4 p-4 rounded-lg border bg-state-success/10 border-state-success/20">
+              <div className="p-2 rounded-lg bg-state-success/20">
+                <Database className="h-5 w-5 text-state-success" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium mb-1 text-green-600 dark:text-green-400">Demo Data Loaded</h3>
+                <h3 className="font-medium mb-1 text-state-success">Demo Data Loaded</h3>
                 <p className="text-sm text-muted-foreground">
                   Your account has sample players and games. Explore the Games, Players, and Analytics tabs to see the app in action.
                 </p>

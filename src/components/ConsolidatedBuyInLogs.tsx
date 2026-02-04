@@ -188,7 +188,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                       </div>
                     </TableCell>
                     <TableCell className="p-2 sm:p-4">
-                      <span className={`font-medium ${entry.buy_ins_added > 0 ? "text-green-600" : "text-destructive"}`}>
+                      <span className={`font-medium ${entry.buy_ins_added > 0 ? "text-state-success" : "text-destructive"}`}>
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                       </span>
                     </TableCell>

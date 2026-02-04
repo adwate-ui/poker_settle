@@ -250,7 +250,7 @@ export const PlayerFormDialog = ({
                   required
                 />
                 {isFieldValid('name') && (
-                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-state-success" />
                 )}
               </div>
               {errors.name && touched.name && (
@@ -293,7 +293,7 @@ export const PlayerFormDialog = ({
                     )}
                   />
                   {isFieldValid('email') && (
-                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-state-success" />
                   )}
                 </div>
                 {errors.email && touched.email && (
@@ -334,7 +334,7 @@ export const PlayerFormDialog = ({
                     )}
                   />
                   {isFieldValid('upiId') && (
-                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-state-success" />
                   )}
                 </div>
                 {errors.upiId && touched.upiId && (

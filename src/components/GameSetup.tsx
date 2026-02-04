@@ -258,16 +258,16 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
                           <p className="text-label tracking-[0.2em] text-muted-foreground">Added Players</p>
-                          <Badge className="bg-primary/10 text-primary border border-primary/20 font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
+                          <Badge variant="outline" className="font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
                             <div key={player.id} className="inline-flex items-center gap-3 px-3 py-1.5 bg-accent/5 border border-border rounded-full group hover:border-primary/30 transition-all">
                               <OptimizedAvatar name={player.name} size="xs" />
                               <span className="font-luxury text-[11px] uppercase tracking-widest text-foreground/80">{player.name}</span>
-                              <button onClick={() => removeSelectedPlayer(player.id)} className="text-muted-foreground hover:text-red-400 transition-colors ml-1">
+                              <Button onClick={() => removeSelectedPlayer(player.id)} variant="ghost" size="icon-sm" className="h-5 w-5 text-muted-foreground hover:text-destructive ml-1">
                                 <X className="h-3 w-3" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                         </div>
@@ -359,7 +359,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                     <p className="font-numbers text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
                                   </div>
                                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Badge className={cn("px-2 py-0.5 font-numbers text-[9px] border-0", player.total_profit > 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
+                                    <Badge className={cn("px-2 py-0.5 font-numbers text-[9px] border-0", player.total_profit > 0 ? "bg-state-success/10 text-state-success" : "bg-state-error/10 text-state-error")}>
                                       {formatProfitLoss(player.total_profit)}
                                     </Badge>
                                     <button
@@ -418,9 +418,9 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                         <p className="font-luxury text-[11px] text-foreground/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         <p className="font-numbers text-[9px] text-muted-foreground uppercase tracking-tighter">Stake: {formatCurrency(game.buy_in_amount)}</p>
                                       </div>
-                                      <button onClick={() => handleDeleteGame(game.id)} className="p-2 hover:bg-red-500/10 rounded-xl text-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
+                                      <Button onClick={() => handleDeleteGame(game.id)} variant="ghost" size="icon-sm" className="p-2 hover:bg-destructive/10 rounded-xl text-destructive/20 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all">
                                         <Trash2 className="h-3.5 w-3.5" />
-                                      </button>
+                                      </Button>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
@@ -429,7 +429,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                       </div>
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
                                         <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
-                                        <p className="text-[11px] font-luxury text-green-400">{formatCurrency(totalWins)}</p>
+                                        <p className="text-[11px] font-luxury text-state-success">{formatCurrency(totalWins)}</p>
                                       </div>
                                     </div>
                                   </div>

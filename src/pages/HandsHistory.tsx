@@ -92,7 +92,7 @@ const HandsHistory = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-state-success">
               {stats.winRate}%
             </div>
             <p className="text-xs text-muted-foreground">

@@ -130,8 +130,8 @@ export const BuyInHistoryDialog = ({
                         <div className={cn(
                           "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-bold border transition-all shadow-sm",
                           entry.buy_ins_added > 0
-                            ? "bg-green-500/10 text-green-400 border-green-500/20 shadow-green-500/5"
-                            : "bg-red-500/10 text-red-400 border-red-500/20 shadow-red-500/5"
+                            ? "bg-state-success/10 text-state-success border-state-success/20 shadow-state-success/5"
+                            : "bg-state-error/10 text-state-error border-state-error/20 shadow-state-error/5"
                         )}>
                           {entry.buy_ins_added > 0 ? (
                             <TrendingUp className="w-3.5 h-3.5" />

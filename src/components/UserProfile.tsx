@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { LogOut, User, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -34,14 +35,14 @@ export const UserProfile = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="outline-none focus:ring-0 group">
+        <Button variant="ghost" size="icon" className="outline-none focus:ring-0 group rounded-full p-0 h-10 w-10">
           <Avatar className="h-10 w-10 border border-border ring-2 ring-transparent group-hover:ring-primary/20 transition-all duration-300">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="bg-muted text-muted-foreground">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

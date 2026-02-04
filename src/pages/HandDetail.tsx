@@ -322,7 +322,7 @@ const HandDetail = () => {
             <Badge variant="outline">{hand.hero_position}</Badge>
             <Badge variant="outline">{hand.final_stage}</Badge>
             {hand.is_hero_win === true && (
-              <Badge className="bg-green-600">
+              <Badge variant="success">
                 <Trophy className="h-3 w-3 mr-1" />
                 Won
               </Badge>

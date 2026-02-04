@@ -130,7 +130,74 @@ All colors use CSS custom properties from `src/index.css`:
 <div className="bg-amber-600">...</div>
 ```
 
+### Semantic State Colors (New)
+
+Use these semantic tokens for consistent state feedback across the app:
+
+| Token | CSS Variable | Usage |
+|-------|--------------|-------|
+| `state-success` | `--state-success` | Positive states, profits, confirmations |
+| `state-error` | `--state-error` | Errors, losses, destructive actions |
+| `state-warning` | `--state-warning` | Cautions, alerts, important decisions |
+| `state-info` | `--state-info` | Informational, help, neutral highlights |
+| `state-neutral` | `--state-neutral` | Neutral states, inactive, disabled |
+
+```tsx
+// ✅ GOOD - Using semantic state colors
+<div className="bg-state-success/10 text-state-success">Profit!</div>
+<div className="bg-state-error/10 text-state-error">Loss</div>
+<div className="bg-state-info/10 text-state-info">Info</div>
+
+// ❌ BAD - Hardcoded colors
+<div className="bg-green-500/10 text-green-400">Profit!</div>
+<div className="bg-red-500/10 text-red-400">Loss</div>
+```
+
 ---
+
+## 📱 Responsive Design
+
+### Breakpoints
+
+| Breakpoint | Width | Usage |
+|------------|-------|-------|
+| `xs` | 475px | Extra small mobile |
+| `sm` | 640px | Small mobile |
+| `md` | 768px | **Mobile/Desktop boundary** |
+| `lg` | 1024px | Desktop |
+| `xl` | 1280px | Large desktop |
+| `2xl` | 1400px | Extra large |
+
+### Responsive Hooks
+
+```tsx
+import { useIsMobile, useBreakpoint, useMinBreakpoint } from '@/hooks/useIsMobile';
+
+// Check if mobile (<768px)
+const isMobile = useIsMobile();
+
+// Get current breakpoint name
+const breakpoint = useBreakpoint(); // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+
+// Check if viewport >= specific breakpoint
+const isDesktop = useMinBreakpoint('lg');
+```
+
+### Responsive Layout Components
+
+```tsx
+import { MobileOnly, DesktopOnly, ResponsiveStack, ResponsiveGrid, Container } 
+  from '@/components/ui/responsive-layout';
+
+// Conditional rendering
+<MobileOnly>Mobile-only content</MobileOnly>
+<DesktopOnly>Desktop-only content</DesktopOnly>
+
+// Responsive layouts
+<ResponsiveStack gap={4}>Column on mobile, row on desktop</ResponsiveStack>
+<ResponsiveGrid mobileColumns={1} desktopColumns={3}>Grid items</ResponsiveGrid>
+<Container size="lg" padded>Centered content</Container>
+```
 
 ## 📏 Spacing System
 
@@ -351,7 +418,161 @@ Before committing a new component:
 
 ---
 
-## 📚 Resources
+## � Element Standards (Mobile vs Desktop)
+
+### Core Sizing
+
+| Element | Mobile (<768px) | Desktop (≥768px) | Notes |
+|---------|-----------------|------------------|-------|
+| Button height | `h-12` (48px) | `h-10` (40px) | Touch-friendly on mobile |
+| Input height | `h-12` (48px) | `h-10` (40px) | 44px min for accessibility |
+| Icon button | `h-12 w-12` | `h-10 w-10` | Use `icon` / `icon-sm` sizes |
+| Touch target | 44×44px min | 32×32px min | Critical for mobile UX |
+| Card padding | `p-4` | `p-6` | Less padding on mobile |
+| Section gap | `gap-4` | `gap-6` | Tighter on mobile |
+
+### Layout Patterns
+
+```tsx
+// ✅ Page Container - Responsive padding
+<div className="px-4 md:px-6 lg:px-8">
+
+// ✅ Section Spacing - Tighter on mobile
+<div className="space-y-4 md:space-y-6">
+
+// ✅ Grid - Stack on mobile, multi-column on desktop
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+// ✅ Card Layout - Full width mobile, side-by-side desktop
+<div className="flex flex-col md:flex-row gap-4">
+```
+
+### Dialog/Modal Standards
+
+| Property | Mobile | Desktop |
+|----------|--------|---------|
+| Width | `w-[95vw]` | `max-w-lg` (512px) |
+| Position | Centered (or bottom sheet) | Centered |
+| Max height | `max-h-[85vh]` | `max-h-[85vh]` |
+| Header | Center-aligned | Left-aligned |
+| Footer | Column layout | Row layout |
+
+```tsx
+// Footer pattern - reverses on desktop
+<DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+  <Button variant="outline">Cancel</Button>
+  <Button>Confirm</Button>
+</DialogFooter>
+```
+
+### Form Patterns
+
+| Aspect | Mobile | Desktop |
+|--------|--------|---------|
+| Field layout | Single column | Two columns possible |
+| Label position | Above input | Above input |
+| Button width | Full width | Auto/fixed width |
+| Error messages | Below input | Below input |
+
+```tsx
+// ✅ Form Field - Full width button on mobile
+<div className="space-y-4">
+  <div className="space-y-2">
+    <Label>Field Name</Label>
+    <Input placeholder="Enter value" />
+  </div>
+  <Button className="w-full md:w-auto">Submit</Button>
+</div>
+
+// ✅ Two-column form on desktop
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div><Label>First Name</Label><Input /></div>
+  <div><Label>Last Name</Label><Input /></div>
+</div>
+```
+
+### Navigation Patterns
+
+| Pattern | Mobile | Desktop |
+|---------|--------|---------|
+| Primary nav | Bottom tabs / Hamburger | Sidebar / Top nav |
+| Section nav | Swipeable tabs | Horizontal tabs |
+| Actions | FAB / Bottom sheet | Inline buttons |
+| Filters | Full-screen drawer | Sidebar / Popover |
+
+```tsx
+// ✅ Tab layout - Scrollable on mobile
+<TabsList className="w-full overflow-x-auto md:overflow-visible">
+  <TabsTrigger>Tab 1</TabsTrigger>
+  <TabsTrigger>Tab 2</TabsTrigger>
+  <TabsTrigger>Tab 3</TabsTrigger>
+</TabsList>
+```
+
+### Table/Data Display
+
+| Pattern | Mobile | Desktop |
+|---------|--------|---------|
+| Tables | Card list / Accordion | Standard table |
+| Data grids | Stack vertically | Grid layout |
+| Pagination | Infinite scroll | Page numbers |
+| Actions | Swipe or long-press | Inline/row actions |
+
+```tsx
+// ✅ Responsive table approach
+<MobileOnly>
+  <div className="space-y-2">
+    {items.map(item => <ItemCard key={item.id} item={item} />)}
+  </div>
+</MobileOnly>
+<DesktopOnly>
+  <Table>
+    <TableHeader>...</TableHeader>
+    <TableBody>...</TableBody>
+  </Table>
+</DesktopOnly>
+```
+
+### Typography Scaling
+
+| Element | Mobile | Desktop |
+|---------|--------|---------|
+| Page title | `text-2xl` | `text-3xl md:text-4xl` |
+| Section title | `text-xl` | `text-2xl` |
+| Body text | `text-sm` | `text-sm` or `text-base` |
+| Labels | `text-xs` | `text-xs` or `text-sm` |
+
+```tsx
+// ✅ Responsive heading
+<h1 className="text-2xl md:text-4xl font-luxury">Page Title</h1>
+<h2 className="text-lg md:text-2xl font-medium">Section</h2>
+```
+
+### Touch & Interaction
+
+**Mobile-First Considerations:**
+- Minimum 44×44px touch targets (WCAG 2.5.5)
+- Adequate spacing between interactive elements (`gap-2` minimum)
+- Swipe gestures for common actions (delete, archive)
+- Bottom-positioned primary actions (thumb zone)
+- Avoid hover-dependent interactions
+
+```tsx
+// ✅ Touch-friendly icon button
+<Button size="icon" className="h-12 w-12 md:h-10 md:w-10">
+  <Icon className="h-5 w-5" />
+</Button>
+
+// ✅ Action row with adequate spacing
+<div className="flex gap-3">
+  <Button size="icon">...</Button>
+  <Button size="icon">...</Button>
+</div>
+```
+
+---
+
+## �📚 Resources
 
 - **Button Component:** `src/components/ui/button.tsx`
 - **Badge Component:** `src/components/ui/badge.tsx`

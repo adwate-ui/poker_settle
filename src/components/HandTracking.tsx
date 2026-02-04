@@ -302,7 +302,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 py-3">
           <CardTitle className="flex justify-between items-center">
             <span className="flex items-center gap-2"><Trophy className="h-5 w-5 text-amber-500" /> Showdown</span>
-            {winnerResult && <Badge className="bg-green-600">Winner Detected!</Badge>}
+            {winnerResult && <Badge className="bg-state-success">Winner Detected!</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
@@ -332,8 +332,8 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             ))}
           </div>
           {winnerResult && (
-            <div className="bg-green-600/20 border border-green-600 p-4 rounded-lg text-center space-y-3">
-              <div className="text-xl font-bold text-green-400">🏆 {winnerResult.winners.map(w => w.playerName).join(' & ')} Wins!</div>
+            <div className="bg-state-success/20 border border-state-success p-4 rounded-lg text-center space-y-3">
+              <div className="text-xl font-bold text-state-success">🏆 {winnerResult.winners.map(w => w.playerName).join(' & ')} Wins!</div>
               <div className="text-poker-gold font-semibold">{winnerResult.winners[0].handName}</div>
               <Button variant="success" className="w-full" onClick={() => handleFinishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}>Confirm & Complete</Button>
             </div>

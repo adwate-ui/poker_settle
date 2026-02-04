@@ -258,7 +258,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                 <p className="text-label text-muted-foreground">Total Profit/Loss</p>
                 <p className={cn(
                   "text-3xl font-numbers",
-                  isProfit ? "text-green-400" : "text-red-400"
+                  isProfit ? "text-state-success" : "text-state-error"
                 )}>
                   {isProfit ? "+" : ""}{formatCurrency(Math.abs(player.total_profit || 0))}
                 </p>
@@ -429,7 +429,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                         <Badge
                           className={cn(
                             "px-4 py-1.5 font-numbers tracking-widest border-0 text-sm",
-                            isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                            isWin ? "bg-state-success/20 text-state-success" : "bg-state-error/20 text-state-error"
                           )}
                         >
                           {isWin ? "+" : ""}{formatCurrency(game.net_amount)}

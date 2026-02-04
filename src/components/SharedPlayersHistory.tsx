@@ -67,7 +67,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
           <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
           <div className="p-4 rounded-lg border bg-card">
             <p className="text-label text-muted-foreground">Net P&L</p>
-            <p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
+            <p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-state-success" : "text-destructive")}>
               {(player.total_profit || 0) < 0 ? '-' : ''}Rs. {Math.abs(Math.round(player.total_profit || 0)).toLocaleString('en-IN')}
             </p>
           </div>
@@ -144,7 +144,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                   </TableCell>
                   <TableCell className={cn(
                     "text-right font-numbers",
-                    h.net_amount >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive",
+                    h.net_amount >= 0 ? "text-state-success" : "text-destructive",
                     isMobile ? "px-1 text-[10px]" : "p-2 sm:p-4"
                   )}>
                     {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}

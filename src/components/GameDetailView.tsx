@@ -751,7 +751,7 @@ export const GameDetailView = ({
                                   className={cn(
                                     isMobile ? "h-6 w-6 rounded-md shadow-sm p-0" : "h-8 px-4 rounded-full text-xs border transition-all",
                                     confirmation.confirmed
-                                      ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
+                                      ? "bg-state-success/10 border-state-success/20 text-state-success hover:bg-state-success/20"
                                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                                   )}
                                 >
@@ -762,7 +762,7 @@ export const GameDetailView = ({
                                 <Badge className={cn(
                                   "rounded-full border-0 font-medium",
                                   isMobile ? "h-5 w-5 p-0 flex items-center justify-center" : "h-7 px-3 text-[10px]",
-                                  confirmation?.confirmed ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-muted text-muted-foreground"
+                                  confirmation?.confirmed ? "bg-state-success/20 text-state-success" : "bg-muted text-muted-foreground"
                                 )}>
                                   {confirmation?.confirmed ? <Check className={cn(isMobile ? "h-3.5 w-3.5" : "h-3 w-3 mr-2")} /> : <History className={cn(isMobile ? "h-3.5 w-3.5" : "h-3 w-3 mr-2")} />}
                                   {!isMobile && (confirmation?.confirmed ? "Settled" : "Pending")}

@@ -208,11 +208,11 @@ const Analytics = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
+        <Card className="bg-gradient-to-br from-state-success/5 to-transparent border-state-success/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <DollarSign className="h-5 w-5 text-green-500" />
+              <div className="p-2 rounded-lg bg-state-success/10">
+                <DollarSign className="h-5 w-5 text-state-success" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">Money Moved</p>
@@ -222,11 +222,11 @@ const Analytics = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/20">
+        <Card className="bg-gradient-to-br from-state-info/5 to-transparent border-state-info/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Users className="h-5 w-5 text-blue-500" />
+              <div className="p-2 rounded-lg bg-state-info/10">
+                <Users className="h-5 w-5 text-state-info" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Players</p>
@@ -236,11 +236,11 @@ const Analytics = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-500/5 to-transparent border-orange-500/20">
+        <Card className="bg-gradient-to-br from-state-warning/5 to-transparent border-state-warning/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/10">
-                <Target className="h-5 w-5 text-orange-500" />
+              <div className="p-2 rounded-lg bg-state-warning/10">
+                <Target className="h-5 w-5 text-state-warning" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">Avg Pot Size</p>
@@ -347,9 +347,9 @@ const Analytics = () => {
                   <div className={cn(
                     "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
                     index === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                    index === 1 ? "bg-gray-400/20 text-gray-400" :
-                    index === 2 ? "bg-orange-600/20 text-orange-600" :
-                    "bg-muted text-muted-foreground"
+                      index === 1 ? "bg-gray-400/20 text-gray-400" :
+                        index === 2 ? "bg-orange-600/20 text-orange-600" :
+                          "bg-muted text-muted-foreground"
                   )}>
                     {index + 1}
                   </div>
@@ -368,7 +368,7 @@ const Analytics = () => {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-red-500" />
+              <TrendingDown className="h-5 w-5 text-state-error" />
               <CardTitle className="text-lg">Biggest Losers</CardTitle>
             </div>
           </CardHeader>
@@ -376,7 +376,7 @@ const Analytics = () => {
             {stats.topLosers.filter((p: any) => (p.total_profit || 0) < 0).slice(0, 5).map((player: any, index: number) => (
               <div key={player.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-red-500/20 text-red-500">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-state-error/20 text-state-error">
                     {index + 1}
                   </div>
                   <span className="font-medium">{player.name}</span>
@@ -456,11 +456,11 @@ const Analytics = () => {
             </div>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full bg-green-500" />
+                <div className="w-4 h-4 rounded-full bg-state-success" />
                 <span className="text-sm">Winners: {stats.profitablePlayers} players</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full bg-red-500" />
+                <div className="w-4 h-4 rounded-full bg-state-error" />
                 <span className="text-sm">Losers: {stats.losingPlayers} players</span>
               </div>
               <div className="flex items-center gap-3">
@@ -489,7 +489,7 @@ const Analytics = () => {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Win Rate</p>
-            <p className="text-3xl font-bold text-green-500">
+            <p className="text-3xl font-bold text-state-success">
               {stats.totalPlayers > 0 ? Math.round((stats.profitablePlayers / stats.totalPlayers) * 100) : 0}%
             </p>
           </CardContent>

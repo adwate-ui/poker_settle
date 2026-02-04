@@ -191,7 +191,7 @@ const PlayersHistory = () => {
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
               <p className="text-label text-muted-foreground">Win Rate</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-numbers text-green-600 dark:text-green-400">
+                <p className="text-3xl font-numbers text-state-success">
                   {players.filter(p => (p.total_profit || 0) >= 0).length}
                 </p>
                 <p className="text-label text-muted-foreground">Profitable Players</p>
@@ -290,7 +290,7 @@ const PlayersHistory = () => {
                     <TableCell className={cn("text-right", isMobile ? "px-1 font-numbers" : "p-2 sm:p-4")}>
                       <span className={cn(
                         "font-medium whitespace-nowrap",
-                        profit >= 0 ? 'text-green-500' : 'text-red-500',
+                        profit >= 0 ? 'text-state-success' : 'text-state-error',
                         isMobile ? 'text-[10px]' : 'text-sm'
                       )}>
                         {profit < 0 ? '-' : ''}Rs. {Math.abs(Math.round(profit)).toLocaleString('en-IN')}
