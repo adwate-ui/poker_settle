@@ -55,7 +55,6 @@ interface PokerSeatProps {
   isDragOver: boolean;
   draggedIndex: number | null;
   positionLabel: string | null;
-  playerBet: number;
   isButton: boolean;
   isFolded: boolean;
   isMucked: boolean;
@@ -65,9 +64,10 @@ interface PokerSeatProps {
   shouldShowCards: boolean;
   playerHoleCards: Record<string, string>;
   playerStacks: Record<string, number>;
-  animateChipsToPot: boolean;
-  animatingPlayerId: string | null;
-  potSize: number;
+  onDrop: (e: React.DragEvent) => void;
+  onTouchStart: (e: React.TouchEvent) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: (e: React.TouchEvent) => void;
   allPlayerNames: string[];
   enableDragDrop: boolean;
   scale?: number;
@@ -75,10 +75,6 @@ interface PokerSeatProps {
   onDragStart: () => void;
   onDragEnd: () => void;
   onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: (e: React.TouchEvent) => void;
 }
 
 const PokerSeat = memo(({
@@ -89,7 +85,6 @@ const PokerSeat = memo(({
   isDragOver,
   draggedIndex,
   positionLabel,
-  playerBet,
   isButton,
   isFolded,
   isMucked,
@@ -99,9 +94,6 @@ const PokerSeat = memo(({
   shouldShowCards,
   playerHoleCards,
   playerStacks,
-  animateChipsToPot,
-  animatingPlayerId,
-  potSize,
   allPlayerNames,
   enableDragDrop,
   scale = 1,
@@ -115,23 +107,6 @@ const PokerSeat = memo(({
   onTouchEnd,
 }: PokerSeatProps) => {
   const TABLE_CENTER_X = 50;
-
-  // Calculate chip stack offset based on position relative to center
-  const stackOffset = useMemo(() => {
-    const rx = pos.x - 50;
-    const ry = pos.y - 50;
-    const dist = Math.sqrt(rx * rx + ry * ry);
-    const nx = rx / dist;
-    const ny = ry / dist;
-
-    // Push chips toward the center of the table
-    // Base distance reduced for dense mode
-    const baseDistance = 15 * scale;
-    return {
-      x: -nx * baseDistance,
-      y: -ny * (baseDistance * 0.8)
-    };
-  }, [pos.x, pos.y, scale]);
 
   return (
     <div
@@ -166,7 +141,7 @@ const PokerSeat = memo(({
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1.2 }}
-            className="absolute inset-0 bg-gold-500/20 blur-2xl rounded-full z-[-1]"
+            className="absolute inset-0 bg-primary/20 blur-2xl rounded-full z-[-1]"
           />
         )}
 
@@ -180,9 +155,9 @@ const PokerSeat = memo(({
           <div className="relative">
             <div className={cn(
               "bg-card border-2 rounded-full w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 flex items-center justify-center shadow-lg transition-all overflow-hidden",
-              isActive && !isFolded ? 'border-poker-gold ring-4 ring-poker-gold/30 animate-pulse' :
-                isWinner ? 'border-gold-400 ring-8 ring-gold-500/20 scale-110' :
-                  isDragOver && draggedIndex !== null ? 'border-poker-gold ring-2 ring-poker-gold' : 'border-primary/20'
+              isActive && !isFolded ? 'border-primary ring-4 ring-primary/30 animate-pulse' :
+                isWinner ? 'border-primary ring-8 ring-primary/20 scale-110' :
+                  isDragOver && draggedIndex !== null ? 'border-primary ring-2 ring-primary' : 'border-primary/20'
             )}>
               <OptimizedAvatar
                 name={position.player_name}
@@ -200,11 +175,11 @@ const PokerSeat = memo(({
 
           <div className={cn(
             "bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-lg shadow-xl border border-white/10 flex flex-col items-center gap-0 min-w-[90px] max-w-[130px] transition-all",
-            isWinner ? "border-gold-500/30 bg-gold-900/40" : ""
+            isWinner ? "border-primary/30 bg-primary/10" : ""
           )}>
             <span className={cn(
               "text-[11px] xs:text-xs font-bold tracking-tight whitespace-nowrap overflow-hidden text-ellipsis w-full text-center",
-              isWinner ? "text-gold-200 font-luxury" : "text-foreground"
+              isWinner ? "text-primary font-luxury" : "text-foreground"
             )} title={position.player_name}>
               {position.player_name}
             </span>
@@ -246,103 +221,107 @@ const PokerSeat = memo(({
           )}
         </div>
 
-        {/* Chip stacks for betting or winning */}
-        <AnimatePresence>
-          {playerBet > 0 && !isFolded && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
-              animate={animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id)
-                ? {
-                  opacity: 0,
-                  scale: 0,
-                  y: -150,
-                  transition: {
-                    type: "spring" as const,
-                    stiffness: 200,
-                    damping: 20,
-                    mass: 1.5
-                  }
-                }
-                : {
-                  opacity: 1,
-                  scale: 1,
-                  x: `${stackOffset.x}%`,
-                  y: `${stackOffset.y}%`,
-                  transition: {
-                    type: "spring" as const,
-                    stiffness: 200,
-                    damping: 18,
-                    mass: 1.2
-                  }
-                }
-              }
-              onAnimationComplete={(definition: any) => {
-                if (definition && typeof definition === 'object' && 'opacity' in definition && definition.opacity === 0 && 'vibrate' in navigator) {
-                  navigator.vibrate(5);
-                }
-              }}
-              className="absolute"
+
+        {
+          isWinner && (
+            <div
+              className="absolute animate-in fade-in zoom-in duration-700"
               style={{
-                zIndex: Z_INDEX.CHIP_STACK,
+                top: pos.y > 50 ? '-100px' : '100px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: Z_INDEX.WINNER_CELEBRATION,
               }}
             >
-              <ChipStack amount={playerBet} size="sm" showAmount={true} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Winner chip physics - animate pot to player */}
-        <AnimatePresence>
-          {isWinner && potSize > 0 && (
-            <motion.div
-              initial={{ left: "50%", top: "50%", opacity: 0, scale: 0.5, x: "-50%", y: "-50%" }}
-              animate={{
-                left: "50%",
-                top: "-40px",
-                opacity: 1,
-                scale: 1,
-                transition: {
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 20,
-                  delay: 0.5
-                }
-              }}
-              className="absolute z-[40]"
-            >
-              <ChipStack amount={potSize} size="sm" showAmount={false} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {isWinner && (
-          <div
-            className="absolute animate-in fade-in zoom-in duration-700"
-            style={{
-              top: pos.y > 50 ? '-100px' : '100px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: Z_INDEX.WINNER_CELEBRATION,
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
-              >
-                <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
-              </motion.div>
+              <div className="flex flex-col items-center gap-2">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
+                >
+                  <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
+                </motion.div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
+          )
+        }
+      </div >
+    </div >
   );
 });
 
 PokerSeat.displayName = 'PokerSeat';
+
+// Global Layer for Betting Chips
+const BettingChipsLayer = memo(({
+  positions,
+  playerBets,
+  animateChipsToPot,
+  animatingPlayerId,
+  getPlayerPosition
+}: {
+  positions: SeatPosition[];
+  playerBets: Record<string, number>;
+  animateChipsToPot: boolean;
+  animatingPlayerId: string | null;
+  getPlayerPosition: (index: number) => { x: number; y: number };
+}) => {
+  return (
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: Z_INDEX.CHIP_STACK }}>
+      <AnimatePresence>
+        {positions.map((position, index) => {
+          const betAmount = playerBets[position.player_id] || 0;
+          if (betAmount <= 0) return null;
+
+          const pos = getPlayerPosition(index);
+
+          // Nudge chips towards center
+          const rx = pos.x - 50;
+          const ry = pos.y - 50;
+          const dist = Math.sqrt(rx * rx + ry * ry);
+          const nudgeFactor = 18; // 18% towards center
+
+          const chipX = pos.x - (rx / dist) * nudgeFactor;
+          const chipY = pos.y - (ry / dist) * nudgeFactor;
+
+          const isExiting = animateChipsToPot && (!animatingPlayerId || animatingPlayerId === position.player_id);
+
+          return (
+            <motion.div
+              key={`chips-${position.player_id}`}
+              initial={{ left: `${chipX}%`, top: `${chipY}%`, opacity: 0, scale: 0.8, x: '-50%', y: '-50%' }}
+              animate={isExiting ? {
+                left: "50%",
+                top: "50%",
+                opacity: 0, // Fade out as it hits pot
+                scale: 0.5,
+                transition: { duration: 0.6, ease: "easeInOut" }
+              } : {
+                left: `${chipX}%`,
+                top: `${chipY}%`,
+                opacity: 1,
+                scale: 1,
+                x: '-50%',
+                y: '-50%',
+                transition: { type: "spring", stiffness: 300, damping: 20 }
+              }}
+              exit={{
+                left: "50%",
+                top: "50%",
+                opacity: 0,
+                scale: 0.5,
+                transition: { duration: 0.5, ease: "anticipate" }
+              }}
+              className="absolute"
+            >
+              <ChipStack amount={betAmount} size="sm" />
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+});
 
 const PokerTableView = memo(({
   positions,
@@ -652,7 +631,7 @@ const PokerTableView = memo(({
               const isDragging = draggedIndex === index;
               const isDragOver = dragOverIndex === index;
               const positionLabel = getPositionLabel(position.player_id);
-              const playerBet = playerBets[position.player_id] || 0;
+              // playerBet logic moved to global layer
               const isButton = buttonPlayerId === position.player_id;
               const isFolded = foldedPlayers.includes(position.player_id);
               const isMucked = muckedPlayers.includes(position.player_id);
@@ -671,7 +650,6 @@ const PokerTableView = memo(({
                   isDragOver={isDragOver}
                   draggedIndex={draggedIndex}
                   positionLabel={positionLabel}
-                  playerBet={playerBet}
                   isButton={isButton}
                   isFolded={isFolded}
                   isMucked={isMucked}
@@ -681,9 +659,6 @@ const PokerTableView = memo(({
                   shouldShowCards={shouldShowCards}
                   playerHoleCards={playerHoleCards}
                   playerStacks={playerStacks}
-                  animateChipsToPot={animateChipsToPot}
-                  animatingPlayerId={animatingPlayerId}
-                  potSize={potSize}
                   allPlayerNames={allPlayerNames}
                   enableDragDrop={enableDragDrop}
                   scale={densityScale}
@@ -699,6 +674,15 @@ const PokerTableView = memo(({
               );
             })}
           </div>
+
+          {/* Global Betting Chips Layer with Physics */}
+          <BettingChipsLayer
+            positions={positions}
+            playerBets={playerBets}
+            animateChipsToPot={animateChipsToPot}
+            animatingPlayerId={animatingPlayerId}
+            getPlayerPosition={getPlayerPosition}
+          />
         </div>
       </div>
     </div>

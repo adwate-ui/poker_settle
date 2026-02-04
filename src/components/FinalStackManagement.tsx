@@ -87,9 +87,9 @@ export const FinalStackManagement = ({
 
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border max-h-[500px] overflow-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10 bg-card">
             <TableRow>
               <TableHead className="pl-6 w-[200px]">Player</TableHead>
               <TableHead>Final Stack</TableHead>

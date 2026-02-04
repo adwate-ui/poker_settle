@@ -51,7 +51,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
             </div>
           </div>
           <Badge variant="stats">
-            {gamePlayer.buy_ins} UNIT{gamePlayer.buy_ins !== 1 ? 'S' : ''}
+            {gamePlayer.buy_ins} BUY-IN{gamePlayer.buy_ins !== 1 ? 'S' : ''}
           </Badge>
         </div>
 

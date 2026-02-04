@@ -8,9 +8,10 @@ import { sendCombinedGameSettlementNotifications } from "@/services/emailNotific
 
 const buyInAmountSchema = z.number().min(1, "Buy-in must be at least ₹1").max(1000000, "Buy-in cannot exceed ₹10,00,000");
 
-export const fetchGames = async (userId: string): Promise<Game[]> => {
+export const fetchGames = async (userId: string, client?: SupabaseClient): Promise<Game[]> => {
     try {
-        const { data, error } = await supabase
+        const supabaseClient = client || supabase;
+        const { data, error } = await supabaseClient
             .from("games")
             .select(`
         *,

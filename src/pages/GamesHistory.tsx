@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,15 +18,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { ArrowUpDown, ArrowUp, ArrowDown, Trash2, Filter, History, Calendar, User as UserIcon, Loader2 } from "lucide-react";
+import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatIndianNumber, formatProfitLoss } from "@/lib/utils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
-import { cn } from "@/lib/utils";
+import { useGames } from "@/features/game/hooks/useGames";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GameWithStats {
   id: string;
@@ -44,11 +45,16 @@ interface GameWithStats {
 type SortField = "date" | "buy_in" | "players" | "chips";
 type SortOrder = "asc" | "desc" | null;
 
-const GamesHistory = () => {
+interface GamesHistoryProps {
+  userId?: string;
+  client?: SupabaseClient;
+  readOnly?: boolean;
+  disablePlayerLinks?: boolean;
+}
+
+const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePlayerLinks = false }: GamesHistoryProps = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [games, setGames] = useState<GameWithStats[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>("all");
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
   const [selectedPlayer, setSelectedPlayer] = useState<string>("all");
@@ -57,78 +63,52 @@ const GamesHistory = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const { prefetch } = usePrefetchGame();
 
-  const fetchGames = useCallback(async () => {
-    setLoading(true);
+  const effectiveUserId = propUserId || user?.id;
+
+  // Use the useGames hook
+  const { data: gamesData, isLoading: loading, refetch } = useGames(effectiveUserId, client);
+
+  // Transform data to match GameWithStats interface
+  const games: GameWithStats[] = useMemo(() => {
+    if (!gamesData) return [];
+
+    return gamesData.map((game: any) => {
+      const playerCount = game.game_players?.length || 0;
+      const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
+      const totalPot = totalBuyIns * game.buy_in_amount;
+      const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
+      const gamePlayers = game.game_players?.map((gp: any) => ({
+        player_name: gp.player?.name || "",
+        net_amount: gp.net_amount || 0,
+      })) || [];
+
+      return {
+        id: game.id,
+        date: game.date,
+        buy_in_amount: game.buy_in_amount,
+        player_count: playerCount,
+        total_pot: totalPot,
+        player_names: playerNames,
+        game_players: gamePlayers,
+      };
+    });
+  }, [gamesData]);
+
+  const handleDeleteGame = async (gameId: string) => {
     try {
-      const { data: gamesData, error } = await supabase
-        .from("games")
-        .select(`
-          id,
-          date,
-          buy_in_amount,
-          is_complete,
-          game_players (
-            id,
-            buy_ins,
-            net_amount,
-            player:players (
-              name
-            )
-          )
-        `)
-        .eq("user_id", user?.id)
-        .eq("is_complete", true)
-        .order("date", { ascending: false });
-
-      if (error) throw error;
-
-      const gamesWithStats: GameWithStats[] = (gamesData || []).map((game: any) => {
-        const playerCount = game.game_players?.length || 0;
-        const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
-        const totalPot = totalBuyIns * game.buy_in_amount;
-        const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
-        const gamePlayers = game.game_players?.map((gp: any) => ({
-          player_name: gp.player?.name || "",
-          net_amount: gp.net_amount || 0,
-        })) || [];
-
-        return {
-          id: game.id,
-          date: game.date,
-          buy_in_amount: game.buy_in_amount,
-          player_count: playerCount,
-          total_pot: totalPot,
-          player_names: playerNames,
-          game_players: gamePlayers,
-        };
-      });
-
-      setGames(gamesWithStats);
-    } catch (error) {
-      console.error("Error fetching games:", error);
-      toast.error("Failed to load games history");
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const handleDeleteGame = useCallback(async (gameId: string) => {
-    try {
-      const { error } = await supabase.from("games").delete().eq("id", gameId);
+      // Use provided client or fallback to global supabase
+      const activeClient = client || supabase;
+      const { error } = await activeClient.from("games").delete().eq("id", gameId);
       if (error) throw error;
       toast.success("Game deleted successfully");
-      fetchGames();
+      refetch();
     } catch (error) {
       console.error("Error deleting game:", error);
       toast.error("Failed to delete game");
     } finally {
       setDeleteGameId(null);
     }
-  }, [fetchGames]);
-
-  useEffect(() => {
-    if (user) fetchGames();
-  }, [user, fetchGames]);
+  };
 
   const uniqueDates = useMemo(() => {
     const dates = games.map((game) => format(new Date(game.date), "MMM d, yyyy"));
@@ -192,6 +172,22 @@ const GamesHistory = () => {
     return filtered;
   }, [games, selectedDate, selectedMonthYear, selectedPlayer, sortField, sortOrder]);
 
+  const handleNavigate = (gameId: string) => {
+    // If shared mode (client present), we might need to handle navigation differently
+    // The current shared route is /shared/:token/game/:gameId
+    // But GamesHistory sits inside /shared/:token/
+    // So simply navigating to `./game/${gameId}` or maintaining the relative path might work
+    // depending on where this component is rendered.
+
+    // If client is present, we assume we are in shared view
+    if (client) {
+      // Assuming the parent route is /shared/:token
+      navigate(`game/${gameId}`);
+    } else {
+      navigate(`/games/${gameId}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
@@ -210,12 +206,16 @@ const GamesHistory = () => {
           </div>
           <CardTitle className="text-3xl font-luxury mb-2">No Games Found</CardTitle>
           <CardDescription>
-            You haven't recorded any completed sessions yet. Once you finalize a game, it will appear here.
+            {readOnly
+              ? "No completed games found for this view."
+              : "You haven't recorded any completed sessions yet. Once you finalize a game, it will appear here."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center pb-12">
-          <Button onClick={() => navigate("/")} size="lg">Start First Session</Button>
-        </CardContent>
+        {!readOnly && (
+          <CardContent className="flex justify-center pb-12">
+            <Button onClick={() => navigate("/")} size="lg">Start First Session</Button>
+          </CardContent>
+        )}
       </Card>
     );
   }
@@ -309,7 +309,7 @@ const GamesHistory = () => {
                 <TableRow
                   key={game.id}
                   className="cursor-pointer"
-                  onClick={() => navigate(`/games/${game.id}`)}
+                  onClick={() => handleNavigate(game.id)}
                   onMouseEnter={() => prefetch(game.id)}
                 >
                   <TableCell className="font-medium">
@@ -330,17 +330,19 @@ const GamesHistory = () => {
                         {formatProfitLoss(playerData.net_amount)}
                       </Badge>
                     ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteGameId(game.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      !readOnly && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteGameId(game.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )
                     )}
                   </TableCell>
                 </TableRow>
@@ -350,20 +352,22 @@ const GamesHistory = () => {
         </Table>
       </Card>
 
-      <Dialog open={!!deleteGameId} onOpenChange={(open) => !open && setDeleteGameId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Game?</DialogTitle>
-            <DialogDescription>
-              This action will permanently remove this session from the history. The accounting for all players will be irreversibly lost.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDeleteGameId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => deleteGameId && handleDeleteGame(deleteGameId)}>Delete Game</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {!readOnly && (
+        <Dialog open={!!deleteGameId} onOpenChange={(open) => !open && setDeleteGameId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Game?</DialogTitle>
+              <DialogDescription>
+                This action will permanently remove this session from the history. The accounting for all players will be irreversibly lost.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setDeleteGameId(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => deleteGameId && handleDeleteGame(deleteGameId)}>Delete Game</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

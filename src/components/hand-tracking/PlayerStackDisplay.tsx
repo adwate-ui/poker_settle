@@ -18,17 +18,17 @@ const PlayerStackDisplay = memo(({
     <div className={cn(
       "flex items-center justify-between p-3 rounded-xl transition-all duration-300",
       isCurrentPlayer
-        ? 'bg-gold-500/10 border border-gold-500/30 shadow-[0_0_15px_rgba(212,184,60,0.1)]'
+        ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
         : 'bg-white/5 border border-white/5'
     )}>
       <div className="flex items-center gap-2 min-w-0">
         <User className={cn(
           "h-3.5 w-3.5 shrink-0",
-          isCurrentPlayer ? "text-gold-500" : "text-white/20"
+          isCurrentPlayer ? "text-primary" : "text-white/20"
         )} />
         <span className={cn(
           "font-luxury text-xs uppercase tracking-widest truncate",
-          isCurrentPlayer ? "text-gold-100 font-bold" : "text-white/40"
+          isCurrentPlayer ? "text-primary-foreground font-bold" : "text-white/40"
         )}>
           {playerName}
         </span>
@@ -38,7 +38,7 @@ const PlayerStackDisplay = memo(({
         className={cn(
           "font-numbers text-[10px] h-6 px-2.5 border-0 border-b-2 rounded-none",
           isCurrentPlayer
-            ? "text-gold-200 border-gold-500/40 bg-gold-500/5"
+            ? "text-primary border-primary/40 bg-primary/5"
             : "text-white/30 border-white/10 bg-white/2"
         )}
       >

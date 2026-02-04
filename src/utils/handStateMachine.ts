@@ -33,20 +33,20 @@ export const getNextPlayerIndex = (
 
   let nextIndex = (currentIndex + 1) % activePlayers.length;
   let attempts = 0;
-  
+
   // Keep rotating until we find an active player
   while (attempts < activePlayers.length) {
     const player = activePlayers[nextIndex];
-    
+
     // Skip players who have folded or were dealt out
     if (playersInHand.includes(player.player_id)) {
       return nextIndex;
     }
-    
+
     nextIndex = (nextIndex + 1) % activePlayers.length;
     attempts++;
   }
-  
+
   return currentIndex; // Fallback to current if no valid player found
 };
 
@@ -60,14 +60,20 @@ export const getStartingPlayerIndex = (
   buttonPlayerId: string
 ): number => {
   if (activePlayers.length === 0) return 0;
-  
+
   // activePlayers should already be sorted by seat position
   const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
   if (buttonIndex === -1) return 0;
-  
+
   if (stage === 'preflop') {
     // Preflop: UTG is the first active player left of Big Blind
     // Button +1 = SB, +2 = BB, +3 = UTG (first active player after BB)
+
+    if (activePlayers.length === 2) {
+      // HEADS UP Preflop: Button starts (Button acts small blind)
+      return buttonIndex;
+    }
+
     const utgIndex = (buttonIndex + 3) % activePlayers.length;
     return utgIndex;
   } else {
@@ -98,67 +104,69 @@ export const isBettingRoundComplete = (
 
   // Get all bets from remaining active players
   const activeBets = remainingPlayers.map(p => streetPlayerBets[p.player_id] || 0);
-  
+
   if (activeBets.length === 0) return false;
-  
+
   // Check if all bets are equal
   const maxBet = Math.max(...activeBets);
   const allBetsEqual = activeBets.every(bet => bet === maxBet);
-  
+
   if (!allBetsEqual) return false;
-  
+
   // CRITICAL: If there was a raise, all players after the raiser must have acted
   if (lastAggressorIndex !== null) {
     const aggressorPlayer = activePlayers[lastAggressorIndex];
     if (!aggressorPlayer) return false;
-    
+
     // Find all actions after the last raise/bet (search backwards)
     let lastAggressiveActionIndex = -1;
     for (let i = streetActions.length - 1; i >= 0; i--) {
       const action = streetActions[i];
-      if (action.player_id === aggressorPlayer.player_id && 
-          (action.action_type === 'Raise' || 
-           (action.action_type === 'Big Blind' && stage === 'preflop'))) {
+      if (action.player_id === aggressorPlayer.player_id &&
+        (action.action_type === 'Raise' ||
+          (action.action_type === 'Big Blind' && stage === 'preflop'))) {
         lastAggressiveActionIndex = i;
         break;
       }
     }
-    
+
     if (lastAggressiveActionIndex === -1) return false;
-    
+
     const actionsAfterRaise = streetActions.slice(lastAggressiveActionIndex + 1);
-    
+
     // All remaining players (except raiser) must have acted after the raise
     for (const player of remainingPlayers) {
       if (player.player_id === aggressorPlayer.player_id) continue;
-      
+
       const hasActedAfterRaise = actionsAfterRaise.some(
         a => a.player_id === player.player_id
       );
-      
+
       if (!hasActedAfterRaise) {
         return false;
       }
     }
   }
-  
+
   // Check that all remaining players have acted at least once
   if (stage === 'preflop') {
     // Preflop: Track non-blind actions separately
     const buttonIndex = activePlayers.findIndex(p => p.player_id === buttonPlayerId);
     if (buttonIndex === -1) return false;
-    
-    const sbIndex = (buttonIndex + 1) % activePlayers.length;
-    const bbIndex = (buttonIndex + 2) % activePlayers.length;
+
+    // Recalculate SB/BB indices for Heads-Up support
+    const isHeadsUp = activePlayers.length === 2;
+    const sbIndex = isHeadsUp ? buttonIndex : (buttonIndex + 1) % activePlayers.length;
+    const bbIndex = isHeadsUp ? (buttonIndex + 1) % activePlayers.length : (buttonIndex + 2) % activePlayers.length;
     const sbPlayerId = activePlayers[sbIndex]?.player_id;
     const bbPlayerId = activePlayers[bbIndex]?.player_id;
-    
+
     if (!sbPlayerId || !bbPlayerId) return false;
-    
+
     // Check that ALL remaining players have acted (excluding blind posts)
     for (const player of remainingPlayers) {
       const playerId = player.player_id;
-      
+
       // For SB and BB, count non-blind actions
       if (playerId === sbPlayerId) {
         const sbNonBlindActions = streetActions.filter(
@@ -185,14 +193,14 @@ export const isBettingRoundComplete = (
   } else {
     // Postflop: All remaining players must have acted at least once
     const playersWhoActed = new Set(streetActions.map(a => a.player_id));
-    
+
     for (const player of remainingPlayers) {
       if (!playersWhoActed.has(player.player_id)) {
         return false;
       }
     }
   }
-  
+
   return true;
 };
 
@@ -204,14 +212,14 @@ export const shouldEndHandEarly = (
   playersInHand: string[]
 ): { shouldEnd: boolean; winnerId: string | null } => {
   const remainingPlayers = activePlayers.filter(p => playersInHand.includes(p.player_id));
-  
+
   if (remainingPlayers.length === 1) {
     return {
       shouldEnd: true,
       winnerId: remainingPlayers[0].player_id
     };
   }
-  
+
   return { shouldEnd: false, winnerId: null };
 };
 
@@ -228,7 +236,7 @@ export const getNextStage = (currentStage: HandStage): HandStage => {
     showdown: 'complete',
     complete: 'complete'
   };
-  
+
   return stageProgression[currentStage] || currentStage;
 };
 
@@ -288,7 +296,7 @@ export const processAction = (
     updates.currentBet = betSize;
     updates.lastAggressorIndex = state.currentPlayerIndex;
   }
-  
+
   // BB is the initial aggressor preflop
   if (actionType === 'Big Blind' && state.stage === 'preflop') {
     updates.lastAggressorIndex = state.currentPlayerIndex;

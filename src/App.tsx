@@ -17,7 +17,7 @@ const Index = lazy(() => import("./pages/Index"));
 const NewGame = lazy(() => import("./pages/NewGame"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
-const SharedView = lazy(() => import("./pages/SharedView"));
+const SharedLayout = lazy(() => import("./pages/SharedLayout"));
 const SharedGameDetail = lazy(() => import("./pages/SharedGameDetail"));
 const SharedPlayerDetail = lazy(() => import("./pages/SharedPlayerDetail"));
 const ShortLinkRedirect = lazy(() => import("./pages/ShortLinkRedirect"));
@@ -77,7 +77,7 @@ const AppContent = () => {
           {/* Public Routes */}
           <Route path="/s/:shortCode" element={<ShortLinkRedirect />} />
           <Route path="/upi-pay" element={<UpiPaymentBouncer />} />
-          <Route path="/shared/:token" element={<SharedView />} />
+          <Route path="/shared/:token" element={<SharedLayout />} />
           <Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />
           <Route path="/shared/:token/player/:playerId" element={<SharedPlayerDetail />} />
 

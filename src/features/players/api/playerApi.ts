@@ -3,11 +3,14 @@ import { Player } from "@/types/poker";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { SupabaseClient } from "@supabase/supabase-js";
+
 const playerNameSchema = z.string().trim().min(1, "Player name is required").max(100, "Player name must be less than 100 characters");
 
-export const fetchPlayers = async (userId: string): Promise<Player[]> => {
+export const fetchPlayers = async (userId: string, client?: SupabaseClient): Promise<Player[]> => {
     try {
-        const { data, error } = await supabase
+        const supabaseClient = client || supabase;
+        const { data, error } = await supabaseClient
             .from("players")
             .select("*")
             .eq("user_id", userId)

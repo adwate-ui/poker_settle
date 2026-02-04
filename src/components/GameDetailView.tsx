@@ -429,10 +429,10 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="animate-in slide-in-from-top-2 duration-300 overflow-x-auto">
-              <div className="rounded-md border m-4 mt-8">
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <div className="rounded-md border m-4 mt-8 max-h-[600px] overflow-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-card">
                     <TableRow>
                       <TableHead className="pl-6">Player</TableHead>
                       <TableHead className="text-center">Buy-ins</TableHead>
@@ -559,10 +559,10 @@ export const GameDetailView = ({
                 </div>
               )}
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[600px]">
                 <Table>
-                  <TableHeader className="bg-muted/50 border-b">
-                    <TableRow className="hover:bg-transparent border-0 h-10">
+                  <TableHeader className="bg-muted/50 border-b sticky top-0 z-10 bg-card">
+                    <TableRow className="h-10">
                       <TableHead className="pl-8 text-left font-medium text-muted-foreground">From</TableHead>
                       <TableHead className="text-left font-medium text-muted-foreground">To</TableHead>
                       <TableHead className="text-center font-medium text-muted-foreground">Amount</TableHead>

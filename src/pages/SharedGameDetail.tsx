@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { GameDetailView } from '@/components/GameDetailView';
 import { useAuth } from '@/hooks/useAuth';
 import GameDashboard from '@/components/GameDashboard';
 import { Game } from '@/types/poker';
 import { Loader2 } from 'lucide-react';
+import { SharedProvider, useSharedContext } from '@/contexts/SharedContext';
 
-const SharedGameDetail = () => {
-  const { token: encodedToken, gameId } = useParams<{ token: string; gameId: string }>();
+const SharedGameDetailContent = () => {
+  const { token, gameId } = useParams<{ token: string; gameId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { sharedClient, isValid, isLoading } = useSharedContext();
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [checkingOwner, setCheckingOwner] = useState(true);
 
@@ -50,7 +51,15 @@ const SharedGameDetail = () => {
     checkOwnerStatus();
   }, [user, gameId]);
 
-  if (!encodedToken || !gameId) {
+  if (isLoading || checkingOwner) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!token || !gameId || !isValid) {
     return (
       <div className="min-h-screen bg-background p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
@@ -65,18 +74,6 @@ const SharedGameDetail = () => {
     return <GameDashboard game={activeGame} onBackToSetup={() => navigate('/')} />;
   }
 
-  if (checkingOwner) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Decode the token from the URL
-  const token = decodeURIComponent(encodedToken);
-  const sharedClient = createSharedClient(token);
-
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
       <GameDetailView
@@ -88,6 +85,14 @@ const SharedGameDetail = () => {
         backLabel="Back to Games History"
       />
     </div>
+  );
+};
+
+const SharedGameDetail = () => {
+  return (
+    <SharedProvider>
+      <SharedGameDetailContent />
+    </SharedProvider>
   );
 };
 

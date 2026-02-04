@@ -9,18 +9,18 @@
 
 import { GamePlayer } from '@/types/poker';
 
-export type PokerPosition = 
-  | 'BTN' 
-  | 'SB' 
-  | 'BB' 
-  | 'UTG' 
-  | 'UTG+1' 
-  | 'UTG+2' 
+export type PokerPosition =
+  | 'BTN'
+  | 'SB'
+  | 'BB'
+  | 'UTG'
+  | 'UTG+1'
+  | 'UTG+2'
   | 'UTG+3'
   | 'MP1'
   | 'MP2'
-  | 'LJ' 
-  | 'HJ' 
+  | 'LJ'
+  | 'HJ'
   | 'CO';
 
 /**
@@ -54,13 +54,13 @@ export const getPlayerPosition = (
 ): PokerPosition => {
   // Calculate clockwise offset from button (0 = BTN, 1 = SB, 2 = BB, etc.)
   const relativePosition = (playerIndex - buttonIndex + totalActivePlayers) % totalActivePlayers;
-  
+
   const positionMap = POSITION_MAPS[totalActivePlayers];
-  
+
   if (positionMap && relativePosition < positionMap.length) {
     return positionMap[relativePosition];
   }
-  
+
   // Fallback for unusual table sizes
   if (relativePosition === 0) return 'BTN';
   if (relativePosition === 1) return 'SB';
@@ -100,22 +100,22 @@ export const getPositionAssignments = (
   seatPositions?: Record<string, number>
 ): Record<string, PokerPosition> => {
   // Sort players by seat position if available
-  const sortedPlayers = seatPositions 
+  const sortedPlayers = seatPositions
     ? sortPlayersBySeat(activePlayers, seatPositions)
     : activePlayers;
-  
+
   const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
-  
+
   if (buttonIndex === -1) {
     throw new Error('Button player not found in active players');
   }
-  
+
   const assignments: Record<string, PokerPosition> = {};
-  
+
   sortedPlayers.forEach((player, index) => {
     assignments[player.player_id] = getPlayerPosition(buttonIndex, index, sortedPlayers.length);
   });
-  
+
   return assignments;
 };
 
@@ -127,10 +127,16 @@ export const getSmallBlindPlayer = (
   buttonPlayerId: string,
   seatPositions?: Record<string, number>
 ): GamePlayer => {
-  const sortedPlayers = seatPositions 
+  const sortedPlayers = seatPositions
     ? sortPlayersBySeat(activePlayers, seatPositions)
     : activePlayers;
   const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
+
+  if (sortedPlayers.length === 2) {
+    // HEADS UP: Button is Small Blind
+    return sortedPlayers[buttonIndex];
+  }
+
   const sbIndex = (buttonIndex + 1) % sortedPlayers.length;
   return sortedPlayers[sbIndex];
 };
@@ -143,10 +149,17 @@ export const getBigBlindPlayer = (
   buttonPlayerId: string,
   seatPositions?: Record<string, number>
 ): GamePlayer => {
-  const sortedPlayers = seatPositions 
+  const sortedPlayers = seatPositions
     ? sortPlayersBySeat(activePlayers, seatPositions)
     : activePlayers;
   const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
+
+  if (sortedPlayers.length === 2) {
+    // HEADS UP: BB is the other player (index 1 if button is 0, index 0 if button is 1) -> effectively button + 1
+    const bbIndex = (buttonIndex + 1) % sortedPlayers.length;
+    return sortedPlayers[bbIndex];
+  }
+
   const bbIndex = (buttonIndex + 2) % sortedPlayers.length;
   return sortedPlayers[bbIndex];
 };
@@ -160,16 +173,16 @@ export const getPositionForPlayer = (
   targetPlayerId: string,
   seatPositions?: Record<string, number>
 ): PokerPosition => {
-  const sortedPlayers = seatPositions 
+  const sortedPlayers = seatPositions
     ? sortPlayersBySeat(activePlayers, seatPositions)
     : activePlayers;
-  
+
   const buttonIndex = sortedPlayers.findIndex(p => p.player_id === buttonPlayerId);
   const playerIndex = sortedPlayers.findIndex(p => p.player_id === targetPlayerId);
-  
+
   if (buttonIndex === -1 || playerIndex === -1) {
     throw new Error('Player not found in active players');
   }
-  
+
   return getPlayerPosition(buttonIndex, playerIndex, sortedPlayers.length);
 };

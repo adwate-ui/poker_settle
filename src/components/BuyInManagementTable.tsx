@@ -105,10 +105,10 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border max-h-[500px] overflow-auto">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>
                 <TableHead className="pl-6">Player</TableHead>
                 <TableHead>Buy-ins</TableHead>

@@ -175,20 +175,20 @@ const NewGame = () => {
   const hasActiveGame = activeGame !== null;
 
   return (
-    <Card className="max-w-4xl mx-auto relative overflow-hidden border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/40 backdrop-blur-xl mb-24 sm:mb-0">
+    <Card className="max-w-4xl mx-auto relative overflow-hidden mb-24 sm:mb-0">
       {hasActiveGame && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
           <Card className="w-full max-w-md border-border shadow-2xl animate-in fade-in zoom-in duration-300">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-full bg-gold-500/10 border border-gold-500/20">
-                  <Play className="h-5 w-5 text-gold-500" />
+                <div className="p-2 rounded-full bg-primary/10 border border-primary/20">
+                  <Play className="h-5 w-5 text-primary" />
                 </div>
-                <CardTitle className="text-2xl font-luxury text-gold-900 dark:text-gold-100">
+                <CardTitle className="text-2xl font-luxury text-foreground">
                   Active Game
                 </CardTitle>
               </div>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-foreground">
                 You have a game in progress. Please complete the current game before starting a new one.
               </CardDescription>
             </CardHeader>
@@ -202,10 +202,10 @@ const NewGame = () => {
       )}
 
       <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">
+        <CardTitle className="text-3xl font-luxury text-foreground uppercase tracking-widest">
           Start New Game
         </CardTitle>
-        <CardDescription className="text-gray-400">
+        <CardDescription className="text-muted-foreground">
           Configure game settings and add players.
         </CardDescription>
       </CardHeader>
@@ -214,7 +214,7 @@ const NewGame = () => {
         <div className="space-y-8">
           {/* Buy-in Section */}
           <div className="space-y-3">
-            <Label htmlFor="buyin" className="text-label text-gold-500/60 ml-1">
+            <Label htmlFor="buyin" className="text-label text-muted-foreground ml-1">
               Initial Buy-in (Rs.)
             </Label>
             <div className="relative group">
@@ -231,9 +231,9 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
-              <div className="absolute right-0 bottom-3 text-gold-500/30 group-focus-within:text-gold-500 transition-colors">
+              <div className="absolute right-0 bottom-3 text-muted-foreground group-focus-within:text-primary transition-colors">
                 <Info className="h-4 w-4" />
               </div>
             </div>
@@ -242,7 +242,7 @@ const NewGame = () => {
           {/* Blinds Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <Label htmlFor="smallblind" className="text-label text-gold-500/60 ml-1">
+              <Label htmlFor="smallblind" className="text-label text-muted-foreground ml-1">
                 Small Blind (Rs.)
               </Label>
               <Input
@@ -262,7 +262,7 @@ const NewGame = () => {
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="bigblind" className="text-label text-gold-500/60 ml-1">
+              <Label htmlFor="bigblind" className="text-label text-muted-foreground ml-1">
                 Big Blind (Rs.)
               </Label>
               <Input
@@ -284,8 +284,8 @@ const NewGame = () => {
           </div>
 
           {/* Add Players Section */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
-            <h3 className="text-label text-gold-400">Add Players</h3>
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-label text-primary">Add Players</h3>
             <PlayerSelector
               allPlayers={players}
               selectedPlayers={gamePlayers}
@@ -299,21 +299,21 @@ const NewGame = () => {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-4 pb-8 px-8 border-t border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2">
+      <CardFooter className="pt-4 pb-8 px-8 border-t border-border bg-accent/5">
         <Button
           onClick={startGame}
           disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-          className="w-full h-14 text-lg font-luxury tracking-[0.2em] uppercase shadow-[0_4px_20px_rgba(212,184,60,0.15)] group relative overflow-hidden active:scale-95 transition-all duration-300"
+          className="w-full h-14 text-lg font-luxury tracking-[0.2em] uppercase shadow-lg group relative overflow-hidden active:scale-95 transition-all duration-300"
           variant="default"
         >
           {loading ? (
             <div className="flex items-center gap-3">
-              <Loader2 className="h-6 w-6 animate-spin text-gold-200" />
+              <Loader2 className="h-6 w-6 animate-spin" />
               <span>Starting Game...</span>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Play className="h-6 w-6 translate-y-[-1px] group-hover:text-gold-200 transition-colors" />
+              <Play className="h-6 w-6 translate-y-[-1px] group-hover:scale-110 transition-transform" />
               <span>Start Game</span>
             </div>
           )}

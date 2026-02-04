@@ -165,18 +165,18 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
-                <h1 className="text-3xl font-luxury text-gold-100 uppercase tracking-widest mb-1">Setup Table</h1>
-                <p className="text-label tracking-[0.3em] text-gold-500/40">Assigning initial seat identifiers</p>
+                <h1 className="text-3xl font-luxury text-foreground uppercase tracking-widest mb-1">Setup Table</h1>
+                <p className="text-label tracking-[0.3em] text-muted-foreground">Assigning initial seat identifiers</p>
               </div>
               <Button
                 variant="ghost"
                 onClick={handleSkipPositionSetup}
-                className="text-label text-white/30 hover:text-white/60 hover:bg-white/5 h-10 px-6 rounded-full border border-white/5"
+                className="text-label text-muted-foreground/60 hover:text-foreground hover:bg-accent/5 h-10 px-6 rounded-full border border-border"
               >
                 Decline Positioning
               </Button>
             </div>
-            <div className="p-8 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl">
+            <div className="p-8 rounded-3xl bg-background/40 backdrop-blur-xl border border-border shadow-2xl">
               <TablePositionEditor
                 players={selectedPlayers}
                 currentPositions={[]}
@@ -189,8 +189,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
-                <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-gold-100 mb-1">Session Initiation</h1>
-                <p className="text-gold-400/60 font-luxury text-xs tracking-[0.3em] uppercase">Executive Game Configuration</p>
+                <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-foreground mb-1">Session Initiation</h1>
+                <p className="text-muted-foreground font-luxury text-xs tracking-[0.3em] uppercase">Executive Game Configuration</p>
               </div>
               <div className="flex items-center gap-4">
                 <UserProfile />
@@ -200,50 +200,50 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 space-y-8">
                 {/* Configuration Card */}
-                <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-                  <CardHeader className="p-6 border-b border-white/5 bg-white/2">
+                <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+                  <CardHeader className="p-6 border-b border-border bg-accent/2">
                     <div className="flex items-center gap-3">
-                      <ShieldCheck className="h-5 w-5 text-gold-500/40" />
-                      <CardTitle className="text-lg font-luxury text-gold-100 uppercase tracking-widest">Game Settings</CardTitle>
+                      <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-lg font-luxury text-foreground uppercase tracking-widest">Game Settings</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-8 space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <Label className="text-label tracking-[0.2em] text-gold-500/60 ml-1">Buy-in Amount (INR)</Label>
+                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (INR)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <span className="text-gold-500 font-numbers text-sm opacity-50">₹</span>
+                            <span className="text-primary font-numbers text-sm opacity-50">₹</span>
                           </div>
                           <Input
                             type="text"
                             value={formatInputDisplay(buyInAmount)}
                             onChange={e => setBuyInAmount(parseIndianNumber(e.target.value))}
-                            className="h-14 pl-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-xl text-gold-100 placeholder:text-white/10"
+                            className="h-14 pl-10 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-numbers text-xl text-foreground placeholder:text-muted-foreground"
                             placeholder="0.00"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <Label className="text-label tracking-[0.2em] text-gold-500/60 ml-1">Add New Player</Label>
+                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Add New Player</Label>
                         <div className="relative group flex gap-3">
                           <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <UserPlus className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
+                              <UserPlus className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </div>
                             <Input
                               value={newPlayerName}
                               onChange={e => setNewPlayerName(e.target.value)}
                               placeholder="Enter Name"
-                              className="h-14 pl-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-wider text-[12px] uppercase text-gold-100 placeholder:text-white/10"
+                              className="h-14 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-wider text-[12px] uppercase text-foreground placeholder:text-muted-foreground"
                               onKeyPress={e => e.key === 'Enter' && addNewPlayer()}
                             />
                           </div>
                           <Button
                             onClick={addNewPlayer}
                             disabled={!newPlayerName.trim()}
-                            className="h-14 w-14 bg-gold-500/10 border border-gold-500/20 hover:bg-gold-500/20 text-gold-500 transition-all"
+                            className="h-14 w-14 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all"
                           >
                             <Plus className="w-5 h-5" />
                           </Button>
@@ -254,14 +254,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     {selectedPlayers.length > 0 && (
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-label tracking-[0.2em] text-gold-500/40">Added Players</p>
-                          <Badge className="bg-gold-500/10 text-gold-500 border border-gold-500/20 font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
+                          <p className="text-label tracking-[0.2em] text-muted-foreground">Added Players</p>
+                          <Badge className="bg-primary/10 text-primary border border-primary/20 font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {selectedPlayers.sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                            <div key={player.id} className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full group hover:border-gold-500/30 transition-all">
-                              <span className="font-luxury text-[11px] uppercase tracking-widest text-gold-100/80">{player.name}</span>
-                              <button onClick={() => removeSelectedPlayer(player.id)} className="text-white/20 hover:text-red-400 transition-colors">
+                            <div key={player.id} className="inline-flex items-center gap-2 px-4 py-2 bg-accent/5 border border-border rounded-full group hover:border-primary/30 transition-all">
+                              <span className="font-luxury text-[11px] uppercase tracking-widest text-foreground/80">{player.name}</span>
+                              <button onClick={() => removeSelectedPlayer(player.id)} className="text-muted-foreground hover:text-red-400 transition-colors">
                                 <X className="h-3 w-3" />
                               </button>
                             </div>
@@ -273,14 +273,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                 </Card>
 
                 {!canCreateGame && (
-                  <Alert className="bg-red-500/10 border-red-500/20 text-red-400 rounded-2xl p-6">
+                  <Alert className="bg-red-500/10 border-red-500/20 text-red-500 rounded-2xl p-6">
                     <div className="flex items-center gap-4">
                       <div className="p-2 bg-red-500/10 rounded-lg">
                         <Info className="h-5 w-5 text-red-500" />
                       </div>
                       <div className="space-y-1">
-                        <AlertTitle className="font-luxury uppercase tracking-widest text-sm">Suspended Sequence Detected</AlertTitle>
-                        <AlertDescription className="text-xs text-white/40 uppercase tracking-widest leading-relaxed">
+                        <AlertTitle className="font-luxury uppercase tracking-widest text-sm text-foreground">Suspended Sequence Detected</AlertTitle>
+                        <AlertDescription className="text-xs text-muted-foreground uppercase tracking-widest leading-relaxed">
                           An incomplete game is active. Finish the current game before starting a new one.
                         </AlertDescription>
                       </div>
@@ -290,8 +290,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   {!canCreateGame && (
-                    <Button onClick={continueGame} className="flex-1 h-14 bg-white/5 border border-white/10 hover:bg-gold-500/10 text-gold-200 font-luxury uppercase tracking-[.2em] text-xs transition-all duration-500 rounded-xl">
-                      <Play className="w-4 h-4 mr-3 text-gold-500 fill-current" />
+                    <Button onClick={continueGame} className="flex-1 h-14 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury uppercase tracking-[.2em] text-xs transition-all duration-500 rounded-xl">
+                      <Play className="w-4 h-4 mr-3 text-primary fill-current" />
                       Resume Active Sequence
                     </Button>
                   )}
@@ -300,7 +300,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame}
                     className={cn(
                       "h-14 font-luxury uppercase tracking-[.2em] text-xs transition-all duration-500 rounded-xl",
-                      !canCreateGame ? 'flex-1 border border-white/5 bg-white/2 text-white/20' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-xl shadow-gold-900/20'
+                      !canCreateGame ? 'flex-1 border border-border bg-accent/2 text-muted-foreground' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-lg shadow-gold-900/20'
                     )}
                   >
                     <Play className="w-4 h-4 mr-3 fill-current" />
@@ -316,13 +316,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
               <div className="lg:col-span-4 space-y-8">
                 {/* Previous Players Sidebar */}
                 {players.length > 0 && (
-                  <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+                  <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
                     <Collapsible open={isPreviousPlayersOpen} onOpenChange={setIsPreviousPlayersOpen}>
                       <CollapsibleTrigger asChild>
-                        <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                        <div className="p-6 border-b border-border bg-accent/2 cursor-pointer flex items-center justify-between group">
                           <div className="flex items-center gap-3">
-                            <Users className="h-4 w-4 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                            <h3 className="text-sm font-luxury text-gold-100/80 uppercase tracking-[0.2em]">Saved Players</h3>
+                            <Users className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-[0.2em]">Saved Players</h3>
                           </div>
                           <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", isPreviousPlayersOpen && "rotate-180")} />
                         </div>
@@ -331,13 +331,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
                           <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <Search className="h-3.5 w-3.5 text-white/20 group-focus-within:text-gold-500 transition-colors" />
+                              <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </div>
                             <Input
                               placeholder="Filter Registry..."
                               value={playerSearchQuery}
                               onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all text-label text-gold-100/60 placeholder:text-white/10"
+                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
                             />
                           </div>
 
@@ -346,12 +346,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               {filteredPlayers.map(player => (
                                 <div
                                   key={player.id}
-                                  className="p-4 bg-white/2 border border-white/5 rounded-xl hover:bg-gold-500/5 hover:border-gold-500/20 transition-all cursor-pointer group flex items-center justify-between"
+                                  className="p-4 bg-accent/2 border border-border rounded-xl hover:bg-accent/5 hover:border-primary/20 transition-all cursor-pointer group flex items-center justify-between"
                                   onClick={() => selectExistingPlayer(player)}
                                 >
                                   <div className="min-w-0">
-                                    <p className="font-luxury text-xs text-gold-100 uppercase tracking-widest truncate">{player.name}</p>
-                                    <p className="font-numbers text-[9px] text-white/20 mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
+                                    <p className="font-luxury text-xs text-foreground uppercase tracking-widest truncate">{player.name}</p>
+                                    <p className="font-numbers text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
                                   </div>
                                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Badge className={cn("px-2 py-0.5 font-numbers text-[9px] border-0", player.total_profit > 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
@@ -376,13 +376,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
                 {/* Game History Sidebar */}
                 {games.length > 0 && (
-                  <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+                  <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
                     <Collapsible open={isGameHistoryOpen} onOpenChange={setIsGameHistoryOpen}>
                       <CollapsibleTrigger asChild>
-                        <div className="p-6 border-b border-white/5 bg-white/2 cursor-pointer flex items-center justify-between group">
+                        <div className="p-6 border-b border-border bg-accent/2 cursor-pointer flex items-center justify-between group">
                           <div className="flex items-center gap-3">
-                            <History className="h-4 w-4 text-gold-500/40 group-hover:text-gold-500 transition-colors" />
-                            <h3 className="text-sm font-luxury text-gold-100/80 uppercase tracking-[0.2em]">Session Ledger</h3>
+                            <History className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-[0.2em]">Session Ledger</h3>
                           </div>
                           <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", isGameHistoryOpen && "rotate-180")} />
                         </div>
@@ -391,13 +391,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
                           <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <Search className="h-3.5 w-3.5 text-white/20 group-focus-within:text-gold-500 transition-colors" />
+                              <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </div>
                             <Input
                               placeholder="Search players..."
                               value={gameSearchQuery}
                               onChange={(e) => setGameSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all text-label text-gold-100/60 placeholder:text-white/10"
+                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
                             />
                           </div>
 
@@ -407,23 +407,23 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                 const totalBuyIns = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
                                 const totalWins = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
                                 return (
-                                  <div key={game.id} className="p-5 bg-white/2 border border-white/5 rounded-2xl space-y-4 hover:border-gold-500/20 transition-all group">
+                                  <div key={game.id} className="p-5 bg-accent/2 border border-border rounded-2xl space-y-4 hover:border-primary/20 transition-all group">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-1">
-                                        <p className="font-luxury text-[11px] text-gold-100/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                        <p className="font-numbers text-[9px] text-gold-500/60 uppercase tracking-tighter">Stake: Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+                                        <p className="font-luxury text-[11px] text-foreground/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                        <p className="font-numbers text-[9px] text-muted-foreground uppercase tracking-tighter">Stake: Rs. {formatIndianNumber(game.buy_in_amount)}</p>
                                       </div>
                                       <button onClick={() => handleDeleteGame(game.id)} className="p-2 hover:bg-red-500/10 rounded-xl text-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </button>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                      <div className="p-2 bg-black/40 rounded-lg text-center">
-                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-white/20 mb-1">Asset Flow</p>
-                                        <p className="text-[11px] font-numbers text-gold-200">₹{formatIndianNumber(totalBuyIns)}</p>
+                                      <div className="p-2 bg-background/40 rounded-lg text-center">
+                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Asset Flow</p>
+                                        <p className="text-[11px] font-numbers text-foreground">₹{formatIndianNumber(totalBuyIns)}</p>
                                       </div>
-                                      <div className="p-2 bg-black/40 rounded-lg text-center">
-                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-white/20 mb-1">Gains</p>
+                                      <div className="p-2 bg-background/40 rounded-lg text-center">
+                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
                                         <p className="text-[11px] font-numbers text-green-400">₹{formatIndianNumber(totalWins)}</p>
                                       </div>
                                     </div>

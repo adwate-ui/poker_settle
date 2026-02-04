@@ -100,7 +100,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                   {history.map((entry) => (
                     <TableRow
                       key={entry.id}
-                      className="h-16 hover:bg-gold-500/5 border-0 transition-colors"
+                      className="h-16 hover:bg-accent/5 border-0 transition-colors"
                     >
                       <TableCell className="pl-8">
                         <div className="flex flex-col gap-0.5">

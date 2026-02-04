@@ -50,22 +50,24 @@ const GameSettingsTab = () => {
           {localChips.map((chip) => (
             <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
               <ProceduralChip
-                value={chip.label}
+                value=""
                 color={COLOR_MAP[chip.color] || chip.color}
                 size="md"
                 className="shadow-md"
               />
               <div className="flex-1">
                 <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
-                <p className="text-sm font-medium text-primary">Rs. {formatIndianNumber(chip.value)}</p>
               </div>
-              <Input
-                type="text"
-                value={chip.value}
-                onChange={(e) => handleValueChange(chip.color, e.target.value)}
-                onBlur={() => updateChipValue(chip.color, chip.value)}
-                className="w-24 text-right tabular-nums"
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground font-medium">Rs.</span>
+                <Input
+                  type="text"
+                  value={formatIndianNumber(chip.value)}
+                  onChange={(e) => handleValueChange(chip.color, e.target.value)}
+                  onBlur={() => updateChipValue(chip.color, chip.value)}
+                  className="w-24 text-right tabular-nums"
+                />
+              </div>
             </div>
           ))}
         </div>

@@ -19,17 +19,48 @@ const SUIT_PATHS = {
   c: "M12 2c-1.657 0-3 1.343-3 3 0 .762.284 1.455.75 1.987C7.306 7.6 5 10 5 13c0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346C10.244 17.545 10 18.682 10 20c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 .762.284 1.455.75 1.987-2.444.613-4.75 3.013-4.75 6.013 0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346-.372.891-.616 2.028-.616 3.346 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3z",
 };
 
+// Add gradients definitions
+const SuitGradientDefs = () => (
+  <svg width="0" height="0" className="absolute w-0 h-0 pointer-events-none">
+    <defs>
+      <linearGradient id="grad-hearts" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#ef4444" />
+        <stop offset="100%" stopColor="#991b1b" />
+      </linearGradient>
+      <linearGradient id="grad-spades" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#374151" />
+        <stop offset="100%" stopColor="#111827" />
+      </linearGradient>
+      <linearGradient id="grad-diamonds" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#3b82f6" />
+        <stop offset="100%" stopColor="#1e40af" />
+      </linearGradient>
+      <linearGradient id="grad-clubs" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#22c55e" />
+        <stop offset="100%" stopColor="#15803d" />
+      </linearGradient>
+      <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#fbbf24" />
+        <stop offset="45%" stopColor="#d97706" />
+        <stop offset="100%" stopColor="#b45309" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, className?: string, fourColor?: boolean }) => {
-  const colors = fourColor ? {
-    h: "#E11D48", // Rose Red
-    s: "#0F172A", // Slate Black
-    d: "#2563EB", // Royal Blue
-    c: "#16A34A", // Green
-  } : {
-    h: "#E11D48",
-    s: "#0F172A",
-    d: "#E11D48",
-    c: "#0F172A",
+  const getFill = (suit: string) => {
+    if (!fourColor) {
+      if (suit === 'd' || suit === 'h') return "url(#grad-hearts)";
+      return "url(#grad-spades)";
+    }
+    switch (suit) {
+      case 'h': return "url(#grad-hearts)";
+      case 's': return "url(#grad-spades)";
+      case 'd': return "url(#grad-diamonds)";
+      case 'c': return "url(#grad-clubs)";
+      default: return "currentColor";
+    }
   };
 
   const path = SUIT_PATHS[suit as keyof typeof SUIT_PATHS];
@@ -38,11 +69,10 @@ const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, cl
   return (
     <svg
       viewBox="0 0 24 24"
-      className={className}
-      fill={colors[suit as keyof typeof colors] || "currentColor"}
+      className={cn(className, "drop-shadow-sm")}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d={path} />
+      <path d={path} fill={getFill(suit)} />
     </svg>
   );
 };
@@ -61,7 +91,7 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     };
 
     return (
-      <div className={cn(className, "rounded-lg shadow-sm overflow-hidden border border-gray-200")}>
+      <div className={cn(className, "rounded-lg shadow-md overflow-hidden border border-gray-400/30")}>
         <CardBackSVG {...sizeMap[size]} design={design} />
       </div>
     );
@@ -107,29 +137,39 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     lg: 'p-2',
   };
 
-  const colors = fourColor ? {
-    h: "text-[#E11D48]",
-    s: "text-[#0F172A]",
-    d: "text-[#2563EB]",
-    c: "text-[#16A34A]",
-  } : {
-    h: "text-[#E11D48]",
-    s: "text-[#0F172A]",
-    d: "text-[#E11D48]",
-    c: "text-[#0F172A]",
+  const getRankColor = (s: string) => {
+    if (!fourColor) {
+      if (s === 'd' || s === 'h') return "text-red-700";
+      return "text-slate-900";
+    }
+    switch (s) {
+      case 'h': return "text-red-700";
+      case 's': return "text-slate-900";
+      case 'd': return "text-blue-700";
+      case 'c': return "text-green-700";
+      default: return "text-gray-900";
+    }
   };
 
-  const rankColor = colors[suit as keyof typeof colors] || "text-gray-900";
+  const rankColor = getRankColor(suit);
 
   return (
     <div className={cn(
       containerSizes[size],
       className,
-      "relative bg-white rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.15)] border border-gray-200 select-none overflow-hidden"
+      "relative rounded-[8px] select-none overflow-hidden",
+      "bg-gradient-to-br from-white to-[#f8f8f8]", // Luxury paper feel
+      "shadow-[0_2px_5px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.1)]"
     )}>
+      {/* Required Definitions */}
+      <SuitGradientDefs />
+
+      {/* Inner Pinstripe Border - Premium Print Detail */}
+      <div className="absolute inset-[3px] border border-gray-200/60 rounded-[5px] pointer-events-none" />
+
       {/* Top-left corner index */}
       <div className={cn("absolute top-0 left-0 flex flex-col items-center leading-none z-10", cornerPadding[size])}>
-        <div className={cn(rankSizes[size], "font-bold tracking-tighter", rankColor)}>
+        <div className={cn(rankSizes[size], "font-luxury font-bold tracking-tighter", rankColor)}>
           {rank}
         </div>
         <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
@@ -137,52 +177,50 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
 
       {/* Main Vision Area */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {isAce ? (
-          <SuitIcon suit={suit} fourColor={fourColor} className={cn(
-            size === 'lg' ? 'w-14 h-14' :
-              size === 'md' ? 'w-11 h-11' :
-                size === 'sm' ? 'w-8 h-8' : 'w-4 h-4'
-          )} />
-        ) : isFaceCard ? (
-          <div className={cn(
-            "rounded border border-gray-100 bg-gray-50/50 flex items-center justify-center relative",
-            size === 'lg' ? 'w-16 h-24' :
-              size === 'md' ? 'w-12 h-18' :
-                size === 'sm' ? 'w-8 h-12' : 'w-4 h-6'
-          )}>
-            <Crown className={cn("opacity-20", rankColor,
-              size === 'lg' ? 'w-10 h-10' :
-                size === 'md' ? 'w-8 h-8' : 'w-4 h-4'
+        {isFaceCard ? (
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Royal Frame and Watermark */}
+            <div className={cn(
+              "absolute border-2 border-[url(#grad-gold)] rounded-full opacity-30",
+              size === 'lg' ? 'w-16 h-16' : size === 'md' ? 'w-14 h-14' : 'w-8 h-8 hidden'
+            )} style={{ borderColor: 'url(#grad-gold)' }} />
+
+            <span className={cn(
+              "absolute font-luxury font-black opacity-[0.03] scale-[2.5]",
+              rankColor
+            )}>
+              {rank}
+            </span>
+
+            <SuitIcon suit={suit} fourColor={fourColor} className={cn(
+              "drop-shadow-md",
+              size === 'lg' ? 'w-12 h-12' :
+                size === 'md' ? 'w-10 h-10' :
+                  size === 'sm' ? 'w-6 h-6' : 'w-4 h-4'
             )} />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={cn("font-bold", rankColor, rankSizes[size])}>{rank}</span>
-            </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center">
-            <SuitIcon suit={suit} fourColor={fourColor} className={cn(
-              "opacity-10",
-              size === 'lg' ? 'w-14 h-14' :
-                size === 'md' ? 'w-11 h-11' :
-                  size === 'sm' ? 'w-8 h-8' : 'w-4 h-4'
-            )} />
-            <div className={cn("absolute font-bold opacity-30", rankColor, rankSizes[size])}>
-              {rank}
-            </div>
-          </div>
+          <SuitIcon suit={suit} fourColor={fourColor} className={cn(
+            "drop-shadow-md",
+            size === 'lg' ? 'w-14 h-14' :
+              size === 'md' ? 'w-12 h-12' :
+                size === 'sm' ? 'w-8 h-8' : 'w-5 h-5',
+            // Small cards need center suit hidden or smaller logic if desirable, 
+            // but for single massive icon style this works well
+          )} />
         )}
       </div>
 
       {/* Bottom-right corner index (rotated) */}
       <div className={cn("absolute bottom-0 right-0 flex flex-col items-center leading-none z-10 rotate-180", cornerPadding[size])}>
-        <div className={cn(rankSizes[size], "font-bold tracking-tighter", rankColor)}>
+        <div className={cn(rankSizes[size], "font-luxury font-bold tracking-tighter", rankColor)}>
           {rank}
         </div>
         <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
       </div>
 
-      {/* Subtle shine / highlight */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+      {/* Shine/Gloss for high-end finish */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 pointer-events-none" />
     </div>
   );
 });

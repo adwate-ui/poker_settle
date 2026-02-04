@@ -35,12 +35,12 @@ export const ProceduralChip = ({
             )}
             style={{
                 backgroundColor: color,
-                // 3D thickness effect
+                // 3D thickness effect - slightly reduced for tighter stacking
                 boxShadow: `
-          0 ${depth * 2}px 0 rgba(0,0,0,0.3),
-          0 ${depth * 3}px 10px rgba(0,0,0,0.4),
-          inset 0 -2px 5px rgba(0,0,0,0.2),
-          inset 0 2px 5px rgba(255,255,255,0.3)
+          0 ${depth}px 0 rgba(0,0,0,0.3),
+          0 ${depth + 1}px 2px rgba(0,0,0,0.2),
+          inset 0 -1px 3px rgba(0,0,0,0.2),
+          inset 0 1px 3px rgba(255,255,255,0.3)
         `,
                 // Edge spots pattern using multiple background layers
                 backgroundImage: `
