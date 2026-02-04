@@ -90,10 +90,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             if (!user) throw new Error("You must be logged in to scan chips.");
 
             const { data: profile } = await supabase
-                .from('profiles')
+                .from('user_api_keys')
                 .select('gemini_api_key')
-                .eq('id', user.id)
-                .single();
+                .eq('user_id', user.id)
+                .maybeSingle();
 
             // @ts-ignore
             const apiKey = profile?.gemini_api_key;
@@ -213,15 +213,15 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
             </Button>
 
             <Dialog open={opened} onOpenChange={setOpened}>
-                <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[95vw] sm:max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-                    <DialogHeader className="p-6 border-b border-white/5 bg-white/2">
+                <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                    <DialogHeader className="p-6 border-b">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
-                                <ScanEye className="w-5 h-5 text-gold-500" />
+                            <div className="p-2 rounded-lg bg-muted border">
+                                <ScanEye className="w-5 h-5 text-primary" />
                             </div>
                             <div>
-                                <DialogTitle className="text-xl font-luxury text-gold-100">AI Chip Auditor</DialogTitle>
-                                <DialogDescription className="text-[10px] uppercase tracking-widest text-gold-500/40 font-luxury">Gemini 3.0 High-Fidelity Recognition</DialogDescription>
+                                <DialogTitle className="text-xl">AI Chip Auditor</DialogTitle>
+                                <DialogDescription className="text-xs text-muted-foreground uppercase tracking-widest">Gemini 3.0 High-Fidelity Recognition</DialogDescription>
                             </div>
                         </div>
                     </DialogHeader>
@@ -259,11 +259,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                             accept="image/*"
                                             onChange={handleFileChange}
                                         />
-                                        <Button onClick={() => camInputRef.current?.click()} className="flex-1 h-14 bg-white/5 hover:bg-gold-500/10 text-gold-100 font-luxury uppercase tracking-widest text-xs border border-white/10">
-                                            <Camera className="mr-2 h-4 w-4 text-gold-500" />
+                                        <Button onClick={() => camInputRef.current?.click()} className="flex-1 h-14 bg-muted hover:bg-muted/80 text-foreground text-xs border">
+                                            <Camera className="mr-2 h-4 w-4 text-primary" />
                                             Open Lens
                                         </Button>
-                                        <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1 h-14 bg-transparent border-white/5 hover:bg-white/5 text-white/40 font-luxury uppercase tracking-widest text-xs">
+                                        <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1 h-14 text-muted-foreground uppercase tracking-widest text-xs">
                                             <Upload className="mr-2 h-4 w-4" />
                                             Import Media
                                         </Button>
@@ -299,10 +299,10 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                             </div>
                                         )}
 
-                                        <div className="bg-white/2 border border-white/5 rounded-xl p-6 shadow-inner flex flex-col gap-6 flex-1">
-                                            <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                                                <span className="text-[10px] uppercase font-luxury tracking-[0.3em] text-gold-500/40">Audit Findings</span>
-                                                <Badge className="bg-gold-500/20 text-gold-500 border-0 font-luxury uppercase text-[9px] tracking-widest">{results.length} Stacks Detected</Badge>
+                                        <div className="bg-muted/30 border rounded-xl p-6 shadow-inner flex flex-col gap-6 flex-1">
+                                            <div className="flex items-center justify-between pb-4 border-b">
+                                                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Audit Findings</span>
+                                                <Badge variant="outline" className="text-primary border-primary/20 uppercase text-[9px] tracking-widest">{results.length} Stacks Detected</Badge>
                                             </div>
 
                                             <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
@@ -333,19 +333,19 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                 )}
                                             </div>
 
-                                            <div className="mt-auto pt-6 border-t border-white/5">
+                                            <div className="mt-auto pt-6 border-t">
                                                 <div className="flex items-baseline justify-between mb-6">
-                                                    <span className="text-[10px] uppercase font-luxury tracking-[0.3em] text-gold-500/40">Collective Value</span>
-                                                    <span className="text-3xl font-numbers text-transparent bg-clip-text bg-gradient-to-r from-gold-100 to-gold-500">
+                                                    <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Collective Value</span>
+                                                    <span className="text-3xl font-numbers text-foreground">
                                                         Rs. {formatIndianNumber(totalValue)}
                                                     </span>
                                                 </div>
                                                 <div className="flex gap-4">
-                                                    <Button variant="ghost" onClick={reset} className="flex-1 h-12 bg-white/5 border border-white/5 hover:bg-white/10 text-gold-100/60 text-label">
+                                                    <Button variant="ghost" onClick={reset} className="flex-1 h-12 bg-muted text-muted-foreground text-label">
                                                         <RefreshCw className="mr-2 h-4 w-4" />
                                                         Reset Audit
                                                     </Button>
-                                                    <Button onClick={handleConfirm} disabled={totalValue === 0 || processing} className="flex-1 h-12 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black text-label border-0 shadow-lg shadow-gold-900/10">
+                                                    <Button onClick={handleConfirm} disabled={totalValue === 0 || processing} className="flex-1 h-12 bg-primary text-primary-foreground text-label">
                                                         <Check className="mr-2 h-4 w-4" />
                                                         Authorize
                                                     </Button>

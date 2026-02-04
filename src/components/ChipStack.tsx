@@ -1,8 +1,23 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChips } from '@/contexts/ChipContext';
-import { PokerChipSVG } from './PokerAssets';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Import chip assets directly
+import redChip from '@/assets/chip-red-20.png';
+import blackChip from '@/assets/chip-black-100.png';
+import blueChip from '@/assets/chip-blue-500.png';
+import yellowChip from '@/assets/chip-yellow-1000.png';
+import greenChip from '@/assets/chip-green-5000.png';
+
+const CHIP_ASSETS: Record<string, string> = {
+  red: redChip,
+  black: blackChip,
+  blue: blueChip,
+  yellow: yellowChip,
+  green: greenChip,
+  white: blackChip, // Fallback
+};
 
 interface ChipStackProps {
   amount: number;
@@ -15,106 +30,71 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
 
   if (amount === 0) return null;
 
-  // Configuration for stack rendering
   const stackConfig = {
-    sm: { chipHeight: 2, scale: 0.8, text: 'text-xs', width: 24, height: 24 },
-    md: { chipHeight: 4, scale: 1, text: 'text-sm', width: 32, height: 32 },
-    lg: { chipHeight: 6, scale: 1.25, text: 'text-base', width: 40, height: 40 }
+    sm: { chipHeight: 2, width: 24, height: 24, fontSize: 'text-xs' },
+    md: { chipHeight: 4, width: 32, height: 32, fontSize: 'text-sm' },
+    lg: { chipHeight: 6, width: 40, height: 40, fontSize: 'text-base' }
   };
 
   const config = stackConfig[size];
 
-  // Calculate chip distribution
   const getChipDistribution = (total: number) => {
     const sortedDenominations = [...CHIP_DENOMINATIONS].sort((a, b) => b.value - a.value);
-
     let remaining = total;
-    const chips: { color: string; count: number; value: number; label: string }[] = [];
+    const chips: { color: string; count: number; value: number }[] = [];
 
     sortedDenominations.forEach(denom => {
       if (denom.value <= 0) return;
-
       const count = Math.floor(remaining / denom.value);
       if (count > 0) {
-        chips.push({ color: denom.color, count, value: denom.value, label: denom.label });
+        chips.push({ color: denom.color, count, value: denom.value });
         remaining -= count * denom.value;
       }
     });
-
-    return chips.reverse(); // Stack from bottom up
+    return chips.reverse();
   };
 
   const distribution = getChipDistribution(amount);
-  const totalChips = distribution.reduce((acc, curr) => acc + curr.count, 0);
   const maxVisualChips = 20;
 
-  // Flatten chip array for rendering individual chips
   const renderChips = () => {
-    let chipsToRender: { color: string, index: number, label: string, groupId: number }[] = [];
-    distribution.forEach((group, gIdx) => {
+    let chipsToRender: { color: string, index: number }[] = [];
+    distribution.forEach((group) => {
       for (let i = 0; i < group.count; i++) {
-        chipsToRender.push({
-          color: group.color,
-          index: i,
-          label: group.label,
-          groupId: gIdx
-        });
+        chipsToRender.push({ color: group.color, index: i });
       }
     });
 
-    // Cap rendering
     if (chipsToRender.length > maxVisualChips) {
       chipsToRender = chipsToRender.slice(0, maxVisualChips);
     }
 
-    const containerVariants = {
-      animate: {
-        transition: {
-          staggerChildren: 0.03, // Trailing effect
-        }
-      }
-    };
-
-    const chipVariants = {
-      initial: { scale: 0, y: -20, opacity: 0 },
-      animate: {
-        scale: 1,
-        y: 0,
-        opacity: 1,
-        transition: {
-          type: "spring" as const,
-          stiffness: 200,
-          damping: 20,
-          mass: 1.5
-        }
-      },
-      exit: { scale: 0, opacity: 0 }
-    };
-
     return (
       <AnimatePresence mode="popLayout">
         <motion.div
-          variants={containerVariants}
           initial="initial"
           animate="animate"
           className="relative w-full h-full"
         >
           {chipsToRender.map((chip, idx) => (
             <motion.div
-              key={`${chip.label}-${chip.index}`}
-              variants={chipVariants}
-              layout
-              className="absolute drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] filter brightness-95"
+              key={`${chip.color}-${idx}`}
+              initial={{ scale: 0, y: -20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              className="absolute drop-shadow-lg"
               style={{
                 bottom: `${idx * config.chipHeight}px`,
                 zIndex: idx,
-                transform: `translateY(${idx * -1}px)`,
+                left: 0,
+                right: 0,
+                margin: 'auto',
+                width: `${config.width}px`,
               }}
             >
-              <PokerChipSVG
-                value={chip.label}
-                color={chip.color}
-                size={config.width}
+              <img
+                src={CHIP_ASSETS[chip.color] || blackChip}
+                alt={`${chip.color} chip`}
+                className="w-full h-auto object-contain"
               />
             </motion.div>
           ))}
@@ -124,11 +104,11 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
   };
 
   return (
-    <div className={cn("flex flex-col items-center gap-1", size === 'lg' ? 'min-w-[50px]' : 'min-w-[40px]')}>
+    <div className={cn("flex flex-col items-center gap-2", size === 'lg' ? 'min-w-[50px]' : 'min-w-[40px]')}>
       <div
         className="relative flex items-end justify-center"
         style={{
-          height: `${Math.min(totalChips, maxVisualChips) * (config.chipHeight + 1) + config.height}px`,
+          height: `${Math.min(distribution.reduce((acc, c) => acc + c.count, 0), maxVisualChips) * (config.chipHeight + 1) + config.height}px`,
           width: `${config.width}px`
         }}
       >
@@ -136,8 +116,8 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
       </div>
 
       {showAmount && (
-        <span className={cn("font-bold tabular-nums text-foreground/90 whitespace-nowrap", config.text)}>
-          {amount.toLocaleString()}
+        <span className={cn("font-medium tabular-nums text-foreground", config.fontSize)}>
+          Rs. {amount.toLocaleString()}
         </span>
       )}
     </div>

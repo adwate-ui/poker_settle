@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Loader2, Save, X, Coins, User } from 'lucide-react';
+import { Edit, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatIndianNumber, cn } from '@/lib/utils';
 import { GamePlayer } from "@/types/poker";
@@ -87,106 +87,63 @@ export const FinalStackManagement = ({
 
   return (
     <>
-      <div className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-gold-900/10 dark:border-white/10 shadow-2xl rounded-xl overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <Table>
-            <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-gold-900/10 dark:border-white/10">
-              <TableRow className="hover:bg-transparent border-0 h-12">
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 pl-8 align-middle w-full">Player</TableHead>
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 align-middle">Final Stack</TableHead>
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 text-right pr-8 align-middle">Actions</TableHead>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-6 w-[200px]">Player</TableHead>
+              <TableHead>Final Stack</TableHead>
+              <TableHead className="text-right pr-6">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedPlayers.map((gamePlayer) => (
+              <TableRow key={gamePlayer.id}>
+                <TableCell className="pl-6 font-medium">
+                  {getDisplayName(gamePlayer.player.name, isMobile)}
+                </TableCell>
+                <TableCell>
+                  Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}
+                </TableCell>
+                <TableCell className="text-right pr-6">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      onClick={() => handleStartEdit(gamePlayer)}
+                      variant="ghost"
+                      size="icon"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <ChipScanner
+                      onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
+                    />
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-white/5">
-              {sortedPlayers.map((gamePlayer) => (
-                <TableRow
-                  key={gamePlayer.id}
-                  className="h-16 hover:bg-gold-500/5 border-0 transition-colors group"
-                >
-                  <TableCell className="pl-8">
-                    <div className="flex items-center gap-3">
-                      <User className="h-3.5 w-3.5 text-gold-500/30 group-hover:text-gold-500/60 transition-colors" />
-                      <span className="font-luxury text-sm text-gold-100 uppercase tracking-widest">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-numbers text-base text-gold-200/80">Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}</span>
-                  </TableCell>
-                  <TableCell className="text-right pr-8">
-                    <div className="flex items-center justify-end gap-3">
-                      <Button
-                        onClick={() => handleStartEdit(gamePlayer)}
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 text-gold-500/40 hover:text-gold-500 hover:bg-gold-500/10 rounded-lg transition-all border border-transparent hover:border-gold-500/20"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <ChipScanner
-                        onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
-      <Dialog open={opened} onOpenChange={(open) => {
-        if (!open) {
-          setOpened(false);
-          setSelectedPlayerId('');
-          setEditValue('');
-        }
-      }}>
+      <Dialog open={opened} onOpenChange={(open) => { if (!open) setOpened(false); }}>
         <DialogContent>
           <DialogHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
-                <Coins className="w-5 h-5 text-gold-500" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Edit Final Stack</DialogTitle>
-                <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury">Player: {selectedPlayer?.player.name}</DialogDescription>
-              </div>
-            </div>
+            <DialogTitle>Edit Final Stack</DialogTitle>
+            <DialogDescription>Player: {selectedPlayer?.player.name}</DialogDescription>
           </DialogHeader>
-
-          <div className="py-8 space-y-6">
-            <div className="space-y-3">
-              <Label className="text-label tracking-[0.3em] text-gold-500/60 ml-1">Final Stack (INR)</Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-gold-500 font-numbers text-sm opacity-50">₹</span>
-                </div>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="h-14 pl-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-xl text-gold-100 placeholder:text-white/10"
-                />
-              </div>
-            </div>
+          <div className="py-4">
+            <Label>Final Stack (INR)</Label>
+            <Input
+              type="number"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              className="mt-2"
+            />
           </div>
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setOpened(false)}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveEdit}
-              disabled={isUpdating || editValue === ''}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black border-0 shadow-lg shadow-gold-900/10 rounded-lg flex-1"
-            >
-              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Save
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpened(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit} disabled={isUpdating}>
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save
             </Button>
           </DialogFooter>
         </DialogContent>
