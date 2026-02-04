@@ -21,7 +21,11 @@
 
   /* Universal Glass Utility */
   .glass-panel {
-    @apply bg-background/60 backdrop-blur-xl border border-border/50 shadow-xl;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 shadow-xl;
+  }
+
+  .felt-gradient {
+    @apply bg-gradient-to-br from-secondary/30 to-background/30;
   }
 
   /* Legacy/Support classes */
@@ -37,6 +41,14 @@
   .font-numbers {
     @apply font-body;
     font-feature-settings: "tnum";
+  }
+
+  .text-label {
+    @apply font-luxury uppercase tracking-widest text-[10px] leading-none;
+  }
+
+  .text-value {
+    @apply font-numbers tracking-tight;
   }
 }
 

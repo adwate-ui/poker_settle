@@ -62,15 +62,15 @@ const HandReplay = ({
   const [visibleHoleCards, setVisibleHoleCards] = useState<Record<string, string>>({});
   const [playerStacks] = useState<Record<string, number>>({});
   const [potSizeHistory, setPotSizeHistory] = useState<Array<{ actionIndex: number; potSize: number; street: string }>>([]);
-  
+
   // Extract hole cards from actions and identify hero
   const playerHoleCards: Record<string, string> = {};
   let heroPlayerId: string | null = null;
-  
+
   interface ActionWithHero extends HandAction {
     is_hero?: boolean;
   }
-  
+
   actions.forEach(action => {
     if (action.hole_cards && !playerHoleCards[action.player_id]) {
       playerHoleCards[action.player_id] = action.hole_cards;
@@ -110,31 +110,31 @@ const HandReplay = ({
     const streetActions = actions.slice(0, upToActionIndex).filter(
       a => a.street_type === currentStreetType
     );
-    
+
     // Get players still in hand (not folded)
     const activePlayers = Object.keys(streetBets).filter(
       pid => !folded.includes(pid)
     );
-    
+
     if (activePlayers.length <= 1) return true; // Only one or zero players left
-    
+
     // All active players must have equal bets (or 0 if no betting occurred)
     const bets = activePlayers.map(pid => streetBets[pid] || 0);
     const maxBet = Math.max(...bets);
     const allEqual = bets.every(bet => bet === maxBet);
-    
+
     if (!allEqual) return false;
-    
+
     // Ensure all active players have acted at least once on this street
     const playersWhoActed = new Set(streetActions.map(a => a.player_id));
     const allActed = activePlayers.every(pid => playersWhoActed.has(pid));
-    
+
     return allActed;
   };
 
   // Process action and update state
   const processAction = (
-    actionIndex: number, 
+    actionIndex: number,
     skipAnimation: boolean = false,
     localStreetBets?: Record<string, number>,
     localPot?: { value: number },
@@ -144,13 +144,13 @@ const HandReplay = ({
     if (actionIndex >= actions.length) return;
 
     const action = actions[actionIndex];
-    
+
     // Use local tracking if provided, otherwise use React state
     const currentBets = localStreetBets || streetPlayerBets;
     const currentPotValue = localPot ? localPot.value : potSize;
     const currentFoldedList = localFolded || foldedPlayers;
     const trackingStreet = localCurrentStreet ? localCurrentStreet.value : currentStreet;
-    
+
     // Check if street changed
     if (action.street_type !== trackingStreet) {
       // BUG B FIX: Validate betting round completion before transitioning
@@ -160,12 +160,12 @@ const HandReplay = ({
         trackingStreet,
         actionIndex
       );
-      
+
       if (!wasComplete && actionIndex > 0) {
         console.warn(
           `⚠️ Street transition at action ${actionIndex} but betting may not be complete!`,
-          { 
-            currentStreet: trackingStreet, 
+          {
+            currentStreet: trackingStreet,
             nextStreet: action.street_type,
             streetBets: currentBets,
             folded: currentFoldedList
@@ -173,7 +173,7 @@ const HandReplay = ({
         );
       }
       const streetCard = streetCards.find(sc => sc.street_type === action.street_type);
-      
+
       if (skipAnimation) {
         // Sweep all uncommitted chips to pot
         const uncommittedAmount = Object.values(currentBets).reduce((sum, bet) => sum + bet, 0);
@@ -182,7 +182,7 @@ const HandReplay = ({
         }
         setPotSize(prev => prev + uncommittedAmount);
         setUncommittedPot(0);
-        
+
         // Clear street bets when moving to new street
         if (localStreetBets) {
           Object.keys(localStreetBets).forEach(key => localStreetBets[key] = 0);
@@ -192,13 +192,13 @@ const HandReplay = ({
         }
         setStreetPlayerBets({});
         setCurrentStreet(action.street_type as 'Preflop' | 'Flop' | 'Turn' | 'River');
-        
+
         // Add community cards for the new street (check if cards from this street are already shown)
         if (streetCard) {
           const streetCardsList: string[] = streetCard.cards_notation.match(/.{1,2}/g) || [];
           const existingCardsList: string[] = communityCards.match(/.{1,2}/g) || [];
           const hasAllCards = streetCardsList.every(card => existingCardsList.includes(card));
-          
+
           if (!hasAllCards) {
             setCommunityCards(prev => {
               const prevCards: string[] = prev.match(/.{1,2}/g) || [];
@@ -212,20 +212,20 @@ const HandReplay = ({
         const uncommittedAmount = Object.values(streetPlayerBets).reduce((sum, bet) => sum + bet, 0);
         setPotSize(prev => prev + uncommittedAmount);
         setUncommittedPot(0);
-        
+
         // Animate chips moving to pot
         setAnimateChipsToPot(true);
         setTimeout(() => {
           // Clear street bets display
           setStreetPlayerBets({});
           setCurrentStreet(action.street_type as 'Preflop' | 'Flop' | 'Turn' | 'River');
-          
+
           // Add community cards for the new street
           if (streetCard) {
             const streetCardsList: string[] = streetCard.cards_notation.match(/.{1,2}/g) || [];
             const existingCardsList: string[] = communityCards.match(/.{1,2}/g) || [];
             const hasAllCards = streetCardsList.every(card => existingCardsList.includes(card));
-            
+
             if (!hasAllCards) {
               setCommunityCards(prev => {
                 const prevCards: string[] = prev.match(/.{1,2}/g) || [];
@@ -243,12 +243,12 @@ const HandReplay = ({
     // BUG A FIX: Use local tracking to avoid stale state during rapid replay
     const currentPlayerBet = currentBets[action.player_id] || 0;
     const additionalBet = action.bet_size - currentPlayerBet;
-    
+
     // Update local tracking if provided
     if (localStreetBets && action.bet_size > 0) {
       localStreetBets[action.player_id] = action.bet_size;
     }
-    
+
     // Update React state for UI display
     if (action.bet_size > 0) {
       setStreetPlayerBets(prev => ({
@@ -256,18 +256,18 @@ const HandReplay = ({
         [action.player_id]: action.bet_size,
       }));
     }
-    
+
     // Track uncommitted pot (chips in front of players, not yet swept to pot)
     if (additionalBet > 0) {
       setUncommittedPot(prev => prev + additionalBet);
-      
+
       // Track for local state if provided (for fast replay)
       if (localPot) {
         // For local tracking during fast replay, we still accumulate to help with calculations
         // but the UI won't show this as pot until street changes
         localPot.value += additionalBet;
       }
-      
+
       // Log bet tracking
       if (action.street_type === 'Turn' || action.street_type === 'River') {
         console.log(`[${action.street_type}] Action ${actionIndex}: ${action.action_type} by ${action.player_id.slice(0, 8)}... - Bet: ${action.bet_size}, Additional: ${additionalBet}, Uncommitted: ${uncommittedPot + additionalBet}`);
@@ -277,7 +277,7 @@ const HandReplay = ({
     // Handle fold - muck cards and add to folded list
     if (action.action_type === 'Fold') {
       const foldedPlayerBet = currentBets[action.player_id] || 0;
-      
+
       // Animate folded player's street bets moving to pot
       if (foldedPlayerBet > 0 && !skipAnimation) {
         // Trigger chip animation for this specific player
@@ -288,7 +288,7 @@ const HandReplay = ({
           setAnimatingPlayerId(null);
         }, 500);
       }
-      
+
       // Move folded player's bets to pot immediately
       if (foldedPlayerBet > 0) {
         if (localPot) {
@@ -297,7 +297,7 @@ const HandReplay = ({
         setPotSize(prev => prev + foldedPlayerBet);
         setUncommittedPot(prev => prev - foldedPlayerBet);
       }
-      
+
       if (localFolded) {
         localFolded.push(action.player_id);
       }
@@ -310,7 +310,7 @@ const HandReplay = ({
       } else {
         setMuckedPlayers(prev => [...prev, action.player_id]);
       }
-      
+
       // Remove folded player's street bets from display
       if (localStreetBets) {
         delete localStreetBets[action.player_id];
@@ -329,7 +329,7 @@ const HandReplay = ({
       // Calculate expected final pot from initial pot + all action contributions
       const calculatedFinalPot = potSize;
       console.log(`[Pot Validation] Replay Final Pot: Rs.${calculatedFinalPot}, Actions Processed: ${currentActionIndex}/${actions.length}`);
-      
+
       // Log Turn and River action counts
       const turnActions = actions.filter(a => a.street_type === 'Turn');
       const riverActions = actions.filter(a => a.street_type === 'River');
@@ -449,13 +449,13 @@ const HandReplay = ({
       if (heroPlayerId && playerHoleCards[heroPlayerId]) {
         setVisibleHoleCards(prev => ({ ...prev, [heroPlayerId]: playerHoleCards[heroPlayerId] }));
       }
-      
+
       // BUG A FIX: Use local tracking during rapid replay to avoid stale state
       const localBets: Record<string, number> = {};
       const localPot = { value: 0 }; // Start at 0, blinds are in actions
       const localFolded: string[] = [];
       const localStreet = { value: 'Preflop' };
-      
+
       // Replay actions without animation using local state tracking
       for (let i = 0; i < targetIndex; i++) {
         processAction(i, true, localBets, localPot, localFolded, localStreet);
@@ -508,8 +508,8 @@ const HandReplay = ({
     let priorBet = 0;
     for (let i = 0; i < currentActionIndex - 1; i++) {
       const prevAction = actions[i];
-      if (prevAction.street_type === action.street_type && 
-          prevAction.player_id === action.player_id) {
+      if (prevAction.street_type === action.street_type &&
+        prevAction.player_id === action.player_id) {
         priorBet = prevAction.bet_size;
       }
     }
@@ -523,7 +523,7 @@ const HandReplay = ({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Poker Table - Show community cards in separate section below */}
-      <div className="bg-gradient-to-br from-green-900/30 to-green-800/30 p-4 rounded-2xl border-2 border-green-700/40 shadow-2xl">
+      <div className="glass-panel felt-gradient shadow-2xl p-4 rounded-2xl">
         <PokerTableView
           positions={positions}
           buttonPlayerId={buttonPlayerId}
@@ -546,7 +546,7 @@ const HandReplay = ({
 
       {/* Community Cards - Separate section with responsive sizes */}
       {communityCards && (
-        <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 sm:p-4 rounded-xl border border-green-700/30">
+        <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-gold-900/10 dark:border-white/10">
           <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
             {/* Extract and display cards by street */}
             {(() => {
@@ -554,13 +554,13 @@ const HandReplay = ({
               const flopCards = allCards.slice(0, 3);
               const turnCard = allCards[3];
               const riverCard = allCards[4];
-              
+
               return (
                 <>
                   {/* Flop */}
                   {flopCards.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-semibold text-muted-foreground">FLOP</span>
+                      <span className="text-label text-gold-900/40 dark:text-gold-500/40">Flop</span>
                       <div className="flex gap-0.5">
                         {flopCards.map((card, idx) => (
                           <React.Fragment key={`flop-${idx}`}>
@@ -571,13 +571,13 @@ const HandReplay = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Turn */}
                   {turnCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
+                      <div className="h-10 sm:h-12 w-px bg-gold-900/10 dark:bg-white/10"></div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-semibold text-muted-foreground">TURN</span>
+                        <span className="text-label text-gold-900/40 dark:text-gold-500/40">Turn</span>
                         <>
                           <PokerCard card={turnCard} size="sm" className="sm:hidden" />
                           <PokerCard card={turnCard} size="md" className="hidden sm:block" />
@@ -585,13 +585,13 @@ const HandReplay = ({
                       </div>
                     </>
                   )}
-                  
+
                   {/* River */}
                   {riverCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-green-700/50"></div>
+                      <div className="h-10 sm:h-12 w-px bg-gold-900/10 dark:bg-white/10"></div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-semibold text-muted-foreground">RIVER</span>
+                        <span className="text-label text-gold-900/40 dark:text-gold-500/40">River</span>
                         <>
                           <PokerCard card={riverCard} size="sm" className="sm:hidden" />
                           <PokerCard card={riverCard} size="md" className="hidden sm:block" />
@@ -608,75 +608,75 @@ const HandReplay = ({
 
       {/* Current Action Display */}
       {currentAction && (
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-lg animate-fade-in">
+        <Card className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-gold-900/10 dark:border-white/10 shadow-lg animate-fade-in">
           <CardContent className="p-3 sm:p-5">
             {/* Mobile: Single row layout */}
             <div className="md:hidden">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="p-1.5 bg-primary/20 rounded-lg flex-shrink-0">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <div className="p-1.5 bg-gold-500/10 rounded-lg flex-shrink-0">
+                    <div className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></div>
                   </div>
-                  <div className="font-bold text-sm truncate">
+                  <div className="font-luxury uppercase tracking-widest text-sm text-gold-900 dark:text-gold-100 truncate">
                     {playerNames[currentAction.player_id]}
                   </div>
                   {currentAction.position && (
-                    <Badge className="text-[10px] px-1.5 py-0 bg-primary/30 text-primary-foreground border-primary/40 flex-shrink-0">
+                    <Badge className="text-[10px] px-1.5 py-0 bg-gold-500/20 text-gold-600 dark:text-gold-400 border-gold-500/30 flex-shrink-0">
                       {currentAction.position.length > 3 ? currentAction.position.substring(0, 3) : currentAction.position}
                     </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5">
+                  <Badge variant="outline" className="text-[10px] font-luxury uppercase tracking-widest px-2 py-0.5 border-gold-500/20 text-gold-600 dark:text-gold-400">
                     {currentAction.action_type}
                   </Badge>
                   {additionalBetAmount > 0 && (
-                    <span className="font-bold text-sm text-amber-600 dark:text-amber-400">
+                    <span className="font-numbers text-sm text-gold-900 dark:text-gold-100">
                       Rs. {additionalBetAmount.toLocaleString('en-IN')}
                     </span>
                   )}
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-border/50 flex justify-between items-center">
-                <span className="text-xs text-muted-foreground font-medium">Current Pot:</span>
-                <span className="font-bold text-sm text-amber-600 dark:text-amber-400">
+                <span className="text-label text-gold-900/40 dark:text-gold-500/40">Current Pot</span>
+                <span className="font-numbers text-sm text-gold-900 dark:text-gold-100">
                   Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
                 </span>
               </div>
             </div>
-            
+
             {/* Desktop: Original multi-row layout */}
             <div className="hidden md:block">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/20 rounded-lg">
-                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                  <div className="p-2 bg-gold-500/10 rounded-lg">
+                    <div className="w-3 h-3 bg-gold-500 rounded-full animate-pulse"></div>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <div className="font-bold text-base sm:text-lg">
+                    <div className="font-luxury uppercase tracking-widest text-lg text-gold-900 dark:text-gold-100">
                       {playerNames[currentAction.player_id]}
                     </div>
                     {currentAction.position && (
-                      <Badge className="w-fit text-xs bg-primary/30 text-primary-foreground border-primary/40">
+                      <Badge className="w-fit text-[10px] bg-gold-500/20 text-gold-600 dark:text-gold-400 border-gold-500/30 font-luxury uppercase tracking-widest">
                         {currentAction.position}
                       </Badge>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                  <Badge variant="outline" className="w-fit text-sm font-semibold">
+                  <Badge variant="outline" className="w-fit text-[10px] font-luxury uppercase tracking-widest px-3 py-1 border-gold-500/20 text-gold-600 dark:text-gold-400">
                     {currentAction.action_type}
                   </Badge>
                   {additionalBetAmount > 0 && (
-                    <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
+                    <span className="font-numbers text-xl text-gold-900 dark:text-gold-100">
                       Rs. {additionalBetAmount.toLocaleString('en-IN')}
                     </span>
                   )}
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
-                <span className="text-sm text-muted-foreground font-medium">Current Pot:</span>
-                <span className="font-bold text-lg text-amber-600 dark:text-amber-400">
+                <span className="text-label text-gold-900/40 dark:text-gold-500/40">Current Pot</span>
+                <span className="font-numbers text-xl text-gold-900 dark:text-gold-100">
                   Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
                 </span>
               </div>
@@ -729,7 +729,7 @@ const HandReplay = ({
               <SkipForward className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
-          
+
           {/* Progress Indicator */}
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-2">
@@ -739,7 +739,7 @@ const HandReplay = ({
               </Badge>
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-              <div 
+              <div
                 className="bg-gradient-to-r from-green-600 to-green-500 h-full transition-all duration-300 ease-out"
                 style={{ width: `${(currentActionIndex / actions.length) * 100}%` }}
               />

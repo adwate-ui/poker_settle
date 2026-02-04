@@ -117,13 +117,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                       </div>
                       <div className="px-6 py-4 bg-black/40 rounded-xl border border-white/5 text-center min-w-[140px]">
                         <p className="text-[9px] uppercase font-luxury tracking-widest text-white/30 mb-1">Net Valuation</p>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "px-4 py-1.5 font-numbers text-sm border-0 border-b-2 rounded-none",
-                            selectedPlayer.total_profit > 0 ? "text-green-400 border-green-500/30 bg-green-500/5" : "text-red-400 border-red-500/30 bg-red-500/5"
-                          )}
-                        >
+                        <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"}>
                           {formatProfitLoss(selectedPlayer.total_profit)}
                         </Badge>
                       </div>
@@ -152,15 +146,10 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                     <span className="font-luxury text-sm text-gold-100/80 uppercase tracking-widest">{new Date(game.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                                   </div>
                                   <div className="flex items-center gap-3">
-                                    <Badge variant="outline" className="bg-black/20 border-white/10 text-white/40 font-numbers px-3 py-1">
+                                    <Badge variant="stats">
                                       {game.buyIns} Units
                                     </Badge>
-                                    <Badge
-                                      className={cn(
-                                        "px-4 py-1.5 font-numbers border-0",
-                                        game.netAmount > 0 ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                                      )}
-                                    >
+                                    <Badge variant={game.netAmount > 0 ? "profit" : "loss"}>
                                       {formatProfitLoss(game.netAmount)}
                                     </Badge>
                                   </div>

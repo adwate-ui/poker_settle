@@ -1,25 +1,39 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
+const selectTriggerVariants = cva(
+  "flex w-full items-center justify-between transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 focus:outline-none",
+  {
+    variants: {
+      variant: {
+        default: "h-12 rounded-lg bg-input/20 border border-input px-4 py-2 text-base font-body text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent",
+        luxury: "h-12 bg-accent/5 border-0 border-b border-border rounded-none px-0 focus:ring-0 focus:border-primary font-luxury tracking-wider text-[11px] uppercase placeholder:text-muted-foreground/30",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>,
+  VariantProps<typeof selectTriggerVariants> { }
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, variant, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      "flex h-12 w-full items-center justify-between rounded-lg bg-input/20 border border-input px-4 py-2",
-      "text-base font-body text-foreground placeholder:text-muted-foreground",
-      "focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
-      "disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 [&>span]:line-clamp-1",
-      className
-    )}
+    className={cn(selectTriggerVariants({ variant, className }))}
     {...props}
   >
     {children}

@@ -70,7 +70,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         </Tabs>
 
         {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-black/80 backdrop-blur-xl border-t border-gold-500/20 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gold-900/10 dark:border-gold-500/20 pb-safe">
           <div className="flex justify-around items-center h-16">
             <button
               onClick={() => handleTabChange("new-game")}

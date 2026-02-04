@@ -100,7 +100,7 @@ const PlayersHistory = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-muted-foreground font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Players...</p>
+        <p className="text-label text-muted-foreground animate-pulse">Loading Players...</p>
       </div>
     );
   }
@@ -138,20 +138,20 @@ const PlayersHistory = () => {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-xs uppercase font-luxury tracking-widest text-muted-foreground">Total Players</p>
+              <p className="text-label text-muted-foreground">Total Players</p>
               <p className="text-3xl font-numbers text-primary">{players.length}</p>
             </div>
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-xs uppercase font-luxury tracking-widest text-muted-foreground">Win Rate</p>
+              <p className="text-label text-muted-foreground">Win Rate</p>
               <div className="flex items-baseline gap-2">
                 <p className="text-3xl font-numbers text-green-600 dark:text-green-400">
                   {players.filter(p => (p.total_profit || 0) >= 0).length}
                 </p>
-                <p className="text-sm text-muted-foreground font-luxury uppercase tracking-widest">Profitable Players</p>
+                <p className="text-label text-muted-foreground">Profitable Players</p>
               </div>
             </div>
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2 hidden lg:block">
-              <p className="text-xs uppercase font-luxury tracking-widest text-muted-foreground">Total Games</p>
+              <p className="text-label text-muted-foreground">Total Games</p>
               <p className="text-3xl font-numbers text-primary">
                 {players.reduce((sum, p) => sum + (p.total_games || 0), 0)}
               </p>

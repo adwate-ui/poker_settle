@@ -149,10 +149,10 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => handleSort('date')} className="cursor-pointer hover:text-primary"><span className="flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('buy_in')} className="text-right cursor-pointer hover:text-primary"><span className="flex items-center justify-end gap-1">Buy-in <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('players')} className="text-center cursor-pointer hover:text-primary"><span className="flex items-center justify-center gap-1">Players <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('chips')} className="text-right cursor-pointer hover:text-primary"><span className="flex items-center justify-end gap-1">Pot <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('date')} className="cursor-pointer hover:text-primary"><span className="text-label flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('buy_in')} className="text-right cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-end gap-1">Buy-in <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('players')} className="text-center cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-center gap-1">Players <ArrowUpDown className="h-3 w-3" /></span></TableHead>
+              <TableHead onClick={() => handleSort('chips')} className="text-right cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-end gap-1">Pot <ArrowUpDown className="h-3 w-3" /></span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

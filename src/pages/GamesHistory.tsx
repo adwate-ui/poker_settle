@@ -196,7 +196,7 @@ const GamesHistory = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-muted-foreground font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Games...</p>
+        <p className="text-label text-muted-foreground animate-pulse">Loading Games...</p>
       </div>
     );
   }
@@ -237,7 +237,7 @@ const GamesHistory = () => {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground ml-1">Date</label>
+              <label className="text-label text-muted-foreground ml-1">Date</label>
               <Select value={selectedDate} onValueChange={setSelectedDate}>
                 <SelectTrigger>
                   <Calendar className="mr-2 h-4 w-4 opacity-50" />
@@ -251,7 +251,7 @@ const GamesHistory = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground ml-1">Month</label>
+              <label className="text-label text-muted-foreground ml-1">Month</label>
               <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
                 <SelectTrigger>
                   <Filter className="mr-2 h-4 w-4 opacity-50" />
@@ -265,7 +265,7 @@ const GamesHistory = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground ml-1">Player</label>
+              <label className="text-label text-muted-foreground ml-1">Player</label>
               <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
                 <SelectTrigger>
                   <UserIcon className="mr-2 h-4 w-4 opacity-50" />

@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import OptimizedAvatar from '@/components/OptimizedAvatar';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface SharedPlayersHistoryProps { token: string; playerId: string; }
@@ -60,8 +61,8 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
           <CardTitle className="flex items-center gap-3"><OptimizedAvatar name={player.name} /> {player.name}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg border bg-card"><p className="text-xs text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
-          <div className="p-4 rounded-lg border bg-card"><p className="text-xs text-muted-foreground">Net P&L</p><p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}</p></div>
+          <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
+          <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Net P&L</p><p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}</p></div>
         </CardContent>
       </Card>
 
@@ -75,10 +76,14 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }} className="cursor-pointer">Date <ArrowUpDown className="h-3 w-3 inline" /></TableHead>
-              <TableHead>Buy-ins</TableHead>
-              <TableHead onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }} className="text-right cursor-pointer">Net <ArrowUpDown className="h-3 w-3 inline" /></TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }} className="cursor-pointer">
+                <span className="text-label">Date <ArrowUpDown className="h-3 w-3 inline" /></span>
+              </TableHead>
+              <TableHead><span className="text-label">Buy-ins</span></TableHead>
+              <TableHead onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }} className="text-right cursor-pointer">
+                <span className="text-label">Net <ArrowUpDown className="h-3 w-3 inline" /></span>
+              </TableHead>
+              <TableHead className="text-right"><span className="text-label">Action</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

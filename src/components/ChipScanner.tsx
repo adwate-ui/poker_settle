@@ -341,11 +341,11 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                     </span>
                                                 </div>
                                                 <div className="flex gap-4">
-                                                    <Button variant="ghost" onClick={reset} className="flex-1 h-12 bg-white/5 border border-white/5 hover:bg-white/10 text-gold-100/60 font-luxury uppercase tracking-widest text-[10px]">
+                                                    <Button variant="ghost" onClick={reset} className="flex-1 h-12 bg-white/5 border border-white/5 hover:bg-white/10 text-gold-100/60 text-label">
                                                         <RefreshCw className="mr-2 h-4 w-4" />
                                                         Reset Audit
                                                     </Button>
-                                                    <Button onClick={handleConfirm} disabled={totalValue === 0 || processing} className="flex-1 h-12 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black font-luxury uppercase tracking-widest text-[10px] border-0 shadow-lg shadow-gold-900/10">
+                                                    <Button onClick={handleConfirm} disabled={totalValue === 0 || processing} className="flex-1 h-12 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black text-label border-0 shadow-lg shadow-gold-900/10">
                                                         <Check className="mr-2 h-4 w-4" />
                                                         Authorize
                                                     </Button>

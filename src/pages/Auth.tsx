@@ -26,7 +26,7 @@ const Auth = () => {
           <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
           <div className="absolute inset-0 blur-xl bg-gold-500/20 rounded-full animate-pulse" />
         </div>
-        <p className="text-gold-200/40 font-luxury tracking-[0.3em] uppercase text-xs animate-pulse">Authenticating Portal...</p>
+        <p className="text-label tracking-[0.3em] text-gold-200/40 animate-pulse">Authenticating Portal...</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ const Auth = () => {
             <CardTitle className="text-4xl font-luxury tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-gold-100 to-gold-500">
               Noble Ledger
             </CardTitle>
-            <CardDescription className="text-xs uppercase tracking-[0.4em] font-luxury text-gold-500/40">
+            <CardDescription className="text-label tracking-[0.4em] text-gold-500/40">
               The Sovereign Poker Suite
             </CardDescription>
           </div>
@@ -89,19 +89,19 @@ const Auth = () => {
           <div className="pt-4 flex items-center justify-center gap-6 opacity-20 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default">
             <div className="flex items-center gap-2 group/icon">
               <Gamepad2 className="h-4 w-4 group-hover/icon:text-gold-500 transition-colors" />
-              <span className="text-[10px] font-luxury uppercase tracking-widest hidden sm:inline">Fair Play</span>
+              <span className="text-label hidden sm:inline">Fair Play</span>
             </div>
             <div className="w-px h-3 bg-white/20" />
             <div className="flex items-center gap-2 group/icon">
               <ShieldCheck className="h-4 w-4 group-hover/icon:text-gold-500 transition-colors" />
-              <span className="text-[10px] font-luxury uppercase tracking-widest hidden sm:inline">Secure Node</span>
+              <span className="text-label hidden sm:inline">Secure Node</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <div className="absolute bottom-8 text-center w-full pointer-events-none">
-        <p className="text-[10px] uppercase tracking-[0.5em] font-luxury text-white/10">Reserved for Elite Strategists</p>
+        <p className="text-label tracking-[0.5em] text-white/10">Reserved for Elite Strategists</p>
       </div>
     </div>
   );

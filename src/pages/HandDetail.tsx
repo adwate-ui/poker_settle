@@ -59,7 +59,7 @@ const HandDetail = () => {
 
   const loadTablePositions = useCallback(async () => {
     if (!handId) return;
-    
+
     try {
       // Get positions directly from the hand record
       const { data: handData, error: handError } = await supabase
@@ -67,9 +67,9 @@ const HandDetail = () => {
         .select('positions')
         .eq('id', handId)
         .single();
-      
+
       if (handError) throw handError;
-      
+
       if (handData && handData.positions) {
         const positions: Record<string, number> = {};
         const posArray = handData.positions as unknown as SeatPosition[];
@@ -86,7 +86,7 @@ const HandDetail = () => {
   const fetchHandDetail = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Fetch hand details
       const { data: handData, error: handError } = await supabase
         .from('poker_hands')
@@ -131,7 +131,7 @@ const HandDetail = () => {
 
       // Get unique player IDs from actions
       const playerIds = [...new Set(actionsData.map(a => a.player_id))];
-      
+
       // Fetch player names
       const { data: playersData } = await supabase
         .from('players')
@@ -189,7 +189,7 @@ const HandDetail = () => {
 
   const handleHoleCardSubmit = async (cards: string) => {
     if (!selectedPlayerForHole) return;
-    
+
     const success = await updateHoleCards(selectedPlayerForHole.actionId, cards);
     if (success) {
       setShowHoleCardInput(false);
@@ -202,15 +202,15 @@ const HandDetail = () => {
   // Get unique players who participated in the hand - memoized
   const playersInHand = useMemo(() => {
     if (!hand) return [];
-    
-    const playerMap = new Map<string, { 
-      playerId: string; 
-      playerName: string; 
-      isHero: boolean; 
+
+    const playerMap = new Map<string, {
+      playerId: string;
+      playerName: string;
+      isHero: boolean;
       holeCards: string | null;
       actionId: string;
     }>();
-    
+
     hand.actions.forEach(action => {
       if (!playerMap.has(action.player_id)) {
         playerMap.set(action.player_id, {
@@ -229,7 +229,7 @@ const HandDetail = () => {
         }
       }
     });
-    
+
     return Array.from(playerMap.values());
   }, [hand]);
 
@@ -243,10 +243,10 @@ const HandDetail = () => {
       })
       .reduce((acc, streetCard) => {
         // Split current cards into individual cards (2 characters each)
-        const existingCards = acc.match(/.{1,2}/g) || [];
+        const existingCards = (acc.match(/.{1,2}/g) || []) as string[];
         const newCardsStr = streetCard.cards_notation;
         const newCards = newCardsStr.match(/.{1,2}/g) || [];
-        
+
         // Only add cards that aren't already in the accumulator
         const cardsToAdd = newCards.filter(card => !existingCards.includes(card));
         return acc + cardsToAdd.join('');
@@ -257,13 +257,13 @@ const HandDetail = () => {
   const communityCardsArray = useMemo(() => {
     if (!hand) return [];
     const cards: string[] = [];
-    
+
     // Add community cards only
     if (communityCards) {
       const communityCardArray = communityCards.match(/.{1,2}/g) || [];
       cards.push(...communityCardArray);
     }
-    
+
     return cards;
   }, [hand, communityCards]);
 
@@ -271,7 +271,7 @@ const HandDetail = () => {
   const knownHoleCards = useMemo(() => {
     if (!hand) return [];
     const cards: string[] = [];
-    
+
     playersInHand.forEach(player => {
       // Exclude the currently selected player's hole cards
       if (player.holeCards && (!selectedPlayerForHole || player.playerId !== selectedPlayerForHole.playerId)) {
@@ -279,7 +279,7 @@ const HandDetail = () => {
         cards.push(...holeCardArray);
       }
     });
-    
+
     return cards;
   }, [hand, selectedPlayerForHole, playersInHand]);
 
@@ -305,9 +305,9 @@ const HandDetail = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <Button 
-        onClick={() => navigate('/hands')} 
-        variant="ghost" 
+      <Button
+        onClick={() => navigate('/hands')}
+        variant="ghost"
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -337,29 +337,29 @@ const HandDetail = () => {
             <h3 className="font-semibold mb-3">Hand Information</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Game Date:</span>
+                <span className="text-label text-muted-foreground">Game Date:</span>
                 <span>{formatDate(hand.game_date)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Hero Position:</span>
+                <span className="text-label text-muted-foreground">Hero Position:</span>
                 <Badge variant="outline">{hand.hero_position}</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Button:</span>
+                <span className="text-label text-muted-foreground">Button:</span>
                 <span>{hand.button_player_name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Final Stage:</span>
+                <span className="text-label text-muted-foreground">Final Stage:</span>
                 <Badge>{hand.final_stage}</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pot Size:</span>
+                <span className="text-label text-muted-foreground">Pot Size:</span>
                 <span className="font-bold text-poker-gold">
                   Rs. {hand.pot_size?.toLocaleString('en-IN') || 0} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Winner:</span>
+                <span className="text-label text-muted-foreground">Winner:</span>
                 <span className="font-semibold flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-amber-500" />
                   {hand.winner_player_name}
@@ -376,7 +376,7 @@ const HandDetail = () => {
               <TabsTrigger value="replay">Hand Replay</TabsTrigger>
               <TabsTrigger value="details">Hand Details</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="replay" className="space-y-4">
               <HandReplay
                 actions={hand.actions}
@@ -389,7 +389,7 @@ const HandDetail = () => {
                 winnerPlayerName={hand.winner_player_name || undefined}
               />
             </TabsContent>
-            
+
             <TabsContent value="details" className="space-y-6">
               {/* Community Cards Section */}
               {hand.street_cards.length > 0 && (
@@ -402,7 +402,7 @@ const HandDetail = () => {
                         const flopCard = hand.street_cards.find(sc => sc.street_type === 'Flop');
                         return flopCard && (
                           <div className="flex flex-col gap-1 sm:gap-2">
-                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">FLOP</span>
+                            <span className="text-label text-muted-foreground">FLOP</span>
                             <div className="flex gap-0.5">
                               {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                 <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -414,7 +414,7 @@ const HandDetail = () => {
                           </div>
                         );
                       })()}
-                      
+
                       {/* Turn */}
                       {(() => {
                         const turnCard = hand.street_cards.find(sc => sc.street_type === 'Turn');
@@ -422,7 +422,7 @@ const HandDetail = () => {
                           <>
                             <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">TURN</span>
+                              <span className="text-label text-muted-foreground">TURN</span>
                               <div className="flex gap-0.5">
                                 {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -435,7 +435,7 @@ const HandDetail = () => {
                           </>
                         );
                       })()}
-                      
+
                       {/* River */}
                       {(() => {
                         const riverCard = hand.street_cards.find(sc => sc.street_type === 'River');
@@ -443,7 +443,7 @@ const HandDetail = () => {
                           <>
                             <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">RIVER</span>
+                              <span className="text-label text-muted-foreground">RIVER</span>
                               <div className="flex gap-0.5">
                                 {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -478,7 +478,7 @@ const HandDetail = () => {
                           <Badge variant="secondary" className="text-xs">Hero</Badge>
                         )}
                       </div>
-                      
+
                       {player.holeCards ? (
                         <div className="flex items-center gap-2">
                           <div className="flex gap-0.5">
@@ -526,7 +526,7 @@ const HandDetail = () => {
 
                     return (
                       <div key={street}>
-                        <div className="font-semibold text-sm text-muted-foreground mb-2">
+                        <div className="text-label text-muted-foreground mb-2">
                           {street}:
                         </div>
                         <div className="space-y-1 pl-4 border-l-2 border-muted">

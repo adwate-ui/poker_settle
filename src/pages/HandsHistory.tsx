@@ -72,7 +72,7 @@ const HandsHistory = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-label text-muted-foreground">
               Total Hands
             </CardTitle>
           </CardHeader>
@@ -83,7 +83,7 @@ const HandsHistory = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-label text-muted-foreground">
               Win Rate
             </CardTitle>
           </CardHeader>
@@ -99,7 +99,7 @@ const HandsHistory = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-label text-muted-foreground">
               Total Won
             </CardTitle>
           </CardHeader>
@@ -112,7 +112,7 @@ const HandsHistory = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-label text-muted-foreground">
               Showdown Rate
             </CardTitle>
           </CardHeader>
@@ -147,7 +147,7 @@ const HandsHistory = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Hero Position</label>
+              <label className="text-label mb-2 block">Hero Position</label>
               <Select
                 value={filters.heroPosition || 'all'}
                 onValueChange={(value) =>
@@ -167,7 +167,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Game</label>
+              <label className="text-label mb-2 block">Game</label>
               <Select
                 value={filters.gameId || 'all'}
                 onValueChange={(value) =>
@@ -189,7 +189,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Result</label>
+              <label className="text-label mb-2 block">Result</label>
               <Select
                 value={filters.result || 'all'}
                 onValueChange={(value) =>
@@ -209,7 +209,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Showdown</label>
+              <label className="text-label mb-2 block">Showdown</label>
               <Select
                 value={filters.showdown || 'all'}
                 onValueChange={(value) =>
@@ -228,7 +228,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Final Stage</label>
+              <label className="text-label mb-2 block">Final Stage</label>
               <Select
                 value={filters.finalStage || 'all'}
                 onValueChange={(value) =>
@@ -250,7 +250,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Villain Name</label>
+              <label className="text-label mb-2 block">Villain Name</label>
               <Select
                 value={filters.villainName || 'all'}
                 onValueChange={(value) =>
@@ -270,7 +270,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Villain Position</label>
+              <label className="text-label mb-2 block">Villain Position</label>
               <Select
                 value={filters.villainPosition || 'all'}
                 onValueChange={(value) =>
@@ -290,7 +290,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Hero's Hole Cards (Adwate)</label>
+              <label className="text-label mb-2 block">Hero's Hole Cards (Adwate)</label>
               <Select
                 value={filters.heroHoleCards || 'all'}
                 onValueChange={(value) =>
@@ -311,7 +311,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Villain's Hole Cards</label>
+              <label className="text-label mb-2 block">Villain's Hole Cards</label>
               <Select
                 value={filters.villainHoleCards || 'all'}
                 onValueChange={(value) =>

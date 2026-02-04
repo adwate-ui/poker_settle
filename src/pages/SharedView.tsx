@@ -28,7 +28,7 @@ const SharedView = () => {
 
       try {
         const sharedClient = createSharedClient(token);
-        
+
         // Validate token using secure RPC function (avoids direct table access)
         const { data: linkData, error: linkError } = await sharedClient
           .rpc('validate_share_token', { _token: token })
@@ -86,7 +86,7 @@ const SharedView = () => {
         <div className="max-w-7xl mx-auto p-4 sm:p-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold">Poker Game Stats</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-label text-muted-foreground">
               <Shield className="h-4 w-4" />
               <span>Read-only view</span>
             </div>

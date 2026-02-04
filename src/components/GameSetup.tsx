@@ -166,12 +166,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
                 <h1 className="text-3xl font-luxury text-gold-100 uppercase tracking-widest mb-1">Setup Table</h1>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold-500/40 font-luxury">Assigning initial seat identifiers</p>
+                <p className="text-label tracking-[0.3em] text-gold-500/40">Assigning initial seat identifiers</p>
               </div>
               <Button
                 variant="ghost"
                 onClick={handleSkipPositionSetup}
-                className="text-[10px] font-luxury uppercase tracking-widest text-white/30 hover:text-white/60 hover:bg-white/5 h-10 px-6 rounded-full border border-white/5"
+                className="text-label text-white/30 hover:text-white/60 hover:bg-white/5 h-10 px-6 rounded-full border border-white/5"
               >
                 Decline Positioning
               </Button>
@@ -210,7 +210,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <CardContent className="p-8 space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Buy-in Amount (INR)</Label>
+                        <Label className="text-label tracking-[0.2em] text-gold-500/60 ml-1">Buy-in Amount (INR)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <span className="text-gold-500 font-numbers text-sm opacity-50">₹</span>
@@ -226,7 +226,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       </div>
 
                       <div className="space-y-3">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Add New Player</Label>
+                        <Label className="text-label tracking-[0.2em] text-gold-500/60 ml-1">Add New Player</Label>
                         <div className="relative group flex gap-3">
                           <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -254,7 +254,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     {selectedPlayers.length > 0 && (
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/40">Added Players</p>
+                          <p className="text-label tracking-[0.2em] text-gold-500/40">Added Players</p>
                           <Badge className="bg-gold-500/10 text-gold-500 border border-gold-500/20 font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -337,7 +337,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               placeholder="Filter Registry..."
                               value={playerSearchQuery}
                               onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[10px] uppercase text-gold-100/60 placeholder:text-white/10"
+                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all text-label text-gold-100/60 placeholder:text-white/10"
                             />
                           </div>
 
@@ -397,7 +397,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               placeholder="Search players..."
                               value={gameSearchQuery}
                               onChange={(e) => setGameSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-widest text-[10px] uppercase text-gold-100/60 placeholder:text-white/10"
+                              className="h-10 pl-9 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all text-label text-gold-100/60 placeholder:text-white/10"
                             />
                           </div>
 

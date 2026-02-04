@@ -109,10 +109,10 @@ const AISettingsTab = () => {
     const fetchKey = async () => {
       setLoading(true);
       const { data } = await supabase
-        .from('profiles')
+        .from('user_api_keys')
         .select('gemini_api_key')
-        .eq('id', user.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       // @ts-ignore
       if (data?.gemini_api_key) {
@@ -128,10 +128,12 @@ const AISettingsTab = () => {
     if (!user) return;
     setLoading(true);
     const { error } = await supabase
-      .from('profiles')
-      // @ts-ignore
-      .update({ gemini_api_key: apiKey })
-      .eq('id', user.id);
+      .from('user_api_keys')
+      .upsert({
+        user_id: user.id,
+        gemini_api_key: apiKey,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
 
     setLoading(false);
     if (error) {
@@ -161,7 +163,7 @@ const AISettingsTab = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gold-900/70 dark:text-gold-200/70 uppercase tracking-widest text-[10px]">Gemini API Key</label>
+          <label className="text-label text-gold-900/70 dark:text-gold-200/70 ml-1">Gemini API Key</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
@@ -227,19 +229,19 @@ const Profile = () => {
         <TabsList className="grid w-full grid-cols-4 bg-black/5 dark:bg-black/20 border border-gold-900/10 dark:border-white/10 p-1 rounded-xl">
           <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
             <User className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Profile</span>
+            <span className="hidden sm:inline text-label">Profile</span>
           </TabsTrigger>
           <TabsTrigger value="game-settings" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
             <div className={`w-4 h-4 rounded-full mr-2 bg-gold-500/20 border-2 border-gold-500`} />
-            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Chips</span>
+            <span className="hidden sm:inline text-label">Chips</span>
           </TabsTrigger>
           <TabsTrigger value="ai" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
             <Bot className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">AI</span>
+            <span className="hidden sm:inline text-label">AI</span>
           </TabsTrigger>
           <TabsTrigger value="storage" className="rounded-lg data-[state=active]:bg-gold-500/10 data-[state=active]:text-gold-800 dark:data-[state=active]:text-gold-200">
             <Database className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline font-luxury uppercase tracking-widest text-[10px]">Storage</span>
+            <span className="hidden sm:inline text-label">Storage</span>
           </TabsTrigger>
         </TabsList>
 
@@ -256,11 +258,11 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">Email</label>
+                <label className="text-label text-gold-600/40 dark:text-gold-500/40 ml-1">Email</label>
                 <p className="text-lg text-luxury-primary">{user.email}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gold-600/40 dark:text-gold-500/40 uppercase tracking-widest text-[10px]">User ID</label>
+                <label className="text-label text-gold-600/40 dark:text-gold-500/40 ml-1">User ID</label>
                 <p className="text-sm text-gold-900/60 dark:text-gold-200/60 font-numbers">{user.id}</p>
               </div>
             </CardContent>

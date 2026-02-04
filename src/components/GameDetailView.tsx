@@ -158,8 +158,8 @@ export const GameDetailView = ({
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4 opacity-30" />;
-    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4 text-gold-500" />;
-    return <ArrowDown className="h-4 w-4 text-gold-500" />;
+    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4 text-primary" />;
+    return <ArrowDown className="h-4 w-4 text-primary" />;
   };
 
   const sortedGamePlayers = useMemo(() => {
@@ -276,8 +276,8 @@ export const GameDetailView = ({
   if (queryLoading) {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Game Data...</p>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="text-muted-foreground font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Game Data...</p>
       </div>
     );
   }
@@ -303,12 +303,12 @@ export const GameDetailView = ({
     }));
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-8 animate-in fade-in duration-700">
       {onBack && (
         <Button
           variant="ghost"
           onClick={onBack}
-          className="mb-4 hover:bg-gold-500/10 text-gold-500 hover:text-gold-400 font-luxury uppercase tracking-widest text-xs"
+          className="mb-4 hover:bg-primary/10 text-primary hover:text-primary/80 font-luxury uppercase tracking-widest text-xs"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {backLabel}
@@ -316,17 +316,17 @@ export const GameDetailView = ({
       )}
 
       <Card className="border-gold-900/10 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-8 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/2">
+        <CardHeader className="pb-8 border-b border-border bg-accent/5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20">
-                <ShieldCheck className="h-6 w-6 text-gold-600 dark:text-gold-500" />
+              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                <ShieldCheck className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-luxury text-luxury-primary">
+                <CardTitle className="text-3xl font-luxury text-foreground">
                   Session Ledger — {format(new Date(game.date), "MMMM d, yyyy")}
                 </CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[0.3em] text-gold-900/40 dark:text-gold-500/40 font-luxury">Game Record</CardDescription>
+                <CardDescription className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-luxury">Game Record</CardDescription>
               </div>
             </div>
             <Button
@@ -334,31 +334,31 @@ export const GameDetailView = ({
               size="sm"
               onClick={() => copyShareLink('game', gameId)}
               disabled={linkLoading}
-              className="h-10 px-6 rounded-full bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 hover:bg-gold-500/10 hover:border-gold-500/30 text-gold-800 dark:text-gold-200 font-luxury uppercase tracking-widest text-[10px]"
+              className="h-10 px-6 rounded-full bg-accent/5 border-border hover:bg-primary/10 hover:border-primary/30 text-muted-foreground hover:text-foreground text-label"
             >
-              <Share2 className="h-3.5 w-3.5 mr-2 text-gold-600 dark:text-gold-500" />
+              <Share2 className="h-3.5 w-3.5 mr-2 text-primary" />
               Export Game
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-8">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Blind Level / Unit</p>
-              <p className="text-2xl font-numbers text-gold-900 dark:text-gold-100">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+            <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-muted-foreground">Blind Level / Unit</p>
+              <p className="text-2xl font-numbers text-foreground">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
             </div>
-            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">The Lineup</p>
-              <p className="text-2xl font-numbers text-luxury-primary">{gamePlayers.length}</p>
+            <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-muted-foreground">The Lineup</p>
+              <p className="text-2xl font-numbers text-foreground">{gamePlayers.length}</p>
             </div>
-            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Liquidity</p>
-              <p className="text-2xl font-numbers text-gold-600 dark:text-gold-500">
+            <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-muted-foreground">Total Liquidity</p>
+              <p className="text-2xl font-numbers text-primary">
                 Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
-            <div className="p-6 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Pot Action</p>
+            <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
+              <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-muted-foreground">Total Pot Action</p>
               <p className="text-2xl font-numbers text-green-600 dark:text-green-400">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
               </p>
@@ -403,7 +403,7 @@ export const GameDetailView = ({
             <div className="p-8 animate-in slide-in-from-top-2 duration-300">
               <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] uppercase tracking-widest font-numbers text-gold-900/60 dark:text-gold-500/60 bg-gold-500/5 px-3 py-1 rounded-full border border-gold-500/10">
+                  <span className="text-[10px] uppercase tracking-widest font-numbers text-gold-900/60 dark:text-gold-500/60 bg-black/5 dark:bg-gold-500/5 px-3 py-1 rounded-full border border-gold-900/10 dark:border-gold-500/10">
                     Snapshot: {tablePositions.length > 0 ? format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm") : "--:--"} IST
                   </span>
                 </div>
@@ -434,7 +434,7 @@ export const GameDetailView = ({
                 )}
               </div>
               <div className="relative">
-                <div className="absolute inset-0 bg-gold-500/5 blur-3xl rounded-full" />
+                <div className="absolute inset-0 bg-gold-500/10 dark:bg-gold-500/5 blur-3xl rounded-full" />
                 <PokerTableView
                   positions={playersWithSeats}
                   totalSeats={playersWithSeats.length}
@@ -468,7 +468,7 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("name")}
-                        className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
+                        className="h-full w-full justify-start text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Player {getSortIcon("name")}
                       </Button>
@@ -477,7 +477,7 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("buy_ins")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
+                        className="h-full w-full justify-center text-center text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Buy-ins {getSortIcon("buy_ins")}
                       </Button>
@@ -486,7 +486,7 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("net_amount")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
+                        className="h-full w-full justify-center text-center text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         P&L {getSortIcon("net_amount")}
                       </Button>
@@ -495,14 +495,14 @@ export const GameDetailView = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("final_stack")}
-                        className="h-full w-full justify-center text-center font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
+                        className="h-full w-full justify-center text-center text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-800 dark:hover:text-gold-200"
                       >
                         Cashout Stack {getSortIcon("final_stack")}
                       </Button>
                     </TableHead>
                     {showOwnerControls && fetchBuyInHistory && (
                       <TableHead className="text-right pr-8">
-                        <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60">Log Audit</span>
+                        <span className="text-label text-gold-900/60 dark:text-gold-500/60">Log Audit</span>
                       </TableHead>
                     )}
                   </TableRow>
@@ -519,19 +519,14 @@ export const GameDetailView = ({
                         <TableCell className="pl-4 sm:pl-8 text-left font-luxury text-[13px] text-gold-800 dark:text-gold-100/80 uppercase tracking-widest">{playerName}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex justify-center">
-                            <Badge variant="outline" className="bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-gold-700/60 dark:text-gold-200/60 font-numbers px-3 py-1">
+                            <Badge variant="stats">
                               {gamePlayer.buy_ins} Stacks
                             </Badge>
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex justify-center">
-                            <Badge
-                              className={cn(
-                                "px-4 py-1.5 font-numbers tracking-widest border-0",
-                                isWin ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-red-500/20 text-red-600 dark:text-red-400"
-                              )}
-                            >
+                            <Badge variant={isWin ? "profit" : "loss"}>
                               {formatProfitLoss(netAmount)}
                             </Badge>
                           </div>
@@ -601,7 +596,7 @@ export const GameDetailView = ({
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {manualTransfers.map((transfer, index) => (
-                      <div key={index} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-gold-900/10 dark:border-white/5 group">
+                      <div key={index} className="flex items-center justify-between bg-black/5 dark:bg-black/40 rounded-xl p-4 border border-gold-900/10 dark:border-white/5 group">
                         <div className="flex items-center gap-4 min-w-0">
                           <div className="text-xs font-luxury text-gold-900/80 dark:text-gold-100/80 truncate">
                             <span className="text-black/40 dark:text-white/40">{transfer.from}</span>
@@ -628,10 +623,10 @@ export const GameDetailView = ({
                 <Table>
                   <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-gold-900/10 dark:border-white/10">
                     <TableRow className="hover:bg-transparent border-0 h-14">
-                      <TableHead className="pl-8 text-left font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Debtor</TableHead>
-                      <TableHead className="text-left font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Creditor</TableHead>
-                      <TableHead className="text-center font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Amount</TableHead>
-                      <TableHead className="text-right pr-8 font-luxury uppercase tracking-widest text-[9px] text-gold-900/60 dark:text-gold-500/60">Status</TableHead>
+                      <TableHead className="pl-8 text-left text-label text-gold-900/60 dark:text-gold-500/60">Debtor</TableHead>
+                      <TableHead className="text-left text-label text-gold-900/60 dark:text-gold-500/60">Creditor</TableHead>
+                      <TableHead className="text-center text-label text-gold-900/60 dark:text-gold-500/60">Amount</TableHead>
+                      <TableHead className="text-right pr-8 text-label text-gold-900/60 dark:text-gold-500/60">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-black/10 dark:divide-white/5">
@@ -654,7 +649,7 @@ export const GameDetailView = ({
                           <TableCell className="text-center">
                             <span className="font-numbers text-base text-gold-600 dark:text-gold-500">Rs. {formatIndianNumber(settlement.amount)}</span>
                             {settlement.isManual && (
-                              <span className="ml-3 text-[9px] font-luxury uppercase tracking-widest text-gold-900/30 dark:text-gold-500/30 px-2 py-0.5 border border-gold-900/10 dark:border-gold-500/10 rounded-full">Manual</span>
+                              <span className="ml-3 text-label text-gold-900/30 dark:text-gold-500/30 px-2 py-0.5 border border-gold-900/10 dark:border-gold-500/10 rounded-full">Manual</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right pr-8">
@@ -668,7 +663,7 @@ export const GameDetailView = ({
                                   await refetchGameDetail();
                                 }}
                                 className={cn(
-                                  "h-10 px-6 rounded-full font-luxury uppercase tracking-widest text-[10px] border transition-all",
+                                  "h-10 px-6 rounded-full text-label border transition-all",
                                   confirmation.confirmed
                                     ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
                                     : "bg-black/5 dark:bg-white/5 border-gold-900/10 dark:border-white/10 text-black/30 dark:text-white/30 hover:bg-black/10 dark:hover:bg-white/10"
@@ -700,7 +695,7 @@ export const GameDetailView = ({
 
       {/* Manual Transfer Dialog */}
       <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
-        <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[90vw] sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
@@ -715,7 +710,7 @@ export const GameDetailView = ({
               <div>
                 <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 ml-1 mb-2 block text-left">Payer (From)</Label>
                 <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                  <SelectTrigger className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
+                  <SelectTrigger variant="luxury">
                     <SelectValue placeholder="Select Origin" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
@@ -729,7 +724,7 @@ export const GameDetailView = ({
               <div>
                 <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60 ml-1 mb-2 block text-left">Recipient (To)</Label>
                 <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                  <SelectTrigger className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-left">
+                  <SelectTrigger variant="luxury">
                     <SelectValue placeholder="Select Destination" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
@@ -747,7 +742,8 @@ export const GameDetailView = ({
                   placeholder="0.00"
                   value={newTransferAmount}
                   onChange={(e) => setNewTransferAmount(e.target.value)}
-                  className="h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-numbers text-lg text-gold-900 dark:text-gold-100 placeholder:text-black/10 dark:placeholder:text-white/10"
+                  variant="luxury"
+                  className="text-lg"
                 />
               </div>
             </div>

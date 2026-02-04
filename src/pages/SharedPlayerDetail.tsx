@@ -153,7 +153,7 @@ const SharedPlayerDetail = () => {
     return [...filteredGameHistory].sort((a, b) => {
       let aVal: number;
       let bVal: number;
-      
+
       switch (sortField) {
         case 'date':
           aVal = new Date(a.games.date).getTime();
@@ -172,7 +172,7 @@ const SharedPlayerDetail = () => {
           bVal = b.net_amount;
           break;
       }
-      
+
       return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
     });
   }, [filteredGameHistory, sortField, sortOrder]);
@@ -200,7 +200,7 @@ const SharedPlayerDetail = () => {
           <Card className="mt-4">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
-                {resourceType === 'game' 
+                {resourceType === 'game'
                   ? 'Player details are not available with a game link. This link only provides access to game data.'
                   : 'Player not found'}
               </p>
@@ -211,8 +211,8 @@ const SharedPlayerDetail = () => {
     );
   }
 
-  const avgPerGame = player.total_games > 0 
-    ? (player.total_profit || 0) / player.total_games 
+  const avgPerGame = player.total_games > 0
+    ? (player.total_profit || 0) / player.total_games
     : 0;
   const isProfit = (player.total_profit || 0) >= 0;
   const winRate = filteredGameHistory.length > 0
@@ -241,21 +241,20 @@ const SharedPlayerDetail = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg border">
-                <p className="text-sm text-muted-foreground">Total Games</p>
+                <p className="text-label text-muted-foreground">Total Games</p>
                 <p className="text-lg font-semibold">{player.total_games || 0}</p>
               </div>
               <div className="p-4 rounded-lg border">
-                <p className="text-sm text-muted-foreground">Total P&L</p>
-                <p className={`text-lg font-semibold ${
-                  isProfit 
-                    ? 'text-green-600 dark:text-green-400' 
+                <p className="text-label text-muted-foreground">Total P&L</p>
+                <p className={`text-lg font-semibold ${isProfit
+                    ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
-                }`}>
+                  }`}>
                   {isProfit ? '+' : ''}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
                 </p>
               </div>
               <div className="p-4 rounded-lg border">
-                <p className="text-sm text-muted-foreground">Win Rate</p>
+                <p className="text-label text-muted-foreground">Win Rate</p>
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                   {winRate.toFixed(1)}%
                 </p>
@@ -334,15 +333,14 @@ const SharedPlayerDetail = () => {
               <TableBody>
                 {sortedGameHistory.map((game, index) => {
                   const isWin = game.net_amount > 0;
-                  
+
                   return (
                     <TableRow
                       key={game.id}
-                      className={`transition-colors ${
-                        index % 2 === 0 
-                          ? 'bg-secondary/5 hover:bg-secondary/20' 
+                      className={`transition-colors ${index % 2 === 0
+                          ? 'bg-secondary/5 hover:bg-secondary/20'
                           : 'hover:bg-primary/10'
-                      }`}
+                        }`}
                     >
                       <TableCell className="font-medium text-primary">
                         <div className="flex items-center gap-2">
@@ -356,11 +354,10 @@ const SharedPlayerDetail = () => {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className={`px-3 py-1 rounded-full font-bold ${
-                          isWin 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                        <span className={`px-3 py-1 rounded-full font-bold ${isWin
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                             : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                        }`}>
+                          }`}>
                           {isWin ? '+' : ''}Rs. {formatIndianNumber(game.net_amount)}
                         </span>
                       </TableCell>

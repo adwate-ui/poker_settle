@@ -63,14 +63,14 @@ class GameErrorBoundary extends Component<
                 <Button
                   variant="ghost"
                   onClick={() => window.location.reload()}
-                  className="flex-1 h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 font-luxury uppercase tracking-widest text-[10px] transition-all"
+                  className="flex-1 h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 text-label transition-all"
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-2" />
                   Attempt Re-Scan
                 </Button>
                 <Button
                   onClick={() => window.history.back()}
-                  className="flex-1 h-12 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-luxury uppercase tracking-widest text-[10px] transition-all"
+                  className="flex-1 h-12 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-label transition-all"
                 >
                   <ChevronLeft className="h-3.5 w-3.5 mr-2" />
                   Back to Terminal

@@ -62,14 +62,14 @@ export const PWAInstallPrompt = () => {
             <Button
               onClick={handleInstall}
               disabled={installing}
-              className="flex-1 h-10 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black font-luxury uppercase tracking-widest text-[10px] shadow-lg shadow-gold-900/10 transition-all"
+              className="flex-1 h-10 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black text-label shadow-lg shadow-gold-900/10 transition-all"
             >
               {installing ? 'Synchronizing...' : 'Authorize Installation'}
             </Button>
             <Button
               variant="ghost"
               onClick={handleDismiss}
-              className="h-10 px-6 border border-white/5 bg-white/2 hover:bg-white/5 text-white/30 font-luxury uppercase tracking-widest text-[10px] transition-colors"
+              className="h-10 px-6 border border-white/5 bg-white/2 hover:bg-white/5 text-white/30 text-label transition-colors"
             >
               Decline
             </Button>

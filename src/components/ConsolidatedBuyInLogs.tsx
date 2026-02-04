@@ -130,9 +130,9 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
               <SelectValue placeholder="All Participants" />
             </SelectTrigger>
             <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
-              <SelectItem value={FILTER_ALL} className="font-luxury uppercase text-[10px] tracking-widest">All Participants</SelectItem>
+              <SelectItem value={FILTER_ALL} className="text-label">All Participants</SelectItem>
               {uniquePlayerNames.map(name => (
-                <SelectItem key={name} value={name} className="font-luxury uppercase text-[10px] tracking-widest">{name}</SelectItem>
+                <SelectItem key={name} value={name} className="text-label">{name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -143,16 +143,16 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       {loading ? (
         <div className="flex flex-col justify-center items-center py-12 gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-gold-500/40" />
-          <p className="text-[10px] font-luxury uppercase tracking-widest text-gold-500/20">Fetching Ledger History...</p>
+          <p className="text-label text-gold-500/20">Fetching Ledger History...</p>
         </div>
       ) : history.length === 0 ? (
         <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
           <History className="h-10 w-10 mx-auto mb-4 text-white/5" />
-          <p className="text-[11px] font-luxury uppercase tracking-[0.2em] text-white/20">No buy-in fluctuations recorded.</p>
+          <p className="text-label tracking-[0.2em] text-white/20">No buy-in fluctuations recorded.</p>
         </div>
       ) : filteredHistory.length === 0 ? (
         <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
-          <p className="text-[11px] font-luxury uppercase tracking-[0.2em] text-white/20">No logs found for "{filterName}" in this archive.</p>
+          <p className="text-label tracking-[0.2em] text-white/20">No logs found for "{filterName}" in this archive.</p>
         </div>
       ) : (
         <div className="rounded-xl border border-white/10 overflow-hidden bg-black/20 shadow-inner">
@@ -160,10 +160,10 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-[#0a0a0a] border-b border-white/10">
                 <TableRow className="hover:bg-transparent border-0 h-12">
-                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 pl-6">Participant</TableHead>
-                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60">Incremental</TableHead>
-                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60">Amended Total</TableHead>
-                  <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-right pr-6">Audit Time</TableHead>
+                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60 pl-6">Participant</TableHead>
+                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60">Incremental</TableHead>
+                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60">Amended Total</TableHead>
+                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60 text-right pr-6">Audit Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-white/5">

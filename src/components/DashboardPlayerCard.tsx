@@ -45,7 +45,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
               <p className="text-[9px] font-luxury text-gold-500/40 uppercase tracking-tighter">Participant Portfolio</p>
             </div>
           </div>
-          <Badge variant="outline" className="bg-gold-500/5 text-gold-400 font-numbers border-gold-500/20 h-6 px-2 text-[10px]">
+          <Badge variant="stats">
             {gamePlayer.buy_ins} UNIT{gamePlayer.buy_ins !== 1 ? 'S' : ''}
           </Badge>
         </div>
@@ -66,13 +66,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
         <div className="pt-3 border-t border-white/5 flex justify-between items-center px-1">
           <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Executive P&L</span>
           <Badge
-            variant="outline"
-            className={cn(
-              "font-numbers px-2.5 py-0.5 border-0 border-b-2 rounded-none h-auto text-[11px]",
-              profitLossStatus === 'profit' ? 'text-green-400 border-green-500/30 bg-green-500/5' :
-                profitLossStatus === 'loss' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
-                  'text-gray-400 border-gray-500/30 bg-gray-500/5'
-            )}
+            variant={profitLossStatus === 'profit' ? 'profit' : profitLossStatus === 'loss' ? 'loss' : 'default'}
           >
             {formatProfitLoss(netAmount)}
           </Badge>

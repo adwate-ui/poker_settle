@@ -168,7 +168,7 @@ const PlayerDetail = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
-        <p className="text-gold-200/60 font-luxury tracking-widest uppercase text-sm animate-pulse">Loading Player Profile...</p>
+        <p className="text-label text-gold-200/60 animate-pulse">Loading Player Profile...</p>
       </div>
     );
   }
@@ -210,7 +210,7 @@ const PlayerDetail = () => {
               </div>
               <div>
                 <CardTitle className="text-3xl font-luxury text-gold-900 dark:text-gold-100">{player.name}</CardTitle>
-                <CardDescription className="text-xs uppercase tracking-[.3em] text-gold-600 dark:text-gold-500/50 font-luxury flex items-center gap-2">
+                <CardDescription className="text-label text-gold-600 dark:text-gold-500/50 flex items-center gap-2">
                   <User className="h-3 w-3" /> Player Profile
                 </CardDescription>
               </div>
@@ -223,11 +223,11 @@ const PlayerDetail = () => {
           <CardContent className="pt-8 space-y-10 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Games</p>
+                <p className="text-label text-gold-900/60 dark:text-gold-500/60">Total Games</p>
                 <p className="text-3xl font-numbers text-luxury-primary">{player.total_games || 0}</p>
               </div>
               <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Total Profit/Loss</p>
+                <p className="text-label text-gold-900/60 dark:text-gold-500/60">Total Profit/Loss</p>
                 <p className={cn(
                   "text-3xl font-numbers",
                   isProfit ? "text-green-400" : "text-red-400"
@@ -236,7 +236,7 @@ const PlayerDetail = () => {
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/5 space-y-2 sm:col-span-2 lg:col-span-1">
-                <p className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">Success Ratio</p>
+                <p className="text-label text-gold-900/60 dark:text-gold-500/60">Success Ratio</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-numbers text-gold-500">{winRate.toFixed(1)}%</p>
                   <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-2">
@@ -250,7 +250,7 @@ const PlayerDetail = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-luxury text-luxury-primary">Player Details</h3>
-                  <p className="text-xs uppercase tracking-widest text-gold-900/40 dark:text-gold-500/40 font-luxury mt-1">Contact and payment info</p>
+                  <p className="text-label text-gold-900/40 dark:text-gold-500/40 mt-1">Contact and payment info</p>
                 </div>
                 <div className="flex gap-3">
                   <Button
@@ -278,19 +278,19 @@ const PlayerDetail = () => {
               {(player.email || player.upi_id || player.payment_preference) ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
+                    <div className="flex items-center gap-2 text-label text-gold-900/60 dark:text-gold-500/60">
                       <Mail className="h-3 w-3" /> Communication
                     </div>
                     <p className="text-sm text-gold-900 dark:text-gold-100 font-medium truncate">{player.email || "Not Disclosed"}</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
+                    <div className="flex items-center gap-2 text-label text-gold-900/60 dark:text-gold-500/60">
                       <CreditCard className="h-3 w-3" /> UPI ID
                     </div>
                     <p className="text-sm text-gold-900 dark:text-gold-100 font-medium truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gold-900/10 dark:border-white/5 bg-black/5 dark:bg-white/2 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-900/60 dark:text-gold-500/60">
+                    <div className="flex items-center gap-2 text-label text-gold-900/60 dark:text-gold-500/60">
                       <Layers className="h-3 w-3" /> Preference
                     </div>
                     <p className="text-sm text-gold-900 dark:text-gold-100 font-medium capitalize">{player.payment_preference ? (player.payment_preference === 'upi' ? 'Digital (UPI)' : 'Physical (Cash)') : "Unspecified"}</p>
@@ -298,7 +298,7 @@ const PlayerDetail = () => {
                 </div>
               ) : (
                 <div className="p-8 rounded-xl border border-dashed border-gold-900/10 dark:border-white/10 bg-black/5 dark:bg-white/2 text-center">
-                  <p className="text-sm font-luxury text-gold-900/30 dark:text-white/30 tracking-widest uppercase">No data associated with this player.</p>
+                  <p className="text-label text-gold-900/30 dark:text-white/30">No data associated with this player.</p>
                 </div>
               )}
             </div>
@@ -318,14 +318,14 @@ const PlayerDetail = () => {
             </div>
             <div className="min-w-[200px]">
               <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-                <SelectTrigger className="h-10 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase text-gold-900 dark:text-white">
+                <SelectTrigger className="h-10 bg-black/5 dark:bg-white/5 border-0 border-b border-gold-900/10 dark:border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all text-label text-gold-900 dark:text-white">
                   <Calendar className="mr-2 h-3.5 w-3.5 text-gold-600 dark:text-gold-500/40" />
                   <SelectValue placeholder="Period Filter" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
-                  <SelectItem value="all" className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">Full Archive</SelectItem>
+                  <SelectItem value="all" className="text-label text-gold-900 dark:text-gold-100/60">Full Archive</SelectItem>
                   {uniqueMonthYears.map((monthYear) => (
-                    <SelectItem key={monthYear} value={monthYear} className="font-luxury uppercase text-[10px] tracking-widest text-gold-900 dark:text-gold-100/60">
+                    <SelectItem key={monthYear} value={monthYear} className="text-label text-gold-900 dark:text-gold-100/60">
                       {monthYear}
                     </SelectItem>
                   ))}
@@ -344,7 +344,7 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("date")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
+                      className="h-full w-full justify-start text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Session Date {getSortIcon("date")}
                     </Button>
@@ -353,7 +353,7 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("buy_ins")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
+                      className="h-full w-full justify-start text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Buy-ins {getSortIcon("buy_ins")}
                     </Button>
@@ -362,7 +362,7 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("net_amount")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
+                      className="h-full w-full justify-start text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Net P&L {getSortIcon("net_amount")}
                     </Button>
@@ -371,13 +371,13 @@ const PlayerDetail = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("final_stack")}
-                      className="h-full w-full justify-start font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
+                      className="h-full w-full justify-start text-label text-gold-900/60 dark:text-gold-500/60 hover:text-gold-900 dark:hover:text-gold-200"
                     >
                       Final Stack {getSortIcon("final_stack")}
                     </Button>
                   </TableHead>
                   <TableHead className="h-14 text-right pr-8">
-                    <span className="font-luxury uppercase tracking-widest text-[10px] text-gold-900/60 dark:text-gold-500/60">Operation</span>
+                    <span className="text-label text-gold-900/60 dark:text-gold-500/60">Operation</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -415,7 +415,7 @@ const PlayerDetail = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => navigate(`/games/${game.game_id}`)}
-                          className="font-luxury uppercase tracking-widest text-[10px] hover:bg-gold-500/10 text-gold-600 dark:text-gold-500 px-4 h-9 rounded-full border border-gold-500/10"
+                          className="text-label hover:bg-gold-500/10 text-gold-600 dark:text-gold-500 px-4 h-9 rounded-full border border-gold-500/10"
                         >
                           Examine
                         </Button>

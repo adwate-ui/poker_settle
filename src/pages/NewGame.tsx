@@ -214,7 +214,7 @@ const NewGame = () => {
         <div className="space-y-8">
           {/* Buy-in Section */}
           <div className="space-y-3">
-            <Label htmlFor="buyin" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+            <Label htmlFor="buyin" className="text-label text-gold-500/60 ml-1">
               Initial Buy-in (Rs.)
             </Label>
             <div className="relative group">
@@ -242,7 +242,7 @@ const NewGame = () => {
           {/* Blinds Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <Label htmlFor="smallblind" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+              <Label htmlFor="smallblind" className="text-label text-gold-500/60 ml-1">
                 Small Blind (Rs.)
               </Label>
               <Input
@@ -262,7 +262,7 @@ const NewGame = () => {
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="bigblind" className="text-sm font-luxury uppercase tracking-[0.2em] text-gold-500/60 ml-1">
+              <Label htmlFor="bigblind" className="text-label text-gold-500/60 ml-1">
                 Big Blind (Rs.)
               </Label>
               <Input
@@ -285,7 +285,7 @@ const NewGame = () => {
 
           {/* Add Players Section */}
           <div className="space-y-4 pt-4 border-t border-white/5">
-            <h3 className="text-base font-luxury uppercase tracking-widest text-gold-400">Add Players</h3>
+            <h3 className="text-label text-gold-400">Add Players</h3>
             <PlayerSelector
               allPlayers={players}
               selectedPlayers={gamePlayers}
