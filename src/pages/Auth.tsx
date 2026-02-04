@@ -26,7 +26,7 @@ const Auth = () => {
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse" />
         </div>
-        <p className="text-label tracking-[0.3em] text-muted-foreground animate-pulse">Authenticating Portal...</p>
+        <p className="text-label tracking-[0.3em] text-muted-foreground animate-pulse">Authenticating...</p>
       </div>
     );
   }
@@ -50,10 +50,10 @@ const Auth = () => {
 
           <div className="space-y-2">
             <CardTitle className="text-4xl font-luxury tracking-tight text-foreground">
-              Noble Ledger
+              Poker Settle
             </CardTitle>
             <CardDescription className="text-label tracking-[0.4em] text-muted-foreground">
-              The Sovereign Poker Suite
+              Game Management & Settlements
             </CardDescription>
           </div>
         </CardHeader>
@@ -75,12 +75,12 @@ const Auth = () => {
               {isSigningIn ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Negotiating...</span>
+                  <span>Signing in...</span>
                 </>
               ) : (
                 <>
                   <ShieldCheck className="h-5 w-5" />
-                  <span>Enter the Vault</span>
+                  <span>Sign in with Google</span>
                 </>
               )}
             </div>
@@ -101,7 +101,7 @@ const Auth = () => {
       </Card>
 
       <div className="absolute bottom-8 text-center w-full pointer-events-none">
-        <p className="text-label tracking-[0.5em] text-muted-foreground/50">Reserved for Elite Strategists</p>
+        <p className="text-label tracking-[0.5em] text-muted-foreground/50">Secure Game Management</p>
       </div>
     </div>
   );

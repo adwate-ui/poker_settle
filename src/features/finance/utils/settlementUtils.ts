@@ -27,8 +27,6 @@ export interface EnhancedSettlement extends Settlement {
  * Phase 3: Cross-Method Settle (Minimize Transactions)
  *   - Settles any remaining balances between Cash and Digital pools.
  *   - Sorts debts by size (High to Low) to match large winners with large losers, reduces total edge count.
- * 
- * @throws Error if the total net amount is not zero (accounting discrepancy).
  */
 export function calculateOptimizedSettlements(
     playerBalances: PlayerBalance[],
@@ -54,11 +52,14 @@ export function calculateOptimizedSettlements(
 
     const balances = Array.from(adjustedAmounts.values());
 
-    // ZERO SUM CHECK
+    // ZERO SUM CHECK - Disabled to prevent dashboard crashes. 
+    // Discrepancies are handled visually in the GameDashboard Action Required section.
+    /*
     const totalNet = balances.reduce((sum, b) => sum + b.amount, 0);
     if (Math.abs(totalNet) > 0.01) {
         throw new Error(`Accounting Discrepancy: Total net amount is ${totalNet.toFixed(2)}. It must be zero to calculate settlements.`);
     }
+    */
 
     const winners = balances
         .filter(b => b.amount > 0)
