@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
 import { formatIndianNumber, formatProfitLoss, cn } from "@/lib/utils";
 import OptimizedAvatar from "./OptimizedAvatar";
-import { GlassCard } from "./ui/GlassCard";
+import { Card } from "@/components/ui/card";
 import { User, Wallet, Coins } from "lucide-react";
 
 interface DashboardPlayerCardProps {
@@ -23,7 +23,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <GlassCard className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
+    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",
         profitLossStatus === 'profit' ? 'bg-green-500' : profitLossStatus === 'loss' ? 'bg-red-500' : 'bg-gold-500/20'
@@ -78,7 +78,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
           </Badge>
         </div>
       </div>
-    </GlassCard>
+    </Card>
   );
 });
 

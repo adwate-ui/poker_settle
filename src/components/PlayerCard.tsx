@@ -6,7 +6,7 @@ import { Check, Plus, History, User, Coins, TrendingUp } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss, cn } from "@/lib/utils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
-import { GlassCard } from "./ui/GlassCard";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -63,7 +63,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <GlassCard className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
+    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
       {/* Status accent */}
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",
@@ -170,7 +170,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
           </div>
         </div>
       </div>
-    </GlassCard>
+    </Card>
   );
 });
 

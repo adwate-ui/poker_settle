@@ -108,6 +108,7 @@ export default {
       },
       fontFamily: {
         luxury: ['Playfair Display', 'serif'],
+        heading: ['Cinzel', 'serif'],
         numbers: ['Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },

@@ -9,7 +9,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatIndianNumber } from '@/lib/utils';
-import { GlassCard } from '@/components/ui/GlassCard';
+
 
 interface MemoizedHandCardProps {
   hand: HandWithDetails;

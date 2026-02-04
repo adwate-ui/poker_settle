@@ -39,7 +39,7 @@ import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 import {
   Collapsible,
@@ -640,7 +640,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             <div className="lg:col-span-7 space-y-8">
 
               {/* Game Summary */}
-              <GlassCard className="p-0 overflow-hidden">
+              <Card className="p-0 overflow-hidden">
                 <Collapsible open={gameStatsOpen} onOpenChange={setGameStatsOpen}>
                   <CollapsibleTrigger asChild>
                     <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
@@ -668,20 +668,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-              </GlassCard>
+              </Card>
 
               {/* Unified Table Position & Hand Tracking Section */}
               {showPositionEditor ? (
-                <GlassCard className="p-0 overflow-hidden border-gold-500/30">
+                <Card className="p-0 overflow-hidden border-gold-500/30">
                   <TablePositionEditor
                     players={gamePlayers.map(gp => gp.player)}
                     currentPositions={currentTablePosition?.positions || []}
                     onSave={handleSaveTablePosition}
                     onCancel={() => setShowPositionEditor(false)}
                   />
-                </GlassCard>
+                </Card>
               ) : handTrackingStage === 'ready' && currentTablePosition && currentTablePosition.positions.length > 0 ? (
-                <GlassCard className="p-0 overflow-hidden">
+                <Card className="p-0 overflow-hidden">
                   <Collapsible open={tablePositionOpen} onOpenChange={setTablePositionOpen}>
                     <CollapsibleTrigger asChild>
                       <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
@@ -720,9 +720,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
-                </GlassCard>
+                </Card>
               ) : (
-                <GlassCard className="p-12 border-dashed border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/2">
+                <Card className="p-12 border-dashed border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/2">
                   <div className="text-center space-y-8">
                     <div className="mx-auto w-24 h-24 bg-gold-500/10 rounded-full flex items-center justify-center border border-gold-500/20 shadow-inner">
                       <UsersIcon className="w-10 h-10 text-gold-500/20" />
@@ -739,7 +739,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       Save Seating
                     </Button>
                   </div>
-                </GlassCard>
+                </Card>
               )}
 
               {/* Hand Tracking Section */}
@@ -753,7 +753,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               )}
 
               {/* Buy-in Logs */}
-              <GlassCard className="p-0 overflow-hidden">
+              <Card className="p-0 overflow-hidden">
                 <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
                   <CollapsibleTrigger asChild>
                     <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
@@ -775,10 +775,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-              </GlassCard>
+              </Card>
 
               {/* Final Stack Logs */}
-              <GlassCard className="p-0 overflow-hidden">
+              <Card className="p-0 overflow-hidden">
                 <Collapsible open={finalStackLogsOpen} onOpenChange={setFinalStackLogsOpen}>
                   <CollapsibleTrigger asChild>
                     <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
@@ -799,14 +799,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-              </GlassCard>
+              </Card>
             </div>
 
             {/* Right Column (30%) - Controls & Administration */}
             <div className="lg:col-span-3 space-y-8">
 
               {/* Players Section */}
-              <GlassCard className="p-0 overflow-hidden">
+              <Card className="p-0 overflow-hidden">
                 <Collapsible open={playersOpen} onOpenChange={setPlayersOpen}>
                   <CollapsibleTrigger asChild>
                     <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 cursor-pointer flex items-center justify-between group">
@@ -930,11 +930,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-              </GlassCard>
+              </Card>
 
               {/* Manual Transfers */}
               {manualTransfers.length > 0 && (
-                <GlassCard className="p-0 overflow-hidden">
+                <Card className="p-0 overflow-hidden">
                   <div className="p-6 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <History className="h-5 w-5 text-gold-500/40" />
@@ -964,12 +964,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </div>
                     ))}
                   </div>
-                </GlassCard>
+                </Card>
               )}
 
               {/* Add Manual Transfer Form */}
               {showManualTransfer && (
-                <GlassCard className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500 border-gold-500/30">
+                <Card className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500 border-gold-500/30">
                   <div className="flex items-center gap-3 border-b border-black/10 dark:border-white/5 pb-4">
                     <ShieldCheck className="h-5 w-5 text-gold-500" />
                     <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Adjustment</h3>
@@ -1025,7 +1025,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <Button onClick={() => setShowManualTransfer(false)} variant="ghost" className="flex-1 h-12 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 text-gold-900/30 dark:text-white/30 font-luxury uppercase tracking-widest text-[10px] rounded-xl transition-all">Cancel</Button>
                     <Button onClick={addManualTransfer} className="flex-1 h-12 bg-gold-600 hover:bg-gold-500 text-black font-luxury uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-gold-900/10 transition-all">Save</Button>
                   </div>
-                </GlassCard>
+                </Card>
               )}
 
               {/* Final Actions Container */}
@@ -1089,7 +1089,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               {/* Settlements Display */}
               {settlements.length > 0 && (
-                <GlassCard className="p-0 overflow-hidden border-gold-500/40 shadow-[0_0_40px_rgba(212,184,60,0.1)]">
+                <Card className="p-0 overflow-hidden border-gold-500/40 shadow-[0_0_40px_rgba(212,184,60,0.1)]">
                   <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
                     <CollapsibleTrigger asChild>
                       <div className="p-6 border-b border-gold-500/20 bg-gold-500/5 cursor-pointer flex items-center justify-between group">
@@ -1120,7 +1120,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
-                </GlassCard>
+                </Card>
               )}
             </div>
           </div>
