@@ -158,10 +158,10 @@ export default {
         },
         shimmer: {
           "0%": {
-            transform: "translateX(-100%)",
+            "background-position": "200% 0",
           },
           "100%": {
-            transform: "translateX(100%)",
+            "background-position": "-200% 0",
           },
         },
       },

@@ -638,55 +638,56 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </TabsContent>
 
             <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-              <DialogContent className="">
-                <DialogHeader className="p-6 border-b border-border">
-                  <DialogTitle className="text-lg font-bold uppercase tracking-widest text-center">Add Player</DialogTitle>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Player</DialogTitle>
+                  <DialogDescription>
+                    Search for an existing player or create a new one.
+                  </DialogDescription>
                 </DialogHeader>
-                <div className="p-6">
-                  <Tabs defaultValue="existing" className="space-y-6">
-                    <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
-                      <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search</TabsTrigger>
-                      <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="existing" className="space-y-6">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
-                        <Input
-                          placeholder="Search..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          variant="luxury"
-                          className="pl-10"
-                        />
-                      </div>
-                      <ScrollArea className="h-[300px]">
-                        <div className="space-y-2">
-                          {availablePlayers.map(p => (
-                            <button key={p.id} onClick={() => addExistingPlayer(p)} className="w-full p-4 rounded-xl border border-border bg-accent/2 flex items-center gap-3 active:bg-primary/10">
-                              <OptimizedAvatar name={p.name} size="sm" />
-                              <span className="uppercase text-xs font-medium">{p.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="new" className="space-y-6">
+                <Tabs defaultValue="existing" className="space-y-6">
+                  <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
+                    <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search</TabsTrigger>
+                    <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="existing" className="space-y-6">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
                       <Input
-                        placeholder="Enter name"
-                        value={newPlayerName}
-                        onChange={(e) => setNewPlayerName(e.target.value)}
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         variant="luxury"
+                        className="pl-10"
                       />
-                      <Button
-                        onClick={addNewPlayer}
-                        disabled={!newPlayerName.trim() || isCreatingPlayer}
-                        className="w-full h-14 font-bold uppercase tracking-widest text-[11px] rounded-xl"
-                      >
-                        Add New Player
-                      </Button>
-                    </TabsContent>
-                  </Tabs>
-                </div>
+                    </div>
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-2">
+                        {availablePlayers.map(p => (
+                          <button key={p.id} onClick={() => addExistingPlayer(p)} className="w-full p-4 rounded-xl border border-border bg-accent/2 flex items-center gap-3 active:bg-primary/10">
+                            <OptimizedAvatar name={p.name} size="sm" />
+                            <span className="uppercase text-xs font-medium">{p.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                  <TabsContent value="new" className="space-y-6">
+                    <Input
+                      placeholder="Enter name"
+                      value={newPlayerName}
+                      onChange={(e) => setNewPlayerName(e.target.value)}
+                      variant="luxury"
+                    />
+                    <Button
+                      onClick={addNewPlayer}
+                      disabled={!newPlayerName.trim() || isCreatingPlayer}
+                      className="w-full h-14 font-bold uppercase tracking-widest text-[11px] rounded-xl"
+                    >
+                      Add New Player
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </DialogContent>
             </Dialog>
           </Tabs>
