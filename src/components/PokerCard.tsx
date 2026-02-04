@@ -18,7 +18,6 @@ const SUIT_PATHS = {
   c: "M12 2c-1.657 0-3 1.343-3 3 0 .762.284 1.455.75 1.987C7.306 7.6 5 10 5 13c0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346C10.244 17.545 10 18.682 10 20c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 .762.284 1.455.75 1.987-2.444.613-4.75 3.013-4.75 6.013 0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346-.372.891-.616 2.028-.616 3.346 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3z",
 };
 
-
 const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }: { suit: string, className?: string, fourColor?: boolean, applyDepth?: boolean }) => {
   const getFill = (suit: string) => {
     if (!fourColor) {
@@ -40,7 +39,7 @@ const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }
   return (
     <svg
       viewBox="0 0 24 24"
-      className={cn(className)}
+      className={cn(className, "drop-shadow-sm")}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -55,6 +54,7 @@ const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }
 const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }: PokerCardProps) => {
   const { design } = useCardBackDesign();
 
+  // 1. Render Card Back or Placeholder
   if (!card || card === 'back' || card === '??') {
     const sizeMap = {
       xxs: { width: 32, height: 46 },
@@ -65,7 +65,7 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     };
 
     return (
-      <div className={cn(className, "rounded-lg shadow-md overflow-hidden border border-gray-400/30 ring-1 ring-black/5")}>
+      <div className={cn(className, "rounded-lg shadow-xl overflow-hidden border border-white/10 ring-1 ring-black/20")}>
         <CardBackSVG {...sizeMap[size]} design={design} />
       </div>
     );
@@ -73,54 +73,57 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
 
   if (card.length < 2) return null;
 
+  // 2. Parse Card Data
   const rank = card.length === 3 ? "10" : card[0].toUpperCase();
   const suit = card[card.length - 1].toLowerCase();
 
   const isFaceCard = ['J', 'Q', 'K'].includes(rank);
   const isAce = rank === 'A';
 
+  // 3. Size Definitions (Optimized for Readability)
   const containerSizes = {
-    xxs: 'w-8 aspect-[2.5/3.5] rounded-[3px]',
-    xs: 'w-10 aspect-[2.5/3.5] rounded-[4px]',
-    sm: 'w-14 aspect-[2.5/3.5] rounded-[6px]',
-    md: 'w-20 aspect-[2.5/3.5] rounded-[8px]',
-    lg: 'w-24 aspect-[2.5/3.5] rounded-[10px]',
+    xxs: 'w-8 aspect-[2.5/3.5] rounded-[4px]',
+    xs: 'w-10 aspect-[2.5/3.5] rounded-[6px]',
+    sm: 'w-14 aspect-[2.5/3.5] rounded-[8px]',
+    md: 'w-20 aspect-[2.5/3.5] rounded-[10px]',
+    lg: 'w-24 aspect-[2.5/3.5] rounded-[12px]',
   };
 
   const rankSizes = {
-    xxs: 'text-[9px]',
-    xs: 'text-[8px]',
-    sm: 'text-[13px]',
-    md: 'text-[21px]',
-    lg: 'text-[25px]',
+    xxs: 'text-[10px]',
+    xs: 'text-[12px]',
+    sm: 'text-[16px]',
+    md: 'text-[24px]',
+    lg: 'text-[28px]',
   };
 
-  const suitIconSizes = {
-    xxs: 'w-1.5 h-1.5',
-    xs: 'w-2 h-2',
-    sm: 'w-3 h-3',
-    md: 'w-4.5 h-4.5',
-    lg: 'w-5.5 h-5.5',
+  const centerSuitSizes = {
+    xxs: 'w-5 h-5',
+    xs: 'w-6 h-6',
+    sm: 'w-8 h-8',
+    md: 'w-12 h-12',
+    lg: 'w-14 h-14',
   };
 
-  const cornerPadding = {
-    xxs: 'p-0',
-    xs: 'p-0',
-    sm: 'p-0.5',
-    md: 'p-1.5',
-    lg: 'p-2',
+  const padding = {
+    xxs: 'px-0.5 py-0.5',
+    xs: 'px-1 py-0.5',
+    sm: 'px-1.5 py-1',
+    md: 'px-2 py-1.5',
+    lg: 'px-2.5 py-2',
   };
 
+  // 4. Color Logic (Luxurious Tones)
   const getRankColor = (s: string) => {
     if (!fourColor) {
-      if (s === 'd' || s === 'h') return "text-[#ef4444]";
-      return "text-[#111827]";
+      if (s === 'd' || s === 'h') return "text-[#be123c]"; // Rose Red
+      return "text-[#0f172a]"; // Slate 900
     }
     switch (s) {
-      case 'h': return "text-[#ef4444]";
-      case 's': return "text-[#111827]";
-      case 'd': return "text-[#3b82f6]";
-      case 'c': return "text-[#22c55e]";
+      case 'h': return "text-[#be123c]"; // Rose Red
+      case 's': return "text-[#0f172a]"; // Slate 900
+      case 'd': return "text-[#2563eb]"; // Royal Blue
+      case 'c': return "text-[#15803d]"; // Emerald Green
       default: return "text-gray-900";
     }
   };
@@ -131,95 +134,50 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     <div className={cn(
       containerSizes[size],
       className,
-      "relative select-none overflow-hidden border border-black/10",
-      "bg-white",
-      "shadow-[0_4px_10px_rgba(0,0,0,0.2),0_1px_2px_rgba(0,0,0,0.1)]",
-      "group"
+      "relative select-none overflow-hidden",
+      "bg-gradient-to-br from-white to-stone-100", // Subtle Ivory Gradient
+      "border border-stone-200/60",
+      "shadow-[0_2px_8px_-2px_rgba(0,0,0,0.15)]", // Soft Luxury Shadow
+      "group hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] transition-shadow duration-300"
     )}>
 
-      {/* 1. Linen Texture Overlay (Filter-based) */}
-      <div className="absolute inset-0 pointer-events-none opacity-40 bg-transparent" style={{ filter: 'url(#linen-texture-filter)' }} />
+      {/* Texture: Linen Filter (Preserved from original) */}
+      <div className="absolute inset-0 pointer-events-none opacity-30 bg-transparent mix-blend-multiply" style={{ filter: 'url(#linen-texture-filter)' }} />
 
-      {/* 2. Inner Glow/Coating */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/40 pointer-events-none" />
-      <div className="absolute inset-0 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] pointer-events-none" />
+      {/* Gloss: Inner shine for depth */}
+      <div className="absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(0,0,0,0.05)] pointer-events-none z-20" />
 
-      {/* Top-left corner index */}
-      <div className={cn("absolute top-0 left-0 flex flex-col items-center leading-none z-10", cornerPadding[size])}>
-        <div className={cn(
-          rankSizes[size],
-          "font-serif font-bold tracking-tight mb-[1px]",
-          rankColor
-        )} style={{ fontFamily: '"Playfair Display", "Bodoni MT", serif' }}>
+      {/* --- Top Left Corner --- */}
+      <div className={cn("absolute top-0 left-0 z-10 flex flex-col items-center leading-none", padding[size])}>
+        <span className={cn("font-luxury font-bold tracking-tighter", rankSizes[size], rankColor)}>
           {rank}
-        </div>
-        <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
+        </span>
       </div>
 
-      {/* Main Vision Area */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {/* --- Center Visual --- */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
         {isFaceCard ? (
-          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Royal Gold Frame */}
-            <div className={cn(
-              "absolute border-[1px] rounded-[2px] opacity-40",
-              size === 'lg' ? 'w-[78%] h-[82%]' : size === 'md' ? 'w-[75%] h-[80%]' : 'w-[70%] h-[75%]'
-            )} style={{
-              borderImage: 'linear-gradient(to bottom right, #fbbf24, #d97706, #b45309) 1',
-              borderStyle: 'solid'
-            }} />
-
-            {/* Background Monogram */}
-            <span className={cn(
-              "absolute font-serif italic font-black opacity-[0.05] select-none",
-              rankColor,
-              size === 'lg' ? 'text-[60px]' : size === 'md' ? 'text-[50px]' : 'text-[30px]'
-            )} style={{ fontFamily: '"Playfair Display", serif' }}>
-              {rank}
-            </span>
-
-            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
-              "relative z-10",
-              size === 'lg' ? 'w-12 h-12' :
-                size === 'md' ? 'w-10 h-10' :
-                  size === 'sm' ? 'w-6 h-6' : 'w-4 h-4'
-            )} />
-          </div>
-        ) : isAce ? (
+          // Face Cards: Gold Ring Accent
           <div className="relative flex items-center justify-center">
-            {/* Sunburst/Halo Effect */}
             <div className={cn(
-              "absolute rounded-full bg-gradient-to-r from-transparent via-primary/5 to-transparent blur-xl animate-pulse",
-              size === 'lg' ? 'w-24 h-24' : size === 'md' ? 'w-20 h-20' : 'w-12 h-12'
+              "absolute rounded-full border border-amber-400/30 bg-amber-50/50",
+              size === 'lg' ? 'w-16 h-16' : size === 'md' ? 'w-14 h-14' : 'w-10 h-10'
             )} />
-
-            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
-              "relative z-10",
-              size === 'lg' ? 'w-20 h-20' :
-                size === 'md' ? 'w-16 h-16' :
-                  size === 'sm' ? 'w-12 h-12' : 'w-8 h-8'
-            )} />
+            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={centerSuitSizes[size]} />
           </div>
         ) : (
-          <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={cn(
-            size === 'lg' ? 'w-14 h-14' :
-              size === 'md' ? 'w-12 h-12' :
-                size === 'sm' ? 'w-8 h-8' : 'w-5 h-5'
-          )} />
+          // Number Cards: Clean Center Suit
+          <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={centerSuitSizes[size]} />
         )}
       </div>
 
-      {/* Bottom-right corner index (rotated) */}
-      <div className={cn("absolute bottom-0 right-0 flex flex-col items-center leading-none z-10 rotate-180", cornerPadding[size])}>
-        <div className={cn(
-          rankSizes[size],
-          "font-serif font-bold tracking-tight mb-[1px]",
-          rankColor
-        )} style={{ fontFamily: '"Playfair Display", "Bodoni MT", serif' }}>
+      {/* --- Bottom Right Corner (Rotated) --- */}
+      <div className={cn("absolute bottom-0 right-0 z-10 flex flex-col items-center leading-none rotate-180", padding[size])}>
+        <span className={cn("font-luxury font-bold tracking-tighter", rankSizes[size], rankColor)}>
           {rank}
-        </div>
-        <SuitIcon suit={suit} fourColor={fourColor} className={suitIconSizes[size]} />
+        </span>
       </div>
+
     </div>
   );
 });

@@ -158,7 +158,6 @@ export const useHandsHistory = () => {
     // 1. Dynamic Perspective & Participation Filter
     // If a hero name is selected, we project the hand data from their perspective
     const isHeroSet = !!filters.heroName;
-    const heroName = filters.heroName || 'Adwate';
 
     if (isHeroSet) {
       // Only include hands where the selected hero participated
@@ -175,11 +174,15 @@ export const useHandsHistory = () => {
       const heroActions = h.actions.filter(a => (a as ActionWithPlayer).player?.name === filters.heroName);
       const firstHeroAction = heroActions[0];
 
-      const isWin = h.winner_player_names.includes(filters.heroName!) || h.winner_player_name === filters.heroName;
+      // Determine hero's position from the first action if available, otherwise fallback to DB default
+      const position = firstHeroAction?.position || h.hero_position;
+
+      // Determine if it was a win for THIS specific hero
+      const isWin = h.winner_player_names.includes(filters.heroName!) || h.winner_player_id === h.actions.find(a => (a as ActionWithPlayer).player?.name === filters.heroName)?.player_id;
 
       return {
         ...h,
-        hero_position: firstHeroAction?.position || h.hero_position,
+        hero_position: position,
         is_hero_win: isWin,
         // is_split is preserved from original db as it's a global property of the hand
       };
@@ -205,11 +208,8 @@ export const useHandsHistory = () => {
     }
 
     if (filters.showdown && filters.showdown !== 'all') {
-      if (filters.showdown === 'yes') {
-        projectedHands = projectedHands.filter(h => h.final_stage === 'Showdown');
-      } else {
-        projectedHands = projectedHands.filter(h => h.final_stage !== 'Showdown');
-      }
+      const isShowdown = filters.showdown === 'yes';
+      projectedHands = projectedHands.filter(h => (h.final_stage === 'Showdown') === isShowdown);
     }
 
     if (filters.finalStage) {
@@ -217,32 +217,24 @@ export const useHandsHistory = () => {
     }
 
     // Handle villain filters
-    if (filters.villainName && filters.villainPosition) {
-      projectedHands = projectedHands.filter(h => {
-        return h.actions.some(action => {
-          const playerData = (action as ActionWithPlayer).player;
-          return playerData?.name === filters.villainName && action.position === filters.villainPosition;
-        });
-      });
-    } else if (filters.villainName) {
-      projectedHands = projectedHands.filter(h => {
-        return h.actions.some(action => {
-          const playerData = (action as ActionWithPlayer).player;
-          return playerData?.name === filters.villainName;
-        });
-      });
+    if (filters.villainName) {
+      projectedHands = projectedHands.filter(h =>
+        h.actions.some(action => (action as ActionWithPlayer).player?.name === filters.villainName && (!filters.villainPosition || action.position === filters.villainPosition))
+      );
     } else if (filters.villainPosition) {
-      projectedHands = projectedHands.filter(h => {
-        return h.actions.some(action => action.position === filters.villainPosition);
-      });
+      projectedHands = projectedHands.filter(h =>
+        h.actions.some(action => action.position === filters.villainPosition)
+      );
     }
 
     // Filter by hero hole cards (Hero is dynamic)
     if (filters.heroHoleCards && filters.heroHoleCards !== 'all') {
       projectedHands = projectedHands.filter(h => {
+        // If hero is set, look for their cards. If not, look for anyone's cards as hero perspective is global.
         const heroAction = h.actions.find(action => {
-          const playerData = (action as ActionWithPlayer).player;
-          return playerData?.name === heroName && action.hole_cards;
+          const name = (action as ActionWithPlayer).player?.name;
+          const isTargetPlayer = isHeroSet ? name === filters.heroName : true;
+          return isTargetPlayer && action.hole_cards;
         });
         return heroAction?.hole_cards && matchesHoleCardFilter(heroAction.hole_cards, filters.heroHoleCards!);
       });
@@ -252,15 +244,12 @@ export const useHandsHistory = () => {
     if (filters.villainHoleCards && filters.villainHoleCards !== 'all') {
       projectedHands = projectedHands.filter(h => {
         if (filters.villainName) {
-          const villainAction = h.actions.find(action => {
-            const playerData = (action as ActionWithPlayer).player;
-            return playerData?.name === filters.villainName && action.hole_cards;
-          });
+          const villainAction = h.actions.find(action => (action as ActionWithPlayer).player?.name === filters.villainName && action.hole_cards);
           return villainAction?.hole_cards && matchesHoleCardFilter(villainAction.hole_cards, filters.villainHoleCards!);
         } else {
           return h.actions.some(action => {
-            const playerData = (action as ActionWithPlayer).player;
-            const isNotHero = playerData?.name !== heroName;
+            const name = (action as ActionWithPlayer).player?.name;
+            const isNotHero = isHeroSet ? name !== filters.heroName : true;
             return isNotHero && action.hole_cards && matchesHoleCardFilter(action.hole_cards, filters.villainHoleCards!);
           });
         }
@@ -286,51 +275,63 @@ export const useHandsHistory = () => {
     setFilters({});
   }, []);
 
-  // Memoized unique values
-  const getUniqueGames = useMemo(() => {
-    const gameMap = new Map();
-    hands.forEach(hand => {
-      if (!gameMap.has(hand.game_id)) {
-        gameMap.set(hand.game_id, {
+  // Dynamic Filter Options Generation (Cascading)
+  const filterOptions = useMemo(() => {
+    const isHeroSet = !!filters.heroName;
+
+    // All unique player names for Hero selection
+    const allPlayerNames = new Set<string>();
+    hands.forEach(h => h.actions.forEach(a => {
+      const name = (a as ActionWithPlayer).player?.name;
+      if (name) allPlayerNames.add(name);
+    }));
+
+    // Filter hands by current hero to determine available games, positions, and villains
+    const heroHands = isHeroSet
+      ? hands.filter(h => h.actions.some(a => (a as ActionWithPlayer).player?.name === filters.heroName))
+      : hands;
+
+    const games = new Map();
+    const heroPositions = new Set<string>();
+    const villainNames = new Set<string>();
+    const villainPositions = new Set<string>();
+
+    heroHands.forEach(hand => {
+      // Available Games
+      if (!games.has(hand.game_id)) {
+        games.set(hand.game_id, {
           id: hand.game_id,
           date: hand.game_date,
           buy_in: hand.game_buy_in,
         });
       }
-    });
-    return Array.from(gameMap.values());
-  }, [hands]);
 
-  const getUniqueHeroPositions = useMemo(() => {
-    const positions = new Set<string>();
-    hands.forEach(hand => {
-      if (hand.hero_position) positions.add(hand.hero_position);
-    });
-    return Array.from(positions).sort();
-  }, [hands]);
+      // Available Hero Positions (for the current hero)
+      if (isHeroSet) {
+        const heroAction = hand.actions.find(a => (a as ActionWithPlayer).player?.name === filters.heroName);
+        if (heroAction?.position) heroPositions.add(heroAction.position);
+      } else {
+        if (hand.hero_position) heroPositions.add(hand.hero_position);
+      }
 
-  const getUniquePlayerNames = useMemo(() => {
-    const names = new Set<string>();
-    hands.forEach(hand => {
+      // Available Villains & Positions
       hand.actions.forEach(action => {
-        const playerData = (action as ActionWithPlayer).player;
-        if (playerData?.name) names.add(playerData.name);
+        const name = (action as ActionWithPlayer).player?.name;
+        if (name && (!isHeroSet || name !== filters.heroName)) {
+          villainNames.add(name);
+        }
+        if (action.position) villainPositions.add(action.position);
       });
     });
-    return Array.from(names).sort();
-  }, [hands]);
 
-  const getUniqueVillainNames = getUniquePlayerNames;
-
-  const getUniqueVillainPositions = useMemo(() => {
-    const positions = new Set<string>();
-    hands.forEach(hand => {
-      hand.actions.forEach(action => {
-        if (action.position) positions.add(action.position);
-      });
-    });
-    return Array.from(positions).sort();
-  }, [hands]);
+    return {
+      heroNames: Array.from(allPlayerNames).sort(),
+      games: Array.from(games.values()).sort((a, b) => b.date.localeCompare(a.date)),
+      heroPositions: Array.from(heroPositions).sort(),
+      villainNames: Array.from(villainNames).sort(),
+      villainPositions: Array.from(villainPositions).sort(),
+    };
+  }, [hands, filters.heroName]);
 
   const getStatistics = useMemo(() => {
     const totalHands = filteredHands.length;
@@ -359,11 +360,12 @@ export const useHandsHistory = () => {
     filters,
     updateFilters,
     clearFilters,
-    getUniqueGames,
-    getUniqueHeroPositions,
-    getUniquePlayerNames,
-    getUniqueVillainNames,
-    getUniqueVillainPositions,
+    heroNames: filterOptions.heroNames,
+    getUniqueGames: filterOptions.games,
+    getUniqueHeroPositions: filterOptions.heroPositions,
+    getUniquePlayerNames: filterOptions.heroNames,
+    getUniqueVillainNames: filterOptions.villainNames,
+    getUniqueVillainPositions: filterOptions.villainPositions,
     getStatistics,
     refetch: () => fetchHands(1, false),
     loadMore,

@@ -126,6 +126,18 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "table": "var(--poker-table-radius)",
+        "table-sm": "var(--poker-table-radius-mobile)",
+      },
+      zIndex: {
+        'player-cards': '5',
+        'player-unit': '10',
+        'player-badge': '15',
+        'poker-overlay': '20',
+        'chip-stack': '25',
+        'position-label': '30',
+        'winner-celebration': '40',
+        'confetti': '50',
       },
       keyframes: {
         "accordion-down": {

@@ -17,9 +17,9 @@ const HandsHistory = () => {
     filters,
     updateFilters,
     clearFilters,
+    heroNames,
     getUniqueGames,
     getUniqueHeroPositions,
-    getUniquePlayerNames,
     getUniqueVillainNames,
     getUniqueVillainPositions,
     getStatistics,
@@ -34,7 +34,7 @@ const HandsHistory = () => {
   const stats = getStatistics;
   const uniqueGames = getUniqueGames;
   const uniquePositions = getUniqueHeroPositions;
-  const uniquePlayerNames = getUniquePlayerNames;
+  const uniqueHeroNames = heroNames;
   const uniqueVillainNames = getUniqueVillainNames;
   const uniqueVillainPositions = getUniqueVillainPositions;
 
@@ -157,11 +157,11 @@ const HandsHistory = () => {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Hero (Default: Adwate)" />
+                  <SelectValue placeholder="Global View" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Default (Adwate)</SelectItem>
-                  {uniquePlayerNames.map(name => (
+                  <SelectItem value="all">Global View (Session Owner)</SelectItem>
+                  {uniqueHeroNames.map(name => (
                     <SelectItem key={name} value={name}>{name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -174,9 +174,10 @@ const HandsHistory = () => {
                 onValueChange={(value) =>
                   updateFilters({ heroPosition: value === 'all' ? undefined : value })
                 }
+                disabled={uniquePositions.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Positions" />
+                  <SelectValue placeholder={uniquePositions.length === 0 ? "No Positions" : "All Positions"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Positions</SelectItem>
@@ -317,9 +318,10 @@ const HandsHistory = () => {
                 onValueChange={(value) =>
                   updateFilters({ heroHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
                 }
+                disabled={!filters.heroName}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Cards" />
+                  <SelectValue placeholder={!filters.heroName ? "Select Hero First" : "All Cards"} />
                 </SelectTrigger>
                 <SelectContent>
                   {HOLE_CARD_FILTER_OPTIONS.map(option => (

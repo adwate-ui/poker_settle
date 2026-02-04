@@ -25,19 +25,19 @@ export const useHandTracking = () => {
           hero_position: heroPosition,
           final_stage: 'Preflop',
           pot_size: 0,
-          positions: positions || [],
+          positions: (positions as any) || [],
         })
         .select()
         .single();
 
       if (error) throw error;
-      
+
       toast({
         title: 'Hand Created',
         description: `Hand #${handNumber} started`,
       });
-      
-      return data as PokerHand;
+
+      return data as unknown as PokerHand;
     } catch (error) {
       const err = error as Error;
       toast({
@@ -185,7 +185,7 @@ export const useHandTracking = () => {
   ): Promise<void> => {
     try {
       const isSplit = winnerPlayerIds.length > 1;
-      
+
       const updateData: Partial<PokerHand> & { is_split?: boolean } = {
         winner_player_id: winnerPlayerIds[0] || null,
         winner_player_ids: winnerPlayerIds,
@@ -193,22 +193,22 @@ export const useHandTracking = () => {
         is_hero_win: isHeroWin,
         is_split: isSplit,
       };
-      
+
       // Only update final_stage if provided
       if (finalStage) {
         updateData.final_stage = finalStage as PokerHand['final_stage'];
       }
-      
+
       const { error } = await supabase
         .from('poker_hands')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', handId);
 
       if (error) throw error;
 
       toast({
         title: 'Hand Complete',
-        description: winnerPlayerIds.length > 1 
+        description: winnerPlayerIds.length > 1
           ? `Chopped pot between ${winnerPlayerIds.length} players`
           : 'Hand has been recorded successfully',
       });
@@ -219,6 +219,75 @@ export const useHandTracking = () => {
         description: err.message,
         variant: 'destructive',
       });
+    }
+  };
+
+  const saveCompleteHandData = async (
+    handId: string,
+    actions: any[],
+    streetCards: any[],
+    winnerPlayerIds: string[],
+    potSize: number,
+    isHeroWin: boolean,
+    finalStageValue: string
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      // 1. Bulk insert actions
+      if (actions.length > 0) {
+        const { error: actionsError } = await supabase
+          .from('player_actions')
+          .insert(actions.map(a => ({
+            ...a,
+            hand_id: handId
+          })));
+        if (actionsError) throw actionsError;
+      }
+
+      // 2. Bulk insert street cards
+      if (streetCards.length > 0) {
+        const { error: cardsError } = await supabase
+          .from('street_cards')
+          .insert(streetCards.map(c => ({
+            ...c,
+            hand_id: handId
+          })));
+        if (cardsError) throw cardsError;
+      }
+
+      // 3. Complete the hand
+      const isSplit = winnerPlayerIds.length > 1;
+      const { error: completeError } = await supabase
+        .from('poker_hands')
+        .update({
+          winner_player_id: winnerPlayerIds[0] || null,
+          winner_player_ids: winnerPlayerIds,
+          pot_size: potSize,
+          is_hero_win: isHeroWin,
+          is_split: isSplit,
+          final_stage: finalStageValue as PokerHand['final_stage'],
+        })
+        .eq('id', handId);
+
+      if (completeError) throw completeError;
+
+      toast({
+        title: 'Hand Saved',
+        description: 'All actions and cards recorded successfully',
+      });
+
+      return true;
+    } catch (error) {
+      const err = error as Error;
+      toast({
+        title: 'Error Saving Hand Data',
+        description: err.message,
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -248,12 +317,12 @@ export const useHandTracking = () => {
         .eq('id', actionId);
 
       if (error) throw error;
-      
+
       toast({
         title: 'Hole Cards Updated',
         description: 'Player hole cards have been saved',
       });
-      
+
       return true;
     } catch (error) {
       const err = error as Error;

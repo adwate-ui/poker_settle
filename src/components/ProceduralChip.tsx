@@ -29,57 +29,51 @@ export const ProceduralChip = ({
     return (
         <div
             className={cn(
-                "relative rounded-full flex items-center justify-center select-none transition-all duration-300 group",
+                "relative rounded-full flex items-center justify-center select-none transition-all duration-300 group shadow-2xl",
                 sizeClasses[size],
                 className
             )}
             style={{
                 backgroundColor: color,
-                // 3D thickness effect - slightly reduced for tighter stacking
+                // Enhanced 3D depth for premium feel
                 boxShadow: `
-          0 ${depth}px 0 rgba(0,0,0,0.3),
-          0 ${depth + 1}px 2px rgba(0,0,0,0.2),
-          inset 0 -1px 3px rgba(0,0,0,0.2),
-          inset 0 1px 3px rgba(255,255,255,0.3)
-        `,
-                // Edge spots pattern using multiple background layers
+                    0 ${depth + 1}px 4px rgba(0,0,0,0.5),
+                    inset 0 -2px 4px rgba(0,0,0,0.4),
+                    inset 0 2px 4px rgba(255,255,255,0.4)
+                `,
+                // Casino-style edge spots using repeating-conic-gradient
                 backgroundImage: `
-          radial-gradient(circle at center, transparent 70%, rgba(255,255,255,0.1) 71%, transparent 72%),
-          repeating-conic-gradient(
-            from 0deg,
-            rgba(255, 255, 255, 0.4) 0deg 15deg,
-            transparent 15deg 45deg
-          )
-        `,
+                    radial-gradient(circle at center, transparent 65%, rgba(0,0,0,0.1) 66%, transparent 68%),
+                    repeating-conic-gradient(
+                        from 0deg,
+                        rgba(255, 255, 255, 0.9) 0deg 15deg,
+                        transparent 15deg 45deg
+                    )
+                `,
             }}
         >
-            {/* Outer Rim texture */}
-            <div className="absolute inset-0 rounded-full border-2 border-white/20 pointer-events-none" />
+            {/* Inner pressed inlay ring */}
+            <div className="absolute inset-0 rounded-full border-[3px] border-black/10 pointer-events-none mix-blend-overlay" />
 
-            {/* Inner circular groove */}
+            {/* Inlay surface */}
             <div
-                className="absolute inset-[15%] rounded-full border border-black/10 shadow-inner flex items-center justify-center"
+                className="absolute inset-[20%] rounded-full shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)] border border-white/10"
                 style={{
-                    background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 70%)`,
+                    background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2) 0%, transparent 60%)`,
                     backgroundColor: 'inherit'
                 }}
             >
-                {/* The numeric value in the center */}
-                <span
-                    className="font-luxury font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] tracking-tighter"
-                    style={{
-                        textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-                    }}
-                >
-                    {value}
-                </span>
+                {/* Subtle pressed texture effect */}
+                <div className="absolute inset-0 rounded-full opacity-20"
+                    style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '4px 4px' }}
+                />
             </div>
 
-            {/* Surface shine/glint layer */}
+            {/* Top glint */}
             <div
                 className="absolute inset-0 rounded-full overflow-hidden pointer-events-none"
                 style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)'
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.2) 100%)'
                 }}
             />
         </div>

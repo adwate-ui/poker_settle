@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { gameKeys } from "@/features/game/api/queryKeys";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,6 +19,7 @@ import { cn } from "@/lib/utils";
 const NewGame = () => {
   const { user } = useAuth();
   const { createPlayer, createOrFindPlayerByName } = usePlayerManagement();
+  const queryClient = useQueryClient();
   const [buyInAmount, setBuyInAmount] = useState("2,000");
   const [smallBlind, setSmallBlind] = useState("20");
   const [bigBlind, setBigBlind] = useState("40");
@@ -57,7 +60,7 @@ const NewGame = () => {
       .single();
 
     if (!error && data) {
-      setActiveGame(data as Game);
+      setActiveGame(data as unknown as Game);
     } else {
       setActiveGame(null);
     }
@@ -107,12 +110,15 @@ const NewGame = () => {
 
     setLoading(true);
     try {
+      const smallBlindVal = parseIndianNumber(smallBlind);
+      const bigBlindVal = parseIndianNumber(bigBlind);
+
       const { data: game, error: gameError } = await supabase
         .from("games")
         .insert({
           buy_in_amount: parsedAmount,
-          small_blind: parseIndianNumber(smallBlind),
-          big_blind: parseIndianNumber(bigBlind),
+          small_blind: smallBlindVal,
+          big_blind: bigBlindVal,
           user_id: user?.id,
           is_complete: false,
         })
@@ -135,22 +141,26 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
-      const { data: completeGame, error: fetchError } = await supabase
-        .from("games")
-        .select(`
-          *,
-          game_players (
-            *,
-            player:players (*)
-          )
-        `)
-        .eq("id", game.id)
-        .single();
+      // Construct a placeholder game object locally to skip the final select roundtrip
+      const placeholderGame: Game = {
+        ...game,
+        game_players: gamePlayers.map(player => ({
+          game_id: game.id,
+          player_id: player.id,
+          buy_ins: 1,
+          final_stack: 0,
+          net_amount: -parsedAmount,
+          id: `temp-${player.id}`,
+          created_at: new Date().toISOString(),
+          player: player
+        }))
+      } as unknown as Game;
 
-      if (fetchError) throw fetchError;
+      // Seed the React Query cache immediately for the dashboard to pick up
+      queryClient.setQueryData(gameKeys.detail(game.id), placeholderGame);
 
       toast.success("Game started!");
-      setActiveGame(completeGame as Game);
+      setActiveGame(placeholderGame);
       setShowActiveGame(true);
     } catch (error) {
       toast.error("Failed to start game");

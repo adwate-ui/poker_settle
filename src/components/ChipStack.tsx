@@ -26,65 +26,57 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
   if (amount === 0) return null;
 
   const stackConfig = {
-    sm: { chipHeight: 4, width: 28, fontSize: 'text-[9px]', maxPerColumn: 5 },
-    md: { chipHeight: 5, width: 34, fontSize: 'text-[10px]', maxPerColumn: 8 },
-    lg: { chipHeight: 6, width: 42, fontSize: 'text-xs', maxPerColumn: 10 }
+    sm: { chipHeight: 2.5, width: 28, fontSize: 'text-[9px]', maxPerColumn: 5 },
+    md: { chipHeight: 3, width: 34, fontSize: 'text-[10px]', maxPerColumn: 6 },
+    lg: { chipHeight: 3.5, width: 42, fontSize: 'text-xs', maxPerColumn: 8 }
   };
 
   const config = stackConfig[size];
 
   // Calculate chip distribution
   const columns = useMemo(() => {
+    // Sort denominations High -> Low
     const sortedDenominations = [...CHIP_DENOMINATIONS].sort((a, b) => b.value - a.value);
     let remaining = amount;
-    const allChips: { color: string; label: string; value: number }[] = [];
 
-    // 1. Break down amount into chips
+    // Group into columns where each column represents only ONE denomination/color
+    const cols: Array<{ color: string; label: string; value: number }[]> = [];
+
     sortedDenominations.forEach(denom => {
       if (denom.value <= 0) return;
       const count = Math.floor(remaining / denom.value);
+
       if (count > 0) {
-        for (let i = 0; i < count; i++) {
-          allChips.push({ color: denom.color, label: denom.label, value: denom.value });
+        // How many columns does this denomination need? (Strict segregation)
+        const fullColumns = Math.floor(count / config.maxPerColumn);
+        const remainder = count % config.maxPerColumn;
+
+        // Create full columns
+        for (let i = 0; i < fullColumns; i++) {
+          const col = Array(config.maxPerColumn).fill({
+            color: denom.color,
+            label: denom.label,
+            value: denom.value
+          });
+          cols.push(col);
         }
+
+        // Create the remainder column
+        if (remainder > 0) {
+          const col = Array(remainder).fill({
+            color: denom.color,
+            label: denom.label,
+            value: denom.value
+          });
+          cols.push(col);
+        }
+
         remaining -= count * denom.value;
       }
     });
 
-    // 2. Limit total chips for performance (render max 25 chips)
-    // We reverse to keep high value chips effectively, but usually standard poker logic keeps high value visible
-    const chipSubset = allChips.slice(0, 30);
-
-    // 3. Group into columns
-    const cols: Array<{ color: string; label: string; value: number }[]> = [];
-    let currentCol: { color: string; label: string; value: number }[] = [];
-
-    // Group by denomination to keep colors together
-    // Sort by value ascending so highest value is on the right (common poker standard) or left depending on pref.
-    // Let's do ascending value (low -> high)
-    chipSubset.sort((a, b) => a.value - b.value);
-
-    chipSubset.forEach((chip) => {
-      // If adding this chip makes the column mismatched in color (optional aesthetic choice) or too tall
-      // For now, simple logic: fill column to max height, then new column.
-      // Better logic: Group identical colors in one column if possible.
-
-      const lastChip = currentCol[currentCol.length - 1];
-      const isSameColor = !lastChip || lastChip.color === chip.color;
-
-      if (currentCol.length < config.maxPerColumn) {
-        currentCol.push(chip);
-      } else {
-        cols.push(currentCol);
-        currentCol = [chip];
-      }
-    });
-
-    if (currentCol.length > 0) {
-      cols.push(currentCol);
-    }
-
-    return cols;
+    // Sort the final columns by value (standard: High on Left, Low on Right)
+    return cols.sort((a, b) => b[0].value - a[0].value);
   }, [amount, CHIP_DENOMINATIONS, config.maxPerColumn]);
 
   return (

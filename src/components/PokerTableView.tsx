@@ -10,17 +10,7 @@ import confetti from 'canvas-confetti';
 import { cn } from "@/lib/utils";
 import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 
-// Z-index constants for proper layering
-const Z_INDEX = {
-  HOLE_CARDS: 5,      // Hole cards should be below player avatars
-  PLAYER_UNIT: 10,    // Player avatar, name, and related elements
-  BUTTON_BADGE: 15,   // Dealer button badge
-  POT_OVERLAY: 20,    // Dimming overlay during winner spotlight
-  CHIP_STACK: 25,     // Chip stacks
-  POSITION_LABEL: 30, // Position labels
-  WINNER_CELEBRATION: 40, // Win amount display and spotlight
-  CONFETTI: 50,       // Confetti (top-most)
-} as const;
+// Z-index management is now handled via Tailwind semantic tokens (z-player-unit, z-winner-celebration, etc.)
 
 interface PokerTableViewProps {
   positions: SeatPosition[];
@@ -126,12 +116,13 @@ const PokerSeat = memo(({
         enableDragDrop ? 'cursor-move select-none' : onPlayerClick ? 'cursor-pointer' : '',
         isDragging ? 'opacity-50 scale-95' : '',
         isDragOver && draggedIndex !== null ? 'scale-110' : '',
-        isFolded ? 'opacity-50 grayscale' : ''
+        isFolded ? 'opacity-50 grayscale' : '',
+        isWinner ? 'z-winner-celebration' : 'z-player-unit'
       )}
       style={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
-        zIndex: isWinner ? Z_INDEX.WINNER_CELEBRATION : Z_INDEX.PLAYER_UNIT,
+        zIndex: isWinner ? undefined : undefined, // Handled via classes now
         scale: scale
       }}
     >
@@ -146,7 +137,7 @@ const PokerSeat = memo(({
         )}
 
         {positionLabel && (
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold shadow-md whitespace-nowrap uppercase tracking-tighter" style={{ zIndex: Z_INDEX.POSITION_LABEL }}>
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold shadow-md whitespace-nowrap uppercase tracking-tighter z-position-label">
             {positionLabel}
           </div>
         )}
@@ -167,14 +158,14 @@ const PokerSeat = memo(({
               />
             </div>
             {isButton && (
-              <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-black shadow-lg" style={{ zIndex: Z_INDEX.BUTTON_BADGE }}>
+              <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-black shadow-lg z-player-badge">
                 D
               </div>
             )}
           </div>
 
           <div className={cn(
-            "bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-lg shadow-xl border border-white/10 flex flex-col items-center gap-0 min-w-[90px] max-w-[130px] transition-all",
+            "glass-panel px-2 py-0.5 rounded-lg flex flex-col items-center gap-0 min-w-[90px] max-w-[130px] transition-all",
             isWinner ? "border-primary/30 bg-primary/10" : ""
           )}>
             <span className={cn(
@@ -193,14 +184,13 @@ const PokerSeat = memo(({
           {shouldShowCards && (
             <div
               className={cn(
-                "absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out",
+                "absolute hidden sm:flex gap-0.5 transition-all duration-300 ease-in-out z-player-cards",
                 isFolded ? 'opacity-30 grayscale' : 'opacity-100',
                 pos.x > TABLE_CENTER_X ? 'right-full mr-2' : 'left-full ml-2'
               )}
               style={{
                 top: '50%',
                 transform: 'translateY(-50%)',
-                zIndex: Z_INDEX.HOLE_CARDS,
               }}
             >
               {typeof hasKnownCards === 'string' ? (
@@ -222,29 +212,26 @@ const PokerSeat = memo(({
         </div>
 
 
-        {
-          isWinner && (
-            <div
-              className="absolute animate-in fade-in zoom-in duration-700"
-              style={{
-                top: pos.y > 50 ? '-100px' : '100px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: Z_INDEX.WINNER_CELEBRATION,
-              }}
-            >
-              <div className="flex flex-col items-center gap-2">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
-                >
-                  <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
-                </motion.div>
-              </div>
+        {isWinner && (
+          <div
+            className="absolute animate-in fade-in zoom-in duration-700 z-winner-celebration"
+            style={{
+              top: pos.y > 50 ? '-100px' : '100px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
+              >
+                <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
+              </motion.div>
             </div>
-          )
-        }
+          </div>
+        )}
       </div >
     </div >
   );
@@ -267,7 +254,7 @@ const BettingChipsLayer = memo(({
   getPlayerPosition: (index: number) => { x: number; y: number };
 }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: Z_INDEX.CHIP_STACK }}>
+    <div className="absolute inset-0 pointer-events-none z-chip-stack">
       <AnimatePresence>
         {positions.map((position, index) => {
           const betAmount = playerBets[position.player_id] || 0;
@@ -530,7 +517,7 @@ const PokerTableView = memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[20] bg-black/40 backdrop-blur-[2px] pointer-events-none"
+            className="absolute inset-0 z-poker-overlay bg-black/40 backdrop-blur-[2px] pointer-events-none"
             style={{
               maskImage: 'radial-gradient(circle at center, transparent 30%, black 100%)',
               WebkitMaskImage: 'radial-gradient(circle at center, transparent 30%, black 100%)'
@@ -547,14 +534,14 @@ const PokerTableView = memo(({
         )}>
           {/* External Table Border: Becomes pill-shaped in vertical mode. Inset increased to seat players outside. */}
           <div className={cn(
-            "absolute inset-[15%] border-[16px] border-[#1a1a1a] shadow-[0_40px_100px_rgba(0,0,0,0.9),inset_0_2px_10px_rgba(255,255,255,0.15)] z-0 transition-all duration-500",
-            isVertical ? "rounded-[80px]" : "rounded-[160px]"
+            "absolute inset-[var(--poker-table-inset)] border-[16px] border-poker-black shadow-[0_40px_100px_rgba(0,0,0,0.9),inset_0_2px_10px_rgba(255,255,255,0.15)] z-0 transition-all duration-500",
+            isVertical ? "rounded-table-sm" : "rounded-table"
           )} />
 
           {/* Inner Felt Boundary */}
           <div className={cn(
-            "absolute inset-[15%] mt-[4px] ml-[4px] mr-[4px] mb-[4px] bg-felt-dark overflow-hidden flex items-center justify-center z-0 shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-500",
-            isVertical ? "rounded-[70px]" : "rounded-[150px]"
+            "absolute inset-[var(--poker-table-inset)] mt-[4px] ml-[4px] mr-[4px] mb-[4px] bg-poker-felt overflow-hidden flex items-center justify-center z-0 shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-500",
+            isVertical ? "rounded-table-sm" : "rounded-table"
           )}>
             {/* Table Texture and Branding */}
             <div
@@ -564,14 +551,13 @@ const PokerTableView = memo(({
             {/* Pro Betting Line */}
             <div className={cn(
               "absolute inset-[40px] border-2 border-white/5 pointer-events-none transition-all duration-500",
-              isVertical ? "rounded-[60px]" : "rounded-[150px]"
+              isVertical ? "rounded-table-sm" : "rounded-table"
             )} />
           </div>
 
           {/* Center area - Community Cards and Pot */}
           <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-            style={{ zIndex: Z_INDEX.WINNER_CELEBRATION }}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-winner-celebration"
           >
             <div className="flex flex-col items-center gap-4">
               {/* Win Amount display */}
@@ -608,7 +594,7 @@ const PokerTableView = memo(({
                 {/* Pot display */}
                 {potSize > 0 && !animateChipsToWinner && (
                   <div className={cn(
-                    "flex items-center gap-3 transition-all duration-500 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-2xl",
+                    "flex items-center gap-3 transition-all duration-500 glass-panel px-4 py-2 rounded-2xl border-white/10 shadow-2xl border-0",
                     animateChipsToPot ? 'scale-110' : 'scale-100'
                   )}>
                     <div className="flex flex-col">

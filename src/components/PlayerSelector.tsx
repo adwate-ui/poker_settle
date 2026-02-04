@@ -12,7 +12,7 @@ import { formatIndianNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PlayerFormDialog, PlayerFormData } from '@/components/PlayerFormDialog';
-import { getPaymentMethodIcon } from '@/utils/playerUtils';
+import OptimizedAvatar from '@/components/OptimizedAvatar';
 
 interface PlayerSelectorProps {
   allPlayers: Player[];
@@ -109,18 +109,15 @@ export const PlayerSelector = ({
                 <CardContent className="p-3">
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex-shrink-0">
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-                        alt={player.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <OptimizedAvatar
+                      name={player.name}
+                      size="sm"
+                    />
 
                     {/* Player Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold truncate">{player.name}</span>
+                        <span className="font-luxury font-semibold truncate">{player.name}</span>
                         {player.total_games && player.total_games > 10 && (
                           <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
                         )}
@@ -178,9 +175,9 @@ export const PlayerSelector = ({
             Add Player
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogContent className="max-w-2xl max-h-[90vh] glass-panel border-white/10 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Add Players to Game</DialogTitle>
+            <DialogTitle className="text-xl font-heading font-bold text-luxury-primary">Add Players to Game</DialogTitle>
             <DialogDescription className="text-muted-foreground uppercase tracking-widest text-[10px]">
               Select from existing players or create a new one
             </DialogDescription>
@@ -343,24 +340,21 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
     <button
       onClick={() => onSelect(player)}
       className={cn(
-        "w-full text-left p-4 rounded-2xl border border-border bg-accent/5 hover:bg-primary/5 hover:border-primary/20 transition-all group",
+        "w-full text-left p-4 rounded-2xl glass-panel hover:bg-primary/10 hover:shadow-[0_0_15px_rgba(212,184,60,0.2)] transition-all group border-0",
         "focus:outline-none focus:ring-2 focus:ring-primary/50"
       )}
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex-shrink-0">
-          <img
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.name)}`}
-            alt={player.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <OptimizedAvatar
+          name={player.name}
+          size="md"
+        />
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-semibold truncate">{player.name}</span>
+            <span className="font-luxury font-semibold truncate text-lg">{player.name}</span>
             {player.total_games && player.total_games > 10 && (
               <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
             )}
@@ -382,14 +376,6 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
                 )}
                 {player.total_profit >= 0 ? '+' : ''}
                 Rs. {formatIndianNumber(Math.abs(player.total_profit))}
-              </Badge>
-            )}
-            {player.payment_preference && (
-              <Badge
-                variant={player.payment_preference === 'cash' ? 'secondary' : 'default'}
-                className="text-[10px] h-5 px-1.5"
-              >
-                {getPaymentMethodIcon(player.payment_preference)} {player.payment_preference.toUpperCase()}
               </Badge>
             )}
           </div>

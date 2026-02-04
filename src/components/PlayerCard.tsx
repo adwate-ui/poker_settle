@@ -63,7 +63,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-border/50 bg-card/60 group overflow-hidden relative">
+    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation glass-panel group overflow-hidden relative border-0">
       {/* Status accent */}
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",

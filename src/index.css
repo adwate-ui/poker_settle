@@ -111,6 +111,12 @@
     --sidebar-accent-foreground: 45 100% 35%;
     --sidebar-border: 45 30% 85%;
     --sidebar-ring: 45 100% 50%;
+
+    /* Design System Tokens */
+    --poker-table-border: var(--poker-black);
+    --poker-table-inset: 15%;
+    --poker-table-radius: 160px;
+    --poker-table-radius-mobile: 80px;
   }
 
   .dark {
@@ -162,6 +168,9 @@
     --sidebar-accent-foreground: 45 80% 60%;
     --sidebar-border: 45 30% 25%;
     --sidebar-ring: 45 100% 50%;
+
+    /* Design System Tokens (Dark Mode) */
+    --poker-table-border: var(--poker-black);
   }
 
   * {

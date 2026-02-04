@@ -56,13 +56,13 @@ const CardSelector = ({
     { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
   ];
 
-  const allCards = ranks.flatMap(rank => 
+  const allCards = ranks.flatMap(rank =>
     suits.map(suit => `${rank}${suit.code}`)
   );
 
   const handleCardClick = (card: string) => {
     if (usedCards.includes(card) || knownHoleCards.includes(card)) return;
-    
+
     // Always allow deselection - this fixes the issue where cards can't be deselected when editing
     if (tempSelection.includes(card)) {
       setTempSelection(tempSelection.filter(c => c !== card));
@@ -78,7 +78,7 @@ const CardSelector = ({
       .sort((a, b) => a - b)
       .map(idx => allCards[idx])
       .join('');
-    
+
     // Call onSelect which will handle closing the dialog
     onSelect(sortedCards);
     // isConfirming will be reset by useEffect when dialog closes
@@ -109,15 +109,15 @@ const CardSelector = ({
       {trigger && <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>}
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-4">
+      <DialogContent className="w-fit max-w-[95vw] max-h-[90vh] flex flex-col p-4 glass-panel border-white/10 shadow-2xl">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center justify-between">
-            <span className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+          <DialogTitle className="flex items-center justify-between gap-4">
+            <span className="text-xl font-heading font-bold flex items-center gap-2 text-luxury-primary">
+              <Sparkles className="w-5 h-5" />
               {label}
             </span>
             <div className="flex items-center gap-2">
-              <Badge 
+              <Badge
                 variant={tempSelection.length === maxCards ? "default" : "secondary"}
                 className="text-base px-3 py-1"
               >
@@ -133,20 +133,20 @@ const CardSelector = ({
         </DialogHeader>
 
         {/* Card grid by suit - scrollable area */}
-        <div className="space-y-2 overflow-y-auto flex-1 pr-2">
+        <div className="space-y-2 overflow-y-auto overflow-x-auto flex-1 pr-2">
           {suits.map(suit => (
             <div key={suit.code} className="space-y-1">
-              <div className="flex items-center gap-2 pb-0.5 border-b border-border">
+              <div className="flex items-center gap-2 pb-0.5 border-b border-white/10">
                 <span className={cn("text-xl", suit.color)}>{suit.symbol}</span>
-                <h3 className="font-semibold text-sm">{suit.name}</h3>
+                <h3 className="font-luxury font-bold text-sm tracking-wide">{suit.name}</h3>
               </div>
-              <div className="grid grid-cols-13 gap-0.5">
+              <div className="grid grid-cols-13 gap-0.5 min-w-[320px]">
                 {ranks.map(rank => {
                   const card = `${rank}${suit.code}`;
                   const isUsed = usedCards.includes(card);
                   const isKnownHole = knownHoleCards.includes(card);
                   const isSelected = tempSelection.includes(card);
-                  
+
                   return (
                     <button
                       key={card}
@@ -155,7 +155,7 @@ const CardSelector = ({
                       className={cn(
                         "relative aspect-[5/7] transition-all duration-200 rounded touch-manipulation",
                         (isUsed || isKnownHole) && "opacity-30 cursor-not-allowed grayscale",
-                        isSelected && "ring-2 ring-primary ring-offset-1 ring-offset-background scale-105 z-10 shadow-lg",
+                        isSelected && "ring-2 ring-poker-gold ring-offset-1 ring-offset-background scale-105 z-10 shadow-[0_0_15px_rgba(212,184,0,0.4)]",
                         !isUsed && !isKnownHole && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
@@ -188,14 +188,14 @@ const CardSelector = ({
         </div>
 
         {/* Action buttons - fixed footer */}
-        <div className="flex gap-3 pt-3 border-t flex-shrink-0 bg-background">
+        <div className="flex gap-3 pt-3 border-t border-white/10 flex-shrink-0">
           <Button variant="outline" onClick={handleCancel} className="flex-1 h-12 text-base">
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleConfirm}
             disabled={tempSelection.length !== maxCards}
-            className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+            className="flex-1 h-12 text-base font-bold bg-gradient-to-r from-money-green to-money-green/80 hover:scale-[1.02] transition-transform shadow-lg"
           >
             {tempSelection.length === maxCards ? (
               <>
