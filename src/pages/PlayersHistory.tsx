@@ -175,108 +175,69 @@ const PlayersHistory = () => {
         </CardContent>
       </Card>
 
-      {/* Mobile Card Layout */}
-      <div className="space-y-3 md:hidden">
-        {sortedPlayers.map((player) => {
-          const profit = player.total_profit || 0;
-          return (
-            <Card
-              key={player.id}
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate(`/players/${player.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <OptimizedAvatar name={player.name} size="md" />
-                    <span className="font-medium font-luxury">{player.name}</span>
-                  </div>
-                  <Badge variant={profit >= 0 ? 'profit' : 'loss'}>
-                    {formatProfitLoss(profit)}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Games Played</p>
-                    <Badge variant="secondary">{player.total_games || 0} Sessions</Badge>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletePlayerId(player.id);
-                    }}
+      {/* Responsive Table Layout */}
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="text-xs sm:text-sm">
+                <TableHead onClick={() => handleSort("name")} className="cursor-pointer hover:text-primary transition-colors p-2 sm:p-4">
+                  <span className="flex items-center gap-1">Player <ArrowUpDown className="h-3 w-3" /></span>
+                </TableHead>
+                <TableHead onClick={() => handleSort("total_games")} className="cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4">
+                  <span className="flex items-center justify-center gap-1">Games <ArrowUpDown className="h-3 w-3" /></span>
+                </TableHead>
+                <TableHead onClick={() => handleSort("total_profit")} className="cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4">
+                  <span className="flex items-center justify-end gap-1">Total Net <ArrowUpDown className="h-3 w-3" /></span>
+                </TableHead>
+                <TableHead className="text-right p-2 sm:p-4">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedPlayers.map((player) => {
+                const profit = player.total_profit || 0;
+                return (
+                  <TableRow
+                    key={player.id}
+                    className="cursor-pointer text-xs sm:text-sm"
+                    onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Desktop Table Layout */}
-      <Card className="overflow-hidden hidden md:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead onClick={() => handleSort("name")} className="cursor-pointer hover:text-primary transition-colors">
-                <span className="flex items-center gap-1">Player <ArrowUpDown className="h-3 w-3" /></span>
-              </TableHead>
-              <TableHead onClick={() => handleSort("total_games")} className="cursor-pointer hover:text-primary transition-colors text-center">
-                <span className="flex items-center justify-center gap-1">Games Played <ArrowUpDown className="h-3 w-3" /></span>
-              </TableHead>
-              <TableHead onClick={() => handleSort("total_profit")} className="cursor-pointer hover:text-primary transition-colors text-right">
-                <span className="flex items-center justify-end gap-1">Total Net <ArrowUpDown className="h-3 w-3" /></span>
-              </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedPlayers.map((player) => {
-              const profit = player.total_profit || 0;
-              return (
-                <TableRow
-                  key={player.id}
-                  className="cursor-pointer"
-                  onClick={() => navigate(`/players/${player.id}`)}
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-4">
-                      <OptimizedAvatar name={player.name} size="md" />
-                      <span className="font-medium font-luxury text-base">{player.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="secondary">{player.total_games || 0} Sessions</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={profit >= 0 ? 'profit' : 'loss'}>
-                      {formatProfitLoss(profit)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletePlayerId(player.id);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                    <TableCell className="p-2 sm:p-4">
+                      <div className="flex items-center gap-2 sm:gap-4 max-w-[120px] sm:max-w-none">
+                        <OptimizedAvatar name={player.name} size="sm" className="h-6 w-6 sm:h-10 sm:w-10" />
+                        <span className="font-medium font-luxury text-xs sm:text-base truncate">{player.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center p-2 sm:p-4">
+                      <Badge variant="secondary" className="text-xs">
+                        <span className="sm:hidden">{player.total_games || 0}</span>
+                        <span className="hidden sm:inline">{player.total_games || 0} Sessions</span>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right p-2 sm:p-4">
+                      <Badge variant={profit >= 0 ? 'profit' : 'loss'} className="text-xs">
+                        {formatProfitLoss(profit)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right p-2 sm:p-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 sm:h-8 sm:w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletePlayerId(player.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
 
 

@@ -1,13 +1,25 @@
 import * as React from 'react';
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Calendar, User, Wallet, History, ChevronRight, Layers } from 'lucide-react';
+import { Trophy, Calendar, User, Wallet, History, ChevronRight, Layers, Trash2 } from 'lucide-react';
 import PokerCard from '@/components/PokerCard';
 import { HandWithDetails } from '@/hooks/useHandsHistory';
 import { PlayerAction } from '@/types/poker';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { cn, formatIndianNumber } from '@/lib/utils';
 import { formatCurrency } from '@/utils/currencyUtils';
 
@@ -15,9 +27,10 @@ import { formatCurrency } from '@/utils/currencyUtils';
 interface MemoizedHandCardProps {
   hand: HandWithDetails;
   formatDate: (dateString: string) => string;
+  onDelete?: (id: string) => void;
 }
 
-const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
+const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -81,7 +94,7 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-end">
+              <div className="flex flex-col items-end gap-2">
                 <Badge
                   variant="outline"
                   className={cn(
@@ -95,6 +108,37 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
                   {resultStatus === 'win' && <Trophy className="h-3 w-3 mr-1.5" />}
                   {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'PROTOCOL'}
                 </Badge>
+                {onDelete && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Hand?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the hand record.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onDelete(hand.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
 

@@ -26,6 +26,7 @@ const HandsHistory = () => {
     getStatistics,
     loadMore,
     hasMore,
+    deleteHand,
   } = useHandsHistory();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,7 +162,7 @@ const HandsHistory = () => {
                   <SelectValue placeholder="Global View" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Global View (Session Owner)</SelectItem>
+                  <SelectItem value="all">All Heros</SelectItem>
                   {uniqueHeroNames.map(name => (
                     <SelectItem key={name} value={name}>{name}</SelectItem>
                   ))}
@@ -299,9 +300,10 @@ const HandsHistory = () => {
                 onValueChange={(value) =>
                   updateFilters({ villainPosition: value === 'all' ? undefined : value })
                 }
+                disabled={!filters.villainName}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Positions" />
+                  <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Positions"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Positions</SelectItem>
@@ -341,9 +343,10 @@ const HandsHistory = () => {
                 onValueChange={(value) =>
                   updateFilters({ villainHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
                 }
+                disabled={!filters.villainName}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Cards" />
+                  <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Cards"} />
                 </SelectTrigger>
                 <SelectContent>
                   {HOLE_CARD_FILTER_OPTIONS.map(option => (
@@ -382,6 +385,7 @@ const HandsHistory = () => {
                   key={hand.id}
                   hand={hand}
                   formatDate={formatDate}
+                  onDelete={deleteHand}
                 />
               ))}
             </div>

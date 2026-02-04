@@ -172,19 +172,43 @@ export const GameDetailView = ({
       return;
     }
 
-    const newTransfer: Settlement = { from: newTransferFrom, to: newTransferTo, amount };
+    // 1. Define the new manual transfer
+    const newManualTransfer: Settlement & { isManual: boolean } = {
+      from: newTransferFrom,
+      to: newTransferTo,
+      amount,
+      isManual: true
+    };
+
+    // 2. Get existing manual transfers
     const existingSettlements = game?.settlements || [];
+    const existingManuals = existingSettlements.filter((s: any) => s.isManual);
 
-    // We want to keep the manual ones identified. 
-    // In our simplified logic, we store all of them, but we need to ensure we don't duplicate logic.
-    // The user wants immediate persistence. 
+    // 3. Combine all manual transfers
+    const allManuals = [...existingManuals, newManualTransfer];
 
-    // First, get all current settlements from DB to be safe (or use game.settlements if we trust it's fresh)
-    const updatedSettlements = [...existingSettlements, { ...newTransfer, isManual: true }];
+    // 4. Get player balances
+    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
+      name: gp.players?.name ?? "",
+      amount: gp.net_amount ?? 0,
+      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
+    }));
+
+    // 5. Calculate new auto-settlements with all manual transfers
+    const newAutoSettlements = calculateOptimizedSettlements(balances, allManuals);
+    const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
+      from,
+      to,
+      amount,
+      isManual: false
+    }));
+
+    // 6. Merge: manuals first, then autos
+    const finalSettlements = [...allManuals, ...autoSettlementsWithFlag];
 
     const { error } = await client
       .from("games")
-      .update({ settlements: updatedSettlements as any })
+      .update({ settlements: finalSettlements as any })
       .eq("id", gameId);
 
     if (error) {
@@ -201,11 +225,35 @@ export const GameDetailView = ({
 
   const handleDeleteManualTransfer = async (index: number) => {
     const existingSettlements = game?.settlements || [];
-    const updatedSettlements = existingSettlements.filter((_, i) => i !== index);
+
+    // 1. Get only manual transfers
+    const manualTransfers = existingSettlements.filter((s: any) => s.isManual);
+
+    // 2. Remove the target transfer by index
+    const remainingManuals = manualTransfers.filter((_, i) => i !== index);
+
+    // 3. Get player balances
+    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
+      name: gp.players?.name ?? "",
+      amount: gp.net_amount ?? 0,
+      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
+    }));
+
+    // 4. Recalculate auto-settlements with remaining manual transfers
+    const newAutoSettlements = calculateOptimizedSettlements(balances, remainingManuals);
+    const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
+      from,
+      to,
+      amount,
+      isManual: false
+    }));
+
+    // 5. Merge and save
+    const finalSettlements = [...remainingManuals, ...autoSettlementsWithFlag];
 
     const { error } = await client
       .from("games")
-      .update({ settlements: updatedSettlements as any })
+      .update({ settlements: finalSettlements as any })
       .eq("id", gameId);
 
     if (error) {
@@ -219,26 +267,12 @@ export const GameDetailView = ({
   const savedSettlements: SettlementWithType[] = (game?.settlements || []) as unknown as SettlementWithType[];
 
   const settlementsWithType = useMemo(() => {
-    // Separate manual ones from auto-calculated ones
-    const manualOnes = savedSettlements.filter(s => s.isManual);
-
-    // Calculate auto-settlements based on manual adjustments
-    const balances: PlayerBalance[] = sortedGamePlayers.map(gp => ({
-      name: gp.players?.name ?? "",
-      amount: gp.net_amount ?? 0,
-      paymentPreference: (gp.players as any)?.payment_preference || 'upi',
+    // Storage-first: return saved settlements directly, ensuring isManual property exists
+    return savedSettlements.map(s => ({
+      ...s,
+      isManual: s.isManual ?? false  // Default to false if not set
     }));
-
-    const optimized = calculateOptimizedSettlements(balances, manualOnes);
-    const calculatedOnes = optimized.map(({ from, to, amount }) => ({
-      from,
-      to,
-      amount,
-      isManual: false
-    }));
-
-    return [...manualOnes, ...calculatedOnes];
-  }, [savedSettlements, sortedGamePlayers]);
+  }, [savedSettlements]);
 
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};

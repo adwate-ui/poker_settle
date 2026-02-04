@@ -32,6 +32,64 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
     return (
       <div className="min-h-screen bg-transparent pt-safe pb-safe">
         {children}
+
+        {/* Mobile Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gold-900/10 dark:border-gold-500/20 pb-safe">
+          <div className="flex justify-around items-center h-16">
+            <button
+              onClick={() => handleTabChange("new-game")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                currentTab === "new-game" ? "text-gold-400" : "text-gray-500"
+              )}
+            >
+              {currentTab === "new-game" && (
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              )}
+              <Play className={cn("h-5 w-5", currentTab === "new-game" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[10px] font-luxury uppercase tracking-widest">New</span>
+            </button>
+            <button
+              onClick={() => handleTabChange("games-history")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                currentTab === "games-history" ? "text-gold-400" : "text-gray-500"
+              )}
+            >
+              {currentTab === "games-history" && (
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              )}
+              <History className={cn("h-5 w-5", currentTab === "games-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[10px] font-luxury uppercase tracking-widest">Games</span>
+            </button>
+            <button
+              onClick={() => handleTabChange("players-history")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                currentTab === "players-history" ? "text-gold-400" : "text-gray-500"
+              )}
+            >
+              {currentTab === "players-history" && (
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              )}
+              <Users className={cn("h-5 w-5", currentTab === "players-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[10px] font-luxury uppercase tracking-widest">Players</span>
+            </button>
+            <button
+              onClick={() => handleTabChange("hands-history")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
+                currentTab === "hands-history" ? "text-gold-400" : "text-gray-500"
+              )}
+            >
+              {currentTab === "hands-history" && (
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              )}
+              <Hand className={cn("h-5 w-5", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <span className="text-[10px] font-luxury uppercase tracking-widest">Hands</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

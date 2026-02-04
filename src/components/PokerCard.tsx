@@ -18,17 +18,19 @@ const SUIT_PATHS = {
   c: "M12 2c-1.657 0-3 1.343-3 3 0 .762.284 1.455.75 1.987C7.306 7.6 5 10 5 13c0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346C10.244 17.545 10 18.682 10 20c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 .762.284 1.455.75 1.987-2.444.613-4.75 3.013-4.75 6.013 0 2.209 1.791 4 4 4 .581 0 1.126-.124 1.616-.346-.372.891-.616 2.028-.616 3.346 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.318-.244-2.455-.616-3.346.49.222 1.035.346 1.616.346 2.209 0 4-1.791 4-4 0-3-2.306-5.4-4.75-6.013.466-.532.75-1.225.75-1.987 0-1.657-1.343-3-3-3z",
 };
 
-const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }: { suit: string, className?: string, fourColor?: boolean, applyDepth?: boolean }) => {
-  const getFill = (suit: string) => {
+const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, className?: string, fourColor?: boolean }) => {
+  const getFill = (suit: string): string => {
     if (!fourColor) {
-      if (suit === 'd' || suit === 'h') return "url(#grad-hearts)";
-      return "url(#grad-spades)";
+      // Traditional two-color deck
+      if (suit === 'd' || suit === 'h') return "#be123c"; // Rose Red
+      return "#0f172a"; // Slate 900
     }
+    // Four-color deck
     switch (suit) {
-      case 'h': return "url(#grad-hearts)";
-      case 's': return "url(#grad-spades)";
-      case 'd': return "url(#grad-diamonds)";
-      case 'c': return "url(#grad-clubs)";
+      case 'h': return "#be123c"; // Rose Red (Hearts)
+      case 's': return "#0f172a"; // Slate 900 (Spades)
+      case 'd': return "#2563eb"; // Royal Blue (Diamonds)
+      case 'c': return "#15803d"; // Emerald Green (Clubs)
       default: return "currentColor";
     }
   };
@@ -45,7 +47,6 @@ const SuitIcon = ({ suit, className = "", fourColor = true, applyDepth = false }
       <path
         d={path}
         fill={getFill(suit)}
-        filter={applyDepth ? "url(#ink-depth)" : undefined}
       />
     </svg>
   );
@@ -163,11 +164,11 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
               "absolute rounded-full border border-amber-400/30 bg-amber-50/50",
               size === 'lg' ? 'w-16 h-16' : size === 'md' ? 'w-14 h-14' : 'w-10 h-10'
             )} />
-            <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={centerSuitSizes[size]} />
+            <SuitIcon suit={suit} fourColor={fourColor} className={centerSuitSizes[size]} />
           </div>
         ) : (
           // Number Cards: Clean Center Suit
-          <SuitIcon suit={suit} fourColor={fourColor} applyDepth className={centerSuitSizes[size]} />
+          <SuitIcon suit={suit} fourColor={fourColor} className={centerSuitSizes[size]} />
         )}
       </div>
 

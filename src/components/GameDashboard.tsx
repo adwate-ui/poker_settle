@@ -459,7 +459,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
         {isMobile ? (
           <Tabs defaultValue="table" className="w-full">
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-gold-900/10 dark:border-white/5 px-2 py-3">
+            <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-gold-900/10 dark:border-white/5 px-2 py-3">
               <TabsList className="bg-transparent grid grid-cols-3 h-12">
                 <TabsTrigger value="table" className="flex flex-col gap-1 data-[state=active]:text-primary">
                   <TableProperties className="h-5 w-5" />
@@ -476,7 +476,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </TabsList>
             </div>
 
-            <TabsContent value="table" className="mt-0 p-0 space-y-4 pb-24">
+            <TabsContent value="table" className="mt-0 p-0 space-y-4 pb-48">
               {showPositionEditor ? (
                 <TablePositionEditor
                   players={gamePlayers.map(gp => gp.player)}
@@ -533,7 +533,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               )}
             </TabsContent>
 
-            <TabsContent value="actions" className="mt-0 p-4 space-y-6 pb-24">
+            <TabsContent value="actions" className="mt-0 p-4 space-y-6 pb-48">
               <BuyInManagementTable
                 gamePlayers={gamePlayers}
                 buyInAmount={currentGame.buy_in_amount}
@@ -549,7 +549,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </div>
             </TabsContent>
 
-            <TabsContent value="info" className="mt-0 p-4 space-y-6 pb-24">
+            <TabsContent value="info" className="mt-0 p-4 space-y-6 pb-48">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-luxury text-foreground uppercase tracking-widest">Players ({gamePlayers.length})</h3>
                 <Button
@@ -582,7 +582,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </span>
                       <div className="flex items-center gap-3">
                         <span className="font-numbers text-sm text-foreground">{formatCurrency(transfer.amount)}</span>
-                        <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" size="icon-sm" className=" text-red-500/50 hover:text-red-500">
+                        <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon-sm" className=" text-red-500/50 hover:text-red-500">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -598,26 +598,28 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <CardTitle>Settlement</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 max-h-[500px] overflow-auto">
-                      <Table>
-                        <TableHeader className="sticky top-0 z-10 bg-card">
-                          <TableRow>
-                            <TableHead>From</TableHead>
-                            <TableHead>To</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {settlements.map((s, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="font-medium text-foreground">{s.from}</TableCell>
-                              <TableCell className="font-medium text-foreground">{s.to}</TableCell>
-                              <TableCell className="text-right font-medium">
-                                {formatCurrency(s.amount)}
-                              </TableCell>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader className="sticky top-0 z-10 bg-card">
+                            <TableRow className="text-xs sm:text-sm">
+                              <TableHead className="p-2">From</TableHead>
+                              <TableHead className="p-2">To</TableHead>
+                              <TableHead className="text-right p-2">Amount</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {settlements.map((s, i) => (
+                              <TableRow key={i} className="text-xs sm:text-sm">
+                                <TableCell className="font-medium text-foreground p-2 max-w-[80px] sm:max-w-none truncate">{s.from}</TableCell>
+                                <TableCell className="font-medium text-foreground p-2 max-w-[80px] sm:max-w-none truncate">{s.to}</TableCell>
+                                <TableCell className="text-right font-medium p-2 whitespace-nowrap">
+                                  {formatCurrency(s.amount)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
                     </CardContent>
                   </Card>
                 )}

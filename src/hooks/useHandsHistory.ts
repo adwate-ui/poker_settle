@@ -89,7 +89,7 @@ export const useHandsHistory = () => {
       if (actionsError) throw actionsError;
 
       // Fetch street cards for these hands
-      const { data: cardsData, error: cardsError} = await supabase
+      const { data: cardsData, error: cardsError } = await supabase
         .from('street_cards')
         .select('*')
         .in('hand_id', handIds)
@@ -365,6 +365,33 @@ export const useHandsHistory = () => {
     };
   }, [filteredHands]);
 
+  // Delete hand function
+  const deleteHand = useCallback(async (handId: string) => {
+    try {
+      const { error } = await supabase
+        .from('poker_hands')
+        .delete()
+        .eq('id', handId);
+
+      if (error) throw error;
+
+      // Update local state by filtering out the deleted hand
+      setHands(prev => prev.filter(h => h.id !== handId));
+
+      toast({
+        title: 'Hand Deleted',
+        description: 'The hand has been successfully removed.',
+      });
+    } catch (error) {
+      const err = error as Error;
+      toast({
+        title: 'Error Deleting Hand',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+
   return {
     hands: filteredHands,
     allHands: hands,
@@ -382,5 +409,6 @@ export const useHandsHistory = () => {
     refetch: () => fetchHands(1, false),
     loadMore,
     hasMore,
+    deleteHand,
   };
 };

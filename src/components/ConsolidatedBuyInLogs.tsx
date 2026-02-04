@@ -160,43 +160,43 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         </div>
       ) : (
         <div className="rounded-xl border overflow-hidden bg-card shadow-sm">
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-card border-b">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="pl-6">Player</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead className="text-right pr-6">Time</TableHead>
+                <TableRow className="hover:bg-transparent text-xs sm:text-sm">
+                  <TableHead className="p-2 sm:p-4 sm:pl-6">Player</TableHead>
+                  <TableHead className="p-2 sm:p-4">Amount</TableHead>
+                  <TableHead className="p-2 sm:p-4">Total</TableHead>
+                  <TableHead className="text-right p-2 sm:p-4 sm:pr-6">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHistory.map((entry) => (
                   <TableRow
                     key={entry.id}
-                    className="cursor-default"
+                    className="cursor-default text-xs sm:text-sm"
                   >
-                    <TableCell className="pl-6">
-                      <div className="flex items-center gap-3">
-                        <User className="h-4 w-4 text-muted-foreground/50" />
+                    <TableCell className="p-2 sm:p-4 sm:pl-6">
+                      <div className="flex items-center gap-2 sm:gap-3 max-w-[100px] sm:max-w-none">
+                        <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground/50 flex-shrink-0" />
                         <Link
                           to={entry.player_id ? `/players/${entry.player_id}` : '#'}
-                          className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                          className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
                         >
                           {entry.player_name}
                         </Link>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="p-2 sm:p-4">
                       <span className={`font-medium ${entry.buy_ins_added > 0 ? "text-green-600" : "text-destructive"}`}>
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="p-2 sm:p-4">
                       <span className="text-muted-foreground">{entry.total_buy_ins_after}</span>
                     </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <div className="flex items-center justify-end gap-2 text-muted-foreground text-xs">
+                    <TableCell className="text-right p-2 sm:p-4 sm:pr-6">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs">
                         <Calendar className="h-3 w-3 opacity-50" />
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                       </div>
