@@ -21,9 +21,15 @@ interface BuyInHistoryDialogProps {
   gamePlayerId: string;
   playerName: string;
   fetchHistory: (gamePlayerId: string) => Promise<BuyInHistory[]>;
+  triggerProps?: Partial<React.ComponentProps<typeof Button>>;
 }
 
-export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: BuyInHistoryDialogProps) => {
+export const BuyInHistoryDialog = ({
+  gamePlayerId,
+  playerName,
+  fetchHistory,
+  triggerProps
+}: BuyInHistoryDialogProps) => {
   const isMobile = useIsMobile();
   const [history, setHistory] = useState<BuyInHistory[]>([]);
   const [open, setOpen] = useState(false);
@@ -53,10 +59,17 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 text-muted-foreground/40 hover:text-foreground hover:bg-muted rounded-lg transition-all"
           aria-label="View buy-in history"
+          {...triggerProps}
+          className={cn(
+            "h-9 w-9 text-muted-foreground/40 hover:text-foreground hover:bg-muted rounded-lg transition-all",
+            triggerProps?.className
+          )}
         >
-          <History className="w-4.5 h-4.5" />
+          <History className={cn(
+            "w-4.5 h-4.5",
+            triggerProps?.size === "icon-sm" && "w-3.5 h-3.5"
+          )} />
         </Button>
       </DialogTrigger>
 

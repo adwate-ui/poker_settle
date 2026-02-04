@@ -23,8 +23,15 @@ import {
   ShieldCheck,
   LayoutDashboard,
   TableProperties,
-  Info
+  Info,
+  Calendar
 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Game, GamePlayer, Settlement, Player, SeatPosition, TablePosition } from "@/types/poker";
 import DashboardPlayerCard from "@/components/DashboardPlayerCard";
@@ -120,6 +127,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
   const { createOrGetSharedLink, getShortUrl } = useSharedLink();
   const isMobile = useIsMobile();
+  const [api, setApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+
+    api.on("select", () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    });
+  }, [api]);
 
 
   // Manual share handler is kept, but auto-replace effect is removed to prevent URL instability
@@ -458,184 +475,225 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         )}
 
         {isMobile ? (
-          <Tabs defaultValue="table" className="w-full">
-            <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-gold-900/10 dark:border-white/5 px-2 py-3">
-              <TabsList className="bg-transparent grid grid-cols-3 h-12">
-                <TabsTrigger value="table" className="flex flex-col gap-1 data-[state=active]:text-primary">
-                  <TableProperties className="h-5 w-5" />
-                  <span className="text-[9px] uppercase tracking-tighter">Table</span>
-                </TabsTrigger>
-                <TabsTrigger value="actions" className="flex flex-col gap-1 data-[state=active]:text-primary">
-                  <Calculator className="h-5 w-5" />
-                  <span className="text-[9px] uppercase tracking-tighter">Actions</span>
-                </TabsTrigger>
-                <TabsTrigger value="info" className="flex flex-col gap-1 data-[state=active]:text-primary">
-                  <Info className="h-5 w-5" />
-                  <span className="text-[9px] uppercase tracking-tighter">Info</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="table" className="mt-0 p-0 space-y-4 pb-48">
-              {showPositionEditor ? (
-                <TablePositionEditor
-                  players={gamePlayers.map(gp => gp.player)}
-                  currentPositions={currentTablePosition?.positions || []}
-                  onSave={handleSaveTablePosition}
-                  onCancel={() => setShowPositionEditor(false)}
-                />
-              ) : handTrackingStage === 'recording' ? (
-                <HandTracking
-                  game={game}
-                  positionsJustChanged={positionsJustChanged}
-                  onHandComplete={handleHandComplete}
-                  initialSeatPositions={currentTablePosition?.positions || []}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <div className="relative aspect-[4/3] bg-white/40 dark:bg-black/40 overflow-hidden shadow-inner">
-                    {currentTablePosition && currentTablePosition.positions.length > 0 ? (
-                      <PokerTableView
-                        positions={currentTablePosition.positions}
-                        totalSeats={gamePlayers.length}
-                        gameId={currentGame.id}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center p-8">
-                        <Button
-                          onClick={() => setShowPositionEditor(true)}
-                          className="h-14 px-10 bg-accent/5 dark:bg-white/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
-                        >
-                          Setup Seating
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {currentTablePosition && currentTablePosition.positions.length > 0 && (
-                    <div className="px-4 flex gap-3">
-                      <Button
-                        onClick={() => setShowPositionEditor(true)}
-                        variant="ghost"
-                        className="flex-1 h-12 border border-border text-muted-foreground text-label"
-                      >
-                        Edit Seating
-                      </Button>
-                      <Button
-                        onClick={handleStartHandTracking}
-                        className="flex-1 h-12 bg-gold-600 text-black text-label rounded-xl"
-                      >
-                        {hasSavedHandState ? 'Resume' : 'Record Hand'}
-                      </Button>
-                    </div>
-                  )}
+          <div className="flex flex-col w-full min-h-screen bg-background">
+            {/* Sticky Mobile Header */}
+            <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-4 py-2 flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onBackToSetup}
+                className="h-9 w-9"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex flex-col">
+                <span className="text-xs font-luxury uppercase tracking-widest text-muted-foreground leading-none mb-1">
+                  Buy-in: {formatCurrency(currentGame.buy_in_amount)}
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-numbers">
+                  <Calendar className="h-3 w-3" />
+                  <span>{new Date(currentGame.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="actions" className="mt-0 p-4 space-y-6 pb-48">
-              <BuyInManagementTable
-                gamePlayers={gamePlayers}
-                buyInAmount={currentGame.buy_in_amount}
-                onAddBuyIn={handleAddBuyIn}
-                fetchBuyInHistory={fetchBuyInHistory}
-              />
-              <div className="border-t border-white/5 pt-6">
-                <FinalStackManagement
-                  gamePlayers={gamePlayers}
-                  onUpdateFinalStack={handleUpdateFinalStack}
-                  smallBlind={currentGame.small_blind}
-                />
               </div>
-            </TabsContent>
-
-            <TabsContent value="info" className="mt-0 p-4 space-y-6 pb-48">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-luxury text-foreground uppercase tracking-widest">Players ({gamePlayers.length})</h3>
-                <Button
-                  onClick={() => setShowAddPlayer(true)}
-                  className="h-10 px-4 bg-accent/5 border border-border text-foreground text-label"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
-                  <DashboardPlayerCard
-                    key={gamePlayer.id}
-                    gamePlayer={gamePlayer}
-                    buyInAmount={currentGame.buy_in_amount}
-                    isLiveGame={true}
-                  />
-                ))}
-              </div>
-
-              {currentGame.settlements && currentGame.settlements.length > 0 && (
-                <div className="space-y-3 pt-6 border-t border-border">
-                  <h3 className="text-sm font-luxury text-muted-foreground uppercase tracking-widest">Manual Adjustments</h3>
-                  {currentGame.settlements.map((transfer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-accent/2 rounded-2xl border border-border">
-                      <span className="text-[11px] font-luxury text-foreground uppercase">
-                        {transfer.from} pays {transfer.to}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <span className="font-numbers text-sm text-foreground">{formatCurrency(transfer.amount)}</span>
-                        <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon-sm" className=" text-red-500/50 hover:text-red-500">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+              <div className="ml-auto flex items-center gap-2">
+                <div className="flex gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                        currentSlide === i ? "bg-primary w-3" : "bg-muted-foreground/20"
+                      )}
+                    />
                   ))}
                 </div>
-              )}
-
-              <div className="space-y-4 pt-6">
-                {settlements.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Settlement</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 max-h-[500px] overflow-auto">
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader className="sticky top-0 z-10 bg-card">
-                            <TableRow className="text-xs sm:text-sm">
-                              <TableHead className="p-2">From</TableHead>
-                              <TableHead className="p-2">To</TableHead>
-                              <TableHead className="text-right p-2">Amount</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {settlements.map((s, i) => (
-                              <TableRow key={i} className="text-xs sm:text-sm">
-                                <TableCell className="font-medium text-foreground p-2 max-w-[80px] sm:max-w-none truncate">{s.from}</TableCell>
-                                <TableCell className="font-medium text-foreground p-2 max-w-[80px] sm:max-w-none truncate">{s.to}</TableCell>
-                                <TableCell className="text-right font-medium p-2 whitespace-nowrap">
-                                  {formatCurrency(s.amount)}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                <Button
-                  onClick={handleCompleteGame}
-                  disabled={!canCompleteGame || isCompletingGame}
-                  className={cn(
-                    "w-full h-16 rounded-2xl font-luxury uppercase tracking-widest text-sm transition-all",
-                    canCompleteGame ? "bg-gradient-to-r from-gold-600 to-gold-400 text-black shadow-lg shadow-gold-900/20" : "bg-accent/5 text-muted-foreground/20"
-                  )}
-                >
-                  {isCompletingGame ? <Loader2 className="h-5 w-5 animate-spin" /> : 'End Game'}
-                </Button>
               </div>
-            </TabsContent>
+            </div>
+
+            {/* Carousel Content */}
+            <div className="mt-[57px] flex-1 overflow-hidden">
+              <Carousel setApi={setApi} className="w-full">
+                <CarouselContent className="ml-0">
+                  {/* Slide 1: Table & Seating */}
+                  <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
+                    <div className="p-0 space-y-4 pb-12">
+                      {showPositionEditor ? (
+                        <div className="p-4">
+                          <TablePositionEditor
+                            players={gamePlayers.map(gp => gp.player)}
+                            currentPositions={currentTablePosition?.positions || []}
+                            onSave={handleSaveTablePosition}
+                            onCancel={() => setShowPositionEditor(false)}
+                          />
+                        </div>
+                      ) : handTrackingStage === 'recording' ? (
+                        <HandTracking
+                          game={game}
+                          positionsJustChanged={positionsJustChanged}
+                          onHandComplete={handleHandComplete}
+                          initialSeatPositions={currentTablePosition?.positions || []}
+                        />
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="relative aspect-[4/3] bg-white/40 dark:bg-black/40 overflow-hidden shadow-inner border-y border-border">
+                            {currentTablePosition && currentTablePosition.positions.length > 0 ? (
+                              <PokerTableView
+                                positions={currentTablePosition.positions}
+                                totalSeats={gamePlayers.length}
+                                gameId={currentGame.id}
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center p-8">
+                                <Button
+                                  onClick={() => setShowPositionEditor(true)}
+                                  className="h-14 px-10 bg-accent/5 dark:bg-white/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
+                                >
+                                  Setup Seating
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+
+                          {currentTablePosition && currentTablePosition.positions.length > 0 && (
+                            <div className="px-4 flex gap-3">
+                              <Button
+                                onClick={() => setShowPositionEditor(true)}
+                                variant="ghost"
+                                className="flex-1 h-12 border border-border text-muted-foreground text-label"
+                              >
+                                Edit Seating
+                              </Button>
+                              <Button
+                                onClick={handleStartHandTracking}
+                                className="flex-1 h-12 bg-gold-600 text-black text-label rounded-xl"
+                              >
+                                {hasSavedHandState ? 'Resume' : 'Record Hand'}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CarouselItem>
+
+                  {/* Slide 2: Actions */}
+                  <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
+                    <div className="p-2 space-y-6 pb-20">
+                      <BuyInManagementTable
+                        gamePlayers={gamePlayers}
+                        buyInAmount={currentGame.buy_in_amount}
+                        onAddBuyIn={handleAddBuyIn}
+                        fetchBuyInHistory={fetchBuyInHistory}
+                      />
+                      <div className="border-t border-white/5 pt-6">
+                        <FinalStackManagement
+                          gamePlayers={gamePlayers}
+                          onUpdateFinalStack={handleUpdateFinalStack}
+                          smallBlind={currentGame.small_blind}
+                        />
+                      </div>
+                    </div>
+                  </CarouselItem>
+
+                  {/* Slide 3: Info & Settlements */}
+                  <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
+                    <div className="p-4 space-y-6 pb-24">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-luxury text-foreground uppercase tracking-widest leading-none">Players ({gamePlayers.length})</h3>
+                        <Button
+                          onClick={() => setShowAddPlayer(true)}
+                          className="h-9 px-4 bg-accent/5 border border-border text-foreground text-label flex items-center"
+                        >
+                          <UserPlus className="w-3.5 h-3.5 mr-2" />
+                          Add
+                        </Button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
+                          <DashboardPlayerCard
+                            key={gamePlayer.id}
+                            gamePlayer={gamePlayer}
+                            buyInAmount={currentGame.buy_in_amount}
+                            isLiveGame={true}
+                          />
+                        ))}
+                      </div>
+
+                      {currentGame.settlements && currentGame.settlements.length > 0 && (
+                        <div className="space-y-3 pt-6 border-t border-border">
+                          <h3 className="text-xs font-luxury text-muted-foreground uppercase tracking-widest">Manual Adjustments</h3>
+                          <div className="space-y-2">
+                            {currentGame.settlements.map((transfer, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 bg-accent/5 rounded-xl border border-border">
+                                <span className="text-[10px] font-luxury text-foreground uppercase tracking-wide">
+                                  {transfer.from} pays {transfer.to}
+                                </span>
+                                <div className="flex items-center gap-3">
+                                  <span className="font-numbers text-xs text-foreground">{formatCurrency(transfer.amount)}</span>
+                                  <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-7 w-7 text-red-500/50 hover:text-red-500">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-4 pt-6">
+                        {settlements.length > 0 && (
+                          <Card className={cn("border-border shadow-none bg-accent/2", isMobile ? "border-0 shadow-none bg-transparent" : "")}>
+                            <CardHeader className={cn(isMobile ? "py-2 px-1" : "py-4 px-4")}>
+                              <CardTitle className={cn("text-sm uppercase tracking-widest font-luxury", isMobile ? "text-xs" : "")}>Settlement</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                              <div className="overflow-x-auto w-full">
+                                <Table className={cn(isMobile && "table-fixed w-full")}>
+                                  <TableHeader className="bg-muted/30">
+                                    <TableRow className={cn("hover:bg-transparent border-border", isMobile ? "h-8" : "")}>
+                                      <TableHead className={cn("px-4 uppercase font-luxury", isMobile ? "h-8 px-2 w-[30%] text-mobile-compact" : "h-9 text-[10px]")}>From</TableHead>
+                                      <TableHead className={cn("px-4 uppercase font-luxury", isMobile ? "h-8 px-2 w-[30%] text-mobile-compact" : "h-9 text-[10px]")}>To</TableHead>
+                                      <TableHead className={cn("px-4 text-right uppercase font-luxury", isMobile ? "h-8 px-2 w-[40%] text-mobile-compact" : "h-9 text-[10px]")}>Amount</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {settlements.map((s, i) => (
+                                      <TableRow key={i} className={cn("border-border hover:bg-transparent", isMobile ? "h-8" : "")}>
+                                        <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px] max-w-[80px]")}>
+                                          {s.from}
+                                        </TableCell>
+                                        <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px] max-w-[80px]")}>
+                                          {s.to}
+                                        </TableCell>
+                                        <TableCell className={cn("text-right font-numbers whitespace-nowrap", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px]")}>
+                                          {formatCurrency(s.amount)}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        <Button
+                          onClick={handleCompleteGame}
+                          disabled={!canCompleteGame || isCompletingGame}
+                          className={cn(
+                            "w-full h-14 rounded-xl font-luxury uppercase tracking-widest text-[11px] transition-all",
+                            canCompleteGame ? "bg-gradient-to-r from-gold-600 to-gold-400 text-black shadow-lg" : "bg-accent/5 text-muted-foreground/20"
+                          )}
+                        >
+                          {isCompletingGame ? <Loader2 className="h-5 w-5 animate-spin" /> : 'End Game'}
+                        </Button>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                </CarouselContent>
+              </Carousel>
+            </div>
 
             <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
               <DialogContent>
@@ -690,7 +748,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </Tabs>
               </DialogContent>
             </Dialog>
-          </Tabs>
+          </div>
         ) : (
           /* Main 2-Column Layout (Desktop) */
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">

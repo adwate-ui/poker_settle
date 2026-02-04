@@ -25,10 +25,11 @@ import { GameCardSkeletonList } from "@/components/skeletons";
 import { EmptyState } from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { formatProfitLoss } from "@/lib/utils";
+import { formatProfitLoss, cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useGames } from "@/features/game/hooks/useGames";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -65,6 +66,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const { prefetch } = usePrefetchGame();
+  const isMobile = useIsMobile();
 
   const effectiveUserId = propUserId || user?.id;
 
@@ -292,24 +294,63 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
 
       {/* Responsive Table Layout */}
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-xs sm:text-sm">
-                <TableHead onClick={() => handleSort("date")} className="cursor-pointer hover:text-primary transition-colors p-2 sm:p-4">
-                  <span className="flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></span>
+        <div className="overflow-x-auto w-full">
+          <Table className={cn(isMobile && "table-fixed w-full")}>
+            <TableHeader className="bg-card/50">
+              <TableRow className={cn(isMobile ? "h-10" : "text-xs sm:text-sm")}>
+                <TableHead
+                  onClick={() => handleSort("date")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[22%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center gap-0.5">
+                    Date
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead onClick={() => handleSort("buy_in")} className="cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4">
-                  <span className="flex items-center justify-end gap-1">Buy-in <ArrowUpDown className="h-3 w-3" /></span>
+                <TableHead
+                  onClick={() => handleSort("buy_in")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4",
+                    isMobile ? "w-[18%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-end gap-0.5">
+                    {isMobile ? "Buy" : "Buy-in"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead onClick={() => handleSort("players")} className="cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4">
-                  <span className="flex items-center justify-center gap-1">Players <ArrowUpDown className="h-3 w-3" /></span>
+                <TableHead
+                  onClick={() => handleSort("players")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4",
+                    isMobile ? "w-[12%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-center gap-0.5">
+                    {isMobile ? "Plyr" : "Players"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead onClick={() => handleSort("chips")} className="cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4">
-                  <span className="flex items-center justify-end gap-1">Total Pot <ArrowUpDown className="h-3 w-3" /></span>
+                <TableHead
+                  onClick={() => handleSort("chips")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4",
+                    isMobile ? "w-[23%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-end gap-0.5">
+                    {isMobile ? "Pot" : "Total Pot"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead className="text-right p-2 sm:p-4">
-                  {selectedPlayer !== "all" ? "Player P&L" : "Actions"}
+                <TableHead className={cn(
+                  "text-right p-2 sm:p-4",
+                  isMobile ? "w-[25%] px-1 text-mobile-compact" : ""
+                )}>
+                  {isMobile ? "P&L" : (selectedPlayer !== "all" ? "Player P&L" : "Actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -319,39 +360,47 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 return (
                   <TableRow
                     key={game.id}
-                    className="cursor-pointer text-xs sm:text-sm"
+                    className={cn(
+                      "cursor-pointer hover:bg-muted/30 transition-colors",
+                      isMobile ? "h-10 text-mobile-compact" : "text-xs sm:text-sm"
+                    )}
                     onClick={() => handleNavigate(game.id)}
                     onMouseEnter={() => prefetch(game.id)}
                   >
-                    <TableCell className="font-medium p-2 sm:p-4 whitespace-nowrap">
-                      {format(new Date(game.date), "MMM d, yyyy")}
+                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      {format(new Date(game.date), isMobile ? "MMM d" : "MMM d, yyyy")}
                     </TableCell>
-                    <TableCell className="text-right font-body p-2 sm:p-4">
-                      {formatCurrency(game.buy_in_amount)}
+                    <TableCell className={cn("text-right font-body", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      {isMobile ? Math.round(game.buy_in_amount) : formatCurrency(game.buy_in_amount)}
                     </TableCell>
-                    <TableCell className="text-center p-2 sm:p-4">
-                      <Badge variant="secondary" className="text-xs">{game.player_count}</Badge>
+                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
+                        {game.player_count}
+                      </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-body font-bold text-primary p-2 sm:p-4">
-                      {formatCurrency(game.total_pot)}
+                    <TableCell className={cn("text-right font-body font-bold text-primary", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      {isMobile ? Math.round(game.total_pot) : formatCurrency(game.total_pot)}
                     </TableCell>
-                    <TableCell className="text-right p-2 sm:p-4">
+                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                       {selectedPlayer !== "all" && playerData ? (
-                        <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="text-xs">
-                          {formatProfitLoss(playerData.net_amount)}
+                        <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className={cn(isMobile ? "h-5 px-1.5 text-[9px]" : "text-xs")}>
+                          {isMobile ? (playerData.net_amount >= 0 ? '+' : '') + Math.round(playerData.net_amount) : formatProfitLoss(playerData.net_amount)}
                         </Badge>
                       ) : (
                         !readOnly && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 sm:h-8 sm:w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                            className={cn(
+                              "text-destructive/50 hover:text-destructive hover:bg-destructive/10",
+                              isMobile ? "h-6 w-6" : "h-6 w-6 sm:h-8 sm:w-8"
+                            )}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteGameId(game.id);
                             }}
                           >
-                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
                           </Button>
                         )
                       )}

@@ -260,4 +260,14 @@
       /* Square on desktop */
     }
   }
+
+  /* Mobile Utility Classes */
+  .text-mobile-compact {
+    font-size: 11px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .table-cell-mobile {
+    padding: 2px 4px !important;
+  }
 }

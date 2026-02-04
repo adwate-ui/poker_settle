@@ -83,12 +83,23 @@ export const BuyInManagementTable = ({
 
   // Helper function to abbreviate names for mobile
   const getDisplayName = (name: string, isMobile: boolean) => {
+    if (!name) return '';
     if (!isMobile) return name;
+
+    // If name is already short, keep it
+    if (name.length <= 10) return name;
+
     const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return name;
-    return parts.map((part, idx) =>
-      idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
-    ).join(' ');
+    if (parts.length === 1) {
+      return name.substring(0, 10);
+    }
+
+    // Format: First Name + Last Initial (e.g., "John D.")
+    const firstName = parts[0];
+    const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+    const formatted = `${firstName} ${lastInitial}.`;
+
+    return formatted.length > 10 ? formatted.substring(0, 7) + "..." : formatted;
   };
 
   const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
@@ -106,39 +117,62 @@ export const BuyInManagementTable = ({
   return (
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
-        <div className="overflow-x-auto">
-          <Table>
+        <div className="overflow-x-auto w-full">
+          <Table className={cn(isMobile && "table-fixed w-full")}>
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>
-                <TableHead className="pl-6">Player</TableHead>
-                <TableHead>Buy-ins</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead className="text-right pr-6">Actions</TableHead>
+                <TableHead className={cn(isMobile ? "pl-2 w-[40%] text-mobile-compact uppercase font-bold" : "pl-6")}>
+                  {isMobile ? "Plyr" : "Player"}
+                </TableHead>
+                <TableHead className={cn(isMobile ? "px-1 w-[20%] text-mobile-compact uppercase font-bold" : "")}>
+                  {isMobile ? "Buys" : "Buy-ins"}
+                </TableHead>
+                <TableHead className={cn(isMobile ? "px-1 w-[20%] text-mobile-compact uppercase font-bold" : "")}>
+                  {isMobile ? "Amt" : "Amount"}
+                </TableHead>
+                <TableHead className={cn(isMobile ? "px-2 w-[20%] text-right text-mobile-compact uppercase font-bold" : "text-right pr-6")}>
+                  {isMobile ? "Act" : "Actions"}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedPlayers.map((gamePlayer) => (
                 <TableRow
                   key={gamePlayer.id}
-                  className="group"
+                  className={cn("group", isMobile && "h-10")}
                 >
-                  <TableCell className="pl-6">
-                    <div className="flex items-center gap-3">
-                      <User className="h-4 w-4 text-muted-foreground/50" />
-                      <span className="font-medium">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "pl-6")}>
                     <div className="flex items-center gap-2">
-                      <Coins className="h-4 w-4 text-muted-foreground/50" />
-                      <span className="font-medium">{gamePlayer.buy_ins}</span>
+                      {!isMobile && <User className="h-4 w-4 text-muted-foreground/50" />}
+                      <span className={cn(
+                        "font-medium truncate",
+                        isMobile ? "text-mobile-compact" : ""
+                      )}>
+                        {getDisplayName(gamePlayer.player.name, isMobile)}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-muted-foreground">{formatCurrency(gamePlayer.buy_ins * buyInAmount)}</span>
+                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "")}>
+                    <div className="flex items-center gap-1">
+                      {!isMobile && <Coins className="h-4 w-4 text-muted-foreground/50" />}
+                      <span className={cn(
+                        "font-medium",
+                        isMobile ? "text-mobile-compact" : ""
+                      )}>
+                        {gamePlayer.buy_ins}
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <div className="flex items-center justify-end gap-3">
+                  <TableCell className={cn(isMobile ? "table-cell-mobile" : "")}>
+                    <span className={cn(
+                      "text-muted-foreground",
+                      isMobile ? "text-mobile-compact" : "text-sm"
+                    )}>
+                      {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
+                    </span>
+                  </TableCell>
+                  <TableCell className={cn(isMobile ? "table-cell-mobile text-right" : "text-right pr-6")}>
+                    <div className="flex items-center justify-end gap-1 sm:gap-3">
                       <Button
                         onClick={() => {
                           setSelectedPlayerId(gamePlayer.id);
@@ -146,16 +180,21 @@ export const BuyInManagementTable = ({
                           setOpened(true);
                         }}
                         variant="ghost"
-                        size="icon"
+                        size={isMobile ? "icon-sm" : "icon"}
                         aria-label={`Add buy-in for ${gamePlayer.player.name}`}
+                        className={cn(isMobile && "h-7 w-7")}
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                       </Button>
                       {fetchBuyInHistory && (
                         <BuyInHistoryDialog
                           gamePlayerId={gamePlayer.id}
                           playerName={gamePlayer.player.name}
                           fetchHistory={fetchBuyInHistory}
+                          triggerProps={{
+                            size: isMobile ? "icon-sm" : "icon",
+                            className: cn(isMobile && "h-7 w-7")
+                          }}
                         />
                       )}
                     </div>

@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
@@ -35,6 +36,7 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
+  const isMobile = useIsMobile();
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -177,20 +179,52 @@ const PlayersHistory = () => {
 
       {/* Responsive Table Layout */}
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-xs sm:text-sm">
-                <TableHead onClick={() => handleSort("name")} className="cursor-pointer hover:text-primary transition-colors p-2 sm:p-4">
-                  <span className="flex items-center gap-1">Player <ArrowUpDown className="h-3 w-3" /></span>
+        <div className="overflow-x-auto w-full">
+          <Table className={cn(isMobile && "table-fixed w-full font-luxury")}>
+            <TableHeader className="bg-card/50">
+              <TableRow className={cn(isMobile ? "h-10" : "text-xs sm:text-sm")}>
+                <TableHead
+                  onClick={() => handleSort("name")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[35%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center gap-0.5">
+                    {isMobile ? "Plyr" : "Player"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead onClick={() => handleSort("total_games")} className="cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4">
-                  <span className="flex items-center justify-center gap-1">Games <ArrowUpDown className="h-3 w-3" /></span>
+                <TableHead
+                  onClick={() => handleSort("total_games")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4",
+                    isMobile ? "w-[15%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-center gap-0.5">
+                    {isMobile ? "Gms" : "Games"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead onClick={() => handleSort("total_profit")} className="cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4">
-                  <span className="flex items-center justify-end gap-1">Total Net <ArrowUpDown className="h-3 w-3" /></span>
+                <TableHead
+                  onClick={() => handleSort("total_profit")}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4",
+                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-end gap-0.5">
+                    {isMobile ? "Net" : "Total Net"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
                 </TableHead>
-                <TableHead className="text-right p-2 sm:p-4">Actions</TableHead>
+                <TableHead className={cn(
+                  "text-right p-2 sm:p-4",
+                  isMobile ? "w-[20%] px-1" : ""
+                )}>
+                  {!isMobile && "Actions"}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,37 +233,49 @@ const PlayersHistory = () => {
                 return (
                   <TableRow
                     key={player.id}
-                    className="cursor-pointer text-xs sm:text-sm"
+                    className={cn(
+                      "cursor-pointer hover:bg-muted/30 transition-colors",
+                      isMobile ? "h-10 text-mobile-compact" : "text-xs sm:text-sm"
+                    )}
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <TableCell className="p-2 sm:p-4">
-                      <div className="flex items-center gap-2 sm:gap-4 max-w-[120px] sm:max-w-none">
-                        <OptimizedAvatar name={player.name} size="sm" className="h-6 w-6 sm:h-10 sm:w-10" />
-                        <span className="font-medium font-luxury text-xs sm:text-base truncate">{player.name}</span>
+                    <TableCell className={cn(isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
+                        <OptimizedAvatar
+                          name={player.name}
+                          size="sm"
+                          className={cn(isMobile ? "h-5 w-5" : "h-6 w-6 sm:h-10 sm:w-10")}
+                        />
+                        <span className="font-medium truncate block">
+                          {player.name}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center p-2 sm:p-4">
-                      <Badge variant="secondary" className="text-xs">
-                        <span className="sm:hidden">{player.total_games || 0}</span>
-                        <span className="hidden sm:inline">{player.total_games || 0} Sessions</span>
+                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
+                        {player.total_games || 0}
+                        {!isMobile && " Sessions"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right p-2 sm:p-4">
-                      <Badge variant={profit >= 0 ? 'profit' : 'loss'} className="text-xs">
-                        {formatProfitLoss(profit)}
+                    <TableCell className={cn("text-right", isMobile ? "px-1 font-numbers" : "p-2 sm:p-4")}>
+                      <Badge variant={profit >= 0 ? 'profit' : 'loss'} className={cn(isMobile ? "h-5 px-1.5 text-[9px]" : "text-xs")}>
+                        {isMobile ? (profit >= 0 ? '+' : '') + Math.round(profit) : formatProfitLoss(profit)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right p-2 sm:p-4">
+                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 sm:h-8 sm:w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                        className={cn(
+                          "text-destructive/50 hover:text-destructive hover:bg-destructive/10",
+                          isMobile ? "h-6 w-6" : "h-6 w-6 sm:h-8 sm:w-8"
+                        )}
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeletePlayerId(player.id);
                         }}
                       >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
                       </Button>
                     </TableCell>
                   </TableRow>

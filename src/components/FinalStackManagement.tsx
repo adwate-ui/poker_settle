@@ -77,12 +77,23 @@ export const FinalStackManagement = ({
 
   // Helper function to abbreviate names for mobile
   const getDisplayName = (name: string, isMobile: boolean) => {
+    if (!name) return '';
     if (!isMobile) return name;
+
+    // If name is already short, keep it
+    if (name.length <= 10) return name;
+
     const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return name;
-    return parts.map((part, idx) =>
-      idx === parts.length - 1 ? part : part.charAt(0).toUpperCase() + '.'
-    ).join(' ');
+    if (parts.length === 1) {
+      return name.substring(0, 10);
+    }
+
+    // Format: First Name + Last Initial (e.g., "John D.")
+    const firstName = parts[0];
+    const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+    const formatted = `${firstName} ${lastInitial}.`;
+
+    return formatted.length > 10 ? formatted.substring(0, 7) + "..." : formatted;
   };
 
   const selectedPlayer = sortedPlayers.find(gp => gp.id === selectedPlayerId);
@@ -90,35 +101,49 @@ export const FinalStackManagement = ({
   return (
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
-        <Table>
+        <Table className={cn(isMobile && "table-fixed w-full")}>
           <TableHeader className="sticky top-0 z-10 bg-card">
             <TableRow>
-              <TableHead className="pl-6 w-[200px]">Player</TableHead>
-              <TableHead>Final Stack</TableHead>
-              <TableHead className="text-right pr-6">Actions</TableHead>
+              <TableHead className={cn(isMobile ? "pl-2 w-[40%] text-mobile-compact uppercase font-bold" : "pl-6 w-[200px]")}>
+                {isMobile ? "Plyr" : "Player"}
+              </TableHead>
+              <TableHead className={cn(isMobile ? "px-1 w-[30%] text-mobile-compact uppercase font-bold" : "")}>
+                {isMobile ? "Stack" : "Final Stack"}
+              </TableHead>
+              <TableHead className={cn(isMobile ? "px-2 w-[30%] text-right text-mobile-compact uppercase font-bold" : "text-right pr-6")}>
+                {isMobile ? "Act" : "Actions"}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedPlayers.map((gamePlayer) => (
-              <TableRow key={gamePlayer.id}>
-                <TableCell className="pl-6 font-medium">
+              <TableRow
+                key={gamePlayer.id}
+                className={cn(isMobile && "h-10")}
+              >
+                <TableCell className={cn("font-medium", isMobile ? "table-cell-mobile text-mobile-compact truncate" : "pl-6")}>
                   {getDisplayName(gamePlayer.player.name, isMobile)}
                 </TableCell>
-                <TableCell>
+                <TableCell className={cn(isMobile ? "table-cell-mobile text-mobile-compact" : "")}>
                   {formatCurrency(gamePlayer.final_stack || 0)}
                 </TableCell>
-                <TableCell className="text-right pr-6">
-                  <div className="flex items-center justify-end gap-2">
+                <TableCell className={cn(isMobile ? "table-cell-mobile text-right" : "text-right pr-6")}>
+                  <div className="flex items-center justify-end gap-1 sm:gap-2">
                     <Button
                       onClick={() => handleStartEdit(gamePlayer)}
-                      variant="ghost"
-                      size="icon"
+                      variant="outline"
+                      size={isMobile ? "icon-sm" : "icon"}
                       aria-label={`Edit final stack for ${gamePlayer.player.name}`}
+                      className={cn("bg-transparent border-border hover:border-gold-500/50", isMobile && "h-7 w-7")}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                     </Button>
                     <ChipScanner
                       onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
+                      triggerProps={{
+                        size: isMobile ? "icon-sm" : "icon",
+                        className: cn(isMobile && "h-7 w-7")
+                      }}
                     />
                   </div>
                 </TableCell>

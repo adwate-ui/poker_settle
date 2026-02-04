@@ -10,7 +10,7 @@ import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer, PlayerAction } from '@/types/poker';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp, Sparkles, Undo2 } from 'lucide-react';
+import { Play, CheckCircle, TrendingUp, Trophy, X, ChevronDown, ChevronUp, Sparkles, Undo2, Eye } from 'lucide-react';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
 import PokerTableView from './PokerTableView';
@@ -117,6 +117,13 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       toast({ title: 'Hand Restored', description: `Continuing Hand #${savedState.currentHand.hand_number}` });
     }
   }, []);
+
+  // Auto-open mobile hand tracking when hand starts or stage changes
+  useEffect(() => {
+    if (isMobile && engine.stage !== 'setup' && engine.stage !== 'showdown') {
+      setShowMobileHandTracking(true);
+    }
+  }, [engine.stage, isMobile]);
 
   // Card selector logic
   const openCardSelector = (type: 'flop' | 'turn' | 'river') => {
@@ -399,32 +406,63 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   return (
     <>
       {isMobile ? (
-        <Drawer open={showMobileHandTracking} onOpenChange={setShowMobileHandTracking} dismissible={true}>
-          <DrawerContent className="h-[95vh] focus:outline-none" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-            <div className="p-4 flex flex-col h-full space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><span className="font-bold">Hand #{engine.currentHand?.hand_number}</span><Badge>{engine.stage}</Badge></div>
-                <div className="flex items-center gap-2"><Badge variant="secondary">💰 {formatCurrency(engine.potSize)}</Badge><Button variant="ghost" size="sm" onClick={engine.resetHandState}><X className="w-4 h-4" /></Button></div>
-              </div>
-              <div className="flex-[2] overflow-hidden rounded-xl border bg-green-900/10">
-                <PokerTableView
-                  positions={engine.activePlayers.map(p => ({ seat: seatPositions[p.player_id] ?? 0, player_id: p.player_id, player_name: p.player.name }))}
-                  buttonPlayerId={engine.buttonPlayerId} seatPositions={seatPositions} playerBets={engine.streetPlayerBets} potSize={engine.visualPotSize}
-                  activePlayerId={engine.currentPlayer?.player_id} foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
-                />
-              </div>
-              {CommunityCardsDisplay}
-              <div className="pb-safe">{ActionControls}</div>
+        <>
+          {!showMobileHandTracking && (
+            <div className="mt-8 flex justify-center px-4">
+              <Button
+                onClick={() => setShowMobileHandTracking(true)}
+                className="w-full max-w-xs bg-primary hover:bg-primary/90 text-white font-bold py-8 px-6 rounded-2xl shadow-xl flex items-center justify-center gap-4 transition-all active:scale-95 animate-in fade-in zoom-in duration-300"
+              >
+                <div className="p-3 bg-white/20 rounded-full">
+                  <Play className="w-6 h-6 fill-current" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs opacity-80 uppercase tracking-widest font-luxury">Hand #{engine.currentHand?.hand_number}</div>
+                  <div className="text-lg">Resume Tracking</div>
+                </div>
+              </Button>
             </div>
-          </DrawerContent>
-        </Drawer>
+          )}
+          <Drawer open={showMobileHandTracking} onOpenChange={setShowMobileHandTracking} dismissible={true}>
+            <DrawerContent className="h-[95vh] focus:outline-none" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+              <div className="p-4 flex flex-col h-full space-y-4">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <span className="font-bold">Hand #{engine.currentHand?.hand_number}</span>
+                    <Badge>{engine.stage?.toUpperCase()}</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">💰 {formatCurrency(engine.potSize)}</Badge>
+                    <Button variant="ghost" size="sm" onClick={engine.resetHandState}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex-[2] overflow-hidden rounded-xl border bg-green-900/10">
+                  <PokerTableView
+                    positions={engine.activePlayers.map(p => ({ seat: seatPositions[p.player_id] ?? 0, player_id: p.player_id, player_name: p.player.name }))}
+                    buttonPlayerId={engine.buttonPlayerId}
+                    seatPositions={seatPositions}
+                    playerBets={engine.streetPlayerBets}
+                    potSize={engine.visualPotSize}
+                    activePlayerId={engine.currentPlayer?.player_id}
+                    foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
+                  />
+                </div>
+                {CommunityCardsDisplay}
+                <div className="pb-safe">{ActionControls}</div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </>
       ) : (
         <Card className="mt-6 border-2 border-primary/50 shadow-xl overflow-hidden">
           <CardHeader className="bg-primary/5 pb-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-xl"><TrendingUp className="w-6 h-6 text-primary" /></div>
-                <div><h2 className="text-xl font-bold">Hand #{engine.currentHand?.hand_number}</h2><Badge variant="outline" className="mt-1">{engine.stage.toUpperCase()}</Badge></div>
+                <div><h2 className="text-xl font-bold">Hand #{engine.currentHand?.hand_number}</h2><Badge variant="outline" className="mt-1">{engine.stage?.toUpperCase()}</Badge></div>
               </div>
               <div className="flex items-center gap-4">
                 <Badge className="text-xl py-3 px-6 bg-amber-500/20 text-amber-600 border-amber-500/20">💰 {formatWithBB(engine.potSize)}</Badge>
@@ -436,8 +474,12 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             <div className="rounded-2xl border-2 border-border/50 bg-green-950/5 overflow-hidden">
               <PokerTableView
                 positions={engine.activePlayers.map(p => ({ seat: seatPositions[p.player_id] ?? 0, player_id: p.player_id, player_name: p.player.name }))}
-                buttonPlayerId={engine.buttonPlayerId} seatPositions={seatPositions} playerBets={engine.streetPlayerBets} potSize={engine.visualPotSize}
-                activePlayerId={engine.currentPlayer?.player_id} foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
+                buttonPlayerId={engine.buttonPlayerId}
+                seatPositions={seatPositions}
+                playerBets={engine.streetPlayerBets}
+                potSize={engine.visualPotSize}
+                activePlayerId={engine.currentPlayer?.player_id}
+                foldedPlayers={engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)}
               />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -465,23 +507,39 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
 
       {/* Card Selector Dialogs */}
       <Dialog open={showCardSelector} onOpenChange={setShowCardSelector}>
-        <DialogContent className="max-w-2xl"><CardSelector maxCards={cardSelectorType === 'flop' ? 3 : 1} usedCards={getUsedCards(parseCardNotationString(tempCommunityCards))} selectedCards={parseCardNotationString(tempCommunityCards)} onSelect={cards => {
-          if (cardSelectorType === 'flop') engine.setFlopCards(cards);
-          else if (cardSelectorType === 'turn') engine.setTurnCard(cards);
-          else engine.setRiverCard(cards);
-          setCardsJustAdded(true); setShowCardSelector(false);
-        }} label={`Select ${cardSelectorType}`} open={true} onOpenChange={setShowCardSelector} /></DialogContent>
+        <DialogContent className="max-w-2xl">
+          <CardSelector
+            maxCards={cardSelectorType === 'flop' ? 3 : 1}
+            usedCards={getUsedCards(parseCardNotationString(tempCommunityCards))}
+            selectedCards={parseCardNotationString(tempCommunityCards)}
+            onSelect={cards => {
+              if (cardSelectorType === 'flop') engine.setFlopCards(cards);
+              else if (cardSelectorType === 'turn') engine.setTurnCard(cards);
+              else engine.setRiverCard(cards);
+              setCardsJustAdded(true);
+              setShowCardSelector(false);
+            }}
+            label={`Select ${cardSelectorType}`}
+            open={true}
+            onOpenChange={setShowCardSelector}
+          />
+        </DialogContent>
       </Dialog>
 
       <CardSelector
-        maxCards={engine.stage === 'flop' ? 3 : 1} open={showDesktopCardSelector} onOpenChange={setShowDesktopCardSelector}
-        usedCards={getUsedCards(parseCardNotationString(tempCommunityCards))} selectedCards={parseCardNotationString(tempCommunityCards)}
+        maxCards={engine.stage === 'flop' ? 3 : 1}
+        open={showDesktopCardSelector}
+        onOpenChange={setShowDesktopCardSelector}
+        usedCards={getUsedCards(parseCardNotationString(tempCommunityCards))}
+        selectedCards={parseCardNotationString(tempCommunityCards)}
         onSelect={cards => {
           if (engine.stage === 'flop') engine.setFlopCards(cards);
           else if (engine.stage === 'turn') engine.setTurnCard(cards);
           else engine.setRiverCard(cards);
-          setCardsJustAdded(true); setShowDesktopCardSelector(false);
-        }} label={`Select ${engine.stage}`}
+          setCardsJustAdded(true);
+          setShowDesktopCardSelector(false);
+        }}
+        label={`Select ${engine.stage}`}
       />
     </>
   );

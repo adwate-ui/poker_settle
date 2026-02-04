@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChipScannerProps {
     onScanComplete: (value: number) => void;
+    triggerProps?: Partial<React.ComponentProps<typeof Button>>;
 }
 
 interface DetectedStack {
@@ -29,7 +30,7 @@ interface DetectedStack {
     raw: any;
 }
 
-export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
+export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) => {
     const [opened, setOpened] = useState(false);
     const [image, setImage] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
@@ -209,8 +210,21 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
     return (
         <>
-            <Button variant="ghost" size="icon" onClick={() => setOpened(true)} size="icon-sm" className=" text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full" aria-label="Open AI chip scanner">
-                <ScanEye className="h-4 w-4" />
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpened(true)}
+                aria-label="Open AI chip scanner"
+                {...triggerProps}
+                className={cn(
+                    "text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full h-9 w-9",
+                    triggerProps?.className
+                )}
+            >
+                <ScanEye className={cn(
+                    "h-4 w-4",
+                    triggerProps?.size === "icon-sm" && "h-3.5 w-3.5"
+                )} />
             </Button>
 
             <Dialog open={opened} onOpenChange={setOpened}>

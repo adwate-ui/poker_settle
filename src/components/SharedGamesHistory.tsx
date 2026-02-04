@@ -8,6 +8,8 @@ import { Loader2, ArrowUpDown, Calendar } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/utils/currencyUtils';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import {
   Select,
   SelectContent,
@@ -40,6 +42,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const isMobile = useIsMobile();
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
@@ -146,30 +149,96 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
       </Card>
 
       <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead onClick={() => handleSort('date')} className="cursor-pointer hover:text-primary"><span className="text-label flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('buy_in')} className="text-right cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-end gap-1">Buy-in <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('players')} className="text-center cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-center gap-1">Players <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-              <TableHead onClick={() => handleSort('chips')} className="text-right cursor-pointer hover:text-primary"><span className="text-label flex items-center justify-end gap-1">Pot <ArrowUpDown className="h-3 w-3" /></span></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedGames.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No games found</TableCell></TableRow>
-            ) : (
-              filteredAndSortedGames.map((game) => (
-                <TableRow key={game.id} onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)} className="cursor-pointer">
-                  <TableCell className="font-medium flex items-center gap-2"><Calendar className="h-4 w-4 opacity-50" /> {format(new Date(game.date), 'MMM d, yyyy')}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(game.buy_in_amount)}</TableCell>
-                  <TableCell className="text-center"><Badge variant="secondary">{game.player_count}</Badge></TableCell>
-                  <TableCell className="text-right font-bold text-primary">{formatCurrency(game.total_pot)}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto w-full">
+          <Table className={cn(isMobile && "table-fixed w-full font-luxury")}>
+            <TableHeader className="bg-card/50">
+              <TableRow className={cn(isMobile ? "h-10 border-b border-border/50" : "")}>
+                <TableHead
+                  onClick={() => handleSort('date')}
+                  className={cn(
+                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center gap-0.5">
+                    Date
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
+                </TableHead>
+                <TableHead
+                  onClick={() => handleSort('buy_in')}
+                  className={cn(
+                    "text-right cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[25%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-end gap-0.5">
+                    {isMobile ? "Buy" : "Buy-in"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
+                </TableHead>
+                <TableHead
+                  onClick={() => handleSort('players')}
+                  className={cn(
+                    "text-center cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[15%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-center gap-0.5">
+                    {isMobile ? "Plyr" : "Players"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
+                </TableHead>
+                <TableHead
+                  onClick={() => handleSort('chips')}
+                  className={cn(
+                    "text-right cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
+                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                  )}
+                >
+                  <span className="flex items-center justify-end gap-0.5">
+                    {isMobile ? "Pot" : "Pot"}
+                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                  </span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredAndSortedGames.length === 0 ? (
+                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No games found</TableCell></TableRow>
+              ) : (
+                filteredAndSortedGames.map((game) => (
+                  <TableRow
+                    key={game.id}
+                    onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)}
+                    className={cn(
+                      "cursor-pointer hover:bg-muted/30 transition-colors",
+                      isMobile ? "h-10 text-mobile-compact" : ""
+                    )}
+                  >
+                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        {!isMobile && <Calendar className="h-4 w-4 opacity-50" />}
+                        {format(new Date(game.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
+                      </div>
+                    </TableCell>
+                    <TableCell className={cn("text-right font-body", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      {isMobile ? Math.round(game.buy_in_amount) : formatCurrency(game.buy_in_amount)}
+                    </TableCell>
+                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "")}>
+                        {game.player_count}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={cn("text-right font-body font-bold text-primary", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      {isMobile ? Math.round(game.total_pot) : formatCurrency(game.total_pot)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     </div>
   );
