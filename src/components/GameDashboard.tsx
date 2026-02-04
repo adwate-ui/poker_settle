@@ -444,7 +444,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     )}>
       <div className={cn(
         "mx-auto space-y-8",
-        isMobile ? "max-full" : "max-w-[1600px]"
+        isMobile ? "w-full" : "max-w-[1600px]"
       )}>
         {/* Header Section - Hidden on mobile Table tab */}
         {!isMobile && (
@@ -555,7 +555,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                           </div>
 
                           {currentTablePosition && currentTablePosition.positions.length > 0 && (
-                            <div className="px-4 flex gap-3">
+                            <div className="grid grid-cols-2 gap-3 w-full px-4">
                               <Button
                                 onClick={() => setShowPositionEditor(true)}
                                 variant="ghost"

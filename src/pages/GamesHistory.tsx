@@ -371,7 +371,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                       {format(new Date(game.date), isMobile ? "MMM d" : "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className={cn("text-right font-body", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      {isMobile ? Math.round(game.buy_in_amount) : formatCurrency(game.buy_in_amount)}
+                      {isMobile ? `Rs.${Math.round(game.buy_in_amount).toLocaleString('en-IN')}` : formatCurrency(game.buy_in_amount)}
                     </TableCell>
                     <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
                       <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
@@ -379,7 +379,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                       </Badge>
                     </TableCell>
                     <TableCell className={cn("text-right font-body font-bold text-primary", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      {isMobile ? Math.round(game.total_pot) : formatCurrency(game.total_pot)}
+                      {isMobile ? `Rs.${Math.round(game.total_pot).toLocaleString('en-IN')}` : formatCurrency(game.total_pot)}
                     </TableCell>
                     <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                       {selectedPlayer !== "all" && playerData ? (

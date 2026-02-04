@@ -118,19 +118,19 @@ export const BuyInManagementTable = ({
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
         <div className="overflow-x-auto w-full">
-          <Table className={cn(isMobile && "table-fixed w-full")}>
+          <Table className="table-fixed w-full">
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>
-                <TableHead className={cn(isMobile ? "pl-2 w-[40%] text-mobile-compact uppercase font-bold" : "pl-6")}>
+                <TableHead className={cn("pl-6 w-[40%]", isMobile && "pl-2 text-mobile-compact uppercase font-bold")}>
                   {isMobile ? "Plyr" : "Player"}
                 </TableHead>
-                <TableHead className={cn(isMobile ? "px-1 w-[20%] text-mobile-compact uppercase font-bold" : "")}>
+                <TableHead className={cn("w-[20%]", isMobile && "px-1 text-mobile-compact uppercase font-bold text-center")}>
                   {isMobile ? "Buys" : "Buy-ins"}
                 </TableHead>
-                <TableHead className={cn(isMobile ? "px-1 w-[20%] text-mobile-compact uppercase font-bold" : "")}>
+                <TableHead className={cn("w-[20%]", isMobile && "px-1 text-mobile-compact uppercase font-bold")}>
                   {isMobile ? "Amt" : "Amount"}
                 </TableHead>
-                <TableHead className={cn(isMobile ? "px-2 w-[20%] text-right text-mobile-compact uppercase font-bold" : "text-right pr-6")}>
+                <TableHead className={cn("text-right pr-6 w-[20%]", isMobile && "px-2 text-mobile-compact uppercase font-bold")}>
                   {isMobile ? "Act" : "Actions"}
                 </TableHead>
               </TableRow>

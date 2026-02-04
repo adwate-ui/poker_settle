@@ -65,7 +65,12 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
-          <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Net P&L</p><p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>{player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit || 0))}</p></div>
+          <div className="p-4 rounded-lg border bg-card">
+            <p className="text-label text-muted-foreground">Net P&L</p>
+            <p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
+              {(player.total_profit || 0) < 0 ? '-' : ''}Rs. {Math.abs(Math.round(player.total_profit || 0)).toLocaleString('en-IN')}
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -138,12 +143,11 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                     </Badge>
                   </TableCell>
                   <TableCell className={cn(
-                    "text-right font-bold font-numbers",
+                    "text-right font-numbers",
                     h.net_amount >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive",
-                    isMobile ? "px-1" : "p-2 sm:p-4"
+                    isMobile ? "px-1 text-[10px]" : "p-2 sm:p-4"
                   )}>
-                    {h.net_amount > 0 ? "+" : ""}
-                    {isMobile ? Math.round(h.net_amount) : formatCurrency(h.net_amount)}
+                    {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}
                   </TableCell>
                   <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                     {isMobile ? (

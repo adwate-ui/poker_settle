@@ -101,16 +101,16 @@ export const FinalStackManagement = ({
   return (
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
-        <Table className={cn(isMobile && "table-fixed w-full")}>
+        <Table className="table-fixed w-full">
           <TableHeader className="sticky top-0 z-10 bg-card">
             <TableRow>
-              <TableHead className={cn(isMobile ? "pl-2 w-[40%] text-mobile-compact uppercase font-bold" : "pl-6 w-[200px]")}>
+              <TableHead className={cn("pl-6 w-[45%]", isMobile && "pl-2 text-mobile-compact uppercase font-bold")}>
                 {isMobile ? "Plyr" : "Player"}
               </TableHead>
-              <TableHead className={cn(isMobile ? "px-1 w-[30%] text-mobile-compact uppercase font-bold" : "")}>
+              <TableHead className={cn("w-[30%]", isMobile && "px-1 text-mobile-compact uppercase font-bold")}>
                 {isMobile ? "Stack" : "Final Stack"}
               </TableHead>
-              <TableHead className={cn(isMobile ? "px-2 w-[30%] text-right text-mobile-compact uppercase font-bold" : "text-right pr-6")}>
+              <TableHead className={cn("text-right pr-6 w-[25%]", isMobile && "px-2 text-mobile-compact uppercase font-bold")}>
                 {isMobile ? "Act" : "Actions"}
               </TableHead>
             </TableRow>
