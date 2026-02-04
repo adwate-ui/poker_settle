@@ -105,7 +105,7 @@ export const PlayerSelector = ({
           </h4>
           <div className="grid gap-2">
             {selectedPlayers.map((player) => (
-              <Card key={player.id} className="group hover:shadow-md transition-all border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
+              <Card key={player.id} className="group hover:shadow-md transition-all">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
@@ -132,7 +132,7 @@ export const PlayerSelector = ({
                         </Badge>
                         {player.total_profit !== undefined && (
                           <Badge
-                            variant={player.total_profit >= 0 ? 'success' : 'destructive'}
+                            variant={player.total_profit >= 0 ? 'profit' : 'destructive'}
                             className="text-[10px] h-5 px-1.5"
                           >
                             {player.total_profit >= 0 ? (
@@ -180,8 +180,8 @@ export const PlayerSelector = ({
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Add Players to Game</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-bold">Add Players to Game</DialogTitle>
+            <DialogDescription className="text-muted-foreground uppercase tracking-widest text-[10px]">
               Select from existing players or create a new one
             </DialogDescription>
           </DialogHeader>
@@ -343,8 +343,8 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
     <button
       onClick={() => onSelect(player)}
       className={cn(
-        "w-full text-left p-4 rounded-2xl border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-gold-500/5 hover:border-gold-500/20 transition-all group",
-        "focus:outline-none focus:ring-2 focus:ring-gold-500/50"
+        "w-full text-left p-4 rounded-2xl border border-border bg-accent/5 hover:bg-primary/5 hover:border-primary/20 transition-all group",
+        "focus:outline-none focus:ring-2 focus:ring-primary/50"
       )}
     >
       <div className="flex items-center gap-3">
@@ -372,7 +372,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
             </Badge>
             {player.total_profit !== undefined && (
               <Badge
-                variant={player.total_profit >= 0 ? 'success' : 'destructive'}
+                variant={player.total_profit >= 0 ? 'profit' : 'destructive'}
                 className="text-[10px] h-5 px-1.5"
               >
                 {player.total_profit >= 0 ? (

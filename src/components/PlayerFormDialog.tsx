@@ -131,15 +131,15 @@ export const PlayerFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-50 rounded-xl max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
-        <DialogHeader className="p-8 border-b border-white/5 bg-white/2">
+      <DialogContent className="max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
+        <DialogHeader className="p-8 border-b border-border">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-gold-500/10 border border-gold-500/20 shadow-[0_0_15px_rgba(212,184,60,0.1)]">
-              <User className="w-6 h-6 text-gold-500" />
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-sm">
+              <User className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-luxury text-gold-100 uppercase tracking-widest">{title}</DialogTitle>
-              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury flex items-center gap-1.5 mt-1">
+              <DialogTitle className="text-2xl font-bold uppercase tracking-widest">{title}</DialogTitle>
+              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5 mt-1">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 {description}
               </DialogDescription>
@@ -151,90 +151,75 @@ export const PlayerFormDialog = ({
           <div className="space-y-6">
             {/* Identity Field */}
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Player Name *</Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
-                </div>
-                <Input
-                  placeholder="Enter player name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={isSubmitting}
-                  className="h-12 pl-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-wider text-[13px] uppercase text-gold-100 placeholder:text-white/10"
-                  required
-                />
-              </div>
+              <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">Player Identity</Label>
+              <Input
+                placeholder="Enter full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isSubmitting}
+                className="h-14 bg-accent/5"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Email Address</Label>
+                  <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">Email Address (Optional)</Label>
                   {email && (
                     <button
                       type="button"
                       onClick={() => setEmail("")}
                       disabled={isSubmitting}
-                      className="text-[9px] font-luxury uppercase tracking-widest text-white/20 hover:text-white/40 transition-colors"
+                      className="text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                     >Clear</button>
                   )}
                 </div>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
-                  </div>
-                  <Input
-                    type="email"
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isSubmitting}
-                    className="h-12 pl-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-gold-100/60 placeholder:text-white/10"
-                  />
-                </div>
+                <Input
+                  type="email"
+                  placeholder="email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                  className="h-14 bg-accent/5"
+                />
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">UPI ID</Label>
+                  <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">Digital Transfer ID (Optional)</Label>
                   {upiId && (
                     <button
                       type="button"
                       onClick={() => setUpiId("")}
                       disabled={isSubmitting}
-                      className="text-[9px] font-luxury uppercase tracking-widest text-white/20 hover:text-white/40 transition-colors"
+                      className="text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                     >Clear</button>
                   )}
                 </div>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <CreditCard className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
-                  </div>
-                  <Input
-                    placeholder="user@bank"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                    disabled={isSubmitting}
-                    className="h-12 pl-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus-visible:ring-0 focus-visible:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase text-gold-100/60 placeholder:text-white/10"
-                  />
-                </div>
+                <Input
+                  placeholder="username@bank"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  disabled={isSubmitting}
+                  className="h-14 bg-accent/5"
+                />
               </div>
             </div>
 
             {/* Protocol Preference */}
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Preferred Payment Method</Label>
+              <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Payment Method</Label>
               <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value as 'upi' | 'cash')}>
-                <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[11px] uppercase">
+                <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-primary transition-all tracking-wider text-[11px] uppercase">
                   <div className="flex items-center gap-3">
-                    <Coins className="h-4 w-4 text-gold-500/40" />
+                    <Coins className="h-4 w-4 text-muted-foreground/40" />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
-                  <SelectItem value="upi" className="font-luxury uppercase text-[10px] tracking-widest">Digital Payment (UPI)</SelectItem>
-                  <SelectItem value="cash" className="font-luxury uppercase text-[10px] tracking-widest">Cash</SelectItem>
+                <SelectContent>
+                  <SelectItem value="upi" className="uppercase text-[10px] tracking-widest">Digital Payment (UPI)</SelectItem>
+                  <SelectItem value="cash" className="uppercase text-[10px] tracking-widest">Cash</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -246,14 +231,14 @@ export const PlayerFormDialog = ({
               variant="ghost"
               onClick={handleCancel}
               disabled={isSubmitting}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-12 border-white/5 bg-white/2 hover:bg-white/5 transition-colors rounded-lg flex-1"
+              className="uppercase tracking-[0.2em] text-[10px] h-12 border-border bg-accent/2 hover:bg-accent/5 transition-colors rounded-lg flex-1"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-12 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black border-0 shadow-lg shadow-gold-900/10 rounded-lg flex-1 transition-all"
+              className="uppercase tracking-[0.2em] text-[10px] h-12 flex-1 transition-all"
             >
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <div className="flex items-center gap-2"><Check className="h-4 w-4" /> <span>{initialData ? "Save Changes" : "Add Player"}</span></div>}
             </Button>

@@ -42,14 +42,14 @@ class GameErrorBoundary extends Component<
                   <AlertCircle className="h-8 w-8 text-red-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-luxury text-red-100 uppercase tracking-widest leading-tight">Archive Integrity Breach</CardTitle>
-                  <CardDescription className="text-[10px] uppercase tracking-[0.3em] text-red-500/40 font-luxury mt-1">System level exception caught in ledger view</CardDescription>
+                  <CardTitle className="text-2xl font-bold uppercase tracking-widest leading-tight text-destructive-foreground">Archive Integrity Breach</CardTitle>
+                  <CardDescription className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">System level exception caught in ledger view</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="py-10 space-y-8">
               <div className="space-y-4">
-                <p className="text-sm font-luxury text-white/50 leading-relaxed uppercase tracking-wider">
+                <p className="text-sm text-muted-foreground leading-relaxed uppercase tracking-wider">
                   The protocol encountered a critical anomaly while decrypting game archives. Data persistence remains intact, but visual rendering has been suspended for security.
                 </p>
                 {this.state.error && (

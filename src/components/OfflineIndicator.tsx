@@ -34,7 +34,7 @@ export const OfflineIndicator = () => {
       if (window.innerWidth >= 640) {
         toast.info('Protocol Interrupted', {
           description: 'You are currently in offline mode. Local archives will sync upon restoration.',
-          icon: <WifiOff className="h-4 w-4 text-gold-500" />,
+          icon: <WifiOff className="h-4 w-4 text-destructive" />,
           duration: 6000,
         });
       }
@@ -62,7 +62,7 @@ export const OfflineIndicator = () => {
           <WifiOff className="h-4 w-4" />
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping opacity-75" />
         </div>
-        <span className="font-luxury uppercase tracking-[0.2em] text-[10px] font-bold">Offline Protocol Active</span>
+        <span className="uppercase tracking-[0.2em] text-[10px] font-bold">Offline Protocol Active</span>
       </Badge>
     </div>
   );

@@ -322,7 +322,7 @@ const PlayerDetail = () => {
                   <Calendar className="mr-2 h-3.5 w-3.5 text-gold-600 dark:text-gold-500/40" />
                   <SelectValue placeholder="Period Filter" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-900/10 dark:border-gold-500/20 backdrop-blur-xl">
+                <SelectContent>
                   <SelectItem value="all" className="text-label text-gold-900 dark:text-gold-100/60">Full Archive</SelectItem>
                   {uniqueMonthYears.map((monthYear) => (
                     <SelectItem key={monthYear} value={monthYear} className="text-label text-gold-900 dark:text-gold-100/60">

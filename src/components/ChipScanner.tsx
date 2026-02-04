@@ -208,7 +208,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
     return (
         <>
-            <Button variant="ghost" size="icon" onClick={() => setOpened(true)} className="h-8 w-8 text-gold-500 hover:text-gold-400 hover:bg-gold-500/10 rounded-full" title="AI Chip Scanner">
+            <Button variant="ghost" size="icon" onClick={() => setOpened(true)} className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full" title="AI Chip Scanner">
                 <ScanEye className="h-4 w-4" />
             </Button>
 
@@ -220,7 +220,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                 <ScanEye className="w-5 h-5 text-primary" />
                             </div>
                             <div>
-                                <DialogTitle className="text-xl">AI Chip Auditor</DialogTitle>
+                                <DialogTitle className="text-xl font-bold uppercase tracking-widest">AI Chip Auditor</DialogTitle>
                                 <DialogDescription className="text-xs text-muted-foreground uppercase tracking-widest">Gemini 3.0 High-Fidelity Recognition</DialogDescription>
                             </div>
                         </div>
@@ -231,15 +231,15 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                             {!image ? (
                                 <div className="flex flex-col gap-6 w-full py-10">
                                     <div className="relative group">
-                                        <div className="absolute inset-0 bg-gold-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <div className="relative p-12 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center gap-6 bg-white/2 hover:border-gold-500/30 transition-all cursor-pointer overflow-hidden"
+                                        <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="relative p-12 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-center gap-6 bg-accent/5 hover:border-primary/30 transition-all cursor-pointer overflow-hidden"
                                             onClick={() => camInputRef.current?.click()}>
-                                            <div className="w-20 h-20 rounded-full bg-gold-500/10 flex items-center justify-center border border-gold-500/20 mb-2">
-                                                <Layers className="w-10 h-10 text-gold-500/60" />
+                                            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 mb-2">
+                                                <Layers className="w-10 h-10 text-primary/60" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-luxury text-gold-100 tracking-widest uppercase mb-1">Capture Stack Snapshot</p>
-                                                <p className="text-xs text-white/30 font-luxury tracking-wider">Position towers within clear visibility</p>
+                                                <p className="text-sm text-foreground font-bold tracking-widest uppercase mb-1">Capture Stack Snapshot</p>
+                                                <p className="text-xs text-muted-foreground tracking-wider">Position towers within clear visibility</p>
                                             </div>
                                         </div>
                                     </div>
@@ -272,30 +272,30 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                             ) : (
                                 <div className="flex flex-col lg:flex-row gap-8 w-full items-stretch">
                                     <div className="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl w-full lg:w-1/2 bg-black/40 flex flex-col gap-2 p-2 min-h-[300px] lg:min-h-0">
-                                        <canvas ref={canvasRef} className="w-full h-auto rounded-lg border border-white/5 shadow-inner" />
+                                        <canvas ref={canvasRef} className="w-full h-auto rounded-lg border border-border shadow-inner" />
                                         {processing && (
-                                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center backdrop-blur-md gap-4">
+                                            <div className="absolute inset-0 bg-background/60 flex flex-col items-center justify-center backdrop-blur-md gap-4">
                                                 <div className="relative">
-                                                    <Loader2 className="h-10 w-10 animate-spin text-gold-500" />
-                                                    <div className="absolute inset-0 blur-xl bg-gold-500/30 rounded-full animate-pulse" />
+                                                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                                                    <div className="absolute inset-0 blur-xl bg-primary/30 rounded-full animate-pulse" />
                                                 </div>
-                                                <p className="text-xs font-luxury tracking-[0.3em] uppercase text-gold-200/60 animate-pulse">Quantifying Assets...</p>
+                                                <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground animate-pulse">Quantifying Assets...</p>
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="w-full lg:w-1/2 flex flex-col gap-6 h-full">
                                         {warning && (
-                                            <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
+                                            <Alert variant="destructive">
                                                 <AlertTriangle className="w-4 h-4" />
-                                                <AlertTitle className="font-luxury uppercase tracking-widest text-xs">Audit Failure</AlertTitle>
-                                                <AlertDescription className="text-[10px] font-luxury tracking-wider">{warning}</AlertDescription>
+                                                <AlertTitle className="uppercase tracking-widest text-xs font-bold">Audit Failure</AlertTitle>
+                                                <AlertDescription className="text-[10px] tracking-wider">{warning}</AlertDescription>
                                             </Alert>
                                         )}
                                         {aiNotes && (
-                                            <div className="p-4 rounded-xl bg-gold-500/5 border border-gold-500/20 flex gap-3">
-                                                <Eye className="h-4 w-4 text-gold-500 shrink-0 mt-0.5" />
-                                                <p className="text-[11px] text-gold-100/60 leading-relaxed font-luxury italic">"{aiNotes}"</p>
+                                            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex gap-3">
+                                                <Eye className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                                <p className="text-[11px] text-muted-foreground leading-relaxed italic">"{aiNotes}"</p>
                                             </div>
                                         )}
 
@@ -309,26 +309,26 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                 {results.map((stack) => {
                                                     const chipConfig = chips.find(c => c.color === stack.chip) || { label: '?', color: 'gray' };
                                                     return (
-                                                        <div key={stack.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 group hover:border-gold-500/30 transition-colors">
+                                                        <div key={stack.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-border group hover:border-primary/30 transition-colors">
                                                             <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold border-2 border-white/20 shadow-lg relative overflow-hidden"
+                                                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold border-2 border-border shadow-lg relative overflow-hidden"
                                                                     style={{ backgroundColor: stack.chip === 'white' ? '#f0f0f0' : stack.chip, color: stack.chip === 'white' ? 'black' : 'white' }}>
                                                                     <div className="absolute inset-0 bg-white/10" />
                                                                     <span className="relative z-10">{chipConfig?.label || '?'}</span>
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-xs font-luxury text-gold-100 uppercase tracking-widest">{stack.chip}</p>
-                                                                    <p className="text-[10px] text-white/30 font-numbers uppercase">{stack.count} units</p>
+                                                                    <p className="text-xs font-bold uppercase tracking-widest">{stack.chip}</p>
+                                                                    <p className="text-[10px] text-muted-foreground font-numbers uppercase">{stack.count} units</p>
                                                                 </div>
                                                             </div>
-                                                            <p className="font-numbers text-sm text-gold-100">Rs. {formatIndianNumber(stack.value)}</p>
+                                                            <p className="font-numbers text-sm text-foreground">Rs. {formatIndianNumber(stack.value)}</p>
                                                         </div>
                                                     )
                                                 })}
                                                 {results.length === 0 && !processing && (
                                                     <div className="py-10 text-center opacity-20 grayscale">
                                                         <Info className="h-8 w-8 mx-auto mb-2" />
-                                                        <p className="text-[10px] font-luxury uppercase tracking-widest">Awaiting visual data</p>
+                                                        <p className="text-[10px] uppercase tracking-widest">Awaiting visual data</p>
                                                     </div>
                                                 )}
                                             </div>

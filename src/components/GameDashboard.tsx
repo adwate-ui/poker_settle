@@ -42,6 +42,14 @@ import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -555,17 +563,33 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               <div className="space-y-4 pt-6">
                 {settlements.length > 0 && (
-                  <div className="p-5 rounded-2xl bg-gold-500/5 border border-gold-500/20">
-                    <h3 className="text-sm font-luxury text-gold-500 uppercase tracking-widest mb-4">Settlements</h3>
-                    <div className="space-y-2">
-                      {settlements.map((s, i) => (
-                        <div key={i} className="flex justify-between text-[11px] uppercase tracking-tighter text-gold-900/60 dark:text-gold-100/60">
-                          <span>{s.from} pays {s.to}</span>
-                          <span className="font-numbers text-gold-800 dark:text-gold-200">{formatCurrency(s.amount)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Settlement</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>From</TableHead>
+                            <TableHead>To</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {settlements.map((s, i) => (
+                            <TableRow key={i}>
+                              <TableCell className="font-medium text-foreground">{s.from}</TableCell>
+                              <TableCell className="font-medium text-foreground">{s.to}</TableCell>
+                              <TableCell className="text-right font-medium">
+                                {formatCurrency(s.amount)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
                 )}
 
                 <Button
@@ -582,19 +606,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </TabsContent>
 
             <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-              <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[95vw] p-0 overflow-hidden">
-                <DialogHeader className="p-6 border-b border-border bg-accent/2">
-                  <DialogTitle className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest text-center">Add Player</DialogTitle>
+              <DialogContent className="max-w-[95vw] p-0 overflow-hidden">
+                <DialogHeader className="p-6 border-b border-border">
+                  <DialogTitle className="text-lg font-bold uppercase tracking-widest text-center">Add Player</DialogTitle>
                 </DialogHeader>
                 <div className="p-6">
                   <Tabs defaultValue="existing" className="space-y-6">
-                    <TabsList className="bg-accent/5 border border-border p-1 h-12 rounded-xl grid grid-cols-2">
-                      <TabsTrigger value="existing" className="text-label data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">Search</TabsTrigger>
-                      <TabsTrigger value="new" className="text-label data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">New</TabsTrigger>
+                    <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
+                      <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search</TabsTrigger>
+                      <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New</TabsTrigger>
                     </TabsList>
                     <TabsContent value="existing" className="space-y-6">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gold-500/40" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
                         <Input
                           placeholder="Search..."
                           value={searchQuery}
@@ -608,7 +632,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                           {availablePlayers.map(p => (
                             <button key={p.id} onClick={() => addExistingPlayer(p)} className="w-full p-4 rounded-xl border border-border bg-accent/2 flex items-center gap-3 active:bg-primary/10">
                               <OptimizedAvatar name={p.name} size="sm" />
-                              <span className="font-luxury uppercase text-xs text-gold-900 dark:text-gold-100">{p.name}</span>
+                              <span className="uppercase text-xs font-medium">{p.name}</span>
                             </button>
                           ))}
                         </div>
@@ -624,7 +648,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <Button
                         onClick={addNewPlayer}
                         disabled={!newPlayerName.trim() || isCreatingPlayer}
-                        className="w-full h-14 bg-gold-500 text-black font-luxury uppercase tracking-widest text-[11px] rounded-xl"
+                        className="w-full h-14 font-bold uppercase tracking-widest text-[11px] rounded-xl"
                       >
                         Add New Player
                       </Button>
@@ -829,29 +853,29 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             Add Player
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-[#f9f4df]/95 dark:bg-[#0a0a0a]/95 border-gold-500/30 backdrop-blur-2xl text-gold-900 dark:text-gold-50 rounded-xl max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
-                          <DialogHeader className="p-8 border-b border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2">
-                            <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Add New Player</DialogTitle>
-                            <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury mt-1">Select existing or add new.</DialogDescription>
+                        <DialogContent className="max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
+                          <DialogHeader className="p-8 border-b border-border">
+                            <DialogTitle className="text-xl font-bold uppercase tracking-widest">Add New Player</DialogTitle>
+                            <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">Select existing or add new.</DialogDescription>
                           </DialogHeader>
 
                           <div className="p-8">
                             <Tabs defaultValue="existing" className="space-y-8">
-                              <TabsList className="bg-accent/5 border border-border p-1 h-12 rounded-xl grid grid-cols-2">
-                                <TabsTrigger value="existing" className="text-label data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">Search Existing</TabsTrigger>
-                                <TabsTrigger value="new" className="text-label data-[state=active]:bg-gold-500 data-[state=active]:text-black rounded-lg">New Player</TabsTrigger>
+                              <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
+                                <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search Existing</TabsTrigger>
+                                <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New Player</TabsTrigger>
                               </TabsList>
 
                               <TabsContent value="existing" className="space-y-6 animate-in fade-in duration-300">
                                 <div className="relative group">
                                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Search className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
+                                    <Search className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                                   </div>
                                   <Input
                                     placeholder="Search players..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="h-12 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-widest text-[11px] uppercase text-foreground placeholder:text-muted-foreground/30"
+                                    className="h-12 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all tracking-widest text-[11px] uppercase text-foreground placeholder:text-muted-foreground/30"
                                   />
                                 </div>
 
@@ -867,8 +891,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                           <OptimizedAvatar name={player.name} size="md" className="ring-1 ring-gold-500/20" />
                                           <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                              <span className="font-luxury text-sm font-bold text-gold-900 dark:text-gold-100 uppercase tracking-widest truncate">{player.name}</span>
-                                              {player.total_games && player.total_games > 10 && <Star className="h-3 w-3 text-gold-500 fill-current" />}
+                                              <span className="text-sm font-bold uppercase tracking-widest truncate">{player.name}</span>
+                                              {player.total_games && player.total_games > 10 && <Star className="h-3 w-3 text-primary fill-current" />}
                                             </div>
                                             <div className="flex gap-2.5 mt-1.5">
                                               <Badge variant="stats">

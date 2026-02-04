@@ -21,7 +21,7 @@ const Auth = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6">
         <div className="relative">
           <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
           <div className="absolute inset-0 blur-xl bg-gold-500/20 rounded-full animate-pulse" />
@@ -32,7 +32,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] relative flex items-center justify-center p-4 overflow-hidden">
+    <div className="min-h-screen bg-background relative flex items-center justify-center p-4 overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold-500/5 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gold-500/5 blur-[120px] rounded-full" />

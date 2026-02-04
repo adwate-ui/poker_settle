@@ -81,7 +81,7 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-luxury tracking-widest text-gold-500/60 uppercase">{label}</Label>
+        <Label className="text-sm tracking-widest text-muted-foreground uppercase">{label}</Label>
         <CardSelector
           maxCards={expectedCards}
           usedCards={usedCards}
@@ -89,9 +89,9 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
           onSelect={handleSelectorSubmit}
           label={`Select ${expectedCards} Card${expectedCards > 1 ? 's' : ''}`}
           trigger={
-            <Button variant="outline" type="button" className="h-9 bg-white/5 border-white/10 hover:bg-gold-500/10 text-gold-200 font-luxury text-[10px] uppercase tracking-widest rounded-full">
-              <Grid3x3 className="w-3.5 h-3.5 mr-2 text-gold-500" />
-              Grid Selection
+            <Button variant="outline" type="button" className="h-9 bg-accent/2 border-border hover:bg-accent/5 text-muted-foreground text-[10px] uppercase tracking-widest rounded-full">
+              <Grid3x3 className="w-3.5 h-3.5 mr-2 text-primary" />
+              KEYPAD
             </Button>
           }
         />
@@ -100,7 +100,7 @@ const CardNotationInput = ({ label, expectedCards, onSubmit, placeholder, usedCa
       {error && (
         <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-xs uppercase tracking-wider font-luxury">{error}</AlertDescription>
+          <AlertDescription className="text-xs uppercase tracking-wider">{error}</AlertDescription>
         </Alert>
       )}
 

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -500,7 +500,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <Coins className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Debt Settlement</h3>
+                <h3 className="text-lg font-medium">Settlement</h3>
               </div>
               <div className="flex items-center gap-4">
                 {showOwnerControls && settlementsOpen && (
@@ -509,7 +509,7 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setTransferDialogOpen(true)}
-                      className="h-8 rounded-full border text-[10px] uppercase tracking-widest"
+                      className="h-8 rounded-full border text-[10px] tracking-widest uppercase"
                     >
                       <Plus className="h-3 w-3 mr-1" /> Add Manual
                     </Button>
@@ -517,7 +517,7 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="sm"
                       onClick={recalculateAndSaveSettlements}
-                      className="h-8 rounded-full border text-[10px] uppercase tracking-widest"
+                      className="h-8 rounded-full border text-[10px] tracking-widest uppercase"
                     >
                       <RefreshCw className="h-3 w-3 mr-1" /> Finalize
                     </Button>
@@ -562,42 +562,42 @@ export const GameDetailView = ({
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-muted/50 border-b">
-                    <TableRow className="hover:bg-transparent border-0 h-14">
-                      <TableHead className="pl-8 text-left text-xs uppercase tracking-widest text-muted-foreground">Debtor</TableHead>
-                      <TableHead className="text-left text-xs uppercase tracking-widest text-muted-foreground">Creditor</TableHead>
-                      <TableHead className="text-center text-xs uppercase tracking-widest text-muted-foreground">Amount</TableHead>
-                      <TableHead className="text-right pr-8 text-xs uppercase tracking-widest text-muted-foreground">Status</TableHead>
+                    <TableRow className="hover:bg-transparent border-0 h-10">
+                      <TableHead className="pl-8 text-left font-medium text-muted-foreground">From</TableHead>
+                      <TableHead className="text-left font-medium text-muted-foreground">To</TableHead>
+                      <TableHead className="text-center font-medium text-muted-foreground">Amount</TableHead>
+                      <TableHead className="text-right pr-8 font-medium text-muted-foreground">Status</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="divide-y divide-black/10 dark:divide-white/5">
+                  <TableBody className="divide-y divide-border">
                     {settlementsWithType.map((settlement, index) => {
                       const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
                       return (
-                        <TableRow key={`settlement-${index}`} className="h-12 sm:h-16 group">
-                          <TableCell className="pl-4 sm:pl-8">
+                        <TableRow key={`settlement-${index}`} className="h-12 sm:h-14 group">
+                          <TableCell className="pl-4 sm:pl-8 font-medium">
                             <div className="flex items-center gap-3">
                               <User className="h-3 w-3 text-muted-foreground" />
                               <Link
                                 to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
-                                className="text-[13px] font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
                               >
                                 {settlement.from}
                               </Link>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
                               <CreditCard className="h-3 w-3 text-muted-foreground" />
                               <Link
                                 to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
-                                className="text-[13px] font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
                               >
                                 {settlement.to}
                               </Link>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <span className="font-bold text-base text-primary">Rs. {formatIndianNumber(settlement.amount)}</span>
+                            <span className="font-medium">Rs. {formatIndianNumber(settlement.amount)}</span>
                             {settlement.isManual && (
                               <Badge variant="outline" className="ml-3">Manual</Badge>
                             )}
@@ -613,7 +613,7 @@ export const GameDetailView = ({
                                   await refetchGameDetail();
                                 }}
                                 className={cn(
-                                  "h-10 px-6 rounded-full text-xs border transition-all",
+                                  "h-8 px-4 rounded-full text-xs border transition-all",
                                   confirmation.confirmed
                                     ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20"
                                     : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -624,7 +624,7 @@ export const GameDetailView = ({
                               </Button>
                             ) : (
                               <Badge className={cn(
-                                "h-9 px-5 rounded-full uppercase tracking-widest text-[9px] border-0",
+                                "h-7 px-3 rounded-full text-[10px] border-0",
                                 confirmation?.confirmed ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-muted text-muted-foreground"
                               )}>
                                 {confirmation?.confirmed ? <Check className="h-3 w-3 mr-2" /> : <History className="h-3 w-3 mr-2" />}
@@ -715,21 +715,3 @@ export const GameDetailView = ({
   );
 };
 
-const ArrowRight = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    {...props}
-  >
-    <path d="M5 12h14" />
-    <path d="m12 5 7 7-7 7" />
-  </svg>
-);

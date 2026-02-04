@@ -178,7 +178,7 @@ const NewGame = () => {
     <Card className="max-w-4xl mx-auto relative overflow-hidden border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/40 backdrop-blur-xl mb-24 sm:mb-0">
       {hasActiveGame && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-white/90 dark:bg-[#0a0a0a]/90 border-black/20 dark:border-gold-500/30 shadow-[0_0_50px_rgba(212,184,60,0.15)] animate-in fade-in zoom-in duration-300">
+          <Card className="w-full max-w-md border-border shadow-2xl animate-in fade-in zoom-in duration-300">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-full bg-gold-500/10 border border-gold-500/20">

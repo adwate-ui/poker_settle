@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { History, TrendingUp, TrendingDown, Wallet, Clock, User, ShieldCheck, X } from "lucide-react";
+import { History, TrendingUp, TrendingDown, Wallet, Clock, User, ShieldCheck, X, Loader2 } from "lucide-react";
 import { BuyInHistory } from "@/types/poker";
 import { format } from "date-fns";
 import { useState, useEffect, useCallback } from "react";
@@ -53,21 +53,21 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 text-gold-500/40 hover:text-gold-500 hover:bg-gold-500/10 rounded-lg transition-all border border-transparent hover:border-gold-500/20"
+          className="h-9 w-9 text-muted-foreground/40 hover:text-foreground hover:bg-muted rounded-lg transition-all"
         >
           <History className="w-4.5 h-4.5" />
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="p-6 border-b border-white/5 bg-white/2">
+        <DialogHeader className="p-6 border-b border-border">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-gold-500/10 border border-gold-500/20 shadow-[0_0_15px_rgba(212,184,60,0.1)]">
-              <History className="w-5 h-5 text-gold-500" />
+            <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 shadow-sm">
+              <History className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-luxury text-gold-100 uppercase tracking-widest">Buy-In History</DialogTitle>
-              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-gold-500/40 font-luxury flex items-center gap-1.5">
+              <DialogTitle className="text-xl font-bold uppercase tracking-widest">Buy-In History</DialogTitle>
+              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5">
                 <User className="h-3 w-3" />
                 Player: {playerName}
               </DialogDescription>
@@ -77,30 +77,26 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
 
         <div className="flex-1 overflow-hidden min-h-[300px]">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-full py-20 text-gold-500/40 gap-4">
-              <div className="animate-spin duration-700">
-                <History className="w-10 h-10 opacity-30" />
-              </div>
-              <p className="text-[10px] font-luxury uppercase tracking-[0.3em] animate-pulse">Loading Archives...</p>
+            <div className="flex flex-col items-center justify-center h-full py-20 text-muted-foreground gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-[10px] uppercase tracking-[0.3em] animate-pulse">Accessing Archive...</p>
             </div>
           ) : history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-24 text-gold-500/20 gap-4">
-              <div className="p-5 bg-white/2 rounded-full border border-dashed border-white/10">
-                <ShieldCheck className="w-8 h-8 opacity-20" />
-              </div>
-              <p className="text-[10px] font-luxury uppercase tracking-[0.2em]">No changes found in history.</p>
+            <div className="flex flex-col items-center justify-center h-full py-24 text-muted-foreground/40 gap-4">
+              <ShieldCheck className="w-8 h-8 opacity-20" />
+              <p className="text-[10px] uppercase tracking-[0.2em]">No changes found in history.</p>
             </div>
           ) : (
             <ScrollArea className="h-full">
               <Table>
-                <TableHeader className="sticky top-0 z-10 bg-[#0a0a0a]/90 backdrop-blur-md">
-                  <TableRow className="hover:bg-transparent border-b border-white/5 h-12">
-                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 pl-8">Time</TableHead>
-                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-center">Change</TableHead>
-                    <TableHead className="font-luxury uppercase tracking-[0.2em] text-[9px] text-gold-500/60 text-right pr-8">Total Buy-ins</TableHead>
+                <TableHeader className="sticky top-0 z-10 bg-background/90 backdrop-blur-md">
+                  <TableRow className="hover:bg-transparent border-b border-border h-12">
+                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground pl-8">Time</TableHead>
+                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground text-center">Change</TableHead>
+                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground text-right pr-8">Total Buy-ins</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-white/5">
+                <TableBody className="divide-y divide-border">
                   {history.map((entry) => (
                     <TableRow
                       key={entry.id}
@@ -108,10 +104,10 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                     >
                       <TableCell className="pl-8">
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-numbers text-sm text-gold-100">
+                          <span className="font-numbers text-sm text-foreground">
                             {format(new Date(entry.timestamp), "h:mm a")}
                           </span>
-                          <span className="text-[9px] font-luxury uppercase tracking-widest text-white/20">
+                          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/60">
                             {format(new Date(entry.timestamp), "MMM d, yyyy")}
                           </span>
                         </div>
@@ -135,10 +131,10 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                       </TableCell>
                       <TableCell className="text-right pr-8">
                         <div className="flex items-center justify-end gap-2.5">
-                          <span className="font-numbers text-base text-gold-100/80">
+                          <span className="font-numbers text-base text-foreground/80">
                             {entry.total_buy_ins_after}
                           </span>
-                          <Wallet className="w-4 h-4 text-gold-500/30" />
+                          <Wallet className="w-4 h-4 text-muted-foreground/30" />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -147,11 +143,11 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
                   <TableRow className="bg-white/2 border-0 h-16 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all">
                     <TableCell className="pl-8">
                       <div className="flex flex-col">
-                        <span className="font-luxury text-[10px] uppercase tracking-[0.2em] text-gold-500/60">Initial Buy-in</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">Initial Buy-in</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="bg-white/5 text-[9px] font-luxury uppercase tracking-widest text-white/40">Original</Badge>
+                      <Badge variant="outline" className="bg-muted text-[9px] uppercase tracking-widest text-muted-foreground">Original</Badge>
                     </TableCell>
                     <TableCell className="text-right pr-8">
                       <div className="flex items-center justify-end gap-2.5">
@@ -165,7 +161,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
             </ScrollArea>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </DialogContent >
+    </Dialog >
   );
 };

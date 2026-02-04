@@ -4,22 +4,22 @@ import { toast as sonnerToast } from "sonner";
 export const toast = {
   success: (message: string) => {
     sonnerToast.success(message, {
-      className: "border-gold-500/20 bg-[#0a0a0a]/95 text-gold-50 font-luxury",
+      className: "border-border bg-popover text-popover-foreground",
     });
   },
   error: (message: string) => {
     sonnerToast.error(message, {
-      className: "border-red-500/20 bg-[#0a0a0a]/95 text-red-400 font-luxury",
+      className: "border-destructive bg-popover text-destructive",
     });
   },
   info: (message: string) => {
     sonnerToast.info(message, {
-      className: "border-blue-500/20 bg-[#0a0a0a]/95 text-blue-400 font-luxury",
+      className: "border-blue-500/20 bg-popover text-blue-500",
     });
   },
   warning: (message: string) => {
     sonnerToast.warning(message, {
-      className: "border-yellow-500/20 bg-[#0a0a0a]/95 text-yellow-400 font-luxury",
+      className: "border-yellow-500/20 bg-popover text-yellow-600 dark:text-yellow-400",
     });
   },
 };

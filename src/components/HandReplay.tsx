@@ -546,7 +546,7 @@ const HandReplay = ({
 
       {/* Community Cards - Separate section with responsive sizes */}
       {communityCards && (
-        <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-gold-900/10 dark:border-white/10">
+        <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-border">
           <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
             {/* Extract and display cards by street */}
             {(() => {
@@ -560,7 +560,7 @@ const HandReplay = ({
                   {/* Flop */}
                   {flopCards.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-label text-gold-900/40 dark:text-gold-500/40">Flop</span>
+                      <span className="text-label text-muted-foreground/60">Flop</span>
                       <div className="flex gap-0.5">
                         {flopCards.map((card, idx) => (
                           <React.Fragment key={`flop-${idx}`}>
@@ -575,9 +575,9 @@ const HandReplay = ({
                   {/* Turn */}
                   {turnCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-gold-900/10 dark:bg-white/10"></div>
+                      <div className="h-10 sm:h-12 w-px bg-border"></div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-label text-gold-900/40 dark:text-gold-500/40">Turn</span>
+                        <span className="text-label text-muted-foreground/60">Turn</span>
                         <>
                           <PokerCard card={turnCard} size="sm" className="sm:hidden" />
                           <PokerCard card={turnCard} size="md" className="hidden sm:block" />
@@ -589,9 +589,9 @@ const HandReplay = ({
                   {/* River */}
                   {riverCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-gold-900/10 dark:bg-white/10"></div>
+                      <div className="h-10 sm:h-12 w-px bg-border"></div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-label text-gold-900/40 dark:text-gold-500/40">River</span>
+                        <span className="text-label text-muted-foreground/60">River</span>
                         <>
                           <PokerCard card={riverCard} size="sm" className="sm:hidden" />
                           <PokerCard card={riverCard} size="md" className="hidden sm:block" />
@@ -608,38 +608,38 @@ const HandReplay = ({
 
       {/* Current Action Display */}
       {currentAction && (
-        <Card className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-gold-900/10 dark:border-white/10 shadow-lg animate-fade-in">
+        <Card className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-border shadow-lg animate-fade-in">
           <CardContent className="p-3 sm:p-5">
             {/* Mobile: Single row layout */}
             <div className="md:hidden">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="p-1.5 bg-gold-500/10 rounded-lg flex-shrink-0">
-                    <div className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></div>
+                  <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                   </div>
-                  <div className="font-luxury uppercase tracking-widest text-sm text-gold-900 dark:text-gold-100 truncate">
+                  <div className="uppercase tracking-widest text-sm font-bold truncate">
                     {playerNames[currentAction.player_id]}
                   </div>
                   {currentAction.position && (
-                    <Badge className="text-[10px] px-1.5 py-0 bg-gold-500/20 text-gold-600 dark:text-gold-400 border-gold-500/30 flex-shrink-0">
+                    <Badge className="text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground border-border flex-shrink-0">
                       {currentAction.position.length > 3 ? currentAction.position.substring(0, 3) : currentAction.position}
                     </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline" className="text-[10px] font-luxury uppercase tracking-widest px-2 py-0.5 border-gold-500/20 text-gold-600 dark:text-gold-400">
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-widest px-2 py-0.5 border-border text-muted-foreground">
                     {currentAction.action_type}
                   </Badge>
                   {additionalBetAmount > 0 && (
-                    <span className="font-numbers text-sm text-gold-900 dark:text-gold-100">
+                    <span className="font-numbers text-sm text-foreground">
                       Rs. {additionalBetAmount.toLocaleString('en-IN')}
                     </span>
                   )}
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-border/50 flex justify-between items-center">
-                <span className="text-label text-gold-900/40 dark:text-gold-500/40">Current Pot</span>
-                <span className="font-numbers text-sm text-gold-900 dark:text-gold-100">
+                <span className="text-label text-muted-foreground/60">Current Pot</span>
+                <span className="font-numbers text-sm text-foreground">
                   Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
                 </span>
               </div>
@@ -649,34 +649,34 @@ const HandReplay = ({
             <div className="hidden md:block">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gold-500/10 rounded-lg">
-                    <div className="w-3 h-3 bg-gold-500 rounded-full animate-pulse"></div>
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <div className="font-luxury uppercase tracking-widest text-lg text-gold-900 dark:text-gold-100">
+                    <div className="uppercase tracking-widest text-lg font-bold">
                       {playerNames[currentAction.player_id]}
                     </div>
                     {currentAction.position && (
-                      <Badge className="w-fit text-[10px] bg-gold-500/20 text-gold-600 dark:text-gold-400 border-gold-500/30 font-luxury uppercase tracking-widest">
+                      <Badge className="w-fit text-[10px] bg-secondary text-secondary-foreground border-border uppercase tracking-widest">
                         {currentAction.position}
                       </Badge>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                  <Badge variant="outline" className="w-fit text-[10px] font-luxury uppercase tracking-widest px-3 py-1 border-gold-500/20 text-gold-600 dark:text-gold-400">
+                  <Badge variant="outline" className="w-fit text-[10px] uppercase tracking-widest px-3 py-1 border-border text-muted-foreground">
                     {currentAction.action_type}
                   </Badge>
                   {additionalBetAmount > 0 && (
-                    <span className="font-numbers text-xl text-gold-900 dark:text-gold-100">
+                    <span className="font-numbers text-xl text-foreground">
                       Rs. {additionalBetAmount.toLocaleString('en-IN')}
                     </span>
                   )}
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
-                <span className="text-label text-gold-900/40 dark:text-gold-500/40">Current Pot</span>
-                <span className="font-numbers text-xl text-gold-900 dark:text-gold-100">
+                <span className="text-label text-muted-foreground/60">Current Pot</span>
+                <span className="font-numbers text-xl text-foreground">
                   Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
                 </span>
               </div>
