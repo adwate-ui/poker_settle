@@ -113,6 +113,7 @@ export const FinalStackManagement = ({
                       onClick={() => handleStartEdit(gamePlayer)}
                       variant="ghost"
                       size="icon"
+                      aria-label={`Edit final stack for ${gamePlayer.player.name}`}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>

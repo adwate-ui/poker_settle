@@ -321,7 +321,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
             <div className="bg-green-600/20 border border-green-600 p-4 rounded-lg text-center space-y-3">
               <div className="text-xl font-bold text-green-400">🏆 {winnerResult.winners.map(w => w.playerName).join(' & ')} Wins!</div>
               <div className="text-poker-gold font-semibold">{winnerResult.winners[0].handName}</div>
-              <Button className="w-full bg-green-600" onClick={() => handleFinishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}>Confirm & Complete</Button>
+              <Button variant="success" className="w-full" onClick={() => handleFinishHand(winnerResult.winners.map(w => w.playerId), 'showdown')}>Confirm & Complete</Button>
             </div>
           )}
         </CardContent>
@@ -379,7 +379,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
           </div>
           <div className="flex gap-2">
             <Input type="number" value={betAmount} onChange={e => setBetAmount(e.target.value)} placeholder="Amount" className="h-12 text-lg" />
-            <Button className="h-12 px-8 bg-orange-600 font-bold" onClick={() => handleAction('Raise', parseFloat(betAmount))} disabled={!betAmount}>Raise</Button>
+            <Button variant="warning" className="h-12 px-8 font-bold" onClick={() => handleAction('Raise', parseFloat(betAmount))} disabled={!betAmount}>Raise</Button>
           </div>
         </>
       ) : <div className="bg-muted/50 p-4 rounded-lg text-center border-dashed border-2">Player Folded</div>}
@@ -387,7 +387,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       <div className="flex gap-2">
         <Button variant="outline" className="h-10" onClick={engine.undoLastAction} disabled={engine.actionHistory.length === 0}><Undo2 className="w-4 h-4 mr-2" /> Undo</Button>
         {engine.canMoveToNextStreet() && (
-          <Button className="flex-1 h-10 bg-green-600 font-bold" onClick={engine.moveToNextStreet}>
+          <Button variant="success" className="flex-1 h-10 font-bold" onClick={engine.moveToNextStreet}>
             {engine.stage === 'river' ? '🏆 Showdown' : 'Next Street →'}
           </Button>
         )}

@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
 import LuxuryLayout from "@/components/layout/LuxuryLayout";
 import { GlobalCardDefs } from "@/components/PokerAssets/GlobalCardDefs";
+import RootErrorBoundary from "@/components/RootErrorBoundary";
 
 // Lazy load all pages for optimal bundle size
 const Index = lazy(() => import("./pages/Index"));
@@ -94,13 +95,15 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <GlobalCardDefs />
-          <ChipProvider>
-            <OfflineIndicator />
-            <PWAInstallPrompt />
-            <Toaster />
-            <AppContent />
-          </ChipProvider>
+          <RootErrorBoundary>
+            <GlobalCardDefs />
+            <ChipProvider>
+              <OfflineIndicator />
+              <PWAInstallPrompt />
+              <Toaster />
+              <AppContent />
+            </ChipProvider>
+          </RootErrorBoundary>
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>

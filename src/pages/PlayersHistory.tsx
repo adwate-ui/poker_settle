@@ -5,7 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { Loader2, Trash2, ArrowUpDown, Users, Trophy, User as UserIcon } from "lucide-react";
+import { Trash2, ArrowUpDown, Users, Trophy, User as UserIcon, UserPlus } from "lucide-react";
+import { PlayerCardSkeletonList } from "@/components/skeletons";
+import { EmptyState } from "@/components/EmptyState";
 import { Player } from "@/types/poker";
 import { formatProfitLoss } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -110,26 +112,27 @@ const PlayersHistory = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-label text-muted-foreground animate-pulse">Loading Players...</p>
+      <div className="space-y-4 p-4">
+        <PlayerCardSkeletonList count={6} />
       </div>
     );
   }
 
   if (players.length === 0) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader className="text-center py-10">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <UserIcon className="h-8 w-8 text-primary" />
-          </div>
-          <CardTitle className="text-3xl font-luxury mb-2">No Players Found</CardTitle>
-          <CardDescription>
-            You haven't registered any players yet. Add players during game setup to track their lifelong performance.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={UserPlus}
+        title="No Players Yet"
+        description="You haven't registered any players yet. Players are automatically created when you start your first game, or you can add them manually to get a head start!"
+        action={{
+          label: "Create First Game",
+          onClick: () => navigate("/"),
+        }}
+        secondaryAction={{
+          label: "View Games",
+          onClick: () => navigate("/games"),
+        }}
+      />
     );
   }
 

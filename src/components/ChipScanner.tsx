@@ -209,7 +209,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
 
     return (
         <>
-            <Button variant="ghost" size="icon" onClick={() => setOpened(true)} className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full" title="AI Chip Scanner">
+            <Button variant="ghost" size="icon" onClick={() => setOpened(true)} size="icon-sm" className=" text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full" aria-label="Open AI chip scanner">
                 <ScanEye className="h-4 w-4" />
             </Button>
 
@@ -328,7 +328,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                 })}
                                                 {results.length === 0 && !processing && (
                                                     <div className="py-10 text-center opacity-20 grayscale">
-                                                        <Info className="h-8 w-8 mx-auto mb-2" />
+                                                        <Info size="icon-sm" className=" mx-auto mb-2" />
                                                         <p className="text-[10px] uppercase tracking-widest">Awaiting visual data</p>
                                                     </div>
                                                 )}

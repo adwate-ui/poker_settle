@@ -582,7 +582,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </span>
                       <div className="flex items-center gap-3">
                         <span className="font-numbers text-sm text-foreground">{formatCurrency(transfer.amount)}</span>
-                        <Button onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-8 w-8 text-red-500/50 hover:text-red-500">
+                        <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" size="icon-sm" className=" text-red-500/50 hover:text-red-500">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

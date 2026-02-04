@@ -56,6 +56,19 @@ export const PlayerFormDialog = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Field-level validation state
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    upiId?: string;
+  }>({});
+
+  const [touched, setTouched] = useState<{
+    name?: boolean;
+    email?: boolean;
+    upiId?: boolean;
+  }>({});
+
   // Sync form fields with initialData when it changes (for edit mode)
   useEffect(() => {
     if (open && initialData) {
@@ -70,25 +83,92 @@ export const PlayerFormDialog = ({
       setUpiId("");
       setPaymentPreference(PaymentMethodConfig.digital.key);
     }
+    // Reset errors and touched state when dialog opens
+    setErrors({});
+    setTouched({});
   }, [open, initialData]);
+
+  // Real-time validation
+  const validateField = (fieldName: 'name' | 'email' | 'upiId', value: string) => {
+    const newErrors = { ...errors };
+
+    switch (fieldName) {
+      case 'name':
+        if (!value.trim()) {
+          newErrors.name = "Player name is required";
+        } else if (value.trim().length < 2) {
+          newErrors.name = "Name must be at least 2 characters";
+        } else {
+          delete newErrors.name;
+        }
+        break;
+
+      case 'email':
+        if (value.trim() && !validateEmail(value.trim())) {
+          newErrors.email = "Invalid email address";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+
+      case 'upiId':
+        if (value.trim() && !validateUpiId(value)) {
+          newErrors.upiId = "Invalid UPI ID format";
+        } else {
+          delete newErrors.upiId;
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (fieldName: 'name' | 'email' | 'upiId', value: string) => {
+    switch (fieldName) {
+      case 'name':
+        setName(value);
+        break;
+      case 'email':
+        setEmail(value);
+        break;
+      case 'upiId':
+        setUpiId(value);
+        break;
+    }
+
+    // Validate on change if field has been touched
+    if (touched[fieldName]) {
+      validateField(fieldName, value);
+    }
+  };
+
+  const handleBlur = (fieldName: 'name' | 'email' | 'upiId') => {
+    setTouched({ ...touched, [fieldName]: true });
+
+    const value = fieldName === 'name' ? name : fieldName === 'email' ? email : upiId;
+    validateField(fieldName, value);
+  };
+
+  const isFieldValid = (fieldName: 'name' | 'email' | 'upiId'): boolean => {
+    const value = fieldName === 'name' ? name : fieldName === 'email' ? email : upiId;
+    return touched[fieldName] && !errors[fieldName] && value.trim().length > 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Player name is required");
-      return;
-    }
+    // Mark all fields as touched
+    setTouched({ name: true, email: true, upiId: true });
 
-    // Validate email format if provided
-    if (email.trim() && !validateEmail(email.trim())) {
-      toast.error("Invalid email address");
-      return;
-    }
+    // Validate all fields
+    const isNameValid = validateField('name', name);
+    const isEmailValid = validateField('email', email);
+    const isUpiIdValid = validateField('upiId', upiId);
 
-    // Validate UPI ID format if provided
-    if (upiId.trim() && !validateUpiId(upiId)) {
-      toast.error("Invalid UPI ID");
+    // Check if form has any errors
+    if (!isNameValid || !isEmailValid || !isUpiIdValid) {
+      toast.error("Please fix the errors before submitting");
       return;
     }
 
@@ -152,15 +232,33 @@ export const PlayerFormDialog = ({
           <div className="space-y-6">
             {/* Identity Field */}
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">Player Identity</Label>
-              <Input
-                placeholder="Enter full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isSubmitting}
-                className="h-14 bg-accent/5"
-                required
-              />
+              <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">
+                Player Identity *
+              </Label>
+              <div className="relative">
+                <Input
+                  placeholder="Enter full name"
+                  value={name}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
+                  onBlur={() => handleBlur('name')}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "h-14 bg-accent/5 pr-10",
+                    errors.name && touched.name && "border-destructive focus-visible:ring-destructive",
+                    isFieldValid('name') && "border-green-500 focus-visible:ring-green-500"
+                  )}
+                  required
+                />
+                {isFieldValid('name') && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                )}
+              </div>
+              {errors.name && touched.name && (
+                <p className="text-xs text-destructive ml-1 flex items-center gap-1">
+                  <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
+                  {errors.name}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -170,20 +268,40 @@ export const PlayerFormDialog = ({
                   {email && (
                     <button
                       type="button"
-                      onClick={() => setEmail("")}
+                      onClick={() => {
+                        setEmail("");
+                        setErrors({ ...errors, email: undefined });
+                        setTouched({ ...touched, email: false });
+                      }}
                       disabled={isSubmitting}
                       className="text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                     >Clear</button>
                   )}
                 </div>
-                <Input
-                  type="email"
-                  placeholder="email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubmitting}
-                  className="h-14 bg-accent/5"
-                />
+                <div className="relative">
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    value={email}
+                    onChange={(e) => handleFieldChange('email', e.target.value)}
+                    onBlur={() => handleBlur('email')}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "h-14 bg-accent/5 pr-10",
+                      errors.email && touched.email && "border-destructive focus-visible:ring-destructive",
+                      isFieldValid('email') && "border-green-500 focus-visible:ring-green-500"
+                    )}
+                  />
+                  {isFieldValid('email') && (
+                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  )}
+                </div>
+                {errors.email && touched.email && (
+                  <p className="text-xs text-destructive ml-1 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -192,19 +310,39 @@ export const PlayerFormDialog = ({
                   {upiId && (
                     <button
                       type="button"
-                      onClick={() => setUpiId("")}
+                      onClick={() => {
+                        setUpiId("");
+                        setErrors({ ...errors, upiId: undefined });
+                        setTouched({ ...touched, upiId: false });
+                      }}
                       disabled={isSubmitting}
                       className="text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                     >Clear</button>
                   )}
                 </div>
-                <Input
-                  placeholder="username@bank"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  disabled={isSubmitting}
-                  className="h-14 bg-accent/5"
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="username@bank"
+                    value={upiId}
+                    onChange={(e) => handleFieldChange('upiId', e.target.value)}
+                    onBlur={() => handleBlur('upiId')}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "h-14 bg-accent/5 pr-10",
+                      errors.upiId && touched.upiId && "border-destructive focus-visible:ring-destructive",
+                      isFieldValid('upiId') && "border-green-500 focus-visible:ring-green-500"
+                    )}
+                  />
+                  {isFieldValid('upiId') && (
+                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  )}
+                </div>
+                {errors.upiId && touched.upiId && (
+                  <p className="text-xs text-destructive ml-1 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
+                    {errors.upiId}
+                  </p>
+                )}
               </div>
             </div>
 

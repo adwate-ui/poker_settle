@@ -147,6 +147,7 @@ export const BuyInManagementTable = ({
                         }}
                         variant="ghost"
                         size="icon"
+                        aria-label={`Add buy-in for ${gamePlayer.player.name}`}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>

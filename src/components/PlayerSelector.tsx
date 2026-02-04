@@ -151,6 +151,7 @@ export const PlayerSelector = ({
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => onRemovePlayer(player.id)}
                       disabled={disabled}
+                      aria-label={`Remove ${player.name} from selection`}
                     >
                       <X className="h-4 w-4" />
                     </Button>

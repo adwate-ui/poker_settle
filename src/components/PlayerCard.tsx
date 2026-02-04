@@ -118,6 +118,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                   size="icon"
                   onClick={handleAddBuyIns}
                   className="w-9 h-9 bg-primary hover:bg-primary/90 text-primary-foreground border-0 rounded-md shrink-0 transition-transform active:scale-90"
+                  aria-label="Add buy-in"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -141,6 +142,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                   size="icon"
                   onClick={confirmFinalStack}
                   className="w-9 h-9 bg-money-green hover:opacity-90 text-white border-0 shadow-lg shadow-money-green/20 rounded-md shrink-0 transition-transform animate-in zoom-in-50 duration-200"
+                  aria-label="Confirm final stack"
                 >
                   <Check className="w-4 h-4" />
                 </Button>

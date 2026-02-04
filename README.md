@@ -61,6 +61,30 @@ Requirements: Node.js and npm.
 git clone <YOUR_GIT_URL>
 cd poker-settle
 npm install
+```
+
+### Environment Setup
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+2. Update `.env` with your credentials:
+
+**Supabase Configuration:**
+- Get your Supabase URL and key from: https://app.supabase.com/project/_/settings/api
+- `VITE_SUPABASE_URL`: Your Supabase project URL
+- `VITE_SUPABASE_PUBLISHABLE_KEY`: Your public anon key
+- `VITE_SUPABASE_PROJECT_ID`: Your Supabase project ID
+
+**EmailJS Configuration (Optional):**
+- Sign up at: https://www.emailjs.com/
+- Configure email service for game notifications
+- Update `VITE_EMAILJS_*` variables with your credentials
+
+3. Start the development server:
+```bash
 npm run dev
 ```
 

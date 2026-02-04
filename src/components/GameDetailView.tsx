@@ -390,6 +390,7 @@ export const GameDetailView = ({
                       size="icon"
                       onClick={() => setCurrentPositionIndex(Math.max(0, currentPositionIndex - 1))}
                       disabled={currentPositionIndex === 0}
+                      aria-label="Previous table position snapshot"
                       className="h-8 w-8 rounded-full disabled:opacity-20"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -401,6 +402,7 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="icon"
                       onClick={() => setCurrentPositionIndex(Math.min(tablePositions.length - 1, currentPositionIndex + 1))}
+                      aria-label="Next table position snapshot"
                       disabled={currentPositionIndex === tablePositions.length - 1}
                       className="h-8 w-8 rounded-full disabled:opacity-20"
                     >

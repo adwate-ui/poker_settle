@@ -54,6 +54,7 @@ export const BuyInHistoryDialog = ({ gamePlayerId, playerName, fetchHistory }: B
           variant="ghost"
           size="icon"
           className="h-9 w-9 text-muted-foreground/40 hover:text-foreground hover:bg-muted rounded-lg transition-all"
+          aria-label="View buy-in history"
         >
           <History className="w-4.5 h-4.5" />
         </Button>

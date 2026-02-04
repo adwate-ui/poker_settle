@@ -16,6 +16,15 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
 
+        // Luxury/Premium variant for high-end actions
+        luxury: "bg-primary/10 border-2 border-primary/20 text-primary hover:bg-primary/20 hover:border-primary/30 font-luxury uppercase tracking-widest shadow-lg shadow-primary/10",
+
+        // Success variant for confirmations
+        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20",
+
+        // Warning variant for important actions
+        warning: "bg-orange-600 text-white hover:bg-orange-700 shadow-lg shadow-orange-600/20",
+
         // Game-Specific Actions
         "game-fold": "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 font-luxury uppercase tracking-widest",
         "game-check": "bg-poker-green/10 text-poker-green border border-poker-green/20 hover:bg-poker-green/20 font-luxury uppercase tracking-widest",
@@ -27,6 +36,7 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3 text-xs",
         lg: "h-14 rounded-xl px-8 text-base",
         icon: "h-12 w-12",
+        "icon-sm": "h-8 w-8 text-xs", // Small icon buttons
         "game-action": "h-14 w-full text-lg", // Standard size for game buttons
       },
     },

@@ -20,7 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
-import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Loader2 } from "lucide-react";
+import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Gamepad2 } from "lucide-react";
+import { GameCardSkeletonList } from "@/components/skeletons";
+import { EmptyState } from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatProfitLoss } from "@/lib/utils";
@@ -191,33 +193,39 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-label text-muted-foreground animate-pulse">Loading Games...</p>
+      <div className="space-y-4">
+        <GameCardSkeletonList count={5} />
       </div>
     );
   }
 
   if (games.length === 0) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader className="text-center py-10">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <History className="h-8 w-8 text-primary" />
-          </div>
-          <CardTitle className="text-3xl font-luxury mb-2">No Games Found</CardTitle>
-          <CardDescription>
-            {readOnly
-              ? "No completed games found for this view."
-              : "You haven't recorded any completed sessions yet. Once you finalize a game, it will appear here."}
-          </CardDescription>
-        </CardHeader>
-        {!readOnly && (
-          <CardContent className="flex justify-center pb-12">
-            <Button onClick={() => navigate("/")} size="lg">Start First Session</Button>
-          </CardContent>
-        )}
-      </Card>
+      <EmptyState
+        icon={Gamepad2}
+        title="No Games Yet"
+        description={
+          readOnly
+            ? "No completed games found for this view."
+            : "You haven't recorded any poker sessions yet. Start your first game to begin tracking buy-ins, stacks, and settlements!"
+        }
+        action={
+          !readOnly
+            ? {
+                label: "Create First Game",
+                onClick: () => navigate("/"),
+              }
+            : undefined
+        }
+        secondaryAction={
+          !readOnly
+            ? {
+                label: "Add Players",
+                onClick: () => navigate("/players"),
+              }
+            : undefined
+        }
+      />
     );
   }
 

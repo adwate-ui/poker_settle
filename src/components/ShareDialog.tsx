@@ -140,6 +140,7 @@ export const ShareDialog = ({
                         className="px-3 min-w-[3rem]"
                         onClick={handleCopy}
                         disabled={isLoading || !shortUrl}
+                        aria-label={copied ? "Link copied" : "Copy link"}
                         variant="secondary"
                     >
                         {copied ? (

@@ -48,7 +48,7 @@ export const useHandsHistory = () => {
   const { toast } = useToast();
 
   // Fetch hands with pagination
-  const fetchHands = useCallback(async (pageNum: number = 1, shouldAppend: boolean = false) => {
+  const fetchHands = useCallback(async (pageNum: number = 1, shouldAppend: boolean = false, signal?: AbortSignal) => {
     try {
       setLoading(true);
 
@@ -65,7 +65,8 @@ export const useHandsHistory = () => {
           game:games(date, buy_in_amount)
         `)
         .order('created_at', { ascending: false })
-        .range(from, to);
+        .range(from, to)
+        .abortSignal(signal!);
 
       if (handsError) throw handsError;
 
@@ -82,15 +83,17 @@ export const useHandsHistory = () => {
           *,
           player:players(name)
         `)
-        .in('hand_id', handIds);
+        .in('hand_id', handIds)
+        .abortSignal(signal!);
 
       if (actionsError) throw actionsError;
 
       // Fetch street cards for these hands
-      const { data: cardsData, error: cardsError } = await supabase
+      const { data: cardsData, error: cardsError} = await supabase
         .from('street_cards')
         .select('*')
-        .in('hand_id', handIds);
+        .in('hand_id', handIds)
+        .abortSignal(signal!);
 
       if (cardsError) throw cardsError;
 
@@ -129,11 +132,14 @@ export const useHandsHistory = () => {
       setPage(pageNum);
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Loading Hands',
-        description: err.message,
-        variant: 'destructive',
-      });
+      // Don't show error if request was aborted (component unmounted)
+      if (err.name !== 'AbortError') {
+        toast({
+          title: 'Error Loading Hands',
+          description: err.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -146,9 +152,15 @@ export const useHandsHistory = () => {
     }
   }, [loading, hasMore, page, fetchHands]);
 
-  // Initial fetch
+  // Initial fetch with cleanup
   useEffect(() => {
-    fetchHands(1, false);
+    const abortController = new AbortController();
+
+    fetchHands(1, false, abortController.signal);
+
+    return () => {
+      abortController.abort();
+    };
   }, [fetchHands]);
 
   // Apply filters with memoization
