@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, ArrowUpDown, Calendar } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
-import { formatIndianNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import {
   Select,
   SelectContent,
@@ -162,9 +162,9 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
               filteredAndSortedGames.map((game) => (
                 <TableRow key={game.id} onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)} className="cursor-pointer">
                   <TableCell className="font-medium flex items-center gap-2"><Calendar className="h-4 w-4 opacity-50" /> {format(new Date(game.date), 'MMM d, yyyy')}</TableCell>
-                  <TableCell className="text-right">Rs. {formatIndianNumber(game.buy_in_amount)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(game.buy_in_amount)}</TableCell>
                   <TableCell className="text-center"><Badge variant="secondary">{game.player_count}</Badge></TableCell>
-                  <TableCell className="text-right font-bold text-primary">Rs. {formatIndianNumber(game.total_pot)}</TableCell>
+                  <TableCell className="text-right font-bold text-primary">{formatCurrency(game.total_pot)}</TableCell>
                 </TableRow>
               ))
             )}

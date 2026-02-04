@@ -8,6 +8,7 @@ import OptimizedAvatar from "./OptimizedAvatar";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
 import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 
 // Z-index management is now handled via Tailwind semantic tokens (z-player-unit, z-winner-celebration, etc.)
@@ -176,7 +177,7 @@ const PokerSeat = memo(({
             </span>
             {playerStacks[position.player_id] !== undefined && (
               <span className="text-[10px] text-muted-foreground/80 font-numbers tracking-tight">
-                Rs. {playerStacks[position.player_id].toLocaleString('en-IN')}
+                {formatCurrency(playerStacks[position.player_id])}
               </span>
             )}
           </div>
@@ -571,7 +572,7 @@ const PokerTableView = memo(({
                   >
                     <span className="text-gold-200 font-luxury tracking-widest text-xs uppercase mb-1">Total Win</span>
                     <span className="text-4xl sm:text-6xl font-luxury text-gold-500 drop-shadow-[0_0_30px_rgba(212,184,60,0.8)] glow-text whitespace-nowrap">
-                      Rs. {potSize.toLocaleString()}
+                      {formatCurrency(potSize)}
                     </span>
                   </motion.div>
                 )}
@@ -600,7 +601,7 @@ const PokerTableView = memo(({
                     <div className="flex flex-col">
                       <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest text-center">Current Pot</span>
                       <span className="text-lg sm:text-2xl font-numbers text-gold-400 font-bold whitespace-nowrap tabular-nums">
-                        Rs. {potSize.toLocaleString('en-IN')}
+                        {formatCurrency(potSize)}
                       </span>
                     </div>
                     {showPotChips && <ChipStack amount={potSize} size="sm" showAmount={false} />}

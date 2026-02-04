@@ -7,6 +7,7 @@ import PokerTableView from './PokerTableView';
 import { SeatPosition } from '@/types/poker';
 import PokerCard from './PokerCard';
 import confetti from 'canvas-confetti';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 interface HandAction {
   id: string;
@@ -513,7 +514,7 @@ const HandReplay = ({
                   </Badge>
                   {additionalBetAmount > 0 && (
                     <span className="font-numbers text-sm text-foreground">
-                      Rs. {additionalBetAmount.toLocaleString('en-IN')}
+                      {formatCurrency(additionalBetAmount)}
                     </span>
                   )}
                 </div>
@@ -521,7 +522,7 @@ const HandReplay = ({
               <div className="mt-2 pt-2 border-t border-border/50 flex justify-between items-center">
                 <span className="text-label text-muted-foreground/60">Current Pot</span>
                 <span className="font-numbers text-sm text-foreground">
-                  Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+                  {formatCurrency(potSize + uncommittedPot)}
                 </span>
               </div>
             </div>
@@ -550,7 +551,7 @@ const HandReplay = ({
                   </Badge>
                   {additionalBetAmount > 0 && (
                     <span className="font-numbers text-xl text-foreground">
-                      Rs. {additionalBetAmount.toLocaleString('en-IN')}
+                      {formatCurrency(additionalBetAmount)}
                     </span>
                   )}
                 </div>
@@ -558,7 +559,7 @@ const HandReplay = ({
               <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
                 <span className="text-label text-muted-foreground/60">Current Pot</span>
                 <span className="font-numbers text-xl text-foreground">
-                  Rs. {(potSize + uncommittedPot).toLocaleString('en-IN')}
+                  {formatCurrency(potSize + uncommittedPot)}
                 </span>
               </div>
             </div>
@@ -640,7 +641,7 @@ const HandReplay = ({
               {winnerPlayerName} Wins!
             </div>
             <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-3">
-              Winnings: Rs. {winningAmount.toLocaleString('en-IN')}
+              Winnings: {formatCurrency(winningAmount)}
             </div>
             <div className="text-sm text-muted-foreground mt-2 italic">
               Chips moved to winner

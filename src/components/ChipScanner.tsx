@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { Camera, Upload, Check, RefreshCw, ScanEye, Layers, AlertTriangle, Eye, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatIndianNumber, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { useChips } from '@/contexts/ChipContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -321,7 +322,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                                     <p className="text-[10px] text-muted-foreground font-numbers uppercase">{stack.count} units</p>
                                                                 </div>
                                                             </div>
-                                                            <p className="font-numbers text-sm text-foreground">Rs. {formatIndianNumber(stack.value)}</p>
+                                                            <p className="font-numbers text-sm text-foreground">{formatCurrency(stack.value)}</p>
                                                         </div>
                                                     )
                                                 })}
@@ -337,7 +338,7 @@ export const ChipScanner = ({ onScanComplete }: ChipScannerProps) => {
                                                 <div className="flex items-baseline justify-between mb-6">
                                                     <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Collective Value</span>
                                                     <span className="text-3xl font-numbers text-foreground">
-                                                        Rs. {formatIndianNumber(totalValue)}
+                                                        {formatCurrency(totalValue)}
                                                     </span>
                                                 </div>
                                                 <div className="flex gap-4">

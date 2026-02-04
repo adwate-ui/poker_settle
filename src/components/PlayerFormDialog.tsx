@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/notifications";
 import { validateUpiId } from "@/utils/playerUtils";
 import { Loader2, Mail, CreditCard, User, ShieldCheck, Coins, Check } from "lucide-react";
+import { PaymentMethodConfig } from "@/config/localization";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,7 @@ export interface PlayerFormData {
   name: string;
   email?: string;
   upi_id?: string;
-  payment_preference?: 'upi' | 'cash';
+  payment_preference?: string;
 }
 
 export const PlayerFormDialog = ({
@@ -50,8 +51,8 @@ export const PlayerFormDialog = ({
   const [name, setName] = useState(initialData?.name || "");
   const [email, setEmail] = useState(initialData?.email || "");
   const [upiId, setUpiId] = useState(initialData?.upi_id || "");
-  const [paymentPreference, setPaymentPreference] = useState<'upi' | 'cash'>(
-    initialData?.payment_preference || 'upi'
+  const [paymentPreference, setPaymentPreference] = useState<string>(
+    initialData?.payment_preference || PaymentMethodConfig.digital.key
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,13 +62,13 @@ export const PlayerFormDialog = ({
       setName(initialData.name || "");
       setEmail(initialData.email || "");
       setUpiId(initialData.upi_id || "");
-      setPaymentPreference(initialData.payment_preference || 'upi');
+      setPaymentPreference(initialData.payment_preference || PaymentMethodConfig.digital.key);
     } else if (open && !initialData) {
       // Reset for new player
       setName("");
       setEmail("");
       setUpiId("");
-      setPaymentPreference('upi');
+      setPaymentPreference(PaymentMethodConfig.digital.key);
     }
   }, [open, initialData]);
 
@@ -106,7 +107,7 @@ export const PlayerFormDialog = ({
       setName("");
       setEmail("");
       setUpiId("");
-      setPaymentPreference('upi');
+      setPaymentPreference(PaymentMethodConfig.digital.key);
       onOpenChange(false);
       toast.success(initialData ? "Player updated" : "New player added");
     } catch (error) {
@@ -125,7 +126,7 @@ export const PlayerFormDialog = ({
     setName(initialData?.name || "");
     setEmail(initialData?.email || "");
     setUpiId(initialData?.upi_id || "");
-    setPaymentPreference(initialData?.payment_preference || 'upi');
+    setPaymentPreference(initialData?.payment_preference || PaymentMethodConfig.digital.key);
     onOpenChange(false);
   };
 
@@ -207,10 +208,9 @@ export const PlayerFormDialog = ({
               </div>
             </div>
 
-            {/* Protocol Preference */}
             <div className="space-y-3">
               <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Payment Method</Label>
-              <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value as 'upi' | 'cash')}>
+              <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value)}>
                 <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-primary transition-all tracking-wider text-[11px] uppercase">
                   <div className="flex items-center gap-3">
                     <Coins className="h-4 w-4 text-muted-foreground/40" />
@@ -218,8 +218,8 @@ export const PlayerFormDialog = ({
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="upi" className="uppercase text-[10px] tracking-widest">Digital Payment (UPI)</SelectItem>
-                  <SelectItem value="cash" className="uppercase text-[10px] tracking-widest">Cash</SelectItem>
+                  <SelectItem value={PaymentMethodConfig.digital.key} className="uppercase text-[10px] tracking-widest">Digital Payment ({PaymentMethodConfig.digital.label})</SelectItem>
+                  <SelectItem value={PaymentMethodConfig.cash.key} className="uppercase text-[10px] tracking-widest">{PaymentMethodConfig.cash.label}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -12,6 +12,7 @@ import HandReplay from '@/components/HandReplay';
 import { useHandTracking } from '@/hooks/useHandTracking';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatPosition } from '@/types/poker';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 interface HandDetail {
   id: string;
@@ -355,7 +356,7 @@ const HandDetail = () => {
               <div className="flex justify-between">
                 <span className="text-label text-muted-foreground">Pot Size:</span>
                 <span className="font-bold text-poker-gold">
-                  Rs. {hand.pot_size?.toLocaleString('en-IN') || 0} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
+                  {formatCurrency(hand.pot_size || 0)} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
               <div className="flex justify-between">
@@ -555,7 +556,7 @@ const HandDetail = () => {
                                   </span>
                                   {action.bet_size > 0 && (
                                     <span className="font-semibold text-poker-gold">
-                                      Rs. {action.bet_size.toLocaleString('en-IN')} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
+                                      {formatCurrency(action.bet_size)} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
                                     </span>
                                   )}
                                 </div>

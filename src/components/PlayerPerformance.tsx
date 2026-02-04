@@ -13,6 +13,7 @@ import {
 import { ChevronDown, TrendingUp, User, ShieldCheck, History, Calendar, Info } from "lucide-react";
 import { Player, Game, TablePosition } from "@/types/poker";
 import { formatIndianNumber, formatProfitLoss, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
 import { useGameData } from "@/hooks/useGameData";
 import PokerTableView from "@/components/PokerTableView";
 
@@ -119,7 +120,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Net Profit/Loss</p>
                         <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"} className="text-xl px-4 py-1">
-                          Rs. {formatIndianNumber(selectedPlayer.total_profit)}
+                          {formatCurrency(selectedPlayer.total_profit)}
                         </Badge>
                       </div>
                     </div>
@@ -163,11 +164,11 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                 <div className="grid grid-cols-2 gap-6">
                                   <div className="space-y-1">
                                     <p className="text-xs text-muted-foreground">Buy-in Amount</p>
-                                    <p className="text-sm font-medium">Rs. {formatIndianNumber(game.buyInAmount)}</p>
+                                    <p className="text-sm font-medium">{formatCurrency(game.buyInAmount)}</p>
                                   </div>
                                   <div className="space-y-1">
                                     <p className="text-xs text-muted-foreground">Total Invested</p>
-                                    <p className="text-sm font-medium">Rs. {formatIndianNumber(game.buyIns * game.buyInAmount)}</p>
+                                    <p className="text-sm font-medium">{formatCurrency(game.buyIns * game.buyInAmount)}</p>
                                   </div>
                                 </div>
                               </div>

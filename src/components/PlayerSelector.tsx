@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, UserPlus, Users, X, Check, TrendingUp, TrendingDown, Star } from 'lucide-react';
-import { formatIndianNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PlayerFormDialog, PlayerFormData } from '@/components/PlayerFormDialog';
@@ -138,7 +138,7 @@ export const PlayerSelector = ({
                               <TrendingDown className="h-3 w-3 mr-1" />
                             )}
                             {player.total_profit >= 0 ? '+' : ''}
-                            Rs. {formatIndianNumber(Math.abs(player.total_profit))}
+                            {formatCurrency(Math.abs(player.total_profit))}
                           </Badge>
                         )}
                       </div>
@@ -375,7 +375,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
                   <TrendingDown className="h-3 w-3 mr-1" />
                 )}
                 {player.total_profit >= 0 ? '+' : ''}
-                Rs. {formatIndianNumber(Math.abs(player.total_profit))}
+                {formatCurrency(Math.abs(player.total_profit))}
               </Badge>
             )}
           </div>

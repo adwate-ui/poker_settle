@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { Check, Plus, History, User, Coins, TrendingUp } from "lucide-react";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
 import { BuyInHistoryDialog } from "./BuyInHistoryDialog";
 import OptimizedAvatar from "./OptimizedAvatar";
 import { Card } from "@/components/ui/card";
@@ -152,7 +153,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         <div className="pt-3 border-t border-border flex flex-col gap-2">
           <div className="flex justify-between items-center px-1">
             <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Total Buy-ins</span>
-            <span className="font-numbers text-2xs text-muted-foreground">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+            <span className="font-numbers text-2xs text-muted-foreground">{formatCurrency(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex justify-between items-center px-1">
             <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Net Profit/Loss</span>

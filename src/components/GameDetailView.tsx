@@ -27,7 +27,9 @@ import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Pl
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatIndianNumber, formatProfitLoss, getProfitLossVariant, cn } from "@/lib/utils";
+import { formatProfitLoss, getProfitLossVariant, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { CurrencyConfig } from "@/config/localization";
 import PokerTableView from "@/components/PokerTableView";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/ConsolidatedBuyInLogs";
@@ -141,7 +143,7 @@ export const GameDetailView = ({
   const metaTagsConfig = useMemo(() => ({
     url: shareUrl,
     title: game ? `Game Details - ${format(new Date(game.date), "MMMM d, yyyy")}` : undefined,
-    description: game ? `Poker game on ${format(new Date(game.date), "MMMM d, yyyy")} - Buy-in: Rs. ${formatIndianNumber(game.buy_in_amount)}` : undefined,
+    description: game ? `Poker game on ${format(new Date(game.date), "MMMM d, yyyy")} - Buy-in: ${formatCurrency(game.buy_in_amount)}` : undefined,
   }), [shareUrl, game]);
 
   useMetaTags(metaTagsConfig);
@@ -319,7 +321,7 @@ export const GameDetailView = ({
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Blind Level / Unit</p>
-              <p className="text-2xl font-bold">Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(game.buy_in_amount)}</p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">The Lineup</p>
@@ -328,13 +330,13 @@ export const GameDetailView = ({
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total Liquidity</p>
               <p className="text-2xl font-bold text-primary">
-                Rs. {formatIndianNumber(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
+                {formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total Pot Action</p>
               <Badge variant="profit" className="text-lg px-3 py-1">
-                +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
+                +{formatCurrency(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
               </Badge>
             </div>
           </div>
@@ -476,7 +478,7 @@ export const GameDetailView = ({
                             </div>
                           </TableCell>
                           <TableCell className="text-center font-medium">
-                            Rs. {formatIndianNumber(finalStack)}
+                            {formatCurrency(finalStack)}
                           </TableCell>
                           {showOwnerControls && fetchBuyInHistory && (
                             <TableCell className="text-right pr-6">
@@ -565,7 +567,7 @@ export const GameDetailView = ({
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <span className="font-medium">Rs. {formatIndianNumber(settlement.amount)}</span>
+                            <span className="font-medium">{formatCurrency(settlement.amount)}</span>
                             {settlement.isManual && (
                               <Badge variant="outline" className="ml-3">Manual</Badge>
                             )}
@@ -675,7 +677,7 @@ export const GameDetailView = ({
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Amount (INR)</Label>
+                <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Amount ({CurrencyConfig.code})</Label>
                 <Input
                   type="number"
                   placeholder="0.00"
@@ -703,4 +705,3 @@ export const GameDetailView = ({
     </div>
   );
 };
-

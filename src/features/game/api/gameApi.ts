@@ -6,7 +6,9 @@ import { z } from "zod";
 import { generateShortCode } from "@/lib/shareUtils";
 import { sendCombinedGameSettlementNotifications } from "@/services/emailNotifications";
 
-const buyInAmountSchema = z.number().min(1, "Buy-in must be at least Rs. 1").max(1000000, "Buy-in cannot exceed Rs. 10,00,000");
+import { CurrencyConfig } from "@/config/localization";
+
+const buyInAmountSchema = z.number().min(1, `Buy-in must be at least ${CurrencyConfig.symbol} 1`).max(1000000, `Buy-in cannot exceed ${CurrencyConfig.symbol} 10,00,000`);
 
 export const fetchGames = async (userId: string, client?: SupabaseClient): Promise<Game[]> => {
     try {

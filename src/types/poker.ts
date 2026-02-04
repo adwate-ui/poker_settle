@@ -5,7 +5,7 @@ export interface Player {
   total_profit: number;
   email?: string;
   upi_id?: string;
-  payment_preference?: 'upi' | 'cash';
+  payment_preference?: string;
 }
 
 export interface GamePlayer {
@@ -13,9 +13,9 @@ export interface GamePlayer {
   game_id: string;
   player_id: string;
   player: Player;
-  buy_ins: number;
-  final_stack: number;
-  net_amount: number;
+  buy_ins: number; // Strict number
+  final_stack: number; // Strict number
+  net_amount: number; // Strict number
 }
 
 export interface Game {
@@ -52,6 +52,15 @@ export interface SeatPosition {
   seat: number;
   player_id: string;
   player_name: string;
+}
+
+// Helper type for Supabase JSON compatibility
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
+export interface TablePositionInsert {
+  game_id: string;
+  positions: Json; // Supabase expects strictly JSON type for jsonb columns
+  snapshot_timestamp: string;
 }
 
 export interface TablePosition {

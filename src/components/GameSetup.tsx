@@ -7,6 +7,8 @@ import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
 import PlayerPerformance from "@/components/PlayerPerformance";
 import { formatIndianNumber, parseIndianNumber, formatInputDisplay, getProfitLossColor, formatProfitLoss, getProfitLossBadgeStyle, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { CurrencyConfig } from "@/config/localization";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,8 +60,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
     checkIncompleteGame();
   }, [hasIncompleteGame]);
 
-  const formatCurrency = (amount: number) => {
-    return `Rs. ${formatIndianNumber(amount)}`;
+  const formatCurrencyLocal = (amount: number) => {
+    return formatCurrency(amount);
   };
 
   const filteredPlayers = players
@@ -213,14 +215,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       <div className="space-y-3">
                         <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (INR)</Label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <span className="text-primary font-luxury text-[10px] opacity-70">Rs. </span>
+                          <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none">
+                            <span className="text-primary font-luxury text-[8px] opacity-70">{CurrencyConfig.symbol}</span>
                           </div>
                           <Input
                             type="text"
                             value={formatInputDisplay(buyInAmount)}
                             onChange={e => setBuyInAmount(parseIndianNumber(e.target.value))}
-                            className="h-14 pl-10 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-numbers text-xl text-foreground placeholder:text-muted-foreground"
+                            className="h-14 pl-8 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-numbers text-xl text-foreground placeholder:text-muted-foreground"
                             placeholder="0.00"
                           />
                         </div>
@@ -414,7 +416,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-1">
                                         <p className="font-luxury text-[11px] text-foreground/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                        <p className="font-numbers text-[9px] text-muted-foreground uppercase tracking-tighter">Stake: Rs. {formatIndianNumber(game.buy_in_amount)}</p>
+                                        <p className="font-numbers text-[9px] text-muted-foreground uppercase tracking-tighter">Stake: {formatCurrency(game.buy_in_amount)}</p>
                                       </div>
                                       <button onClick={() => handleDeleteGame(game.id)} className="p-2 hover:bg-red-500/10 rounded-xl text-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
                                         <Trash2 className="h-3.5 w-3.5" />
@@ -423,11 +425,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
                                         <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Asset Flow</p>
-                                        <p className="text-[11px] font-luxury text-foreground">Rs. {formatIndianNumber(totalBuyIns)}</p>
+                                        <p className="text-[11px] font-luxury text-foreground">{formatCurrency(totalBuyIns)}</p>
                                       </div>
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
                                         <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
-                                        <p className="text-[11px] font-luxury text-green-400">Rs. {formatIndianNumber(totalWins)}</p>
+                                        <p className="text-[11px] font-luxury text-green-400">{formatCurrency(totalWins)}</p>
                                       </div>
                                     </div>
                                   </div>

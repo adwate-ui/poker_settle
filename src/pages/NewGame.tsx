@@ -12,7 +12,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Play, Info } from "lucide-react";
 import GameDashboard from "@/components/GameDashboard";
 import PlayerSelector from "@/components/PlayerSelector";
-import { formatIndianNumber, parseIndianNumber } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { parseIndianNumber } from "@/lib/utils";
+import { CurrencyConfig } from "@/config/localization";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import { cn } from "@/lib/utils";
 
@@ -141,7 +143,6 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
-      // Construct a placeholder game object locally to skip the final select roundtrip
       const placeholderGame: Game = {
         ...game,
         game_players: gamePlayers.map(player => ({
@@ -156,7 +157,6 @@ const NewGame = () => {
         }))
       } as unknown as Game;
 
-      // Seed the React Query cache immediately for the dashboard to pick up
       queryClient.setQueryData(gameKeys.detail(game.id), placeholderGame);
 
       toast.success("Game started!");
@@ -225,7 +225,7 @@ const NewGame = () => {
           {/* Buy-in Section */}
           <div className="space-y-3">
             <Label htmlFor="buyin" className="text-label text-muted-foreground ml-1">
-              Initial Buy-in (Rs.)
+              Initial Buy-in ({CurrencyConfig.symbol})
             </Label>
             <div className="relative group">
               <Input
@@ -236,7 +236,7 @@ const NewGame = () => {
                 onChange={(e) => {
                   const value = e.target.value.replace(/,/g, '');
                   if (value === '' || !isNaN(Number(value))) {
-                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    const formatted = value === '' ? '' : formatCurrency(Number(value), false);
                     setBuyInAmount(formatted);
                   }
                 }}
@@ -253,7 +253,7 @@ const NewGame = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-3">
               <Label htmlFor="smallblind" className="text-label text-muted-foreground ml-1">
-                Small Blind (Rs.)
+                Small Blind ({CurrencyConfig.symbol})
               </Label>
               <Input
                 id="smallblind"
@@ -263,7 +263,7 @@ const NewGame = () => {
                 onChange={(e) => {
                   const value = e.target.value.replace(/,/g, '');
                   if (value === '' || !isNaN(Number(value))) {
-                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    const formatted = value === '' ? '' : formatCurrency(Number(value), false);
                     setSmallBlind(formatted);
                   }
                 }}
@@ -273,7 +273,7 @@ const NewGame = () => {
             </div>
             <div className="space-y-3">
               <Label htmlFor="bigblind" className="text-label text-muted-foreground ml-1">
-                Big Blind (Rs.)
+                Big Blind ({CurrencyConfig.symbol})
               </Label>
               <Input
                 id="bigblind"
@@ -283,7 +283,7 @@ const NewGame = () => {
                 onChange={(e) => {
                   const value = e.target.value.replace(/,/g, '');
                   if (value === '' || !isNaN(Number(value))) {
-                    const formatted = value === '' ? '' : formatIndianNumber(Number(value));
+                    const formatted = value === '' ? '' : formatCurrency(Number(value), false);
                     setBigBlind(formatted);
                   }
                 }}

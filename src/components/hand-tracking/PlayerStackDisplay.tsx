@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatIndianNumber, cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { User, Wallet } from 'lucide-react';
 
 interface PlayerStackDisplayProps {
@@ -43,7 +44,7 @@ const PlayerStackDisplay = memo(({
         )}
       >
         <Wallet className="h-3 w-3 mr-1.5 opacity-40 shrink-0" />
-        Rs. {formatIndianNumber(stack)}
+        {formatCurrency(stack)}
       </Badge>
     </div>
   );

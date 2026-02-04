@@ -35,7 +35,7 @@ import { useSharedLink } from "@/hooks/useSharedLink";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { UserProfile } from "@/components/UserProfile";
-import { formatIndianNumber, parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/utils";
+import { parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/utils";
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
@@ -81,6 +81,8 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert } from "@/components/ui/alert";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { PaymentMethodConfig, CurrencyConfig } from "@/config/localization";
 
 interface GameDashboardProps {
   game: Game;
@@ -315,7 +317,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     const balances: PlayerBalance[] = gamePlayers.map(gp => ({
       name: gp.player.name,
       amount: gp.net_amount || 0,
-      paymentPreference: gp.player.payment_preference || 'upi'
+      paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
     }));
 
     return calculateOptimizedSettlements(balances, currentGame.settlements || []);
@@ -376,9 +378,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     }
   }, [currentGame.id]);
 
-  const formatCurrency = useCallback((amount: number) => {
-    return `Rs. ${formatIndianNumber(amount)}`;
-  }, []);
+  // use memoized or config-based currency formatting instead of hardcoded helper
 
   const totalBuyIns = useMemo(() =>
     gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * currentGame.buy_in_amount), 0),
@@ -1062,7 +1062,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-medium text-muted-foreground ml-1">Amount (INR)</Label>
+                      <Label className="text-xs font-medium text-muted-foreground ml-1">Amount ({CurrencyConfig.code})</Label>
                       <Input
                         type="text"
                         placeholder="0.00"
@@ -1092,7 +1092,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       {!isStackBalanced && (
                         <p className="text-xs text-red-400 leading-relaxed font-medium">
                           <span className="font-bold uppercase tracking-wider block mb-1 opacity-80">Chip Mismatch</span>
-                          The final chips on the table (Rs. {formatIndianNumber(totalFinalStack)}) do not match the total buy-ins (Rs. {formatIndianNumber(totalBuyIns)}).
+                          The final chips on the table ({formatCurrency(totalFinalStack)}) do not match the total buy-ins ({formatCurrency(totalBuyIns)}).
                         </p>
                       )}
                       {!isBalanced && (

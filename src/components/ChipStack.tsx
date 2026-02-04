@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { useChips } from '@/contexts/ChipContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProceduralChip } from './ProceduralChip';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 const COLOR_MAP: Record<string, string> = {
   blue: '#1d4ed8',   // blue-700
@@ -122,7 +123,7 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
       {showAmount && (
         <div className="bg-black/60 backdrop-blur-md border border-white/10 px-2 py-0.5 rounded-full shadow-lg z-50">
           <span className={cn("font-bold font-numbers text-primary whitespace-nowrap", config.fontSize)}>
-            Rs. {amount.toLocaleString()}
+            {formatCurrency(amount)}
           </span>
         </div>
       )}

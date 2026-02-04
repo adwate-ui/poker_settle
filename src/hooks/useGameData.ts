@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement } from "@/types/poker";
+import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement, Json, TablePositionInsert } from "@/types/poker";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
@@ -11,8 +11,12 @@ import { useGames } from "@/features/game/hooks/useGames";
 import { usePlayers } from "@/features/players/hooks/usePlayers";
 import { useUpdateGamePlayer } from "@/features/game/hooks/useGameMutations";
 
+import { CurrencyConfig } from "@/config/localization";
+
+import { formatCurrency } from "@/utils/currencyUtils";
+
 // Keep local schemas for simple updates not yet moved
-const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, "Final stack cannot exceed Rs. 1,00,00,000");
+const finalStackSchema = z.number().min(0, "Final stack cannot be negative").max(10000000, `Final stack cannot exceed ${formatCurrency(10000000)}`);
 const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(100, "Buy-ins cannot exceed 100");
 
 export const useGameData = () => {
@@ -286,9 +290,9 @@ export const useGameData = () => {
         .from("table_positions")
         .insert([{
           game_id: gameId,
-          positions: positions as unknown as Record<string, unknown>[],
+          positions: positions as unknown as Json,
           snapshot_timestamp: new Date().toISOString()
-        }])
+        } satisfies TablePositionInsert])
         .select()
         .single();
 

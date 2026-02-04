@@ -3,7 +3,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatIndianNumber, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { CurrencyConfig } from '@/config/localization';
 import { GamePlayer } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ChipScanner } from './ChipScanner';
@@ -48,7 +50,7 @@ export const FinalStackManagement = ({
     }
 
     if (smallBlind && smallBlind > 0 && value % smallBlind !== 0) {
-      toast.error(`Final stack must be a multiple of the small blind (Rs. ${smallBlind})`);
+      toast.error(`Final stack must be a multiple of the small blind (${formatCurrency(smallBlind)})`);
       return;
     }
 
@@ -103,7 +105,7 @@ export const FinalStackManagement = ({
                   {getDisplayName(gamePlayer.player.name, isMobile)}
                 </TableCell>
                 <TableCell>
-                  Rs. {formatIndianNumber(gamePlayer.final_stack || 0)}
+                  {formatCurrency(gamePlayer.final_stack || 0)}
                 </TableCell>
                 <TableCell className="text-right pr-6">
                   <div className="flex items-center justify-end gap-2">
@@ -132,7 +134,7 @@ export const FinalStackManagement = ({
             <DialogDescription>Player: {selectedPlayer?.player.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label>Final Stack (INR)</Label>
+            <Label>Final Stack ({CurrencyConfig.code})</Label>
             <Input
               type="number"
               value={editValue}

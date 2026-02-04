@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatIndianNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 
 interface MemoizedHandCardProps {
@@ -124,7 +125,7 @@ const MemoizedHandCard = memo(({ hand, formatDate }: MemoizedHandCardProps) => {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/40">Aggregated Pot</p>
-                <p className="text-xl text-foreground">Rs. {formatIndianNumber(hand.pot_size || 0)}</p>
+                <p className="text-xl text-foreground">{formatCurrency(hand.pot_size || 0)}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-accent border border-border group-hover:scale-110 transition-transform">
                 <ChevronRight className="h-4 w-4 text-foreground" />

@@ -8,6 +8,7 @@ import { useHandsHistory } from '@/hooks/useHandsHistory';
 import { Loader2, Trophy, TrendingUp, Target, Filter, X } from 'lucide-react';
 import MemoizedHandCard from '@/components/MemoizedHandCard';
 import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 const HandsHistory = () => {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ const HandsHistory = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              Rs. {stats.totalPotWon.toLocaleString('en-IN')}
+              {formatCurrency(stats.totalPotWon)}
             </div>
           </CardContent>
         </Card>
@@ -203,7 +204,7 @@ const HandsHistory = () => {
                   <SelectItem value="all">All Games</SelectItem>
                   {uniqueGames.map(game => (
                     <SelectItem key={game.id} value={game.id}>
-                      {formatDate(game.date)} - Rs. {game.buy_in}
+                      {formatDate(game.date)} - {formatCurrency(game.buy_in)}
                     </SelectItem>
                   ))}
                 </SelectContent>

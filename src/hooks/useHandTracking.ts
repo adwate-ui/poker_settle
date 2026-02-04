@@ -234,26 +234,42 @@ export const useHandTracking = () => {
     try {
       setLoading(true);
 
-      // 1. Bulk insert actions
+      // 1. Bulk UPSERT actions (sanitize payload first)
       if (actions.length > 0) {
+        // Explicitly map optional fields to null if undefined to satisfy Postgres/Supabase
+        const sanitizedActions = actions.map(a => ({
+          ...a,
+          hand_id: handId,
+          position: a.position ?? null,
+          hole_cards: a.hole_cards ?? null,
+          is_hero: !!a.is_hero // Ensure boolean
+        }));
+
         const { error: actionsError } = await supabase
           .from('player_actions')
-          .insert(actions.map(a => ({
-            ...a,
-            hand_id: handId
-          })));
-        if (actionsError) throw actionsError;
+          .upsert(sanitizedActions);  // Use upsert for idempotency
+
+        if (actionsError) {
+          console.error("Failed to save actions:", actionsError, sanitizedActions);
+          throw actionsError;
+        }
       }
 
-      // 2. Bulk insert street cards
+      // 2. Bulk UPSERT street cards
       if (streetCards.length > 0) {
+        const sanitizedCards = streetCards.map(c => ({
+          ...c,
+          hand_id: handId
+        }));
+
         const { error: cardsError } = await supabase
           .from('street_cards')
-          .insert(streetCards.map(c => ({
-            ...c,
-            hand_id: handId
-          })));
-        if (cardsError) throw cardsError;
+          .upsert(sanitizedCards); // Use upsert for idempotency
+
+        if (cardsError) {
+          console.error("Failed to save street cards:", cardsError, sanitizedCards);
+          throw cardsError;
+        }
       }
 
       // 3. Complete the hand
@@ -270,7 +286,10 @@ export const useHandTracking = () => {
         })
         .eq('id', handId);
 
-      if (completeError) throw completeError;
+      if (completeError) {
+        console.error("Failed to update hand completion status:", completeError);
+        throw completeError;
+      }
 
       toast({
         title: 'Hand Saved',
@@ -280,12 +299,15 @@ export const useHandTracking = () => {
       return true;
     } catch (error) {
       const err = error as Error;
+      console.error("CRITICAL: Hand Save Failed", err);
+
       toast({
         title: 'Error Saving Hand Data',
-        description: err.message,
+        description: `${err.message} - Click Save again to retry.`, // Inform user they can retry
         variant: 'destructive',
       });
-      return false;
+      // CRITICAL: Re-throw error so the UI knows NOT to clear local state
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -344,6 +366,7 @@ export const useHandTracking = () => {
     updateHandPot,
     updateHandStage,
     completeHand,
+    saveCompleteHandData,
     getHandActions,
     updateHoleCards,
   };

@@ -23,7 +23,8 @@ import { toast } from "@/lib/notifications";
 import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { formatIndianNumber, formatProfitLoss } from "@/lib/utils";
+import { formatProfitLoss } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useGames } from "@/features/game/hooks/useGames";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -316,13 +317,13 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                     {format(new Date(game.date), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell className="text-right font-body">
-                    Rs. {formatIndianNumber(game.buy_in_amount)}
+                    {formatCurrency(game.buy_in_amount)}
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="secondary">{game.player_count}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-body font-bold text-primary">
-                    Rs. {formatIndianNumber(game.total_pot)}
+                    {formatCurrency(game.total_pot)}
                   </TableCell>
                   <TableCell className="text-right">
                     {selectedPlayer !== "all" && playerData ? (

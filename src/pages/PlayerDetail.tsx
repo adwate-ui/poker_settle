@@ -14,7 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers, History } from "lucide-react";
 import { format } from "date-fns";
-import { formatIndianNumber, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { cn } from "@/lib/utils";
+import { CurrencyConfig, PaymentMethodConfig } from "@/config/localization";
 import { Player } from "@/types/poker";
 import { ShareDialog } from "@/components/ShareDialog";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -92,9 +94,6 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
         .order("games(date)", { ascending: false });
 
       if (historyError) throw historyError;
-      // Filter out any where games is null (though with inner join it shouldn't be, but pure select might allow null if game deleted)
-      // Actually RLS might filter games if not visible.
-      // And we need to map to GameHistory structure clearly 
       const validHistory = (historyData || []).filter((h: any) => h.games) as unknown as GameHistory[];
       setGameHistory(validHistory);
     } catch (error) {
@@ -125,27 +124,6 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
 
   const handleNavigateGame = (gameId: string) => {
     if (client) {
-      // Shared view navigation
-      // navigation handled by valid routes in SharedLayout context if possible
-      // But SharedLayout only has tabs.
-      // It doesn't have a route for "Game Detail" unless we add one or use a modal.
-      // The user request said: "Tab 1: Games. Tab 2: Player Details".
-      // It didn't mention Deep Linking to Game Detail from Player Detail in Shared View.
-      // But GamesHistory has "Examine" button in shared view?
-      // In `GamesHistory` (refactored), I added `navigate('game/${gameId}')`.
-      // This implies there is a route. 
-      // `App.tsx` has `<Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />`.
-      // Wait, I am removing `SharedView.tsx`. `SharedGameDetail` likely still exists?
-      // If I am fully replacing `SharedView` with `SharedLayout`, I should integrate `SharedGameDetail` if needed.
-      // But the user request Phase 3 says: "Refactor `SharedView.tsx` (rename to `SharedLayout.tsx`)... If scope='game': Render GamesHistory... If scope='player': Render Tabs."
-      // It doesn't mention keeping `SharedGameDetail`. 
-      // However, if the user clicks "Examine" on a game, where do they go?
-      // Usually to the game detail.
-      // If I look at `App.tsx` routes again:
-      // `<Route path="/shared/:token/game/:gameId" element={<SharedGameDetail />} />`
-      // This route is OUTSIDE `SharedView`. It is a separate route.
-      // So `navigate('game/ID')` from `share/:token/` (which renders `SharedLayout`) will go to `share/:token/game/ID`.
-      // So yes, I can navigate.
       navigate(`../game/${gameId}`, { relative: "path" });
     } else {
       navigate(`/games/${gameId}`);
@@ -282,7 +260,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                   "text-3xl font-numbers",
                   isProfit ? "text-green-400" : "text-red-400"
                 )}>
-                  {isProfit ? "+" : ""}Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}
+                  {isProfit ? "+" : ""}{formatCurrency(Math.abs(player.total_profit || 0))}
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2 sm:col-span-2 lg:col-span-1">
@@ -336,7 +314,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                   </div>
                   <div className="p-5 rounded-xl border border-border bg-accent/2 space-y-3">
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
-                      <CreditCard className="h-3 w-3" /> UPI ID
+                      <CreditCard className="h-3 w-3" /> Digital ID
                     </div>
                     <p className="text-sm text-foreground font-medium truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
@@ -344,7 +322,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Layers className="h-3 w-3" /> Preference
                     </div>
-                    <p className="text-sm text-foreground font-medium capitalize">{player.payment_preference ? (player.payment_preference === 'upi' ? 'Digital (UPI)' : 'Physical (Cash)') : "Unspecified"}</p>
+                    <p className="text-sm text-foreground font-medium capitalize">{player.payment_preference ? (player.payment_preference === PaymentMethodConfig.digital.key ? PaymentMethodConfig.digital.label : PaymentMethodConfig.cash.label) : "Unspecified"}</p>
                   </div>
                 </div>
               ) : (
@@ -357,7 +335,6 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
         )}
       </Card>
 
-      {/* Game History Ledger */}
       <Card className="border-border bg-background/60 backdrop-blur-xl shadow-2xl overflow-hidden">
         <CardHeader className="pb-4 border-b border-border bg-accent/5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -455,11 +432,11 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                             isWin ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
                           )}
                         >
-                          {isWin ? "+" : ""}Rs. {formatIndianNumber(game.net_amount)}
+                          {isWin ? "+" : ""}{formatCurrency(game.net_amount)}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-numbers text-base text-foreground/60">
-                        Rs. {formatIndianNumber(game.final_stack)}
+                        {formatCurrency(game.final_stack)}
                       </TableCell>
                       <TableCell className="text-right pr-8">
                         <Button

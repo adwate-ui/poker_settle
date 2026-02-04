@@ -12,7 +12,9 @@ import { toast } from 'sonner';
 import { useChips } from '@/contexts/ChipContext';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { cn, formatIndianNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { CurrencyConfig } from "@/config/localization";
 
 import { ProceduralChip } from '@/components/ProceduralChip';
 
@@ -59,10 +61,10 @@ const GameSettingsTab = () => {
                 <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground font-medium">Rs.</span>
+                <span className="text-sm text-muted-foreground font-medium">{CurrencyConfig.symbol}</span>
                 <Input
                   type="text"
-                  value={formatIndianNumber(chip.value)}
+                  value={formatCurrency(chip.value, false)}
                   onChange={(e) => handleValueChange(chip.color, e.target.value)}
                   onBlur={() => updateChipValue(chip.color, chip.value)}
                   className="w-24 text-right tabular-nums"

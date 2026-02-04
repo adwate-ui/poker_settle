@@ -1,21 +1,14 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { CurrencyConfig } from "@/config/localization";
+import { formatCurrency, formatIndianNumber as formatNumberLocalized } from "@/utils/currencyUtils";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format number with Indian numbering style (commas at lakhs/crores)
-export function formatIndianNumber(num: number): string {
-  const numStr = Math.abs(num).toString();
-  const lastThree = numStr.substring(numStr.length - 3);
-  const otherNumbers = numStr.substring(0, numStr.length - 3);
-
-  if (otherNumbers !== '') {
-    return (num < 0 ? '-' : '') + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
-  }
-  return (num < 0 ? '-' : '') + lastThree;
-}
+// Re-export centralized formatter
+export const formatIndianNumber = formatNumberLocalized;
 
 // Parse Indian formatted number string back to number
 export function parseIndianNumber(str: string): number {
@@ -47,11 +40,12 @@ export function getProfitLossVariant(amount: number): 'profit' | 'loss' {
 }
 
 // Format profit/loss with sign
-// For positive amounts: adds '+' after Rs. (e.g., "Rs. +1,000")
-// For negative amounts: adds '-' after Rs. (e.g., "Rs. -1,000")
+// For positive amounts: adds '+' before (e.g., "+Rs. 1,000")
+// For negative amounts: adds '-' before (e.g., "-Rs. 1,000")
 export function formatProfitLoss(amount: number): string {
   const sign = amount >= 0 ? '+' : '-';
-  return `Rs. ${sign}${formatIndianNumber(Math.abs(amount))}`;
+  const formattedAmount = formatCurrency(Math.abs(amount));
+  return `${sign}${formattedAmount}`;
 }
 
 /**

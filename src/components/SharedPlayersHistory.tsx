@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, ArrowUpDown } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
-import { formatIndianNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { format } from 'date-fns';
 import OptimizedAvatar from '@/components/OptimizedAvatar';
 import { useNavigate } from 'react-router-dom';
@@ -62,7 +62,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
-          <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Net P&L</p><p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>Rs. {formatIndianNumber(Math.abs(player.total_profit || 0))}</p></div>
+          <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Net P&L</p><p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>{player.total_profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(player.total_profit || 0))}</p></div>
         </CardContent>
       </Card>
 
@@ -94,7 +94,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                   <Badge variant="secondary">{h.buy_ins}</Badge>
                 </TableCell>
                 <TableCell className={cn("text-right font-bold font-numbers", h.net_amount >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
-                  {h.net_amount > 0 ? "+" : ""} {formatIndianNumber(h.net_amount)}
+                  {h.net_amount > 0 ? "+" : h.net_amount < 0 ? "" : ""} {formatCurrency(h.net_amount)}
                 </TableCell>
                 <TableCell className="text-right"><Button variant="ghost" size="sm" onClick={() => navigate(`/shared/${token}/game/${h.game_id}`)}>View</Button></TableCell>
               </TableRow>

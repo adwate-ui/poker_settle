@@ -2,7 +2,8 @@ import { memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
-import { formatIndianNumber, formatProfitLoss, cn } from "@/lib/utils";
+import { formatProfitLoss, cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currencyUtils";
 import OptimizedAvatar from "./OptimizedAvatar";
 import { Card } from "@/components/ui/card";
 import { User, Wallet, Coins } from "lucide-react";
@@ -59,11 +60,11 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
           <div className="space-y-1">
             <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Buy-in</p>
-            <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(totalBuyIns)}</p>
+            <p className="font-numbers text-sm text-foreground/60">{formatCurrency(totalBuyIns)}</p>
           </div>
           <div className="space-y-1 text-right">
             <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Final Stack</p>
-            <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(finalStack)}</p>
+            <p className="font-numbers text-sm text-foreground/60">{formatCurrency(finalStack)}</p>
           </div>
         </div>
 

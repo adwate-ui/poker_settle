@@ -1,9 +1,10 @@
 import { Settlement } from "@/types/poker";
+import { PaymentMethodConfig } from "@/config/localization";
 
 export interface PlayerBalance {
     name: string;
     amount: number;
-    paymentPreference: 'upi' | 'cash';
+    paymentPreference: string;
 }
 
 export interface EnhancedSettlement extends Settlement {
@@ -12,7 +13,22 @@ export interface EnhancedSettlement extends Settlement {
 }
 
 /**
- * Calculate settlements with cash player optimization
+ * Calculate optimized settlements with payment method awareness.
+ * 
+ * Algorithm Overview:
+ * Phase 1: Cash Optimization
+ *   - Settles debts between players who both prefer Cash.
+ *   - Keeps physical cash flow within the "Cash" ecosystem.
+ * 
+ * Phase 2: Digital Optimization
+ *   - Settles debts between players who both prefer Digital (UPI/Venmo).
+ *   - Maximizes digital-to-digital transfers.
+ * 
+ * Phase 3: Cross-Method Settle (Minimize Transactions)
+ *   - Settles any remaining balances between Cash and Digital pools.
+ *   - Sorts debts by size (High to Low) to match large winners with large losers, reduces total edge count.
+ * 
+ * @throws Error if the total net amount is not zero (accounting discrepancy).
  */
 export function calculateOptimizedSettlements(
     playerBalances: PlayerBalance[],
@@ -38,6 +54,12 @@ export function calculateOptimizedSettlements(
 
     const balances = Array.from(adjustedAmounts.values());
 
+    // ZERO SUM CHECK
+    const totalNet = balances.reduce((sum, b) => sum + b.amount, 0);
+    if (Math.abs(totalNet) > 0.01) {
+        throw new Error(`Accounting Discrepancy: Total net amount is ${totalNet.toFixed(2)}. It must be zero to calculate settlements.`);
+    }
+
     const winners = balances
         .filter(b => b.amount > 0)
         .map(b => ({ ...b }));
@@ -48,18 +70,20 @@ export function calculateOptimizedSettlements(
 
     const settlements: EnhancedSettlement[] = [];
 
-    const cashWinners = winners.filter(w => w.paymentPreference === 'cash');
-    const cashLosers = losers.filter(l => l.paymentPreference === 'cash');
+    const cashWinners = winners.filter(w => w.paymentPreference === PaymentMethodConfig.cash.key);
+    const cashLosers = losers.filter(l => l.paymentPreference === PaymentMethodConfig.cash.key);
 
     settleGroup(cashWinners, cashLosers, settlements, true);
 
-    const upiWinners = winners.filter(w => w.paymentPreference === 'upi' || !w.paymentPreference);
-    const upiLosers = losers.filter(l => l.paymentPreference === 'upi' || !l.paymentPreference);
+    const digitalWinners = winners.filter(w => w.paymentPreference === PaymentMethodConfig.digital.key || !w.paymentPreference);
+    const digitalLosers = losers.filter(l => l.paymentPreference === PaymentMethodConfig.digital.key || !l.paymentPreference);
 
-    settleGroup(upiWinners, upiLosers, settlements, false);
+    settleGroup(digitalWinners, digitalLosers, settlements, false);
 
-    const remainingWinners = [...cashWinners, ...upiWinners].filter(w => w.amount > 0);
-    const remainingLosers = [...cashLosers, ...upiLosers].filter(l => l.amount > 0);
+    // Phase 3: Settle between cash and digital players (remaining balances)
+    // Re-filter for anyone that still has an outstanding balance
+    const remainingWinners = [...cashWinners, ...digitalWinners].filter(w => w.amount > 0.01);
+    const remainingLosers = [...cashLosers, ...digitalLosers].filter(l => l.amount > 0.01);
 
     settleGroup(remainingWinners, remainingLosers, settlements, true);
 
@@ -72,6 +96,11 @@ function settleGroup(
     settlements: EnhancedSettlement[],
     involvesCash: boolean
 ): void {
+    // Optimization: Sort by amount descending (Largest First)
+    // This helps minimize the number of transactions by clearing largest debts with largest winnings first.
+    winners.sort((a, b) => b.amount - a.amount);
+    losers.sort((a, b) => b.amount - a.amount);
+
     let winnerIndex = 0;
     let loserIndex = 0;
 
@@ -172,13 +201,13 @@ export function calculateStandardSettlements(
 export function getSettlementStats(settlements: EnhancedSettlement[]) {
     const totalTransactions = settlements.length;
     const cashTransactions = settlements.filter(s => s.involvesCashPlayer).length;
-    const upiTransactions = totalTransactions - cashTransactions;
+    const digitalTransactions = totalTransactions - cashTransactions;
     const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
 
     return {
         totalTransactions,
         cashTransactions,
-        upiTransactions,
+        digitalTransactions,
         totalAmount,
     };
 }

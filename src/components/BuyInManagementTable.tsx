@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2, Minus, X, User, Coins, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatIndianNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { BuyInHistoryDialog } from '@/components/BuyInHistoryDialog';
@@ -135,7 +135,7 @@ export const BuyInManagementTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+                    <span className="text-sm text-muted-foreground">{formatCurrency(gamePlayer.buy_ins * buyInAmount)}</span>
                   </TableCell>
                   <TableCell className="text-right pr-6">
                     <div className="flex items-center justify-end gap-3">
@@ -227,7 +227,7 @@ export const BuyInManagementTable = ({
                   "text-3xl font-bold",
                   buyInCount > 0 ? 'text-primary' : 'text-destructive'
                 )}>
-                  Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
+                  {formatCurrency(Math.abs(buyInCount * buyInAmount))}
                 </p>
               </div>
             </div>
