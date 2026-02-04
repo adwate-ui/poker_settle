@@ -6,11 +6,11 @@ export interface ChipDenomination {
 }
 
 export const CHIP_DENOMINATIONS: ChipDenomination[] = [
-    { value: 5000, color: 'blue', label: '5K', rgb: [30, 64, 175] }, // #1e40af
-    { value: 1000, color: 'white', label: '1K', rgb: [255, 255, 255] }, // #ffffff
-    { value: 500, color: 'green', label: '500', rgb: [21, 128, 61] }, // #15803d
-    { value: 100, color: 'black', label: '100', rgb: [26, 26, 26] }, // #1a1a1a
-    { value: 20, color: 'red', label: '20', rgb: [185, 28, 28] }, // #b91c1c
+    { value: 5000, color: 'blue', label: '5K', rgb: [29, 78, 216] }, // blue-700
+    { value: 1000, color: 'yellow', label: '1K', rgb: [161, 98, 7] }, // yellow-700
+    { value: 500, color: 'green', label: '500', rgb: [21, 128, 61] }, // green-700
+    { value: 100, color: 'black', label: '100', rgb: [24, 24, 27] }, // zinc-900
+    { value: 20, color: 'red', label: '20', rgb: [185, 28, 28] }, // red-700
 ];
 
 // Helper to find closest chip color

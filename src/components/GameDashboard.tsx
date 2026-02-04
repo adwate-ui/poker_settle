@@ -1044,10 +1044,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </Button>
                   )}
 
-                  <div className="p-6 rounded-2xl bg-gold-500/5 border border-gold-500/10 text-center space-y-1">
-                    <p className="text-[10px] text-gold-500/40 font-luxury uppercase tracking-[0.3em] font-bold">Settlements</p>
-                    <p className="text-2xl font-numbers text-gold-800 dark:text-gold-200">{settlements.length}</p>
-                  </div>
 
                   <Button
                     onClick={handleCompleteGame}

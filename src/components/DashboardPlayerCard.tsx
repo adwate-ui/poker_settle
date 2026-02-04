@@ -23,10 +23,10 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-white/5 bg-black/40 group overflow-hidden relative">
+    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-border/50 bg-card/60 group overflow-hidden relative">
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",
-        profitLossStatus === 'profit' ? 'bg-green-500' : profitLossStatus === 'loss' ? 'bg-red-500' : 'bg-gold-500/20'
+        profitLossStatus === 'profit' ? 'bg-money-green' : profitLossStatus === 'loss' ? 'bg-money-red' : 'bg-primary/20'
       )} />
 
       <div className="space-y-4">
@@ -36,13 +36,13 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
             <OptimizedAvatar
               name={gamePlayer.player.name}
               size="sm"
-              className="flex-shrink-0 border border-white/10"
+              className="flex-shrink-0 border border-border"
             />
             <div className="min-w-0">
-              <h4 className="font-luxury text-sm font-bold text-gold-100 uppercase tracking-widest truncate">
+              <h4 className="font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate">
                 {gamePlayer.player.name}
               </h4>
-              <p className="text-[9px] font-luxury text-gold-500/40 uppercase tracking-tighter">Participant Portfolio</p>
+              <p className="text-3xs font-luxury text-muted-foreground/60 uppercase tracking-tighter">Participant Portfolio</p>
             </div>
           </div>
           <Badge variant="stats">
@@ -51,20 +51,20 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
         </div>
 
         {/* Asset Details */}
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
           <div className="space-y-1">
-            <p className="text-[9px] uppercase font-luxury tracking-widest text-white/20 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Stake</p>
-            <p className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(totalBuyIns)}</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Stake</p>
+            <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(totalBuyIns)}</p>
           </div>
           <div className="space-y-1 text-right">
-            <p className="text-[9px] uppercase font-luxury tracking-widest text-white/20 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Total Assets</p>
-            <p className="font-numbers text-sm text-gold-100/60">Rs. {formatIndianNumber(finalStack)}</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Total Assets</p>
+            <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(finalStack)}</p>
           </div>
         </div>
 
         {/* P&L Result */}
-        <div className="pt-3 border-t border-white/5 flex justify-between items-center px-1">
-          <span className="text-[9px] uppercase font-luxury tracking-widest text-white/20">Executive P&L</span>
+        <div className="pt-3 border-t border-border flex justify-between items-center px-1">
+          <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Executive P&L</span>
           <Badge
             variant={profitLossStatus === 'profit' ? 'profit' : profitLossStatus === 'loss' ? 'loss' : 'default'}
           >

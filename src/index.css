@@ -50,6 +50,12 @@
   .text-value {
     @apply font-numbers tracking-tight;
   }
+
+  /* Ultimate Noise Texture Utility */
+  .bg-noise-texture {
+    @apply fixed inset-0 pointer-events-none opacity-[0.03] z-[1] mix-blend-overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
 }
 
 @layer base {
@@ -90,6 +96,8 @@
     --poker-green: 158 64% 42%;
     --poker-gold: 45 100% 45%;
     --poker-felt: 158 50% 30%;
+    --poker-red: 0 84% 60%;
+    --poker-black: 220 10% 15%;
     --chip-red: 0 84% 60%;
     --chip-blue: 220 85% 55%;
     --money-green: 142 71% 35%;
@@ -139,6 +147,8 @@
     --poker-green: 160 64% 40%;
     --poker-gold: 45 100% 50%;
     --poker-felt: 160 30% 10%;
+    --poker-red: 0 62% 40%;
+    --poker-black: 160 30% 5%;
     --chip-red: 0 62% 40%;
     --chip-blue: 220 85% 60%;
     --money-green: 142 71% 55%;

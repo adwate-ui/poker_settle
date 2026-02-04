@@ -104,8 +104,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                       <CardDescription>Participant Portfolio Overview</CardDescription>
                     </div>
                     {/* Standard Badge usage for Net Valuation */}
-                    <Badge variant={selectedPlayer.total_profit >= 0 ? "default" : "destructive"}
-                      className={selectedPlayer.total_profit >= 0 ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}>
+                    <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"}>
                       {formatProfitLoss(selectedPlayer.total_profit)}
                     </Badge>
                   </CardHeader>
@@ -117,9 +116,9 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Net Valuation</p>
-                        <p className={cn("text-2xl font-bold", selectedPlayer.total_profit >= 0 ? "text-green-600" : "text-red-600")}>
-                          {formatIndianNumber(selectedPlayer.total_profit)}
-                        </p>
+                        <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"} className="text-xl px-4 py-1">
+                          Rs. {formatIndianNumber(selectedPlayer.total_profit)}
+                        </Badge>
                       </div>
                     </div>
                   </CardContent>
@@ -149,8 +148,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                                     <Badge variant="outline">
                                       {game.buyIns} Units
                                     </Badge>
-                                    <Badge variant={game.netAmount > 0 ? "default" : "destructive"}
-                                      className={game.netAmount > 0 ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}>
+                                    <Badge variant={game.netAmount > 0 ? "profit" : "loss"}>
                                       {formatProfitLoss(game.netAmount)}
                                     </Badge>
                                   </div>

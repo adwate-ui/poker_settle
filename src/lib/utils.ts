@@ -10,7 +10,7 @@ export function formatIndianNumber(num: number): string {
   const numStr = Math.abs(num).toString();
   const lastThree = numStr.substring(numStr.length - 3);
   const otherNumbers = numStr.substring(0, numStr.length - 3);
-  
+
   if (otherNumbers !== '') {
     return (num < 0 ? '-' : '') + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
   }
@@ -42,8 +42,8 @@ export function getProfitLossColor(amount: number): 'green' | 'red' {
 }
 
 // Get consistent badge variant for profit/loss values (for shadcn badges)
-export function getProfitLossVariant(amount: number): 'success' | 'destructive' {
-  return amount >= 0 ? 'success' : 'destructive';
+export function getProfitLossVariant(amount: number): 'profit' | 'loss' {
+  return amount >= 0 ? 'profit' : 'loss';
 }
 
 // Format profit/loss with sign
@@ -54,15 +54,48 @@ export function formatProfitLoss(amount: number): string {
   return `Rs. ${sign}${formatIndianNumber(Math.abs(amount))}`;
 }
 
-// Get inline style for P&L badge to ensure correct background color
-// This ensures negative values always show red, positive show green
-// Used as a workaround for CSS specificity issues on mobile devices
-export function getProfitLossBadgeStyle(amount: number): { backgroundColor: string; color: string } {
-  // Handle NaN, Infinity, and undefined values - default to red for consistency
-  const isNegative = isFinite(amount) ? amount < 0 : true;
-  
-  return {
-    backgroundColor: isNegative ? 'var(--mantine-color-red-filled)' : 'var(--mantine-color-green-filled)',
-    color: 'white'
+/**
+ * Generates a consistent hex color from a string
+ * Returns color without the '#' prefix for easier URL usage
+ */
+export function stringToColor(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Use HSL for better control over vibrancy and lightness
+  const h = Math.abs(hash) % 360;
+  const s = 70; // Vibrant but not overly saturated
+  const l = 60; // Light enough for the adventure character style to pop
+
+  const hDecimal = h / 360;
+  const sDecimal = s / 100;
+  const lDecimal = l / 100;
+
+  let r, g, b;
+  if (sDecimal === 0) {
+    r = g = b = lDecimal;
+  } else {
+    const q = lDecimal < 0.5 ? lDecimal * (1 + sDecimal) : lDecimal + sDecimal - lDecimal * sDecimal;
+    const p = 2 * lDecimal - q;
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+    r = hue2rgb(p, q, hDecimal + 1 / 3);
+    g = hue2rgb(p, q, hDecimal);
+    b = hue2rgb(p, q, hDecimal - 1 / 3);
+  }
+
+  const toHex = (x: number) => {
+    const hex = Math.round(x * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
   };
+
+  return `${toHex(r)}${toHex(g)}${toHex(b)}`;
 }

@@ -16,11 +16,11 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
 
-        // Game-Specific Actions (No manual classes needed anymore!)
-        "game-fold": "bg-red-500/10 text-red-600 border border-red-500/20 hover:bg-red-500/20 dark:text-red-400 font-luxury uppercase tracking-widest",
-        "game-check": "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400 font-luxury uppercase tracking-widest",
-        "game-call": "bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20 dark:text-blue-400 font-luxury uppercase tracking-widest",
-        "game-raise": "bg-amber-500/10 text-amber-600 border border-amber-500/20 hover:bg-amber-500/20 dark:text-amber-400 font-luxury uppercase tracking-widest",
+        // Game-Specific Actions
+        "game-fold": "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 font-luxury uppercase tracking-widest",
+        "game-check": "bg-poker-green/10 text-poker-green border border-poker-green/20 hover:bg-poker-green/20 font-luxury uppercase tracking-widest",
+        "game-call": "bg-chip-blue/10 text-chip-blue border border-chip-blue/20 hover:bg-chip-blue/20 font-luxury uppercase tracking-widest",
+        "game-raise": "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-luxury uppercase tracking-widest",
       },
       size: {
         default: "h-12 px-6 py-2",

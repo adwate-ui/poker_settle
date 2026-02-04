@@ -6,7 +6,7 @@ import { ChipStack } from "./ChipStack";
 import { GamePlayer } from "@/types/poker";
 import OptimizedAvatar from "./OptimizedAvatar";
 import { motion, AnimatePresence } from "framer-motion";
-import * as confetti from 'canvas-confetti';
+import confetti from 'canvas-confetti';
 import { cn } from "@/lib/utils";
 import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 
@@ -582,11 +582,6 @@ const PokerTableView = memo(({
               className="absolute inset-0 opacity-40 mix-blend-overlay"
               style={{ background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.7) 100%)' }}
             />
-            <div className="opacity-[0.03] select-none pointer-events-none transform -rotate-12">
-              <span className="font-luxury text-6xl sm:text-8xl tracking-[0.2em] text-white whitespace-nowrap">
-                POKER SETTLE
-              </span>
-            </div>
             {/* Pro Betting Line */}
             <div className={cn(
               "absolute inset-[40px] border-2 border-white/5 pointer-events-none transition-all duration-500",

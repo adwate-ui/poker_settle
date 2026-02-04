@@ -12,7 +12,18 @@ import { toast } from 'sonner';
 import { useChips } from '@/contexts/ChipContext';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from "@/lib/utils";
+import { cn, formatIndianNumber } from "@/lib/utils";
+
+import { ProceduralChip } from '@/components/ProceduralChip';
+
+const COLOR_MAP: Record<string, string> = {
+  black: '#18181b',
+  blue: '#1d4ed8',
+  green: '#15803d',
+  red: '#b91c1c',
+  yellow: '#a16207',
+  white: '#d4d4d8',
+};
 
 const GameSettingsTab = () => {
   const { chips, updateChipValue, resetDefaults } = useChips();
@@ -38,12 +49,15 @@ const GameSettingsTab = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           {localChips.map((chip) => (
             <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
-              <div className={cn("w-8 h-8 rounded-full border shadow-sm",
-                chip.color === 'white' ? 'bg-white border-gray-200' : `bg-${chip.color}-500`)}
-                style={{ backgroundColor: chip.color }} />
+              <ProceduralChip
+                value={chip.label}
+                color={COLOR_MAP[chip.color] || chip.color}
+                size="md"
+                className="shadow-md"
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
-                <p className="text-xs text-muted-foreground">Default: {chip.label}</p>
+                <p className="text-sm font-medium text-primary">Rs. {formatIndianNumber(chip.value)}</p>
               </div>
               <Input
                 type="text"

@@ -317,9 +317,9 @@ export const GameDetailView = ({
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total Pot Action</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <Badge variant="profit" className="text-lg px-3 py-1">
                 +Rs. {formatIndianNumber(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
-              </p>
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -447,8 +447,7 @@ export const GameDetailView = ({
                           </TableCell>
                           <TableCell className="text-center">
                             <div className="flex justify-center">
-                              <Badge variant={isWin ? "default" : "destructive"}
-                                className={isWin ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}>
+                              <Badge variant={isWin ? "profit" : "loss"}>
                                 {formatProfitLoss(netAmount)}
                               </Badge>
                             </div>

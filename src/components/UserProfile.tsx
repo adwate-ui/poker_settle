@@ -35,9 +35,9 @@ export const UserProfile = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="outline-none focus:ring-0 group">
-          <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-transparent group-hover:ring-gold-500/30 transition-all duration-300">
+          <Avatar className="h-10 w-10 border border-border ring-2 ring-transparent group-hover:ring-primary/20 transition-all duration-300">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-black/40 text-gold-500 font-luxury">
+            <AvatarFallback className="bg-muted text-muted-foreground">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -46,28 +46,28 @@ export const UserProfile = () => {
 
       <DropdownMenuContent
         align="end"
-        className="w-56 bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl text-gold-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)]"
+        className="w-56 bg-popover text-popover-foreground border-border shadow-md"
       >
         <DropdownMenuLabel className="p-3">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-luxury font-bold leading-none text-gold-100">{displayName}</p>
-            <p className="text-xs leading-none text-white/40">{user.email}</p>
+            <p className="text-sm font-bold leading-none text-foreground">{displayName}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-gold-500/10" />
+        <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
           onClick={() => navigate('/profile')}
-          className="p-3 cursor-pointer focus:bg-white/5 focus:text-gold-400 transition-colors"
+          className="p-3 cursor-pointer"
         >
           <Settings className="mr-2 h-4 w-4" />
-          <span className="font-luxury text-sm">Profile & Share Link</span>
+          <span className="text-sm">Profile & Share Link</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleSignOut}
-          className="p-3 cursor-pointer focus:bg-white/5 focus:text-red-400 transition-colors"
+          className="p-3 cursor-pointer"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span className="font-luxury text-sm">Sign out</span>
+          <span className="text-sm">Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

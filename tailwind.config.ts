@@ -19,7 +19,15 @@ export default {
       gridTemplateColumns: {
         '13': 'repeat(13, minmax(0, 1fr))',
       },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
+        '3xs': ['0.5rem', { lineHeight: '0.65rem' }],
+      },
       colors: {
+        suit: {
+          red: "hsl(var(--destructive))",
+          black: "hsl(var(--foreground))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -68,6 +76,8 @@ export default {
           green: "hsl(var(--poker-green))",
           gold: "hsl(var(--poker-gold))",
           felt: "hsl(var(--poker-felt))",
+          red: "hsl(var(--poker-red))",
+          black: "hsl(var(--poker-black))",
         },
         chip: {
           red: "hsl(var(--chip-red))",

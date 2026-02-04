@@ -1,22 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useChips } from '@/contexts/ChipContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProceduralChip } from './ProceduralChip';
 
-// Import chip assets directly
-import redChip from '@/assets/chip-red-20.png';
-import blackChip from '@/assets/chip-black-100.png';
-import blueChip from '@/assets/chip-blue-500.png';
-import yellowChip from '@/assets/chip-yellow-1000.png';
-import greenChip from '@/assets/chip-green-5000.png';
-
-const CHIP_ASSETS: Record<string, string> = {
-  red: redChip,
-  black: blackChip,
-  blue: blueChip,
-  yellow: yellowChip,
-  green: greenChip,
-  white: blackChip, // Fallback
+const COLOR_MAP: Record<string, string> = {
+  blue: '#1d4ed8',   // blue-700
+  yellow: '#a16207', // yellow-700
+  green: '#15803d',  // green-700
+  black: '#18181b',  // zinc-900
+  red: '#b91c1c',    // red-700
+  white: '#d4d4d8',  // zinc-300
 };
 
 interface ChipStackProps {
@@ -31,94 +25,81 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
   if (amount === 0) return null;
 
   const stackConfig = {
-    sm: { chipHeight: 2, width: 24, height: 24, fontSize: 'text-xs' },
-    md: { chipHeight: 4, width: 32, height: 32, fontSize: 'text-sm' },
-    lg: { chipHeight: 6, width: 40, height: 40, fontSize: 'text-base' }
+    sm: { chipHeight: 5, width: 32, fontSize: 'text-[10px]' },
+    md: { chipHeight: 6, width: 40, fontSize: 'text-xs' },
+    lg: { chipHeight: 7, width: 48, fontSize: 'text-sm' }
   };
 
   const config = stackConfig[size];
 
-  const getChipDistribution = (total: number) => {
+  const distribution = useMemo(() => {
     const sortedDenominations = [...CHIP_DENOMINATIONS].sort((a, b) => b.value - a.value);
-    let remaining = total;
-    const chips: { color: string; count: number; value: number }[] = [];
+    let remaining = amount;
+    const chips: { color: string; label: string; value: number }[] = [];
 
     sortedDenominations.forEach(denom => {
       if (denom.value <= 0) return;
       const count = Math.floor(remaining / denom.value);
       if (count > 0) {
-        chips.push({ color: denom.color, count, value: denom.value });
+        for (let i = 0; i < count; i++) {
+          chips.push({ color: denom.color, label: denom.label, value: denom.value });
+        }
         remaining -= count * denom.value;
       }
     });
-    return chips.reverse();
-  };
 
-  const distribution = getChipDistribution(amount);
-  const maxVisualChips = 20;
+    // Limit to 20 chips for visual performance and space
+    return chips.slice(0, 20).reverse();
+  }, [amount, CHIP_DENOMINATIONS]);
 
-  const renderChips = () => {
-    let chipsToRender: { color: string, index: number }[] = [];
-    distribution.forEach((group) => {
-      for (let i = 0; i < group.count; i++) {
-        chipsToRender.push({ color: group.color, index: i });
-      }
-    });
-
-    if (chipsToRender.length > maxVisualChips) {
-      chipsToRender = chipsToRender.slice(0, maxVisualChips);
-    }
-
-    return (
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          initial="initial"
-          animate="animate"
-          className="relative w-full h-full"
-        >
-          {chipsToRender.map((chip, idx) => (
-            <motion.div
-              key={`${chip.color}-${idx}`}
-              initial={{ scale: 0, y: -20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              className="absolute drop-shadow-lg"
-              style={{
-                bottom: `${idx * config.chipHeight}px`,
-                zIndex: idx,
-                left: 0,
-                right: 0,
-                margin: 'auto',
-                width: `${config.width}px`,
-              }}
-            >
-              <img
-                src={CHIP_ASSETS[chip.color] || blackChip}
-                alt={`${chip.color} chip`}
-                className="w-full h-auto object-contain"
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      </AnimatePresence>
-    );
-  };
+  // Generate deterministic offsets for each chip in the stack to look "organic"
+  const offsets = useMemo(() => {
+    return distribution.map((_, i) => ({
+      x: (Math.sin(i * 123.45) * 2), // Slight horizontal shift
+      rotate: (Math.cos(i * 678.9) * 4) // Slight rotation
+    }));
+  }, [distribution]);
 
   return (
-    <div className={cn("flex flex-col items-center gap-2", size === 'lg' ? 'min-w-[50px]' : 'min-w-[40px]')}>
+    <div className={cn("flex flex-col items-center gap-1.5", size === 'lg' ? 'min-w-[60px]' : 'min-w-[40px]')}>
       <div
-        className="relative flex items-end justify-center"
+        className="relative flex flex-col-reverse items-center justify-end"
         style={{
-          height: `${Math.min(distribution.reduce((acc, c) => acc + c.count, 0), maxVisualChips) * (config.chipHeight + 1) + config.height}px`,
+          height: `${40 + (distribution.length * config.chipHeight)}px`,
           width: `${config.width}px`
         }}
       >
-        {renderChips()}
+        <AnimatePresence mode="popLayout">
+          {distribution.map((chip, idx) => (
+            <motion.div
+              key={`${amount}-${idx}`}
+              initial={{ opacity: 0, y: -20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="absolute"
+              style={{
+                bottom: `${idx * config.chipHeight}px`,
+                zIndex: idx,
+                x: offsets[idx]?.x || 0,
+                rotate: offsets[idx]?.rotate || 0
+              }}
+            >
+              <ProceduralChip
+                value={chip.label}
+                color={COLOR_MAP[chip.color] || '#333'}
+                size={size}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {showAmount && (
-        <span className={cn("font-medium tabular-nums text-foreground", config.fontSize)}>
-          Rs. {amount.toLocaleString()}
-        </span>
+        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-2 py-0.5 rounded-full shadow-lg">
+          <span className={cn("font-bold font-numbers text-gold-400 whitespace-nowrap", config.fontSize)}>
+            Rs. {amount.toLocaleString()}
+          </span>
+        </div>
       )}
     </div>
   );
