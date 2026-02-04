@@ -326,9 +326,9 @@ const GamesHistory = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     {selectedPlayer !== "all" && playerData ? (
-                      <span className={cn("font-bold", playerData.net_amount >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
+                      <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'}>
                         {formatProfitLoss(playerData.net_amount)}
-                      </span>
+                      </Badge>
                     ) : (
                       <Button
                         variant="ghost"
@@ -355,7 +355,7 @@ const GamesHistory = () => {
           <DialogHeader>
             <DialogTitle>Delete Game?</DialogTitle>
             <DialogDescription>
-              This action will permanently purge this session from the archives. The accounting for all participants will be irreversibly lost.
+              This action will permanently remove this session from the history. The accounting for all players will be irreversibly lost.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

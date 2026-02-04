@@ -83,7 +83,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
               <h4 className="font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate">
                 {gamePlayer.player.name}
               </h4>
-              <p className="text-3xs font-luxury text-muted-foreground/60 uppercase tracking-tighter">Verified Participant</p>
+              <p className="text-3xs font-luxury text-muted-foreground/60 uppercase tracking-tighter">Verified Player</p>
             </div>
           </div>
 
@@ -103,7 +103,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
           {/* Add Buy-ins Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Increment Stake</Label>
+            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Add Buy-in</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="number"
@@ -126,7 +126,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
 
           {/* Final Stack Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Final Liquidity</Label>
+            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Final Stack</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="text"
@@ -148,14 +148,14 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
           </div>
         </div>
 
-        {/* Valuation Summary */}
+        {/* Profit/Loss Summary */}
         <div className="pt-3 border-t border-border flex flex-col gap-2">
           <div className="flex justify-between items-center px-1">
             <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Total Buy-ins</span>
             <span className="font-numbers text-2xs text-muted-foreground">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex justify-between items-center px-1">
-            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Amount</span>
+            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Net Profit/Loss</span>
             <Badge
               variant={profitLossStatus === 'profit' ? 'profit' : profitLossStatus === 'loss' ? 'loss' : 'default'}
             >

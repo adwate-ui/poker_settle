@@ -75,19 +75,19 @@ export const PlayerFormDialog = ({
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error("Participant identity is required");
+      toast.error("Player name is required");
       return;
     }
 
     // Validate email format if provided
     if (email.trim() && !validateEmail(email.trim())) {
-      toast.error("Invalid communication endpoint (Email)");
+      toast.error("Invalid email address");
       return;
     }
 
     // Validate UPI ID format if provided
     if (upiId.trim() && !validateUpiId(upiId)) {
-      toast.error("Invalid clearance identifier (UPI ID)");
+      toast.error("Invalid UPI ID");
       return;
     }
 
@@ -110,7 +110,7 @@ export const PlayerFormDialog = ({
       onOpenChange(false);
       toast.success(initialData ? "Player updated" : "New player added");
     } catch (error) {
-      console.error("Error saving participant:", error);
+      console.error("Error saving player:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -151,13 +151,13 @@ export const PlayerFormDialog = ({
           <div className="space-y-6">
             {/* Identity Field */}
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Participant Identity (Full Name) *</Label>
+              <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Player Name *</Label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <User className="h-4 w-4 text-gold-500/40 group-focus-within:text-gold-500 transition-colors" />
                 </div>
                 <Input
-                  placeholder="Enter identification name"
+                  placeholder="Enter player name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={isSubmitting}
@@ -167,11 +167,10 @@ export const PlayerFormDialog = ({
               </div>
             </div>
 
-            {/* Communication & Clearance Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Communication Endpoint (Email)</Label>
+                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Email Address</Label>
                   {email && (
                     <button
                       type="button"
@@ -198,7 +197,7 @@ export const PlayerFormDialog = ({
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Clearance Identifier (UPI ID)</Label>
+                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">UPI ID</Label>
                   {upiId && (
                     <button
                       type="button"
@@ -234,8 +233,8 @@ export const PlayerFormDialog = ({
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
-                  <SelectItem value="upi" className="font-luxury uppercase text-[10px] tracking-widest">Digital Clearance (UPI)</SelectItem>
-                  <SelectItem value="cash" className="font-luxury uppercase text-[10px] tracking-widest">Physical Asset (Cash)</SelectItem>
+                  <SelectItem value="upi" className="font-luxury uppercase text-[10px] tracking-widest">Digital Payment (UPI)</SelectItem>
+                  <SelectItem value="cash" className="font-luxury uppercase text-[10px] tracking-widest">Cash</SelectItem>
                 </SelectContent>
               </Select>
             </div>

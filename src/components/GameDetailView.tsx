@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -231,6 +232,16 @@ export const GameDetailView = ({
 
   const settlementsWithType = useMemo(() => getSettlementsWithType(), [getSettlementsWithType]);
 
+  const nameToIdMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    gamePlayers.forEach(gp => {
+      if (gp.players?.name) {
+        map[gp.players.name] = gp.player_id;
+      }
+    });
+    return map;
+  }, [gamePlayers]);
+
   if (queryLoading) {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
@@ -439,7 +450,14 @@ export const GameDetailView = ({
 
                       return (
                         <TableRow key={gamePlayer.id}>
-                          <TableCell className="pl-6 font-medium">{playerName}</TableCell>
+                          <TableCell className="pl-6 font-medium">
+                            <Link
+                              to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
+                              className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block w-fit"
+                            >
+                              {playerName}
+                            </Link>
+                          </TableCell>
                           <TableCell className="text-center">
                             <Badge variant="outline">
                               {gamePlayer.buy_ins}
@@ -559,13 +577,23 @@ export const GameDetailView = ({
                           <TableCell className="pl-4 sm:pl-8">
                             <div className="flex items-center gap-3">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-[13px] font-medium">{settlement.from}</span>
+                              <Link
+                                to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
+                                className="text-[13px] font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                              >
+                                {settlement.from}
+                              </Link>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <CreditCard className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-[13px] font-medium">{settlement.to}</span>
+                              <Link
+                                to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
+                                className="text-[13px] font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                              >
+                                {settlement.to}
+                              </Link>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">

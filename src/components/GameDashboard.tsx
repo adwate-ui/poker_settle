@@ -970,23 +970,23 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               {/* Add Manual Transfer Form */}
               {showManualTransfer && (
-                <Card className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500 border-gold-500/30">
-                  <div className="flex items-center gap-3 border-b border-border pb-4">
-                    <ShieldCheck className="h-5 w-5 text-gold-500" />
-                    <h3 className="text-lg font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manual Adjustment</h3>
+                <Card className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500">
+                  <div className="flex items-center gap-3 border-b pb-4">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Manual Adjustment</h3>
                   </div>
 
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">From Player</Label>
+                        <Label className="text-xs font-medium text-muted-foreground ml-1">From Player</Label>
                         <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
-                          <SelectTrigger className="h-11 bg-accent/5 border-0 border-b border-border rounded-none focus:ring-0 focus:border-primary transition-all font-luxury tracking-wider text-[10px] uppercase text-foreground">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select Player..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                          <SelectContent>
                             {gamePlayers.map(gp => (
-                              <SelectItem key={`from-${gp.id}`} value={gp.player.name} className="font-luxury uppercase text-[10px] tracking-widest">
+                              <SelectItem key={`from-${gp.id}`} value={gp.player.name}>
                                 {gp.player.name}
                               </SelectItem>
                             ))}
@@ -994,14 +994,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">To Player</Label>
+                        <Label className="text-xs font-medium text-muted-foreground ml-1">To Player</Label>
                         <Select value={newTransferTo} onValueChange={setNewTransferTo}>
-                          <SelectTrigger className="h-11 bg-accent/5 border-0 border-b border-border rounded-none focus:ring-0 focus:border-primary transition-all font-luxury tracking-wider text-[10px] uppercase text-foreground">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select Player..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
+                          <SelectContent>
                             {gamePlayers.map(gp => (
-                              <SelectItem key={`to-${gp.id}`} value={gp.player.name} className="font-luxury uppercase text-[10px] tracking-widest">
+                              <SelectItem key={`to-${gp.id}`} value={gp.player.name}>
                                 {gp.player.name}
                               </SelectItem>
                             ))}
@@ -1011,20 +1011,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-gold-500/60 ml-1">Amount (INR)</Label>
+                      <Label className="text-xs font-medium text-muted-foreground ml-1">Amount (INR)</Label>
                       <Input
                         type="text"
                         placeholder="0.00"
                         value={newTransferAmount}
                         onChange={(e) => setNewTransferAmount(e.target.value)}
-                        className="h-14 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-numbers text-xl text-foreground placeholder:text-muted-foreground/30"
                       />
                     </div>
                   </div>
 
                   <div className="flex gap-4">
-                    <Button onClick={() => setShowManualTransfer(false)} variant="ghost" className="flex-1 h-12 border border-border bg-accent/5 hover:bg-accent/10 text-muted-foreground text-label rounded-xl transition-all">Cancel</Button>
-                    <Button onClick={addManualTransfer} className="flex-1 h-12 bg-gold-600 hover:bg-gold-500 text-black text-label rounded-xl shadow-lg shadow-gold-900/10 transition-all">Save</Button>
+                    <Button variant="outline" onClick={() => setShowManualTransfer(false)} className="flex-1">Cancel</Button>
+                    <Button onClick={addManualTransfer} className="flex-1">Save</Button>
                   </div>
                 </Card>
               )}
@@ -1036,10 +1035,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     <Button
                       onClick={() => setShowManualTransfer(true)}
                       disabled={!canCompleteGame}
-                      variant="ghost"
-                      className="w-full h-12 border border-border bg-accent/5 hover:bg-accent/10 text-muted-foreground hover:text-foreground text-label rounded-xl transition-all"
+                      variant="outline"
+                      className="w-full gap-2"
                     >
-                      <Plus className="w-3.5 h-3.5 mr-2.5" />
+                      <Plus className="h-4 w-4" />
                       Add Manual Adjustment
                     </Button>
                   )}

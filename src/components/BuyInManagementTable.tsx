@@ -105,39 +105,39 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <div className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-gold-900/10 dark:border-white/10 shadow-2xl rounded-xl overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+      <div className="rounded-md border">
+        <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-black/5 dark:bg-white/5 border-b border-gold-900/10 dark:border-white/10">
-              <TableRow className="hover:bg-transparent border-0 h-12">
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 pl-8 align-middle w-full">Player</TableHead>
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 align-middle">Buy-ins</TableHead>
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 align-middle">Amount</TableHead>
-                <TableHead className="text-label text-gold-900/60 dark:text-gold-500/60 text-right pr-8 align-middle">Actions</TableHead>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pl-6">Player</TableHead>
+                <TableHead>Buy-ins</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead className="text-right pr-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-white/5">
+            <TableBody>
               {sortedPlayers.map((gamePlayer) => (
                 <TableRow
                   key={gamePlayer.id}
-                  className="h-16 hover:bg-gold-500/5 border-0 transition-colors group"
+                  className="group"
                 >
-                  <TableCell className="pl-8">
+                  <TableCell className="pl-6">
                     <div className="flex items-center gap-3">
-                      <User className="h-3.5 w-3.5 text-gold-500/30 group-hover:text-gold-500/60 transition-colors" />
-                      <span className="font-luxury text-sm text-gold-900 dark:text-gold-100 uppercase tracking-widest">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
+                      <User className="h-4 w-4 text-muted-foreground/50" />
+                      <span className="font-medium">{getDisplayName(gamePlayer.player.name, isMobile)}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Coins className="h-3 w-3 text-gold-500/40" />
-                      <span className="font-numbers text-base text-gold-800 dark:text-gold-200/80">{gamePlayer.buy_ins}</span>
+                      <Coins className="h-4 w-4 text-muted-foreground/50" />
+                      <span className="font-medium">{gamePlayer.buy_ins}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-numbers text-sm text-gold-900/60 dark:text-gold-100/60">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
+                    <span className="text-sm text-muted-foreground">Rs. {formatIndianNumber(gamePlayer.buy_ins * buyInAmount)}</span>
                   </TableCell>
-                  <TableCell className="text-right pr-8">
+                  <TableCell className="text-right pr-6">
                     <div className="flex items-center justify-end gap-3">
                       <Button
                         onClick={() => {
@@ -147,7 +147,6 @@ export const BuyInManagementTable = ({
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 text-gold-500/40 hover:text-gold-500 hover:bg-gold-500/10 rounded-lg transition-all border border-transparent hover:border-gold-500/20"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -177,12 +176,12 @@ export const BuyInManagementTable = ({
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gold-500/10 border border-gold-500/20">
-                <TrendingUp className="w-5 h-5 text-gold-500" />
+              <div className="p-2 rounded-lg bg-primary/10">
+                <TrendingUp className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-luxury text-gold-900 dark:text-gold-100 uppercase tracking-widest">Manage Buy-ins</DialogTitle>
-                <DialogDescription className="text-label text-gold-500/40 font-luxury">Player: {selectedPlayer?.player.name}</DialogDescription>
+                <DialogTitle>Manage Buy-ins</DialogTitle>
+                <DialogDescription>Player: {selectedPlayer?.player.name}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -191,44 +190,42 @@ export const BuyInManagementTable = ({
             <div className="flex flex-col items-center gap-8">
               <div className="flex items-center justify-center gap-8 w-full">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={decrement}
-                  className="h-16 w-16 border border-white/10 hover:border-gold-500/30 hover:bg-gold-500/10 rounded-2xl group transition-all"
+                  className="h-16 w-16 rounded-2xl group transition-all"
                 >
-                  <Minus className="h-7 w-7 text-gold-500 group-hover:scale-110 transition-transform" />
+                  <Minus className="h-7 w-7 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
 
                 <div className="flex flex-col items-center min-w-[120px]">
                   <span className={cn(
-                    "text-5xl text-value transition-colors",
-                    buyInCount < 0 ? 'text-red-400' : 'text-gold-800 dark:text-gold-200'
+                    "text-5xl font-bold transition-colors",
+                    buyInCount < 0 ? 'text-destructive' : 'text-foreground'
                   )}>
                     {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
                   </span>
-                  <span className="text-label tracking-[0.3em] text-gold-500/40 mt-2">
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
                     {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
                   </span>
                 </div>
 
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={increment}
-                  className="h-16 w-16 border border-white/10 hover:border-gold-500/30 hover:bg-gold-500/10 rounded-2xl group transition-all"
+                  className="h-16 w-16 rounded-2xl group transition-all"
                 >
-                  <Plus className="h-7 w-7 text-gold-500 group-hover:scale-110 transition-transform" />
+                  <Plus className="h-7 w-7 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
               </div>
 
               <div className={cn(
-                "p-6 rounded-2xl w-full text-center border transition-all duration-500 backdrop-blur-md",
-                buyInCount > 0
-                  ? 'bg-gold-500/5 border-gold-500/20 shadow-[0_0_30px_rgba(212,184,60,0.05)]'
-                  : 'bg-red-500/5 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.05)]'
+                "p-6 rounded-2xl w-full text-center border transition-all duration-500",
+                buyInCount > 0 ? 'bg-primary/5 border-primary/20' : 'bg-destructive/5 border-destructive/20'
               )}>
-                <p className="text-label text-white/30 mb-2">Cost Impact</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Cost Impact</p>
                 <p className={cn(
-                  "text-3xl font-numbers",
-                  buyInCount > 0 ? 'text-gold-900 dark:text-gold-100' : 'text-red-600 dark:text-red-100'
+                  "text-3xl font-bold",
+                  buyInCount > 0 ? 'text-primary' : 'text-destructive'
                 )}>
                   Rs. {formatIndianNumber(Math.abs(buyInCount * buyInAmount))}
                 </p>
@@ -238,21 +235,17 @@ export const BuyInManagementTable = ({
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setOpened(false)}
-              className="font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/2 hover:bg-black/10 dark:hover:bg-white/5 transition-colors rounded-lg flex-1"
+              className="flex-1"
             >
               Cancel
             </Button>
             <Button
               onClick={handleAddBuyIn}
               disabled={isAdding || !selectedPlayerId || buyInCount === 0}
-              className={cn(
-                "font-luxury uppercase tracking-[0.2em] text-[10px] h-11 border-0 shadow-lg rounded-lg flex-1 transition-all",
-                buyInCount < 0
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/10'
-                  : 'bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-gold-900/10'
-              )}
+              variant={buyInCount < 0 ? "destructive" : "default"}
+              className="flex-1"
             >
               {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>{buyInCount > 0 ? 'Add Buy-in' : 'Remove Buy-in'}</span>}
             </Button>

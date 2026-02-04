@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
@@ -22,6 +23,7 @@ interface BuyInHistoryEntry {
   total_buy_ins_after: number;
   game_player_id: string;
   player_name: string;
+  player_id?: string;
 }
 
 interface ConsolidatedBuyInLogsProps {
@@ -62,6 +64,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         total_buy_ins_after: number;
         game_player_id: string;
         game_players: {
+          player_id: string;
           players: {
             name: string;
           };
@@ -75,6 +78,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         total_buy_ins_after: entry.total_buy_ins_after,
         game_player_id: entry.game_player_id,
         player_name: entry.game_players.players.name,
+        player_id: entry.game_players.player_id,
       }));
 
       setHistory(formattedHistory);
@@ -125,14 +129,14 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       {!loading && history.length > 0 && (
         <div className="max-w-[250px]">
           <Select value={filterName} onValueChange={setFilterName}>
-            <SelectTrigger className="h-10 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-gold-500 transition-all font-luxury tracking-wider text-[10px] uppercase">
-              <Filter className="mr-2 h-3.5 w-3.5 text-gold-500/40" />
-              <SelectValue placeholder="All Participants" />
+            <SelectTrigger className="w-full">
+              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="All Players" />
             </SelectTrigger>
-            <SelectContent className="bg-[#0a0a0a]/95 border-gold-500/20 backdrop-blur-xl">
-              <SelectItem value={FILTER_ALL} className="text-label">All Participants</SelectItem>
+            <SelectContent>
+              <SelectItem value={FILTER_ALL}>All Players</SelectItem>
               {uniquePlayerNames.map(name => (
-                <SelectItem key={name} value={name} className="text-label">{name}</SelectItem>
+                <SelectItem key={name} value={name}>{name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -142,53 +146,58 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       {/* Table with fixed height and scroll */}
       {loading ? (
         <div className="flex flex-col justify-center items-center py-12 gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-gold-500/40" />
-          <p className="text-label text-gold-500/20">Fetching Ledger History...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Fetching Buy-in Log...</p>
         </div>
       ) : history.length === 0 ? (
-        <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
-          <History className="h-10 w-10 mx-auto mb-4 text-white/5" />
-          <p className="text-label tracking-[0.2em] text-white/20">No buy-in fluctuations recorded.</p>
+        <div className="py-16 text-center border border-dashed rounded-xl bg-muted/20">
+          <History className="h-10 w-10 mx-auto mb-4 text-muted-foreground/20" />
+          <p className="text-sm text-muted-foreground">No buy-in changes recorded.</p>
         </div>
       ) : filteredHistory.length === 0 ? (
-        <div className="py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/2">
-          <p className="text-label tracking-[0.2em] text-white/20">No logs found for "{filterName}" in this archive.</p>
+        <div className="py-16 text-center border border-dashed rounded-xl bg-muted/20">
+          <p className="text-sm text-muted-foreground">No logs found for "{filterName}" in this archive.</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-white/10 overflow-hidden bg-black/20 shadow-inner">
-          <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+        <div className="rounded-xl border overflow-hidden bg-card shadow-sm">
+          <div className="max-h-[400px] overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-[#0a0a0a] border-b border-white/10">
-                <TableRow className="hover:bg-transparent border-0 h-12">
-                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60 pl-6">Participant</TableHead>
-                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60">Incremental</TableHead>
-                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60">Amended Total</TableHead>
-                  <TableHead className="text-label tracking-[0.2em] text-gold-500/60 text-right pr-6">Audit Time</TableHead>
+              <TableHeader className="sticky top-0 z-10 bg-card border-b">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-6">Player</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead className="text-right pr-6">Time</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-white/5">
+              <TableBody>
                 {filteredHistory.map((entry) => (
                   <TableRow
                     key={entry.id}
-                    className="h-14 hover:bg-gold-500/5 border-0 transition-colors"
+                    className="cursor-default"
                   >
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
-                        <User className="h-3 w-3 text-gold-500/40" />
-                        <span className="font-luxury text-[11px] text-gold-100 uppercase tracking-widest">{entry.player_name}</span>
+                        <User className="h-4 w-4 text-muted-foreground/50" />
+                        <Link
+                          to={entry.player_id ? `/players/${entry.player_id}` : '#'}
+                          className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all"
+                        >
+                          {entry.player_name}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`font-numbers text-sm ${entry.buy_ins_added > 0 ? "text-green-400" : "text-red-400"}`}>
+                      <span className={`font-medium ${entry.buy_ins_added > 0 ? "text-green-600" : "text-destructive"}`}>
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="font-numbers text-sm text-gold-100/60">{entry.total_buy_ins_after}</span>
+                      <span className="text-muted-foreground">{entry.total_buy_ins_after}</span>
                     </TableCell>
                     <TableCell className="text-right pr-6">
-                      <div className="flex items-center justify-end gap-2 text-white/30 font-numbers text-[10px] uppercase">
-                        <Calendar className="h-3 w-3 opacity-30" />
+                      <div className="flex items-center justify-end gap-2 text-muted-foreground text-xs">
+                        <Calendar className="h-3 w-3 opacity-50" />
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                       </div>
                     </TableCell>

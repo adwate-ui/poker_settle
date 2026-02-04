@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -24,6 +25,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const [gameTablePositions, setGameTablePositions] = useState<Record<string, TablePosition | null>>({});
+  const navigate = useNavigate();
   const { getTablePositionWithMostPlayers } = useGameData();
 
   const playerGames = useMemo(() => {
@@ -80,10 +82,10 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
         <CollapsibleContent>
           <div className="p-8 space-y-8 animate-in slide-in-from-top-2 duration-300">
             <div className="max-w-md">
-              <label className="text-xs font-medium text-muted-foreground mb-2 block">Select Participant Profile</label>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Select Player</label>
               <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Identify Participant..." />
+                  <SelectValue placeholder="Search Player..." />
                 </SelectTrigger>
                 <SelectContent>
                   {sortedPlayers.map(player => (
@@ -101,9 +103,9 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="space-y-1">
                       <CardTitle className="text-2xl">{selectedPlayer.name}</CardTitle>
-                      <CardDescription>Participant Portfolio Overview</CardDescription>
+                      <CardDescription>Player Summary</CardDescription>
                     </div>
-                    {/* Standard Badge usage for Net Valuation */}
+                    {/* Standard Badge usage for Net Profit/Loss */}
                     <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"}>
                       {formatProfitLoss(selectedPlayer.total_profit)}
                     </Badge>
@@ -115,7 +117,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                         <p className="text-2xl font-bold">{selectedPlayer.total_games}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-muted-foreground">Net Valuation</p>
+                        <p className="text-sm font-medium text-muted-foreground">Net Profit/Loss</p>
                         <Badge variant={selectedPlayer.total_profit >= 0 ? "profit" : "loss"} className="text-xl px-4 py-1">
                           Rs. {formatIndianNumber(selectedPlayer.total_profit)}
                         </Badge>
@@ -127,13 +129,17 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-b pb-4">
                     <History className="h-4 w-4 text-muted-foreground" />
-                    <h5 className="text-sm font-medium">Session Archive History</h5>
+                    <h5 className="text-sm font-medium">Game History</h5>
                   </div>
 
                   {playerGames.length > 0 ? (
                     <div className="grid grid-cols-1 gap-4">
                       {playerGames.map((game) => (
-                        <Card key={game.gameId} className="border-white/5 bg-white/2 hover:bg-white/5 transition-all group overflow-hidden">
+                        <Card
+                          key={game.gameId}
+                          className="border-white/5 bg-white/2 hover:bg-white/10 dark:hover:bg-black/40 hover:border-primary/40 cursor-pointer transition-all group overflow-hidden"
+                          onClick={() => navigate(`/games/${game.gameId}`)}
+                        >
                           <div className="p-6">
                             <div className="flex flex-col lg:flex-row gap-8">
                               <div className="flex-1 space-y-6">
@@ -156,11 +162,11 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
 
                                 <div className="grid grid-cols-2 gap-6">
                                   <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground">Base Stake</p>
+                                    <p className="text-xs text-muted-foreground">Buy-in Amount</p>
                                     <p className="text-sm font-medium">Rs. {formatIndianNumber(game.buyInAmount)}</p>
                                   </div>
                                   <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground">Total Commitment</p>
+                                    <p className="text-xs text-muted-foreground">Total Invested</p>
                                     <p className="text-sm font-medium">Rs. {formatIndianNumber(game.buyIns * game.buyInAmount)}</p>
                                   </div>
                                 </div>
@@ -169,7 +175,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                               {gameTablePositions[game.gameId] && gameTablePositions[game.gameId]!.positions.length > 0 && (
                                 <div className="lg:w-48 xl:w-64 opacity-60 group-hover:opacity-100 transition-opacity">
                                   <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
-                                    <ShieldCheck className="h-3 w-3" /> Peak Position
+                                    <ShieldCheck className="h-3 w-3" /> Best Position
                                   </p>
                                   <div className="scale-[0.85] origin-top-left">
                                     <PokerTableView positions={gameTablePositions[game.gameId]!.positions} />
@@ -184,7 +190,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                   ) : (
                     <div className="py-20 text-center border border-dashed rounded-2xl bg-muted/50">
                       <Info className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">No archived sessions found for this participant.</p>
+                      <p className="text-sm text-muted-foreground">No game history found for this player.</p>
                     </div>
                   )}
                 </div>
@@ -192,7 +198,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
             ) : (
               <div className="py-24 text-center border border-dashed rounded-2xl bg-muted/50">
                 <User className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Select a participant to synchronize performance data.</p>
+                <p className="text-sm text-muted-foreground">Select a player to see performance data.</p>
               </div>
             )}
           </div>

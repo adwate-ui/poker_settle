@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { GamePlayer } from "@/types/poker";
 import { formatIndianNumber, formatProfitLoss, cn } from "@/lib/utils";
@@ -39,10 +40,14 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
               className="flex-shrink-0 border border-border"
             />
             <div className="min-w-0">
-              <h4 className="font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate">
+              <Link
+                to={gamePlayer.player.id ? `/players/${gamePlayer.player.id}` : '#'}
+                onClick={(e) => e.stopPropagation()}
+                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate block"
+              >
                 {gamePlayer.player.name}
-              </h4>
-              <p className="text-3xs font-luxury text-muted-foreground/60 uppercase tracking-tighter">Participant Portfolio</p>
+              </Link>
+              <p className="text-3xs font-luxury text-muted-foreground/60 uppercase tracking-tighter">Player Details</p>
             </div>
           </div>
           <Badge variant="stats">
@@ -53,18 +58,18 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame = false 
         {/* Asset Details */}
         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
           <div className="space-y-1">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Stake</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Wallet className="h-2.5 w-2.5" /> Total Buy-in</p>
             <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(totalBuyIns)}</p>
           </div>
           <div className="space-y-1 text-right">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Total Assets</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 flex items-center justify-end gap-1.5"><Coins className="h-2.5 w-2.5" /> Final Stack</p>
             <p className="font-numbers text-sm text-foreground/60">Rs. {formatIndianNumber(finalStack)}</p>
           </div>
         </div>
 
         {/* P&L Result */}
         <div className="pt-3 border-t border-border flex justify-between items-center px-1">
-          <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Executive P&L</span>
+          <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Net P&L</span>
           <Badge
             variant={profitLossStatus === 'profit' ? 'profit' : profitLossStatus === 'loss' ? 'loss' : 'default'}
           >

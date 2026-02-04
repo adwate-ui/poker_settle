@@ -114,7 +114,7 @@ const PlayersHistory = () => {
           </div>
           <CardTitle className="text-3xl font-luxury mb-2">No Players Found</CardTitle>
           <CardDescription>
-            You haven't registered any participants. Add players during game setup to track their lifelong performance.
+            You haven't registered any players yet. Add players during game setup to track their lifelong performance.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -195,12 +195,9 @@ const PlayersHistory = () => {
                     <Badge variant="secondary">{player.total_games || 0} Sessions</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={cn(
-                      "font-bold font-numbers",
-                      profit >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive"
-                    )}>
+                    <Badge variant={profit >= 0 ? 'profit' : 'loss'}>
                       {formatProfitLoss(profit)}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -227,7 +224,7 @@ const PlayersHistory = () => {
           <DialogHeader>
             <DialogTitle>Delete Player?</DialogTitle>
             <DialogDescription>
-              This action will permanently purge this player and all their historic sessions from the ledger. This operation is irreversible.
+              This action will permanently delete this player and all their historic sessions from the records. This operation is irreversible.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
