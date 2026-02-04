@@ -175,7 +175,52 @@ const PlayersHistory = () => {
         </CardContent>
       </Card>
 
-      <Card className="overflow-hidden">
+      {/* Mobile Card Layout */}
+      <div className="space-y-3 md:hidden">
+        {sortedPlayers.map((player) => {
+          const profit = player.total_profit || 0;
+          return (
+            <Card
+              key={player.id}
+              className="cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => navigate(`/players/${player.id}`)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <OptimizedAvatar name={player.name} size="md" />
+                    <span className="font-medium font-luxury">{player.name}</span>
+                  </div>
+                  <Badge variant={profit >= 0 ? 'profit' : 'loss'}>
+                    {formatProfitLoss(profit)}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Games Played</p>
+                    <Badge variant="secondary">{player.total_games || 0} Sessions</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletePlayerId(player.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <Card className="overflow-hidden hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -233,6 +278,7 @@ const PlayersHistory = () => {
           </TableBody>
         </Table>
       </Card>
+
 
       <Dialog open={!!deletePlayerId} onOpenChange={(open) => !open && setDeletePlayerId(null)}>
         <DialogContent>

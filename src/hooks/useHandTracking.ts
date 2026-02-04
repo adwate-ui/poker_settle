@@ -53,18 +53,22 @@ export const useHandTracking = () => {
 
   const getNextHandNumber = async (gameId: string): Promise<number> => {
     try {
-      // Get the highest hand number across ALL hands (not just this game)
-      // to ensure cumulative numbering from inception
-      const { data, error } = await supabase
-        .from('poker_hands')
-        .select('hand_number')
-        .order('hand_number', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Call the RPC function to get the true global max (bypassing RLS)
+      // This uses SECURITY DEFINER to see all hands, not just current user's
+      // Note: Type assertion needed as this function isn't in auto-generated types yet
+      const { data, error } = await (supabase.rpc as any)('get_next_hand_number');
 
-      if (error) throw error;
-      return data ? data.hand_number + 1 : 1;
+      if (error) {
+        console.error('Error fetching next hand number via RPC:', error);
+        throw error;
+      }
+
+      // data is the integer returned by the function
+      return data as number;
+
     } catch (error) {
+      console.error('Failed to get next hand number:', error);
+      // Fallback only if absolutely necessary (though this may still conflict)
       return 1;
     }
   };

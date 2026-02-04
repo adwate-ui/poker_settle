@@ -212,17 +212,17 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
         action={
           !readOnly
             ? {
-                label: "Create First Game",
-                onClick: () => navigate("/"),
-              }
+              label: "Create First Game",
+              onClick: () => navigate("/"),
+            }
             : undefined
         }
         secondaryAction={
           !readOnly
             ? {
-                label: "Add Players",
-                onClick: () => navigate("/players"),
-              }
+              label: "Add Players",
+              onClick: () => navigate("/players"),
+            }
             : undefined
         }
       />
@@ -290,7 +290,66 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
         </CardContent>
       </Card>
 
-      <Card className="overflow-hidden">
+      {/* Mobile Card Layout */}
+      <div className="space-y-3 md:hidden">
+        {filteredAndSortedGames.map((game) => {
+          const playerData = game.game_players.find((gp) => gp.player_name === selectedPlayer);
+          return (
+            <Card
+              key={game.id}
+              className="cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => handleNavigate(game.id)}
+              onMouseEnter={() => prefetch(game.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-sm">
+                    {format(new Date(game.date), "MMM d, yyyy")}
+                  </span>
+                  <Badge variant="secondary">{game.player_count} players</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Buy-in</p>
+                    <p className="font-body">{formatCurrency(game.buy_in_amount)}</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-xs text-muted-foreground">Total Pot</p>
+                    <p className="font-body font-bold text-primary">{formatCurrency(game.total_pot)}</p>
+                  </div>
+                </div>
+                {selectedPlayer !== "all" && playerData && (
+                  <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Your P&L</span>
+                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'}>
+                      {formatProfitLoss(playerData.net_amount)}
+                    </Badge>
+                  </div>
+                )}
+                {selectedPlayer === "all" && !readOnly && (
+                  <div className="mt-3 pt-3 border-t border-border/50 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteGameId(game.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <Card className="overflow-hidden hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -360,6 +419,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           </TableBody>
         </Table>
       </Card>
+
 
       {!readOnly && (
         <Dialog open={!!deleteGameId} onOpenChange={(open) => !open && setDeleteGameId(null)}>
