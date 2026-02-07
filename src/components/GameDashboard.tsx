@@ -529,7 +529,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <div className="flex gap-1">
-                  {[0, 1, 2].map((i) => (
+                  {[0, 1, 2, 3].map((i) => (
                     <div
                       key={i}
                       className={cn(
@@ -606,26 +606,83 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CarouselItem>
 
-                  {/* Slide 2: Actions */}
+                  {/* Slide 2: Buy-in Tracking */}
                   <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
-                    <div className="p-2 space-y-6 pb-20">
+                    <div className="p-4 space-y-6 pb-20">
+                      <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+                        <Plus className="h-5 w-5 text-primary" />
+                        <h3 className="text-lg font-luxury uppercase tracking-widest text-foreground">Buy-in Tracking</h3>
+                      </div>
                       <BuyInManagementTable
                         gamePlayers={gamePlayers}
                         buyInAmount={currentGame.buy_in_amount}
                         onAddBuyIn={handleAddBuyIn}
                         fetchBuyInHistory={fetchBuyInHistory}
                       />
-                      <div className="border-t border-white/5 pt-6">
-                        <FinalStackManagement
-                          gamePlayers={gamePlayers}
-                          onUpdateFinalStack={handleUpdateFinalStack}
-                          smallBlind={currentGame.small_blind}
-                        />
+                    </div>
+                  </CarouselItem>
+
+                  {/* Slide 3: Final Stack Ledger & Game End */}
+                  <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
+                    <div className="p-4 space-y-6 pb-20">
+                      <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+                        <DollarSign className="h-5 w-5 text-primary" />
+                        <h3 className="text-lg font-luxury uppercase tracking-widest text-foreground">Final Stack Ledger</h3>
+                      </div>
+
+                      <FinalStackManagement
+                        gamePlayers={gamePlayers}
+                        onUpdateFinalStack={handleUpdateFinalStack}
+                        smallBlind={currentGame.small_blind}
+                      />
+
+                      {/* End Game Logic & Discrepancies */}
+                      <div className="space-y-5 pt-4">
+                        {hasDiscrepancies && (
+                          <Card className="bg-state-error/10 border-state-error/20 p-6 space-y-4">
+                            <div className="flex items-center gap-3 border-b border-state-error/20 pb-4">
+                              <ShieldCheck className="h-5 w-5 text-state-error" />
+                              <h3 className="text-state-error font-luxury uppercase tracking-widest text-sm">Action Required</h3>
+                            </div>
+                            <div className="space-y-3">
+                              {!isStackBalanced && (
+                                <p className="text-xs text-state-error/80 leading-relaxed font-medium">
+                                  <span className="font-bold uppercase tracking-wider block mb-1 opacity-80">Chip Mismatch</span>
+                                  The final chips on the table ({formatCurrency(totalFinalStack)}) do not match the total buy-ins ({formatCurrency(totalBuyIns)}).
+                                </p>
+                              )}
+                              {!isBalanced && (
+                                <p className="text-xs text-state-error/80 leading-relaxed font-medium">
+                                  <span className="font-bold uppercase tracking-wider block mb-1 opacity-80">Accounting Mismatch</span>
+                                  The total winnings do not equal the total losses. The numbers don't add up to zero.
+                                </p>
+                              )}
+                            </div>
+                          </Card>
+                        )}
+
+                        <Button
+                          onClick={handleCompleteGame}
+                          disabled={!canCompleteGame || isCompletingGame}
+                          className={cn(
+                            "w-full h-20 text-black font-black text-xl tracking-tighter rounded-2xl transition-all relative overflow-hidden group",
+                            canCompleteGame && !isCompletingGame
+                              ? 'bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 bg-[length:200%_100%] animate-shimmer hover:shadow-[0_0_50px_rgba(212,184,60,0.3)] active:scale-95'
+                              : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
+                          )}
+                        >
+                          {isCompletingGame ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
+                            <div className="flex items-center justify-center gap-4">
+                              <Trophy className="w-7 h-7 fill-current" />
+                              <span className="font-luxury uppercase tracking-[0.2em] text-lg">End Game</span>
+                            </div>
+                          )}
+                        </Button>
                       </div>
                     </div>
                   </CarouselItem>
 
-                  {/* Slide 3: Info & Settlements */}
+                  {/* Slide 4: Players, Manual Adjustments, Settlements */}
                   <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
                     <div className="p-4 space-y-6 pb-24">
                       <div className="flex justify-between items-center mb-4">
@@ -650,32 +707,89 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         ))}
                       </div>
 
-                      {currentGame.settlements && currentGame.settlements.length > 0 && (
-                        <div className="space-y-3 pt-6 border-t border-border">
+                      {/* Manual Adjustments Section */}
+                      <div className="space-y-3 pt-6 border-t border-border">
+                        <div className="flex items-center justify-between">
                           <h3 className="text-xs font-luxury text-muted-foreground uppercase tracking-widest">Manual Adjustments</h3>
-                          <div className="space-y-2">
-                            {currentGame.settlements.map((transfer, index) => (
-                              <div key={index} className="flex items-center justify-between p-3 bg-accent/5 rounded-xl border border-border">
-                                <span className="text-[10px] font-luxury text-foreground uppercase tracking-wide">
-                                  {transfer.from} pays {transfer.to}
-                                </span>
-                                <div className="flex items-center gap-3">
-                                  <span className="font-numbers text-xs text-foreground">{formatCurrency(transfer.amount)}</span>
-                                  <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-7 w-7 text-red-500/50 hover:text-red-500">
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
+                          {!showManualTransfer && (
+                            <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(true)} className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider">
+                              <Plus className="w-3 h-3 mr-1" /> Add
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Add Manual Transfer Form (Inline) */}
+                        {showManualTransfer && (
+                          <Card className="p-4 space-y-4 animate-in slide-in-from-right-4 duration-300 bg-accent/5 border-border">
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">From</Label>
+                                  <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
+                                    <SelectTrigger className="h-8 text-xs">
+                                      <SelectValue placeholder="Select..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {gamePlayers.map(gp => (
+                                        <SelectItem key={`from-${gp.id}`} value={gp.player.name}>{gp.player.name}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">To</Label>
+                                  <Select value={newTransferTo} onValueChange={setNewTransferTo}>
+                                    <SelectTrigger className="h-8 text-xs">
+                                      <SelectValue placeholder="Select..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {gamePlayers.map(gp => (
+                                        <SelectItem key={`to-${gp.id}`} value={gp.player.name}>{gp.player.name}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                              <div className="space-y-1">
+                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={newTransferAmount}
+                                  onChange={(e) => setNewTransferAmount(e.target.value)}
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(false)} className="flex-1 h-8 text-xs">Cancel</Button>
+                              <Button size="sm" onClick={addManualTransfer} className="flex-1 h-8 text-xs bg-primary text-primary-foreground">Save</Button>
+                            </div>
+                          </Card>
+                        )}
+
+                        <div className="space-y-2">
+                          {currentGame.settlements && currentGame.settlements.map((transfer, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-accent/5 rounded-xl border border-border">
+                              <span className="text-[10px] font-luxury text-foreground uppercase tracking-wide">
+                                {transfer.from} pays {transfer.to}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                <span className="font-numbers text-xs text-foreground">{formatCurrency(transfer.amount)}</span>
+                                <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-7 w-7 text-red-500/50 hover:text-red-500">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
 
                       <div className="space-y-4 pt-6">
                         {settlements.length > 0 && (
                           <Card className={cn("border-border shadow-none bg-accent/2", isMobile ? "border-0 shadow-none bg-transparent" : "")}>
                             <CardHeader className={cn(isMobile ? "py-2 px-1" : "py-4 px-4")}>
-                              <CardTitle className={cn("text-sm uppercase tracking-widest font-luxury", isMobile ? "text-xs" : "")}>Settlement</CardTitle>
+                              <CardTitle className={cn("text-sm uppercase tracking-widest font-luxury", isMobile ? "text-xs" : "")}>Settlements</CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
                               <div className="overflow-x-auto w-full">
@@ -707,17 +821,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             </CardContent>
                           </Card>
                         )}
-
-                        <Button
-                          onClick={handleCompleteGame}
-                          disabled={!canCompleteGame || isCompletingGame}
-                          className={cn(
-                            "w-full h-14 rounded-xl font-luxury uppercase tracking-widest text-[11px] transition-all",
-                            canCompleteGame ? "bg-gradient-to-r from-gold-600 to-gold-400 text-black shadow-lg" : "bg-accent/5 text-muted-foreground/20"
-                          )}
-                        >
-                          {isCompletingGame ? <Loader2 className="h-5 w-5 animate-spin" /> : 'End Game'}
-                        </Button>
                       </div>
                     </div>
                   </CarouselItem>
