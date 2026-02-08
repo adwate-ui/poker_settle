@@ -375,10 +375,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     const allSettlements = [...(currentGame.settlements || []), ...settlements];
 
     try {
+      // 1. First, complete the game in the database
       await completeGame(currentGame.id, allSettlements);
       toast.success("Game finalized successfully");
 
-      // Send WhatsApp summaries asynchronously
+      // 2. Then, attempt to send WhatsApp summaries (non-blocking for navigation)
       try {
         toast.info("WhatsApp summaries are being sent...");
 
@@ -402,15 +403,18 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         );
       } catch (wsError) {
         console.error("Failed to send WhatsApp summaries:", wsError);
-        // We don't block navigation on WhatsApp failure, just log it
+        // We log the error but don't show an error toast to the user here 
+        // because the primary goal (game completion) was successful
       }
 
+      // 3. Always navigate to the game detail page after success
       navigate(`/games/${currentGame.id}`);
     } catch (error) {
+      console.error("Error completing game:", error);
       toast.error(ErrorMessages.game.complete(error));
       setIsCompletingGame(false);
     }
-  }, [currentGame, settlements, completeGame, navigate, isCompletingGame, createOrGetSharedLink, gamePlayers, players]);
+  }, [currentGame, settlements, completeGame, navigate, isCompletingGame, createOrGetSharedLink, gamePlayers]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {

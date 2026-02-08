@@ -3,8 +3,6 @@ import { Game, Player, GamePlayer, Settlement, SeatPosition } from "@/types/poke
 import { SupabaseClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { z } from "zod";
-import { generateShortCode } from "@/lib/shareUtils";
-import { sendCombinedGameSettlementNotifications } from "@/services/emailNotifications";
 
 import { CurrencyConfig } from "@/config/localization";
 
@@ -103,7 +101,7 @@ export const completeGameApi = async (
     gameId: string,
     settlements: Settlement[],
     createConfirmations: (gameId: string, settlements: Settlement[]) => Promise<void>
-) => {
+): Promise<Game> => {
     // Fetch the latest game data
     const { data: gameData, error: gameError } = await supabase
         .from("games")
@@ -127,13 +125,15 @@ export const completeGameApi = async (
         throw new Error("Total winnings and losses must sum to zero before completing the game");
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("games")
         .update({
             is_complete: true,
             settlements: settlements as any
         })
-        .eq("id", gameId);
+        .eq("id", gameId)
+        .select()
+        .single();
 
     if (error) throw error;
 
@@ -144,60 +144,7 @@ export const completeGameApi = async (
         console.error('Failed to create settlement confirmations:', confirmationError);
     }
 
-    // Send email notifications
-    try {
-        let gameToken = '';
-
-        // Check for existing shared link
-        const { data: existingLink, error: fetchLinkError } = await supabase
-            .from('shared_links')
-            .select('access_token')
-            .eq('user_id', userId)
-            .eq('resource_type', 'game')
-            .eq('resource_id', gameId)
-            .maybeSingle();
-
-        if (fetchLinkError) {
-            console.error('Error fetching shared link:', fetchLinkError);
-        }
-
-        if (existingLink) {
-            gameToken = existingLink.access_token;
-        } else {
-            const shortCode = generateShortCode();
-            const { data: newLink, error: createError } = await supabase
-                .from('shared_links')
-                .insert({
-                    user_id: userId,
-                    resource_type: 'game',
-                    resource_id: gameId,
-                    short_code: shortCode,
-                })
-                .select('access_token')
-                .single();
-
-            if (createError) {
-                console.error('Error creating shared link:', createError);
-            } else if (newLink) {
-                gameToken = newLink.access_token;
-            }
-        }
-
-        // Send combined notifications
-        const notificationResult = await sendCombinedGameSettlementNotifications(
-            allGamePlayers as GamePlayer[],
-            settlements,
-            gameId,
-            gameData.date,
-            gameData.buy_in_amount,
-            gameToken
-        );
-
-        return notificationResult;
-    } catch (notificationError) {
-        console.error('Failed to send email notifications:', notificationError);
-        throw notificationError;
-    }
+    return data as any;
 };
 
 export const updateGamePlayerApi = async (playerGameId: string, updates: Partial<GamePlayer>): Promise<void> => {

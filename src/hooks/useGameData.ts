@@ -186,37 +186,21 @@ export const useGameData = () => {
     if (!user) throw new Error("User not authenticated");
 
     try {
-      const notificationResult = await completeGameApi(
+      await completeGameApi(
         user.id,
         gameId,
         settlements,
         createConfirmations
       );
 
-      if (notificationResult.sent > 0) {
-        toast.success(`Game completed! ${notificationResult.sent} email notifications sent.`);
-      } else if (notificationResult.failed > 0 && notificationResult.errors.length > 0) {
-        const actualErrors = notificationResult.errors.filter(e => !e.includes('No email address'));
-        if (actualErrors.length > 0) {
-          console.warn('Some email notifications failed:', actualErrors);
-          toast.warning('Game completed! Some email notifications failed to send.');
-        } else {
-          toast.success('Game completed!');
-        }
-      } else {
-        toast.success('Game completed!');
-      }
+      toast.success('Game completed successfully!');
 
       // Refresh games list
       await fetchGames();
     } catch (error: any) {
-      if (error.message?.includes('email notifications failed')) {
-        toast.warning('Game completed! But email notifications failed to send.');
-      } else {
-        console.error('Error completing game:', error);
-        toast.error(ErrorMessages.game.complete(error));
-        throw error;
-      }
+      console.error('Error completing game:', error);
+      toast.error(ErrorMessages.game.complete(error));
+      throw error;
     }
   };
 
@@ -278,7 +262,7 @@ export const useGameData = () => {
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data as any as Game;
     } catch (error) {
       console.error("Error fetching incomplete game:", error);
       return null;
