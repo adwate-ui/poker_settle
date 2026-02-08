@@ -82,7 +82,7 @@ export const usePlayerManagement = () => {
           const playerToken = await getOrCreatePlayerShareToken(user.id, data.id);
           const playerLink = generatePlayerShareLink(data.id, playerToken);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
-          
+
           if (notificationResult.success) {
             toast.success(`${data.name} added! Welcome email sent.`);
           } else {
@@ -133,24 +133,30 @@ export const usePlayerManagement = () => {
         const updateData: {
           name?: string;
           email?: string | null;
+          phone_number?: string | null;
           upi_id?: string | null;
-          payment_preference?: 'upi' | 'cash';
+          payment_preference?: string;
         } = {};
-        
+
         if (playerData.name) {
           updateData.name = playerData.name;
         }
-        
+
         // Allow clearing email by passing empty string -> convert to null
         if (playerData.email !== undefined) {
           updateData.email = playerData.email || null;
         }
-        
+
+        // Allow clearing phone_number by passing empty string -> convert to null
+        if (playerData.phone_number !== undefined) {
+          updateData.phone_number = playerData.phone_number || null;
+        }
+
         // Allow clearing upi_id by passing empty string -> convert to null
         if (playerData.upi_id !== undefined) {
           updateData.upi_id = playerData.upi_id || null;
         }
-        
+
         // Allow updating payment_preference
         if (playerData.payment_preference !== undefined) {
           updateData.payment_preference = playerData.payment_preference;
@@ -172,7 +178,7 @@ export const usePlayerManagement = () => {
           const playerToken = await getOrCreatePlayerShareToken(user.id, data.id);
           const playerLink = generatePlayerShareLink(data.id, playerToken);
           const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
-          
+
           if (notificationResult.success) {
             toast.success(`${data.name} updated! Welcome email sent.`);
           } else {

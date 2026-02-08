@@ -6,7 +6,7 @@ export const CurrencyConfig = {
 
 export const PaymentMethodConfig = {
     digital: {
-        key: "digital",
+        key: "upi",
         label: "UPI/Venmo",
     },
     cash: {

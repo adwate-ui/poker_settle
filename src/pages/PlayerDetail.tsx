@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers, History, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Phone, CreditCard, Layers, History, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatCurrency } from "@/utils/currencyUtils";
@@ -315,9 +315,9 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-5 rounded-lg border border-border bg-accent/5 space-y-3">
                     <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
-                      <Mail className="h-3 w-3" /> Communication
+                      <Phone className="h-3 w-3" /> WhatsApp
                     </div>
-                    <p className="text-sm text-foreground font-medium truncate">{player.email || "Not Disclosed"}</p>
+                    <p className="text-sm text-foreground font-medium truncate">{player.phone_number || "Not Linked"}</p>
                   </div>
                   <div className="p-5 rounded-lg border border-border bg-accent/5 space-y-3">
                     <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">

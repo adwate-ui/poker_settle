@@ -36,6 +36,7 @@ interface PlayerFormDialogProps {
 export interface PlayerFormData {
   name: string;
   phone_number?: string;
+  email?: string;
   upi_id?: string;
   payment_preference?: string;
 }
@@ -177,6 +178,7 @@ export const PlayerFormDialog = ({
       const playerData: PlayerFormData = {
         name: name.trim(),
         phone_number: phoneNumber.trim() || '',
+        email: initialData?.email || '', // Keep existing email if any
         upi_id: upiId.trim() || '',
         payment_preference: paymentPreference,
       };
