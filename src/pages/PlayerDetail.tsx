@@ -379,7 +379,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                 Final Stack {getSortIcon("final_stack")}
               </div>
             </TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -408,7 +408,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                 <TableCell className="font-numbers text-muted-foreground">
                   <ResponsiveCurrency amount={game.final_stack} />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell>
                   <Button
                     variant="outline"
                     size={isMobile ? "icon" : "sm"}

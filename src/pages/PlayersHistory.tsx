@@ -226,23 +226,23 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_games")}
-              className="text-center cursor-pointer"
+              className="cursor-pointer"
             >
-              <div className="flex items-center justify-center gap-1">
+              <div className="flex items-center gap-1">
                 Games
                 <ArrowUpDown className="h-3 w-3" />
               </div>
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_profit")}
-              className="text-right cursor-pointer"
+              className="cursor-pointer"
             >
-              <div className="flex items-center justify-end gap-1">
+              <div className="flex items-center gap-1">
                 Total Net
                 <ArrowUpDown className="h-3 w-3" />
               </div>
             </TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -263,13 +263,13 @@ const PlayersHistory = () => {
                     <ResponsiveName name={player.name} className="font-medium" />
                   </div>
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell>
                   <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
                     {player.total_games || 0}
                     <span className="sm:inline hidden"> Sessions</span>
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell>
                   <Badge
                     variant={profit >= 0 ? "profit" : "loss"}
                     className="font-medium whitespace-nowrap font-numbers px-1.5"
@@ -277,7 +277,7 @@ const PlayersHistory = () => {
                     <ResponsiveCurrency amount={profit} />
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell>
                   <Button
                     variant="ghost"
                     size={isMobile ? "icon" : "icon-sm"}

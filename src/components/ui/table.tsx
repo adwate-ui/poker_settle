@@ -10,7 +10,7 @@ const Table = React.forwardRef<
   }
 >(({ className, tableClassName, layout = "fixed", variant = "default", ...props }, ref) => (
   <div className={cn(
-    "relative w-full overflow-hidden rounded-xl border border-border/50",
+    "relative w-full overflow-y-auto overflow-x-hidden rounded-xl border border-border/50",
     variant === "default" && "bg-card/30 backdrop-blur-sm shadow-2xl",
     variant === "ghost" && "border-none bg-transparent shadow-none",
     className
@@ -83,16 +83,12 @@ TableRow.displayName = "TableRow"
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
-  React.ThHTMLAttributes<HTMLTableCellElement> & {
-    align?: 'left' | 'center' | 'right';
-  }
->(({ className, align = 'left', ...props }, ref) => (
+  React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
       "h-10 px-2 sm:px-4 truncate whitespace-nowrap text-left align-middle font-semibold font-luxury text-foreground uppercase tracking-widest text-xs [&:has([role=checkbox])]:pr-0",
-      align === 'center' && "text-center",
-      align === 'right' && "text-right",
       className
     )}
     {...props}
@@ -104,16 +100,13 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement> & {
     isNumeric?: boolean;
-    align?: 'left' | 'center' | 'right';
   }
->(({ className, isNumeric, align = 'left', ...props }, ref) => (
+>(({ className, isNumeric, ...props }, ref) => (
   <td
     ref={ref}
     className={cn(
-      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-medium font-body text-xs [&:has([role=checkbox])]:pr-0",
+      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-medium font-body text-xs [&:has([role=checkbox])]:pr-0 text-left",
       isNumeric && "font-numbers",
-      align === 'center' && "text-center",
-      align === 'right' && "text-right",
       className
     )}
     {...props}
