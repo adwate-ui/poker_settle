@@ -103,7 +103,7 @@ export const BuyInManagementTable = ({
             <TableHead className="w-1/3">
               <span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span>
             </TableHead>
-            <TableHead className="w-1/6 text-center">
+            <TableHead className="w-1/6">
               <span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span>
             </TableHead>
             <TableHead className="w-1/4">
@@ -111,7 +111,7 @@ export const BuyInManagementTable = ({
             </TableHead>
             <TableHead className="w-1/8">
             </TableHead>
-            <TableHead className="w-1/8 text-right">
+            <TableHead className="w-1/8">
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -124,13 +124,13 @@ export const BuyInManagementTable = ({
               <TableCell className="font-medium truncate text-foreground">
                 <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="text-center font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
                 {gamePlayer.buy_ins}
               </TableCell>
-              <TableCell className="text-right font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell>
                 <Button
                   onClick={() => {
                     setSelectedPlayerId(gamePlayer.id);
@@ -145,7 +145,7 @@ export const BuyInManagementTable = ({
                   <Plus className="h-4 w-4" />
                 </Button>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {fetchBuyInHistory && (
                   <BuyInHistoryDialog
                     gamePlayerId={gamePlayer.id}

@@ -111,7 +111,7 @@ export const FinalStackManagement = ({
               Final Stack
             </TableHead>
             <TableHead className="w-1/6" />
-            <TableHead className="w-1/6 text-right" />
+            <TableHead className="w-1/6" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -125,7 +125,7 @@ export const FinalStackManagement = ({
               <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.final_stack || 0)}
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell>
                 <Button
                   onClick={() => handleStartEdit(gamePlayer)}
                   variant="outline"
@@ -139,7 +139,7 @@ export const FinalStackManagement = ({
                   <Edit className="h-4 w-4" />
                 </Button>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <ChipScanner
                   onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
                   triggerProps={{

@@ -788,7 +788,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                 <TableRow className={cn(isMobile ? "h-8" : "")}>
                                   <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[30%]" : "h-9")}>From</TableHead>
                                   <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[30%]" : "h-9")}>To</TableHead>
-                                  <TableHead className={cn("px-4 text-right", isMobile ? "h-8 px-2 w-[40%]" : "h-9")}>Amount</TableHead>
+                                  <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[40%]" : "h-9")}>Amount</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -800,7 +800,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                     <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2" : "py-2 px-4 max-w-[80px]")}>
                                       {s.to}
                                     </TableCell>
-                                    <TableCell className={cn("text-right font-numbers whitespace-nowrap", isMobile ? "py-1 px-2" : "py-2 px-4")}>
+                                    <TableCell className={cn("font-medium font-numbers", isMobile ? "py-1 px-2" : "py-2 px-4")}>
                                       {formatCurrency(s.amount)}
                                     </TableCell>
                                   </TableRow>
