@@ -435,12 +435,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   );
 
   const totalWinnings = useMemo(() =>
-    gamePlayers.reduce((sum, gp) => sum + Math.max(0, gp.net_amount || 0), 0),
+    gamePlayers.reduce((sum, gp) => sum + Math.max(0, Math.round(gp.net_amount || 0)), 0),
     [gamePlayers]
   );
 
   const totalLosses = useMemo(() =>
-    gamePlayers.reduce((sum, gp) => sum + Math.min(0, gp.net_amount || 0), 0),
+    gamePlayers.reduce((sum, gp) => sum + Math.min(0, Math.round(gp.net_amount || 0)), 0),
     [gamePlayers]
   );
 
@@ -450,12 +450,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
   );
 
   const isBalanced = useMemo(() =>
-    Math.abs(totalWinnings + totalLosses) < 0.01,
+    Math.abs(Math.round(totalWinnings + totalLosses)) === 0,
     [totalWinnings, totalLosses]
   );
 
   const isStackBalanced = useMemo(() =>
-    Math.abs(totalFinalStack - totalBuyIns) < 0.01,
+    Math.abs(Math.round(totalFinalStack - totalBuyIns)) === 0,
     [totalFinalStack, totalBuyIns]
   );
 
@@ -829,35 +829,40 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </div>
 
             <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Player</DialogTitle>
-                  <DialogDescription>
+              <DialogContent className="p-6">
+                <DialogHeader className="p-0 mb-6">
+                  <DialogTitle className="text-xl font-luxury uppercase tracking-widest">Add Player</DialogTitle>
+                  <DialogDescription className="text-3xs font-luxury uppercase tracking-widest text-muted-foreground mt-1">
                     Search for an existing player or create a new one.
                   </DialogDescription>
                 </DialogHeader>
                 <Tabs defaultValue="existing" className="space-y-6">
-                  <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
-                    <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search</TabsTrigger>
-                    <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New</TabsTrigger>
+                  <TabsList className="bg-muted border border-border p-1 h-10 rounded-lg grid grid-cols-2">
+                    <TabsTrigger value="existing" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">Search</TabsTrigger>
+                    <TabsTrigger value="new" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">New</TabsTrigger>
                   </TabsList>
                   <TabsContent value="existing" className="space-y-6">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
                       <Input
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         variant="luxury"
-                        className="pl-10"
+                        className="pl-9 h-10"
                       />
                     </div>
                     <ScrollArea className="h-[300px]">
                       <div className="space-y-2">
                         {availablePlayers.map(p => (
-                          <Button key={p.id} onClick={() => addExistingPlayer(p)} variant="ghost" className="w-full p-4 h-auto rounded-xl border border-border bg-accent/5 justify-start gap-3">
+                          <Button
+                            key={p.id}
+                            onClick={() => addExistingPlayer(p)}
+                            variant="ghost"
+                            className="w-full p-3 h-auto rounded-lg border border-border bg-accent/5 justify-start gap-3"
+                          >
                             <OptimizedAvatar name={p.name} size="sm" />
-                            <span className="uppercase text-xs font-medium">{p.name}</span>
+                            <span className="uppercase text-[10px] font-luxury tracking-widest">{p.name}</span>
                           </Button>
                         ))}
                       </div>
@@ -869,11 +874,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       value={newPlayerName}
                       onChange={(e) => setNewPlayerName(e.target.value)}
                       variant="luxury"
+                      className="h-10"
                     />
                     <Button
                       onClick={addNewPlayer}
                       disabled={!newPlayerName.trim() || isCreatingPlayer}
-                      className="w-full h-14 font-bold uppercase tracking-widest text-[11px] rounded-xl"
+                      variant="luxury"
+                      size="lg"
+                      className="w-full"
                     >
                       Add New Player
                     </Button>
@@ -1009,7 +1017,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className={cn("animate-in slide-in-from-top-2 duration-300", isMobile ? "p-4" : "p-6")}>
                       <BuyInManagementTable
                         gamePlayers={gamePlayers}
                         buyInAmount={currentGame.buy_in_amount}
@@ -1034,7 +1042,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className={cn("animate-in slide-in-from-top-2 duration-300", isMobile ? "p-4" : "p-6")}>
                       <FinalStackManagement
                         gamePlayers={gamePlayers}
                         onUpdateFinalStack={handleUpdateFinalStack}
@@ -1072,29 +1080,30 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             Add Player
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-[90vw] sm:max-w-xl p-0 overflow-hidden">
-                          <DialogHeader className="p-8 border-b border-border">
-                            <DialogTitle className="text-xl font-bold uppercase tracking-widest">Add New Player</DialogTitle>
-                            <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">Select existing or add new.</DialogDescription>
+                        <DialogContent className="max-w-[90vw] sm:max-w-xl p-6">
+                          <DialogHeader className="p-0 mb-6">
+                            <DialogTitle className="text-xl font-luxury uppercase tracking-widest">Add New Player</DialogTitle>
+                            <DialogDescription className="text-3xs font-luxury uppercase tracking-widest text-muted-foreground mt-1">Select existing or add new.</DialogDescription>
                           </DialogHeader>
 
-                          <div className="p-8">
+                          <div className="space-y-6">
                             <Tabs defaultValue="existing" className="space-y-8">
-                              <TabsList className="bg-muted border border-border p-1 h-12 rounded-xl grid grid-cols-2">
-                                <TabsTrigger value="existing" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Search Existing</TabsTrigger>
-                                <TabsTrigger value="new" className="text-label data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">New Player</TabsTrigger>
+                              <TabsList className="bg-muted border border-border p-1 h-10 rounded-lg grid grid-cols-2">
+                                <TabsTrigger value="existing" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">Search Existing</TabsTrigger>
+                                <TabsTrigger value="new" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">New Player</TabsTrigger>
                               </TabsList>
 
                               <TabsContent value="existing" className="space-y-6 animate-in fade-in duration-300">
                                 <div className="relative group">
-                                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Search className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                                   </div>
                                   <Input
-                                    placeholder="Search players..."
+                                    placeholder="SEARCH PLAYERS..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="h-12 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all tracking-widest text-[11px] uppercase text-foreground placeholder:text-muted-foreground/30"
+                                    variant="luxury"
+                                    className="pl-10 h-11"
                                   />
                                 </div>
 
@@ -1105,12 +1114,12 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                         <button
                                           key={player.id}
                                           onClick={() => addExistingPlayer(player)}
-                                          className="w-full text-left p-4 rounded-2xl border border-border bg-accent/2 hover:bg-primary/5 hover:border-primary/20 transition-all group flex items-center gap-4"
+                                          className="w-full text-left p-4 rounded-lg border border-border bg-accent/2 hover:bg-primary/5 hover:border-primary/20 transition-all group flex items-center gap-4"
                                         >
                                           <OptimizedAvatar name={player.name} size="md" className="ring-1 ring-primary/20" />
                                           <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                              <span className="text-sm font-bold uppercase tracking-widest truncate">{player.name}</span>
+                                              <span className="text-xs font-luxury uppercase tracking-widest truncate">{player.name}</span>
                                               {player.total_games && player.total_games > 10 && <Star className="h-3 w-3 text-primary fill-current" />}
                                             </div>
                                             <div className="flex gap-2.5 mt-1.5">
@@ -1128,8 +1137,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                         </button>
                                       ))
                                     ) : (
-                                      <div className="py-20 text-center border border-dashed border-black/10 dark:border-white/10 rounded-2xl bg-black/5 dark:bg-white/2">
-                                        <p className="text-[10px] font-luxury uppercase tracking-[0.2em] text-black/20 dark:text-white/20">No players found.</p>
+                                      <div className="py-20 text-center border border-dashed border-black/10 dark:border-white/10 rounded-lg bg-black/5 dark:bg-white/2">
+                                        <p className="text-3xs font-luxury uppercase tracking-widest text-black/20 dark:text-white/20">No players found.</p>
                                       </div>
                                     )}
                                   </div>
@@ -1138,12 +1147,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                               <TabsContent value="new" className="space-y-8 animate-in fade-in duration-300">
                                 <div className="space-y-3">
-                                  <Label className="text-[10px] uppercase font-luxury tracking-[0.2em] text-muted-foreground ml-1">Player Name</Label>
+                                  <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground ml-1">Player Name</Label>
                                   <Input
-                                    placeholder="Enter name"
+                                    placeholder="ENTER NAME"
                                     value={newPlayerName}
                                     onChange={(e) => setNewPlayerName(e.target.value)}
-                                    className="h-14 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-widest text-[13px] uppercase text-foreground placeholder:text-muted-foreground/30"
+                                    variant="luxury"
+                                    className="h-11"
                                     onKeyPress={(e) => e.key === 'Enter' && !isCreatingPlayer && addNewPlayer()}
                                     autoFocus
                                   />
@@ -1151,7 +1161,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                 <Button
                                   onClick={addNewPlayer}
                                   disabled={!newPlayerName.trim() || isCreatingPlayer}
-                                  className="w-full h-14 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black font-luxury uppercase tracking-widest text-[11px] rounded-xl shadow-xl shadow-gold-900/10 transition-all"
+                                  variant="luxury"
+                                  size="lg"
+                                  className="w-full"
                                 >
                                   {isCreatingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Player'}
                                 </Button>
@@ -1185,38 +1197,40 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       <h3 className="text-[10px] font-luxury text-foreground uppercase tracking-[0.2em]">Manual Adjustments</h3>
                     </div>
                   </div>
-                  <Table className="table-fixed w-full text-left border-collapse">
-                    <TableHeader>
-                      <TableRow className="border-b border-white/10 hover:bg-transparent">
-                        <TableHead className="w-[35%] pl-4 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">From</TableHead>
-                        <TableHead className="w-[35%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
-                        <TableHead className="w-[30%] pr-4 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amt</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {currentGame.settlements.map((transfer, index) => (
-                        <TableRow key={index} className="border-b border-white/5 hover:bg-white/5 h-11">
-                          <TableCell className="pl-4 py-1 font-medium text-[11px] truncate text-foreground">
-                            {transfer.from}
-                          </TableCell>
-                          <TableCell className="px-1 py-1 font-medium text-[11px] truncate text-muted-foreground">
-                            {transfer.to}
-                          </TableCell>
-                          <TableCell className="pr-4 py-1 text-right font-numbers text-[11px] whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-2">
-                              <span className="text-foreground">{formatCurrency(transfer.amount)}</span>
-                              <button
-                                onClick={() => handleDeleteManualTransfer(index)}
-                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500/20 hover:text-red-500 transition-all"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </TableCell>
+                  <div className="max-h-[300px] overflow-auto">
+                    <Table className="table-fixed w-full text-left border-collapse">
+                      <TableHeader className="sticky top-0 z-10 bg-background">
+                        <TableRow className="border-b border-white/10 hover:bg-transparent">
+                          <TableHead className="w-[35%] pl-4 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">From</TableHead>
+                          <TableHead className="w-[35%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
+                          <TableHead className="w-[30%] pr-4 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amt</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {currentGame.settlements.map((transfer, index) => (
+                          <TableRow key={index} className="border-b border-white/5 hover:bg-white/5 h-11">
+                            <TableCell className="pl-4 py-1 font-medium text-[11px] truncate text-foreground">
+                              {transfer.from}
+                            </TableCell>
+                            <TableCell className="px-1 py-1 font-medium text-[11px] truncate text-muted-foreground">
+                              {transfer.to}
+                            </TableCell>
+                            <TableCell className="pr-4 py-1 text-right font-numbers text-[11px] whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="text-foreground">{formatCurrency(transfer.amount)}</span>
+                                <button
+                                  onClick={() => handleDeleteManualTransfer(index)}
+                                  className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500/20 hover:text-red-500 transition-all"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </Card>
               )}
 

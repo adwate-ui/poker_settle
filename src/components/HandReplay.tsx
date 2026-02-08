@@ -6,6 +6,7 @@ import { Play, Pause, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
 import PokerTableView from './PokerTableView';
 import { SeatPosition } from '@/types/poker';
 import PokerCard from './PokerCard';
+import { Separator } from '@/components/ui/separator';
 import confetti from 'canvas-confetti';
 import { formatCurrency } from '@/utils/currencyUtils';
 
@@ -428,8 +429,8 @@ const HandReplay = ({
 
       {/* Community Cards - Separate section with responsive sizes */}
       {communityCards && (
-        <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-border">
-          <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
+        <div className="bg-accent/5 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-border/50 shadow-inner">
+          <div className="flex gap-1.5 items-center flex-wrap">
             {/* Extract and display cards by street */}
             {(() => {
               const allCards = communityCards.match(/.{1,2}/g) || [];
@@ -442,7 +443,7 @@ const HandReplay = ({
                   {/* Flop */}
                   {flopCards.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-label text-muted-foreground/60">Flop</span>
+                      <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">Flop</span>
                       <div className="flex gap-1.5">
                         {flopCards.map((card, idx) => (
                           <React.Fragment key={`flop-${idx}`}>
@@ -457,13 +458,13 @@ const HandReplay = ({
                   {/* Turn */}
                   {turnCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-border"></div>
+                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-border/50" />
                       <div className="flex flex-col gap-1">
-                        <span className="text-label text-muted-foreground/60">Turn</span>
-                        <>
+                        <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">Turn</span>
+                        <div className="flex gap-0.5">
                           <PokerCard card={turnCard} size="sm" className="sm:hidden" />
                           <PokerCard card={turnCard} size="md" className="hidden sm:block" />
-                        </>
+                        </div>
                       </div>
                     </>
                   )}
@@ -471,26 +472,26 @@ const HandReplay = ({
                   {/* River */}
                   {riverCard && (
                     <>
-                      <div className="h-10 sm:h-12 w-px bg-border"></div>
+                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-border/50" />
                       <div className="flex flex-col gap-1">
-                        <span className="text-label text-muted-foreground/60">River</span>
-                        <>
+                        <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">River</span>
+                        <div className="flex gap-0.5">
                           <PokerCard card={riverCard} size="sm" className="sm:hidden" />
                           <PokerCard card={riverCard} size="md" className="hidden sm:block" />
-                        </>
+                        </div>
                       </div>
                     </>
                   )}
                 </>
               );
             })()}
-          </div>
+          </div >
         </div>
       )}
 
       {/* Current Action Display */}
       {currentAction && (
-        <Card className="bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-border shadow-lg animate-fade-in">
+        <Card className="bg-card/50 backdrop-blur-md border border-border/50 shadow-sm animate-fade-in">
           <CardContent className="p-3 sm:p-5">
             {/* Mobile: Single row layout */}
             <div className="md:hidden">
@@ -520,7 +521,7 @@ const HandReplay = ({
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-border/50 flex justify-between items-center">
-                <span className="text-label text-muted-foreground/60">Current Pot</span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold font-numbers">Pot</span>
                 <span className="font-numbers text-sm text-foreground">
                   {formatCurrency(potSize + uncommittedPot)}
                 </span>
@@ -557,7 +558,7 @@ const HandReplay = ({
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
-                <span className="text-label text-muted-foreground/60">Current Pot</span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold font-numbers">Pot</span>
                 <span className="font-numbers text-xl text-foreground">
                   {formatCurrency(potSize + uncommittedPot)}
                 </span>
@@ -637,13 +638,13 @@ const HandReplay = ({
             <div className="text-3xl sm:text-4xl font-bold mb-3 animate-bounce">
               🎉🏆🎉
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+            <div className="text-2xl sm:text-3xl font-luxury font-bold text-primary mb-2 uppercase tracking-tighter">
               {winnerPlayerName} Wins!
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-state-success mt-3">
+            <div className="text-xl sm:text-2xl font-numbers font-bold text-state-success mt-3">
               Winnings: {formatCurrency(winningAmount)}
             </div>
-            <div className="text-sm text-muted-foreground mt-2 italic">
+            <div className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-2 italic">
               Chips moved to winner
             </div>
           </CardContent>

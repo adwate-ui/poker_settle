@@ -13,25 +13,23 @@ interface PokerCardProps {
 // Global SVG Paths for perfect scaling
 const SUIT_PATHS = {
   h: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
-  s: "M17,13c0,3-2.5,5-5,5c-1.5,0-2-1.5-2-1.5S9.5,18,8,18c-2.5,0-5-2-5-5c0-4,4-6,9-11C13,7,17,9,17,13z M12,19c0,0,1,1,1,3 h-2c0-2,1-3,1-3z",
+  s: "M12 2C9.5 7 4.5 9 4.5 14.5C4.5 17.5 7 20 10 20C10.5 20 11 19.5 11 18V22H13V18C13 19.5 13.5 20 14 20C17 20 19.5 17.5 19.5 14.5C19.5 9 14.5 7 12 2Z",
   d: "M12,2L4.5,12L12,22l7.5-10L12,2z",
-  c: "M16.5,15.5c0-2-1.5-3.5-3-4c1-1,2-2.5,2-4c0-2.5-2-4.5-4.5-4.5S6.5,5,6.5,7.5c0,1.5,1,3,2,4c-1.5,0.5-3,2-3,4 c0,2.5,2,4.5,4.5,4.5c0,0,0,0,0,0v4h4v-4c0,0,0,0,0,0C14.5,20,16.5,18,16.5,15.5z",
+  c: "M12 10C13.5 10 15 8.5 15 6.5C15 4.5 13.5 3 12 3C10.5 3 9 4.5 9 6.5C9 8.5 10.5 10 12 10ZM16 11C14 11 12.5 12.5 12.5 14.5C12.5 12.5 11 11 9 11C7 11 5.5 12.5 5.5 14.5C5.5 16.5 7 18 9 18H11V22H13V18H15C17 18 18.5 16.5 18.5 14.5C18.5 12.5 17 11 16 11Z",
 };
 
 const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, className?: string, fourColor?: boolean }) => {
-  const getFill = (suit: string): string => {
+  const getSuitColorClass = (suit: string): string => {
     if (!fourColor) {
-      // Traditional two-color deck
-      if (suit === 'd' || suit === 'h') return "#be123c"; // Rose Red
-      return "#0f172a"; // Slate 900
+      if (suit === 'd' || suit === 'h') return "text-state-error";
+      return "text-foreground";
     }
-    // Four-color deck
     switch (suit) {
-      case 'h': return "#be123c"; // Rose Red (Hearts)
-      case 's': return "#0f172a"; // Slate 900 (Spades)
-      case 'd': return "#2563eb"; // Royal Blue (Diamonds)
-      case 'c': return "#15803d"; // Emerald Green (Clubs)
-      default: return "currentColor";
+      case 'h': return "text-state-error";
+      case 's': return "text-foreground";
+      case 'd': return "text-blue-600"; // Royal Blue equivalent
+      case 'c': return "text-green-700"; // Emerald Green equivalent
+      default: return "";
     }
   };
 
@@ -41,13 +39,11 @@ const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, cl
   return (
     <svg
       viewBox="0 0 24 24"
-      className={cn(className, "drop-shadow-sm")}
+      className={cn(className, "drop-shadow-sm", getSuitColorClass(suit))}
       xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
     >
-      <path
-        d={path}
-        fill={getFill(suit)}
-      />
+      <path d={path} />
     </svg>
   );
 };
@@ -117,15 +113,15 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
   // 4. Color Logic (Luxurious Tones)
   const getRankColor = (s: string) => {
     if (!fourColor) {
-      if (s === 'd' || s === 'h') return "text-[#be123c]"; // Rose Red
-      return "text-[#0f172a]"; // Slate 900
+      if (s === 'd' || s === 'h') return "text-state-error";
+      return "text-foreground";
     }
     switch (s) {
-      case 'h': return "text-[#be123c]"; // Rose Red
-      case 's': return "text-[#0f172a]"; // Slate 900
-      case 'd': return "text-[#2563eb]"; // Royal Blue
-      case 'c': return "text-[#15803d]"; // Emerald Green
-      default: return "text-gray-900";
+      case 'h': return "text-state-error";
+      case 's': return "text-foreground";
+      case 'd': return "text-blue-600";
+      case 'c': return "text-green-700";
+      default: return "text-foreground";
     }
   };
 

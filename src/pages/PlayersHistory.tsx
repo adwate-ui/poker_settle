@@ -287,14 +287,16 @@ const PlayersHistory = () => {
                         {!isMobile && " Sessions"}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right", isMobile ? "px-1 font-numbers" : "p-2 sm:p-4")}>
-                      <span className={cn(
-                        "font-medium whitespace-nowrap",
-                        profit >= 0 ? 'text-state-success' : 'text-state-error',
-                        isMobile ? 'text-[10px]' : 'text-sm'
-                      )}>
+                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                      <Badge
+                        variant={profit >= 0 ? "profit" : "loss"}
+                        className={cn(
+                          "font-medium whitespace-nowrap font-numbers",
+                          isMobile ? 'text-[10px] px-1.5' : 'text-sm px-3'
+                        )}
+                      >
                         {profit < 0 ? '-' : ''}Rs. {Math.abs(Math.round(profit)).toLocaleString('en-IN')}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                       <Button

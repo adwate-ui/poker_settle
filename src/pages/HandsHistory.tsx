@@ -76,26 +76,26 @@ const HandsHistory = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
               Total Hands
             </p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalHands}</div>
+            <div className="text-2xl font-bold font-numbers">{stats.totalHands}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
               Win Rate
             </p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-state-success">
+            <div className="text-2xl font-bold text-state-success font-numbers">
               {stats.winRate}%
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-numbers">
               {stats.handsWon}W / {stats.handsLost}L
             </p>
           </CardContent>
@@ -103,12 +103,12 @@ const HandsHistory = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
               Total Won
             </p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
+            <div className="text-2xl font-bold text-primary font-numbers">
               {formatCurrency(stats.totalPotWon)}
             </div>
           </CardContent>
@@ -116,13 +116,13 @@ const HandsHistory = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
               Showdown Rate
             </p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.showdownRate}%</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold font-numbers">{stats.showdownRate}%</div>
+            <p className="text-xs text-muted-foreground font-numbers">
               {stats.showdownHands} hands
             </p>
           </CardContent>
@@ -133,11 +133,11 @@ const HandsHistory = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
               <Filter className="h-5 w-5" />
               Filters
               {hasActiveFilters && (
-                <Badge variant="secondary">{Object.keys(filters).length} active</Badge>
+                <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-[9px]">{Object.keys(filters).length} active</Badge>
               )}
             </CardTitle>
             {hasActiveFilters && (
@@ -151,7 +151,7 @@ const HandsHistory = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero Name</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Name</label>
               <Select
                 value={filters.heroName || 'all'}
                 onValueChange={(value) =>
@@ -170,7 +170,7 @@ const HandsHistory = () => {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero Position</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Position</label>
               <Select
                 value={filters.heroPosition || 'all'}
                 onValueChange={(value) =>
@@ -191,7 +191,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Game</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Game</label>
               <Select
                 value={filters.gameId || 'all'}
                 onValueChange={(value) =>
@@ -213,7 +213,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Result</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Result</label>
               <Select
                 value={filters.result || 'all'}
                 onValueChange={(value) =>
@@ -233,7 +233,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Showdown</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Showdown</label>
               <Select
                 value={filters.showdown || 'all'}
                 onValueChange={(value) =>
@@ -252,7 +252,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Final Stage</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Final Stage</label>
               <Select
                 value={filters.finalStage || 'all'}
                 onValueChange={(value) =>
@@ -274,7 +274,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Villain Name</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Name</label>
               <Select
                 value={filters.villainName || 'all'}
                 onValueChange={(value) =>
@@ -294,7 +294,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Villain Position</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Position</label>
               <Select
                 value={filters.villainPosition || 'all'}
                 onValueChange={(value) =>
@@ -315,7 +315,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Hero's Hole Cards</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero's Hole Cards</label>
               <Select
                 value={filters.heroHoleCards || 'all'}
                 onValueChange={(value) =>
@@ -337,7 +337,7 @@ const HandsHistory = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Villain's Hole Cards</label>
+              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain's Hole Cards</label>
               <Select
                 value={filters.villainHoleCards || 'all'}
                 onValueChange={(value) =>
@@ -364,11 +364,11 @@ const HandsHistory = () => {
       {/* Hands List */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
             <TrendingUp className="h-5 w-5" />
             Hands History
-            <Badge variant="outline" className="ml-auto">
-              {hands.length} hands
+            <Badge variant="outline" className="ml-auto font-numbers">
+              {hands.length}
             </Badge>
           </CardTitle>
         </CardHeader>

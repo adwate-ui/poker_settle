@@ -123,22 +123,32 @@ export const BuyInManagementTable = ({
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow className="border-b border-white/10 hover:bg-transparent">
                 <TableHead className={cn(
-                  "w-[40%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                  "w-[35%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
                   isMobile ? "pl-2" : "pl-6"
                 )}>
-                  {isMobile ? "Plyr" : "Player"}
+                  <div className="flex items-center gap-1.5">
+                    <User className="h-3 w-3" />
+                    <span>{isMobile ? "Plyr" : "Player"}</span>
+                  </div>
                 </TableHead>
-                <TableHead className="w-[20%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
-                  {isMobile ? "Buys" : "Buy-ins"}
+                <TableHead className="w-[15%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Coins className="h-3 w-3" />
+                    <span>{isMobile ? "Buys" : "Buy-ins"}</span>
+                  </div>
                 </TableHead>
-                <TableHead className="w-[20%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
-                  {isMobile ? "Amt" : "Amount"}
+                <TableHead className="w-[20%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>{isMobile ? "Amt" : "Amount"}</span>
+                  </div>
+                </TableHead>
+                <TableHead className="w-[15%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
                 </TableHead>
                 <TableHead className={cn(
-                  "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                  isMobile ? "w-[20%] pr-2" : "pr-6"
+                  "w-[15%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5",
+                  isMobile ? "pr-2" : "pr-6"
                 )}>
-                  {isMobile ? "Act" : "Actions"}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -149,49 +159,43 @@ export const BuyInManagementTable = ({
                   className={cn("border-b border-white/5 hover:bg-white/5", isMobile ? "h-11" : "group")}
                 >
                   <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-6")}>
-                    <div className="flex items-center gap-2">
-                      {!isMobile && <User className="h-4 w-4 text-muted-foreground/50" />}
-                      <span className="truncate">
-                        {getDisplayName(gamePlayer.player.name, isMobile)}
-                      </span>
-                    </div>
+                    <span className="truncate">
+                      {getDisplayName(gamePlayer.player.name, isMobile)}
+                    </span>
                   </TableCell>
-                  <TableCell className={cn("py-2.5 px-1 text-center font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
-                    <div className="flex items-center justify-center gap-1">
-                      {!isMobile && <Coins className="h-4 w-4 text-muted-foreground/50" />}
-                      <span>{gamePlayer.buy_ins}</span>
-                    </div>
+                  <TableCell className={cn("py-2.5 px-1 text-center font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground/50" : "text-muted-foreground/50")}>
+                    {gamePlayer.buy_ins}
                   </TableCell>
-                  <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
+                  <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap text-muted-foreground/50", isMobile ? "text-[11px]" : "")}>
                     {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
                   </TableCell>
-                  <TableCell className={cn("text-right py-1", isMobile ? "pr-2 pl-1" : "pr-6")}>
-                    <div className="flex items-center justify-end gap-1 sm:gap-3">
-                      <Button
-                        onClick={() => {
-                          setSelectedPlayerId(gamePlayer.id);
-                          setBuyInCount(1);
-                          setOpened(true);
+                  <TableCell className="text-center py-1 border-l border-white/5">
+                    <Button
+                      onClick={() => {
+                        setSelectedPlayerId(gamePlayer.id);
+                        setBuyInCount(1);
+                        setOpened(true);
+                      }}
+                      variant="ghost"
+                      size={isMobile ? "icon-sm" : "icon"}
+                      aria-label={`Add buy-in for ${gamePlayer.player.name}`}
+                      className={cn("bg-transparent", isMobile && "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity")}
+                    >
+                      <Plus className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                    </Button>
+                  </TableCell>
+                  <TableCell className={cn("text-right py-1 border-l border-white/5", isMobile ? "pr-2" : "pr-6")}>
+                    {fetchBuyInHistory && (
+                      <BuyInHistoryDialog
+                        gamePlayerId={gamePlayer.id}
+                        playerName={gamePlayer.player.name}
+                        fetchHistory={fetchBuyInHistory}
+                        triggerProps={{
+                          size: isMobile ? "icon-sm" : "icon",
+                          className: cn(isMobile && "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity")
                         }}
-                        variant="ghost"
-                        size={isMobile ? "icon-sm" : "icon"}
-                        aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                        className={cn("bg-transparent", isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")}
-                      >
-                        <Plus className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
-                      </Button>
-                      {fetchBuyInHistory && (
-                        <BuyInHistoryDialog
-                          gamePlayerId={gamePlayer.id}
-                          playerName={gamePlayer.player.name}
-                          fetchHistory={fetchBuyInHistory}
-                          triggerProps={{
-                            size: isMobile ? "icon-sm" : "icon",
-                            className: cn(isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")
-                          }}
-                        />
-                      )}
-                    </div>
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

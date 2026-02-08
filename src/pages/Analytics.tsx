@@ -177,7 +177,7 @@ const Analytics = () => {
     );
   }
 
-  const COLORS = ["#d4b83c", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+  const COLORS = ["hsl(var(--primary))", "hsl(var(--state-success))", "hsl(var(--state-warning))", "hsl(var(--state-error))", "hsl(var(--accent))"];
 
   return (
     <div className="space-y-6 pb-8">
@@ -192,59 +192,58 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+        <Card className="bg-accent/5 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Gamepad2 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Games</p>
-                <p className="text-2xl font-bold">{stats.totalGames}</p>
+                <p className="text-33xs uppercase font-luxury tracking-widest text-muted-foreground">Total Games</p>
+                <p className="text-3xl font-bold font-numbers">{stats.totalGames}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-state-success/5 to-transparent border-state-success/20">
+        <Card className="bg-accent/5 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-state-success/10">
                 <DollarSign className="h-5 w-5 text-state-success" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Money Moved</p>
-                <p className="text-2xl font-bold">{formatCurrency(stats.totalMoneyMoved)}</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Money Moved</p>
+                <p className="text-3xl font-bold font-numbers">{formatCurrency(stats.totalMoneyMoved)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-state-info/5 to-transparent border-state-info/20">
+        <Card className="bg-accent/5 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-state-info/10">
                 <Users className="h-5 w-5 text-state-info" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Players</p>
-                <p className="text-2xl font-bold">{stats.totalPlayers}</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Total Players</p>
+                <p className="text-3xl font-bold font-numbers">{stats.totalPlayers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-state-warning/5 to-transparent border-state-warning/20">
+        <Card className="bg-accent/5 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-state-warning/10">
                 <Target className="h-5 w-5 text-state-warning" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Avg Pot Size</p>
-                <p className="text-2xl font-bold">{formatCurrency(stats.avgPotSize)}</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Avg Pot Size</p>
+                <p className="text-3xl font-bold font-numbers">{formatCurrency(stats.avgPotSize)}</p>
               </div>
             </div>
           </CardContent>
@@ -258,7 +257,7 @@ const Analytics = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">Monthly Activity</CardTitle>
+              <CardTitle className="text-lg font-luxury tracking-wider uppercase">Monthly Activity</CardTitle>
             </div>
             <CardDescription>Games and pot size over the last 6 months</CardDescription>
           </CardHeader>
@@ -268,8 +267,8 @@ const Analytics = () => {
                 <AreaChart data={stats.monthlyData}>
                   <defs>
                     <linearGradient id="potGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#d4b83c" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#d4b83c" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
@@ -280,12 +279,14 @@ const Analytics = () => {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    itemStyle={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
+                    labelStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", marginBottom: "4px" }}
                     formatter={(value: number) => [formatCurrency(value), "Total Pot"]}
                   />
                   <Area
                     type="monotone"
                     dataKey="pot"
-                    stroke="#d4b83c"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     fill="url(#potGradient)"
                   />
@@ -300,7 +301,7 @@ const Analytics = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">Buy-in Distribution</CardTitle>
+              <CardTitle className="text-lg font-luxury tracking-wider uppercase">Buy-in Distribution</CardTitle>
             </div>
             <CardDescription>Most common buy-in amounts</CardDescription>
           </CardHeader>
@@ -316,6 +317,8 @@ const Analytics = () => {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    itemStyle={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
+                    labelStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", marginBottom: "4px" }}
                     formatter={(value: number) => [`${value} games`, "Count"]}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
@@ -337,7 +340,7 @@ const Analytics = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-yellow-500" />
-              <CardTitle className="text-lg">Top Winners</CardTitle>
+              <CardTitle className="text-lg font-luxury tracking-wider uppercase">Top Winners</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -345,17 +348,14 @@ const Analytics = () => {
               <div key={player.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-                    index === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                      index === 1 ? "bg-gray-400/20 text-gray-400" :
-                        index === 2 ? "bg-orange-600/20 text-orange-600" :
-                          "bg-muted text-muted-foreground"
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold",
+                    index === 0 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                   )}>
                     {index + 1}
                   </div>
                   <span className="font-medium">{player.name}</span>
                 </div>
-                <Badge variant="profit">+{formatCurrency(player.total_profit || 0)}</Badge>
+                <Badge variant="profit" className="font-numbers">+{formatCurrency(player.total_profit || 0)}</Badge>
               </div>
             ))}
             {stats.topWinners.length === 0 && (
@@ -369,19 +369,19 @@ const Analytics = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-state-error" />
-              <CardTitle className="text-lg">Biggest Losers</CardTitle>
+              <CardTitle className="text-lg font-luxury tracking-wider uppercase">Biggest Losers</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {stats.topLosers.filter((p: any) => (p.total_profit || 0) < 0).slice(0, 5).map((player: any, index: number) => (
               <div key={player.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-state-error/20 text-state-error">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-muted text-muted-foreground">
                     {index + 1}
                   </div>
                   <span className="font-medium">{player.name}</span>
                 </div>
-                <Badge variant="loss">{formatCurrency(player.total_profit || 0)}</Badge>
+                <Badge variant="loss" className="font-numbers">{formatCurrency(player.total_profit || 0)}</Badge>
               </div>
             ))}
             {stats.topLosers.filter((p: any) => (p.total_profit || 0) < 0).length === 0 && (
@@ -395,7 +395,7 @@ const Analytics = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Flame className="h-5 w-5 text-orange-500" />
-              <CardTitle className="text-lg">Most Active</CardTitle>
+              <CardTitle className="text-lg font-luxury tracking-wider uppercase">Most Active</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -403,14 +403,14 @@ const Analytics = () => {
               <div key={player.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-                    index === 0 ? "bg-orange-500/20 text-orange-500" : "bg-muted text-muted-foreground"
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold",
+                    index === 0 ? "bg-accent/20 text-accent-foreground" : "bg-muted text-muted-foreground"
                   )}>
                     {index + 1}
                   </div>
                   <span className="font-medium">{player.name}</span>
                 </div>
-                <Badge variant="secondary">{player.total_games || 0} games</Badge>
+                <Badge variant="secondary" className="font-numbers">{player.total_games || 0} games</Badge>
               </div>
             ))}
           </CardContent>
@@ -422,7 +422,7 @@ const Analytics = () => {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Award className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-lg">Win/Loss Distribution</CardTitle>
+            <CardTitle className="text-lg font-luxury tracking-wider uppercase">Win/Loss Distribution</CardTitle>
           </div>
           <CardDescription>Player performance breakdown</CardDescription>
         </CardHeader>
@@ -433,9 +433,9 @@ const Analytics = () => {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "Winners", value: stats.profitablePlayers, fill: "#10b981" },
-                      { name: "Losers", value: stats.losingPlayers, fill: "#ef4444" },
-                      { name: "Break Even", value: stats.breakEvenPlayers, fill: "#6b7280" },
+                      { name: "Winners", value: stats.profitablePlayers, fill: "hsl(var(--state-success))" },
+                      { name: "Losers", value: stats.losingPlayers, fill: "hsl(var(--state-error))" },
+                      { name: "Break Even", value: stats.breakEvenPlayers, fill: "hsl(var(--muted))" },
                     ]}
                     cx="50%"
                     cy="50%"
@@ -450,6 +450,8 @@ const Analytics = () => {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    itemStyle={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
+                    labelStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", marginBottom: "4px" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -476,28 +478,28 @@ const Analytics = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Avg Players/Game</p>
-            <p className="text-3xl font-bold text-primary">{stats.avgPlayersPerGame}</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-1">Avg Players/Game</p>
+            <p className="text-3xl font-bold text-primary font-numbers">{stats.avgPlayersPerGame}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Buy-ins</p>
-            <p className="text-3xl font-bold text-primary">{stats.totalBuyIns}</p>
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-1">Total Buy-ins</p>
+            <p className="text-3xl font-bold text-primary font-numbers">{stats.totalBuyIns}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Win Rate</p>
-            <p className="text-3xl font-bold text-state-success">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-1">Win Rate</p>
+            <p className="text-3xl font-bold text-state-success font-numbers">
               {stats.totalPlayers > 0 ? Math.round((stats.profitablePlayers / stats.totalPlayers) * 100) : 0}%
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Games This Month</p>
-            <p className="text-3xl font-bold text-primary">
+            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-1">Games This Month</p>
+            <p className="text-3xl font-bold text-primary font-numbers">
               {stats.monthlyData[stats.monthlyData.length - 1]?.games || 0}
             </p>
           </CardContent>

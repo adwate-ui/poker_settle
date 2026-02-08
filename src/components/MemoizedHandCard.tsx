@@ -83,8 +83,8 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
                 <div className="flex items-center gap-2.5">
                   <span className="text-foreground font-bold tracking-widest text-[11px] uppercase">Sequence #{hand.hand_number}</span>
                   <div className="flex gap-1.5">
-                    <Badge variant="outline" className="bg-muted/50 border-border text-[9px] tracking-widest h-5 px-1.5 text-muted-foreground">{hand.hero_position}</Badge>
-                    <Badge variant="outline" className="bg-muted/50 border-border text-[9px] tracking-widest h-5 px-1.5 text-muted-foreground">{hand.final_stage}</Badge>
+                    <Badge variant="stats" className="h-5 px-1.5">{hand.hero_position}</Badge>
+                    <Badge variant="stats" className="h-5 px-1.5">{hand.final_stage}</Badge>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
@@ -96,14 +96,8 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
 
               <div className="flex flex-col items-end gap-2">
                 <Badge
-                  variant="outline"
-                  className={cn(
-                    "px-3 py-1 text-[11px] border-0 border-b-2 rounded-none h-auto",
-                    resultStatus === 'win' ? 'text-emerald-600 border-emerald-500/30 bg-emerald-500/5' :
-                      resultStatus === 'loss' ? 'text-rose-600 border-rose-500/30 bg-rose-500/5' :
-                        resultStatus === 'split' ? 'text-primary border-primary/30 bg-primary/5' :
-                          'text-muted-foreground/60 border-border'
-                  )}
+                  variant={resultStatus === 'win' ? 'profit' : resultStatus === 'loss' ? 'loss' : resultStatus === 'split' ? 'info' : 'neutral'}
+                  className="px-3 py-1 text-[10px] tracking-widest uppercase"
                 >
                   {resultStatus === 'win' && <Trophy className="h-3 w-3 mr-1.5" />}
                   {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'PROTOCOL'}
@@ -168,8 +162,8 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/40">Aggregated Pot</p>
-                <p className="text-xl text-foreground">{formatCurrency(hand.pot_size || 0)}</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold font-numbers">Pot</p>
+                <p className="text-xl text-foreground font-numbers">{formatCurrency(hand.pot_size || 0)}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-accent border border-border group-hover:scale-110 transition-transform">
                 <ChevronRight className="h-4 w-4 text-foreground" />

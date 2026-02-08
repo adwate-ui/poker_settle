@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Game, GamePlayer, PokerHand, PlayerAction, HandStage, ActionType, SeatPosition } from '@/types/poker';
+import { Game, GamePlayer, PokerHand, PlayerAction, SeatPosition } from '@/types/poker';
 import {
     getNextPlayerIndex,
     getStartingPlayerIndex,
@@ -9,7 +9,9 @@ import {
     getNextStage,
     getCallAmount,
     processAction,
-    resetForNewStreet
+    resetForNewStreet,
+    HandStage,
+    ActionType
 } from '@/utils/handStateMachine';
 import {
     getPositionForPlayer,
@@ -231,7 +233,8 @@ export const usePokerEngine = (
 
         setStreetActions([sbAction, bbAction]);
         setAllHandActions([sbAction, bbAction]);
-        setCurrentPlayerIndex(getStartingPlayerIndex('preflop', active, buttonId));
+        const currentPlayersInHand = active.map(p => p.player_id);
+        setCurrentPlayerIndex(getStartingPlayerIndex('preflop', active, buttonId, currentPlayersInHand));
         setStage('preflop');
         setCurrentBet(bbAmount);
         setPotSize(sbAmount + bbAmount);
@@ -314,7 +317,22 @@ export const usePokerEngine = (
         }, currentHand.button_player_id);
 
         if (updates.stage) setStage(updates.stage);
-        if (updates.currentPlayerIndex !== undefined) setCurrentPlayerIndex(updates.currentPlayerIndex);
+
+        let finalStartingIndex = updates.currentPlayerIndex;
+        if (updates.currentPlayerIndex !== undefined) {
+            const startingPlayer = activePlayers[updates.currentPlayerIndex];
+            if (startingPlayer && !playersInHand.includes(startingPlayer.player_id)) {
+                console.warn(`[PokerEngine] Starting player ${startingPlayer.player?.name} is not in hand. Finding next valid player.`);
+                finalStartingIndex = getNextPlayerIndex(
+                    (updates.currentPlayerIndex - 1 + activePlayers.length) % activePlayers.length,
+                    updates.stage || stage,
+                    activePlayers,
+                    buttonIndex,
+                    playersInHand
+                );
+            }
+            setCurrentPlayerIndex(finalStartingIndex);
+        }
         if (updates.currentBet !== undefined) setCurrentBet(updates.currentBet);
         if (updates.streetPlayerBets) setStreetPlayerBets(updates.streetPlayerBets);
         if (updates.streetActions) setStreetActions(updates.streetActions);
@@ -323,6 +341,15 @@ export const usePokerEngine = (
 
     const recordAction = useCallback(async (actionType: ActionType, betSizeValue?: number) => {
         if (!currentHand || !currentPlayer) return;
+
+        // Strict Validation: Ensure current player is actually in the hand
+        if (!playersInHand.includes(currentPlayer.player_id)) {
+            console.warn(`[PokerEngine] Attempted action for folded player ${currentPlayer.player?.name}. Skipping.`);
+            const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
+            setCurrentPlayerIndex(getNextPlayerIndex(currentPlayerIndex, stage, activePlayers, buttonIndex, playersInHand));
+            return;
+        }
+
         saveStateToHistory();
 
         const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);

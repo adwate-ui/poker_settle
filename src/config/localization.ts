@@ -1,6 +1,6 @@
 export const CurrencyConfig = {
     symbol: "Rs.",
-    code: "INR",
+    code: "Rs.",
     locale: "en-IN",
 };
 

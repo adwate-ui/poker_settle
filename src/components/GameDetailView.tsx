@@ -433,26 +433,20 @@ export const GameDetailView = ({
           </div>
         </CardHeader>
         <CardContent className="pt-8">
-          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Blind Level / Unit</p>
-              <p className="text-2xl font-bold">{formatCurrency(game.buy_in_amount)}</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Buy-in</p>
+              <p className="text-2xl font-bold font-numbers">{formatCurrency(game.buy_in_amount)}</p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">The Lineup</p>
-              <p className="text-2xl font-bold">{gamePlayers.length}</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground"># Players</p>
+              <p className="text-2xl font-bold font-numbers">{gamePlayers.length}</p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total Liquidity</p>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Chips in Play</p>
+              <p className="text-2xl font-bold text-primary font-numbers">
                 {formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
-            </div>
-            <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total Pot Action</p>
-              <Badge variant="profit" className="text-lg px-3 py-1">
-                +{formatCurrency(gamePlayers.filter(gp => (gp.net_amount ?? 0) > 0).reduce((sum, gp) => sum + (gp.net_amount ?? 0), 0))}
-              </Badge>
             </div>
           </div>
         </CardContent>
@@ -465,7 +459,7 @@ export const GameDetailView = ({
             <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Stack Rebuys</h3>
+                <h3 className="text-lg font-medium">Buy-in Logs</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
             </div>
@@ -557,10 +551,11 @@ export const GameDetailView = ({
                   <TableHeader className="sticky top-0 z-10 bg-card">
                     <TableRow className="border-b border-white/10 hover:bg-transparent">
                       <TableHead className={cn(
-                        "w-[35%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                        showOwnerControls && fetchBuyInHistory ? "w-[30%]" : "w-[40%]",
+                        "py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
                         isMobile ? "pl-2" : "pl-6"
                       )}>
-                        {isMobile ? "Player" : "Player"}
+                        Player
                       </TableHead>
                       <TableHead className="w-[15%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
                         {isMobile ? "Buys" : "Buy-ins"}
@@ -569,15 +564,15 @@ export const GameDetailView = ({
                         {isMobile ? "P&L" : "P&L"}
                       </TableHead>
                       <TableHead className={cn(
-                        "w-[25%] py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                        "w-[20%] py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
                         !isMobile || !(showOwnerControls && fetchBuyInHistory) ? "pr-2" : "px-1"
                       )}>
                         {isMobile ? "Cash" : "Cashout"}
                       </TableHead>
                       {showOwnerControls && fetchBuyInHistory && (
                         <TableHead className={cn(
-                          "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                          isMobile ? "w-[15%] pr-2" : "pr-6"
+                          "w-[10%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                          isMobile ? "pr-2" : "pr-6"
                         )}>
                           {isMobile ? "Hist" : "Audit"}
                         </TableHead>
@@ -602,7 +597,7 @@ export const GameDetailView = ({
                             </Link>
                           </TableCell>
                           <TableCell className={cn("px-1 py-1 text-center font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
-                            <Badge variant="outline" className={cn(isMobile ? "px-1 py-0 text-[10px] h-4 min-w-[16px] border-white/10" : "")}>
+                            <Badge variant="secondary" className={cn(isMobile ? "px-1 py-0 text-[10px] h-4 min-w-[16px] border-white/10" : "")}>
                               {gamePlayer.buy_ins}
                             </Badge>
                           </TableCell>
@@ -675,70 +670,79 @@ export const GameDetailView = ({
               <div className="overflow-x-auto max-h-[600px]">
                 <Table className="table-fixed w-full text-left border-collapse">
                   <TableHeader className="bg-muted/50 border-b border-white/10 sticky top-0 z-10 bg-card">
-                    <TableRow className="border-b border-white/10 hover:bg-transparent">
-                      <TableHead className={cn(
-                        "w-[30%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                        isMobile ? "pl-2" : "pl-8"
-                      )}>
-                        From
-                      </TableHead>
-                      <TableHead className="w-[30%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
-                      <TableHead className="w-[25%] px-1 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">{isMobile ? "Amt" : "Amount"}</TableHead>
-                      <TableHead className={cn(
-                        "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                        isMobile ? "w-[15%] pr-2" : "pr-8"
-                      )}>{isMobile ? "Sts" : "Status"}</TableHead>
-                    </TableRow>
+                    {settlementsWithType.some(s => s.isManual) ? (
+                      <TableRow className="border-b border-white/10 hover:bg-transparent">
+                        <TableHead className={cn(
+                          "w-[25%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                          isMobile ? "pl-2" : "pl-8"
+                        )}>From</TableHead>
+                        <TableHead className="w-[25%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
+                        <TableHead className="w-[15%] px-1 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amount</TableHead>
+                        <TableHead className="w-[15%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Type</TableHead>
+                        <TableHead className="w-[10%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Sts</TableHead>
+                        <TableHead className={cn(
+                          "w-[10%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                          isMobile ? "pr-2" : "pr-8"
+                        )}>Act</TableHead>
+                      </TableRow>
+                    ) : (
+                      <TableRow className="border-b border-white/10 hover:bg-transparent">
+                        <TableHead className={cn(
+                          "w-[30%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                          isMobile ? "pl-2" : "pl-8"
+                        )}>From</TableHead>
+                        <TableHead className="w-[30%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">To</TableHead>
+                        <TableHead className="w-[25%] px-1 py-2 text-right text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">{isMobile ? "Amt" : "Amount"}</TableHead>
+                        <TableHead className={cn(
+                          "w-[15%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                          isMobile ? "pr-2" : "pr-8"
+                        )}>{isMobile ? "Sts" : "Status"}</TableHead>
+                      </TableRow>
+                    )}
                   </TableHeader>
                   <TableBody className="divide-y divide-border">
                     {settlementsWithType.map((settlement, index) => {
                       const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
+                      const hasManual = settlementsWithType.some(s => s.isManual);
+
                       return (
                         <TableRow key={`settlement-${index}`} className={cn("border-b border-white/5 hover:bg-white/5", isMobile ? "h-11" : "h-12 sm:h-14", "group")}>
                           <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-4 sm:pl-8")}>
-                            <div className="flex items-center gap-1 sm:gap-3">
-                              {!isMobile && <User className="h-3 w-3 text-muted-foreground" />}
-                              <Link
-                                to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
-                                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                              >
-                                {settlement.from}
-                              </Link>
-                            </div>
+                            <Link
+                              to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
+                              className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                            >
+                              {settlement.from}
+                            </Link>
                           </TableCell>
                           <TableCell className={cn("py-2.5 px-1", isMobile ? "font-medium text-[11px] truncate text-muted-foreground" : "")}>
-                            <div className="flex items-center gap-1 sm:gap-3">
-                              {!isMobile && <CreditCard className="h-3 w-3 text-muted-foreground" />}
-                              <Link
-                                to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
-                                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                              >
-                                {settlement.to}
-                              </Link>
-                            </div>
+                            <Link
+                              to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
+                              className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                            >
+                              {settlement.to}
+                            </Link>
                           </TableCell>
                           <TableCell className={cn("text-right py-1 font-numbers whitespace-nowrap px-1", isMobile ? "text-[11px]" : "")}>
                             <span className="font-medium">
                               {formatCurrency(settlement.amount)}
                             </span>
-                            {settlement.isManual && (
-                              <Badge variant="outline" className={cn("ml-1 border-white/10", isMobile ? "px-0.5 py-0 text-[8px] min-w-[12px] h-3 flex items-center justify-center inline-flex" : "ml-3")}>
-                                {isMobile ? "M" : "Manual"}
-                              </Badge>
-                            )}
                           </TableCell>
-                          <TableCell className={cn("text-right py-1", isMobile ? "pr-2 pl-1" : "pr-8")}>
-                            <div className="flex items-center justify-end gap-1">
-                              {settlement.isManual && showOwnerControls && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteManualTransfer(index)}
-                                  className={cn(isMobile ? "h-6 w-6" : "h-8 w-8", "text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors")}
-                                >
-                                  <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3.5 w-3.5")} />
-                                </Button>
+
+                          {hasManual && (
+                            <TableCell className="px-1 py-1 text-center">
+                              {settlement.isManual ? (
+                                <Badge variant="outline" className={cn("border-white/10", isMobile ? "px-0.5 py-0 text-[8px] min-w-[12px] h-3 inline-flex items-center justify-center" : "text-[10px]")}>
+                                  {isMobile ? "M" : "Manual"}
+                                </Badge>
+                              ) : (
+                                <span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-luxury">Auto</span>
                               )}
+                            </TableCell>
+                          )}
+
+                          <TableCell className={cn("text-center py-1", isMobile ? "px-1" : "px-1")}>
+                            <div className="flex items-center justify-center">
                               {showOwnerControls && confirmation ? (
                                 <Button
                                   variant="ghost"
@@ -749,27 +753,41 @@ export const GameDetailView = ({
                                     await refetchGameDetail();
                                   }}
                                   className={cn(
-                                    isMobile ? "h-6 w-6 rounded-md shadow-sm p-0" : "h-8 px-4 rounded-full text-xs border transition-all",
+                                    isMobile ? "h-6 w-6 rounded-md p-0" : "h-7 px-2 rounded-md text-[10px] border transition-all",
                                     confirmation.confirmed
                                       ? "bg-state-success/10 border-state-success/20 text-state-success hover:bg-state-success/20"
                                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                                   )}
                                 >
-                                  {confirmation.confirmed ? <Check className={cn(isMobile ? "h-4 w-4" : "h-3.5 w-3.5 mr-2")} /> : <X className={cn(isMobile ? "h-4 w-4" : "h-3.5 w-3.5 mr-2")} />}
-                                  {!isMobile && (confirmation.confirmed ? "Authorized" : "Confirm")}
+                                  {confirmation.confirmed ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
+                                  {!isMobile && <span className="ml-1">{confirmation.confirmed ? "Settled" : "Pending"}</span>}
                                 </Button>
                               ) : (
-                                <Badge className={cn(
-                                  "rounded-full border-0 font-medium",
-                                  isMobile ? "h-5 w-5 p-0 flex items-center justify-center" : "h-7 px-3 text-[10px]",
-                                  confirmation?.confirmed ? "bg-state-success/20 text-state-success" : "bg-muted text-muted-foreground"
+                                <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className={cn(
+                                  "rounded-md font-numbers",
+                                  isMobile ? "h-5 w-5 p-0 flex items-center justify-center" : "h-6 px-2 text-[10px]"
                                 )}>
-                                  {confirmation?.confirmed ? <Check className={cn(isMobile ? "h-3.5 w-3.5" : "h-3 w-3 mr-2")} /> : <History className={cn(isMobile ? "h-3.5 w-3.5" : "h-3 w-3 mr-2")} />}
-                                  {!isMobile && (confirmation?.confirmed ? "Settled" : "Pending")}
+                                  {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
+                                  {!isMobile && <span className="ml-1">{confirmation?.confirmed ? "Settled" : "Pending"}</span>}
                                 </Badge>
                               )}
                             </div>
                           </TableCell>
+
+                          {hasManual && (
+                            <TableCell className={cn("text-right py-1", isMobile ? "pr-2" : "pr-8")}>
+                              {settlement.isManual && showOwnerControls && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteManualTransfer(index)}
+                                  className={cn(isMobile ? "h-6 w-6" : "h-8 w-8", "text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors")}
+                                >
+                                  <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3.5 w-3.5")} />
+                                </Button>
+                              )}
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })}

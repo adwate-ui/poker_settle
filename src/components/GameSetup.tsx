@@ -213,7 +213,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <CardContent className="p-8 space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (INR)</Label>
+                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (Rs.)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none">
                             <span className="text-primary font-luxury text-[8px] opacity-70">{CurrencyConfig.symbol}</span>

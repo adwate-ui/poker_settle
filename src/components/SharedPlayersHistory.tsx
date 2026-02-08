@@ -67,9 +67,12 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
           <div className="p-4 rounded-lg border bg-card"><p className="text-label text-muted-foreground">Total Games</p><p className="text-2xl font-bold font-numbers">{player.total_games}</p></div>
           <div className="p-4 rounded-lg border bg-card">
             <p className="text-label text-muted-foreground">Net P&L</p>
-            <p className={cn("text-2xl font-bold font-numbers", (player.total_profit || 0) >= 0 ? "text-state-success" : "text-destructive")}>
+            <Badge
+              variant={(player.total_profit || 0) >= 0 ? "profit" : "loss"}
+              className="text-xl font-bold font-numbers px-4 py-1"
+            >
               {(player.total_profit || 0) < 0 ? '-' : ''}Rs. {Math.abs(Math.round(player.total_profit || 0)).toLocaleString('en-IN')}
-            </p>
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -143,11 +146,18 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                     </Badge>
                   </TableCell>
                   <TableCell className={cn(
-                    "text-right font-numbers",
-                    h.net_amount >= 0 ? "text-state-success" : "text-destructive",
-                    isMobile ? "px-1 text-[10px]" : "p-2 sm:p-4"
+                    "text-right",
+                    isMobile ? "px-1" : "p-2 sm:p-4"
                   )}>
-                    {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}
+                    <Badge
+                      variant={h.net_amount >= 0 ? "profit" : "loss"}
+                      className={cn(
+                        "font-numbers font-medium",
+                        isMobile ? "text-[10px] px-1.5" : "px-3"
+                      )}
+                    >
+                      {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}
+                    </Badge>
                   </TableCell>
                   <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
                     {isMobile ? (

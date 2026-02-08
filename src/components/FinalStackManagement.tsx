@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Loader2 } from 'lucide-react';
+import { Edit, Loader2, User, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 import { ErrorMessages } from '@/lib/errorUtils';
 import { cn } from '@/lib/utils';
@@ -106,19 +106,26 @@ export const FinalStackManagement = ({
           <TableHeader className="sticky top-0 z-10 bg-card">
             <TableRow className="border-b border-white/10 hover:bg-transparent">
               <TableHead className={cn(
-                "w-[45%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
+                "w-[40%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
                 isMobile ? "pl-2" : "pl-6"
               )}>
-                {isMobile ? "Plyr" : "Player"}
+                <div className="flex items-center gap-1.5">
+                  <User className="h-3 w-3" />
+                  <span>{isMobile ? "Plyr" : "Player"}</span>
+                </div>
               </TableHead>
-              <TableHead className="w-[30%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">
-                {isMobile ? "Stack" : "Final Stack"}
+              <TableHead className="w-[30%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                <div className="flex items-center gap-1.5">
+                  <Coins className="h-3 w-3" />
+                  <span>{isMobile ? "Stack" : "Final Stack"}</span>
+                </div>
+              </TableHead>
+              <TableHead className="w-[15%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
               </TableHead>
               <TableHead className={cn(
-                "text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                isMobile ? "w-[25%] pr-2" : "pr-6"
+                "w-[15%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5",
+                isMobile ? "pr-2" : "pr-6"
               )}>
-                {isMobile ? "Act" : "Actions"}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -131,28 +138,28 @@ export const FinalStackManagement = ({
                 <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-6")}>
                   {getDisplayName(gamePlayer.player.name, isMobile)}
                 </TableCell>
-                <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground" : "")}>
+                <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap text-muted-foreground/50", isMobile ? "text-[11px]" : "")}>
                   {formatCurrency(gamePlayer.final_stack || 0)}
                 </TableCell>
-                <TableCell className={cn("text-right py-1", isMobile ? "pr-2 pl-1" : "pr-6")}>
-                  <div className="flex items-center justify-end gap-1 sm:gap-2">
-                    <Button
-                      onClick={() => handleStartEdit(gamePlayer)}
-                      variant="outline"
-                      size={isMobile ? "icon-sm" : "icon"}
-                      aria-label={`Edit final stack for ${gamePlayer.player.name}`}
-                      className={cn("bg-transparent border-white/10 hover:border-gold-500/50", isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")}
-                    >
-                      <Edit className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
-                    </Button>
-                    <ChipScanner
-                      onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
-                      triggerProps={{
-                        size: isMobile ? "icon-sm" : "icon",
-                        className: cn(isMobile && "h-7 w-7 opacity-70 hover:opacity-100 transition-opacity")
-                      }}
-                    />
-                  </div>
+                <TableCell className="text-center py-1 border-l border-white/5">
+                  <Button
+                    onClick={() => handleStartEdit(gamePlayer)}
+                    variant="outline"
+                    size={isMobile ? "icon-sm" : "icon"}
+                    aria-label={`Edit final stack for ${gamePlayer.player.name}`}
+                    className={cn("bg-transparent border-white/10 hover:border-gold-500/50", isMobile ? "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity" : "text-muted-foreground/50 hover:text-foreground")}
+                  >
+                    <Edit className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                  </Button>
+                </TableCell>
+                <TableCell className={cn("text-right py-1 border-l border-white/5", isMobile ? "pr-2" : "pr-6")}>
+                  <ChipScanner
+                    onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
+                    triggerProps={{
+                      size: isMobile ? "icon-sm" : "icon",
+                      className: cn(isMobile ? "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity" : "text-muted-foreground/50 hover:text-foreground")
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

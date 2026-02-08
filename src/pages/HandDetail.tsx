@@ -319,50 +319,50 @@ const HandDetail = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 flex-wrap">
             <span>Hand #{hand.hand_number}</span>
-            <Badge variant="outline">{hand.hero_position}</Badge>
-            <Badge variant="outline">{hand.final_stage}</Badge>
+            <Badge variant="stats">{hand.hero_position}</Badge>
+            <Badge variant="stats">{hand.final_stage}</Badge>
             {hand.is_hero_win === true && (
-              <Badge variant="success">
+              <Badge variant="profit">
                 <Trophy className="h-3 w-3 mr-1" />
                 Won
               </Badge>
             )}
             {hand.is_hero_win === false && (
-              <Badge variant="destructive">Lost</Badge>
+              <Badge variant="loss">Lost</Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Hand Info */}
           <div>
-            <h3 className="font-semibold mb-3">Hand Information</h3>
+            <h3 className="text-lg font-luxury tracking-wider uppercase mb-3 text-primary">Hand Information</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Game Date:</span>
-                <span>{formatDate(hand.game_date)}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Game Date:</span>
+                <span className="font-numbers">{formatDate(hand.game_date)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Hero Position:</span>
-                <Badge variant="outline">{hand.hero_position}</Badge>
+              <div className="flex justify-between items-center">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Hero Position:</span>
+                <Badge variant="stats" className="text-[9px]">{hand.hero_position}</Badge>
               </div>
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Button:</span>
-                <span>{hand.button_player_name}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Button:</span>
+                <span className="font-luxury uppercase tracking-wider text-xs">{hand.button_player_name}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Final Stage:</span>
-                <Badge>{hand.final_stage}</Badge>
+              <div className="flex justify-between items-center">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stage:</span>
+                <Badge variant="stats" className="text-[9px]">{hand.final_stage}</Badge>
               </div>
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Pot Size:</span>
-                <span className="font-bold text-poker-gold">
+              <div className="flex justify-between items-center bg-accent/10 p-2 rounded-lg">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold">Pot Size:</span>
+                <span className="font-bold text-primary font-numbers">
                   {formatCurrency(hand.pot_size || 0)} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-label text-muted-foreground">Winner:</span>
-                <span className="font-semibold flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-amber-500" />
+              <div className="flex justify-between items-center">
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Winner:</span>
+                <span className="font-luxury font-bold flex items-center gap-2 text-xs uppercase tracking-wider text-primary">
+                  <Trophy className="h-4 w-4 text-primary" />
                   {hand.winner_player_name}
                 </span>
               </div>
@@ -395,15 +395,15 @@ const HandDetail = () => {
               {/* Community Cards Section */}
               {hand.street_cards.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-3">Community Cards</h3>
-                  <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 p-3 sm:p-4 rounded-xl border border-green-700/30">
-                    <div className="flex gap-2 sm:gap-3 md:gap-4 items-center flex-wrap">
+                  <h3 className="text-lg font-luxury tracking-wider uppercase mb-3 text-primary">Community Cards</h3>
+                  <div className="felt-gradient shadow-inner p-3 sm:p-4 rounded-xl border border-border/50">
+                    <div className="flex gap-1.5 items-center flex-wrap">
                       {/* Flop */}
                       {(() => {
                         const flopCard = hand.street_cards.find(sc => sc.street_type === 'Flop');
                         return flopCard && (
                           <div className="flex flex-col gap-1 sm:gap-2">
-                            <span className="text-label text-muted-foreground">FLOP</span>
+                            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">FLOP</span>
                             <div className="flex gap-0.5">
                               {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                 <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -421,9 +421,9 @@ const HandDetail = () => {
                         const turnCard = hand.street_cards.find(sc => sc.street_type === 'Turn');
                         return turnCard && (
                           <>
-                            <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
+                            <Separator orientation="vertical" className="h-10 sm:h-12 md:h-16 bg-border/50" />
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-label text-muted-foreground">TURN</span>
+                              <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">TURN</span>
                               <div className="flex gap-0.5">
                                 {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -442,9 +442,9 @@ const HandDetail = () => {
                         const riverCard = hand.street_cards.find(sc => sc.street_type === 'River');
                         return riverCard && (
                           <>
-                            <div className="h-10 sm:h-12 md:h-16 w-px bg-green-700/50"></div>
+                            <Separator orientation="vertical" className="h-10 sm:h-12 md:h-16 bg-border/50" />
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-label text-muted-foreground">RIVER</span>
+                              <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">RIVER</span>
                               <div className="flex gap-0.5">
                                 {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -466,7 +466,7 @@ const HandDetail = () => {
 
               {/* Hole Cards Section */}
               <div>
-                <h3 className="font-semibold mb-3">Hole Cards</h3>
+                <h3 className="text-lg font-luxury tracking-wider uppercase mb-3 text-primary">Hole Cards</h3>
                 <div className="space-y-2">
                   {playersInHand.map((player) => (
                     <div
@@ -519,7 +519,7 @@ const HandDetail = () => {
 
               {/* Action History */}
               <div>
-                <h3 className="font-semibold mb-3">Action History</h3>
+                <h3 className="text-lg font-luxury tracking-wider uppercase mb-3 text-primary">Action History</h3>
                 <div className="space-y-3">
                   {['Preflop', 'Flop', 'Turn', 'River'].map(street => {
                     const streetActions = hand.actions.filter(a => a.street_type === street);
@@ -527,17 +527,18 @@ const HandDetail = () => {
 
                     return (
                       <div key={street}>
-                        <div className="text-label text-muted-foreground mb-2">
+                        <div className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2">
                           {street}:
                         </div>
-                        <div className="space-y-1 pl-4 border-l-2 border-muted">
+                        <div className="space-y-2 pl-4 relative">
+                          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-muted rounded-full" />
                           {streetActions
                             .sort((a, b) => a.action_sequence - b.action_sequence)
                             .map((action, idx) => (
                               <div key={idx} className="text-sm flex justify-between items-center py-1">
                                 <div className="flex items-center gap-2">
                                   {action.is_hero && (
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge variant="stats" className="text-xs">
                                       Hero
                                     </Badge>
                                   )}
@@ -551,11 +552,11 @@ const HandDetail = () => {
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">
+                                  <span className="text-muted-foreground font-luxury uppercase tracking-widest text-3xs">
                                     {action.action_type}
                                   </span>
                                   {action.bet_size > 0 && (
-                                    <span className="font-semibold text-poker-gold">
+                                    <span className="font-bold text-primary font-numbers">
                                       {formatCurrency(action.bet_size)} ({(action.bet_size / hand.big_blind).toFixed(1)} BB)
                                     </span>
                                   )}

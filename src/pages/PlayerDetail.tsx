@@ -144,9 +144,10 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 opacity-30" />;
-    if (sortOrder === "asc") return <ArrowUp className="h-4 w-4 text-gold-500" />;
-    return <ArrowDown className="h-4 w-4 text-gold-500" />;
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 opacity-30 text-muted-foreground" />;
+    return sortOrder === "asc"
+      ? <ArrowUp className="h-3 w-3 text-primary" />
+      : <ArrowDown className="h-3 w-3 text-primary" />;
   };
 
   const uniqueMonthYears = useMemo(() => {
@@ -193,16 +194,16 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-gold-500" />
-        <p className="text-label text-gold-200/60 animate-pulse">Loading Player Profile...</p>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground animate-pulse">Loading Player Profile...</p>
       </div>
     );
   }
 
   if (!player) {
     return (
-      <Card className="max-w-4xl mx-auto border-border bg-background/60 backdrop-blur-xl p-10 text-center">
-        <p className="text-muted-foreground font-luxury tracking-widest uppercase">Player not found.</p>
+      <Card className="max-w-4xl mx-auto border-border bg-background/60 backdrop-blur-xl p-6 text-center">
+        <p className="text-muted-foreground font-luxury tracking-widest uppercase text-3xs">Player not found.</p>
       </Card>
     );
   }
@@ -226,7 +227,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
       )}
 
       <Card className="border-border bg-background/60 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-6 border-b border-border bg-accent/5">
+        <CardHeader className="p-4 sm:p-6 border-b border-border bg-accent/5">
           <div
             onClick={() => setIsStatsOpen(!isStatsOpen)}
             className="flex items-center justify-between cursor-pointer group"
@@ -238,9 +239,10 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
               </div>
               <div>
                 <CardTitle className="text-3xl font-luxury text-foreground">{player.name}</CardTitle>
-                <CardDescription className="text-label text-muted-foreground flex items-center gap-2">
-                  <User className="h-3 w-3" /> Player Profile
-                </CardDescription>
+                <div className="flex items-center gap-2 mt-1">
+                  <User className="h-3 w-3 text-muted-foreground/50" />
+                  <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Player Profile</span>
+                </div>
               </div>
             </div>
             <ChevronDown className={cn("h-6 w-6 text-muted-foreground group-hover:text-primary transition-all duration-300", isStatsOpen && "transform rotate-180")} />
@@ -248,27 +250,29 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
         </CardHeader>
 
         {isStatsOpen && (
-          <CardContent className="pt-8 space-y-10 animate-in fade-in duration-500">
+          <CardContent className="p-4 sm:p-8 space-y-10 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                <p className="text-label text-muted-foreground">Total Games</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Total Games</p>
                 <p className="text-3xl font-numbers text-foreground">{player.total_games || 0}</p>
               </div>
               <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                <p className="text-label text-muted-foreground">Total Profit/Loss</p>
-                <p className={cn(
-                  "text-3xl font-numbers",
-                  isProfit ? "text-state-success" : "text-state-error"
-                )}>
-                  {isProfit ? "+" : ""}{formatCurrency(Math.abs(player.total_profit || 0))}
-                </p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Total Profit/Loss</p>
+                <div className="flex items-center">
+                  <Badge
+                    variant={isProfit ? "profit" : "loss"}
+                    className="text-2xl font-numbers py-1 px-3 h-auto"
+                  >
+                    {isProfit ? "+" : ""}{formatCurrency(Math.abs(player.total_profit || 0))}
+                  </Badge>
+                </div>
               </div>
               <div className="p-6 rounded-xl border border-border bg-accent/5 space-y-2 sm:col-span-2 lg:col-span-1">
-                <p className="text-label text-muted-foreground">Success Ratio</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Success Ratio</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-numbers text-primary">{winRate.toFixed(1)}%</p>
-                  <div className="w-full h-1.5 bg-accent/10 rounded-full overflow-hidden mt-2">
-                    <div className="h-full bg-primary/50" style={{ width: `${winRate}%` }} />
+                  <div className="w-full h-1.5 bg-primary/20 rounded-full overflow-hidden mt-2">
+                    <div className="h-full bg-primary" style={{ width: `${winRate}%` }} />
                   </div>
                 </div>
               </div>
@@ -278,7 +282,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-luxury text-foreground">Player Details</h3>
-                  <p className="text-label text-muted-foreground mt-1">Contact and payment info</p>
+                  <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-1">Contact and payment info</p>
                 </div>
                 {!readOnly && (
                   <div className="flex gap-3">
@@ -306,28 +310,28 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
 
               {(player.email || player.upi_id || player.payment_preference) ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-5 rounded-xl border border-border bg-accent/2 space-y-3">
-                    <div className="flex items-center gap-2 text-label text-muted-foreground">
+                  <div className="p-5 rounded-lg border border-border bg-accent/5 space-y-3">
+                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
                       <Mail className="h-3 w-3" /> Communication
                     </div>
                     <p className="text-sm text-foreground font-medium truncate">{player.email || "Not Disclosed"}</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-border bg-accent/2 space-y-3">
-                    <div className="flex items-center gap-2 text-label text-muted-foreground">
+                  <div className="p-5 rounded-lg border border-border bg-accent/5 space-y-3">
+                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
                       <CreditCard className="h-3 w-3" /> Digital ID
                     </div>
                     <p className="text-sm text-foreground font-medium truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-border bg-accent/2 space-y-3">
-                    <div className="flex items-center gap-2 text-label text-muted-foreground">
+                  <div className="p-5 rounded-lg border border-border bg-accent/5 space-y-3">
+                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
                       <Layers className="h-3 w-3" /> Preference
                     </div>
                     <p className="text-sm text-foreground font-medium capitalize">{player.payment_preference ? (player.payment_preference === PaymentMethodConfig.digital.key ? PaymentMethodConfig.digital.label : PaymentMethodConfig.cash.label) : "Unspecified"}</p>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 rounded-xl border border-dashed border-border bg-accent/2 text-center">
-                  <p className="text-label text-muted-foreground/30">No data associated with this player.</p>
+                <div className="p-8 rounded-xl border border-dashed border-border bg-accent/5 text-center">
+                  <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/30">No data associated with this player.</p>
                 </div>
               )}
             </div>
@@ -365,85 +369,72 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
 
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="table-fixed w-full">
               <TableHeader className="bg-accent/5">
-                <TableRow className="border-b-border hover:bg-transparent items-center">
-                  <TableHead className="h-14 align-middle">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort("date")}
-                      className="h-full w-full justify-start text-label text-muted-foreground hover:text-foreground"
-                    >
-                      Session Date {getSortIcon("date")}
-                    </Button>
+                <TableRow className="border-b-border hover:bg-transparent">
+                  <TableHead
+                    onClick={() => handleSort("date")}
+                    className="w-[25%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground pl-8"
+                  >
+                    <div className="flex items-center gap-1">
+                      Session Day {getSortIcon("date")}
+                    </div>
                   </TableHead>
-                  <TableHead className="h-14 align-middle">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort("buy_ins")}
-                      className="h-full w-full justify-start text-label text-muted-foreground hover:text-foreground"
-                    >
+                  <TableHead
+                    onClick={() => handleSort("buy_ins")}
+                    className="w-[15%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
+                  >
+                    <div className="flex items-center gap-1">
                       Buy-ins {getSortIcon("buy_ins")}
-                    </Button>
+                    </div>
                   </TableHead>
-                  <TableHead className="h-14 align-middle">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort("net_amount")}
-                      className="h-full w-full justify-start text-label text-muted-foreground hover:text-foreground"
-                    >
+                  <TableHead
+                    onClick={() => handleSort("net_amount")}
+                    className="w-[25%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
+                  >
+                    <div className="flex items-center gap-1">
                       Net P&L {getSortIcon("net_amount")}
-                    </Button>
+                    </div>
                   </TableHead>
-                  <TableHead className="h-14 align-middle">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort("final_stack")}
-                      className="h-full w-full justify-start text-label text-muted-foreground hover:text-foreground"
-                    >
+                  <TableHead
+                    onClick={() => handleSort("final_stack")}
+                    className="w-[20%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
+                  >
+                    <div className="flex items-center gap-1">
                       Final Stack {getSortIcon("final_stack")}
-                    </Button>
+                    </div>
                   </TableHead>
-                  <TableHead className="h-14 text-right pr-8">
-                    <span className="text-label text-muted-foreground">Operation</span>
-                  </TableHead>
+                  <TableHead className="w-[15%] h-10 text-right pr-8" />
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-border">
                 {sortedGameHistory.map((game) => {
                   const isWin = game.net_amount > 0;
                   return (
-                    <TableRow key={game.id} className="h-20 border-border group hover:bg-accent/5 transition-colors">
-                      <TableCell className="font-luxury text-sm text-foreground/80 pl-8">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                          {format(new Date(game.games.date), "MMM d, yyyy")}
-                        </div>
+                    <TableRow key={game.id} className="h-12 border-border group hover:bg-accent/5 transition-colors">
+                      <TableCell className="font-luxury text-[11px] text-foreground/80 pl-8">
+                        {format(new Date(game.games.date), "MMM d, yyyy")}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-accent/5 border-border text-muted-foreground font-numbers px-3 py-1 text-sm">
-                          {game.buy_ins} Stacks
-                        </Badge>
+                      <TableCell className="font-numbers text-xs text-muted-foreground">
+                        {game.buy_ins} <span className="text-[10px] opacity-50 uppercase font-luxury tracking-tighter">Stacks</span>
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={cn(
-                            "px-4 py-1.5 font-numbers tracking-widest border-0 text-sm",
-                            isWin ? "bg-state-success/20 text-state-success" : "bg-state-error/20 text-state-error"
-                          )}
+                          variant={isWin ? "profit" : "loss"}
+                          className="font-numbers tracking-widest text-[11px] px-2 py-0.5"
                         >
                           {isWin ? "+" : ""}{formatCurrency(game.net_amount)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-numbers text-base text-foreground/60">
+                      <TableCell className="font-numbers text-xs text-foreground/60">
                         {formatCurrency(game.final_stack)}
                       </TableCell>
                       <TableCell className="text-right pr-8">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleNavigateGame(game.game_id)}
-                          className="text-label hover:bg-accent/10 text-primary px-4 h-9 rounded-full border border-primary/10"
+                          className="text-[10px] h-7 px-3 rounded-full font-luxury uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
                         >
                           Examine
                         </Button>

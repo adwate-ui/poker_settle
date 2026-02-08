@@ -57,7 +57,8 @@ export const getNextPlayerIndex = (
 export const getStartingPlayerIndex = (
   stage: HandStage,
   activePlayers: GamePlayer[],
-  buttonPlayerId: string
+  buttonPlayerId: string,
+  playersInHand: string[]
 ): number => {
   if (activePlayers.length === 0) return 0;
 
@@ -74,12 +75,35 @@ export const getStartingPlayerIndex = (
       return buttonIndex;
     }
 
-    const utgIndex = (buttonIndex + 3) % activePlayers.length;
-    return utgIndex;
+    const theoreticalUtgIndex = (buttonIndex + 3) % activePlayers.length;
+
+    // Check if theoretical UTG is in hand, otherwise rotate
+    let currentIndex = theoreticalUtgIndex;
+    let attempts = 0;
+    while (attempts < activePlayers.length) {
+      const player = activePlayers[currentIndex];
+      if (playersInHand.includes(player.player_id)) {
+        return currentIndex;
+      }
+      currentIndex = (currentIndex + 1) % activePlayers.length;
+      attempts++;
+    }
+    return theoreticalUtgIndex; // Fallback
   } else {
-    // Postflop: First active player immediately left of button
-    const firstPlayerIndex = (buttonIndex + 1) % activePlayers.length;
-    return firstPlayerIndex;
+    // Postflop: First active player immediately left of button who is still in hand
+    let currentIndex = (buttonIndex + 1) % activePlayers.length;
+    let attempts = 0;
+
+    while (attempts < activePlayers.length) {
+      const player = activePlayers[currentIndex];
+      if (playersInHand.includes(player.player_id)) {
+        return currentIndex;
+      }
+      currentIndex = (currentIndex + 1) % activePlayers.length;
+      attempts++;
+    }
+
+    return (buttonIndex + 1) % activePlayers.length; // Fallback
   }
 };
 
@@ -319,7 +343,7 @@ export const resetForNewStreet = (
   buttonPlayerId: string
 ): Partial<HandState> => {
   const newStage = getNextStage(state.stage);
-  const startingIndex = getStartingPlayerIndex(newStage, state.activePlayers, buttonPlayerId);
+  const startingIndex = getStartingPlayerIndex(newStage, state.activePlayers, buttonPlayerId, state.playersInHand);
 
   // Reset street-specific bets and aggressor tracking
   const resetBets: Record<string, number> = {};

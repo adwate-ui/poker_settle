@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { createSharedClient } from "@/integrations/supabase/client-shared";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, User, Filter, Calendar, History } from "lucide-react";
 import {
   Select,
@@ -159,15 +160,15 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           <p className="text-sm text-muted-foreground">No logs found for "{filterName}" in this archive.</p>
         </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden bg-card shadow-sm">
+        <div className="rounded-xl border overflow-hidden">
           <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
-            <Table>
+            <Table className="table-fixed w-full">
               <TableHeader className="sticky top-0 z-10 bg-card border-b">
-                <TableRow className="hover:bg-transparent text-xs sm:text-sm">
-                  <TableHead className="p-2 sm:p-4 sm:pl-6">Player</TableHead>
-                  <TableHead className="p-2 sm:p-4">Amount</TableHead>
-                  <TableHead className="p-2 sm:p-4">Total</TableHead>
-                  <TableHead className="text-right p-2 sm:p-4 sm:pr-6">Time</TableHead>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[40%] p-2 sm:p-4 sm:pl-6 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Player</TableHead>
+                  <TableHead className="w-[20%] p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amount</TableHead>
+                  <TableHead className="w-[20%] p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Total</TableHead>
+                  <TableHead className="w-[20%] text-right p-2 sm:p-4 sm:pr-6 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -177,8 +178,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                     className="cursor-default text-xs sm:text-sm"
                   >
                     <TableCell className="p-2 sm:p-4 sm:pl-6">
-                      <div className="flex items-center gap-2 sm:gap-3 max-w-[100px] sm:max-w-none">
-                        <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground/50 flex-shrink-0" />
+                      <div className="flex items-center gap-2 sm:gap-3 max-w-[150px] sm:max-w-none">
                         <Link
                           to={entry.player_id ? `/players/${entry.player_id}` : '#'}
                           className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
@@ -187,17 +187,19 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                         </Link>
                       </div>
                     </TableCell>
-                    <TableCell className="p-2 sm:p-4">
-                      <span className={`font-medium ${entry.buy_ins_added > 0 ? "text-state-success" : "text-destructive"}`}>
+                    <TableCell className="p-2 sm:p-4 font-numbers">
+                      <Badge
+                        variant={entry.buy_ins_added > 0 ? "profit" : "loss"}
+                        className="h-5 px-1.5 text-[9px]"
+                      >
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                      </span>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="p-2 sm:p-4">
+                    <TableCell className="p-2 sm:p-4 font-numbers">
                       <span className="text-muted-foreground">{entry.total_buy_ins_after}</span>
                     </TableCell>
                     <TableCell className="text-right p-2 sm:p-4 sm:pr-6">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs">
-                        <Calendar className="h-3 w-3 opacity-50" />
+                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs font-numbers">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                       </div>
                     </TableCell>
