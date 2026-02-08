@@ -372,23 +372,34 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     if (isCompletingGame) return;
 
     setIsCompletingGame(true);
+    // Initial loading state
+    const loadingToastId = toast.loading("Saving game...");
+
     const allSettlements = [...(currentGame.settlements || []), ...settlements];
 
     try {
-      // 1. First, complete the game in the database
+      // 1. Complete the game in the database
       await completeGame(currentGame.id, allSettlements);
-      toast.success("Game saved. Syncing ledger and sending notifications in 30s...");
 
-      // 2. Wait for 30 seconds for data propagation
-      await new Promise(resolve => setTimeout(resolve, 30000));
+      // Update toast for the delay phase
+      toast.dismiss(loadingToastId);
+      const syncToastId = toast.loading("Syncing ledger & preparing notifications (10s)...");
 
-      // 3. Then, attempt to send WhatsApp summaries
+      // 2. Wait for 10 seconds for data propagation (Reduced from 30s)
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      toast.dismiss(syncToastId);
+
+      // 3. Attempt to send WhatsApp summaries
       try {
         toast.info("Sending WhatsApp summaries...");
 
         // Get game token for shareable link
         const linkData = await createOrGetSharedLink('game', currentGame.id);
         const gameToken = linkData?.accessToken || '';
+
+        if (!gameToken) {
+          console.warn("Could not generate game token for WhatsApp link");
+        }
 
         // Construct game players data with their IDs and net amounts
         const gamePlayersData = gamePlayers.map(gp => ({
@@ -404,13 +415,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           gamePlayersData,
           allSettlements
         );
+
+        toast.success("Game finalized & notifications sent!");
       } catch (wsError) {
         console.error("Failed to send WhatsApp summaries:", wsError);
+        // Do not block navigation on notification failure
+        toast.error("Game saved, but WhatsApp notifications failed.");
       }
 
-      // 4. Always navigate to the game detail page after success
+      // 4. Always navigate to the game detail page
       navigate(`/games/${currentGame.id}`);
+
     } catch (error) {
+      toast.dismiss(loadingToastId);
       console.error("Error completing game:", error);
       toast.error(ErrorMessages.game.complete(error));
       setIsCompletingGame(false);

@@ -22,4 +22,12 @@ export const toast = {
       className: "border-yellow-500/20 bg-popover text-yellow-600 dark:text-yellow-400",
     });
   },
+  loading: (message: string) => {
+    return sonnerToast.loading(message, {
+      className: "border-border bg-popover text-popover-foreground",
+    });
+  },
+  dismiss: (id?: string | number) => {
+    sonnerToast.dismiss(id);
+  },
 };
