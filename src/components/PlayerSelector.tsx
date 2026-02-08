@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PlayerFormDialog, PlayerFormData } from '@/components/PlayerFormDialog';
 import OptimizedAvatar from '@/components/OptimizedAvatar';
+import { ResponsiveName } from '@/components/ResponsiveName';
+import { ResponsiveCurrency } from '@/components/ResponsiveCurrency';
 
 interface PlayerSelectorProps {
   allPlayers: Player[];
@@ -115,22 +117,22 @@ export const PlayerSelector = ({
                     />
 
                     {/* Player Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-luxury font-semibold truncate">{player.name}</span>
+                    <div className="flex-1 min-w-0 flex items-center gap-3 overflow-hidden">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ResponsiveName name={player.name} className="font-medium text-sm" />
                         {player.total_games && player.total_games > 10 && (
                           <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                      <div className="flex items-center gap-2 flex-nowrap shrink-0">
+                        <Badge variant="outline" className="text-tiny h-5 px-1.5 whitespace-nowrap">
                           <Users className="h-3 w-3 mr-1" />
-                          {player.total_games || 0} games
+                          {player.total_games || 0}
                         </Badge>
                         {player.total_profit !== undefined && (
                           <Badge
-                            variant={player.total_profit >= 0 ? 'profit' : 'destructive'}
-                            className="text-[10px] h-5 px-1.5"
+                            variant={player.total_profit >= 0 ? 'profit' : 'loss'}
+                            className="text-tiny h-5 px-1.5 whitespace-nowrap"
                           >
                             {player.total_profit >= 0 ? (
                               <TrendingUp className="h-3 w-3 mr-1" />
@@ -138,7 +140,7 @@ export const PlayerSelector = ({
                               <TrendingDown className="h-3 w-3 mr-1" />
                             )}
                             {player.total_profit >= 0 ? '+' : ''}
-                            {formatCurrency(Math.abs(player.total_profit))}
+                            <ResponsiveCurrency amount={Math.abs(player.total_profit)} className="ml-0.5" />
                           </Badge>
                         )}
                       </div>
@@ -341,7 +343,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
     <button
       onClick={() => onSelect(player)}
       className={cn(
-        "w-full text-left p-4 rounded-2xl glass-panel hover:bg-primary/10 hover:shadow-[0_0_15px_rgba(212,184,60,0.2)] transition-all group border-0",
+        "w-full text-left p-0 px-3 h-14 flex items-center rounded-2xl glass-panel hover:bg-primary/10 hover:shadow-[0_0_15px_rgba(212,184,60,0.2)] transition-all group border-0",
         "focus:outline-none focus:ring-2 focus:ring-primary/50"
       )}
     >
@@ -353,22 +355,22 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
         />
 
         {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-luxury font-semibold truncate text-lg">{player.name}</span>
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-3 overflow-hidden">
+          <div className="flex items-center gap-2 min-w-0">
+            <ResponsiveName name={player.name} className="font-medium text-base" />
             {player.total_games && player.total_games > 10 && (
               <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+          <div className="flex items-center gap-2 flex-nowrap shrink-0">
+            <Badge variant="outline" className="text-tiny h-5 px-1.5 whitespace-nowrap">
               <Users className="h-3 w-3 mr-1" />
-              {player.total_games || 0} games
+              {player.total_games || 0}
             </Badge>
             {player.total_profit !== undefined && (
               <Badge
-                variant={player.total_profit >= 0 ? 'profit' : 'destructive'}
-                className="text-[10px] h-5 px-1.5"
+                variant={player.total_profit >= 0 ? 'profit' : 'loss'}
+                className="text-tiny h-5 px-1.5 whitespace-nowrap"
               >
                 {player.total_profit >= 0 ? (
                   <TrendingUp className="h-3 w-3 mr-1" />
@@ -376,7 +378,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
                   <TrendingDown className="h-3 w-3 mr-1" />
                 )}
                 {player.total_profit >= 0 ? '+' : ''}
-                {formatCurrency(Math.abs(player.total_profit))}
+                <ResponsiveCurrency amount={Math.abs(player.total_profit)} className="ml-0.5" />
               </Badge>
             )}
           </div>

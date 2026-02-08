@@ -76,12 +76,16 @@ TableRow.displayName = "TableRow"
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
-  React.ThHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
+  React.ThHTMLAttributes<HTMLTableCellElement> & {
+    align?: 'left' | 'center' | 'right';
+  }
+>(({ className, align = 'left', ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-luxury font-bold text-muted-foreground uppercase tracking-widest text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-medium font-luxury text-muted-foreground uppercase tracking-widest text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      align === 'center' && "text-center",
+      align === 'right' && "text-right",
       className
     )}
     {...props}
@@ -91,12 +95,18 @@ TableHead.displayName = "TableHead"
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
-  React.TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
+  React.TdHTMLAttributes<HTMLTableCellElement> & {
+    isNumeric?: boolean;
+    align?: 'left' | 'center' | 'right';
+  }
+>(({ className, isNumeric, align = 'left', ...props }, ref) => (
   <td
     ref={ref}
     className={cn(
-      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-body text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "p-2 py-3 sm:px-4 sm:py-4 truncate whitespace-nowrap align-middle font-medium font-body text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      isNumeric && "font-numbers",
+      align === 'center' && "text-center",
+      align === 'right' && "text-right",
       className
     )}
     {...props}

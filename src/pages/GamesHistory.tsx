@@ -338,7 +338,8 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className="cursor-pointer text-right"
+              className="cursor-pointer"
+              align="right"
             >
               <div className="flex items-center justify-end gap-1">
                 Buy-in
@@ -347,7 +348,8 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("players")}
-              className="cursor-pointer text-center"
+              className="cursor-pointer"
+              align="center"
             >
               <div className="flex items-center justify-center gap-1">
                 Players
@@ -356,14 +358,15 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("chips")}
-              className="cursor-pointer text-right"
+              className="cursor-pointer"
+              align="right"
             >
               <div className="flex items-center justify-end gap-1">
                 Total Pot
                 <ArrowUpDown className="h-3 w-3 opacity-50" />
               </div>
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead align="right">
               {selectedPlayer !== "all" ? "Player P&L" : "P&L"}
             </TableHead>
           </TableRow>
@@ -381,18 +384,18 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 <TableCell className="font-medium whitespace-nowrap">
                   {format(new Date(game.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell className="text-right font-numbers text-muted-foreground">
+                <TableCell align="right" isNumeric className="text-muted-foreground">
                   <ResponsiveCurrency amount={game.buy_in_amount} />
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell align="center">
                   <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
                     {game.player_count}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right font-numbers font-semibold text-muted-foreground">
+                <TableCell align="right" isNumeric className="font-semibold text-muted-foreground">
                   <ResponsiveCurrency amount={game.total_pot} />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell align="right">
                   {selectedPlayer !== "all" && playerData ? (
                     <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1.5">
                       <ResponsiveCurrency amount={playerData.net_amount} />

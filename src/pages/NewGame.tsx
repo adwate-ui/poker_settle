@@ -204,7 +204,7 @@ const NewGame = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={continueGame} className="w-full h-12 text-base font-luxury tracking-widest uppercase hover:scale-[1.02] transition-transform shadow-lg shadow-gold-500/10" variant="default">
+              <Button onClick={continueGame} className="w-full h-12 text-base font-luxury tracking-widest uppercase hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10" variant="default">
                 Resume Active Game
               </Button>
             </CardContent>
@@ -269,7 +269,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -289,7 +289,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-black/5 dark:bg-white/5 border-0 border-b border-black/10 dark:border-white/20 px-4 rounded-none text-xl font-numbers text-black dark:text-white placeholder:text-black/10 dark:placeholder:text-white/10 focus:border-gold-500 focus:bg-black/10 dark:focus:bg-white/10 transition-all duration-300 ease-out"
+                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
             </div>
           </div>

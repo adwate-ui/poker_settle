@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { UserProfile } from "./UserProfile";
 import { cn } from "@/lib/utils";
 import { Play, History, Users, Hand } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 interface TabLayoutProps {
   children: React.ReactNode;
@@ -40,52 +41,52 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
               onClick={() => handleTabChange("new-game")}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
-                currentTab === "new-game" ? "text-gold-400" : "text-gray-500"
+                currentTab === "new-game" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "new-game" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Play className={cn("h-5 w-5", currentTab === "new-game" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Play className={cn("h-5 w-5", currentTab === "new-game" && "drop-shadow-glow")} />
               <span className="text-[10px] font-luxury uppercase tracking-widest">New</span>
             </button>
             <button
               onClick={() => handleTabChange("games-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
-                currentTab === "games-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "games-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "games-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <History className={cn("h-5 w-5", currentTab === "games-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <History className={cn("h-5 w-5", currentTab === "games-history" && "drop-shadow-glow")} />
               <span className="text-[10px] font-luxury uppercase tracking-widest">Games</span>
             </button>
             <button
               onClick={() => handleTabChange("players-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
-                currentTab === "players-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "players-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "players-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Users className={cn("h-5 w-5", currentTab === "players-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Users className={cn("h-5 w-5", currentTab === "players-history" && "drop-shadow-glow")} />
               <span className="text-[10px] font-luxury uppercase tracking-widest">Players</span>
             </button>
             <button
               onClick={() => handleTabChange("hands-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative group",
-                currentTab === "hands-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "hands-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "hands-history" && (
-                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Hand className={cn("h-5 w-5", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Hand className={cn("h-5 w-5", currentTab === "hands-history" && "drop-shadow-glow")} />
               <span className="text-[10px] font-luxury uppercase tracking-widest">Hands</span>
             </button>
           </div>
@@ -96,12 +97,13 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-luxury font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-200 to-gold-500 drop-shadow-sm">
+      <div className="container mx-auto px-4 pt-2 pb-8 md:py-8 max-w-7xl">
+        <div className="flex justify-between items-center mb-4 md:mb-10">
+          <h1 className="text-xl md:text-3xl font-luxury font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary/80 to-primary drop-shadow-sm">
             Poker Tracker
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             <UserProfile />
           </div>
         </div>
@@ -134,52 +136,52 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
               onClick={() => handleTabChange("new-game")}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
-                currentTab === "new-game" ? "text-gold-400" : "text-gray-500"
+                currentTab === "new-game" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "new-game" && (
-                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Play className={cn("h-4 w-4", currentTab === "new-game" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Play className={cn("h-4 w-4", currentTab === "new-game" && "drop-shadow-glow")} />
               <span className="text-[8px] font-luxury uppercase tracking-wider">New</span>
             </button>
             <button
               onClick={() => handleTabChange("games-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
-                currentTab === "games-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "games-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "games-history" && (
-                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <History className={cn("h-4 w-4", currentTab === "games-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <History className={cn("h-4 w-4", currentTab === "games-history" && "drop-shadow-glow")} />
               <span className="text-[8px] font-luxury uppercase tracking-wider">Games</span>
             </button>
             <button
               onClick={() => handleTabChange("players-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
-                currentTab === "players-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "players-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "players-history" && (
-                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Users className={cn("h-4 w-4", currentTab === "players-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Users className={cn("h-4 w-4", currentTab === "players-history" && "drop-shadow-glow")} />
               <span className="text-[8px] font-luxury uppercase tracking-wider">Players</span>
             </button>
             <button
               onClick={() => handleTabChange("hands-history")}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
-                currentTab === "hands-history" ? "text-gold-400" : "text-gray-500"
+                currentTab === "hands-history" ? "text-primary" : "text-muted-foreground"
               )}
             >
               {currentTab === "hands-history" && (
-                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
-              <Hand className={cn("h-4 w-4", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
+              <Hand className={cn("h-4 w-4", currentTab === "hands-history" && "drop-shadow-glow")} />
               <span className="text-[8px] font-luxury uppercase tracking-wider">Hands</span>
             </button>
           </div>

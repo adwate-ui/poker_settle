@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-tiny sm:text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-tiny sm:text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -13,9 +13,9 @@ const badgeVariants = cva(
         destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground border-border",
         stats: "bg-black/5 dark:bg-white/5 border-border text-muted-foreground font-numbers px-3 py-1 font-normal",
-        profit: "border-transparent bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
-        loss: "border-transparent bg-rose-600 text-white hover:bg-rose-700 shadow-md",
-        luxury: "bg-primary/10 border-primary/20 text-primary font-luxury uppercase tracking-widest px-3 py-1",
+        profit: "border-transparent bg-state-success text-state-success-foreground hover:bg-state-success/80 shadow-md",
+        loss: "border-transparent bg-state-error text-state-error-foreground hover:bg-state-error/80 shadow-md",
+        luxury: "bg-primary/10 border-primary/20 text-primary px-3 py-1",
         // Semantic state variants
         info: "border-transparent bg-state-info/10 text-state-info hover:bg-state-info/20",
         warning: "border-transparent bg-state-warning/10 text-state-warning hover:bg-state-warning/20",

@@ -125,13 +125,13 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
   const uniquePlayerNames = Array.from(new Set(history.map(entry => entry.player_name))).sort();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Player Name Filter - Dropdown */}
       {!loading && history.length > 0 && (
-        <div className="max-w-[250px]">
+        <div className="max-w-[200px] mb-4">
           <Select value={filterName} onValueChange={setFilterName}>
-            <SelectTrigger className="w-full">
-              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+            <SelectTrigger className="w-full h-9 bg-muted/50 border-input/50">
+              <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
               <SelectValue placeholder="All Players" />
             </SelectTrigger>
             <SelectContent>
