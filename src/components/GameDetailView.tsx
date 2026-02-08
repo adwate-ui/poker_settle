@@ -550,11 +550,11 @@ export const GameDetailView = ({
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Player</TableHead>
-                    <TableHead align="center">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                    <TableHead align="center">P&L</TableHead>
-                    {!isMobile && <TableHead align="center">Cashout</TableHead>}
+                    <TableHead>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                    <TableHead>P&L</TableHead>
+                    {!isMobile && <TableHead>Cashout</TableHead>}
                     {showOwnerControls && fetchBuyInHistory && (
-                      <TableHead align="right">{isMobile ? "Hist" : "Audit"}</TableHead>
+                      <TableHead>{isMobile ? "Hist" : "Audit"}</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
@@ -575,13 +575,13 @@ export const GameDetailView = ({
                             {playerName}
                           </Link>
                         </TableCell>
-                        <TableCell align="center">
+                        <TableCell>
                           <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
                             {gamePlayer.buy_ins}
                           </Badge>
                         </TableCell>
-                        <TableCell align="center">
-                          <div className="flex justify-center">
+                        <TableCell>
+                          <div>
                             <Badge
                               variant={isWin ? "profit" : "loss"}
                               className="font-numbers px-1.5"
@@ -591,12 +591,12 @@ export const GameDetailView = ({
                           </div>
                         </TableCell>
                         {!isMobile && (
-                          <TableCell align="center" isNumeric className="text-muted-foreground whitespace-nowrap">
+                          <TableCell isNumeric className="text-muted-foreground whitespace-nowrap">
                             {formatCurrency(finalStack)}
                           </TableCell>
                         )}
                         {showOwnerControls && fetchBuyInHistory && (
-                          <TableCell align="right">
+                          <TableCell>
                             <BuyInHistoryDialog
                               gamePlayerId={gamePlayer.id}
                               playerName={playerName}
@@ -653,17 +653,17 @@ export const GameDetailView = ({
                     <TableRow className="hover:bg-transparent">
                       <TableHead>From</TableHead>
                       <TableHead>To</TableHead>
-                      <TableHead align="right">Amount</TableHead>
-                      <TableHead align="center">Type</TableHead>
-                      <TableHead align="center">Sts</TableHead>
-                      <TableHead align="right">Act</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Sts</TableHead>
+                      <TableHead>Act</TableHead>
                     </TableRow>
                   ) : (
                     <TableRow className="hover:bg-transparent">
                       <TableHead>From</TableHead>
                       <TableHead>To</TableHead>
-                      <TableHead align="right">{isMobile ? "Amt" : "Amount"}</TableHead>
-                      <TableHead align="right">{isMobile ? "Sts" : "Status"}</TableHead>
+                      <TableHead>{isMobile ? "Amt" : "Amount"}</TableHead>
+                      <TableHead>{isMobile ? "Sts" : "Status"}</TableHead>
                     </TableRow>
                   )}
                 </TableHeader>
@@ -690,12 +690,12 @@ export const GameDetailView = ({
                             {settlement.to}
                           </Link>
                         </TableCell>
-                        <TableCell align="right" isNumeric className="whitespace-nowrap">
+                        <TableCell isNumeric className="whitespace-nowrap">
                           {formatCurrency(settlement.amount)}
                         </TableCell>
 
                         {hasManual && (
-                          <TableCell align="center">
+                          <TableCell>
                             {settlement.isManual ? (
                               <Badge variant="outline" className="font-luxury uppercase tracking-tighter">
                                 {isMobile ? "M" : "Manual"}
@@ -706,8 +706,8 @@ export const GameDetailView = ({
                           </TableCell>
                         )}
 
-                        <TableCell align="center">
-                          <div className="flex items-center justify-center">
+                        <TableCell>
+                          <div className="flex items-center">
                             {showOwnerControls && confirmation ? (
                               <Button
                                 variant="ghost"
@@ -735,7 +735,7 @@ export const GameDetailView = ({
                         </TableCell>
 
                         {hasManual && (
-                          <TableCell align="right">
+                          <TableCell>
                             {settlement.isManual && showOwnerControls && (
                               <Button
                                 variant="ghost"

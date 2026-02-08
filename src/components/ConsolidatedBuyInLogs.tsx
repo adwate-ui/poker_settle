@@ -168,7 +168,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
               <TableHead>Player</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Total</TableHead>
-              <TableHead className="text-right">Time</TableHead>
+              <TableHead>Time</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -195,8 +195,8 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                 <TableCell className="font-numbers text-muted-foreground whitespace-nowrap">
                   {entry.total_buy_ins_after}
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground font-numbers whitespace-nowrap">
+                <TableCell>
+                  <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground font-numbers whitespace-nowrap">
                     {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                   </div>
                 </TableCell>
