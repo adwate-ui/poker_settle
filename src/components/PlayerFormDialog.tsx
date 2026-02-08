@@ -3,7 +3,7 @@ import { Player } from "@/types/poker";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/notifications";
 import { validateUpiId } from "@/utils/playerUtils";
-import { Loader2, Mail, CreditCard, User, ShieldCheck, Coins, Check } from "lucide-react";
+import { Loader2, Phone, CreditCard, User, ShieldCheck, Coins, Check } from "lucide-react";
 import { PaymentMethodConfig } from "@/config/localization";
 import {
   Dialog,
@@ -35,7 +35,7 @@ interface PlayerFormDialogProps {
 
 export interface PlayerFormData {
   name: string;
-  email?: string;
+  phone_number?: string;
   upi_id?: string;
   payment_preference?: string;
 }
@@ -49,7 +49,7 @@ export const PlayerFormDialog = ({
   description = "Enter player details.",
 }: PlayerFormDialogProps) => {
   const [name, setName] = useState(initialData?.name || "");
-  const [email, setEmail] = useState(initialData?.email || "");
+  const [phoneNumber, setPhoneNumber] = useState(initialData?.phone_number || "");
   const [upiId, setUpiId] = useState(initialData?.upi_id || "");
   const [paymentPreference, setPaymentPreference] = useState<string>(
     initialData?.payment_preference || PaymentMethodConfig.digital.key
@@ -59,13 +59,13 @@ export const PlayerFormDialog = ({
   // Field-level validation state
   const [errors, setErrors] = useState<{
     name?: string;
-    email?: string;
+    phoneNumber?: string;
     upiId?: string;
   }>({});
 
   const [touched, setTouched] = useState<{
     name?: boolean;
-    email?: boolean;
+    phoneNumber?: boolean;
     upiId?: boolean;
   }>({});
 
@@ -73,13 +73,13 @@ export const PlayerFormDialog = ({
   useEffect(() => {
     if (open && initialData) {
       setName(initialData.name || "");
-      setEmail(initialData.email || "");
+      setPhoneNumber(initialData.phone_number || "");
       setUpiId(initialData.upi_id || "");
       setPaymentPreference(initialData.payment_preference || PaymentMethodConfig.digital.key);
     } else if (open && !initialData) {
       // Reset for new player
       setName("");
-      setEmail("");
+      setPhoneNumber("");
       setUpiId("");
       setPaymentPreference(PaymentMethodConfig.digital.key);
     }
@@ -89,7 +89,7 @@ export const PlayerFormDialog = ({
   }, [open, initialData]);
 
   // Real-time validation
-  const validateField = (fieldName: 'name' | 'email' | 'upiId', value: string) => {
+  const validateField = (fieldName: 'name' | 'phoneNumber' | 'upiId', value: string) => {
     const newErrors = { ...errors };
 
     switch (fieldName) {
@@ -103,11 +103,11 @@ export const PlayerFormDialog = ({
         }
         break;
 
-      case 'email':
-        if (value.trim() && !validateEmail(value.trim())) {
-          newErrors.email = "Invalid email address";
+      case 'phoneNumber':
+        if (value.trim() && !validatePhoneNumber(value.trim())) {
+          newErrors.phoneNumber = "Phone number must be 10-15 digits";
         } else {
-          delete newErrors.email;
+          delete newErrors.phoneNumber;
         }
         break;
 
@@ -124,13 +124,13 @@ export const PlayerFormDialog = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleFieldChange = (fieldName: 'name' | 'email' | 'upiId', value: string) => {
+  const handleFieldChange = (fieldName: 'name' | 'phoneNumber' | 'upiId', value: string) => {
     switch (fieldName) {
       case 'name':
         setName(value);
         break;
-      case 'email':
-        setEmail(value);
+      case 'phoneNumber':
+        setPhoneNumber(value);
         break;
       case 'upiId':
         setUpiId(value);
@@ -143,15 +143,15 @@ export const PlayerFormDialog = ({
     }
   };
 
-  const handleBlur = (fieldName: 'name' | 'email' | 'upiId') => {
+  const handleBlur = (fieldName: 'name' | 'phoneNumber' | 'upiId') => {
     setTouched({ ...touched, [fieldName]: true });
 
-    const value = fieldName === 'name' ? name : fieldName === 'email' ? email : upiId;
+    const value = fieldName === 'name' ? name : fieldName === 'phoneNumber' ? phoneNumber : upiId;
     validateField(fieldName, value);
   };
 
-  const isFieldValid = (fieldName: 'name' | 'email' | 'upiId'): boolean => {
-    const value = fieldName === 'name' ? name : fieldName === 'email' ? email : upiId;
+  const isFieldValid = (fieldName: 'name' | 'phoneNumber' | 'upiId'): boolean => {
+    const value = fieldName === 'name' ? name : fieldName === 'phoneNumber' ? phoneNumber : upiId;
     return touched[fieldName] && !errors[fieldName] && value.trim().length > 0;
   };
 
@@ -159,15 +159,15 @@ export const PlayerFormDialog = ({
     e.preventDefault();
 
     // Mark all fields as touched
-    setTouched({ name: true, email: true, upiId: true });
+    setTouched({ name: true, phoneNumber: true, upiId: true });
 
     // Validate all fields
     const isNameValid = validateField('name', name);
-    const isEmailValid = validateField('email', email);
+    const isPhoneValid = validateField('phoneNumber', phoneNumber);
     const isUpiIdValid = validateField('upiId', upiId);
 
     // Check if form has any errors
-    if (!isNameValid || !isEmailValid || !isUpiIdValid) {
+    if (!isNameValid || !isPhoneValid || !isUpiIdValid) {
       toast.error("Please fix the errors before submitting");
       return;
     }
@@ -176,7 +176,7 @@ export const PlayerFormDialog = ({
     try {
       const playerData: PlayerFormData = {
         name: name.trim(),
-        email: email.trim() || '',
+        phone_number: phoneNumber.trim() || '',
         upi_id: upiId.trim() || '',
         payment_preference: paymentPreference,
       };
@@ -185,7 +185,7 @@ export const PlayerFormDialog = ({
 
       // Reset form
       setName("");
-      setEmail("");
+      setPhoneNumber("");
       setUpiId("");
       setPaymentPreference(PaymentMethodConfig.digital.key);
       onOpenChange(false);
@@ -197,14 +197,14 @@ export const PlayerFormDialog = ({
     }
   };
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  const validatePhoneNumber = (phone: string): boolean => {
+    const phoneRegex = /^\d{10,15}$/;
+    return phoneRegex.test(phone.replace(/\+/g, ''));
   };
 
   const handleCancel = () => {
     setName(initialData?.name || "");
-    setEmail(initialData?.email || "");
+    setPhoneNumber(initialData?.phone_number || "");
     setUpiId(initialData?.upi_id || "");
     setPaymentPreference(initialData?.payment_preference || PaymentMethodConfig.digital.key);
     onOpenChange(false);
@@ -264,14 +264,14 @@ export const PlayerFormDialog = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">Email Address (Optional)</Label>
-                  {email && (
+                  <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground ml-1 mb-2 block font-medium">WhatsApp Number (Optional)</Label>
+                  {phoneNumber && (
                     <button
                       type="button"
                       onClick={() => {
-                        setEmail("");
-                        setErrors({ ...errors, email: undefined });
-                        setTouched({ ...touched, email: false });
+                        setPhoneNumber("");
+                        setErrors({ ...errors, phoneNumber: undefined });
+                        setTouched({ ...touched, phoneNumber: false });
                       }}
                       disabled={isSubmitting}
                       className="text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
@@ -280,26 +280,26 @@ export const PlayerFormDialog = ({
                 </div>
                 <div className="relative">
                   <Input
-                    type="email"
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(e) => handleFieldChange('email', e.target.value)}
-                    onBlur={() => handleBlur('email')}
+                    type="tel"
+                    placeholder="919876543210"
+                    value={phoneNumber}
+                    onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
+                    onBlur={() => handleBlur('phoneNumber')}
                     disabled={isSubmitting}
                     className={cn(
                       "h-14 bg-accent/5 pr-10",
-                      errors.email && touched.email && "border-destructive focus-visible:ring-destructive",
-                      isFieldValid('email') && "border-green-500 focus-visible:ring-green-500"
+                      errors.phoneNumber && touched.phoneNumber && "border-destructive focus-visible:ring-destructive",
+                      isFieldValid('phoneNumber') && "border-green-500 focus-visible:ring-green-500"
                     )}
                   />
-                  {isFieldValid('email') && (
+                  {isFieldValid('phoneNumber') && (
                     <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-state-success" />
                   )}
                 </div>
-                {errors.email && touched.email && (
+                {errors.phoneNumber && touched.phoneNumber && (
                   <p className="text-xs text-destructive ml-1 flex items-center gap-1">
                     <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
-                    {errors.email}
+                    {errors.phoneNumber}
                   </p>
                 )}
               </div>

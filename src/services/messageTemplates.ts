@@ -47,6 +47,15 @@ export interface CombinedGameSettlementMessageData {
   upiId?: string;
 }
 
+export interface WhatsAppSessionSummaryData {
+  playerName: string;
+  gameDate: string;
+  netAmount: number;
+  gameLink: string;
+  settlements: Array<Settlement & { toUpiId?: string; confirmationId?: string }>;
+  isWinner: boolean;
+}
+
 /**
  * Generate welcome message for newly added player
  */
@@ -284,6 +293,50 @@ ${data.gameLink}
   }
 
   message += `\nPlease settle at your earliest convenience. Thank you! 🙏`;
+
+  return message;
+}
+
+/**
+ * Generate a unified WhatsApp session summary message
+ * strictly following the requested mobile-first format
+ */
+export function generateWhatsAppSessionSummary(data: WhatsAppSessionSummaryData): string {
+  const netFormatted = (data.netAmount >= 0 ? '+' : '-') + formatCurrency(Math.abs(data.netAmount));
+  const dateObj = new Date(data.gameDate);
+  const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+
+  let message = `♣️ *Poker Session: ${dateFormatted}*\n`;
+  message += `💰 *Net: ${netFormatted}*\n\n`;
+
+  message += `📊 *Game Link:* ${data.gameLink}\n\n`;
+
+  if (data.settlements.length > 0) {
+    message += `🤝 *Settlements:*\n`;
+
+    data.settlements.forEach((s) => {
+      if (data.isWinner) {
+        // Player is a winner, they receive money
+        message += `• Receive ${formatCurrency(s.amount)} from ${s.from}\n`;
+      } else {
+        // Player is a loser, they pay money
+        message += `• Pay ${s.to} ${formatCurrency(s.amount)}`;
+
+        if (s.toUpiId) {
+          const upiLink = generateUpiPaymentLink(
+            s.toUpiId,
+            s.to,
+            s.amount,
+            `Poker ${dateFormatted}`
+          );
+          message += `: ${upiLink}`;
+        }
+        message += `\n`;
+      }
+    });
+  } else {
+    message += `✅ No pending settlements.`;
+  }
 
   return message;
 }

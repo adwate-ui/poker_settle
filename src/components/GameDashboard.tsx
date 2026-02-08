@@ -66,6 +66,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { sendSessionSummaryNotification } from "@/services/whatsappNotifications";
 import {
   Collapsible,
   CollapsibleContent,
@@ -376,12 +377,40 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     try {
       await completeGame(currentGame.id, allSettlements);
       toast.success("Game finalized successfully");
+
+      // Send WhatsApp summaries asynchronously
+      try {
+        toast.info("WhatsApp summaries are being sent...");
+
+        // Get game token for shareable link
+        const linkData = await createOrGetSharedLink('game', currentGame.id);
+        const gameToken = linkData?.accessToken || '';
+
+        // Construct game players data with their IDs and net amounts
+        const gamePlayersData = gamePlayers.map(gp => ({
+          player_id: gp.player_id,
+          net_amount: gp.net_amount
+        }));
+
+        await sendSessionSummaryNotification(
+          currentGame.id,
+          currentGame.date,
+          gameToken,
+          players,
+          gamePlayersData,
+          allSettlements
+        );
+      } catch (wsError) {
+        console.error("Failed to send WhatsApp summaries:", wsError);
+        // We don't block navigation on WhatsApp failure, just log it
+      }
+
       navigate(`/games/${currentGame.id}`);
     } catch (error) {
       toast.error(ErrorMessages.game.complete(error));
       setIsCompletingGame(false);
     }
-  }, [currentGame, settlements, completeGame, navigate, isCompletingGame]);
+  }, [currentGame, settlements, completeGame, navigate, isCompletingGame, createOrGetSharedLink, gamePlayers, players]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {

@@ -98,6 +98,7 @@ export function exportGamesToCSV(games: Game[]): void {
 export function exportPlayersToCSV(players: Player[]): void {
   const data = players.map(player => ({
     name: player.name,
+    phone: player.phone_number || '',
     email: player.email || '',
     upiId: player.upi_id || '',
     paymentPreference: player.payment_preference || 'upi',
@@ -108,6 +109,7 @@ export function exportPlayersToCSV(players: Player[]): void {
 
   const headers = [
     { key: 'name', label: 'Name' },
+    { key: 'phone', label: 'Phone' },
     { key: 'email', label: 'Email' },
     { key: 'upiId', label: 'UPI ID' },
     { key: 'paymentPreference', label: 'Payment Preference' },

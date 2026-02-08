@@ -10,6 +10,7 @@ import {
   generateSettlementMessage,
   generateGameShareLink,
   formatMessageDate,
+  generateWhatsAppSessionSummary,
 } from "./messageTemplates";
 import { Player, Settlement } from "@/types/poker";
 
@@ -147,10 +148,10 @@ export async function sendSettlementNotifications(
   };
 
   // Group settlements by player and enrich with recipient UPI IDs
-  const playerSettlements = new Map<string, { 
-    settlements: Array<Settlement & { toUpiId?: string }>; 
-    isWinner: boolean; 
-    total: number 
+  const playerSettlements = new Map<string, {
+    settlements: Array<Settlement & { toUpiId?: string }>;
+    isWinner: boolean;
+    total: number
   }>();
 
   settlements.forEach((settlement) => {
@@ -220,6 +221,97 @@ export async function sendSettlementNotifications(
     } else {
       results.failed++;
       results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
+      results.success = false;
+    }
+
+    // Small delay between messages
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  return results;
+}
+
+/**
+ * Send a unified session summary notification to each player
+ * Includes game summary, share link, and individual settlements
+ */
+export async function sendSessionSummaryNotification(
+  gameId: string,
+  gameDate: string,
+  gameToken: string,
+  players: Player[],
+  gamePlayers: Array<{
+    player_id: string;
+    net_amount: number;
+  }>,
+  settlements: Settlement[]
+): Promise<NotificationResult> {
+  if (!evolutionApiService.isConfigured()) {
+    console.warn("Evolution API not configured. Notifications not sent.");
+    return {
+      success: false,
+      sent: 0,
+      failed: players.length,
+      errors: ["WhatsApp service not configured"],
+    };
+  }
+
+  const results: NotificationResult = {
+    success: true,
+    sent: 0,
+    failed: 0,
+    errors: [],
+  };
+
+  const gameLink = generateGameShareLink(gameId, gameToken);
+  const playersMap = new Map(players.map(p => [p.id, p]));
+  const gamePlayersMap = new Map(gamePlayers.map(gp => [gp.player_id, gp]));
+
+  for (const player of players) {
+    const gamePlayerData = gamePlayersMap.get(player.id);
+    if (!gamePlayerData) continue;
+
+    if (!player.phone_number) {
+      console.error(`WhatsApp Error: No phone number for player ${player.name}`);
+      results.failed++;
+      results.errors.push(`${player.name}: No phone number`);
+      continue;
+    }
+
+    // Filter relevant settlements for this player
+    const playerSettlements = settlements
+      .filter(s => s.from === player.name || s.to === player.name)
+      .map(s => {
+        const enrichedSettlement = { ...s };
+        if (s.from === player.name) {
+          // Player needs to pay, find recipient's UPI ID
+          const recipient = players.find(p => p.name === s.to);
+          return { ...enrichedSettlement, toUpiId: recipient?.upi_id };
+        }
+        return enrichedSettlement;
+      });
+
+    const isWinner = gamePlayerData.net_amount >= 0;
+
+    const message = generateWhatsAppSessionSummary({
+      playerName: player.name,
+      gameDate,
+      netAmount: gamePlayerData.net_amount,
+      gameLink,
+      settlements: playerSettlements,
+      isWinner,
+    });
+
+    const result = await evolutionApiService.sendMessage({
+      number: player.phone_number,
+      text: message,
+    });
+
+    if (result.success) {
+      results.sent++;
+    } else {
+      results.failed++;
+      results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
       results.success = false;
     }
 
