@@ -47,41 +47,41 @@ const AddPlayerDialog = memo(({
 }: AddPlayerDialogProps) => {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[95vw] sm:max-w-xl p-6">
-                <DialogHeader className="p-0 mb-6">
-                    <DialogTitle>Add Player</DialogTitle>
+            <DialogContent className="max-w-[95vw] sm:max-w-lg p-4 sm:p-6 bg-background/80 backdrop-blur-xl border-border/50">
+                <DialogHeader className="p-0 mb-4 text-left">
+                    <DialogTitle className="font-luxury uppercase tracking-widest text-lg">Add Player</DialogTitle>
                     <DialogDescription>
                         Search for an existing player or create a new one.
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue="existing" className="space-y-6">
+                <Tabs defaultValue="existing" className="space-y-4">
                     <TabsList className="grid grid-cols-2">
                         <TabsTrigger
                             value="existing"
-                            className="text-[10px]"
+                            className="font-luxury text-3xs uppercase tracking-widest"
                         >
                             Search
                         </TabsTrigger>
                         <TabsTrigger
                             value="new"
-                            className="text-[10px]"
+                            className="font-luxury text-3xs uppercase tracking-widest"
                         >
                             New
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="existing" className="space-y-6">
+                    <TabsContent value="existing" className="space-y-4">
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Search className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                             </div>
                             <Input
-                                placeholder="SEARCH PLAYERS..."
+                                placeholder="Search players..."
                                 value={searchQuery}
                                 onChange={(e) => onSearchChange(e.target.value)}
                                 variant="luxury"
-                                className="pl-10"
+                                className="pl-10 h-12 sm:h-10"
                             />
                         </div>
 
@@ -105,22 +105,23 @@ const AddPlayerDialog = memo(({
                         </ScrollArea>
                     </TabsContent>
 
-                    <TabsContent value="new" className="space-y-6">
+                    <TabsContent value="new" className="space-y-4">
                         <div className="space-y-3">
                             <Input
-                                placeholder="ENTER PLAYER NAME"
+                                placeholder="Enter player name"
                                 value={newPlayerName}
                                 onChange={(e) => onNewPlayerNameChange(e.target.value)}
                                 variant="luxury"
                                 onKeyPress={(e) => e.key === 'Enter' && !isCreating && onAddNew()}
                                 autoFocus
+                                className="h-12 sm:h-10"
                             />
                         </div>
                         <Button
                             onClick={onAddNew}
                             disabled={!newPlayerName.trim() || isCreating}
                             variant="luxury"
-                            className="w-full h-11"
+                            className="w-full h-12 sm:h-10"
                         >
                             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add New Player'}
                         </Button>

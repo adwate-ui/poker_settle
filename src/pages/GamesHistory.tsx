@@ -35,6 +35,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { formatProfitLoss, cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useGames } from "@/features/game/hooks/useGames";
@@ -68,6 +69,7 @@ interface GamesHistoryProps {
 const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePlayerLinks = false }: GamesHistoryProps = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState<string>("all");
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
   const [selectedPlayer, setSelectedPlayer] = useState<string>("all");
@@ -319,109 +321,103 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       </Card>
 
       {/* Responsive Table Layout */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto w-full">
-          <Table className="table-fixed sm:table-auto">
-            <TableHeader>
-              <TableRow className="h-10 sm:h-auto">
-                <TableHead
-                  onClick={() => handleSort("date")}
-                  className="cursor-pointer hover:text-primary transition-colors w-[22%] sm:w-[25%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center gap-1">
-                    Date
-                    <ArrowUpDown className="h-3 w-3" />
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => handleSort("buy_in")}
-                  className="cursor-pointer hover:text-primary transition-colors text-right w-[18%] sm:w-[20%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center justify-end gap-1">
-                    <span className="sm:inline hidden">Buy-in</span>
-                    <span className="sm:hidden inline">Buy</span>
-                    <ArrowUpDown className="h-3 w-3" />
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => handleSort("players")}
-                  className="cursor-pointer hover:text-primary transition-colors text-center w-[12%] sm:w-[15%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center justify-center gap-1">
-                    <span className="sm:inline hidden">Players</span>
-                    <span className="sm:hidden inline">Plyr</span>
-                    <ArrowUpDown className="h-3 w-3" />
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => handleSort("chips")}
-                  className="cursor-pointer hover:text-primary transition-colors text-right w-[23%] sm:w-[20%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center justify-end gap-1">
-                    <span className="sm:inline hidden">Total Pot</span>
-                    <span className="sm:hidden inline">Pot</span>
-                    <ArrowUpDown className="h-3 w-3" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-right w-[25%] sm:w-[20%] px-1 sm:px-4">
-                  <span className="sm:inline hidden">{selectedPlayer !== "all" ? "Player P&L" : ""}</span>
-                  <span className="sm:hidden inline">P&L</span>
-                </TableHead>
+      <Table
+        className="max-h-[600px] border-border/50"
+        tableClassName="sm:table-auto"
+      >
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead
+              onClick={() => handleSort("date")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Date
+                <ArrowUpDown className="h-3 w-3 opacity-50" />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("buy_in")}
+              className="cursor-pointer text-right"
+            >
+              <div className="flex items-center justify-end gap-1">
+                Buy-in
+                <ArrowUpDown className="h-3 w-3 opacity-50" />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("players")}
+              className="cursor-pointer text-center"
+            >
+              <div className="flex items-center justify-center gap-1">
+                Players
+                <ArrowUpDown className="h-3 w-3 opacity-50" />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("chips")}
+              className="cursor-pointer text-right"
+            >
+              <div className="flex items-center justify-end gap-1">
+                Total Pot
+                <ArrowUpDown className="h-3 w-3 opacity-50" />
+              </div>
+            </TableHead>
+            <TableHead className="text-right">
+              {selectedPlayer !== "all" ? "Player P&L" : "P&L"}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredAndSortedGames.map((game) => {
+            const playerData = game.game_players.find((gp) => gp.player_name === selectedPlayer);
+            return (
+              <TableRow
+                key={game.id}
+                className="cursor-pointer"
+                onClick={() => handleNavigate(game.id)}
+                onMouseEnter={() => prefetch(game.id)}
+              >
+                <TableCell className="font-medium whitespace-nowrap">
+                  {format(new Date(game.date), "MMM d, yyyy")}
+                </TableCell>
+                <TableCell className="text-right font-numbers text-muted-foreground">
+                  <ResponsiveCurrency amount={game.buy_in_amount} />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
+                    {game.player_count}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right font-numbers font-semibold text-muted-foreground">
+                  <ResponsiveCurrency amount={game.total_pot} />
+                </TableCell>
+                <TableCell className="text-right">
+                  {selectedPlayer !== "all" && playerData ? (
+                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1.5">
+                      <ResponsiveCurrency amount={playerData.net_amount} />
+                    </Badge>
+                  ) : (
+                    !readOnly && (
+                      <Button
+                        variant="ghost"
+                        size={isMobile ? "icon" : "icon-sm"}
+                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-11 w-11 sm:h-8 sm:w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteGameId(game.id);
+                        }}
+                      >
+                        <Trash2 className="h-5 w-5 sm:h-4 sm:w-4" />
+                      </Button>
+                    )
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAndSortedGames.map((game) => {
-                const playerData = game.game_players.find((gp) => gp.player_name === selectedPlayer);
-                return (
-                  <TableRow
-                    key={game.id}
-                    className="cursor-pointer h-10 sm:h-auto"
-                    onClick={() => handleNavigate(game.id)}
-                    onMouseEnter={() => prefetch(game.id)}
-                  >
-                    <TableCell className="font-medium whitespace-nowrap px-1 sm:px-4">
-                      <span className="sm:inline hidden">{format(new Date(game.date), "MMM d, yyyy")}</span>
-                      <span className="sm:hidden inline">{format(new Date(game.date), "MMM d")}</span>
-                    </TableCell>
-                    <TableCell className="text-right font-numbers px-1 sm:px-4">
-                      <ResponsiveCurrency amount={game.buy_in_amount} />
-                    </TableCell>
-                    <TableCell className="text-center px-1 sm:px-4">
-                      <Badge variant="secondary" className="font-numbers h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs min-w-[20px]">
-                        {game.player_count}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-numbers font-semibold px-1 sm:px-4">
-                      <ResponsiveCurrency amount={game.total_pot} />
-                    </TableCell>
-                    <TableCell className="text-right px-1 sm:px-4">
-                      {selectedPlayer !== "all" && playerData ? (
-                        <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs">
-                          <ResponsiveCurrency amount={playerData.net_amount} />
-                        </Badge>
-                      ) : (
-                        !readOnly && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-6 w-6 sm:h-8 sm:w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteGameId(game.id);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                        )
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+            );
+          })}
+        </TableBody>
+      </Table>
 
 
       {!readOnly && (

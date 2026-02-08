@@ -382,7 +382,7 @@ const Auth = () => {
       </Card>
 
       <div className="absolute bottom-8 text-center w-full pointer-events-none">
-        <p className="text-label tracking-[0.5em] text-muted-foreground/50">Secure Game Management</p>
+        <p className="text-label tracking-[0.5em] text-muted-foreground">Secure Game Management</p>
       </div>
     </div>
   );

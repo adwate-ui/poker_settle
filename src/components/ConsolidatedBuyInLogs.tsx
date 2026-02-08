@@ -160,55 +160,51 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           <p className="text-sm text-muted-foreground">No logs found for "{filterName}" in this archive.</p>
         </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden">
-          <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
-            <Table layout="fixed">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[40%] sm:pl-6">Player</TableHead>
-                  <TableHead className="w-[20%]">Amount</TableHead>
-                  <TableHead className="w-[20%]">Total</TableHead>
-                  <TableHead className="w-[20%] text-right sm:pr-6">Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHistory.map((entry) => (
-                  <TableRow
-                    key={entry.id}
-                    className="cursor-default"
+        <Table
+          className="max-h-[400px]"
+          tableClassName="sm:table-auto"
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Player</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead className="text-right">Time</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredHistory.map((entry) => (
+              <TableRow key={entry.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2 sm:gap-3 max-w-[150px] sm:max-w-none">
+                    <Link
+                      to={entry.player_id ? `/players/${entry.player_id}` : '#'}
+                      className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
+                    >
+                      {entry.player_name}
+                    </Link>
+                  </div>
+                </TableCell>
+                <TableCell className="font-numbers">
+                  <Badge
+                    variant={entry.buy_ins_added > 0 ? "profit" : "loss"}
+                    className="px-1.5"
                   >
-                    <TableCell className="sm:pl-6">
-                      <div className="flex items-center gap-2 sm:gap-3 max-w-[150px] sm:max-w-none">
-                        <Link
-                          to={entry.player_id ? `/players/${entry.player_id}` : '#'}
-                          className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
-                        >
-                          {entry.player_name}
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-numbers">
-                      <Badge
-                        variant={entry.buy_ins_added > 0 ? "profit" : "loss"}
-                        className="h-5 px-1.5 text-[9px]"
-                      >
-                        {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-numbers">
-                      <span className="text-muted-foreground">{entry.total_buy_ins_after}</span>
-                    </TableCell>
-                    <TableCell className="text-right sm:pr-6">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground font-numbers">
-                        {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+                    {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
+                  </Badge>
+                </TableCell>
+                <TableCell className="font-numbers text-muted-foreground whitespace-nowrap">
+                  {entry.total_buy_ins_after}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground font-numbers whitespace-nowrap">
+                    {format(new Date(entry.timestamp), "MMM d, h:mm a")}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   );

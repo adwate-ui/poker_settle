@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Eye } from 'lucide-react';
+import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
 
 interface SharedPlayersHistoryProps { token: string; playerId: string; }
 
@@ -84,100 +85,77 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
             <SelectContent><SelectItem value="all">All Months</SelectItem>{uniqueMonths.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div className="overflow-x-auto w-full">
-          <Table layout={isMobile ? "fixed" : "auto"}>
-            <TableHeader>
-              <TableRow className={cn(isMobile ? "h-10" : "")}>
-                <TableHead
-                  onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
-                  className={isMobile ? "w-[30%] px-1" : ""}
-                >
-                  <span className="flex items-center gap-0.5">
-                    Date
-                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3 inline")} />
-                  </span>
-                </TableHead>
-                <TableHead className={isMobile ? "w-[15%] px-1" : ""}>
-                  <span className="flex items-center gap-0.5">
-                    {isMobile ? "Buys" : "Buy-ins"}
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
-                  className={cn(
-                    "text-right",
-                    isMobile ? "w-[30%] px-1" : ""
-                  )}
-                >
-                  <span className="flex items-center justify-end gap-0.5">
-                    Net
-                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3 inline")} />
-                  </span>
-                </TableHead>
-                <TableHead className={cn(
-                  "text-right",
-                  isMobile ? "w-[25%] px-1" : ""
-                )}>
-                  {!isMobile && "Action"}
-                </TableHead>
+
+        <Table layout={isMobile ? "fixed" : "auto"}>
+          <TableHeader>
+            <TableRow>
+              <TableHead
+                onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  Date
+                  <ArrowUpDown className="h-3 w-3" />
+                </div>
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  {isMobile ? "Buys" : "Buy-ins"}
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
+                className="text-right cursor-pointer"
+              >
+                <div className="flex items-center justify-end gap-1">
+                  Net
+                  <ArrowUpDown className="h-3 w-3" />
+                </div>
+              </TableHead>
+              <TableHead className="text-right">
+                {!isMobile && "Action"}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredHistory.map(h => (
+              <TableRow
+                key={h.id}
+                className="hover:bg-muted/30 transition-colors"
+                onClick={() => navigate(`/shared/${token}/game/${h.game_id}`)}
+              >
+                <TableCell className="font-medium">
+                  {format(new Date(h.games.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="font-numbers">
+                    {h.buy_ins}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Badge
+                    variant={h.net_amount >= 0 ? "profit" : "loss"}
+                    className="font-numbers font-medium whitespace-nowrap"
+                  >
+                    <ResponsiveCurrency amount={h.net_amount} />
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size={isMobile ? "icon" : "icon-sm"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/shared/${token}/game/${h.game_id}`);
+                    }}
+                  >
+                    {isMobile ? <Eye className="h-4 w-4 text-muted-foreground" /> : "View"}
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredHistory.map(h => (
-                <TableRow
-                  key={h.id}
-                  className={cn(
-                    "hover:bg-muted/30 transition-colors",
-                    isMobile ? "h-10" : ""
-                  )}
-                >
-                  <TableCell className={cn("font-medium", isMobile ? "px-1" : "")}>
-                    {format(new Date(h.games.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
-                  </TableCell>
-                  <TableCell className={isMobile ? "px-1" : ""}>
-                    <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
-                      {h.buy_ins}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className={cn(
-                    "text-right",
-                    isMobile ? "px-1" : ""
-                  )}>
-                    <Badge
-                      variant={h.net_amount >= 0 ? "profit" : "loss"}
-                      className={cn(
-                        "font-numbers font-medium",
-                        isMobile ? "text-[10px] px-1.5" : "text-sm px-3"
-                      )}
-                    >
-                      {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className={cn("text-right", isMobile ? "px-1" : "")}>
-                    {isMobile ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => navigate(`/shared/${token}/game/${h.game_id}`)}
-                      >
-                        <Eye className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/shared/${token}/game/${h.game_id}`)}
-                      >
-                        View
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );

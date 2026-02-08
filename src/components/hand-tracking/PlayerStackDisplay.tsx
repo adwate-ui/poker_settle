@@ -20,7 +20,7 @@ const PlayerStackDisplay = memo(({
       "flex items-center justify-between p-3 rounded-xl transition-all duration-300",
       isCurrentPlayer
         ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
-        : 'bg-white/5 border border-white/5'
+        : 'bg-white/5 border border-border/50'
     )}>
       <div className="flex items-center gap-2 min-w-0">
         <User className={cn(

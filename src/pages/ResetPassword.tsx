@@ -269,7 +269,7 @@ const ResetPassword = () => {
       </Card>
 
       <div className="absolute bottom-8 text-center w-full pointer-events-none">
-        <p className="text-label tracking-[0.5em] text-muted-foreground/50">Secure Password Update</p>
+        <p className="text-label tracking-[0.5em] text-muted-foreground">Secure Password Update</p>
       </div>
     </div>
   );

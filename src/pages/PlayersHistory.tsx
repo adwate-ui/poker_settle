@@ -20,6 +20,7 @@ import { Player } from "@/types/poker";
 import { formatProfitLoss } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import {
   Dialog,
@@ -39,6 +40,7 @@ type SortOrder = "asc" | "desc" | null;
 const PlayersHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
@@ -208,99 +210,92 @@ const PlayersHistory = () => {
       </Card>
 
       {/* Responsive Table Layout */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto w-full">
-          <Table className="table-fixed sm:table-auto">
-            <TableHeader>
-              <TableRow className="h-10 sm:h-auto">
-                <TableHead
-                  onClick={() => handleSort("name")}
-                  className="w-[35%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center gap-0.5">
-                    <span className="sm:inline hidden">Player</span>
-                    <span className="sm:hidden inline">Plyr</span>
-                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => handleSort("total_games")}
-                  className="text-center w-[15%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center justify-center gap-0.5">
-                    <span className="sm:inline hidden">Games</span>
-                    <span className="sm:hidden inline">Gms</span>
-                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
-                  </span>
-                </TableHead>
-                <TableHead
-                  onClick={() => handleSort("total_profit")}
-                  className="text-right w-[30%] px-1 sm:px-4"
-                >
-                  <span className="flex items-center justify-end gap-0.5">
-                    <span className="sm:inline hidden">Total Net</span>
-                    <span className="sm:hidden inline">Net</span>
-                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-right w-[20%] px-1 sm:px-4">
-                  <span className="sm:inline hidden">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedPlayers.map((player) => {
-                const profit = player.total_profit || 0;
-                return (
-                  <TableRow
-                    key={player.id}
-                    className="cursor-pointer h-10 sm:h-auto"
-                    onClick={() => navigate(`/players/${player.id}`)}
+      <Table
+        className="max-h-[600px] border-border/50"
+        tableClassName="sm:table-auto"
+      >
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead
+              onClick={() => handleSort("name")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Player
+                <ArrowUpDown className="h-3 w-3" />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("total_games")}
+              className="text-center cursor-pointer"
+            >
+              <div className="flex items-center justify-center gap-1">
+                Games
+                <ArrowUpDown className="h-3 w-3" />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("total_profit")}
+              className="text-right cursor-pointer"
+            >
+              <div className="flex items-center justify-end gap-1">
+                Total Net
+                <ArrowUpDown className="h-3 w-3" />
+              </div>
+            </TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedPlayers.map((player) => {
+            const profit = player.total_profit || 0;
+            return (
+              <TableRow
+                key={player.id}
+                className="cursor-pointer"
+                onClick={() => navigate(`/players/${player.id}`)}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
+                    <OptimizedAvatar
+                      name={player.name}
+                      size="sm"
+                    />
+                    <ResponsiveName name={player.name} className="font-medium" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
+                    {player.total_games || 0}
+                    <span className="sm:inline hidden"> Sessions</span>
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Badge
+                    variant={profit >= 0 ? "profit" : "loss"}
+                    className="font-medium whitespace-nowrap font-numbers px-1.5"
                   >
-                    <TableCell className="px-1 sm:px-4">
-                      <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
-                        <OptimizedAvatar
-                          name={player.name}
-                          size="sm"
-                          className="h-5 w-5 sm:h-10 sm:w-10"
-                        />
-                        <ResponsiveName name={player.name} className="font-medium" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center px-1 sm:px-4">
-                      <Badge variant="secondary" className="font-numbers h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs min-w-[20px]">
-                        {player.total_games || 0}
-                        <span className="sm:inline hidden"> Sessions</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-1 sm:px-4">
-                      <Badge
-                        variant={profit >= 0 ? "profit" : "loss"}
-                        className="font-medium whitespace-nowrap font-numbers text-[10px] sm:text-sm px-1.5 sm:px-3 h-5 sm:h-auto"
-                      >
-                        <ResponsiveCurrency amount={profit} />
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-1 sm:px-4">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-6 w-6 sm:h-8 sm:w-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeletePlayerId(player.id);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+                    <ResponsiveCurrency amount={profit} />
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size={isMobile ? "icon" : "icon-sm"}
+                    className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletePlayerId(player.id);
+                    }}
+                  >
+                    <Trash2 className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
 
 
       <Dialog open={!!deletePlayerId} onOpenChange={(open) => !open && setDeletePlayerId(null)}>

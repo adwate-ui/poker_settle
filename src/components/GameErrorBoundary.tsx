@@ -36,7 +36,7 @@ class GameErrorBoundary extends Component<
         <div className="max-w-4xl mx-auto mt-16 px-6">
           <Card className="border-red-500/30 bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent opacity-50" />
-            <CardHeader className="pt-10 pb-6 border-b border-white/5 bg-red-500/5">
+            <CardHeader className="pt-10 pb-6 border-b border-border/50 bg-red-500/5">
               <div className="flex items-center gap-5">
                 <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20">
                   <AlertCircle className="h-8 w-8 text-red-500" />
@@ -53,7 +53,7 @@ class GameErrorBoundary extends Component<
                   We're sorry, but we couldn't load this game view. Your data is safe and hasn't been affected. You can try refreshing the page or go back to view other games.
                 </p>
                 {this.state.error && (
-                  <div className="p-4 bg-white/2 border border-white/5 rounded-xl font-mono text-[11px] text-red-400/60 break-words opacity-50">
+                  <div className="p-4 bg-white/2 border border-border/50 rounded-xl font-mono text-[11px] text-red-400/60 break-words opacity-50">
                     {this.state.error.toString()}
                   </div>
                 )}

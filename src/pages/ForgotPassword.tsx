@@ -146,7 +146,7 @@ const ForgotPassword = () => {
       </Card>
 
       <div className="absolute bottom-8 text-center w-full pointer-events-none">
-        <p className="text-label tracking-[0.5em] text-muted-foreground/50">Secure Password Recovery</p>
+        <p className="text-label tracking-[0.5em] text-muted-foreground">Secure Password Recovery</p>
       </div>
     </div>
   );

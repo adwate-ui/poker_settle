@@ -69,7 +69,7 @@ export const PWAInstallPrompt = () => {
             <Button
               variant="ghost"
               onClick={handleDismiss}
-              className="h-10 px-6 border border-white/5 bg-white/2 hover:bg-white/5 text-white/30 text-label transition-colors"
+              className="h-10 px-6 border border-border/50 bg-white/2 hover:bg-white/5 text-white/30 text-label transition-colors"
             >
               Decline
             </Button>

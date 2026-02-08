@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers, History } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Mail, CreditCard, Layers, History, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { cn } from "@/lib/utils";
 import { CurrencyConfig, PaymentMethodConfig } from "@/config/localization";
@@ -24,6 +25,7 @@ import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog"
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import { Badge } from "@/components/ui/badge";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
 
 interface GameHistory {
   id: string;
@@ -51,6 +53,7 @@ interface PlayerDetailProps {
 const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false }: PlayerDetailProps = {}) => {
   const params = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   // If prop provided, use it, otherwise use param
   const playerId = propPlayerId || params.playerId;
 
@@ -240,7 +243,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
               <div>
                 <CardTitle className="text-3xl font-luxury text-foreground">{player.name}</CardTitle>
                 <div className="flex items-center gap-2 mt-1">
-                  <User className="h-3 w-3 text-muted-foreground/50" />
+                  <User className="h-3 w-3 text-muted-foreground" />
                   <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Player Profile</span>
                 </div>
               </div>
@@ -339,114 +342,91 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
         )}
       </Card>
 
-      <Card className="border-border bg-background/60 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <CardHeader className="pb-4 border-b border-border bg-accent/5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <History className="h-5 w-5 text-primary" />
+      <Table
+        className="max-h-[600px]"
+        tableClassName="sm:table-auto"
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead
+              onClick={() => handleSort("date")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Session Day {getSortIcon("date")}
               </div>
-              <CardTitle className="text-2xl font-luxury text-foreground">Game History</CardTitle>
-            </div>
-            <div className="min-w-[200px]">
-              <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-                <SelectTrigger className="h-10 bg-accent/5 border-0 border-b border-border rounded-none focus:ring-0 focus:border-primary transition-all text-label text-foreground">
-                  <Calendar className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="Period Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="text-label text-foreground/60">Full Archive</SelectItem>
-                  {uniqueMonthYears.map((monthYear) => (
-                    <SelectItem key={monthYear} value={monthYear} className="text-label text-foreground/60">
-                      {monthYear}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table className="table-fixed w-full">
-              <TableHeader className="bg-accent/5">
-                <TableRow className="border-b-border hover:bg-transparent">
-                  <TableHead
-                    onClick={() => handleSort("date")}
-                    className="w-[25%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground pl-8"
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("buy_ins")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Buy-ins {getSortIcon("buy_ins")}
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("net_amount")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Net P&L {getSortIcon("net_amount")}
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("final_stack")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-1">
+                Final Stack {getSortIcon("final_stack")}
+              </div>
+            </TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedGameHistory.map((game) => {
+            const isWin = game.net_amount > 0;
+            return (
+              <TableRow
+                key={game.id}
+                className="cursor-pointer transition-colors"
+                onClick={() => handleNavigateGame(game.game_id)}
+              >
+                <TableCell className="font-medium">
+                  {format(new Date(game.games.date), "MMM d, yyyy")}
+                </TableCell>
+                <TableCell className="font-numbers text-muted-foreground">
+                  {game.buy_ins} <span className="text-[10px] opacity-50 uppercase font-luxury tracking-tighter">Stacks</span>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={isWin ? "profit" : "loss"}
+                    className="font-numbers px-2"
                   >
-                    <div className="flex items-center gap-1">
-                      Session Day {getSortIcon("date")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("buy_ins")}
-                    className="w-[15%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
+                    <ResponsiveCurrency amount={game.net_amount} />
+                  </Badge>
+                </TableCell>
+                <TableCell className="font-numbers text-muted-foreground">
+                  <ResponsiveCurrency amount={game.final_stack} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="outline"
+                    size={isMobile ? "icon" : "sm"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateGame(game.game_id);
+                    }}
+                    className="font-luxury uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
                   >
-                    <div className="flex items-center gap-1">
-                      Buy-ins {getSortIcon("buy_ins")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("net_amount")}
-                    className="w-[25%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
-                  >
-                    <div className="flex items-center gap-1">
-                      Net P&L {getSortIcon("net_amount")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("final_stack")}
-                    className="w-[20%] h-10 align-middle cursor-pointer hover:text-primary transition-colors text-[9px] uppercase tracking-widest font-luxury text-muted-foreground"
-                  >
-                    <div className="flex items-center gap-1">
-                      Final Stack {getSortIcon("final_stack")}
-                    </div>
-                  </TableHead>
-                  <TableHead className="w-[15%] h-10 text-right pr-8" />
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-border">
-                {sortedGameHistory.map((game) => {
-                  const isWin = game.net_amount > 0;
-                  return (
-                    <TableRow key={game.id} className="h-12 border-border group hover:bg-accent/5 transition-colors">
-                      <TableCell className="font-luxury text-[11px] text-foreground/80 pl-8">
-                        {format(new Date(game.games.date), "MMM d, yyyy")}
-                      </TableCell>
-                      <TableCell className="font-numbers text-xs text-muted-foreground">
-                        {game.buy_ins} <span className="text-[10px] opacity-50 uppercase font-luxury tracking-tighter">Stacks</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={isWin ? "profit" : "loss"}
-                          className="font-numbers tracking-widest text-[11px] px-2 py-0.5"
-                        >
-                          {isWin ? "+" : ""}{formatCurrency(game.net_amount)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-numbers text-xs text-foreground/60">
-                        {formatCurrency(game.final_stack)}
-                      </TableCell>
-                      <TableCell className="text-right pr-8">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleNavigateGame(game.game_id)}
-                          className="text-[10px] h-7 px-3 rounded-full font-luxury uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
-                        >
-                          Examine
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                    {isMobile ? <ArrowRight className="h-4 w-4" /> : "Examine"}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
 
       <ShareDialog
         open={shareDialogOpen}

@@ -9,6 +9,7 @@ import { formatCurrency } from '@/utils/currencyUtils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { BuyInHistoryDialog } from '@/components/BuyInHistoryDialog';
 import { ResponsiveName } from '@/components/ResponsiveName';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ export const BuyInManagementTable = ({
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [buyInCount, setBuyInCount] = useState<number>(1);
   const [isAdding, setIsAdding] = useState(false);
+  const isMobile = useIsMobile();
 
   const validateBuyInInput = (): { valid: boolean; player?: GamePlayer } => {
     if (!selectedPlayerId || typeof buyInCount !== 'number' || buyInCount === 0) {
@@ -95,84 +97,83 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <div className="rounded-md border max-h-[500px] overflow-auto">
-        <div className="overflow-x-auto w-full">
-          <Table className="table-fixed sm:table-auto">
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[35%] pl-2 sm:pl-6">
-                  <div className="flex items-center gap-1.5">
-                    <User className="h-3 w-3" />
-                    <span><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
-                  </div>
-                </TableHead>
-                <TableHead className="w-[15%] px-1 text-center border-l border-white/5">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Coins className="h-3 w-3" />
-                    <span><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
-                  </div>
-                </TableHead>
-                <TableHead className="w-[20%] px-1 border-l border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="h-3 w-3" />
-                    <span><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
-                  </div>
-                </TableHead>
-                <TableHead className="w-[15%] border-l border-white/5">
-                </TableHead>
-                <TableHead className="w-[15%] text-right border-l border-white/5 pr-2 sm:pr-6">
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedPlayers.map((gamePlayer) => (
-                <TableRow
-                  key={gamePlayer.id}
-                  className="border-white/5 h-11 sm:h-auto sm:group"
+      <Table
+        className="max-h-[500px]"
+        tableClassName="table-fixed sm:table-auto"
+      >
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-1/3">
+              <div className="flex items-center gap-1.5">
+                <User className="h-3 w-3" />
+                <span><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
+              </div>
+            </TableHead>
+            <TableHead className="w-1/6 text-center">
+              <div className="flex items-center justify-center gap-1.5">
+                <Coins className="h-3 w-3" />
+                <span><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
+              </div>
+            </TableHead>
+            <TableHead className="w-1/4">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="h-3 w-3" />
+                <span><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
+              </div>
+            </TableHead>
+            <TableHead className="w-1/8">
+            </TableHead>
+            <TableHead className="w-1/8 text-right">
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedPlayers.map((gamePlayer) => (
+            <TableRow
+              key={gamePlayer.id}
+              className="border-border/50 h-11 sm:h-auto sm:group"
+            >
+              <TableCell className="font-medium truncate text-foreground">
+                <ResponsiveName name={gamePlayer.player.name} />
+              </TableCell>
+              <TableCell className="text-center font-numbers whitespace-nowrap text-muted-foreground">
+                {gamePlayer.buy_ins}
+              </TableCell>
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
+                {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
+              </TableCell>
+              <TableCell className="text-center">
+                <Button
+                  onClick={() => {
+                    setSelectedPlayerId(gamePlayer.id);
+                    setBuyInCount(1);
+                    setOpened(true);
+                  }}
+                  variant="ghost"
+                  size={isMobile ? "icon" : "icon-sm"}
+                  aria-label={`Add buy-in for ${gamePlayer.player.name}`}
+                  className="bg-transparent sm:h-9 sm:w-9 h-11 w-11 text-muted-foreground hover:text-foreground transition-opacity"
                 >
-                  <TableCell className="pl-2 sm:pl-6 font-medium truncate text-foreground">
-                    <ResponsiveName name={gamePlayer.player.name} />
-                  </TableCell>
-                  <TableCell className="px-1 text-center font-numbers whitespace-nowrap text-muted-foreground/50">
-                    {gamePlayer.buy_ins}
-                  </TableCell>
-                  <TableCell className="px-1 font-numbers whitespace-nowrap text-muted-foreground/50">
-                    {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
-                  </TableCell>
-                  <TableCell className="text-center py-1 border-l border-white/5">
-                    <Button
-                      onClick={() => {
-                        setSelectedPlayerId(gamePlayer.id);
-                        setBuyInCount(1);
-                        setOpened(true);
-                      }}
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                      className="bg-transparent sm:h-9 sm:w-9 h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity"
-                    >
-                      <Plus className="sm:h-4 sm:w-4 h-3.5 w-3.5" />
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-right py-1 border-l border-white/5 pr-2 sm:pr-6">
-                    {fetchBuyInHistory && (
-                      <BuyInHistoryDialog
-                        gamePlayerId={gamePlayer.id}
-                        playerName={gamePlayer.player.name}
-                        fetchHistory={fetchBuyInHistory}
-                        triggerProps={{
-                          size: "icon-sm",
-                          className: "sm:h-9 sm:w-9 h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity"
-                        }}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+                  <Plus className="sm:h-4 sm:w-4 h-5 w-5" />
+                </Button>
+              </TableCell>
+              <TableCell className="text-right">
+                {fetchBuyInHistory && (
+                  <BuyInHistoryDialog
+                    gamePlayerId={gamePlayer.id}
+                    playerName={gamePlayer.player.name}
+                    fetchHistory={fetchBuyInHistory}
+                    triggerProps={{
+                      size: isMobile ? "icon" : "icon-sm",
+                      className: "sm:h-9 sm:w-9 h-11 w-11 text-muted-foreground hover:text-foreground transition-opacity"
+                    }}
+                  />
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       <Dialog open={opened} onOpenChange={(open) => {
         if (!open) {

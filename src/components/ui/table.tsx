@@ -3,15 +3,16 @@ import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement> & { layout?: "auto" | "fixed" }
->(({ className, layout = "fixed", ...props }, ref) => (
-  <div className="relative w-full overflow-auto rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm">
+  React.HTMLAttributes<HTMLTableElement> & { layout?: "auto" | "fixed", tableClassName?: string }
+>(({ className, tableClassName, layout = "fixed", ...props }, ref) => (
+  <div className={cn("relative w-full overflow-y-auto overflow-x-hidden md:overflow-auto rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm", className)}>
     <table
       ref={ref}
       className={cn(
         "w-full caption-bottom text-sm",
-        layout === "fixed" ? "table-fixed" : "table-auto",
-        className
+        "table-fixed",
+        layout === "auto" && "sm:table-auto",
+        tableClassName
       )}
       {...props}
     />
@@ -80,7 +81,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-4 text-left align-middle font-luxury font-bold text-muted-foreground uppercase tracking-widest text-mobile-compact sm:text-[9px] [&:has([role=checkbox])]:pr-0",
+      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-luxury font-bold text-muted-foreground uppercase tracking-widest text-mobile-compact sm:text-[9px] [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}
@@ -95,7 +96,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "p-4 align-middle font-body text-mobile-compact sm:text-[9px] [&:has([role=checkbox])]:pr-0",
+      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-body text-mobile-compact sm:text-[9px] [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}

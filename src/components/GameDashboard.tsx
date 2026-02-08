@@ -1047,7 +1047,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </TableHeader>
                       <TableBody>
                         {currentGame.settlements.map((transfer, index) => (
-                          <TableRow key={index} className="border-b border-white/5 hover:bg-white/5 h-11">
+                          <TableRow key={index} className="border-b border-border/50 hover:bg-white/5 h-11">
                             <TableCell className="pl-4 py-1 font-medium text-[11px] truncate text-foreground">
                               {transfer.from}
                             </TableCell>

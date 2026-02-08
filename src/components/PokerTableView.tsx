@@ -546,7 +546,7 @@ const PokerTableView = memo(({
             />
             {/* Pro Betting Line */}
             <div className={cn(
-              "absolute inset-[40px] border-2 border-white/5 pointer-events-none transition-all duration-500",
+              "absolute inset-[40px] border-2 border-border/50 pointer-events-none transition-all duration-500",
               isVertical ? "rounded-table-sm" : "rounded-table"
             )} />
           </div>
