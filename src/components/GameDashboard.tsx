@@ -396,7 +396,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           currentGame.id,
           currentGame.date,
           gameToken,
-          players,
+          gamePlayers.map(gp => gp.player),
           gamePlayersData,
           allSettlements
         );

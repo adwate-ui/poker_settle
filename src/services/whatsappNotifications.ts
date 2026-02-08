@@ -267,9 +267,9 @@ export async function sendSessionSummaryNotification(
   const playersMap = new Map(players.map(p => [p.id, p]));
   const gamePlayersMap = new Map(gamePlayers.map(gp => [gp.player_id, gp]));
 
-  for (const player of players) {
-    const gamePlayerData = gamePlayersMap.get(player.id);
-    if (!gamePlayerData) continue;
+  for (const gamePlayer of gamePlayers) {
+    const player = playersMap.get(gamePlayer.player_id);
+    if (!player) continue;
 
     if (!player.phone_number) {
       console.error(`WhatsApp Error: No phone number for player ${player.name}`);
@@ -291,12 +291,12 @@ export async function sendSessionSummaryNotification(
         return enrichedSettlement;
       });
 
-    const isWinner = gamePlayerData.net_amount >= 0;
+    const isWinner = gamePlayer.net_amount >= 0;
 
     const message = generateWhatsAppSessionSummary({
       playerName: player.name,
       gameDate,
-      netAmount: gamePlayerData.net_amount,
+      netAmount: gamePlayer.net_amount,
       gameLink,
       settlements: playerSettlements,
       isWinner,

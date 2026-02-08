@@ -160,8 +160,8 @@ Here are your settlement details:
 
     if (data.settlements.some(s => s.toUpiId)) {
       message += `\n💡 *How to Pay:*\n`;
-      message += `• *On Android/Mobile:* Tap the blue "Tap to Pay" button above - it will open your digital payment app directly with pre-filled details!\n`;
-      message += `• *If button doesn't work:* Copy the ID shown below the button and use it in your payment app's "Pay to ID" option\n`;
+      message += `• *On Android/Mobile:* Tap the payment link above - it will open your digital payment app directly with pre-filled details!\n`;
+      message += `• *If the link doesn't work:* Copy the ID shown below the link and use it in your payment app's "Pay to ID" option\n`;
       message += `• *On Desktop:* Copy the payment link or ID and use it in your mobile payment app\n`;
     }
 
@@ -281,8 +281,8 @@ ${data.gameLink}
 
     if (data.settlements.some(s => s.toUpiId)) {
       message += `\n💡 *How to Pay:*\n`;
-      message += `• *On Android/Mobile:* Tap the blue "Tap to Pay" button above - it will open your digital payment app directly with pre-filled details!\n`;
-      message += `• *If button doesn't work:* Copy the ID shown below the button and use it in your payment app's "Pay to ID" option\n`;
+      message += `• *On Android/Mobile:* Tap the payment link above - it will open your digital payment app directly with pre-filled details!\n`;
+      message += `• *If the link doesn't work:* Copy the ID shown below the link and use it in your payment app's "Pay to ID" option\n`;
       message += `• *On Desktop:* Copy the payment link or ID and use it in your mobile payment app\n`;
     }
 
