@@ -555,7 +555,7 @@ export const GameDetailView = ({
                     <TableHead>Player</TableHead>
                     <TableHead align="center">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
                     <TableHead align="center">P&L</TableHead>
-                    <TableHead align="center">{isMobile ? "Cash" : "Cashout"}</TableHead>
+                    {!isMobile && <TableHead align="center">Cashout</TableHead>}
                     {showOwnerControls && fetchBuyInHistory && (
                       <TableHead align="right">{isMobile ? "Hist" : "Audit"}</TableHead>
                     )}
@@ -593,9 +593,11 @@ export const GameDetailView = ({
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell align="center" isNumeric className="text-muted-foreground whitespace-nowrap">
-                          {formatCurrency(finalStack)}
-                        </TableCell>
+                        {!isMobile && (
+                          <TableCell align="center" isNumeric className="text-muted-foreground whitespace-nowrap">
+                            {formatCurrency(finalStack)}
+                          </TableCell>
+                        )}
                         {showOwnerControls && fetchBuyInHistory && (
                           <TableCell align="right">
                             <BuyInHistoryDialog

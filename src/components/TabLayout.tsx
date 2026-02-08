@@ -31,7 +31,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
 
   if (isLiveGame) {
     return (
-      <div className="min-h-screen bg-transparent pt-safe pb-safe">
+      <div className="min-h-screen bg-transparent pb-safe">
         {children}
 
         {/* Mobile Bottom Navigation */}

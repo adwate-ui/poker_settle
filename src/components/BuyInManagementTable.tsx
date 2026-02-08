@@ -106,19 +106,19 @@ export const BuyInManagementTable = ({
             <TableHead className="w-1/3">
               <div className="flex items-center gap-1.5">
                 <User className="h-3 w-3" />
-                <span><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
               </div>
             </TableHead>
             <TableHead className="w-1/6 text-center">
               <div className="flex items-center justify-center gap-1.5">
                 <Coins className="h-3 w-3" />
-                <span><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
               </div>
             </TableHead>
             <TableHead className="w-1/4">
               <div className="flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
-                <span><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
               </div>
             </TableHead>
             <TableHead className="w-1/8">
@@ -133,13 +133,13 @@ export const BuyInManagementTable = ({
               key={gamePlayer.id}
               className="border-border/50 h-11 sm:h-auto sm:group"
             >
-              <TableCell className="font-medium truncate text-foreground">
+              <TableCell className="text-2xs sm:text-sm font-medium truncate text-foreground">
                 <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="text-center font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="text-center text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
                 {gamePlayer.buy_ins}
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="text-right text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
               </TableCell>
               <TableCell className="text-center">
@@ -152,9 +152,9 @@ export const BuyInManagementTable = ({
                   variant="ghost"
                   size={isMobile ? "icon" : "icon-sm"}
                   aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                  className="bg-transparent sm:h-9 sm:w-9 h-11 w-11 text-muted-foreground hover:text-foreground transition-opacity"
+                  className="bg-transparent text-muted-foreground hover:text-foreground transition-opacity"
                 >
-                  <Plus className="sm:h-4 sm:w-4 h-5 w-5" />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </TableCell>
               <TableCell className="text-right">
@@ -165,7 +165,7 @@ export const BuyInManagementTable = ({
                     fetchHistory={fetchBuyInHistory}
                     triggerProps={{
                       size: isMobile ? "icon" : "icon-sm",
-                      className: "sm:h-9 sm:w-9 h-11 w-11 text-muted-foreground hover:text-foreground transition-opacity"
+                      className: "text-muted-foreground hover:text-foreground transition-opacity"
                     }}
                   />
                 )}
@@ -173,7 +173,7 @@ export const BuyInManagementTable = ({
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </Table >
 
       <Dialog open={opened} onOpenChange={(open) => {
         if (!open) {
@@ -200,30 +200,32 @@ export const BuyInManagementTable = ({
               <div className="flex items-center justify-center gap-8 w-full">
                 <Button
                   variant="outline"
+                  size="lg"
                   onClick={decrement}
-                  className="h-16 w-16 rounded-2xl group transition-all"
+                  className="rounded-2xl group transition-all"
                 >
-                  <Minus className="h-7 w-7 text-primary group-hover:scale-110 transition-transform" />
+                  <Minus className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
 
                 <div className="flex flex-col items-center min-w-[120px]">
                   <span className={cn(
-                    "text-5xl font-bold transition-colors",
+                    "text-5xl font-bold font-luxury transition-colors",
                     buyInCount < 0 ? 'text-destructive' : 'text-foreground'
                   )}>
                     {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
                   </span>
-                  <span className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
+                  <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-2">
                     {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
                   </span>
                 </div>
 
                 <Button
                   variant="outline"
+                  size="lg"
                   onClick={increment}
-                  className="h-16 w-16 rounded-2xl group transition-all"
+                  className="rounded-2xl group transition-all"
                 >
-                  <Plus className="h-7 w-7 text-primary group-hover:scale-110 transition-transform" />
+                  <Plus className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
               </div>
 
@@ -234,7 +236,7 @@ export const BuyInManagementTable = ({
                   buyInCount > 0 ? 'bg-primary/10 border-primary/30' : 'bg-destructive/10 border-destructive/30'
                 )}
               >
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Cost Impact</p>
+                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2">Cost Impact</p>
                 <p className={cn(
                   "text-3xl font-bold",
                   buyInCount > 0 ? 'text-primary' : 'text-destructive'

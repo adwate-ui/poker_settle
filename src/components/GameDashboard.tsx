@@ -538,7 +538,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
             </div>
 
             {/* Carousel Content */}
-            <div className="mt-[57px] flex-1 overflow-hidden">
+            <div className="mt-[52px] flex-1 overflow-hidden">
               <Carousel setApi={setApi} className="w-full">
                 <CarouselContent className="ml-0">
                   {/* Slide 1: Table & Seating */}
@@ -603,7 +603,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                   {/* Slide 2: Buy-in Tracking */}
                   <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
-                    <div className="p-4 space-y-6 pb-20">
+                    <div className="px-4 pt-1 space-y-4 pb-20">
                       <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                         <Plus className="h-5 w-5 text-primary" />
                         <h3 className="text-lg font-luxury uppercase tracking-widest text-foreground">Buy-in Tracking</h3>
@@ -619,7 +619,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                   {/* Slide 3: Final Stack Ledger & Game End */}
                   <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
-                    <div className="p-4 space-y-6 pb-20">
+                    <div className="px-4 pt-1 space-y-4 pb-20">
                       <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                         <DollarSign className="h-5 w-5 text-primary" />
                         <h3 className="text-lg font-luxury uppercase tracking-widest text-foreground">Final Stack Ledger</h3>
@@ -679,7 +679,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                   {/* Slide 4: Players, Manual Adjustments, Settlements */}
                   <CarouselItem className="pl-0 h-[calc(100vh-57px-env(safe-area-inset-bottom))] overflow-y-auto">
-                    <div className="p-4 space-y-6 pb-24">
+                    <div className="px-4 pt-1 space-y-4 pb-24">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-luxury text-foreground uppercase tracking-widest leading-none">Players ({gamePlayers.length})</h3>
                         <Button

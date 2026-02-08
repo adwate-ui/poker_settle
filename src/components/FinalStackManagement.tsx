@@ -110,13 +110,13 @@ export const FinalStackManagement = ({
             <TableHead className="w-1/3">
               <div className="flex items-center gap-1.5">
                 <User className="h-3 w-3" />
-                <span>Player</span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Player</span>
               </div>
             </TableHead>
             <TableHead className="w-1/4">
               <div className="flex items-center gap-1.5">
                 <Coins className="h-3 w-3" />
-                <span>Final Stack</span>
+                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stack</span>
               </div>
             </TableHead>
             <TableHead className="w-1/6" />
@@ -129,35 +129,33 @@ export const FinalStackManagement = ({
               key={gamePlayer.id}
               className="border-b border-border/50"
             >
-              <TableCell className="font-medium truncate text-foreground">
+              <TableCell className="text-2xs sm:text-sm font-medium truncate text-foreground">
                 {getDisplayName(gamePlayer.player.name, isMobile)}
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.final_stack || 0)}
               </TableCell>
               <TableCell className="text-center">
                 <Button
                   onClick={() => handleStartEdit(gamePlayer)}
                   variant="outline"
-                  size={isMobile ? "icon" : "icon-sm"}
+                  size="icon"
                   aria-label={`Edit final stack for ${gamePlayer.player.name}`}
                   className={cn(
                     "bg-transparent border-border/50 hover:border-gold-500/50",
-                    isMobile ? "h-11 w-11" : "sm:h-8 sm:w-8",
                     "text-muted-foreground hover:text-foreground transition-opacity"
                   )}
                 >
-                  <Edit className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+                  <Edit className="h-4 w-4" />
                 </Button>
               </TableCell>
               <TableCell className="text-right">
                 <ChipScanner
                   onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
                   triggerProps={{
-                    size: isMobile ? "icon" : "icon-sm",
+                    size: "icon",
                     className: cn(
                       "bg-transparent",
-                      isMobile ? "h-11 w-11" : "sm:h-8 sm:w-8",
                       "text-muted-foreground hover:text-foreground transition-opacity"
                     )
                   }}
@@ -175,7 +173,7 @@ export const FinalStackManagement = ({
             <DialogDescription>Player: {selectedPlayer?.player.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label>Final Stack ({CurrencyConfig.code})</Label>
+            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stack ({CurrencyConfig.code})</Label>
             <Input
               type="number"
               value={editValue}
