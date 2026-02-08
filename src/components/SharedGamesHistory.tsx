@@ -150,14 +150,14 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto w-full">
-          <Table className={cn(isMobile && "table-fixed w-full font-luxury")}>
-            <TableHeader className="bg-card/50">
-              <TableRow className={cn(isMobile ? "h-10 border-b border-border/50" : "")}>
+          <Table layout={isMobile ? "fixed" : "auto"}>
+            <TableHeader>
+              <TableRow className={cn(isMobile ? "h-10" : "")}>
                 <TableHead
                   onClick={() => handleSort('date')}
                   className={cn(
-                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                    "cursor-pointer hover:text-primary transition-colors",
+                    isMobile ? "w-[30%] px-1" : ""
                   )}
                 >
                   <span className="flex items-center gap-0.5">
@@ -168,8 +168,8 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 <TableHead
                   onClick={() => handleSort('buy_in')}
                   className={cn(
-                    "text-right cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[25%] px-1 text-mobile-compact" : ""
+                    "text-right cursor-pointer hover:text-primary transition-colors",
+                    isMobile ? "w-[25%] px-1" : ""
                   )}
                 >
                   <span className="flex items-center justify-end gap-0.5">
@@ -180,8 +180,8 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 <TableHead
                   onClick={() => handleSort('players')}
                   className={cn(
-                    "text-center cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[15%] px-1 text-mobile-compact" : ""
+                    "text-center cursor-pointer hover:text-primary transition-colors",
+                    isMobile ? "w-[15%] px-1" : ""
                   )}
                 >
                   <span className="flex items-center justify-center gap-0.5">
@@ -192,8 +192,8 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 <TableHead
                   onClick={() => handleSort('chips')}
                   className={cn(
-                    "text-right cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                    "text-right cursor-pointer hover:text-primary transition-colors",
+                    isMobile ? "w-[30%] px-1" : ""
                   )}
                 >
                   <span className="flex items-center justify-end gap-0.5">
@@ -212,25 +212,25 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                     key={game.id}
                     onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)}
                     className={cn(
-                      "cursor-pointer hover:bg-muted/30 transition-colors",
-                      isMobile ? "h-10 text-mobile-compact" : ""
+                      "cursor-pointer",
+                      isMobile ? "h-10" : ""
                     )}
                   >
-                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "")}>
                       <div className="flex items-center gap-1 sm:gap-2">
                         {!isMobile && <Calendar className="h-4 w-4 opacity-50" />}
                         {format(new Date(game.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell className={cn("text-right font-body", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className={cn("text-right font-numbers", isMobile ? "px-1" : "")}>
                       {isMobile ? `Rs.${Math.round(game.buy_in_amount).toLocaleString('en-IN')}` : formatCurrency(game.buy_in_amount)}
                     </TableCell>
-                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "")}>
+                    <TableCell className={cn("text-center", isMobile ? "px-1" : "")}>
+                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
                         {game.player_count}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right font-body font-bold text-primary", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className={cn("text-right font-numbers font-bold text-primary", isMobile ? "px-1" : "")}>
                       {isMobile ? `Rs.${Math.round(game.total_pot).toLocaleString('en-IN')}` : formatCurrency(game.total_pot)}
                     </TableCell>
                   </TableRow>

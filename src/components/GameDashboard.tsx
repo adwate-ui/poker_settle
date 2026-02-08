@@ -47,7 +47,8 @@ import { parseIndianNumber, formatInputDisplay, formatProfitLoss } from "@/lib/u
 import PokerTableView from "@/components/PokerTableView";
 import TablePositionEditor from "@/components/TablePositionEditor";
 import HandTracking from "@/components/HandTracking";
-import OptimizedAvatar from "@/components/OptimizedAvatar";
+import LuxurySelectionCard from "@/components/LuxurySelectionCard";
+import AddPlayerDialog from "@/components/AddPlayerDialog";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
@@ -72,12 +73,6 @@ import {
 } from "@/components/ui/collapsible";
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -827,68 +822,6 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                 </CarouselContent>
               </Carousel>
             </div>
-
-            <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-              <DialogContent className="p-6">
-                <DialogHeader className="p-0 mb-6">
-                  <DialogTitle className="text-xl font-luxury uppercase tracking-widest">Add Player</DialogTitle>
-                  <DialogDescription className="text-3xs font-luxury uppercase tracking-widest text-muted-foreground mt-1">
-                    Search for an existing player or create a new one.
-                  </DialogDescription>
-                </DialogHeader>
-                <Tabs defaultValue="existing" className="space-y-6">
-                  <TabsList className="bg-muted border border-border p-1 h-10 rounded-lg grid grid-cols-2">
-                    <TabsTrigger value="existing" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">Search</TabsTrigger>
-                    <TabsTrigger value="new" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">New</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="existing" className="space-y-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
-                      <Input
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        variant="luxury"
-                        className="pl-9 h-10"
-                      />
-                    </div>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {availablePlayers.map(p => (
-                          <Button
-                            key={p.id}
-                            onClick={() => addExistingPlayer(p)}
-                            variant="ghost"
-                            className="w-full p-3 h-auto rounded-lg border border-border bg-accent/5 justify-start gap-3"
-                          >
-                            <OptimizedAvatar name={p.name} size="sm" />
-                            <span className="uppercase text-[10px] font-luxury tracking-widest">{p.name}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                  <TabsContent value="new" className="space-y-6">
-                    <Input
-                      placeholder="Enter name"
-                      value={newPlayerName}
-                      onChange={(e) => setNewPlayerName(e.target.value)}
-                      variant="luxury"
-                      className="h-10"
-                    />
-                    <Button
-                      onClick={addNewPlayer}
-                      disabled={!newPlayerName.trim() || isCreatingPlayer}
-                      variant="luxury"
-                      size="lg"
-                      className="w-full"
-                    >
-                      Add New Player
-                    </Button>
-                  </TabsContent>
-                </Tabs>
-              </DialogContent>
-            </Dialog>
           </div>
         ) : (
           /* Main 2-Column Layout (Desktop) */
@@ -910,18 +843,18 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="p-8 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in slide-in-from-top-2 duration-300">
-                      <div className="space-y-2 p-5 rounded-2xl bg-accent/5 border border-border transition-all group hover:border-primary/20">
+                      <Card variant="luxury" className="space-y-2 p-5 rounded-2xl transition-all group hover:border-primary/20 bg-card/10">
                         <p className="text-[10px] text-muted-foreground font-luxury tracking-[0.2em] uppercase">Total Buy-ins</p>
                         <p className="text-2xl font-numbers text-foreground">{formatCurrency(totalBuyIns)}</p>
-                      </div>
-                      <div className="space-y-2 p-5 rounded-2xl bg-accent/5 border border-border transition-all group hover:border-primary/20">
+                      </Card>
+                      <Card variant="luxury" className="space-y-2 p-5 rounded-2xl transition-all group hover:border-primary/20 bg-card/10">
                         <p className="text-[10px] text-muted-foreground font-luxury tracking-[0.2em] uppercase">Chips in Play</p>
                         <p className="text-2xl font-numbers text-foreground">{formatCurrency(totalFinalStack)}</p>
-                      </div>
-                      <div className="space-y-2 p-5 rounded-2xl bg-accent/5 border border-border transition-all group hover:border-primary/20">
+                      </Card>
+                      <Card variant="luxury" className="space-y-2 p-5 rounded-2xl transition-all group hover:border-primary/20 bg-card/10">
                         <p className="text-[10px] text-muted-foreground font-luxury tracking-[0.2em] uppercase">Players</p>
                         <p className="text-2xl font-numbers text-foreground">{gamePlayers.length}</p>
-                      </div>
+                      </Card>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
@@ -958,11 +891,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="p-8 space-y-8 animate-in slide-in-from-top-2 duration-300">
-                        <div className="relative rounded-3xl overflow-hidden bg-white/40 dark:bg-black/40 border border-gold-900/10 dark:border-white/5 p-10 pt-12 shadow-inner">
+                        <Card variant="luxury" className="relative rounded-3xl overflow-hidden p-10 pt-12 shadow-inner border-gold-900/10">
                           <PokerTableView
                             positions={currentTablePosition.positions}
                           />
-                        </div>
+                        </Card>
                         <div className="flex flex-col sm:flex-row gap-4">
                           <Button
                             onClick={() => setShowPositionEditor(true)}
@@ -984,7 +917,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </Collapsible>
                 </Card>
               ) : (
-                <Card className="p-12 border-dashed border-border bg-accent/5">
+                <Card variant="luxury" className="p-12 border-dashed">
                   <div className="text-center space-y-8">
                     <div className="mx-auto w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center border border-border shadow-inner">
                       <UsersIcon className="w-10 h-10 text-muted-foreground" />
@@ -1071,107 +1004,13 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                      <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
-                        <DialogTrigger asChild>
-                          <Button
-                            className="w-full h-12 bg-accent/5 border border-border hover:bg-primary/10 text-foreground text-label rounded-xl transition-all"
-                          >
-                            <UserPlus className="w-3.5 h-3.5 mr-2.5 text-gold-500" />
-                            Add Player
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[90vw] sm:max-w-xl p-6">
-                          <DialogHeader className="p-0 mb-6">
-                            <DialogTitle className="text-xl font-luxury uppercase tracking-widest">Add New Player</DialogTitle>
-                            <DialogDescription className="text-3xs font-luxury uppercase tracking-widest text-muted-foreground mt-1">Select existing or add new.</DialogDescription>
-                          </DialogHeader>
-
-                          <div className="space-y-6">
-                            <Tabs defaultValue="existing" className="space-y-8">
-                              <TabsList className="bg-muted border border-border p-1 h-10 rounded-lg grid grid-cols-2">
-                                <TabsTrigger value="existing" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">Search Existing</TabsTrigger>
-                                <TabsTrigger value="new" className="text-[10px] uppercase font-luxury tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">New Player</TabsTrigger>
-                              </TabsList>
-
-                              <TabsContent value="existing" className="space-y-6 animate-in fade-in duration-300">
-                                <div className="relative group">
-                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
-                                  </div>
-                                  <Input
-                                    placeholder="SEARCH PLAYERS..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    variant="luxury"
-                                    className="pl-10 h-11"
-                                  />
-                                </div>
-
-                                <ScrollArea className="h-[350px] pr-4">
-                                  <div className="space-y-3">
-                                    {availablePlayers.length > 0 ? (
-                                      availablePlayers.map((player) => (
-                                        <button
-                                          key={player.id}
-                                          onClick={() => addExistingPlayer(player)}
-                                          className="w-full text-left p-4 rounded-lg border border-border bg-accent/2 hover:bg-primary/5 hover:border-primary/20 transition-all group flex items-center gap-4"
-                                        >
-                                          <OptimizedAvatar name={player.name} size="md" className="ring-1 ring-primary/20" />
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-xs font-luxury uppercase tracking-widest truncate">{player.name}</span>
-                                              {player.total_games && player.total_games > 10 && <Star className="h-3 w-3 text-primary fill-current" />}
-                                            </div>
-                                            <div className="flex gap-2.5 mt-1.5">
-                                              <Badge variant="stats">
-                                                {player.total_games || 0} SESSIONS
-                                              </Badge>
-                                              {player.total_profit !== undefined && (
-                                                <Badge variant={player.total_profit >= 0 ? "profit" : "loss"}>
-                                                  {formatProfitLoss(player.total_profit)}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                          <Check className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </button>
-                                      ))
-                                    ) : (
-                                      <div className="py-20 text-center border border-dashed border-black/10 dark:border-white/10 rounded-lg bg-black/5 dark:bg-white/2">
-                                        <p className="text-3xs font-luxury uppercase tracking-widest text-black/20 dark:text-white/20">No players found.</p>
-                                      </div>
-                                    )}
-                                  </div>
-                                </ScrollArea>
-                              </TabsContent>
-
-                              <TabsContent value="new" className="space-y-8 animate-in fade-in duration-300">
-                                <div className="space-y-3">
-                                  <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground ml-1">Player Name</Label>
-                                  <Input
-                                    placeholder="ENTER NAME"
-                                    value={newPlayerName}
-                                    onChange={(e) => setNewPlayerName(e.target.value)}
-                                    variant="luxury"
-                                    className="h-11"
-                                    onKeyPress={(e) => e.key === 'Enter' && !isCreatingPlayer && addNewPlayer()}
-                                    autoFocus
-                                  />
-                                </div>
-                                <Button
-                                  onClick={addNewPlayer}
-                                  disabled={!newPlayerName.trim() || isCreatingPlayer}
-                                  variant="luxury"
-                                  size="lg"
-                                  className="w-full"
-                                >
-                                  {isCreatingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Player'}
-                                </Button>
-                              </TabsContent>
-                            </Tabs>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        onClick={() => setShowAddPlayer(true)}
+                        className="w-full h-12 bg-accent/5 border border-border hover:bg-primary/10 text-foreground text-label rounded-xl transition-all"
+                      >
+                        <UserPlus className="w-3.5 h-3.5 mr-2.5 text-gold-500" />
+                        Add Player
+                      </Button>
 
                       <div className="space-y-4">
                         {gamePlayers.sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
@@ -1190,7 +1029,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               {/* Manual Transfers */}
               {currentGame.settlements && currentGame.settlements.length > 0 && (
-                <Card className="p-0 overflow-hidden bg-background">
+                <Card variant="luxury" className="p-0">
                   <div className="p-4 border-b border-white/10 bg-accent/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <History className="h-4 w-4 text-gold-500" />
@@ -1236,10 +1075,10 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
               {/* Add Manual Transfer Form */}
               {showManualTransfer && (
-                <Card className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500">
-                  <div className="flex items-center gap-3 border-b pb-4">
+                <Card variant="luxury" className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500">
+                  <div className="flex items-center gap-3 border-b pb-4 border-border/40">
                     <ShieldCheck className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Manual Adjustment</h3>
+                    <h3 className="text-lg font-luxury uppercase tracking-widest">Manual Adjustment</h3>
                   </div>
 
                   <div className="space-y-6">
@@ -1394,6 +1233,19 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
         )}
       </div>
+
+      <AddPlayerDialog
+        open={showAddPlayer}
+        onOpenChange={setShowAddPlayer}
+        availablePlayers={availablePlayers}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        newPlayerName={newPlayerName}
+        onNewPlayerNameChange={setNewPlayerName}
+        onAddExisting={addExistingPlayer}
+        onAddNew={addNewPlayer}
+        isCreating={isCreatingPlayer}
+      />
     </div>
   );
 };

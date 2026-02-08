@@ -7,8 +7,8 @@ import { toast } from 'sonner';
 import { ErrorMessages } from '@/lib/errorUtils';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { GamePlayer, BuyInHistory } from "@/types/poker";
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { BuyInHistoryDialog } from '@/components/BuyInHistoryDialog';
+import { ResponsiveName } from '@/components/ResponsiveName';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Card } from '@/components/ui/card';
 
 interface BuyInManagementTableProps {
   gamePlayers: GamePlayer[];
@@ -80,29 +81,6 @@ export const BuyInManagementTable = ({
     a.player.name.localeCompare(b.player.name)
   );
 
-  const isMobile = useIsMobile();
-
-  // Helper function to abbreviate names for mobile
-  const getDisplayName = (name: string, isMobile: boolean) => {
-    if (!name) return '';
-    if (!isMobile) return name;
-
-    // If name is already short, keep it
-    if (name.length <= 10) return name;
-
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) {
-      return name.substring(0, 10);
-    }
-
-    // Format: First Name + Last Initial (e.g., "John D.")
-    const firstName = parts[0];
-    const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
-    const formatted = `${firstName} ${lastInitial}.`;
-
-    return formatted.length > 10 ? formatted.substring(0, 7) + "..." : formatted;
-  };
-
   const selectedPlayer = gamePlayers.find(gp => gp.id === selectedPlayerId);
 
   const increment = () => setBuyInCount(prev => {
@@ -119,36 +97,30 @@ export const BuyInManagementTable = ({
     <>
       <div className="rounded-md border max-h-[500px] overflow-auto">
         <div className="overflow-x-auto w-full">
-          <Table className="table-fixed w-full text-left border-collapse">
-            <TableHeader className="sticky top-0 z-10 bg-card">
-              <TableRow className="border-b border-white/10 hover:bg-transparent">
-                <TableHead className={cn(
-                  "w-[35%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                  isMobile ? "pl-2" : "pl-6"
-                )}>
+          <Table className="table-fixed sm:table-auto">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[35%] pl-2 sm:pl-6">
                   <div className="flex items-center gap-1.5">
                     <User className="h-3 w-3" />
-                    <span>{isMobile ? "Plyr" : "Player"}</span>
+                    <span><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
                   </div>
                 </TableHead>
-                <TableHead className="w-[15%] px-1 py-2 text-center text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                <TableHead className="w-[15%] px-1 text-center border-l border-white/5">
                   <div className="flex items-center justify-center gap-1.5">
                     <Coins className="h-3 w-3" />
-                    <span>{isMobile ? "Buys" : "Buy-ins"}</span>
+                    <span><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
                   </div>
                 </TableHead>
-                <TableHead className="w-[20%] px-1 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                <TableHead className="w-[20%] px-1 border-l border-white/5">
                   <div className="flex items-center gap-1.5">
                     <TrendingUp className="h-3 w-3" />
-                    <span>{isMobile ? "Amt" : "Amount"}</span>
+                    <span><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
                   </div>
                 </TableHead>
-                <TableHead className="w-[15%] py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5">
+                <TableHead className="w-[15%] border-l border-white/5">
                 </TableHead>
-                <TableHead className={cn(
-                  "w-[15%] text-right py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground border-l border-white/5",
-                  isMobile ? "pr-2" : "pr-6"
-                )}>
+                <TableHead className="w-[15%] text-right border-l border-white/5 pr-2 sm:pr-6">
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -156,17 +128,15 @@ export const BuyInManagementTable = ({
               {sortedPlayers.map((gamePlayer) => (
                 <TableRow
                   key={gamePlayer.id}
-                  className={cn("border-b border-white/5 hover:bg-white/5", isMobile ? "h-11" : "group")}
+                  className="border-white/5 h-11 sm:h-auto sm:group"
                 >
-                  <TableCell className={cn("py-2.5", isMobile ? "pl-2 font-medium text-[11px] truncate text-foreground" : "pl-6")}>
-                    <span className="truncate">
-                      {getDisplayName(gamePlayer.player.name, isMobile)}
-                    </span>
+                  <TableCell className="pl-2 sm:pl-6 font-medium truncate text-foreground">
+                    <ResponsiveName name={gamePlayer.player.name} />
                   </TableCell>
-                  <TableCell className={cn("py-2.5 px-1 text-center font-numbers whitespace-nowrap", isMobile ? "text-[11px] text-muted-foreground/50" : "text-muted-foreground/50")}>
+                  <TableCell className="px-1 text-center font-numbers whitespace-nowrap text-muted-foreground/50">
                     {gamePlayer.buy_ins}
                   </TableCell>
-                  <TableCell className={cn("py-2.5 px-1 font-numbers whitespace-nowrap text-muted-foreground/50", isMobile ? "text-[11px]" : "")}>
+                  <TableCell className="px-1 font-numbers whitespace-nowrap text-muted-foreground/50">
                     {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
                   </TableCell>
                   <TableCell className="text-center py-1 border-l border-white/5">
@@ -177,22 +147,22 @@ export const BuyInManagementTable = ({
                         setOpened(true);
                       }}
                       variant="ghost"
-                      size={isMobile ? "icon-sm" : "icon"}
+                      size="icon-sm"
                       aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                      className={cn("bg-transparent", isMobile && "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity")}
+                      className="bg-transparent sm:h-9 sm:w-9 h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity"
                     >
-                      <Plus className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                      <Plus className="sm:h-4 sm:w-4 h-3.5 w-3.5" />
                     </Button>
                   </TableCell>
-                  <TableCell className={cn("text-right py-1 border-l border-white/5", isMobile ? "pr-2" : "pr-6")}>
+                  <TableCell className="text-right py-1 border-l border-white/5 pr-2 sm:pr-6">
                     {fetchBuyInHistory && (
                       <BuyInHistoryDialog
                         gamePlayerId={gamePlayer.id}
                         playerName={gamePlayer.player.name}
                         fetchHistory={fetchBuyInHistory}
                         triggerProps={{
-                          size: isMobile ? "icon-sm" : "icon",
-                          className: cn(isMobile && "h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity")
+                          size: "icon-sm",
+                          className: "sm:h-9 sm:w-9 h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-opacity"
                         }}
                       />
                     )}
@@ -214,8 +184,8 @@ export const BuyInManagementTable = ({
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <TrendingUp className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-lg bg-card/20 border border-border/40">
+                <TrendingUp className="w-5 h-5 text-gold-400" />
               </div>
               <div>
                 <DialogTitle>Manage Buy-ins</DialogTitle>
@@ -256,10 +226,13 @@ export const BuyInManagementTable = ({
                 </Button>
               </div>
 
-              <div className={cn(
-                "p-6 rounded-2xl w-full text-center border transition-all duration-500",
-                buyInCount > 0 ? 'bg-primary/5 border-primary/20' : 'bg-destructive/5 border-destructive/20'
-              )}>
+              <Card
+                variant="luxury"
+                className={cn(
+                  "p-6 w-full text-center transition-all duration-500",
+                  buyInCount > 0 ? 'bg-primary/10 border-primary/30' : 'bg-destructive/10 border-destructive/30'
+                )}
+              >
                 <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Cost Impact</p>
                 <p className={cn(
                   "text-3xl font-bold",
@@ -267,7 +240,7 @@ export const BuyInManagementTable = ({
                 )}>
                   {formatCurrency(Math.abs(buyInCount * buyInAmount))}
                 </p>
-              </div>
+              </Card>
             </div>
           </div>
 

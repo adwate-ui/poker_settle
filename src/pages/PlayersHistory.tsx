@@ -30,7 +30,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { ResponsiveName } from "@/components/ResponsiveName";
+import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
 
 type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
@@ -44,7 +45,6 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
-  const isMobile = useIsMobile();
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -210,50 +210,41 @@ const PlayersHistory = () => {
       {/* Responsive Table Layout */}
       <Card className="overflow-hidden">
         <div className="overflow-x-auto w-full">
-          <Table className={cn(isMobile && "table-fixed w-full font-luxury")}>
-            <TableHeader className="bg-card/50">
-              <TableRow className={cn(isMobile ? "h-10" : "text-xs sm:text-sm")}>
+          <Table className="table-fixed sm:table-auto">
+            <TableHeader>
+              <TableRow className="h-10 sm:h-auto">
                 <TableHead
                   onClick={() => handleSort("name")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[35%] px-1 text-mobile-compact" : ""
-                  )}
+                  className="w-[35%] px-1 sm:px-4"
                 >
                   <span className="flex items-center gap-0.5">
-                    {isMobile ? "Plyr" : "Player"}
-                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                    <span className="sm:inline hidden">Player</span>
+                    <span className="sm:hidden inline">Plyr</span>
+                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
                   </span>
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort("total_games")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4",
-                    isMobile ? "w-[15%] px-1 text-mobile-compact" : ""
-                  )}
+                  className="text-center w-[15%] px-1 sm:px-4"
                 >
                   <span className="flex items-center justify-center gap-0.5">
-                    {isMobile ? "Gms" : "Games"}
-                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                    <span className="sm:inline hidden">Games</span>
+                    <span className="sm:hidden inline">Gms</span>
+                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
                   </span>
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort("total_profit")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4",
-                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
-                  )}
+                  className="text-right w-[30%] px-1 sm:px-4"
                 >
                   <span className="flex items-center justify-end gap-0.5">
-                    {isMobile ? "Net" : "Total Net"}
-                    <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
+                    <span className="sm:inline hidden">Total Net</span>
+                    <span className="sm:hidden inline">Net</span>
+                    <ArrowUpDown className="h-2 w-2 sm:h-3 sm:w-3 opacity-50 sm:opacity-100" />
                   </span>
                 </TableHead>
-                <TableHead className={cn(
-                  "text-right p-2 sm:p-4",
-                  isMobile ? "w-[20%] px-1" : ""
-                )}>
-                  {!isMobile && "Actions"}
+                <TableHead className="text-right w-[20%] px-1 sm:px-4">
+                  <span className="sm:inline hidden">Actions</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -263,55 +254,44 @@ const PlayersHistory = () => {
                 return (
                   <TableRow
                     key={player.id}
-                    className={cn(
-                      "cursor-pointer hover:bg-muted/30 transition-colors",
-                      isMobile ? "h-10 text-mobile-compact" : "text-xs sm:text-sm"
-                    )}
+                    className="cursor-pointer h-10 sm:h-auto"
                     onClick={() => navigate(`/players/${player.id}`)}
                   >
-                    <TableCell className={cn(isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className="px-1 sm:px-4">
                       <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
                         <OptimizedAvatar
                           name={player.name}
                           size="sm"
-                          className={cn(isMobile ? "h-5 w-5" : "h-6 w-6 sm:h-10 sm:w-10")}
+                          className="h-5 w-5 sm:h-10 sm:w-10"
                         />
-                        <span className="font-medium truncate block">
-                          {player.name}
-                        </span>
+                        <ResponsiveName name={player.name} className="font-medium" />
                       </div>
                     </TableCell>
-                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
+                    <TableCell className="text-center px-1 sm:px-4">
+                      <Badge variant="secondary" className="font-numbers h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs min-w-[20px]">
                         {player.total_games || 0}
-                        {!isMobile && " Sessions"}
+                        <span className="sm:inline hidden"> Sessions</span>
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className="text-right px-1 sm:px-4">
                       <Badge
                         variant={profit >= 0 ? "profit" : "loss"}
-                        className={cn(
-                          "font-medium whitespace-nowrap font-numbers",
-                          isMobile ? 'text-[10px] px-1.5' : 'text-sm px-3'
-                        )}
+                        className="font-medium whitespace-nowrap font-numbers text-[10px] sm:text-sm px-1.5 sm:px-3 h-5 sm:h-auto"
                       >
-                        {profit < 0 ? '-' : ''}Rs. {Math.abs(Math.round(profit)).toLocaleString('en-IN')}
+                        <ResponsiveCurrency amount={profit} />
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className="text-right px-1 sm:px-4">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={cn(
-                          "text-destructive/50 hover:text-destructive hover:bg-destructive/10",
-                          isMobile ? "h-6 w-6" : "h-6 w-6 sm:h-8 sm:w-8"
-                        )}
+                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-6 w-6 sm:h-8 sm:w-8"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeletePlayerId(player.id);
                         }}
                       >
-                        <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>

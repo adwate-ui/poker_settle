@@ -85,25 +85,19 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
           </Select>
         </div>
         <div className="overflow-x-auto w-full">
-          <Table className={cn(isMobile && "table-fixed w-full font-luxury")}>
-            <TableHeader className="bg-card/50">
+          <Table layout={isMobile ? "fixed" : "auto"}>
+            <TableHeader>
               <TableRow className={cn(isMobile ? "h-10" : "")}>
                 <TableHead
                   onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
-                  )}
+                  className={isMobile ? "w-[30%] px-1" : ""}
                 >
                   <span className="flex items-center gap-0.5">
                     Date
                     <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3 inline")} />
                   </span>
                 </TableHead>
-                <TableHead className={cn(
-                  "p-2 sm:p-4",
-                  isMobile ? "w-[15%] px-1 text-mobile-compact" : ""
-                )}>
+                <TableHead className={isMobile ? "w-[15%] px-1" : ""}>
                   <span className="flex items-center gap-0.5">
                     {isMobile ? "Buys" : "Buy-ins"}
                   </span>
@@ -111,8 +105,8 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                 <TableHead
                   onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
                   className={cn(
-                    "text-right cursor-pointer hover:text-primary transition-colors p-2 sm:p-4",
-                    isMobile ? "w-[30%] px-1 text-mobile-compact" : ""
+                    "text-right",
+                    isMobile ? "w-[30%] px-1" : ""
                   )}
                 >
                   <span className="flex items-center justify-end gap-0.5">
@@ -121,7 +115,7 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                   </span>
                 </TableHead>
                 <TableHead className={cn(
-                  "text-right p-2 sm:p-4",
+                  "text-right",
                   isMobile ? "w-[25%] px-1" : ""
                 )}>
                   {!isMobile && "Action"}
@@ -134,32 +128,32 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                   key={h.id}
                   className={cn(
                     "hover:bg-muted/30 transition-colors",
-                    isMobile ? "h-10 text-mobile-compact" : ""
+                    isMobile ? "h-10" : ""
                   )}
                 >
-                  <TableCell className={cn("font-medium", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                  <TableCell className={cn("font-medium", isMobile ? "px-1" : "")}>
                     {format(new Date(h.games.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
                   </TableCell>
-                  <TableCell className={cn(isMobile ? "px-1" : "p-2 sm:p-4")}>
-                    <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "")}>
+                  <TableCell className={isMobile ? "px-1" : ""}>
+                    <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
                       {h.buy_ins}
                     </Badge>
                   </TableCell>
                   <TableCell className={cn(
                     "text-right",
-                    isMobile ? "px-1" : "p-2 sm:p-4"
+                    isMobile ? "px-1" : ""
                   )}>
                     <Badge
                       variant={h.net_amount >= 0 ? "profit" : "loss"}
                       className={cn(
                         "font-numbers font-medium",
-                        isMobile ? "text-[10px] px-1.5" : "px-3"
+                        isMobile ? "text-[10px] px-1.5" : "text-sm px-3"
                       )}
                     >
                       {h.net_amount < 0 ? '-' : ''}Rs. {Math.abs(Math.round(h.net_amount)).toLocaleString('en-IN')}
                     </Badge>
                   </TableCell>
-                  <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                  <TableCell className={cn("text-right", isMobile ? "px-1" : "")}>
                     {isMobile ? (
                       <Button
                         variant="ghost"

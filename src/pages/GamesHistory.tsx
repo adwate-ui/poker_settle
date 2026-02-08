@@ -38,7 +38,7 @@ import { formatProfitLoss, cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useGames } from "@/features/game/hooks/useGames";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -75,7 +75,6 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const { prefetch } = usePrefetchGame();
-  const isMobile = useIsMobile();
 
   const effectiveUserId = propUserId || user?.id;
 
@@ -322,15 +321,12 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       {/* Responsive Table Layout */}
       <Card className="overflow-hidden">
         <div className="overflow-x-auto w-full">
-          <Table className={cn(isMobile && "table-fixed w-full")}>
-            <TableHeader className="bg-card/50">
-              <TableRow className={cn(isMobile ? "h-10" : "text-xs sm:text-sm")}>
+          <Table className="table-fixed sm:table-auto">
+            <TableHeader>
+              <TableRow className="h-10 sm:h-auto">
                 <TableHead
                   onClick={() => handleSort("date")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                    isMobile ? "w-[22%] px-1 text-mobile-compact" : "w-[25%]"
-                  )}
+                  className="cursor-pointer hover:text-primary transition-colors w-[22%] sm:w-[25%] px-1 sm:px-4"
                 >
                   <span className="flex items-center gap-1">
                     Date
@@ -339,45 +335,37 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort("buy_in")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                    isMobile ? "w-[18%] px-1 text-mobile-compact" : "w-[20%]"
-                  )}
+                  className="cursor-pointer hover:text-primary transition-colors text-right w-[18%] sm:w-[20%] px-1 sm:px-4"
                 >
                   <span className="flex items-center justify-end gap-1">
-                    {isMobile ? "Buy" : "Buy-in"}
+                    <span className="sm:inline hidden">Buy-in</span>
+                    <span className="sm:hidden inline">Buy</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </span>
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort("players")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors text-center p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                    isMobile ? "w-[12%] px-1 text-mobile-compact" : "w-[15%]"
-                  )}
+                  className="cursor-pointer hover:text-primary transition-colors text-center w-[12%] sm:w-[15%] px-1 sm:px-4"
                 >
                   <span className="flex items-center justify-center gap-1">
-                    {isMobile ? "Plyr" : "Players"}
+                    <span className="sm:inline hidden">Players</span>
+                    <span className="sm:hidden inline">Plyr</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </span>
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort("chips")}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors text-right p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                    isMobile ? "w-[23%] px-1 text-mobile-compact" : "w-[20%]"
-                  )}
+                  className="cursor-pointer hover:text-primary transition-colors text-right w-[23%] sm:w-[20%] px-1 sm:px-4"
                 >
                   <span className="flex items-center justify-end gap-1">
-                    {isMobile ? "Pot" : "Total Pot"}
+                    <span className="sm:inline hidden">Total Pot</span>
+                    <span className="sm:hidden inline">Pot</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </span>
                 </TableHead>
-                <TableHead className={cn(
-                  "text-right p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground",
-                  isMobile ? "w-[25%] px-1 text-mobile-compact" : "w-[20%]"
-                )}>
-                  {isMobile ? "P&L" : (selectedPlayer !== "all" ? "Player P&L" : "")}
+                <TableHead className="text-right w-[25%] sm:w-[20%] px-1 sm:px-4">
+                  <span className="sm:inline hidden">{selectedPlayer !== "all" ? "Player P&L" : ""}</span>
+                  <span className="sm:hidden inline">P&L</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -387,47 +375,42 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 return (
                   <TableRow
                     key={game.id}
-                    className={cn(
-                      "cursor-pointer hover:bg-muted/30 transition-colors",
-                      isMobile ? "h-10 text-mobile-compact" : "text-xs sm:text-sm"
-                    )}
+                    className="cursor-pointer h-10 sm:h-auto"
                     onClick={() => handleNavigate(game.id)}
                     onMouseEnter={() => prefetch(game.id)}
                   >
-                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      {format(new Date(game.date), isMobile ? "MMM d" : "MMM d, yyyy")}
+                    <TableCell className="font-medium whitespace-nowrap px-1 sm:px-4">
+                      <span className="sm:inline hidden">{format(new Date(game.date), "MMM d, yyyy")}</span>
+                      <span className="sm:hidden inline">{format(new Date(game.date), "MMM d")}</span>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      {isMobile ? `Rs.${Math.round(game.buy_in_amount).toLocaleString('en-IN')}` : formatCurrency(game.buy_in_amount)}
+                    <TableCell className="text-right font-numbers px-1 sm:px-4">
+                      <ResponsiveCurrency amount={game.buy_in_amount} />
                     </TableCell>
-                    <TableCell className={cn("text-center", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      <Badge variant="secondary" className={cn("font-numbers", isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
+                    <TableCell className="text-center px-1 sm:px-4">
+                      <Badge variant="secondary" className="font-numbers h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs min-w-[20px]">
                         {game.player_count}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers font-semibold", isMobile ? "px-1" : "p-2 sm:p-4")}>
-                      {isMobile ? `Rs.${Math.round(game.total_pot).toLocaleString('en-IN')}` : formatCurrency(game.total_pot)}
+                    <TableCell className="text-right font-numbers font-semibold px-1 sm:px-4">
+                      <ResponsiveCurrency amount={game.total_pot} />
                     </TableCell>
-                    <TableCell className={cn("text-right", isMobile ? "px-1" : "p-2 sm:p-4")}>
+                    <TableCell className="text-right px-1 sm:px-4">
                       {selectedPlayer !== "all" && playerData ? (
-                        <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className={cn(isMobile ? "h-5 px-1.5 text-[9px]" : "text-xs")}>
-                          {isMobile ? (playerData.net_amount >= 0 ? '+' : '') + Math.round(playerData.net_amount) : formatProfitLoss(playerData.net_amount)}
+                        <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="h-5 sm:h-auto px-1.5 text-[9px] sm:text-xs">
+                          <ResponsiveCurrency amount={playerData.net_amount} />
                         </Badge>
                       ) : (
                         !readOnly && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={cn(
-                              "text-destructive/50 hover:text-destructive hover:bg-destructive/10",
-                              isMobile ? "h-6 w-6" : "h-6 w-6 sm:h-8 sm:w-8"
-                            )}
+                            className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-6 w-6 sm:h-8 sm:w-8"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteGameId(game.id);
                             }}
                           >
-                            <Trash2 className={cn(isMobile ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         )
                       )}

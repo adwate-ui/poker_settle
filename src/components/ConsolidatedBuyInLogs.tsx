@@ -162,22 +162,22 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       ) : (
         <div className="rounded-xl border overflow-hidden">
           <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
-            <Table className="table-fixed w-full">
-              <TableHeader className="sticky top-0 z-10 bg-card border-b">
+            <Table layout="fixed">
+              <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[40%] p-2 sm:p-4 sm:pl-6 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Player</TableHead>
-                  <TableHead className="w-[20%] p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Amount</TableHead>
-                  <TableHead className="w-[20%] p-2 sm:p-4 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Total</TableHead>
-                  <TableHead className="w-[20%] text-right p-2 sm:p-4 sm:pr-6 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">Time</TableHead>
+                  <TableHead className="w-[40%] sm:pl-6">Player</TableHead>
+                  <TableHead className="w-[20%]">Amount</TableHead>
+                  <TableHead className="w-[20%]">Total</TableHead>
+                  <TableHead className="w-[20%] text-right sm:pr-6">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHistory.map((entry) => (
                   <TableRow
                     key={entry.id}
-                    className="cursor-default text-xs sm:text-sm"
+                    className="cursor-default"
                   >
-                    <TableCell className="p-2 sm:p-4 sm:pl-6">
+                    <TableCell className="sm:pl-6">
                       <div className="flex items-center gap-2 sm:gap-3 max-w-[150px] sm:max-w-none">
                         <Link
                           to={entry.player_id ? `/players/${entry.player_id}` : '#'}
@@ -187,7 +187,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                         </Link>
                       </div>
                     </TableCell>
-                    <TableCell className="p-2 sm:p-4 font-numbers">
+                    <TableCell className="font-numbers">
                       <Badge
                         variant={entry.buy_ins_added > 0 ? "profit" : "loss"}
                         className="h-5 px-1.5 text-[9px]"
@@ -195,11 +195,11 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                         {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                       </Badge>
                     </TableCell>
-                    <TableCell className="p-2 sm:p-4 font-numbers">
+                    <TableCell className="font-numbers">
                       <span className="text-muted-foreground">{entry.total_buy_ins_after}</span>
                     </TableCell>
-                    <TableCell className="text-right p-2 sm:p-4 sm:pr-6">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs font-numbers">
+                    <TableCell className="text-right sm:pr-6">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2 text-muted-foreground font-numbers">
                         {format(new Date(entry.timestamp), "MMM d, h:mm a")}
                       </div>
                     </TableCell>
