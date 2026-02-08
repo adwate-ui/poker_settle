@@ -377,11 +377,14 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
     try {
       // 1. First, complete the game in the database
       await completeGame(currentGame.id, allSettlements);
-      toast.success("Game finalized successfully");
+      toast.success("Game saved. Syncing ledger and sending notifications in 30s...");
 
-      // 2. Then, attempt to send WhatsApp summaries (non-blocking for navigation)
+      // 2. Wait for 30 seconds for data propagation
+      await new Promise(resolve => setTimeout(resolve, 30000));
+
+      // 3. Then, attempt to send WhatsApp summaries
       try {
-        toast.info("WhatsApp summaries are being sent...");
+        toast.info("Sending WhatsApp summaries...");
 
         // Get game token for shareable link
         const linkData = await createOrGetSharedLink('game', currentGame.id);
@@ -403,11 +406,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         );
       } catch (wsError) {
         console.error("Failed to send WhatsApp summaries:", wsError);
-        // We log the error but don't show an error toast to the user here 
-        // because the primary goal (game completion) was successful
       }
 
-      // 3. Always navigate to the game detail page after success
+      // 4. Always navigate to the game detail page after success
       navigate(`/games/${currentGame.id}`);
     } catch (error) {
       console.error("Error completing game:", error);
