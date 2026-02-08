@@ -429,8 +429,8 @@ const HandReplay = ({
 
       {/* Community Cards - Separate section with responsive sizes */}
       {communityCards && (
-        <div className="bg-accent/5 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-border/50 shadow-inner">
-          <div className="flex gap-1.5 items-center flex-wrap">
+        <div className="bg-poker-green/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-poker-green/20 shadow-inner">
+          <div className="flex gap-4 items-center flex-wrap">
             {/* Extract and display cards by street */}
             {(() => {
               const allCards = communityCards.match(/.{1,2}/g) || [];
@@ -443,7 +443,7 @@ const HandReplay = ({
                   {/* Flop */}
                   {flopCards.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">Flop</span>
+                      <span className="text-3xs uppercase font-luxury tracking-widest text-poker-green/50">Flop</span>
                       <div className="flex gap-1.5">
                         {flopCards.map((card, idx) => (
                           <React.Fragment key={`flop-${idx}`}>
@@ -458,9 +458,9 @@ const HandReplay = ({
                   {/* Turn */}
                   {turnCard && (
                     <>
-                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-border/50" />
+                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-poker-green/30" />
                       <div className="flex flex-col gap-1">
-                        <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">Turn</span>
+                        <span className="text-3xs uppercase font-luxury tracking-widest text-poker-green/50">Turn</span>
                         <div className="flex gap-0.5">
                           <PokerCard card={turnCard} size="sm" className="sm:hidden" />
                           <PokerCard card={turnCard} size="md" className="hidden sm:block" />
@@ -472,9 +472,9 @@ const HandReplay = ({
                   {/* River */}
                   {riverCard && (
                     <>
-                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-border/50" />
+                      <Separator orientation="vertical" className="h-10 sm:h-12 bg-poker-green/30" />
                       <div className="flex flex-col gap-1">
-                        <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/60">River</span>
+                        <span className="text-3xs uppercase font-luxury tracking-widest text-poker-green/50">River</span>
                         <div className="flex gap-0.5">
                           <PokerCard card={riverCard} size="sm" className="sm:hidden" />
                           <PokerCard card={riverCard} size="md" className="hidden sm:block" />
@@ -485,7 +485,7 @@ const HandReplay = ({
                 </>
               );
             })()}
-          </div >
+          </div>
         </div>
       )}
 

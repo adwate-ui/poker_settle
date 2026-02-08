@@ -102,22 +102,15 @@ export const FinalStackManagement = ({
   return (
     <>
       <Table
-        className="max-h-[500px]"
         tableClassName="sm:table-auto"
       >
-        <TableHeader className="sticky top-0 z-10 bg-card">
-          <TableRow className="border-b border-border/50 hover:bg-transparent">
+        <TableHeader>
+          <TableRow>
             <TableHead className="w-1/3">
-              <div className="flex items-center gap-1.5">
-                <User className="h-3 w-3" />
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Player</span>
-              </div>
+              Player
             </TableHead>
             <TableHead className="w-1/4">
-              <div className="flex items-center gap-1.5">
-                <Coins className="h-3 w-3" />
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stack</span>
-              </div>
+              Final Stack
             </TableHead>
             <TableHead className="w-1/6" />
             <TableHead className="w-1/6 text-right" />
@@ -127,12 +120,11 @@ export const FinalStackManagement = ({
           {sortedPlayers.map((gamePlayer) => (
             <TableRow
               key={gamePlayer.id}
-              className="border-b border-border/50"
             >
-              <TableCell className="text-2xs sm:text-sm font-medium truncate text-foreground">
+              <TableCell className="font-medium truncate text-foreground">
                 {getDisplayName(gamePlayer.player.name, isMobile)}
               </TableCell>
-              <TableCell className="text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.final_stack || 0)}
               </TableCell>
               <TableCell className="text-center">

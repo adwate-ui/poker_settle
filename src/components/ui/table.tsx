@@ -3,13 +3,22 @@ import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement> & { layout?: "auto" | "fixed", tableClassName?: string }
->(({ className, tableClassName, layout = "fixed", ...props }, ref) => (
-  <div className={cn("relative w-full overflow-y-auto overflow-x-hidden md:overflow-auto rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm", className)}>
+  React.HTMLAttributes<HTMLTableElement> & {
+    layout?: "auto" | "fixed",
+    tableClassName?: string,
+    variant?: "default" | "ghost"
+  }
+>(({ className, tableClassName, layout = "fixed", variant = "default", ...props }, ref) => (
+  <div className={cn(
+    "relative w-full overflow-y-auto overflow-x-hidden md:overflow-auto rounded-xl",
+    variant === "default" && "border border-white/10 bg-card/30 backdrop-blur-sm shadow-2xl",
+    variant === "ghost" && "border-none bg-transparent shadow-none",
+    className
+  )}>
     <table
       ref={ref}
       className={cn(
-        "w-full caption-bottom text-sm",
+        "w-full caption-bottom text-sm select-none",
         "table-fixed",
         layout === "auto" && "sm:table-auto",
         tableClassName
@@ -26,7 +35,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("sticky top-0 z-10 bg-card/80 backdrop-blur-md [&_tr]:border-b border-border/50", className)}
+    className={cn("sticky top-0 z-10 bg-black/20 backdrop-blur-md [&_tr]:border-b border-white/5", className)}
     {...props}
   />
 ))
@@ -51,7 +60,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 backdrop-blur-sm",
+      "border-t border-white/10 bg-muted/50 font-medium [&>tr]:last:border-b-0 backdrop-blur-sm",
       className
     )}
     {...props}
@@ -66,7 +75,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b border-border/50 transition-colors hover:bg-muted/20 data-[state=selected]:bg-muted backdrop-blur-sm",
+      "border-b border-white/5 transition-colors hover:bg-white/5 data-[state=selected]:bg-muted backdrop-blur-sm",
       className
     )}
     {...props}
@@ -83,7 +92,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-medium font-luxury text-muted-foreground uppercase tracking-widest text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-medium font-luxury text-muted-foreground/70 uppercase tracking-widest text-2xs sm:text-xs [&:has([role=checkbox])]:pr-0",
       align === 'center' && "text-center",
       align === 'right' && "text-right",
       className
@@ -103,7 +112,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "p-2 py-3 sm:px-4 sm:py-4 truncate whitespace-nowrap align-middle font-medium font-body text-tiny sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "p-2 py-3 sm:px-4 sm:py-4 truncate whitespace-nowrap align-middle font-medium font-body text-2xs sm:text-xs [&:has([role=checkbox])]:pr-0",
       isNumeric && "font-numbers",
       align === 'center' && "text-center",
       align === 'right' && "text-right",

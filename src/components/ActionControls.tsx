@@ -14,6 +14,8 @@ interface ActionControlsProps {
     canUndo: boolean;
     canMoveToNextStreet: boolean;
     stage: string;
+    isStreetCardMissing?: boolean;
+    onOpenCardSelector?: () => void;
 }
 
 const ActionControls = ({
@@ -27,50 +29,63 @@ const ActionControls = ({
     onNextStreet,
     canUndo,
     canMoveToNextStreet,
-    stage
+    stage,
+    isStreetCardMissing,
+    onOpenCardSelector
 }: ActionControlsProps) => {
     const isPlayerActive = currentPlayerId && playersInHand.includes(currentPlayerId);
 
     return (
         <div className="space-y-3">
             {isPlayerActive ? (
-                <>
-                    <div className="grid grid-cols-2 gap-2">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="h-12 font-bold"
-                            onClick={() => onAction(currentBet === 0 ? 'Check' : 'Call', currentBet)}
-                        >
-                            {currentBet === 0 ? 'Check' : `Call ${currentBet}`}
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="lg"
-                            className="h-12 font-bold"
-                            onClick={() => onAction('Fold')}
-                        >
-                            Fold
-                        </Button>
-                    </div>
-                    <div className="flex gap-2">
-                        <Input
-                            type="number"
-                            value={betAmount}
-                            onChange={e => setBetAmount(e.target.value)}
-                            placeholder="Amount"
-                            className="h-12 text-lg"
-                        />
-                        <Button
-                            variant="warning"
-                            className="h-12 px-8 font-bold"
-                            onClick={() => onAction('Raise', parseFloat(betAmount))}
-                            disabled={!betAmount}
-                        >
-                            Raise
-                        </Button>
-                    </div>
-                </>
+                isStreetCardMissing ? (
+                    <Button
+                        variant="luxury"
+                        size="lg"
+                        className="w-full h-14 font-luxury uppercase tracking-widest text-lg animate-pulse"
+                        onClick={onOpenCardSelector}
+                    >
+                        Set {stage} Cards
+                    </Button>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="h-12 font-bold"
+                                onClick={() => onAction(currentBet === 0 ? 'Check' : 'Call', currentBet)}
+                            >
+                                {currentBet === 0 ? 'Check' : `Call ${currentBet}`}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="lg"
+                                className="h-12 font-bold"
+                                onClick={() => onAction('Fold')}
+                            >
+                                Fold
+                            </Button>
+                        </div>
+                        <div className="flex gap-2">
+                            <Input
+                                type="number"
+                                value={betAmount}
+                                onChange={e => setBetAmount(e.target.value)}
+                                placeholder="Amount"
+                                className="h-12 text-lg"
+                            />
+                            <Button
+                                variant="warning"
+                                className="h-12 px-8 font-bold"
+                                onClick={() => onAction('Raise', parseFloat(betAmount))}
+                                disabled={!betAmount}
+                            >
+                                Raise
+                            </Button>
+                        </div>
+                    </>
+                )
             ) : (
                 <div className="bg-muted/50 p-4 rounded-lg text-center border-dashed border-2">
                     Player Folded
@@ -91,6 +106,7 @@ const ActionControls = ({
                         variant="success"
                         className="flex-1 h-10 font-bold"
                         onClick={onNextStreet}
+                        disabled={isStreetCardMissing}
                     >
                         {stage === 'river' ? '🏆 Showdown' : 'Next Street →'}
                     </Button>

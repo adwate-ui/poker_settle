@@ -366,6 +366,14 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     foldedPlayers: engine.activePlayers.filter(p => !engine.playersInHand.includes(p.player_id)).map(p => p.player_id)
   };
 
+
+  const isStreetCardMissing = useMemo(() => {
+    if (engine.stage === 'flop' && !engine.flopCards) return true;
+    if (engine.stage === 'turn' && !engine.turnCard) return true;
+    if (engine.stage === 'river' && !engine.riverCard) return true;
+    return false;
+  }, [engine.stage, engine.flopCards, engine.turnCard, engine.riverCard]);
+
   const actionControlsProps = {
     currentPlayerId: engine.currentPlayer?.player_id,
     playersInHand: engine.playersInHand,
@@ -377,7 +385,9 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     onNextStreet: engine.moveToNextStreet,
     canUndo: engine.actionHistory.length > 0,
     canMoveToNextStreet: engine.canMoveToNextStreet(),
-    stage: engine.stage
+    stage: engine.stage,
+    isStreetCardMissing,
+    onOpenCardSelector: () => openCardSelector(engine.stage as any)
   };
 
   const communityCardsProps = {

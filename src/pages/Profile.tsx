@@ -46,38 +46,40 @@ const GameSettingsTab = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle>Chip Values</CardTitle>
         <CardDescription>Customize the monetary value of each chip color.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
         <div className="grid gap-4 sm:grid-cols-2">
           {localChips.map((chip) => (
-            <div key={chip.color} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
-              <ProceduralChip
-                value=""
-                color={COLOR_MAP[chip.color] || chip.color}
-                size="md"
-                className="shadow-md"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
+            <div key={chip.color} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-3">
+                <ProceduralChip
+                  value=""
+                  color={COLOR_MAP[chip.color] || chip.color}
+                  size="md"
+                  className="shadow-md"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium capitalize">{chip.color} Chip</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:ml-auto">
                 <span className="text-sm text-muted-foreground font-medium">{CurrencyConfig.symbol}</span>
                 <Input
                   type="text"
                   value={formatCurrency(chip.value, false)}
                   onChange={(e) => handleValueChange(chip.color, e.target.value)}
                   onBlur={() => updateChipValue(chip.color, chip.value)}
-                  className="w-24 text-right tabular-nums"
+                  className="w-full sm:w-24 text-right tabular-nums h-12 md:h-10"
                 />
               </div>
             </div>
           ))}
         </div>
         <div className="flex justify-end pt-4">
-          <Button variant="outline" size="sm" onClick={resetDefaults}>
+          <Button variant="outline" size="sm" onClick={resetDefaults} className="h-12 md:h-10">
             <RefreshCw className="mr-2 h-4 w-4" /> Reset Defaults
           </Button>
         </div>
@@ -99,11 +101,11 @@ const HelpTab = () => {
     <>
       {showOnboarding && <OnboardingWizard forceShow onComplete={() => setShowOnboarding(false)} />}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 md:p-6">
           <CardTitle>Help & Support</CardTitle>
           <CardDescription>Get help with using Poker Settle</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
           <div className="space-y-4">
             <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -114,7 +116,7 @@ const HelpTab = () => {
                 <p className="text-sm text-muted-foreground mb-3">
                   New to Poker Settle? Replay the onboarding tutorial to learn about all the features.
                 </p>
-                <Button variant="outline" size="sm" onClick={handleReplayOnboarding}>
+                <Button variant="outline" size="sm" onClick={handleReplayOnboarding} className="h-12 md:h-10">
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Replay Tutorial
                 </Button>
@@ -175,17 +177,17 @@ const AISettingsTab = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle>AI Configuration</CardTitle>
         <CardDescription>Configure settings for the AI Chip Scanner.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
         <div className="space-y-2">
           <label className="text-sm font-medium">Gemini API Key</label>
           <div className="flex gap-2">
-            <Input type="password" value={isSaved ? "••••••••" : apiKey} onChange={(e) => setApiKey(e.target.value)} disabled={isSaved || loading} className="flex-1" />
-            {isSaved ? <Button variant="outline" onClick={() => { setApiKey(''); setIsSaved(false); }}>Change</Button> :
-              <Button onClick={handleSave} disabled={loading}>{loading ? 'Saving...' : 'Save'}</Button>}
+            <Input type="password" value={isSaved ? "••••••••" : apiKey} onChange={(e) => setApiKey(e.target.value)} disabled={isSaved || loading} className="flex-1 h-12 md:h-10" />
+            {isSaved ? <Button variant="outline" onClick={() => { setApiKey(''); setIsSaved(false); }} className="h-12 md:h-10">Change</Button> :
+              <Button onClick={handleSave} disabled={loading} className="h-12 md:h-10">{loading ? 'Saving...' : 'Save'}</Button>}
           </div>
         </div>
       </CardContent>
@@ -243,11 +245,11 @@ const DemoDataTab = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle>Demo Data</CardTitle>
         <CardDescription>Load sample data to explore app features or showcase to others.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
         {checkingDemo ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -281,6 +283,7 @@ const DemoDataTab = () => {
                   size="sm"
                   onClick={handleClearDemo}
                   disabled={isLoading}
+                  className="h-12 md:h-10"
                 >
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -306,6 +309,7 @@ const DemoDataTab = () => {
                 <Button
                   onClick={handleLoadDemo}
                   disabled={isLoading}
+                  className="h-12 md:h-10"
                 >
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -343,15 +347,15 @@ const Profile = () => {
   if (loading || !user) return <div className="p-8 space-y-6"><Skeleton className="h-12 w-48" /><Skeleton className="h-64 w-full" /></div>;
 
   return (
-    <div className="container max-w-4xl py-8 space-y-8">
+    <div className="container max-w-4xl py-6 px-4 md:py-8 md:px-0 space-y-8">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate('/')} className="-ml-4 text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" onClick={() => navigate('/')} className="ml-0 md:-ml-4 text-muted-foreground hover:text-foreground h-12 md:h-10">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
         </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="flex w-full overflow-x-auto justify-start md:grid md:grid-cols-6 h-auto p-1 bg-muted/20">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="game-settings">Chips</TabsTrigger>
           <TabsTrigger value="ai">AI</TabsTrigger>
@@ -362,11 +366,11 @@ const Profile = () => {
 
         <TabsContent value="profile">
           <Card>
-            <CardHeader>
+            <CardHeader className="p-4 md:p-6">
               <CardTitle>Profile</CardTitle>
               <CardDescription>Your account information</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
               <div><label className="text-sm font-medium text-muted-foreground">Email</label><p className="text-lg">{user.email}</p></div>
               <div><label className="text-sm font-medium text-muted-foreground">User ID</label><p className="text-sm font-mono text-muted-foreground">{user.id}</p></div>
             </CardContent>

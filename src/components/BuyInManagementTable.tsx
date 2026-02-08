@@ -98,28 +98,18 @@ export const BuyInManagementTable = ({
   return (
     <>
       <Table
-        className="max-h-[500px]"
         tableClassName="table-fixed sm:table-auto"
       >
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow>
             <TableHead className="w-1/3">
-              <div className="flex items-center gap-1.5">
-                <User className="h-3 w-3" />
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span></span>
-              </div>
+              <span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span>
             </TableHead>
             <TableHead className="w-1/6 text-center">
-              <div className="flex items-center justify-center gap-1.5">
-                <Coins className="h-3 w-3" />
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span></span>
-              </div>
+              <span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span>
             </TableHead>
             <TableHead className="w-1/4">
-              <div className="flex items-center gap-1.5">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground"><span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span></span>
-              </div>
+              <span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span>
             </TableHead>
             <TableHead className="w-1/8">
             </TableHead>
@@ -131,15 +121,15 @@ export const BuyInManagementTable = ({
           {sortedPlayers.map((gamePlayer) => (
             <TableRow
               key={gamePlayer.id}
-              className="border-border/50 h-11 sm:h-auto sm:group"
+              className="h-11 sm:h-auto sm:group"
             >
-              <TableCell className="text-2xs sm:text-sm font-medium truncate text-foreground">
+              <TableCell className="font-medium truncate text-foreground">
                 <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="text-center text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="text-center font-numbers whitespace-nowrap text-muted-foreground">
                 {gamePlayer.buy_ins}
               </TableCell>
-              <TableCell className="text-right text-2xs sm:text-sm font-numbers whitespace-nowrap text-muted-foreground">
+              <TableCell className="text-right font-numbers whitespace-nowrap text-muted-foreground">
                 {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
               </TableCell>
               <TableCell className="text-center">

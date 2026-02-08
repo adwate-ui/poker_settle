@@ -322,7 +322,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
 
       {/* Responsive Table Layout */}
       <Table
-        className="max-h-[600px] border-border/50"
+        className="max-h-[600px]"
         tableClassName="sm:table-auto"
       >
         <TableHeader>

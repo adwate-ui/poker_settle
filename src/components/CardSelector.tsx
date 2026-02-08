@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PokerCard from './PokerCard';
 import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, RotateCcw } from 'lucide-react';
 
 interface CardSelectorProps {
   onSelect: (cards: string) => void;
@@ -110,22 +110,23 @@ const CardSelector = ({
         {trigger}
       </DialogTrigger>}
       <DialogContent className="w-fit max-w-[95vw] max-h-[90vh] flex flex-col p-4 glass-panel border-white/10 shadow-2xl">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center justify-between gap-4">
-            <span className="text-xl font-heading font-bold flex items-center gap-2 text-luxury-primary">
-              <Sparkles className="w-5 h-5" />
+        <DialogHeader className="flex-shrink-0 text-left sm:text-center">
+          <DialogTitle className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <span className="text-base sm:text-xl font-heading font-bold flex items-center gap-2 text-luxury-primary whitespace-nowrap">
+              <Sparkles className="w-5 h-5 hidden sm:block" />
               {label}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 whitespace-nowrap">
               <Badge
                 variant={tempSelection.length === maxCards ? "default" : "secondary"}
-                className="text-base px-3 py-1"
+                className="text-xs sm:text-base px-2 sm:px-3 py-1"
               >
                 {tempSelection.length} / {maxCards}
               </Badge>
               {tempSelection.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={handleClear}>
-                  Clear All
+                <Button variant="ghost" size="sm" onClick={handleClear} className="h-7 px-2 sm:h-9 sm:px-4">
+                  <span className="hidden sm:inline">Clear All</span>
+                  <RotateCcw className="w-3.5 h-3.5 sm:hidden" />
                 </Button>
               )}
             </div>

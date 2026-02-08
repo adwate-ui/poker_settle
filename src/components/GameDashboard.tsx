@@ -501,7 +501,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           </div>
         )}
 
-        {isMobile ? (
+        {isMobile && (
           <div className="flex flex-col w-full min-h-screen bg-background">
             {/* Sticky Mobile Header */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-4 py-2 flex items-center gap-3">
@@ -707,7 +707,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         <div className="flex items-center justify-between">
                           <h3 className="text-xs font-luxury text-muted-foreground uppercase tracking-widest">Manual Adjustments</h3>
                           {!showManualTransfer && (
-                            <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(true)} className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider">
+                            <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(true)} className="h-6 px-2 text-2xs uppercase font-bold tracking-wider">
                               <Plus className="w-3 h-3 mr-1" /> Add
                             </Button>
                           )}
@@ -719,7 +719,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             <div className="space-y-3">
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
-                                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">From</Label>
+                                  <Label className="text-2xs uppercase tracking-wider text-muted-foreground">From</Label>
                                   <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
                                     <SelectTrigger className="h-8 text-xs">
                                       <SelectValue placeholder="Select..." />
@@ -732,7 +732,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                   </Select>
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">To</Label>
+                                  <Label className="text-2xs uppercase tracking-wider text-muted-foreground">To</Label>
                                   <Select value={newTransferTo} onValueChange={setNewTransferTo}>
                                     <SelectTrigger className="h-8 text-xs">
                                       <SelectValue placeholder="Select..." />
@@ -746,7 +746,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                                 </div>
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</Label>
+                                <Label className="text-2xs uppercase tracking-wider text-muted-foreground">Amount</Label>
                                 <Input
                                   type="number"
                                   placeholder="0.00"
@@ -766,7 +766,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                         <div className="space-y-2">
                           {currentGame.settlements && currentGame.settlements.map((transfer, index) => (
                             <div key={index} className="flex items-center justify-between p-3 bg-accent/5 rounded-xl border border-border">
-                              <span className="text-[10px] font-luxury text-foreground uppercase tracking-wide">
+                              <span className="text-2xs font-luxury text-foreground uppercase tracking-wide">
                                 {transfer.from} pays {transfer.to}
                               </span>
                               <div className="flex items-center gap-3">
@@ -782,39 +782,32 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                       <div className="space-y-4 pt-6">
                         {settlements.length > 0 && (
-                          <Card className={cn("border-border shadow-none bg-accent/2", isMobile ? "border-0 shadow-none bg-transparent" : "")}>
-                            <CardHeader className={cn(isMobile ? "py-2 px-1" : "py-4 px-4")}>
-                              <CardTitle className={cn("text-sm uppercase tracking-widest font-luxury", isMobile ? "text-xs" : "")}>Settlements</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                              <div className="overflow-x-auto w-full">
-                                <Table className={cn(isMobile && "table-fixed w-full")}>
-                                  <TableHeader className="bg-muted/30">
-                                    <TableRow className={cn("hover:bg-transparent border-border", isMobile ? "h-8" : "")}>
-                                      <TableHead className={cn("px-4 uppercase font-luxury", isMobile ? "h-8 px-2 w-[30%] text-mobile-compact" : "h-9 text-[10px]")}>From</TableHead>
-                                      <TableHead className={cn("px-4 uppercase font-luxury", isMobile ? "h-8 px-2 w-[30%] text-mobile-compact" : "h-9 text-[10px]")}>To</TableHead>
-                                      <TableHead className={cn("px-4 text-right uppercase font-luxury", isMobile ? "h-8 px-2 w-[40%] text-mobile-compact" : "h-9 text-[10px]")}>Amount</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {settlements.map((s, i) => (
-                                      <TableRow key={i} className={cn("border-border hover:bg-transparent", isMobile ? "h-8" : "")}>
-                                        <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px] max-w-[80px]")}>
-                                          {s.from}
-                                        </TableCell>
-                                        <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px] max-w-[80px]")}>
-                                          {s.to}
-                                        </TableCell>
-                                        <TableCell className={cn("text-right font-numbers whitespace-nowrap", isMobile ? "py-1 px-2 text-mobile-compact" : "py-2 px-4 text-[11px]")}>
-                                          {formatCurrency(s.amount)}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                            </CardContent>
-                          </Card>
+                          <div className={cn("overflow-hidden rounded-xl border border-white/10", isMobile ? "border-0" : "")}>
+                            <Table className={cn(isMobile && "table-fixed w-full")}>
+                              <TableHeader>
+                                <TableRow className={cn(isMobile ? "h-8" : "")}>
+                                  <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[30%]" : "h-9")}>From</TableHead>
+                                  <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[30%]" : "h-9")}>To</TableHead>
+                                  <TableHead className={cn("px-4 text-right", isMobile ? "h-8 px-2 w-[40%]" : "h-9")}>Amount</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {settlements.map((s, i) => (
+                                  <TableRow key={i} className={cn("border-border hover:bg-transparent", isMobile ? "h-8" : "")}>
+                                    <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2" : "py-2 px-4 max-w-[80px]")}>
+                                      {s.from}
+                                    </TableCell>
+                                    <TableCell className={cn("font-medium truncate", isMobile ? "py-1 px-2" : "py-2 px-4 max-w-[80px]")}>
+                                      {s.to}
+                                    </TableCell>
+                                    <TableCell className={cn("text-right font-numbers whitespace-nowrap", isMobile ? "py-1 px-2" : "py-2 px-4")}>
+                                      {formatCurrency(s.amount)}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -823,7 +816,9 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </Carousel>
             </div>
           </div>
-        ) : (
+        )}
+
+        {!isMobile && (
           /* Main 2-Column Layout (Desktop) */
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
             {/* Left Column (70%) - Central Gameplay Elements */}
@@ -1231,7 +1226,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
               </div>
             </div>
           </div>
-        )}
+        )
+        }
       </div>
 
       <AddPlayerDialog
@@ -1246,7 +1242,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         onAddNew={addNewPlayer}
         isCreating={isCreatingPlayer}
       />
-    </div>
+    </div >
   );
 };
 
