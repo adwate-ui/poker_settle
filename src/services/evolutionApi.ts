@@ -1,7 +1,4 @@
-/**
- * Evolution API WhatsApp Integration Service
- * Documentation: https://github.com/EvolutionAPI/evolution-api
- */
+import { supabase } from "@/integrations/supabase/client";
 
 export interface EvolutionApiConfig {
   baseUrl: string;
@@ -34,10 +31,7 @@ class EvolutionApiService {
    * Check if the service is configured
    */
   isConfigured(): boolean {
-    return this.config !== null && 
-           !!this.config.baseUrl && 
-           !!this.config.apiKey && 
-           !!this.config.instanceName;
+    return this.config !== null;
   }
 
   /**
@@ -59,7 +53,7 @@ class EvolutionApiService {
    * Send a WhatsApp message via Evolution API
    */
   async sendMessage(payload: SendMessagePayload): Promise<SendMessageResponse> {
-    if (!this.isConfigured() || !this.config) {
+    if (!this.isConfigured()) {
       console.warn('Evolution API not configured. Message not sent.');
       return {
         success: false,
@@ -70,7 +64,7 @@ class EvolutionApiService {
     try {
       // Ensure phone number is in correct format (remove spaces, dashes, etc.)
       const cleanNumber = this.formatPhoneNumber(payload.number);
-      
+
       if (!cleanNumber) {
         return {
           success: false,
@@ -78,31 +72,18 @@ class EvolutionApiService {
         };
       }
 
-      const url = `${this.config.baseUrl}/message/sendText/${this.config.instanceName}`;
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': this.config.apiKey,
-        },
-        body: JSON.stringify({
-          number: cleanNumber,
-          text: payload.text,
-        }),
+      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+        body: { number: cleanNumber, text: payload.text }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Evolution API error:', errorText);
+      if (error) {
+        console.error('Supabase function error:', error);
         return {
           success: false,
-          error: `API error: ${response.status} ${response.statusText}`,
+          error: error.message || 'Error invoking WhatsApp function',
         };
       }
 
-      const data = await response.json();
-      
       return {
         success: true,
         messageId: data.key?.id || data.messageId,
@@ -122,21 +103,21 @@ class EvolutionApiService {
    */
   private formatPhoneNumber(phone: string): string | null {
     if (!phone) return null;
-    
+
     // Remove all non-digit characters except leading +
     let cleaned = phone.replace(/[^\d+]/g, '');
-    
+
     // If it starts with +, keep it, otherwise remove any +
     if (!cleaned.startsWith('+')) {
       cleaned = cleaned.replace(/\+/g, '');
     }
-    
+
     // Ensure it has reasonable length (7-15 digits)
     const digitsOnly = cleaned.replace(/\+/g, '');
     if (digitsOnly.length < 7 || digitsOnly.length > 15) {
       return null;
     }
-    
+
     // If it doesn't start with +, add country code if it looks like Indian number
     if (!cleaned.startsWith('+')) {
       if (cleaned.length === 10) {
@@ -147,7 +128,7 @@ class EvolutionApiService {
         cleaned = '+' + cleaned;
       }
     }
-    
+
     return cleaned;
   }
 
@@ -163,15 +144,15 @@ class EvolutionApiService {
    */
   async sendBulkMessages(messages: SendMessagePayload[]): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = [];
-    
+
     for (const message of messages) {
       const result = await this.sendMessage(message);
       results.push(result);
-      
+
       // Add a small delay between messages to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
+
     return results;
   }
 
@@ -188,7 +169,7 @@ class EvolutionApiService {
 
     try {
       const url = `${this.config.baseUrl}/instance/connectionState/${this.config.instanceName}`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -204,11 +185,11 @@ class EvolutionApiService {
       }
 
       const data = await response.json();
-      
+
       return {
         success: data.state === 'open' || data.instance?.state === 'open',
-        error: data.state !== 'open' && data.instance?.state !== 'open' 
-          ? 'WhatsApp instance not connected' 
+        error: data.state !== 'open' && data.instance?.state !== 'open'
+          ? 'WhatsApp instance not connected'
           : undefined,
       };
     } catch (error) {
@@ -223,18 +204,3 @@ class EvolutionApiService {
 
 // Export singleton instance
 export const evolutionApiService = new EvolutionApiService();
-
-// Initialize from environment variables if available
-if (typeof import.meta !== 'undefined' && import.meta.env) {
-  const baseUrl = import.meta.env.VITE_EVOLUTION_API_URL;
-  const apiKey = import.meta.env.VITE_EVOLUTION_API_KEY;
-  const instanceName = import.meta.env.VITE_EVOLUTION_INSTANCE_NAME;
-
-  if (baseUrl && apiKey && instanceName) {
-    evolutionApiService.configure({
-      baseUrl,
-      apiKey,
-      instanceName,
-    });
-  }
-}

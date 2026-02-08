@@ -258,11 +258,10 @@ export const useGameData = () => {
         `)
         .eq("is_complete", false)
         .eq("user_id", user.id)
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
 
       if (error) throw error;
-      return data as any as Game;
+      return (data && data.length > 0) ? (data[0] as any as Game) : null;
     } catch (error) {
       console.error("Error fetching incomplete game:", error);
       return null;
