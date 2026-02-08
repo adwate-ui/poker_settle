@@ -782,8 +782,8 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
 
                       <div className="space-y-4 pt-6">
                         {settlements.length > 0 && (
-                          <div className={cn("overflow-hidden rounded-xl border border-white/10", isMobile ? "border-0" : "")}>
-                            <Table className={cn(isMobile && "table-fixed w-full")}>
+                          <div className="section-content p-0">
+                            <Table>
                               <TableHeader>
                                 <TableRow className={cn(isMobile ? "h-8" : "")}>
                                   <TableHead className={cn("px-4", isMobile ? "h-8 px-2 w-[30%]" : "h-9")}>From</TableHead>
@@ -837,7 +837,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="p-8 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className="section-content grid grid-cols-1 sm:grid-cols-3 gap-6">
                       <Card variant="luxury" className="space-y-2 p-5 rounded-2xl transition-all group hover:border-primary/20 bg-card/10">
                         <p className="text-[10px] text-muted-foreground font-luxury tracking-[0.2em] uppercase">Total Buy-ins</p>
                         <p className="text-2xl font-numbers text-foreground">{formatCurrency(totalBuyIns)}</p>
@@ -885,7 +885,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="p-8 space-y-8 animate-in slide-in-from-top-2 duration-300">
+                      <div className="section-content space-y-8">
                         <Card variant="luxury" className="relative rounded-3xl overflow-hidden p-10 pt-12 shadow-inner border-gold-900/10">
                           <PokerTableView
                             positions={currentTablePosition.positions}
@@ -945,7 +945,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className={cn("animate-in slide-in-from-top-2 duration-300", isMobile ? "p-4" : "p-6")}>
+                    <div className="section-content">
                       <BuyInManagementTable
                         gamePlayers={gamePlayers}
                         buyInAmount={currentGame.buy_in_amount}
@@ -970,7 +970,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className={cn("animate-in slide-in-from-top-2 duration-300", isMobile ? "p-4" : "p-6")}>
+                    <div className="section-content">
                       <FinalStackManagement
                         gamePlayers={gamePlayers}
                         onUpdateFinalStack={handleUpdateFinalStack}
@@ -998,7 +998,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className="section-content space-y-6">
                       <Button
                         onClick={() => setShowAddPlayer(true)}
                         className="w-full h-12 bg-accent/5 border border-border hover:bg-primary/10 text-foreground text-label rounded-xl transition-all"
@@ -1032,7 +1032,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                     </div>
                   </div>
                   <div className="max-h-[300px] overflow-auto">
-                    <Table className="table-fixed w-full text-left border-collapse">
+                    <Table>
                       <TableHeader className="sticky top-0 z-10 bg-background">
                         <TableRow className="border-b border-white/10 hover:bg-transparent">
                           <TableHead className="w-[35%] pl-4 py-2 text-[9px] uppercase tracking-widest font-luxury text-muted-foreground">From</TableHead>
@@ -1200,7 +1200,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
-                            <div className="p-6 space-y-3 animate-in slide-in-from-top-2 duration-300">
+                            <div className="section-content space-y-3">
                               {settlements.map((settlement, index) => (
                                 <div key={index} className="flex items-center justify-between p-4 bg-accent/5 rounded-2xl border border-border hover:border-primary/20 transition-colors group">
                                   <div className="flex flex-col gap-0.5">

@@ -465,7 +465,7 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+            <div className="section-content">
               <ConsolidatedBuyInLogs gameId={gameId} token={token} />
             </div>
           </CollapsibleContent>
@@ -485,7 +485,7 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="p-8 animate-in slide-in-from-top-2 duration-300">
+            <div className="section-content">
               <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <span className="text-[10px] uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full border">
@@ -545,11 +545,8 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="animate-in slide-in-from-top-2 duration-300">
-              <Table
-                className={cn("mt-8 max-h-[600px]", isMobile ? "m-0" : "m-4")}
-                tableClassName="sm:table-auto"
-              >
+            <div className="section-content">
+              <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Player</TableHead>
@@ -648,12 +645,9 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="animate-in slide-in-from-top-2 duration-300">
+            <div className="section-content">
 
-              <Table
-                className="max-h-[600px]"
-                tableClassName="sm:table-auto"
-              >
+              <Table className="max-h-[600px]">
                 <TableHeader>
                   {settlementsWithType.some(s => s.isManual) ? (
                     <TableRow className="hover:bg-transparent">

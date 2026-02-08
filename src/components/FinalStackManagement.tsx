@@ -101,9 +101,7 @@ export const FinalStackManagement = ({
 
   return (
     <>
-      <Table
-        tableClassName="sm:table-auto"
-      >
+      <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-1/3">

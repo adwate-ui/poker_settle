@@ -97,9 +97,7 @@ export const BuyInManagementTable = ({
 
   return (
     <>
-      <Table
-        tableClassName="table-fixed sm:table-auto"
-      >
+      <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-1/3">

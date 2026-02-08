@@ -344,7 +344,6 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
 
       <Table
         className="max-h-[600px]"
-        tableClassName="sm:table-auto"
       >
         <TableHeader>
           <TableRow>

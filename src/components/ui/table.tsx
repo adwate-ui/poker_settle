@@ -4,23 +4,21 @@ import { cn } from "@/lib/utils";
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & {
-    layout?: "auto" | "fixed",
+    layout?: "fixed", // Deprecated but kept for type compat, forced to fixed
     tableClassName?: string,
     variant?: "default" | "ghost"
   }
 >(({ className, tableClassName, layout = "fixed", variant = "default", ...props }, ref) => (
   <div className={cn(
-    "relative w-full overflow-y-auto overflow-x-hidden md:overflow-auto rounded-xl",
-    variant === "default" && "border border-white/10 bg-card/30 backdrop-blur-sm shadow-2xl",
+    "relative w-full overflow-hidden rounded-xl border border-border/50",
+    variant === "default" && "bg-card/30 backdrop-blur-sm shadow-2xl",
     variant === "ghost" && "border-none bg-transparent shadow-none",
     className
   )}>
     <table
       ref={ref}
       className={cn(
-        "w-full caption-bottom text-sm select-none",
-        "table-fixed",
-        layout === "auto" && "sm:table-auto",
+        "w-full caption-bottom text-sm select-none table-fixed",
         tableClassName
       )}
       {...props}
@@ -35,7 +33,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("sticky top-0 z-10 bg-black/20 backdrop-blur-md [&_tr]:border-b border-white/5", className)}
+    className={cn("sticky top-0 z-10 bg-card border-b border-border", className)}
     {...props}
   />
 ))
@@ -92,7 +90,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-4 truncate whitespace-nowrap text-left align-middle font-medium font-luxury text-muted-foreground/70 uppercase tracking-widest text-2xs sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "h-10 px-2 sm:px-4 truncate whitespace-nowrap text-left align-middle font-semibold font-luxury text-foreground uppercase tracking-widest text-xs [&:has([role=checkbox])]:pr-0",
       align === 'center' && "text-center",
       align === 'right' && "text-right",
       className
@@ -112,7 +110,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "p-2 py-3 sm:px-4 sm:py-4 truncate whitespace-nowrap align-middle font-medium font-body text-2xs sm:text-xs [&:has([role=checkbox])]:pr-0",
+      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-medium font-body text-xs [&:has([role=checkbox])]:pr-0",
       isNumeric && "font-numbers",
       align === 'center' && "text-center",
       align === 'right' && "text-right",

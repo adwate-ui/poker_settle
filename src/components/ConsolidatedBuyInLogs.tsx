@@ -162,7 +162,6 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       ) : (
         <Table
           className="max-h-[400px]"
-          tableClassName="sm:table-auto"
         >
           <TableHeader>
             <TableRow>

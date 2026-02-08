@@ -212,7 +212,6 @@ const PlayersHistory = () => {
       {/* Responsive Table Layout */}
       <Table
         className="max-h-[600px]"
-        tableClassName="sm:table-auto"
       >
         <TableHeader>
           <TableRow className="hover:bg-transparent">
