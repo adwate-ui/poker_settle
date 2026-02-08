@@ -235,6 +235,7 @@ Use Tailwind's standard spacing scale (multiples of 0.25rem):
 
 ### Font Size Scale
 
+- **`text-tiny`** - 0.5625rem (9px) - micro labels
 - **`text-3xs`** - 0.625rem (10px) - labels
 - **`text-2xs`** - 0.6875rem (11px) - small labels
 - **`text-xs`** - 0.75rem (12px) - compact text

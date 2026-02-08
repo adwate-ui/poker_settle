@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserProfile } from "./UserProfile";
 import { cn } from "@/lib/utils";
-import { Play, History, Users, Hand, BarChart3 } from "lucide-react";
+import { Play, History, Users, Hand } from "lucide-react";
 
 interface TabLayoutProps {
   children: React.ReactNode;
@@ -19,15 +19,13 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
     : location.pathname === "/games" ? "games-history"
       : location.pathname.startsWith("/players") ? "players-history"
         : location.pathname.startsWith("/hands") ? "hands-history"
-          : location.pathname === "/analytics" ? "analytics"
-            : defaultTab;
+          : defaultTab;
 
   const handleTabChange = (value: string) => {
     if (value === "new-game") navigate("/");
     else if (value === "games-history") navigate("/games");
     else if (value === "players-history") navigate("/players");
     else if (value === "hands-history") navigate("/hands");
-    else if (value === "analytics") navigate("/analytics");
   };
 
   if (isLiveGame) {
@@ -122,9 +120,6 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
             <TabsTrigger value="hands-history" className="flex-1 sm:flex-none">
               Hands Tracking
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1 sm:flex-none">
-              Analytics
-            </TabsTrigger>
           </TabsList>
 
           <div className="mt-2 pb-24 sm:pb-0">
@@ -186,19 +181,6 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
               )}
               <Hand className={cn("h-4 w-4", currentTab === "hands-history" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
               <span className="text-[8px] font-luxury uppercase tracking-wider">Hands</span>
-            </button>
-            <button
-              onClick={() => handleTabChange("analytics")}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all duration-300 relative group",
-                currentTab === "analytics" ? "text-gold-400" : "text-gray-500"
-              )}
-            >
-              {currentTab === "analytics" && (
-                <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
-              )}
-              <BarChart3 className={cn("h-4 w-4", currentTab === "analytics" && "drop-shadow-[0_0_8px_rgba(212,184,60,0.5)]")} />
-              <span className="text-[8px] font-luxury uppercase tracking-wider">Stats</span>
             </button>
           </div>
         </div>

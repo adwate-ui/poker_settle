@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-tiny sm:text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -15,7 +15,7 @@ const badgeVariants = cva(
         stats: "bg-black/5 dark:bg-white/5 border-border text-muted-foreground font-numbers px-3 py-1 font-normal",
         profit: "border-transparent bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
         loss: "border-transparent bg-rose-600 text-white hover:bg-rose-700 shadow-md",
-        luxury: "bg-primary/10 border-primary/20 text-primary font-luxury uppercase tracking-widest text-[10px] px-3 py-1",
+        luxury: "bg-primary/10 border-primary/20 text-primary font-luxury uppercase tracking-widest px-3 py-1",
         // Semantic state variants
         info: "border-transparent bg-state-info/10 text-state-info hover:bg-state-info/20",
         warning: "border-transparent bg-state-warning/10 text-state-warning hover:bg-state-warning/20",

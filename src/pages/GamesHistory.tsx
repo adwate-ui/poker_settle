@@ -379,7 +379,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 onMouseEnter={() => prefetch(game.id)}
               >
                 <TableCell className="font-medium whitespace-nowrap">
-                  {format(new Date(game.date), "MMM d, yyyy")}
+                  {format(new Date(game.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
                 <TableCell className="text-right font-numbers text-muted-foreground">
                   <ResponsiveCurrency amount={game.buy_in_amount} />

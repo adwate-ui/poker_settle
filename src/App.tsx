@@ -77,7 +77,6 @@ const AppContent = () => {
             <Route path="/players/:playerId" element={<Index />} />
             <Route path="/hands" element={<Index />} />
             <Route path="/hands/:handId" element={<Index />} />
-            <Route path="/analytics" element={<Index />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
 

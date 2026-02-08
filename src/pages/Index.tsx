@@ -8,7 +8,6 @@ import PlayersHistory from "./PlayersHistory";
 import PlayerDetail from "./PlayerDetail";
 import HandsHistory from "./HandsHistory";
 import HandDetail from "./HandDetail";
-import Analytics from "./Analytics";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 
 const Index = () => {
@@ -33,9 +32,6 @@ const Index = () => {
       </TabsContent>
       <TabsContent value="hands-history" className="mt-0">
         {isHandDetail ? <HandDetail /> : <HandsHistory />}
-      </TabsContent>
-      <TabsContent value="analytics" className="mt-0">
-        <Analytics />
       </TabsContent>
     </TabLayout>
   );

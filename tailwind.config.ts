@@ -20,6 +20,7 @@ export default {
         '13': 'repeat(13, minmax(0, 1fr))',
       },
       fontSize: {
+        'tiny': ['0.5625rem', { lineHeight: '0.65rem' }],
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
         '3xs': ['0.5rem', { lineHeight: '0.65rem' }],
       },
