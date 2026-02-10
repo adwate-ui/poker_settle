@@ -33,12 +33,14 @@ Deno.serve(async (req) => {
             number: cleanNumber,
             text: text,
             delay: 1200,
-            linkPreview: true
+            linkPreview: false // Disabled for speed to prevent timeouts
         };
 
-        // Fetch with 5s Timeout
+        // Fetch with 15s Timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        console.log('[Edge] Starting fetch to:', targetUrl);
 
         try {
             const response = await fetch(targetUrl, {
@@ -63,8 +65,8 @@ Deno.serve(async (req) => {
         } catch (err) {
             clearTimeout(timeoutId);
             if (err.name === 'AbortError') {
-                console.error('[Edge] Timeout: Server Unresponsive');
-                return new Response(JSON.stringify({ error: 'Evolution API Timeout' }), { status: 504, headers: corsHeaders });
+                console.error('[Edge] Timeout: Server Unresponsive (15s limit)');
+                return new Response(JSON.stringify({ error: 'Evolution API Timeout (15s limit)' }), { status: 504, headers: corsHeaders });
             }
             throw err;
         }
