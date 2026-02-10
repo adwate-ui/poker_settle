@@ -18,21 +18,34 @@ Deno.serve(async (req) => {
         const instanceName = Deno.env.get('EVOLUTION_INSTANCE_NAME');
 
         if (!url || !apiKey || !instanceName) {
-            return new Response(
-                JSON.stringify({ error: 'Server configuration missing' }),
-                { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
+            throw new Error('Missing server configuration');
         }
 
-        // 1. Clean URL and format number
+        // 1. Prepare URL and Number
         const cleanUrl = url.replace(/\/$/, '');
         let cleanNumber = number.replace(/[^\d]/g, '');
         if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
-        // 2. USE THE WORKING POSTMAN ENDPOINT
         const targetUrl = `${cleanUrl}/message/sendText/${instanceName}`;
 
-        console.log(`Requesting: ${targetUrl} for ${cleanNumber}`);
+        console.log(`[Edge] Requesting: ${targetUrl} | Number: ${cleanNumber}`);
+
+        // 2. Prepare STRICT Payload (No root 'text' field)
+        const payload = {
+            number: cleanNumber,
+            options: {
+                delay: 1200,
+                presence: "composing",
+                linkPreview: true
+            },
+            textMessage: {
+                text: text
+            }
+        };
+
+        // 3. Fetch with Timeout (Prevent hanging)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -40,23 +53,15 @@ Deno.serve(async (req) => {
                 'Content-Type': 'application/json',
                 'apikey': apiKey,
             },
-            body: JSON.stringify({
-                number: cleanNumber,
-                text: text, // Evolution Exchange v2.3.7 usually expects text at root or inside textMessage
-                textMessage: {
-                    text: text
-                },
-                options: {
-                    delay: 1200,
-                    presence: "composing",
-                    linkPreview: true
-                }
-            }),
+            body: JSON.stringify(payload),
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
+        // 4. Log Response for Debugging
         const responseText = await response.text();
-        console.log('Evolution Response Status:', response.status);
-        console.log('Evolution Response Body:', responseText);
+        console.log('[Edge] Evolution Response:', response.status, responseText);
 
         return new Response(responseText, {
             status: response.status,
@@ -64,7 +69,7 @@ Deno.serve(async (req) => {
         });
 
     } catch (error) {
-        console.error('Function Error:', error.message);
+        console.error('[Edge] Error:', error.message);
         return new Response(
             JSON.stringify({ error: error.message }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
