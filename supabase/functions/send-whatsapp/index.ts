@@ -26,27 +26,23 @@ Deno.serve(async (req) => {
         let cleanNumber = number.replace(/[^\d]/g, '');
         if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
+        // Use the confirmed working endpoint
         const targetUrl = `${cleanUrl}/message/sendText/${instanceName}`;
 
         console.log(`[Edge] Requesting: ${targetUrl} | Number: ${cleanNumber}`);
 
-        // 2. Prepare STRICT Payload (No root 'text' field)
+        // 2. payload FIX: 'text' must be at the ROOT level
         const payload = {
             number: cleanNumber,
+            text: text,  // <--- This is the required field
             options: {
                 delay: 1200,
                 presence: "composing",
                 linkPreview: true
-            },
-            textMessage: {
-                text: text
             }
         };
 
-        // 3. Fetch with Timeout (Prevent hanging)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
+        // 3. Fetch
         const response = await fetch(targetUrl, {
             method: 'POST',
             headers: {
@@ -54,12 +50,9 @@ Deno.serve(async (req) => {
                 'apikey': apiKey,
             },
             body: JSON.stringify(payload),
-            signal: controller.signal
         });
 
-        clearTimeout(timeoutId);
-
-        // 4. Log Response for Debugging
+        // 4. Log Response
         const responseText = await response.text();
         console.log('[Edge] Evolution Response:', response.status, responseText);
 
