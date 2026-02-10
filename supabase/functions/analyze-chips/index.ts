@@ -24,7 +24,7 @@ serve(async (req) => {
       })
     }
 
-    const { image, apiKey: userApiKey, ping } = body;
+    const { image, apiKey: userApiKey, ping, defined_chips } = body;
 
     // 1. Health Check / Ping Mode
     if (ping) {
@@ -58,49 +58,43 @@ serve(async (req) => {
     // Using gemini-2.5-pro as explicitly requested.
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
+    const chipsContext = defined_chips
+      ? JSON.stringify(defined_chips.map((c: any) => ({ color: c.color, label: c.label })))
+      : "Standard Casino Colors (Red, Blue, Green, Black, White)";
+
     const prompt = `
-      Act as an Optical Metrology Expert. Perform a precise count of the poker chips in this image using the following geometric constraint:
+      You are a World-Class Casino Pit Boss and Optical Expert.
+      
+      **Goal:** accurately count the poker chips in each vertical stack in this image.
 
-      Constraint: The Width-to-Height ratio of a single chip is exactly 12:1.
+      **CONTEXT:**
+      You are strictly limited to identifying chips from this provided list: 
+      ${chipsContext}
+      If a chip color is ambiguous, snap it to the closest valid color from this list.
 
-      **CRITICAL: BOUNDARY DEFINITION**
-      To measure Height (H) accurately, you must identify the exact pixels:
-      - **Bottom Edge:** The line where the lowest chip touches the table surface (Ignore reflection).
-      - **Top Edge:** The top line of the *side profile* of the highest chip.
-      - **Perspective Warning:** Do NOT include the elliptical "top face" of the stack in your height measurement. Measure only the vertical side stack.
+      **METHODOLOGY (The "Ridge Count" Technique):**
+      1.  **Do NOT attempt pixel measurements.** They are unreliable due to perspective.
+      2.  **Instead, count the Horizontal Ridges (side edges):** Look at the vertical profile of each stack. Each chip creates a distinct horizontal line or "ridge" on the side of the stack.
+      3.  **Count these ridges.** 1 Ridge = 1 Chip.
+      4.  **Grouping:** Group contiguous vertical stacks of the same color.
+      5.  **Exclusions:** Ignore loose chips lying flat on the table. Only count stacked chips.
 
-      **Execution Steps:**
-
-      1. **Calibration**: Measure the pixel width of the top-most chip in the a stack. Divide this width by 12 to establish the Standard Chip Height (px).
-
-      2. **Vertical Measurement**: Measure the distance between the Bottom Edge and Top Edge defined above.
-
-      3. **Mathematical Calculation**: Divide the Total Stack Height by Standard Chip Height. Round to the nearest whole number to derive the count.
-
-      4. **Visual Verification**: Cross-check the calculated number against the visible horizontal ridges (edges) on the side of the chips.
-
-      5. **Relative Logic Check**: Ensure the counts align with visual comparisons (e.g., if Stack B is physically taller than Stack A, its count must be higher).
-
-      **Instructions:**
-      1.  Identify distinct vertical stacks.
-      2.  Ignore loose chips lying flat.
-      3.  Provide a bounding box [ymin, xmin, ymax, xmax] (0-1000 scale).
-
-      Output strictly as valid JSON in the following format:
+      **OUTPUT FORMAT:**
+      Return strictly valid JSON. matching this TypeScript interface:
       {
-        "thinking_process": "Calibration: Stack 1 Width 102px -> StdHeight = 8.5px. Stack 1 Height 98px -> 98/8.5 = 11.5 -> 12 chips. Visual check confirms ridges match.",
+        "thinking_process": "Found 2 stacks. Stack 1 (Red): Counted 12 distinct ridges on the side profile. Stack 2 (Blue): Counted 5 ridges...",
         "stacks": [
           { 
             "color": "red", 
             "count": 12, 
             "confidence": 0.95,
-            "box_2d": [100, 200, 500, 300] 
+            "box_2d": [ymin, xmin, ymax, xmax] // 0-1000 normalized
           }
         ],
-        "analysis_notes": "Brief summary for the user."
+        "analysis_notes": "Detected 2 stacks. Lighting is good. Counts are high confidence based on visible ridges."
       }
 
-      Do not include markdown formatting (like \`\`\`json). Just the raw JSON string.
+      Do not include markdown formatting. Just the raw JSON string.
     `;
 
     // Clean base64 if needed (remove data:image/... prefix)

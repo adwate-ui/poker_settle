@@ -109,6 +109,13 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
             const { data: { session } } = await supabase.auth.getSession();
             const functionUrl = 'https://xfahfllkbutljcowwxpx.supabase.co/functions/v1/analyze-chips';
 
+            // Create context for the AI
+            const definedChips = chips.map(c => ({
+                color: c.color,
+                label: c.label,
+                value: c.value
+            }));
+
             const response = await fetch(functionUrl, {
                 method: 'POST',
                 headers: {
@@ -117,7 +124,8 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
                 },
                 body: JSON.stringify({
                     image: imageSrc,
-                    apiKey: apiKey
+                    apiKey: apiKey,
+                    defined_chips: definedChips
                 })
             });
 
@@ -133,16 +141,25 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
 
             if (data.stacks && Array.isArray(data.stacks)) {
                 data.stacks.forEach((s: any, idx: number) => {
-                    const matchedChip = chips.find(c => c.color.toLowerCase() === s.color.toLowerCase()) ||
-                        chips.find(c => c.label.toLowerCase().includes(s.color.toLowerCase())) ||
+                    // Fuzzy match the color returned by AI to our defined chips
+                    // The AI is now constrained to our list, so exact match is likely,
+                    // but we keep the fallback just in case.
+                    const lowerColor = s.color.toLowerCase();
+
+                    const matchedChip = chips.find(c => c.color.toLowerCase() === lowerColor) ||
+                        chips.find(c => c.label.toLowerCase().includes(lowerColor)) ||
+                        chips.find(c => lowerColor.includes(c.color.toLowerCase())) ||
+                        // Fallback: If AI says "red" but we have "dark red", try to match
                         chips[0];
 
+                    // Use the AI's count, but rely on our local value/label
                     const val = (matchedChip ? matchedChip.value : 0) * s.count;
 
                     parsedStacks.push({
                         id: idx,
                         count: s.count,
                         value: val,
+                        // If we matched a chip, use its canonical color name, otherwise use AI's raw output
                         chip: matchedChip ? matchedChip.color : s.color,
                         raw: s
                     });
@@ -197,6 +214,25 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
             setOpened(false);
             reset();
         }
+    };
+
+    const handleUpdateCount = (index: number, delta: number) => {
+        setResults(prev => {
+            const newResults = [...prev];
+            const stack = { ...newResults[index] };
+            const newCount = Math.max(0, stack.count + delta);
+
+            // Calculate new value
+            const chipConfig = chips.find(c => c.color === stack.chip) || { value: 0 };
+            const newValue = newCount * chipConfig.value;
+
+            newResults[index] = {
+                ...stack,
+                count: newCount,
+                value: newValue
+            };
+            return newResults;
+        });
     };
 
     const reset = () => {
@@ -274,10 +310,15 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
                                             accept="image/*"
                                             onChange={handleFileChange}
                                         />
-                                        <Button onClick={() => camInputRef.current?.click()} className="flex-1 h-14 bg-muted hover:bg-muted/80 text-foreground text-xs border">
-                                            <Camera className="mr-2 h-4 w-4 text-primary" />
-                                            Open Lens
-                                        </Button>
+                                        <div className="flex-1 flex flex-col gap-2">
+                                            <Button onClick={() => camInputRef.current?.click()} className="h-14 bg-muted hover:bg-muted/80 text-foreground text-xs border w-full">
+                                                <Camera className="mr-2 h-4 w-4 text-primary" />
+                                                Open Lens
+                                            </Button>
+                                            <p className="text-[10px] text-muted-foreground text-center italic">
+                                                *Tip: Take photo from the <strong>side</strong> to see stack height.
+                                            </p>
+                                        </div>
                                         <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1 h-14 text-muted-foreground uppercase tracking-widest text-xs">
                                             <Upload className="mr-2 h-4 w-4" />
                                             Import Media
@@ -321,8 +362,8 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
                                             </div>
 
                                             <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                                                {results.map((stack) => {
-                                                    const chipConfig = chips.find(c => c.color === stack.chip) || { label: '?', color: 'gray' };
+                                                {results.map((stack, idx) => {
+                                                    const chipConfig = chips.find(c => c.color === stack.chip) || { label: '?', color: 'gray', value: 0 };
                                                     return (
                                                         <div key={stack.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-border group hover:border-primary/30 transition-colors">
                                                             <div className="flex items-center gap-4">
@@ -333,7 +374,21 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-xs font-bold uppercase tracking-widest">{stack.chip}</p>
-                                                                    <p className="text-[10px] text-muted-foreground font-numbers uppercase">{stack.count} units</p>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <button
+                                                                            onClick={() => handleUpdateCount(idx, -1)}
+                                                                            className="w-5 h-5 flex items-center justify-center rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground text-xs border"
+                                                                        >
+                                                                            -
+                                                                        </button>
+                                                                        <p className="text-[10px] text-muted-foreground font-numbers uppercase w-12 text-center">{stack.count} units</p>
+                                                                        <button
+                                                                            onClick={() => handleUpdateCount(idx, 1)}
+                                                                            className="w-5 h-5 flex items-center justify-center rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground text-xs border"
+                                                                        >
+                                                                            +
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <p className="font-numbers text-sm text-foreground">{formatCurrency(stack.value)}</p>

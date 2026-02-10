@@ -381,55 +381,20 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       // 1. Complete the game in the database
       await completeGame(currentGame.id, allSettlements);
 
-      // Update toast for the delay phase
-      toast.dismiss(loadingToastId);
-      const syncToastId = toast.loading("Syncing ledger & preparing notifications (10s)...");
+      // 2. Immediate Navigation (Background processing on next page)
+      toast.success("Game finalized! Redirecting...");
 
-      // 2. Wait for 10 seconds for data propagation (Reduced from 30s)
-      await new Promise(resolve => setTimeout(resolve, 10000));
-      toast.dismiss(syncToastId);
-
-      // 3. Attempt to send WhatsApp summaries
-      try {
-        toast.info("Sending WhatsApp summaries...");
-
-        // Get game token for shareable link
-        const linkData = await createOrGetSharedLink('game', currentGame.id);
-        const gameToken = linkData?.accessToken || '';
-
-        if (!gameToken) {
-          console.warn("Could not generate game token for WhatsApp link");
-        }
-
-        // Construct game players data with their IDs and net amounts
-        const gamePlayersData = gamePlayers.map(gp => ({
-          player_id: gp.player_id,
-          net_amount: gp.net_amount
-        }));
-
-        console.log("Sending WhatsApp notification for game:", currentGame.id);
-        await sendSessionSummaryNotification(
-          currentGame.id,
-          currentGame.date,
-          gameToken,
-          gamePlayers.map(gp => gp.player),
-          gamePlayersData,
-          allSettlements
-        );
-
-        toast.success("Game finalized & notifications sent!");
-      } catch (wsError) {
-        console.error("Failed to send WhatsApp summaries:", wsError);
-        // Do not block navigation on notification failure
-        toast.error("Game saved, but WhatsApp notifications failed. Check console for details.");
-      } finally {
-        // 4. Always navigate to the game detail page
-        if (currentGame?.id) {
-          navigate(`/games/${currentGame.id}`);
-        } else {
-          console.error("Game ID missing during completion, cannot navigate");
-          toast.error("Game saved, but could not navigate to details.");
-        }
+      if (currentGame?.id) {
+        navigate(`/games/${currentGame.id}`, {
+          state: {
+            justCompleted: true,
+            settlements: allSettlements,
+            gamePlayers: gamePlayers
+          }
+        });
+      } else {
+        console.error("Game ID missing during completion, cannot navigate");
+        toast.error("Game saved, but could not navigate to details.");
       }
 
     } catch (error) {
@@ -438,7 +403,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.error(ErrorMessages.game.complete(error));
       setIsCompletingGame(false);
     }
-  }, [currentGame, settlements, completeGame, navigate, isCompletingGame, createOrGetSharedLink, gamePlayers]);
+  }, [currentGame, settlements, completeGame, navigate, isCompletingGame, gamePlayers]);
 
   const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
     try {

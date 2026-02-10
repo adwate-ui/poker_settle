@@ -23,43 +23,20 @@ Deno.serve(async (req) => {
         let cleanNumber = number.replace(/[^\d]/g, '');
         if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
-        // 1. Diagnostic Step: Check Connectivity to API Root
-        try {
-            const diagController = new AbortController();
-            const diagTimeout = setTimeout(() => diagController.abort(), 5000);
+        console.log(`[Edge] Processing: ${cleanNumber}`);
 
-            console.log(`[Edge] Checking connectivity to: ${cleanUrl}`);
-            const diagResponse = await fetch(cleanUrl, {
-                method: 'GET',
-                signal: diagController.signal
-            });
-            clearTimeout(diagTimeout);
-
-            if (!diagResponse.ok) throw new Error(`Status ${diagResponse.status}`);
-            console.log('[Edge] Connectivity Check: Success');
-
-        } catch (e) {
-            console.error('[Edge] Connectivity Check Failed:', e);
-            return new Response(JSON.stringify({
-                error: "Connectivity Check Failed",
-                details: "Could not reach API Root. Check Docker Binding (0.0.0.0) or IP Whitelist."
-            }), { status: 502, headers: corsHeaders });
-        }
-
-        // Endpoint: /message/sendText (Confirmed by your Postman test)
+        // Target
         const targetUrl = `${cleanUrl}/message/sendText/${instanceName}`;
 
-        console.log(`[Edge] Requesting: ${targetUrl} | Number: ${cleanNumber}`);
-
-        // Payload: Strict Root-Level Text (Matches your 'instance requires property text' fix)
+        // Payload
         const payload = {
             number: cleanNumber,
             text: text,
-            delay: 1200,
-            linkPreview: false // Disabled for speed to prevent timeouts
+            delay: 100,
+            linkPreview: false
         };
 
-        // Fetch with 15s Timeout
+        // Fetch with Strict 15s Timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
@@ -69,28 +46,31 @@ Deno.serve(async (req) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': apiKey,
+                    'Connection': 'close' // Prevent open socket hang
                 },
                 body: JSON.stringify(payload),
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
 
+            // Return raw text if success, or basic error if not
             const responseText = await response.text();
-            console.log(`[Edge] Response: ${response.status} ${responseText}`);
+
+            if (!response.ok) {
+                console.error(`[Edge] Upstream Error: ${response.status} ${responseText}`);
+                throw new Error(`Upstream Error: ${response.status} ${responseText}`);
+            }
 
             return new Response(responseText, {
-                status: response.status,
+                status: 200,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
 
         } catch (err) {
             clearTimeout(timeoutId);
             if (err.name === 'AbortError') {
-                console.error('[Edge] Timeout: Firewall Block Detected');
-                return new Response(JSON.stringify({
-                    error: "Firewall Block Detected",
-                    detail: "Supabase could not reach 140.245.240.186:8080 within 15s. Ensure Port 8080 is open to 0.0.0.0/0."
-                }), { status: 504, headers: corsHeaders });
+                console.error('[Edge] Timeout: 15s Limit Hit');
+                return new Response(JSON.stringify({ error: 'Evolution API unresponsive after 15s' }), { status: 504, headers: corsHeaders });
             }
             throw err;
         }
