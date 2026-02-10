@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-    // Handle CORS preflight requests
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
     }
@@ -14,31 +13,26 @@ Deno.serve(async (req) => {
     try {
         const { number, text } = await req.json();
 
-        const url = Deno.env.get('EVOLUTION_API_URL')?.replace(/\/+$/, '');
+        const url = Deno.env.get('EVOLUTION_API_URL');
         const apiKey = Deno.env.get('EVOLUTION_API_KEY');
         const instanceName = Deno.env.get('EVOLUTION_INSTANCE_NAME');
 
         if (!url || !apiKey || !instanceName) {
-            console.error('Missing configuration environment variables');
             return new Response(
-                JSON.stringify({ error: 'Server configuration error' }),
-                {
-                    status: 500,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                }
+                JSON.stringify({ error: 'Server configuration missing' }),
+                { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
         }
 
-        // Strict Phone Number Cleaning: strip all non-numeric, prefix 10-digit with 91
-        let cleanedNumber = number.replace(/\D/g, '');
-        if (cleanedNumber.length === 10) {
-            cleanedNumber = `91${cleanedNumber}`;
-        }
+        // 1. Clean URL and format number
+        const cleanUrl = url.replace(/\/$/, '');
+        let cleanNumber = number.replace(/[^\d]/g, '');
+        if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
-        const targetUrl = `${url}/message/send/text/${instanceName}`;
+        // 2. USE THE WORKING POSTMAN ENDPOINT
+        const targetUrl = `${cleanUrl}/message/sendText/${instanceName}`;
 
-        console.log(`Sending message to: ${cleanedNumber}`);
-        console.log(`Target URL: ${targetUrl}`);
+        console.log(`Requesting: ${targetUrl} for ${cleanNumber}`);
 
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -47,32 +41,33 @@ Deno.serve(async (req) => {
                 'apikey': apiKey,
             },
             body: JSON.stringify({
-                number: cleanedNumber,
+                number: cleanNumber,
+                text: text, // Evolution Exchange v2.3.7 usually expects text at root or inside textMessage
+                textMessage: {
+                    text: text
+                },
                 options: {
                     delay: 1200,
                     presence: "composing",
                     linkPreview: true
-                },
-                textMessage: {
-                    text: text
                 }
             }),
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Evolution Response Status:', response.status);
+        console.log('Evolution Response Body:', responseText);
 
-        return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(responseText, {
             status: response.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
+
     } catch (error) {
-        console.error('Error processing request:', error);
+        console.error('Function Error:', error.message);
         return new Response(
             JSON.stringify({ error: error.message }),
-            {
-                status: 500,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
 });
