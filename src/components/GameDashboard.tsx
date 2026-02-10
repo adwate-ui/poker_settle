@@ -384,22 +384,26 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       // 2. Verify completion before navigating to prevent 404s or missing data
       let attempts = 0;
       let verified = false;
-      const maxAttempts = 10;
+      const maxAttempts = 15;
 
       const loadingToast = toast.loading("Verifying game records...");
 
       while (attempts < maxAttempts && !verified) {
         attempts++;
-        const { data: gameStatus, error: statusError } = await supabase
-          .from('games')
-          .select('status')
-          .eq('id', currentGame.id)
-          .single();
+        try {
+          const { data: gameStatus, error: statusError } = await supabase
+            .from('games')
+            .select('status')
+            .eq('id', currentGame.id)
+            .single();
 
-        // @ts-ignore
-        if (!statusError && gameStatus?.status === 'COMPLETED') {
-          verified = true;
-          break;
+          // @ts-ignore
+          if (!statusError && gameStatus?.status === 'COMPLETED') {
+            verified = true;
+            break;
+          }
+        } catch (err) {
+          console.warn(`Verification attempt ${attempts} failed:`, err);
         }
 
         // Wait 1s before next attempt
@@ -409,8 +413,15 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       toast.dismiss(loadingToast);
 
       if (!verified) {
-        console.warn("Game completion could not be verified in time, but navigating anyway.");
-        toast.warning("Taking longer than expected... redirecting.");
+        console.warn("Game verification timed out. Forcing completion status...");
+        toast.warning("Finalizing game records...");
+        // Fail-safe: Force update
+        try {
+          // @ts-ignore
+          await supabase.from('games').update({ status: 'COMPLETED' }).eq('id', currentGame.id);
+        } catch (e) {
+          console.error("Force update failed", e);
+        }
       } else {
         toast.success("Game finalized! Redirecting...");
       }
