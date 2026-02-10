@@ -23,6 +23,29 @@ Deno.serve(async (req) => {
         let cleanNumber = number.replace(/[^\d]/g, '');
         if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
+        // 1. Diagnostic Step: Check Connectivity to API Root
+        try {
+            const diagController = new AbortController();
+            const diagTimeout = setTimeout(() => diagController.abort(), 5000);
+
+            console.log(`[Edge] Checking connectivity to: ${cleanUrl}`);
+            const diagResponse = await fetch(cleanUrl, {
+                method: 'GET',
+                signal: diagController.signal
+            });
+            clearTimeout(diagTimeout);
+
+            if (!diagResponse.ok) throw new Error(`Status ${diagResponse.status}`);
+            console.log('[Edge] Connectivity Check: Success');
+
+        } catch (e) {
+            console.error('[Edge] Connectivity Check Failed:', e);
+            return new Response(JSON.stringify({
+                error: "Connectivity Check Failed",
+                details: "Could not reach API Root. Check Docker Binding (0.0.0.0) or IP Whitelist."
+            }), { status: 502, headers: corsHeaders });
+        }
+
         // Endpoint: /message/sendText (Confirmed by your Postman test)
         const targetUrl = `${cleanUrl}/message/sendText/${instanceName}`;
 
@@ -39,8 +62,6 @@ Deno.serve(async (req) => {
         // Fetch with 15s Timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        console.log('[Edge] Starting fetch to:', targetUrl);
 
         try {
             const response = await fetch(targetUrl, {
@@ -65,8 +86,11 @@ Deno.serve(async (req) => {
         } catch (err) {
             clearTimeout(timeoutId);
             if (err.name === 'AbortError') {
-                console.error('[Edge] Timeout: Server Unresponsive (15s limit)');
-                return new Response(JSON.stringify({ error: 'Evolution API Timeout (15s limit)' }), { status: 504, headers: corsHeaders });
+                console.error('[Edge] Timeout: Firewall Block Detected');
+                return new Response(JSON.stringify({
+                    error: "Firewall Block Detected",
+                    detail: "Supabase could not reach 140.245.240.186:8080 within 15s. Ensure Port 8080 is open to 0.0.0.0/0."
+                }), { status: 504, headers: corsHeaders });
             }
             throw err;
         }
