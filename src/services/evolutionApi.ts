@@ -78,32 +78,16 @@ class EvolutionApiService {
   private formatPhoneNumber(phone: string): string | null {
     if (!phone) return null;
 
-    // Remove all non-digit characters except leading +
-    let cleaned = phone.replace(/[^\d+]/g, '');
+    // Remove all non-digit characters
+    const digitsOnly = phone.replace(/\D/g, '');
 
-    // If it starts with +, keep it, otherwise remove any +
-    if (!cleaned.startsWith('+')) {
-      cleaned = cleaned.replace(/\+/g, '');
-    }
-
-    // Ensure it has reasonable length (7-15 digits)
-    const digitsOnly = cleaned.replace(/\+/g, '');
-    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+    // Ensure it has reasonable length (10-15 digits)
+    if (digitsOnly.length < 10 || digitsOnly.length > 15) {
       return null;
     }
 
-    // If it doesn't start with +, add country code if it looks like Indian number
-    if (!cleaned.startsWith('+')) {
-      if (cleaned.length === 10) {
-        // Assume Indian number, add +91
-        cleaned = '+91' + cleaned;
-      } else if (cleaned.length > 10) {
-        // Add + prefix if not present
-        cleaned = '+' + cleaned;
-      }
-    }
-
-    return cleaned;
+    // Return raw digits, Edge Function handles 91 prefixing
+    return digitsOnly;
   }
 
   /**

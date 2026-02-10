@@ -49,7 +49,7 @@ export default function ShortLinkRedirect() {
               .from('games')
               .select('user_id')
               .eq('id', data.resource_id)
-              .single();
+              .maybeSingle();
 
             if (game && game.user_id === session.user.id) {
               isOwner = true;
@@ -59,7 +59,7 @@ export default function ShortLinkRedirect() {
               .from('players')
               .select('user_id')
               .eq('id', data.resource_id)
-              .single();
+              .maybeSingle();
 
             if (player && player.user_id === session.user.id) {
               isOwner = true;

@@ -407,6 +407,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
           net_amount: gp.net_amount
         }));
 
+        console.log("Sending WhatsApp notification for game:", currentGame.id);
         await sendSessionSummaryNotification(
           currentGame.id,
           currentGame.date,
@@ -420,11 +421,16 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       } catch (wsError) {
         console.error("Failed to send WhatsApp summaries:", wsError);
         // Do not block navigation on notification failure
-        toast.error("Game saved, but WhatsApp notifications failed.");
+        toast.error("Game saved, but WhatsApp notifications failed. Check console for details.");
+      } finally {
+        // 4. Always navigate to the game detail page
+        if (currentGame?.id) {
+          navigate(`/games/${currentGame.id}`);
+        } else {
+          console.error("Game ID missing during completion, cannot navigate");
+          toast.error("Game saved, but could not navigate to details.");
+        }
       }
-
-      // 4. Always navigate to the game detail page
-      navigate(`/games/${currentGame.id}`);
 
     } catch (error) {
       toast.dismiss(loadingToastId);

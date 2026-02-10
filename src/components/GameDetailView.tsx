@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2, Download, FileText, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, ArrowLeft, ArrowRight, RefreshCw, Plus, Trash2, ChevronDown, Check, X, Calendar, User, Coins, TrendingUp, History, ShieldCheck, CreditCard, Loader2, Download, FileText, Printer, Search } from "lucide-react";
 import { exportGameDetailsToCSV, printGameReport } from "@/lib/exportUtils";
 import { Game as GameType } from "@/types/poker";
 import {
@@ -310,8 +310,27 @@ export const GameDetailView = ({
 
   if (!game) {
     return (
-      <Card className="max-w-4xl mx-auto p-10 text-center">
-        <p className="text-muted-foreground uppercase tracking-widest">Game record not found in ledger.</p>
+      <Card className="max-w-md mx-auto mt-10 p-8 text-center border-dashed">
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-3 bg-muted rounded-full">
+            <Search className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Game Record Not Found</h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+              We couldn't find the game details. This might happen if the game is still being saved or if the link is invalid.
+            </p>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <Button variant="outline" onClick={() => onBack?.()}>
+              Go Back
+            </Button>
+            <Button onClick={() => refetchGameDetail()} className="gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Retry
+            </Button>
+          </div>
+        </div>
       </Card>
     );
   }
