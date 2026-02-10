@@ -103,6 +103,13 @@ export const useSharedLink = (): UseSharedLinkReturn => {
 
         // Unique constraint violation - try again
         if (error?.code === '23505') {
+          // It might be a collision on (user_id, resource_type, resource_id) instead of short_code.
+          // In that case, another request just created it. Let's try to fetch it.
+          const existing = await fetchExistingLink(resourceType, resourceId);
+          if (existing) {
+            return existing;
+          }
+          // If not found, it was a short_code collision. Retry with new code.
           attempts++;
           continue;
         }
@@ -114,7 +121,7 @@ export const useSharedLink = (): UseSharedLinkReturn => {
 
       throw new Error('Failed to generate unique short code after max attempts');
     },
-    [user]
+    [user, fetchExistingLink]
   );
 
   /**
