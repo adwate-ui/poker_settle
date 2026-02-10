@@ -45,12 +45,11 @@ const GameDetail = () => {
         // Guard: Verify game status to prevent premature notifications
         const { data: gameCheck } = await supabase
           .from('games')
-          .select('status')
+          .select('is_complete')
           .eq('id', gameId)
           .single();
 
-        // @ts-ignore - status exists on DB but might be missing in generated types
-        if (gameCheck?.status !== 'COMPLETED') {
+        if (gameCheck?.is_complete !== true) {
           console.warn("Game status verified as NOT completed. Aborting notification.");
           return;
         }

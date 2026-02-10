@@ -393,12 +393,11 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         try {
           const { data: gameStatus, error: statusError } = await supabase
             .from('games')
-            .select('status')
+            .select('is_complete')
             .eq('id', currentGame.id)
             .single();
 
-          // @ts-ignore
-          if (!statusError && gameStatus?.status === 'COMPLETED') {
+          if (!statusError && gameStatus?.is_complete === true) {
             verified = true;
             break;
           }
@@ -417,8 +416,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
         toast.warning("Finalizing game records...");
         // Fail-safe: Force update
         try {
-          // @ts-ignore
-          await supabase.from('games').update({ status: 'COMPLETED' }).eq('id', currentGame.id);
+          await supabase.from('games').update({ is_complete: true }).eq('id', currentGame.id);
         } catch (e) {
           console.error("Force update failed", e);
         }
