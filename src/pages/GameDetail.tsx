@@ -42,6 +42,19 @@ const GameDetail = () => {
       notificationSentRef.current = true;
 
       const sendNotifications = async () => {
+        // Guard: Verify game status to prevent premature notifications
+        const { data: gameCheck } = await supabase
+          .from('games')
+          .select('status')
+          .eq('id', gameId)
+          .single();
+
+        // @ts-ignore - status exists on DB but might be missing in generated types
+        if (gameCheck?.status !== 'COMPLETED') {
+          console.warn("Game status verified as NOT completed. Aborting notification.");
+          return;
+        }
+
         try {
           toast.loading("Sending WhatsApp summaries...", { duration: 3000 });
 

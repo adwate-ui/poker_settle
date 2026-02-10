@@ -381,9 +381,41 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       // 1. Complete the game in the database
       await completeGame(currentGame.id, allSettlements);
 
-      // 2. Immediate Navigation (Background processing on next page)
-      toast.success("Game finalized! Redirecting...");
+      // 2. Verify completion before navigating to prevent 404s or missing data
+      let attempts = 0;
+      let verified = false;
+      const maxAttempts = 5;
 
+      const loadingToast = toast.loading("Verifying game records...");
+
+      while (attempts < maxAttempts && !verified) {
+        attempts++;
+        const { data: gameStatus, error: statusError } = await supabase
+          .from('games')
+          .select('status')
+          .eq('id', currentGame.id)
+          .single();
+
+        // @ts-ignore
+        if (!statusError && gameStatus?.status === 'COMPLETED') {
+          verified = true;
+          break;
+        }
+
+        // Wait 1s before next attempt
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      toast.dismiss(loadingToast);
+
+      if (!verified) {
+        console.warn("Game completion could not be verified in time, but navigating anyway.");
+        toast.warning("Taking longer than expected... redirecting.");
+      } else {
+        toast.success("Game finalized! Redirecting...");
+      }
+
+      // 3. Navigation
       if (currentGame?.id) {
         navigate(`/games/${currentGame.id}`, {
           state: {

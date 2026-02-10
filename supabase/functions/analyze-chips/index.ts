@@ -63,35 +63,36 @@ serve(async (req) => {
       : "Standard Casino Colors (Red, Blue, Green, Black, White)";
 
     const prompt = `
-      You are a World-Class Casino Pit Boss and Optical Expert.
-      
-      **Goal:** accurately count the poker chips in each vertical stack in this image.
+      You are a Veteran Casino Pit Boss. Your eyes are trained to count chips instantly by recognizing patterns.
 
-      **CONTEXT:**
-      You are strictly limited to identifying chips from this provided list: 
+      **Goal:** Count the poker chips in the image.
+
+      **CONSTRAINT:**
+      You can ONLY identify chips from this specific list provided by the user: 
       ${chipsContext}
-      If a chip color is ambiguous, snap it to the closest valid color from this list.
+      Do not guess colors outside this list. If a chip looks like a variant (e.g. "dark red" vs "red"), snap it to the closest valid color from the list.
 
       **METHODOLOGY (The "Ridge Count" Technique):**
-      1.  **Do NOT attempt pixel measurements.** They are unreliable due to perspective.
-      2.  **Instead, count the Horizontal Ridges (side edges):** Look at the vertical profile of each stack. Each chip creates a distinct horizontal line or "ridge" on the side of the stack.
-      3.  **Count these ridges.** 1 Ridge = 1 Chip.
-      4.  **Grouping:** Group contiguous vertical stacks of the same color.
-      5.  **Exclusions:** Ignore loose chips lying flat on the table. Only count stacked chips.
+      1.  **Identify Stacks:** Locate vertical columns of chips.
+      2.  **Count Ridges:** Look at the *side profile* of the stack. Count the distinct horizontal lines (ridges) that separate each chip.
+          -   *Visual Tip:* 5 chips look like a small block. 20 chips usually form a standard "barrel".
+      3.  **Context Check (The Barrel Heuristic):** If a stack is roughly the same height as a known stack of 20, assign it a count of 20. Do not output "19" or "21" unless the height difference is obvious.
+      4.  **Ignore:** Loose chips lying flat on the felt (unless explicitly asked).
 
-      **OUTPUT FORMAT:**
-      Return strictly valid JSON. matching this TypeScript interface:
+      **OUTPUT:** 
+      Return strictly valid JSON containing a "stacks" array.
+      FORMAT:
       {
-        "thinking_process": "Found 2 stacks. Stack 1 (Red): Counted 12 distinct ridges on the side profile. Stack 2 (Blue): Counted 5 ridges...",
+        "thinking_process": "Observations about stacks, ridges seen, and barrel estimations...",
         "stacks": [
           { 
-            "color": "red", 
-            "count": 12, 
+            "color": "exact_match_from_list", 
+            "count": number,
             "confidence": 0.95,
-            "box_2d": [ymin, xmin, ymax, xmax] // 0-1000 normalized
+            "box_2d": [ymin, xmin, ymax, xmax] 
           }
         ],
-        "analysis_notes": "Detected 2 stacks. Lighting is good. Counts are high confidence based on visible ridges."
+        "analysis_notes": "Short summary of what was found."
       }
 
       Do not include markdown formatting. Just the raw JSON string.
