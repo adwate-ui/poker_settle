@@ -384,7 +384,7 @@ const GameDashboard = ({ game, onBackToSetup }: GameDashboardProps) => {
       // 2. Verify completion before navigating to prevent 404s or missing data
       let attempts = 0;
       let verified = false;
-      const maxAttempts = 5;
+      const maxAttempts = 10;
 
       const loadingToast = toast.loading("Verifying game records...");
 
