@@ -195,7 +195,7 @@ export function generateCustomMessage(playerName: string, message: string, gameL
  */
 export function generatePlayerShareLink(playerId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
-  return `${base}/shared/${token}/player/${playerId}`;
+  return `${base}/shared/${encodeURIComponent(token)}/player/${playerId}`;
 }
 
 /**
@@ -205,7 +205,7 @@ export function generatePlayerShareLink(playerId: string, token: string, baseUrl
 export function generateGameShareLink(gameId: string, token: string, baseUrl?: string): string {
   const base = baseUrl || window.location.origin;
   // Ensure we use the public shared route, not the authenticated /games/ route
-  return `${base}/shared/${token}/game/${gameId}`;
+  return `${base}/shared/${encodeURIComponent(token)}/game/${gameId}`;
 }
 
 /**
