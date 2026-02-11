@@ -95,7 +95,7 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
 
         // NOTE: This assumes we are using the project URL and Key from env
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
         return new SupabaseClient(supabaseUrl, supabaseAnonKey, {
             global: {
