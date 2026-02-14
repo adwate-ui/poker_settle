@@ -113,7 +113,7 @@ export const getTheme = (themeName: ThemeName): Theme => {
   return themes[themeName] || themes.default;
 };
 
-export const getCharacterForPlayer = (themeName: ThemeName, playerName: string): string | null => {
+export const getCharacterForPlayer = (_themeName: ThemeName, _playerName: string): string | null => {
   return null;
 };
 
@@ -122,9 +122,9 @@ export const getCharacterForPlayer = (themeName: ThemeName, playerName: string):
  * Note: Character assignment removed with anime themes.
  */
 export const getUniqueCharacterForPlayer = (
-  themeName: ThemeName,
-  playerName: string,
-  allPlayerNames: string[]
+  _themeName: ThemeName,
+  _playerName: string,
+  _allPlayerNames: string[]
 ): string | null => {
   return null;
 };

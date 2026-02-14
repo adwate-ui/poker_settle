@@ -1,6 +1,9 @@
-import { HandStage, PokerHand, PlayerAction, GamePlayer } from '@/types/poker';
+import { PokerHand, PlayerAction, GamePlayer } from '@/types/poker';
+import { HandStage } from '@/utils/handStateMachine';
 
-export interface HandState {
+export type HistoryState = Omit<SavedHandState, 'actionHistory' | 'timestamp'>;
+
+export interface SavedHandState {
     currentHand: PokerHand | null;
     stage: HandStage;
     buttonPlayerId: string;
@@ -20,38 +23,38 @@ export interface HandState {
     playerBets: Record<string, number>;
     streetPlayerBets: Record<string, number>;
     lastAggressorIndex: number | null;
-    actionHistory: any[];
+    actionHistory: HistoryState[];
     timestamp: number;
 }
 
 export const useHandPersistence = (gameId: string) => {
-    const getHandStateKey = () => `poker_hand_state_${gameId}`;
+    const getSavedHandStateKey = () => `poker_hand_state_${gameId}`;
 
-    const saveHandState = (state: Omit<HandState, 'timestamp'>) => {
+    const saveSavedHandState = (state: Omit<SavedHandState, 'timestamp'>) => {
         if (!state.currentHand) return;
 
-        const handState: HandState = {
+        const handState: SavedHandState = {
             ...state,
             timestamp: Date.now(),
         };
 
         try {
-            localStorage.setItem(getHandStateKey(), JSON.stringify(handState));
+            localStorage.setItem(getSavedHandStateKey(), JSON.stringify(handState));
         } catch (error) {
             console.error('Failed to save hand state:', error);
         }
     };
 
-    const loadHandState = (): HandState | null => {
+    const loadSavedHandState = (): SavedHandState | null => {
         try {
-            const savedState = localStorage.getItem(getHandStateKey());
+            const savedState = localStorage.getItem(getSavedHandStateKey());
             if (!savedState) return null;
 
             const handState = JSON.parse(savedState);
             // Check if state is not too old (e.g., 24 hours)
             const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in ms
             if (Date.now() - handState.timestamp > MAX_AGE) {
-                localStorage.removeItem(getHandStateKey());
+                localStorage.removeItem(getSavedHandStateKey());
                 return null;
             }
 
@@ -64,15 +67,15 @@ export const useHandPersistence = (gameId: string) => {
 
     const clearHandState = () => {
         try {
-            localStorage.removeItem(getHandStateKey());
+            localStorage.removeItem(getSavedHandStateKey());
         } catch (error) {
             console.error('Failed to clear hand state:', error);
         }
     };
 
     return {
-        saveHandState,
-        loadHandState,
+        saveHandState: saveSavedHandState,
+        loadHandState: loadSavedHandState,
         clearHandState,
     };
 };

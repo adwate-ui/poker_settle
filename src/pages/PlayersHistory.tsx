@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { Trash2, ArrowUpDown, Users, Trophy, User as UserIcon, UserPlus, Download, FileText, Printer } from "lucide-react";
+import { Trash2, ArrowUpDown, Trophy, UserPlus, Download, FileText, Printer } from "lucide-react";
 import { exportPlayersToCSV, printPlayersReport } from "@/lib/exportUtils";
 import {
   DropdownMenu,
@@ -15,13 +15,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PlayerCardSkeletonList } from "@/components/skeletons";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { Player } from "@/types/poker";
-import { formatProfitLoss } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import OptimizedAvatar from "@/components/OptimizedAvatar";
+import OptimizedAvatar from "@/components/player/OptimizedAvatar";
 import {
   Dialog,
   DialogContent,
@@ -30,9 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { ResponsiveName } from "@/components/ResponsiveName";
-import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
+import { ResponsiveName } from "@/components/ui-primitives/ResponsiveName";
+import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
 
 type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
@@ -52,9 +50,13 @@ const PlayersHistory = () => {
     setLoading(true);
     try {
       // Fetch players
-      const { data, error } = await supabase.from("players").select("*").eq("user_id", user?.id);
-      if (error) throw error;
-      setPlayers(data || []);
+      const { data: playersData, error: playersError } = await supabase
+        .from("players")
+        .select("*")
+        .eq("user_id", user?.id);
+
+      if (playersError) throw playersError;
+      setPlayers(playersData || []);
 
       // Fetch unique games count
       const { count, error: countError } = await supabase

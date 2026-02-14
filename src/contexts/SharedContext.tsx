@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 type SharedScope = {
     type: 'game' | 'player';
@@ -26,7 +27,7 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isValid, setIsValid] = useState(false);
     const { token } = useParams<{ token: string }>();
-    const navigate = useNavigate();
+    const { user } = useAuth();
 
     useEffect(() => {
         const validateToken = async () => {
@@ -35,9 +36,21 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
                 return;
             }
 
+            // If the user is a shared user, we don't need to validate the token via RPC
+            if (user?.user_metadata?.is_shared_user) {
+                // For shared users, the token is implicitly valid if they are logged in via the shared link.
+                // We can derive scope from the token itself or assume it's handled by RLS.
+                // For now, we'll just set it as valid and let RLS handle access.
+                setIsValid(true);
+                setIsLoading(false);
+                // Optionally, parse token to set scope if needed for UI logic
+                // For this context, we'll rely on RLS for data access.
+                return;
+            }
+
             try {
                 // 1. Validate token via RPC and get owner_id
-                // @ts-ignore - RPC not yet typed
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const { data: ownerId, error } = await supabase.rpc('get_shared_link_owner' as any, {
                     _token: token
                 });
@@ -50,7 +63,6 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
                 }
 
                 // 2. Fetch link details to determine scope via RPC (avoids RLS)
-                // @ts-ignore - RPC not yet typed
                 const { data: linkData, error: linkError } = await supabase
                     .rpc('validate_share_token', { _token: token })
                     .maybeSingle();
@@ -84,16 +96,10 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         validateToken();
-    }, [token]);
+    }, [token, user]);
 
     // Helper to create client with specific headers
     const createSharedClient = (accessToken: string) => {
-        // We can't actually "create" a new supabase client easily deeply integrated with the same auth persistence,
-        // but for RLS via public access, we just need to pass the header.
-        // However, the standard supabase client in @supabase/supabase-js allows setting global headers.
-        // Creating a fresh instance is cleaner.
-
-        // NOTE: This assumes we are using the project URL and Key from env
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -120,6 +126,7 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSharedContext = () => {
     const context = useContext(SharedContext);
     if (context === undefined) {

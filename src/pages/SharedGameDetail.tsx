@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { GameDetailView } from '@/components/GameDetailView';
+import { GameDetailView } from '@/components/game/GameDetailView';
 import { useAuth } from '@/hooks/useAuth';
-import GameDashboard from '@/components/GameDashboard';
+import GameDashboard from '@/components/game/GameDashboard';
 import { Game } from '@/types/poker';
 import { Loader2 } from 'lucide-react';
 import { SharedProvider, useSharedContext } from '@/contexts/SharedContext';

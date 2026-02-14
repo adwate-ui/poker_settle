@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { ArrowUpDown, Trash2, Filter, History, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
+import { ArrowUpDown, Trash2, Filter, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
 import { exportGamesToCSV } from "@/lib/exportUtils";
 import { Game } from "@/types/poker";
 import {
@@ -31,15 +31,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GameCardSkeletonList } from "@/components/skeletons";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { formatProfitLoss, cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { formatCurrency } from "@/utils/currencyUtils";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useGames } from "@/features/game/hooks/useGames";
-import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
+import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,7 +64,7 @@ interface GamesHistoryProps {
   disablePlayerLinks?: boolean;
 }
 
-const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePlayerLinks = false }: GamesHistoryProps = {}) => {
+const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePlayerLinks: _disablePlayerLinks = false }: GamesHistoryProps = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -87,12 +85,12 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const games: GameWithStats[] = useMemo(() => {
     if (!gamesData) return [];
 
-    return gamesData.map((game: any) => {
+    return gamesData.map((game) => {
       const playerCount = game.game_players?.length || 0;
-      const totalBuyIns = game.game_players?.reduce((sum: number, gp: any) => sum + (gp.buy_ins || 0), 0) || 0;
+      const totalBuyIns = game.game_players?.reduce((sum: number, gp) => sum + (gp.buy_ins || 0), 0) || 0;
       const totalPot = totalBuyIns * game.buy_in_amount;
-      const playerNames = game.game_players?.map((gp: any) => gp.player?.name || "").filter(Boolean) || [];
-      const gamePlayers = game.game_players?.map((gp: any) => ({
+      const playerNames = game.game_players?.map((gp) => gp.player?.name || "").filter(Boolean) || [];
+      const gamePlayers = game.game_players?.map((gp) => ({
         player_name: gp.player?.name || "",
         net_amount: gp.net_amount || 0,
       })) || [];

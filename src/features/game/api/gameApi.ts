@@ -1,12 +1,47 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Game, Player, GamePlayer, Settlement, SeatPosition } from "@/types/poker";
+import { Game, Player, GamePlayer, Settlement, SeatPosition, Json, TablePosition, SettlementConfirmation } from "@/types/poker";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { z } from "zod";
 
 import { CurrencyConfig } from "@/config/localization";
 
 const buyInAmountSchema = z.number().min(1, `Buy-in must be at least ${CurrencyConfig.symbol} 1`).max(1000000, `Buy-in cannot exceed ${CurrencyConfig.symbol} 10,00,000`);
+
+
+/**
+ * Transforms raw database game data into the strict Game interface
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const transformGameData = (rawGame: any): Game => {
+    return {
+        id: rawGame.id,
+        date: rawGame.date,
+        buy_in_amount: Number(rawGame.buy_in_amount),
+        is_complete: Boolean(rawGame.is_complete),
+        small_blind: rawGame.small_blind ? Number(rawGame.small_blind) : undefined,
+        big_blind: rawGame.big_blind ? Number(rawGame.big_blind) : undefined,
+        settlements: (rawGame.settlements as unknown as Settlement[]) || [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        game_players: (rawGame.game_players || []).map((gp: any) => ({
+            id: gp.id,
+            game_id: gp.game_id,
+            player_id: gp.player_id,
+            buy_ins: Number(gp.buy_ins || 0),
+            final_stack: Number(gp.final_stack || 0),
+            net_amount: Number(gp.net_amount || 0),
+            player: {
+                id: gp.player?.id,
+                name: gp.player?.name || 'Unknown',
+                total_games: Number(gp.player?.total_games || 0),
+                total_profit: Number(gp.player?.total_profit || 0),
+                phone_number: gp.player?.phone_number,
+                upi_id: gp.player?.upi_id,
+                payment_preference: gp.player?.payment_preference
+            }
+        }))
+    };
+};
 
 export const fetchGames = async (userId: string, client?: SupabaseClient): Promise<Game[]> => {
     try {
@@ -25,7 +60,7 @@ export const fetchGames = async (userId: string, client?: SupabaseClient): Promi
             .order("date", { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        return (data || []).map(transformGameData);
     } catch (error) {
         console.error("Error fetching games:", error);
         toast.error("Failed to fetch games");
@@ -89,7 +124,7 @@ export const createGame = async (userId: string, buyInAmount: number, selectedPl
 
         if (fetchError) throw fetchError;
 
-        return completeGame as any;
+        return transformGameData(completeGame);
     } catch (error) {
         console.error("Error creating game:", error);
         throw error;
@@ -120,7 +155,8 @@ export const completeGameApi = async (
     const allGamePlayers = gameData.game_players;
 
     // Check if total net amounts sum to zero
-    const totalNet = allGamePlayers.reduce((sum: number, gp: GamePlayer) => sum + (gp.net_amount || 0), 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const totalNet = allGamePlayers.reduce((sum: number, gp: any) => sum + (Number(gp.net_amount) || 0), 0);
     if (Math.abs(totalNet) > 0.01) {
         throw new Error("Total winnings and losses must sum to zero before completing the game");
     }
@@ -129,10 +165,16 @@ export const completeGameApi = async (
         .from("games")
         .update({
             is_complete: true,
-            settlements: settlements as any
+            settlements: settlements as unknown as Json
         })
         .eq("id", gameId)
-        .select()
+        .select(`
+            *,
+            game_players(
+                *,
+                player:players(*)
+            )
+        `)
         .single();
 
     if (error) throw error;
@@ -144,7 +186,7 @@ export const completeGameApi = async (
         console.error('Failed to create settlement confirmations:', confirmationError);
     }
 
-    return data as any;
+    return transformGameData(data);
 };
 
 export const updateGamePlayerApi = async (playerGameId: string, updates: Partial<GamePlayer>): Promise<void> => {
@@ -156,6 +198,7 @@ export const updateGamePlayerApi = async (playerGameId: string, updates: Partial
     if (error) throw error;
 };
 
+
 export const fetchGameDetail = async (client: SupabaseClient, gameId: string) => {
     const [gameResult, playersResult, positionsResult, confirmationsResult] = await Promise.all([
         client.from("games").select("*").eq("id", gameId).maybeSingle(),
@@ -163,10 +206,14 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string) =>
             .from("game_players")
             .select(`
             *,
-            players (
+            player:players (
+              id,
               name,
               payment_preference,
-              upi_id
+              upi_id,
+              total_games,
+              total_profit,
+              phone_number
             )
           `)
             .eq("game_id", gameId),
@@ -184,18 +231,43 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string) =>
     if (gameResult.error) throw gameResult.error;
     if (!gameResult.data) throw new Error("Game not found");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gamePlayers = (playersResult.data || []).map((gp: any): GamePlayer => ({
+        id: gp.id,
+        game_id: gp.game_id,
+        player_id: gp.player_id,
+        buy_ins: Number(gp.buy_ins || 0),
+        final_stack: Number(gp.final_stack || 0),
+        net_amount: Number(gp.net_amount || 0),
+        player: {
+            id: gp.player?.id,
+            name: gp.player?.name || 'Unknown',
+            total_games: Number(gp.player?.total_games || 0),
+            total_profit: Number(gp.player?.total_profit || 0),
+            phone_number: gp.player?.phone_number || undefined,
+            upi_id: gp.player?.upi_id || undefined,
+            payment_preference: gp.player?.payment_preference || undefined
+        }
+    })).sort((a, b) => {
+        const nameA = (a.player.name ?? '').toLowerCase();
+        const nameB = (b.player.name ?? '').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
     return {
-        game: gameResult.data,
-        gamePlayers: (playersResult.data || []).sort((a, b) => {
-            const nameA = (a.players?.name ?? '').toLowerCase();
-            const nameB = (b.players?.name ?? '').toLowerCase();
-            return nameA.localeCompare(nameB);
-        }),
-        tablePositions: (positionsResult.data || []).map((tp) => ({
+        game: {
+            ...gameResult.data,
+            settlements: (gameResult.data.settlements as unknown as Settlement[]) || [],
+            game_players: gamePlayers
+        } as Game,
+        gamePlayers,
+        tablePositions: (positionsResult.data || []).map((tp): TablePosition => ({
             id: tp.id,
+            game_id: tp.game_id,
             snapshot_timestamp: tp.snapshot_timestamp,
-            positions: tp.positions as unknown as SeatPosition[],
+            positions: (tp.positions as unknown as SeatPosition[]) || [],
+            created_at: tp.created_at
         })),
-        confirmations: confirmationsResult.data || []
+        confirmations: (confirmationsResult.data || []) as SettlementConfirmation[]
     };
 };

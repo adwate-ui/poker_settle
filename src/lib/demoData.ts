@@ -1,376 +1,235 @@
-import { supabase } from '@/integrations/supabase/client';
+import { Player, Game, GamePlayer } from "@/types/poker";
+import { supabase } from "@/integrations/supabase/client";
 
-// Demo player data
-const DEMO_PLAYERS = [
-  { name: 'Alex "The Shark" Johnson', email: 'alex@demo.test', upi_id: 'alex@upi' },
-  { name: 'Sam Chen', email: 'sam@demo.test', upi_id: 'samchen@upi' },
-  { name: 'Jordan Williams', email: 'jordan@demo.test', upi_id: 'jordan@upi' },
-  { name: 'Taylor Swift', email: 'taylor@demo.test', upi_id: 'taylor@upi' },
-  { name: 'Morgan Lee', email: 'morgan@demo.test', upi_id: 'morgan@upi' },
-  { name: 'Casey Brooks', email: 'casey@demo.test', upi_id: 'casey@upi' },
+// This file provides realistic demo data for various game states
+// It uses fixed UUIDs to maintain consistency during testing
+
+export const DEMO_USER_ID = "00000000-0000-0000-0000-000000000000";
+
+export const DEMO_PLAYERS: Player[] = [
+  {
+    id: "p1",
+    name: "Alex",
+    user_id: DEMO_USER_ID,
+    total_games: 15,
+    total_profit: 2500,
+    phone_number: "+919999999991",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "p2",
+    name: "Sam",
+    user_id: DEMO_USER_ID,
+    total_games: 12,
+    total_profit: -1200,
+    phone_number: "+919999999992",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "p3",
+    name: "Jordan",
+    user_id: DEMO_USER_ID,
+    total_games: 8,
+    total_profit: 450,
+    upi_id: "jordan@upi",
+    created_at: new Date().toISOString()
+  }
 ];
 
-// Generate a random date within the past N months
-const randomPastDate = (monthsAgo: number): string => {
-  const now = new Date();
-  const past = new Date(now);
-  past.setMonth(past.getMonth() - Math.floor(Math.random() * monthsAgo));
-  past.setDate(Math.floor(Math.random() * 28) + 1);
-  past.setHours(Math.floor(Math.random() * 4) + 18); // Evening games 6pm-10pm
-  past.setMinutes(Math.floor(Math.random() * 60));
-  return past.toISOString();
+export const DEMO_GAME: Game = {
+  id: "g1",
+  user_id: DEMO_USER_ID,
+  date: new Date().toISOString(),
+  buy_in_amount: 500,
+  small_blind: 5,
+  big_blind: 10,
+  status: "completed",
+  created_at: new Date().toISOString(),
+  share_token: "demo-token"
 };
 
-// Generate buy-in variations
-const generateBuyIns = (playerCount: number, buyInAmount: number): number[] => {
-  const buyIns: number[] = [];
-  for (let i = 0; i < playerCount; i++) {
-    // Some players buy in multiple times
-    const baseBuyIns = Math.random() > 0.3 ? 1 : Math.floor(Math.random() * 2) + 2;
-    buyIns.push(baseBuyIns);
+export const DEMO_GAME_PLAYERS: GamePlayer[] = [
+  {
+    id: "gp1",
+    game_id: "g1",
+    player_id: "p1",
+    buy_ins: 2,
+    final_stack: 2500,
+    net_amount: 1500,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "gp2",
+    game_id: "g1",
+    player_id: "p2",
+    buy_ins: 3,
+    final_stack: 0,
+    net_amount: -1500,
+    created_at: new Date().toISOString()
   }
-  return buyIns;
-};
-
-// Generate final stacks that roughly balance (with some variance)
-const generateFinalStacks = (
-  buyIns: number[],
-  buyInAmount: number
-): number[] => {
-  const totalPot = buyIns.reduce((sum, bi) => sum + bi * buyInAmount, 0);
-  const playerCount = buyIns.length;
-
-  // Generate random final stacks that sum to total pot
-  let stacks: number[] = [];
-  let remaining = totalPot;
-
-  for (let i = 0; i < playerCount - 1; i++) {
-    // Generate a stack with some variance
-    const avgShare = remaining / (playerCount - i);
-    const variance = avgShare * 0.6; // 60% variance
-    let stack = Math.round(avgShare + (Math.random() * 2 - 1) * variance);
-    stack = Math.max(0, stack); // No negative stacks
-    stack = Math.min(remaining, stack); // Can't exceed remaining
-    stack = Math.round(stack / 10) * 10; // Round to nearest 10
-    stacks.push(stack);
-    remaining -= stack;
-  }
-  stacks.push(remaining); // Last player gets the rest
-
-  // Shuffle to randomize who wins/loses
-  return stacks.sort(() => Math.random() - 0.5);
-};
-
-// Demo game configurations
-const DEMO_GAME_CONFIGS = [
-  { buyInAmount: 50, playerIndices: [0, 1, 2, 3] },
-  { buyInAmount: 100, playerIndices: [0, 1, 2, 4, 5] },
-  { buyInAmount: 50, playerIndices: [1, 2, 3, 5] },
-  { buyInAmount: 200, playerIndices: [0, 2, 3, 4] },
-  { buyInAmount: 50, playerIndices: [0, 1, 3, 4, 5] },
-  { buyInAmount: 100, playerIndices: [0, 1, 2, 3, 4, 5] },
 ];
 
-export interface DemoDataResult {
-  success: boolean;
-  message: string;
-  playersCreated: number;
-  gamesCreated: number;
-}
+// Demo Data Management functions for Profile Page
 
-/**
- * Loads demo data into the current user's account
- */
-export const loadDemoData = async (userId: string): Promise<DemoDataResult> => {
+export const hasDemoData = async (userId: string): Promise<boolean> => {
   try {
-    // Step 1: Create demo players
-    const createdPlayers: { id: string; name: string }[] = [];
+    const { count, error } = await supabase
+      .from('players')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('phone_number', '+919999999991'); // Specific demo player signature
 
-    for (const playerData of DEMO_PLAYERS) {
-      const { data: player, error } = await supabase
-        .from('players')
-        .insert({
-          user_id: userId,
-          name: playerData.name,
-          email: playerData.email,
-          upi_id: playerData.upi_id,
-        })
-        .select('id, name')
-        .single();
-
-      if (error) {
-        console.error('Error creating demo player:', error);
-        continue;
-      }
-
-      if (player) {
-        createdPlayers.push(player);
-      }
-    }
-
-    if (createdPlayers.length === 0) {
-      return {
-        success: false,
-        message: 'Failed to create demo players',
-        playersCreated: 0,
-        gamesCreated: 0,
-      };
-    }
-
-    // Step 2: Create demo games
-    let gamesCreated = 0;
-
-    for (let i = 0; i < DEMO_GAME_CONFIGS.length; i++) {
-      const config = DEMO_GAME_CONFIGS[i];
-      const gameDate = randomPastDate(5); // Games within past 5 months
-
-      // Create the game
-      const { data: game, error: gameError } = await supabase
-        .from('games')
-        .insert({
-          user_id: userId,
-          buy_in_amount: config.buyInAmount,
-          status: 'completed',
-          created_at: gameDate,
-          is_shared: false,
-        })
-        .select('id')
-        .single();
-
-      if (gameError || !game) {
-        console.error('Error creating demo game:', gameError);
-        continue;
-      }
-
-      // Get players for this game
-      const gamePlayers = config.playerIndices
-        .map(idx => createdPlayers[idx])
-        .filter(Boolean);
-
-      if (gamePlayers.length < 2) continue;
-
-      // Generate buy-ins and final stacks
-      const buyIns = generateBuyIns(gamePlayers.length, config.buyInAmount);
-      const finalStacks = generateFinalStacks(buyIns, config.buyInAmount);
-
-      // Add players to the game
-      for (let j = 0; j < gamePlayers.length; j++) {
-        const { data: gamePlayer, error: gpError } = await supabase
-          .from('game_players')
-          .insert({
-            game_id: game.id,
-            player_id: gamePlayers[j].id,
-            buy_ins: buyIns[j],
-            final_stack: finalStacks[j],
-          })
-          .select('id')
-          .single();
-
-        if (gpError || !gamePlayer) {
-          console.error('Error adding player to game:', gpError);
-          continue;
-        }
-
-        // Create buy-in history entries
-        for (let k = 0; k < buyIns[j]; k++) {
-          const buyInTime = new Date(gameDate);
-          buyInTime.setMinutes(buyInTime.getMinutes() + k * 45); // Spread buy-ins over time
-
-          await supabase.from('buy_in_history').insert({
-            game_player_id: gamePlayer.id,
-            amount: config.buyInAmount,
-            created_at: buyInTime.toISOString(),
-          });
-        }
-      }
-
-      // Create settlements for the game
-      const settlements = calculateSettlements(
-        gamePlayers.map((p, idx) => ({
-          id: p.id,
-          name: p.name,
-          buyIns: buyIns[idx],
-          finalStack: finalStacks[idx],
-        })),
-        config.buyInAmount
-      );
-
-      for (const settlement of settlements) {
-        const fromPlayer = gamePlayers.find(p => p.name === settlement.from);
-        const toPlayer = gamePlayers.find(p => p.name === settlement.to);
-
-        if (fromPlayer && toPlayer) {
-          await supabase.from('settlements').insert({
-            game_id: game.id,
-            from_player_id: fromPlayer.id,
-            to_player_id: toPlayer.id,
-            amount: settlement.amount,
-            status: Math.random() > 0.3 ? 'completed' : 'pending', // Some pending
-          });
-        }
-      }
-
-      gamesCreated++;
-    }
-
-    return {
-      success: true,
-      message: `Demo data loaded! Created ${createdPlayers.length} players and ${gamesCreated} games.`,
-      playersCreated: createdPlayers.length,
-      gamesCreated,
-    };
-  } catch (error) {
-    console.error('Error loading demo data:', error);
-    return {
-      success: false,
-      message: 'An error occurred while loading demo data',
-      playersCreated: 0,
-      gamesCreated: 0,
-    };
+    if (error) return false;
+    return (count || 0) > 0;
+  } catch (err) {
+    console.error('Error checking demo data:', err);
+    return false;
   }
 };
 
-// Simple settlement calculation for demo data
-interface PlayerResult {
-  id: string;
-  name: string;
-  buyIns: number;
-  finalStack: number;
-}
-
-interface Settlement {
-  from: string;
-  to: string;
-  amount: number;
-}
-
-const calculateSettlements = (
-  players: PlayerResult[],
-  buyInAmount: number
-): Settlement[] => {
-  const settlements: Settlement[] = [];
-
-  // Calculate net for each player
-  const nets = players.map(p => ({
-    name: p.name,
-    net: p.finalStack - (p.buyIns * buyInAmount),
-  }));
-
-  // Sort by net (losers first, winners last)
-  nets.sort((a, b) => a.net - b.net);
-
-  // Simple settlement: losers pay winners
-  let i = 0; // losers pointer
-  let j = nets.length - 1; // winners pointer
-
-  while (i < j) {
-    const loser = nets[i];
-    const winner = nets[j];
-
-    if (loser.net >= 0 || winner.net <= 0) break;
-
-    const amount = Math.min(Math.abs(loser.net), winner.net);
-
-    if (amount > 0) {
-      settlements.push({
-        from: loser.name,
-        to: winner.name,
-        amount,
-      });
+export const loadDemoData = async (userId: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    // 1. Check if already exists to avoid duplicates
+    const exists = await hasDemoData(userId);
+    if (exists) {
+      return { success: false, message: 'Demo data already exists for this account.' };
     }
 
-    loser.net += amount;
-    winner.net -= amount;
+    // 2. Insert Demo Players
+    const demoPlayers = [
+      { name: 'Alex', user_id: userId, phone_number: '+919999999991', total_games: 15, total_profit: 2500 },
+      { name: 'Sam', user_id: userId, phone_number: '+919999999992', total_games: 12, total_profit: -1200 },
+      { name: 'Jordan', user_id: userId, phone_number: '+919999999993', total_games: 8, total_profit: 450 },
+      { name: 'Priya', user_id: userId, phone_number: '+919999999994', total_games: 22, total_profit: 5800 },
+      { name: 'Rahul', user_id: userId, phone_number: '+919999999995', total_games: 5, total_profit: -800 },
+      { name: 'Vikram', user_id: userId, phone_number: '+919999999996', total_games: 18, total_profit: 1200 },
+    ];
 
-    if (loser.net >= 0) i++;
-    if (winner.net <= 0) j--;
+    const { data: players, error: pError } = await supabase
+      .from('players')
+      .insert(demoPlayers)
+      .select();
+
+    if (pError) throw pError;
+    if (!players) throw new Error('Failed to create demo players');
+
+    // 3. Insert Demo Games (over 5 months)
+    const now = new Date();
+    const demoGames = Array.from({ length: 6 }).map((_, i) => ({
+      user_id: userId,
+      date: new Date(now.getFullYear(), now.getMonth() - i, 15).toISOString(),
+      buy_in_amount: i % 2 === 0 ? 500 : 1000,
+      small_blind: i % 2 === 0 ? 5 : 10,
+      big_blind: i % 2 === 0 ? 10 : 20,
+      status: 'completed',
+    }));
+
+    const { data: games, error: gError } = await supabase
+      .from('games')
+      .insert(demoGames)
+      .select();
+
+    if (gError) throw gError;
+    if (!games) throw new Error('Failed to create demo games');
+
+    // 4. Create Game Players and History for the latest game
+    const latestGame = games[0];
+    const gpData = players.map((p, i) => ({
+      game_id: latestGame.id,
+      player_id: p.id,
+      buy_ins: i % 3 + 1,
+      final_stack: i % 2 === 0 ? latestGame.buy_in_amount * 3 : 0,
+      net_amount: i % 2 === 0 ? latestGame.buy_in_amount : -latestGame.buy_in_amount * (i % 3 + 1),
+    }));
+
+    const { error: gpError } = await supabase.from('game_players').insert(gpData);
+    if (gpError) throw gpError;
+
+    return { success: true, message: 'Demo archives synchronized. Protocol active.' };
+  } catch (err) {
+    console.error('Error loading demo data:', err);
+    return { success: false, message: 'Encryption failed. Demo data could not be seeded.' };
   }
-
-  return settlements;
 };
 
-/**
- * Clears all demo data (players with @demo.test email and their associated games)
- */
 export const clearDemoData = async (userId: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Find demo players
-    const { data: demoPlayers } = await supabase
+    // 1. Identify demo players
+    const { data: players, error: pError } = await supabase
       .from('players')
       .select('id')
       .eq('user_id', userId)
-      .like('email', '%@demo.test');
+      .in('phone_number', [
+        '+919999999991', '+919999999992', '+919999999993',
+        '+919999999994', '+919999999995', '+919999999996'
+      ]);
 
-    if (!demoPlayers || demoPlayers.length === 0) {
-      return {
-        success: true,
-        message: 'No demo data found to clear.',
-      };
+    if (pError) throw pError;
+    if (!players || players.length === 0) {
+      return { success: true, message: 'No demo protocols found to purge.' };
     }
 
-    const demoPlayerIds = demoPlayers.map(p => p.id);
+    const playerIds = players.map(p => p.id);
 
-    // Find games that only have demo players
-    const { data: gamePlayersData } = await supabase
+    // 2. Delete games (which should cascade to game_players and history if DB is set up, 
+    // but we'll be thorough if needed. Usually games belongs to user_id, 
+    // so we need to be careful not to delete ALL games of the user.)
+
+    // We only delete games that HAVE demo players in them
+    const { data: demoGps, error: dge } = await supabase
       .from('game_players')
-      .select('game_id, player_id')
-      .in('player_id', demoPlayerIds);
+      .select('game_id')
+      .in('player_id', playerIds);
 
-    if (gamePlayersData) {
-      // Get unique game IDs
-      const gameIds = [...new Set(gamePlayersData.map(gp => gp.game_id))];
-
-      // Delete settlements for these games
-      for (const gameId of gameIds) {
-        await supabase.from('settlements').delete().eq('game_id', gameId);
-      }
-
-      // Delete game players and their buy-in history
-      for (const gameId of gameIds) {
-        const { data: gamePlayers } = await supabase
-          .from('game_players')
-          .select('id')
-          .eq('game_id', gameId);
-
-        if (gamePlayers) {
-          for (const gp of gamePlayers) {
-            await supabase.from('buy_in_history').delete().eq('game_player_id', gp.id);
-          }
-        }
-
-        await supabase.from('game_players').delete().eq('game_id', gameId);
-      }
-
-      // Delete games
+    if (!dge && demoGps && demoGps.length > 0) {
+      const gameIds = Array.from(new Set(demoGps.map(dg => dg.game_id)));
       await supabase.from('games').delete().in('id', gameIds);
     }
 
-    // Delete demo players
-    await supabase.from('players').delete().in('id', demoPlayerIds);
+    // 3. Delete players
+    const { error: de } = await supabase.from('players').delete().in('id', playerIds);
+    if (de) throw de;
 
-    return {
-      success: true,
-      message: `Cleared ${demoPlayers.length} demo players and their games.`,
-    };
-  } catch (error) {
-    console.error('Error clearing demo data:', error);
-    return {
-      success: false,
-      message: 'An error occurred while clearing demo data',
-    };
+    return { success: true, message: 'Demo protocols purged. System cleared.' };
+  } catch (err) {
+    console.error('Error clearing demo data:', err);
+    return { success: false, message: 'Purge failed. Manual intervention may be required.' };
   }
 };
 
-/**
- * Check if demo data exists for a user
- */
-export const hasDemoData = async (userId: string): Promise<boolean> => {
-  const { data } = await supabase
-    .from('players')
-    .select('id')
-    .eq('user_id', userId)
-    .like('email', '%@demo.test')
-    .limit(1);
+// Legacy seed function
+export const seedDemoData = async () => {
+  try {
+    // Check if demo players exist
+    const { data: existingPlayers } = await supabase
+      .from("players")
+      .select("id")
+      .eq("user_id", DEMO_USER_ID);
 
-  return (data?.length ?? 0) > 0;
+    if (!existingPlayers || existingPlayers.length === 0) {
+      // Seed players
+      await supabase.from("players").insert(DEMO_PLAYERS);
+
+      // Seed game
+      await supabase.from("games").insert([DEMO_GAME]);
+
+      // Seed game players
+      await supabase.from("game_players").insert(DEMO_GAME_PLAYERS);
+
+      // Seed some buy-in history
+      const demoBuyInHistory = [
+        {
+          game_id: "g1",
+          player_id: "p1",
+          amount: 500,
+          created_at: new Date().toISOString()
+        }
+      ];
+      await supabase.from("buy_in_history").insert(demoBuyInHistory);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error seeding demo data:", error);
+    return false;
+  }
 };

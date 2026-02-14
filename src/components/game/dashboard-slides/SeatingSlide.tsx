@@ -1,0 +1,94 @@
+import { Button } from "@/components/ui/button";
+import { Game, GamePlayer, TablePosition, SeatPosition } from "@/types/poker";
+import TablePositionEditor from "@/components/poker/TablePositionEditor";
+import HandTracking from "@/components/poker/HandTracking";
+import PokerTableView from "@/components/poker/PokerTableView";
+
+interface SeatingSlideProps {
+    game: Game;
+    gamePlayers: GamePlayer[];
+    showPositionEditor: boolean;
+    setShowPositionEditor: (show: boolean) => void;
+    currentTablePosition: TablePosition | null;
+    handleSaveTablePosition: (positions: SeatPosition[]) => Promise<void>;
+    handTrackingStage: 'setup' | 'ready' | 'recording';
+    positionsJustChanged: boolean;
+    handleHandComplete: () => void;
+    handleStartHandTracking: () => void;
+    hasSavedHandState: boolean;
+}
+
+const SeatingSlide = ({
+    game,
+    gamePlayers,
+    showPositionEditor,
+    setShowPositionEditor,
+    currentTablePosition,
+    handleSaveTablePosition,
+    handTrackingStage,
+    positionsJustChanged,
+    handleHandComplete,
+    handleStartHandTracking,
+    hasSavedHandState,
+}: SeatingSlideProps) => {
+    return (
+        <div className="p-0 space-y-4 pb-12">
+            {showPositionEditor ? (
+                <div className="p-4">
+                    <TablePositionEditor
+                        players={gamePlayers.map(gp => gp.player)}
+                        currentPositions={currentTablePosition?.positions || []}
+                        onSave={handleSaveTablePosition}
+                        onCancel={() => setShowPositionEditor(false)}
+                    />
+                </div>
+            ) : handTrackingStage === 'recording' ? (
+                <HandTracking
+                    game={game}
+                    positionsJustChanged={positionsJustChanged}
+                    onHandComplete={handleHandComplete}
+                    initialSeatPositions={currentTablePosition?.positions || []}
+                />
+            ) : (
+                <div className="space-y-4">
+                    <div className="relative aspect-[4/3] bg-white/40 dark:bg-black/40 overflow-hidden shadow-inner border-y border-border">
+                        {currentTablePosition && currentTablePosition.positions.length > 0 ? (
+                            <PokerTableView
+                                positions={currentTablePosition.positions}
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center p-8">
+                                <Button
+                                    onClick={() => setShowPositionEditor(true)}
+                                    className="h-14 px-10 bg-accent/5 dark:bg-white/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
+                                >
+                                    Setup Seating
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {currentTablePosition && currentTablePosition.positions.length > 0 && (
+                        <div className="grid grid-cols-2 gap-3 w-full px-4">
+                            <Button
+                                onClick={() => setShowPositionEditor(true)}
+                                variant="ghost"
+                                className="flex-1 h-12 border border-border text-muted-foreground text-label"
+                            >
+                                Edit Seating
+                            </Button>
+                            <Button
+                                onClick={handleStartHandTracking}
+                                className="flex-1 h-12 bg-gold-600 text-black text-label rounded-xl"
+                            >
+                                {hasSavedHandState ? 'Resume' : 'Record Hand'}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default SeatingSlide;

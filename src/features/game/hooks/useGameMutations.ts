@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateGamePlayerApi } from "../api/gameApi";
 import { gameKeys } from "../api/queryKeys";
 import { GamePlayer } from "@/types/poker";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 
 export const useUpdateGamePlayer = () => {
     const queryClient = useQueryClient();

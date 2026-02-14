@@ -1,31 +1,23 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Phone, CreditCard, Layers, History, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Share2, ChevronDown, Edit, User, Phone, CreditCard, Layers, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { cn } from "@/lib/utils";
-import { CurrencyConfig, PaymentMethodConfig } from "@/config/localization";
 import { Player } from "@/types/poker";
-import { ShareDialog } from "@/components/ShareDialog";
-import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { PlayerFormDialog, PlayerFormData } from "@/components/PlayerFormDialog";
+import { ShareDialog } from "@/components/shared/ShareDialog";
+import OptimizedAvatar from "@/components/player/OptimizedAvatar";
+import { PlayerFormDialog, PlayerFormData } from "@/components/player/PlayerFormDialog";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import { Badge } from "@/components/ui/badge";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ResponsiveCurrency } from "@/components/ResponsiveCurrency";
+import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
 
 interface GameHistory {
   id: string;
@@ -50,7 +42,7 @@ interface PlayerDetailProps {
   readOnly?: boolean;
 }
 
-const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false }: PlayerDetailProps = {}) => {
+const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnly = false }: PlayerDetailProps = {}) => {
   const params = useParams();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -63,7 +55,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [selectedMonthYear, setSelectedMonthYear] = useState<string>("all");
+  const [selectedMonthYear] = useState<string>("all");
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { updatePlayer } = usePlayerManagement();
@@ -97,7 +89,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
         .order("games(date)", { ascending: false });
 
       if (historyError) throw historyError;
-      const validHistory = (historyData || []).filter((h: any) => h.games) as unknown as GameHistory[];
+      const validHistory = (historyData || []).filter((h) => h.games) as unknown as GameHistory[];
       setGameHistory(validHistory);
     } catch (error) {
       console.error("Error fetching player data:", error);
@@ -120,7 +112,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
       const updatedPlayer = await updatePlayer(playerId, playerData);
       setPlayer(updatedPlayer);
       toast.success("Player details updated successfully");
-    } catch (error) {
+    } catch (_error) {
       // toast handled in hook
     }
   };
@@ -153,7 +145,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
       : <ArrowDown className="h-3 w-3 text-primary" />;
   };
 
-  const uniqueMonthYears = useMemo(() => {
+  const _uniqueMonthYears = useMemo(() => {
     const monthYears = gameHistory.map((game) => format(new Date(game.games.date), "MMM yyyy"));
     return Array.from(new Set(monthYears)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [gameHistory]);
@@ -329,7 +321,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId, client, readOnly = false
                     <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
                       <Layers className="h-3 w-3" /> Preference
                     </div>
-                    <p className="text-sm text-foreground font-medium capitalize">{player.payment_preference ? (player.payment_preference === PaymentMethodConfig.digital.key ? PaymentMethodConfig.digital.label : PaymentMethodConfig.cash.label) : "Unspecified"}</p>
+                    <p className="text-sm text-foreground font-medium capitalize">{player.payment_preference ? (player.payment_preference === "digital" ? "Digital" : "Cash") : "Unspecified"}</p>
                   </div>
                 </div>
               ) : (

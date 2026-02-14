@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -51,11 +51,11 @@ export const useAuthProvider = () => {
         setUser(session?.user ?? null);
         // Only set loading to false if we're sure there's no hash fragment to process
         // Check if there are hash params that might be OAuth tokens
-        const hasAuthHash = typeof window !== 'undefined' && 
-          window.location.hash && 
-          (window.location.hash.includes('access_token') || 
-           window.location.hash.includes('id_token') || 
-           window.location.hash.includes('refresh_token'));
+        const hasAuthHash = typeof window !== 'undefined' &&
+          window.location.hash &&
+          (window.location.hash.includes('access_token') ||
+            window.location.hash.includes('id_token') ||
+            window.location.hash.includes('refresh_token'));
         if (!hasAuthHash) {
           setLoading(false);
         } else {

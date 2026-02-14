@@ -1,4 +1,4 @@
-
+ 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0"
 
@@ -59,7 +59,7 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
     const chipsContext = defined_chips
-      ? JSON.stringify(defined_chips.map((c: any) => ({ color: c.color, label: c.label })))
+      ? JSON.stringify(defined_chips.map((c: { color: string, label: string }) => ({ color: c.color, label: c.label })))
       : "Standard Casino Colors (Red, Blue, Green, Black, White)";
 
     const prompt = `

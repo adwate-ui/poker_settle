@@ -84,6 +84,7 @@ export interface PokerHand {
   winner_player_ids: string[];
   hero_position: string | null;
   is_hero_win: boolean | null;
+  is_split?: boolean | null;
   positions?: SeatPosition[];
   created_at: string;
   updated_at: string;

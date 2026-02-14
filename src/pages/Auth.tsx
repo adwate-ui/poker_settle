@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShieldCheck, Gamepad2, Coins, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 
 const Auth = () => {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading } = useAuth();
@@ -59,11 +59,12 @@ const Auth = () => {
     try {
       await signInWithEmail(email, password);
       toast.success("Welcome back!");
-    } catch (error: any) {
-      if (error.message?.includes("Invalid login credentials")) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
+      if (errorMessage.includes("Invalid login credentials")) {
         toast.error("Invalid email or password");
       } else {
-        toast.error(error.message || "Failed to sign in");
+        toast.error(errorMessage);
       }
     } finally {
       setIsSigningIn(false);
@@ -87,11 +88,12 @@ const Auth = () => {
       await signUpWithEmail(email, password);
       toast.success("Account created! Please check your email to verify your account.");
       setActiveTab("signin");
-    } catch (error: any) {
-      if (error.message?.includes("already registered")) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create account";
+      if (errorMessage.includes("already registered")) {
         toast.error("This email is already registered. Try signing in instead.");
       } else {
-        toast.error(error.message || "Failed to create account");
+        toast.error(errorMessage);
       }
     } finally {
       setIsSigningIn(false);

@@ -1,7 +1,23 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PokerHand, PlayerAction, StreetCard, Player, SeatPosition } from '@/types/poker';
+import { PokerHand, PlayerAction, StreetCard, SeatPosition, Json } from '@/types/poker';
 import { useToast } from '@/hooks/use-toast';
+
+export interface ActionToSave {
+  player_id: string;
+  street_type: "Preflop" | "Flop" | "Turn" | "River";
+  action_type: PlayerAction['action_type'];
+  bet_size?: number;
+  action_sequence: number;
+  is_hero: boolean;
+  position?: string | null;
+  hole_cards?: string | null;
+}
+
+export interface CardToSave {
+  street_type: "Flop" | "Turn" | "River";
+  cards_notation: string;
+}
 
 export const useHandTracking = () => {
   const [loading, setLoading] = useState(false);
@@ -25,7 +41,7 @@ export const useHandTracking = () => {
           hero_position: heroPosition,
           final_stage: 'Preflop',
           pot_size: 0,
-          positions: (positions as any) || [],
+          positions: (positions as unknown as Json[]) || [],
         })
         .select()
         .single();
@@ -51,11 +67,12 @@ export const useHandTracking = () => {
     }
   };
 
-  const getNextHandNumber = async (gameId: string): Promise<number> => {
+  const getNextHandNumber = async (_gameId: string): Promise<number> => {
     try {
       // Call the RPC function to get the true global max (bypassing RLS)
       // This uses SECURITY DEFINER to see all hands, not just current user's
       // Note: Type assertion needed as this function isn't in auto-generated types yet
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.rpc as any)('get_next_hand_number');
 
       if (error) {
@@ -205,7 +222,7 @@ export const useHandTracking = () => {
 
       const { error } = await supabase
         .from('poker_hands')
-        .update(updateData as any)
+        .update(updateData as unknown as Record<string, Json>) // Use a generic record to bypass schema strictness for JSON fields
         .eq('id', handId);
 
       if (error) throw error;
@@ -228,8 +245,8 @@ export const useHandTracking = () => {
 
   const saveCompleteHandData = async (
     handId: string,
-    actions: any[],
-    streetCards: any[],
+    actions: ActionToSave[],
+    streetCards: CardToSave[],
     winnerPlayerIds: string[],
     potSize: number,
     isHeroWin: boolean,
@@ -327,7 +344,7 @@ export const useHandTracking = () => {
 
       if (error) throw error;
       return (data || []) as PlayerAction[];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   };

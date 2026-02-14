@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { GameDetailView } from "@/components/GameDetailView";
-import { BuyInHistory } from "@/types/poker";
-import GameErrorBoundary from "@/components/GameErrorBoundary";
+import { GameDetailView } from "@/components/game/GameDetailView";
+import { BuyInHistory, Settlement, GamePlayer } from "@/types/poker";
+import GameErrorBoundary from "@/components/game/GameErrorBoundary";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { sendSessionSummaryNotification } from "@/services/whatsappNotifications";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 
 const GameDetail = () => {
   const { gameId } = useParams();
@@ -34,8 +34,8 @@ const GameDetail = () => {
   React.useEffect(() => {
     const state = location.state as {
       justCompleted?: boolean;
-      settlements?: any[];
-      gamePlayers?: any[];
+      settlements?: Settlement[];
+      gamePlayers?: GamePlayer[];
     } | null;
 
     if (state?.justCompleted && gameId && !notificationSentRef.current) {

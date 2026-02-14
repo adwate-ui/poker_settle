@@ -5,19 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, RefreshCw, HelpCircle, Sparkles, Info, Database, Trash2, Loader2, AlertTriangle } from 'lucide-react';
-import { useOnboarding, OnboardingWizard } from '@/components/OnboardingWizard';
+import { useOnboarding, OnboardingWizard } from '@/components/feedback/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CacheManager } from '@/components/CacheManager';
+import { CacheManager } from '@/components/feedback/CacheManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
+import { toast } from '@/lib/notifications';
 import { useChips } from '@/contexts/ChipContext';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { CurrencyConfig } from "@/config/localization";
 
-import { ProceduralChip } from '@/components/ProceduralChip';
+import { ProceduralChip } from '@/components/poker/ProceduralChip';
 import { loadDemoData, clearDemoData, hasDemoData } from '@/lib/demoData';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -155,8 +154,8 @@ const AISettingsTab = () => {
     const fetchKey = async () => {
       setLoading(true);
       const { data } = await supabase.from('user_api_keys').select('gemini_api_key').eq('user_id', user.id).maybeSingle();
-      // @ts-ignore
-      if (data?.gemini_api_key) { setApiKey(data.gemini_api_key); setIsSaved(true); }
+      const apiKeyData = data as { gemini_api_key: string } | null;
+      if (apiKeyData?.gemini_api_key) { setApiKey(apiKeyData.gemini_api_key); setIsSaved(true); }
       setLoading(false);
     };
     fetchKey();

@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const SharedContent = () => {
-    const { scope, sharedClient, isLoading, isValid, isPlayerToken, isGameToken } = useSharedContext();
+    const { scope, sharedClient, isLoading, isValid, isGameToken } = useSharedContext();
 
     if (isLoading) {
         return (

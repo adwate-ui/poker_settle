@@ -1,13 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Game, GamePlayer, PokerHand, PlayerAction, SeatPosition } from '@/types/poker';
+import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import {
     getNextPlayerIndex,
     getStartingPlayerIndex,
     isBettingRoundComplete,
     shouldEndHandEarly,
-    getNextStage,
-    getCallAmount,
     processAction,
     resetForNewStreet,
     HandStage,
@@ -18,14 +16,37 @@ import {
     getSmallBlindPlayer,
     getBigBlindPlayer
 } from '@/utils/pokerPositions';
-import { determineWinner, parseCardNotationString } from '@/utils/pokerHandEvaluator';
-import { useHandPersistence } from './useHandPersistence';
+
+import { useHandPersistence, SavedHandState, HistoryState } from './useHandPersistence';
+import { useHandTracking } from './useHandTracking';
+
+interface EngineStateSnapshot {
+    stage: HandStage;
+    currentPlayerIndex: number;
+    actionSequence: number;
+    currentBet: number;
+    potSize: number;
+    streetPlayerBets: Record<string, number>;
+    playerBets: Record<string, number>;
+    playersInHand: string[];
+    streetActions: PlayerAction[];
+    allHandActions: PlayerAction[];
+    lastAggressorIndex: number | null;
+    flopCards: string;
+    turnCard: string;
+    riverCard: string;
+    playerHoleCards: Record<string, string>;
+    currentHand: PokerHand | null;
+    buttonPlayerId: string;
+    dealtOutPlayers: string[];
+    activePlayers: GamePlayer[];
+}
 
 export const usePokerEngine = (
     game: Game,
     heroPlayer: GamePlayer | undefined,
     seatPositions: Record<string, number>,
-    handTracking: any, // Results from useHandTracking
+    handTracking: ReturnType<typeof useHandTracking>,
     persistence: ReturnType<typeof useHandPersistence>
 ) => {
     const { toast } = useToast();
@@ -55,7 +76,7 @@ export const usePokerEngine = (
     const [playerBets, setPlayerBets] = useState<Record<string, number>>({});
     const [streetPlayerBets, setStreetPlayerBets] = useState<Record<string, number>>({});
     const [lastAggressorIndex, setLastAggressorIndex] = useState<number | null>(null);
-    const [actionHistory, setActionHistory] = useState<any[]>([]);
+    const [actionHistory, setActionHistory] = useState<EngineStateSnapshot[]>([]);
 
     // Computed
     const visualPotSize = useMemo(() => {
@@ -97,7 +118,7 @@ export const usePokerEngine = (
                 playerBets,
                 streetPlayerBets,
                 lastAggressorIndex,
-                actionHistory,
+                actionHistory: actionHistory as unknown as HistoryState[], // Casting to match SavedHandState
             });
         }, 500);
 
@@ -105,19 +126,20 @@ export const usePokerEngine = (
     }, [
         currentHand, stage, currentPlayerIndex, actionSequence, currentBet,
         flopCards, turnCard, riverCard, potSize, streetActions, allHandActions,
-        playersInHand, playerHoleCards, playerBets, streetPlayerBets, lastAggressorIndex, persistence
+        playersInHand, playerHoleCards, playerBets, streetPlayerBets, lastAggressorIndex,
+        persistence, buttonPlayerId, dealtOutPlayers, activePlayers, actionHistory
     ]);
 
     // Methods
     const saveStateToHistory = useCallback(() => {
-        const currentState = {
+        const currentState: EngineStateSnapshot = {
             stage,
             currentPlayerIndex,
             actionSequence,
             currentBet,
             potSize,
             streetPlayerBets: { ...streetPlayerBets },
-            totalPlayerBets: { ...playerBets },
+            playerBets: { ...playerBets },
             playersInHand: [...playersInHand],
             streetActions: [...streetActions],
             allHandActions: [...allHandActions],
@@ -125,9 +147,14 @@ export const usePokerEngine = (
             flopCards,
             turnCard,
             riverCard,
+            playerHoleCards: { ...playerHoleCards },
+            currentHand,
+            buttonPlayerId,
+            dealtOutPlayers: [...dealtOutPlayers],
+            activePlayers: [...activePlayers],
         };
         setActionHistory(prev => [...prev, currentState]);
-    }, [stage, currentPlayerIndex, actionSequence, currentBet, potSize, streetPlayerBets, playerBets, playersInHand, streetActions, allHandActions, lastAggressorIndex, flopCards, turnCard, riverCard]);
+    }, [stage, currentPlayerIndex, actionSequence, currentBet, potSize, streetPlayerBets, playerBets, playersInHand, streetActions, allHandActions, lastAggressorIndex, flopCards, turnCard, riverCard, playerHoleCards, currentHand, buttonPlayerId, dealtOutPlayers, activePlayers]);
 
     const undoLastAction = useCallback(() => {
         if (actionHistory.length === 0) return;
@@ -139,7 +166,7 @@ export const usePokerEngine = (
         setCurrentBet(previousState.currentBet);
         setPotSize(previousState.potSize);
         setStreetPlayerBets(previousState.streetPlayerBets);
-        setPlayerBets(previousState.totalPlayerBets);
+        setPlayerBets(previousState.playerBets);
         setPlayersInHand(previousState.playersInHand);
         setStreetActions(previousState.streetActions);
         setAllHandActions(previousState.allHandActions);
@@ -147,10 +174,15 @@ export const usePokerEngine = (
         setFlopCards(previousState.flopCards);
         setTurnCard(previousState.turnCard);
         setRiverCard(previousState.riverCard);
+        setPlayerHoleCards(previousState.playerHoleCards);
+        setCurrentHand(previousState.currentHand);
+        setButtonPlayerId(previousState.buttonPlayerId);
+        setDealtOutPlayers(previousState.dealtOutPlayers);
+        setActivePlayers(previousState.activePlayers);
         setActionHistory(prev => prev.slice(0, -1));
     }, [actionHistory]);
 
-    const startNewHand = async (buttonId: string, dealtOutIds: string[]) => {
+    const startNewHand = useCallback(async (buttonId: string, dealtOutIds: string[]) => {
         if (!buttonId) return;
         if (Object.keys(seatPositions).length === 0) {
             toast({ title: 'Error', description: 'Table positions not loaded.', variant: 'destructive' });
@@ -240,9 +272,9 @@ export const usePokerEngine = (
         setPotSize(sbAmount + bbAmount);
         setActionSequence(2);
         setLastAggressorIndex(active.findIndex(p => p.player_id === bbPlayer.player_id));
-    };
+    }, [game.big_blind, game.id, game.small_blind, game.game_players, getNextHandNumber, seatPositions, heroPlayer, toast]);
 
-    const finishHand = async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
+    const finishHand = useCallback(async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
         if (!currentHand) return;
         persistence.clearHandState();
 
@@ -256,7 +288,7 @@ export const usePokerEngine = (
         const heroPos = heroPlayer?.player_id ? getPositionForPlayer(activePlayers, currentHand.button_player_id, heroPlayer.player_id, seatPositions) : 'UTG';
         const positionsData = activePlayers.map(gp => ({ seat: seatPositions[gp.player_id] ?? 0, player_id: gp.player_id, player_name: gp.player.name }));
 
-        const savedHand = await createNewHand(game.id, currentHand.button_player_id, currentHand.hand_number, heroPos, positionsData as any);
+        const savedHand = await createNewHand(game.id, currentHand.button_player_id, currentHand.hand_number, heroPos, positionsData as unknown as []);
         if (!savedHand) {
             toast({ title: 'Error', description: 'Failed to save hand', variant: 'destructive' });
             return;
@@ -303,7 +335,7 @@ export const usePokerEngine = (
         setStreetPlayerBets({});
         setLastAggressorIndex(null);
         setActionHistory([]);
-    };
+    }, [currentHand, persistence, activePlayers, heroPlayer, seatPositions, game.id, allHandActions, createNewHand, playerHoleCards, flopCards, turnCard, riverCard, potSize, saveCompleteHandData, stage, toast]);
 
     const moveToNextStreet = useCallback(() => {
         if (!currentHand) return;
@@ -405,7 +437,12 @@ export const usePokerEngine = (
         } else {
             setCurrentPlayerIndex(getNextPlayerIndex(currentPlayerIndex, stage, activePlayers, buttonIndex, updatedPlayersInHand));
         }
-    }, [currentHand, currentPlayer, saveStateToHistory, activePlayers, seatPositions, stage, actionSequence, heroPlayer, playersInHand, dealtOutPlayers, currentBet, potSize, streetPlayerBets, playerBets, streetActions, lastAggressorIndex, moveToNextStreet]);
+    }, [
+        currentHand, currentPlayer, saveStateToHistory, activePlayers, seatPositions,
+        stage, actionSequence, heroPlayer, playersInHand, dealtOutPlayers, currentBet,
+        potSize, streetPlayerBets, playerBets, streetActions, lastAggressorIndex,
+        moveToNextStreet, finishHand, currentPlayerIndex
+    ]);
 
     const canMoveToNextStreet = useCallback(() => {
         if (!currentHand) return false;
@@ -423,7 +460,8 @@ export const usePokerEngine = (
     }, [currentHand, stage, flopCards, turnCard, riverCard, activePlayers, playersInHand, streetPlayerBets, streetActions, lastAggressorIndex]);
 
     // Restore state
-    const restoreState = useCallback((savedState: any) => {
+    const restoreState = useCallback((savedState: SavedHandState) => {
+        if (!savedState) return;
         setCurrentHand(savedState.currentHand);
         setStage(savedState.stage);
         setButtonPlayerId(savedState.buttonPlayerId);
@@ -443,7 +481,7 @@ export const usePokerEngine = (
         setPlayerBets(savedState.playerBets);
         setStreetPlayerBets(savedState.streetPlayerBets);
         setLastAggressorIndex(savedState.lastAggressorIndex);
-        setActionHistory(savedState.actionHistory);
+        setActionHistory(savedState.actionHistory as unknown as EngineStateSnapshot[]);
     }, []);
 
     return {

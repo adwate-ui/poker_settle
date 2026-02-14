@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { CurrencyConfig } from "@/config/localization";
 import { formatCurrency, formatIndianNumber as formatNumberLocalized } from "@/utils/currencyUtils";
 
 export function cn(...inputs: ClassValue[]) {

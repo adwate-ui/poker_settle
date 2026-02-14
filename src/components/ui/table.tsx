@@ -8,7 +8,7 @@ const Table = React.forwardRef<
     tableClassName?: string,
     variant?: "default" | "ghost"
   }
->(({ className, tableClassName, layout = "fixed", variant = "default", ...props }, ref) => (
+>(({ className, tableClassName, layout: _layout = "fixed", variant = "default", ...props }, ref) => (
   <div className={cn(
     "relative w-full overflow-y-auto overflow-x-hidden rounded-xl border border-border/50",
     variant === "default" && "bg-card/30 backdrop-blur-sm shadow-2xl",

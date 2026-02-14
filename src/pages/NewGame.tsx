@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { gameKeys } from "@/features/game/api/queryKeys";
+import { transformGameData } from "@/features/game/api/gameApi";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,14 +13,12 @@ import { ErrorMessages } from "@/lib/errorUtils";
 import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Play, Info } from "lucide-react";
-import GameDashboard from "@/components/GameDashboard";
-import PlayerSelector from "@/components/PlayerSelector";
+import GameDashboard from "@/components/game/GameDashboard";
+import PlayerSelector from "@/components/player/PlayerSelector";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { parseIndianNumber } from "@/lib/utils";
 import { CurrencyConfig } from "@/config/localization";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
-import { cn } from "@/lib/utils";
-
 const NewGame = () => {
   const { user } = useAuth();
   const { createPlayer, createOrFindPlayerByName } = usePlayerManagement();
@@ -63,7 +63,7 @@ const NewGame = () => {
       .maybeSingle();
 
     if (!error && data) {
-      setActiveGame(data as unknown as Game);
+      setActiveGame(transformGameData(data));
     } else {
       setActiveGame(null);
     }
@@ -85,7 +85,7 @@ const NewGame = () => {
     return player;
   };
 
-  const addNewPlayerWithDetails = async (playerData: import('@/components/PlayerFormDialog').PlayerFormData): Promise<Player> => {
+  const addNewPlayerWithDetails = async (playerData: import('@/components/player/PlayerFormDialog').PlayerFormData): Promise<Player> => {
     const player = await createPlayer(playerData);
     setPlayers([...players, player]);
     return player;
@@ -144,7 +144,7 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
-      const placeholderGame: Game = {
+      const placeholderGame: Game = transformGameData({
         ...game,
         game_players: gamePlayers.map(player => ({
           game_id: game.id,
@@ -156,7 +156,7 @@ const NewGame = () => {
           created_at: new Date().toISOString(),
           player: player
         }))
-      } as unknown as Game;
+      });
 
       queryClient.setQueryData(gameKeys.detail(game.id), placeholderGame);
 

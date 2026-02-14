@@ -265,7 +265,6 @@ export async function sendSessionSummaryNotification(
 
   const gameLink = generateGameShareLink(gameId, gameToken);
   const playersMap = new Map(players.map(p => [p.id, p]));
-  const gamePlayersMap = new Map(gamePlayers.map(gp => [gp.player_id, gp]));
 
   for (const gamePlayer of gamePlayers) {
     const player = playersMap.get(gamePlayer.player_id);

@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Build & debug artifacts
+build_*.txt
+lint_*.txt
+lint_*.json
+errors_*.txt
+*_diff.txt
+_*.txt

@@ -3,7 +3,7 @@
  * Standardized message templates for various notifications
  */
 
-import { Player, Settlement } from "@/types/poker";
+import { Settlement } from "@/types/poker";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { generateUpiPaymentLink } from "@/utils/upiPaymentLinks";
 import { CurrencyConfig, PaymentMethodConfig } from "@/config/localization";

@@ -1,22 +1,21 @@
 import * as React from "react";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/components/AuthProvider";
+import { AuthProvider } from "@/components/layout/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ChipProvider } from "@/contexts/ChipContext";
 import { useAuth } from "@/hooks/useAuth";
-import { OfflineIndicator } from "@/components/OfflineIndicator";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { OfflineIndicator } from "@/components/feedback/OfflineIndicator";
+import { PWAInstallPrompt } from "@/components/feedback/PWAInstallPrompt";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
 import LuxuryLayout from "@/components/layout/LuxuryLayout";
-import { GlobalCardDefs } from "@/components/PokerAssets/GlobalCardDefs";
-import RootErrorBoundary from "@/components/RootErrorBoundary";
+import { GlobalCardDefs } from "@/components/poker/PokerAssets/GlobalCardDefs";
+import RootErrorBoundary from "@/components/feedback/RootErrorBoundary";
 
-// Lazy load all pages for optimal bundle size
 const Index = lazy(() => import("./pages/Index"));
-const NewGame = lazy(() => import("./pages/NewGame"));
+// NewGame moved to Index.tsx
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SharedLayout = lazy(() => import("./pages/SharedLayout"));
@@ -29,9 +28,16 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
+const GamesList = lazy(() => import("./pages/GamesHistory"));
+const PlayersList = lazy(() => import("./pages/PlayersHistory"));
+const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
+const HandsList = lazy(() => import("./pages/HandsHistory"));
+const HandDetail = lazy(() => import("./pages/HandDetail"));
+
 const queryClient = new QueryClient();
 
 import { Outlet, Navigate } from "react-router-dom";
+import TabLayout from "@/components/layout/TabLayout";
 
 const AppLayout = () => (
   <LuxuryLayout>
@@ -71,12 +77,36 @@ const AppContent = () => {
           {/* Protected Routes wrapped in Layout */}
           <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
             <Route path="/" element={<Index />} />
-            <Route path="/games" element={<Index />} />
+
+            <Route path="/games" element={
+              <TabLayout defaultTab="games-history">
+                <GamesList />
+              </TabLayout>
+            } />
             <Route path="/games/:gameId" element={<GameDetail />} />
-            <Route path="/players" element={<Index />} />
-            <Route path="/players/:playerId" element={<Index />} />
-            <Route path="/hands" element={<Index />} />
-            <Route path="/hands/:handId" element={<Index />} />
+
+            <Route path="/players" element={
+              <TabLayout defaultTab="players-history">
+                <PlayersList />
+              </TabLayout>
+            } />
+            <Route path="/players/:playerId" element={
+              <TabLayout defaultTab="players-history">
+                <PlayerDetail />
+              </TabLayout>
+            } />
+
+            <Route path="/hands" element={
+              <TabLayout defaultTab="hands-history">
+                <HandsList />
+              </TabLayout>
+            } />
+            <Route path="/hands/:handId" element={
+              <TabLayout defaultTab="hands-history">
+                <HandDetail />
+              </TabLayout>
+            } />
+
             <Route path="/profile" element={<Profile />} />
           </Route>
 

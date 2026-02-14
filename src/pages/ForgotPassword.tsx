@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Coins } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 
 const ForgotPassword = () => {
   const { resetPassword } = useAuth();
@@ -27,8 +27,9 @@ const ForgotPassword = () => {
       await resetPassword(email);
       setEmailSent(true);
       toast.success("Password reset email sent!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email. Please try again.");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send reset email. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

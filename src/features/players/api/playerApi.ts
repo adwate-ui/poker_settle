@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Player } from "@/types/poker";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { z } from "zod";
 
 import { SupabaseClient } from "@supabase/supabase-js";

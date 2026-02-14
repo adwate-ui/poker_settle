@@ -280,10 +280,11 @@ export async function sendSettlementNotifications(
         results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
         results.success = false;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(`❌ Error processing settlement notification for ${playerName}:`, error);
       results.failed++;
-      results.errors.push(`${playerName}: ${error.message || "Internal error"}`);
+      const errorMessage = error instanceof Error ? error.message : "Internal error";
+      results.errors.push(`${playerName}: ${errorMessage}`);
       results.success = false;
     } finally {
       // Small delay between messages
@@ -458,10 +459,11 @@ export async function sendCombinedGameSettlementNotifications(
         results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
         results.success = false;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(`❌ Error processing combined notification for ${player.name}:`, error);
       results.failed++;
-      results.errors.push(`${player.name}: ${error.message || "Internal error"}`);
+      const errorMessage = error instanceof Error ? error.message : "Internal error";
+      results.errors.push(`${player.name}: ${errorMessage}`);
       results.success = false;
     } finally {
       // Small delay between messages

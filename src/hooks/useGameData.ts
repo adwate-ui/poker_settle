@@ -1,18 +1,18 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement, Json, TablePositionInsert } from "@/types/poker";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { createOrFindPlayer as apiCreateOrFindPlayer } from "@/features/players/api/playerApi";
-import { createGame as apiCreateGame, completeGameApi } from "@/features/game/api/gameApi";
+import { createGame as apiCreateGame, completeGameApi, transformGameData } from "@/features/game/api/gameApi";
 import { useGames } from "@/features/game/hooks/useGames";
 import { usePlayers } from "@/features/players/hooks/usePlayers";
 import { useUpdateGamePlayer } from "@/features/game/hooks/useGameMutations";
 
-import { CurrencyConfig } from "@/config/localization";
+
 
 import { formatCurrency } from "@/utils/currencyUtils";
 
@@ -197,7 +197,7 @@ export const useGameData = () => {
 
       // Refresh games list
       await fetchGames();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error completing game:', error);
       toast.error(ErrorMessages.game.complete(error));
       throw error;
@@ -224,7 +224,7 @@ export const useGameData = () => {
     await fetchGames();
   };
 
-  const hasIncompleteGame = async (): Promise<boolean> => {
+  const hasIncompleteGame = useCallback(async (): Promise<boolean> => {
     if (!user) return false;
 
     try {
@@ -241,7 +241,7 @@ export const useGameData = () => {
       console.error("Error checking for incomplete games:", error);
       return false;
     }
-  };
+  }, [user]);
 
   const getIncompleteGame = async (): Promise<Game | null> => {
     if (!user) return null;
@@ -261,7 +261,7 @@ export const useGameData = () => {
         .limit(1);
 
       if (error) throw error;
-      return (data && data.length > 0) ? (data[0] as any as Game) : null;
+      return (data && data.length > 0) ? transformGameData(data[0]) : null;
     } catch (error) {
       console.error("Error fetching incomplete game:", error);
       return null;

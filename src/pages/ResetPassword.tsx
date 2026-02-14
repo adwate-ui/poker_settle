@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Lock, CheckCircle2, Coins, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 
 const ResetPassword = () => {
   const { updatePassword, user } = useAuth();
@@ -92,8 +92,9 @@ const ResetPassword = () => {
       setTimeout(() => {
         navigate("/");
       }, 2000);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update password. Please try again.");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update password. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

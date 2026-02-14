@@ -9,7 +9,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   delay: number
 ): ((...args: Parameters<T>) => void) => {
   let timeoutId: ReturnType<typeof setTimeout>;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
@@ -25,7 +25,7 @@ export const throttle = <T extends (...args: any[]) => any>(
   limit: number
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -64,7 +64,7 @@ export const lazyLoadImage = (img: HTMLImageElement): void => {
         threshold: 0.01,
       }
     );
-    
+
     observer.observe(img);
   } else {
     // Fallback for older browsers
@@ -98,14 +98,14 @@ export const memoize = <Args extends any[], Result>(
   fn: (...args: Args) => Result
 ): ((...args: Args) => Result) => {
   const cache = new Map<string, Result>();
-  
+
   return (...args: Args): Result => {
     const key = JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
-    
+
     const result = fn(...args);
     cache.set(key, result);
     return result;

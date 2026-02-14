@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ChipDenomination, CHIP_DENOMINATIONS as DEFAULT_CHIPS } from '@/config/chips';
-import { toast } from 'sonner';
+import { toast } from '@/lib/notifications';
 
 interface ChipContextType {
     chips: ChipDenomination[];
@@ -13,6 +13,7 @@ interface ChipContextType {
 
 const ChipContext = createContext<ChipContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useChips = () => {
     const context = useContext(ChipContext);
     if (!context) {
@@ -35,7 +36,7 @@ export const ChipProvider = ({ children }: { children: ReactNode }) => {
             }
 
             try {
-                // @ts-ignore: Supabase types don't include chip_denominations yet
+
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('chip_denominations')
@@ -44,11 +45,12 @@ export const ChipProvider = ({ children }: { children: ReactNode }) => {
 
                 if (error) throw error;
 
-                // @ts-ignore
+
+                // @ts-expect-error: chip_denominations type casting
                 if (data?.chip_denominations) {
                     // Parse and merge with defaults to ensure structure is valid
                     // This handles cases where we might add new properties in future
-                    // @ts-ignore
+                    // @ts-expect-error: chip_denominations type casting
                     const loadedChips = data.chip_denominations as ChipDenomination[];
                     setChips(loadedChips);
                 } else {
@@ -75,10 +77,10 @@ export const ChipProvider = ({ children }: { children: ReactNode }) => {
 
             setChips(updatedChips); // Optimistic update
 
-            // @ts-ignore
+
             const { error } = await supabase
                 .from('profiles')
-                .update({ chip_denominations: updatedChips })
+                .update({ chip_denominations: updatedChips } as unknown as { avatar_url?: string; created_at?: string; email?: string; full_name?: string; id?: string; theme?: string; updated_at?: string; })
                 .eq('id', user.id);
 
             if (error) throw error;
@@ -94,10 +96,10 @@ export const ChipProvider = ({ children }: { children: ReactNode }) => {
         if (!user) return;
         try {
             setChips(DEFAULT_CHIPS);
-            // @ts-ignore
+
             const { error } = await supabase
                 .from('profiles')
-                .update({ chip_denominations: DEFAULT_CHIPS })
+                .update({ chip_denominations: DEFAULT_CHIPS } as unknown as { avatar_url?: string; created_at?: string; email?: string; full_name?: string; id?: string; theme?: string; updated_at?: string; })
                 .eq('id', user.id);
 
             if (error) throw error;

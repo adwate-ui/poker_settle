@@ -5,10 +5,10 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Player } from "@/types/poker";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
-import { PlayerFormData } from "@/components/PlayerFormDialog";
+import { PlayerFormData } from "@/components/player/PlayerFormDialog";
 import { sendPlayerWelcomeNotification } from "@/services/emailNotifications";
 import { generatePlayerShareLink } from "@/services/messageTemplates";
 import { generateShortCode } from "@/lib/shareUtils";

@@ -5,7 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 
 // Add network status monitoring
 window.addEventListener('online', () => {
-  console.log('Network: Online');
+  // Network recovered
 });
 
 window.addEventListener('offline', () => {
@@ -17,15 +17,12 @@ const updateSW = registerSW({
   immediate: true,
   onNeedRefresh() {
     // Auto-update immediately to prevent stale content
-    console.log('PWA: New version available, updating...');
     updateSW(true);
   },
   onOfflineReady() {
     // Offline mode is intentionally limited - log but don't advertise
-    console.log('PWA: Service worker registered (offline support disabled)');
   },
   onRegisteredSW(swUrl, r) {
-    console.log('Service Worker registered:', swUrl);
     // Check for updates every 3 minutes
     if (r) {
       setInterval(() => {
@@ -50,7 +47,6 @@ if ('caches' in window) {
       // Keep only essential workbox precache, clear all runtime caches
       if (!name.startsWith('workbox-precache')) {
         caches.delete(name);
-        console.log('Cleared cache:', name);
       }
     });
   });

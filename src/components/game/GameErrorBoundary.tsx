@@ -1,0 +1,89 @@
+import * as React from "react";
+import { Component, ReactNode } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AlertCircle, RefreshCw, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface GameErrorBoundaryProps {
+  children: ReactNode;
+}
+
+interface GameErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class GameErrorBoundary extends Component<
+  GameErrorBoundaryProps,
+  GameErrorBoundaryState
+> {
+  constructor(props: GameErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): GameErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[GameDetail] Error boundary caught", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-4xl mx-auto mt-16 px-6">
+          <Card className="border-red-500/30 bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent opacity-50" />
+            <CardHeader className="pt-10 pb-6 border-b border-border/50 bg-red-500/5">
+              <div className="flex items-center gap-5">
+                <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20">
+                  <AlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold uppercase tracking-widest leading-tight text-destructive-foreground">Something Went Wrong</CardTitle>
+                  <CardDescription className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">We encountered an unexpected error</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="py-10 space-y-8">
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We're sorry, but we couldn't load this game view. Your data is safe and hasn't been affected. You can try refreshing the page or go back to view other games.
+                </p>
+                {this.state.error && (
+                  <div className="p-4 bg-muted/20 border border-border/50 rounded-xl font-mono text-[11px] text-red-400/60 break-words opacity-50">
+                    {this.state.error.toString()}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => window.location.reload()}
+                  className="flex-1 h-12 bg-muted/10 border border-border hover:bg-muted/20 text-foreground/80 text-label transition-all"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-2" />
+                  Refresh Page
+                </Button>
+                <Button
+                  onClick={() => window.history.back()}
+                  className="flex-1 h-12 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-label transition-all"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5 mr-2" />
+                  Go Back
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default GameErrorBoundary;
