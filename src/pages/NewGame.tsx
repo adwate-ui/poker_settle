@@ -180,7 +180,7 @@ const NewGame = () => {
   };
 
   if (activeGame && showActiveGame) {
-    return <GameDashboard game={activeGame} onBackToSetup={handleBackFromGame} />;
+    return <GameDashboard gameId={activeGame.id} />;
   }
 
   const hasActiveGame = activeGame !== null;
