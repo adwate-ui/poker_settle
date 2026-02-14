@@ -58,7 +58,12 @@ interface GamePlayer {
   buy_ins: number;
   final_stack: number | null;
   net_amount: number | null;
-  players: {
+  players?: {
+    name: string | null;
+    payment_preference?: string;
+    upi_id?: string;
+  } | null;
+  player?: {
     name: string | null;
     payment_preference?: string;
     upi_id?: string;
@@ -158,17 +163,17 @@ export const GameDetailView = ({
 
   const sortedGamePlayers = useMemo(() => {
     return [...gamePlayers].sort((a, b) => {
-      const aName = (a.players?.name ?? "").toLowerCase();
-      const bName = (b.players?.name ?? "").toLowerCase();
+      const aName = (a.player?.name ?? a.players?.name ?? "").toLowerCase();
+      const bName = (b.player?.name ?? b.players?.name ?? "").toLowerCase();
       return aName < bName ? -1 : 1;
     });
   }, [gamePlayers]);
 
   const playerBalances = useMemo((): PlayerBalance[] => {
     return sortedGamePlayers.map(gp => ({
-      name: gp.players?.name ?? "",
+      name: gp.player?.name ?? gp.players?.name ?? "",
       amount: gp.net_amount ?? 0,
-      paymentPreference: gp.players?.payment_preference || 'upi',
+      paymentPreference: (gp.player?.payment_preference ?? gp.players?.payment_preference) || 'upi',
     }));
   }, [sortedGamePlayers]);
 
@@ -290,8 +295,9 @@ export const GameDetailView = ({
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};
     gamePlayers.forEach(gp => {
-      if (gp.players?.name) {
-        map[gp.players.name] = gp.player_id;
+      const name = gp.player?.name ?? gp.players?.name;
+      if (name) {
+        map[name] = gp.player_id;
       }
     });
     return map;
@@ -342,7 +348,7 @@ export const GameDetailView = ({
     : gamePlayers.map((gp, index) => ({
       seat: index + 1,
       player_id: gp.player_id,
-      player_name: gp.players?.name ?? `Player ${index + 1}`,
+      player_name: gp.player?.name ?? gp.players?.name ?? `Player ${index + 1}`,
     }));
 
   return (
@@ -359,7 +365,7 @@ export const GameDetailView = ({
       )}
 
       <Card className="overflow-hidden">
-        <CardHeader className="pb-8 border-b border-border bg-accent/5">
+        <CardHeader className="p-3 sm:p-6 pb-4 sm:pb-8 border-b border-border bg-accent/5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
@@ -397,7 +403,7 @@ export const GameDetailView = ({
                         net_amount: gp.net_amount || 0,
                         player: {
                           id: gp.player_id,
-                          name: gp.players?.name || 'Unknown',
+                          name: (gp.player?.name ?? gp.players?.name) || 'Unknown',
                           total_games: 0,
                           total_profit: 0,
                         }
@@ -424,7 +430,7 @@ export const GameDetailView = ({
                         net_amount: gp.net_amount || 0,
                         player: {
                           id: gp.player_id,
-                          name: gp.players?.name || 'Unknown',
+                          name: (gp.player?.name ?? gp.players?.name) || 'Unknown',
                           total_games: 0,
                           total_profit: 0,
                         }
@@ -473,7 +479,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Buy-in Logs</h3>
@@ -482,7 +488,7 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="section-content">
+            <div className={cn("section-content", isMobile && "p-0")}>
               <ConsolidatedBuyInLogs gameId={gameId} token={token} />
             </div>
           </CollapsibleContent>
@@ -493,7 +499,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Seat Draw</h3>
@@ -502,7 +508,7 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="section-content">
+            <div className={cn("section-content", isMobile && "p-0")}>
               <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <span className="text-[10px] uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full border">
@@ -553,7 +559,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Session P&L</h3>
@@ -562,13 +568,13 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="section-content">
+            <div className={cn("section-content", isMobile && "p-0")}>
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Player</TableHead>
-                    <TableHead>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                    <TableHead>P&L</TableHead>
+                    <TableHead className={isMobile ? "px-1" : ""}>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                    <TableHead className={isMobile ? "px-1" : ""}>P&L</TableHead>
                     {!isMobile && <TableHead>Cashout</TableHead>}
                     {showOwnerControls && fetchBuyInHistory && (
                       <TableHead>{isMobile ? "Hist" : "Audit"}</TableHead>
@@ -577,7 +583,7 @@ export const GameDetailView = ({
                 </TableHeader>
                 <TableBody>
                   {sortedGamePlayers.map((gamePlayer) => {
-                    const playerName = gamePlayer.players?.name ?? "--";
+                    const playerName = gamePlayer.player?.name ?? gamePlayer.players?.name ?? "--";
                     const netAmount = gamePlayer.net_amount ?? 0;
                     const finalStack = gamePlayer.final_stack ?? 0;
                     const isWin = netAmount > 0;
@@ -592,12 +598,12 @@ export const GameDetailView = ({
                             {playerName}
                           </Link>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isMobile ? "px-1" : ""}>
                           <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
                             {gamePlayer.buy_ins}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isMobile ? "px-1" : ""}>
                           <div>
                             <Badge
                               variant={isWin ? "profit" : "loss"}
@@ -639,7 +645,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <Coins className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Settlement</h3>
@@ -662,7 +668,7 @@ export const GameDetailView = ({
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="section-content">
+            <div className={cn("section-content", isMobile && "p-0")}>
 
               <Table className="max-h-[600px]">
                 <TableHeader>

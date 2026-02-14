@@ -22,6 +22,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS chip_denominations jsonb DEFAULT '
 -- Create players table to store persistent player data
 CREATE TABLE public.players (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL UNIQUE,
   total_games INTEGER DEFAULT 0,
   total_profit DECIMAL(10,2) DEFAULT 0,
@@ -32,6 +33,7 @@ CREATE TABLE public.players (
 -- Create games table to store game sessions
 CREATE TABLE public.games (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   buy_in_amount DECIMAL(8,2) NOT NULL,
   is_complete BOOLEAN DEFAULT false,
@@ -57,10 +59,68 @@ ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.game_players ENABLE ROW LEVEL SECURITY;
 
--- Create policies for public access (since no auth is implemented yet)
-CREATE POLICY "Allow all operations on players" ON public.players FOR ALL USING (true);
-CREATE POLICY "Allow all operations on games" ON public.games FOR ALL USING (true);
-CREATE POLICY "Allow all operations on game_players" ON public.game_players FOR ALL USING (true);
+-- Players policies - users can only access their own players
+CREATE POLICY "Users can view their own players" ON public.players
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own players" ON public.players
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own players" ON public.players
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own players" ON public.players
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Games policies - users can only access their own games
+CREATE POLICY "Users can view their own games" ON public.games
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own games" ON public.games
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own games" ON public.games
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own games" ON public.games
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Game players policies - users can only access game_players for their own games
+CREATE POLICY "Users can view game_players for their games" ON public.game_players
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.games 
+      WHERE games.id = game_players.game_id 
+      AND games.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can create game_players for their games" ON public.game_players
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.games 
+      WHERE games.id = game_players.game_id 
+      AND games.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can update game_players for their games" ON public.game_players
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.games 
+      WHERE games.id = game_players.game_id 
+      AND games.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can delete game_players for their games" ON public.game_players
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM public.games 
+      WHERE games.id = game_players.game_id 
+      AND games.user_id = auth.uid()
+    )
+  );
 
 -- Create function to update timestamps
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
@@ -148,77 +208,7 @@ ADD COLUMN settlements JSONB DEFAULT '[]'::jsonb;
 -- ORIGINAL MIGRATION: 20250929035938_fa6e59d6-a0c4-4537-b2fe-27bd85bc5a22.sql
 -- ==================================================================
 
--- Add user_id to existing tables to associate data with users
-ALTER TABLE public.players ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
-ALTER TABLE public.games ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- Update RLS policies to filter by user_id
-DROP POLICY IF EXISTS "Allow all operations on players" ON public.players;
-DROP POLICY IF EXISTS "Allow all operations on games" ON public.players;
-DROP POLICY IF EXISTS "Allow all operations on game_players" ON public.game_players;
-
--- Players policies - users can only access their own players
-CREATE POLICY "Users can view their own players" ON public.players
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create their own players" ON public.players
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own players" ON public.players
-  FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own players" ON public.players
-  FOR DELETE USING (auth.uid() = user_id);
-
--- Games policies - users can only access their own games
-CREATE POLICY "Users can view their own games" ON public.games
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create their own games" ON public.games
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own games" ON public.games
-  FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own games" ON public.games
-  FOR DELETE USING (auth.uid() = user_id);
-
--- Game players policies - users can only access game_players for their own games
-CREATE POLICY "Users can view game_players for their games" ON public.game_players
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.games 
-      WHERE games.id = game_players.game_id 
-      AND games.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can create game_players for their games" ON public.game_players
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.games 
-      WHERE games.id = game_players.game_id 
-      AND games.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can update game_players for their games" ON public.game_players
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.games 
-      WHERE games.id = game_players.game_id 
-      AND games.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can delete game_players for their games" ON public.game_players
-  FOR DELETE USING (
-    EXISTS (
-      SELECT 1 FROM public.games 
-      WHERE games.id = game_players.game_id 
-      AND games.user_id = auth.uid()
-    )
-  );
 
 -- Create profiles table for additional user info
 CREATE TABLE public.profiles (
@@ -288,30 +278,7 @@ ALTER TABLE public.players ADD CONSTRAINT players_user_id_name_key UNIQUE (user_
 -- ORIGINAL MIGRATION: 20251027092533_5cef2764-bf74-4c46-bbe6-3c11d039163b.sql
 -- ==================================================================
 
--- Remove the dangerous policy that allows public access to all game data
-DROP POLICY IF EXISTS "Allow all operations on games" ON public.games;
 
--- The existing user-specific policies already provide proper access control:
--- - Users can view their own games
--- - Users can create their own games
--- - Users can update their own games
--- - Users can delete their own games
-
--- ==================================================================
--- ORIGINAL MIGRATION: 20251027092647_8f8b910c-2a3f-480d-80f1-860cf7fce098.sql
--- ==================================================================
-
--- First, ensure all existing records have valid user_id values
--- Update any NULL user_ids to prevent the NOT NULL constraint from failing
--- (This should not be needed if RLS policies are working correctly, but it's a safety measure)
-
--- Make user_id NOT NULL on games table to prevent orphaned records
-ALTER TABLE public.games 
-ALTER COLUMN user_id SET NOT NULL;
-
--- Make user_id NOT NULL on players table to prevent orphaned records
-ALTER TABLE public.players 
-ALTER COLUMN user_id SET NOT NULL;
 
 -- Add check constraints for data integrity
 ALTER TABLE public.games

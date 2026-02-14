@@ -102,16 +102,23 @@ export async function sendGameCompletionNotifications(
       gameLink,
     });
 
-    const result = await evolutionApiService.sendMessage({
-      number: player.phone_number,
-      text: message,
-    });
+    try {
+      const result = await evolutionApiService.sendMessage({
+        number: player.phone_number,
+        text: message,
+      });
 
-    if (result.success) {
-      results.sent++;
-    } else {
+      if (result.success) {
+        results.sent++;
+      } else {
+        results.failed++;
+        results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
+        results.success = false;
+      }
+    } catch (error) {
+      console.error(`Failed to send completion message to ${player.name}:`, error);
       results.failed++;
-      results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
+      results.errors.push(`${player.name}: Exception - ${error instanceof Error ? error.message : String(error)}`);
       results.success = false;
     }
 

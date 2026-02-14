@@ -1,36 +1,26 @@
 import { Button } from "@/components/ui/button";
-import { Game, GamePlayer, TablePosition, SeatPosition } from "@/types/poker";
 import TablePositionEditor from "@/components/poker/TablePositionEditor";
 import HandTracking from "@/components/poker/HandTracking";
 import PokerTableView from "@/components/poker/PokerTableView";
+import { useDashboardStore } from "@/features/game/stores/dashboardStore";
+import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardActions";
 
-interface SeatingSlideProps {
-    game: Game;
-    gamePlayers: GamePlayer[];
-    showPositionEditor: boolean;
-    setShowPositionEditor: (show: boolean) => void;
-    currentTablePosition: TablePosition | null;
-    handleSaveTablePosition: (positions: SeatPosition[]) => Promise<void>;
-    handTrackingStage: 'setup' | 'ready' | 'recording';
-    positionsJustChanged: boolean;
-    handleHandComplete: () => void;
-    handleStartHandTracking: () => void;
-    hasSavedHandState: boolean;
-}
+const SeatingSlide = () => {
+    const {
+        game,
+        gamePlayers,
+        showPositionEditor,
+        setShowPositionEditor,
+        currentTablePosition,
+        handTrackingStage,
+        positionsJustChanged,
+        hasSavedHandState,
+    } = useDashboardStore();
 
-const SeatingSlide = ({
-    game,
-    gamePlayers,
-    showPositionEditor,
-    setShowPositionEditor,
-    currentTablePosition,
-    handleSaveTablePosition,
-    handTrackingStage,
-    positionsJustChanged,
-    handleHandComplete,
-    handleStartHandTracking,
-    hasSavedHandState,
-}: SeatingSlideProps) => {
+    const { handleSaveTablePosition, handleHandComplete, handleStartHandTracking } = useGameDashboardActions();
+
+    if (!game) return null;
+
     return (
         <div className="p-0 space-y-4 pb-12">
             {showPositionEditor ? (

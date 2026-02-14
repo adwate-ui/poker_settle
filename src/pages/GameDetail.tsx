@@ -116,7 +116,7 @@ const GameDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 py-2 sm:py-8">
       <GameErrorBoundary>
         <GameDetailView
           gameId={gameId}

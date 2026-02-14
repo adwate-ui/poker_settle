@@ -49,19 +49,42 @@ interface PokerSeatProps {
   isActive: boolean;
   hasKnownCards: string | boolean;
   shouldShowCards: boolean;
-  playerStacks: Record<string, number>;
-  onDrop: (e: React.DragEvent) => void;
-  onTouchStart: (e: React.TouchEvent) => void;
+  stackAmount?: number;
+  onDrop: (e: React.DragEvent, index: number) => void;
+  onTouchStart: (e: React.TouchEvent, index: number) => void;
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   allPlayerNames: string[];
   enableDragDrop: boolean;
   scale?: number;
   onPlayerClick?: (playerId: string) => void;
-  onDragStart: () => void;
+  onDragStart: (index: number) => void;
   onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent, index: number) => void;
 }
+
+const arePokerSeatPropsEqual = (prev: PokerSeatProps, next: PokerSeatProps) => {
+  if (prev.index !== next.index) return false;
+  if (prev.position.player_id !== next.position.player_id) return false;
+  if (prev.position.player_name !== next.position.player_name) return false;
+  if (Math.abs(prev.pos.x - next.pos.x) > 0.01 || Math.abs(prev.pos.y - next.pos.y) > 0.01) return false;
+  if (prev.isDragging !== next.isDragging) return false;
+  if (prev.isDragOver !== next.isDragOver) return false;
+  if (prev.draggedIndex !== next.draggedIndex) return false;
+  if (prev.positionLabel !== next.positionLabel) return false;
+  if (prev.isButton !== next.isButton) return false;
+  if (prev.isFolded !== next.isFolded) return false;
+  if (prev.isWinner !== next.isWinner) return false;
+  if (prev.isActive !== next.isActive) return false;
+  if (prev.shouldShowCards !== next.shouldShowCards) return false;
+  if (prev.hasKnownCards !== next.hasKnownCards) return false;
+  if (prev.stackAmount !== next.stackAmount) return false;
+  if (prev.scale !== next.scale) return false;
+  if (prev.enableDragDrop !== next.enableDragDrop) return false;
+  if (prev.allPlayerNames !== next.allPlayerNames) return false; // This is a reference check, but explicit is better
+
+  return true;
+};
 
 const PokerSeat = memo(({
   index,
@@ -77,7 +100,7 @@ const PokerSeat = memo(({
   isActive,
   hasKnownCards,
   shouldShowCards,
-  playerStacks,
+  stackAmount,
   allPlayerNames,
   enableDragDrop,
   scale = 1,
@@ -96,11 +119,14 @@ const PokerSeat = memo(({
     <div
       data-player-index={index}
       draggable={enableDragDrop}
-      onDragStart={onDragStart}
+      onDragStart={(e) => {
+        // We handle drag image here if needed, but logic is in handler
+        onDragStart(index);
+      }}
       onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onTouchStart={onTouchStart}
+      onDragOver={(e) => onDragOver(e, index)}
+      onDrop={(e) => onDrop(e, index)}
+      onTouchStart={(e) => onTouchStart(e, index)}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onContextMenu={(e) => enableDragDrop && e.preventDefault()}
@@ -167,9 +193,9 @@ const PokerSeat = memo(({
             )} title={position.player_name}>
               {position.player_name}
             </span>
-            {playerStacks[position.player_id] !== undefined && (
+            {stackAmount !== undefined && (
               <span className="text-[10px] text-muted-foreground/80 font-numbers tracking-tight">
-                {formatCurrency(playerStacks[position.player_id])}
+                {formatCurrency(stackAmount)}
               </span>
             )}
           </div>
@@ -228,7 +254,7 @@ const PokerSeat = memo(({
       </div >
     </div >
   );
-});
+}, arePokerSeatPropsEqual);
 
 PokerSeat.displayName = 'PokerSeat';
 
@@ -631,16 +657,16 @@ const PokerTableView = memo(({
                   isActive={isActive}
                   hasKnownCards={hasKnownCards ?? false}
                   shouldShowCards={shouldShowCards}
-                  playerStacks={playerStacks}
+                  stackAmount={playerStacks[position.player_id]}
                   allPlayerNames={allPlayerNames}
                   enableDragDrop={enableDragDrop}
                   scale={densityScale}
                   onPlayerClick={onPlayerClick}
-                  onDragStart={() => handleDragStart(index)}
+                  onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onTouchStart={(e) => handleTouchStart(e, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                 />

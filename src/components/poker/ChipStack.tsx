@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { useChips } from '@/contexts/ChipContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,7 @@ interface ChipStackProps {
 }
 
 // Multi-column chip stack implementation
-export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackProps) => {
+export const ChipStack = memo(({ amount, size = 'md', showAmount = true }: ChipStackProps) => {
   const { chips: CHIP_DENOMINATIONS } = useChips();
 
   const stackConfig = {
@@ -130,4 +130,6 @@ export const ChipStack = ({ amount, size = 'md', showAmount = true }: ChipStackP
       )}
     </div>
   );
-};
+});
+
+ChipStack.displayName = 'ChipStack';

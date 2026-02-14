@@ -12,8 +12,43 @@ const buyInAmountSchema = z.number().min(1, `Buy-in must be at least ${CurrencyC
 /**
  * Transforms raw database game data into the strict Game interface
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const transformGameData = (rawGame: any): Game => {
+interface RawGamePlayer {
+    id: string;
+    game_id: string;
+    player_id: string;
+    buy_ins: number;
+    final_stack: number;
+    net_amount: number;
+    player?: {
+        id: string;
+        name: string;
+        total_games?: number;
+        total_profit?: number;
+        phone_number?: string | null;
+        upi_id?: string | null;
+        payment_preference?: string | null;
+    } | null;
+}
+
+interface RawGameResponse {
+    id: string;
+    date: string;
+    buy_in_amount: number;
+    is_complete: boolean;
+    small_blind?: number | null;
+    big_blind?: number | null;
+    settlements?: Json | null;
+    user_id?: string;
+    game_players?: RawGamePlayer[] | null;
+}
+
+/**
+ * Transforms raw database game data into the strict Game interface
+ */
+export const transformGameData = (rawGame: RawGameResponse): Game => {
+    // Runtime check for game_players array
+    const gamePlayers = Array.isArray(rawGame.game_players) ? rawGame.game_players : [];
+
     return {
         id: rawGame.id,
         date: rawGame.date,
@@ -22,8 +57,7 @@ export const transformGameData = (rawGame: any): Game => {
         small_blind: rawGame.small_blind ? Number(rawGame.small_blind) : undefined,
         big_blind: rawGame.big_blind ? Number(rawGame.big_blind) : undefined,
         settlements: (rawGame.settlements as unknown as Settlement[]) || [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        game_players: (rawGame.game_players || []).map((gp: any) => ({
+        game_players: gamePlayers.map((gp) => ({
             id: gp.id,
             game_id: gp.game_id,
             player_id: gp.player_id,
@@ -35,9 +69,9 @@ export const transformGameData = (rawGame: any): Game => {
                 name: gp.player?.name || 'Unknown',
                 total_games: Number(gp.player?.total_games || 0),
                 total_profit: Number(gp.player?.total_profit || 0),
-                phone_number: gp.player?.phone_number,
-                upi_id: gp.player?.upi_id,
-                payment_preference: gp.player?.payment_preference
+                phone_number: gp.player?.phone_number || undefined,
+                upi_id: gp.player?.upi_id || undefined,
+                payment_preference: gp.player?.payment_preference || undefined
             }
         }))
     };

@@ -34,7 +34,7 @@ const parseCard = (notation: string): Card => {
     '9': '9', '8': '8', '7': '7', '6': '6', '5': '5',
     '4': '4', '3': '3', '2': '2'
   };
-  
+
   return {
     rank: rankMap[notation[0].toUpperCase()] || notation[0],
     suit: notation[1].toLowerCase()
@@ -62,7 +62,7 @@ const evaluateHand = (cards: Card[]): { rank: number; name: string; bestCards: C
 
   // Sort cards by rank (descending)
   const sorted = [...cards].sort((a, b) => parseInt(b.rank) - parseInt(a.rank));
-  
+
   // Check for flush
   const suitCounts: Record<string, Card[]> = {};
   sorted.forEach(card => {
@@ -76,17 +76,21 @@ const evaluateHand = (cards: Card[]): { rank: number; name: string; bestCards: C
   // Check for straight
   const checkStraight = (cardSet: Card[]): Card[] | null => {
     const uniqueRanks = Array.from(new Set(cardSet.map(c => parseInt(c.rank)))).sort((a, b) => b - a);
-    
+
     // Check for ace-low straight (A-2-3-4-5)
-    if (uniqueRanks.includes(14) && uniqueRanks.includes(2) && uniqueRanks.includes(3) && 
-        uniqueRanks.includes(4) && uniqueRanks.includes(5)) {
-      return cardSet.filter(c => ['14', '2', '3', '4', '5'].includes(c.rank)).slice(0, 5);
+    // 14, 5, 4, 3, 2
+    if (uniqueRanks.includes(14) && uniqueRanks.includes(2) && uniqueRanks.includes(3) &&
+      uniqueRanks.includes(4) && uniqueRanks.includes(5)) {
+      const straightRanks = ['14', '5', '4', '3', '2'];
+      // Select exactly one card for each rank
+      return straightRanks.map(rank => cardSet.find(c => c.rank === rank)!);
     }
-    
+
     for (let i = 0; i <= uniqueRanks.length - 5; i++) {
       if (uniqueRanks[i] - uniqueRanks[i + 4] === 4) {
         const straightRanks = uniqueRanks.slice(i, i + 5);
-        return cardSet.filter(c => straightRanks.includes(parseInt(c.rank))).slice(0, 5);
+        // Select exactly one card for each rank
+        return straightRanks.map(rank => cardSet.find(c => parseInt(c.rank) === rank)!);
       }
     }
     return null;
@@ -197,14 +201,14 @@ export const determineWinner = (
   if (players.length === 0) return null;
 
   const community = communityCards.match(/.{1,2}/g)?.map(parseCard) || [];
-  
+
   const results: HandResult[] = players.map(player => {
     const hole = player.holeCards.match(/.{1,2}/g)?.map(parseCard) || [];
     const allCards = [...hole, ...community];
-    
+
     // Evaluate all possible 5-card combinations
     let bestResult = { rank: 0, name: 'Invalid', bestCards: [] as Card[] };
-    
+
     if (allCards.length >= 5) {
       // For simplicity, we'll evaluate the best 5 from 7 cards
       // In a production app, you'd check all 21 combinations
@@ -230,40 +234,40 @@ export const determineWinner = (
   // Sort by hand rank (descending), then by high card values
   results.sort((a, b) => {
     if (a.handRank !== b.handRank) return b.handRank - a.handRank;
-    
+
     // If same hand rank, compare high cards in best hand
     for (let i = 0; i < 5; i++) {
       const aCard = a.bestHand[i] ? parseCard(a.bestHand[i]) : null;
       const bCard = b.bestHand[i] ? parseCard(b.bestHand[i]) : null;
-      
+
       if (!aCard || !bCard) break;
-      
+
       const aRank = parseInt(aCard.rank);
       const bRank = parseInt(bCard.rank);
-      
+
       if (aRank !== bRank) return bRank - aRank;
     }
-    
+
     return 0;
   });
 
   // Find all winners (players with same hand as top player)
   const topHandRank = results[0].handRank;
   const topBestHand = results[0].bestHand;
-  
+
   const winners = results.filter(result => {
     if (result.handRank !== topHandRank) return false;
-    
+
     // Compare all cards to detect exact tie
     for (let i = 0; i < 5; i++) {
       const resultCard = result.bestHand[i] ? parseCard(result.bestHand[i]) : null;
       const topCard = topBestHand[i] ? parseCard(topBestHand[i]) : null;
-      
+
       if (!resultCard || !topCard) return false;
-      
+
       if (parseInt(resultCard.rank) !== parseInt(topCard.rank)) return false;
     }
-    
+
     return true;
   });
 
@@ -275,14 +279,14 @@ export const determineWinner = (
 
 export const formatCardNotation = (notation: string): string => {
   if (!notation || notation.length < 2) return notation;
-  
+
   const suitSymbols: Record<string, string> = {
     'h': '♥', 'H': '♥',
     'd': '♦', 'D': '♦',
     'c': '♣', 'C': '♣',
     's': '♠', 'S': '♠'
   };
-  
+
   const cards = notation.match(/.{1,2}/g) || [];
   return cards.map(card => {
     const rank = card[0].toUpperCase();

@@ -1,20 +1,16 @@
 import { Plus } from "lucide-react";
-import { GamePlayer, BuyInHistory } from "@/types/poker";
 import { BuyInManagementTable } from "@/components/game/BuyInManagementTable";
+import { useDashboardStore } from "@/features/game/stores/dashboardStore";
+import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardActions";
+import { useGameData } from "@/hooks/useGameData";
 
-interface BuyInSlideProps {
-    gamePlayers: GamePlayer[];
-    buyInAmount: number;
-    handleAddBuyIn: (gamePlayerId: string, buyInsToAdd: number) => Promise<void>;
-    fetchBuyInHistory: (gameId: string) => Promise<BuyInHistory[]>;
-}
+const BuyInSlide = () => {
+    const { gamePlayers, game } = useDashboardStore();
+    const { handleAddBuyIn } = useGameDashboardActions();
+    const { fetchBuyInHistory } = useGameData();
 
-const BuyInSlide = ({
-    gamePlayers,
-    buyInAmount,
-    handleAddBuyIn,
-    fetchBuyInHistory,
-}: BuyInSlideProps) => {
+    const buyInAmount = game?.buy_in_amount || 0;
+
     return (
         <div className="px-4 pt-1 space-y-4 pb-20">
             <div className="flex items-center gap-3 border-b border-border/50 pb-4">

@@ -1,7 +1,7 @@
+import { useMemo } from 'react';
 import { UserPlus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardPlayerCard from "@/components/game/DashboardPlayerCard";
-import { GamePlayer, Settlement } from "@/types/poker";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,44 +22,48 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
+import { useDashboardStore } from "@/features/game/stores/dashboardStore";
+import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardActions";
+import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
+import { PaymentMethodConfig } from "@/config/localization";
 
 interface OverviewSlideProps {
-    gamePlayers: GamePlayer[];
-    buyInAmount: number;
-    setShowAddPlayer: (show: boolean) => void;
-    showManualTransfer: boolean;
-    setShowManualTransfer: (show: boolean) => void;
-    newTransferFrom: string;
-    setNewTransferFrom: (value: string) => void;
-    newTransferTo: string;
-    setNewTransferTo: (value: string) => void;
-    newTransferAmount: string;
-    setNewTransferAmount: (value: string) => void;
-    addManualTransfer: () => Promise<void>;
-    handleDeleteManualTransfer: (index: number) => Promise<void>;
-    manualSettlements: Settlement[];
-    optimizedSettlements: Settlement[];
     isMobile?: boolean;
 }
 
-const OverviewSlide = ({
-    gamePlayers,
-    buyInAmount,
-    setShowAddPlayer,
-    showManualTransfer,
-    setShowManualTransfer,
-    newTransferFrom,
-    setNewTransferFrom,
-    newTransferTo,
-    setNewTransferTo,
-    newTransferAmount,
-    setNewTransferAmount,
-    addManualTransfer,
-    handleDeleteManualTransfer,
-    manualSettlements,
-    optimizedSettlements,
-    isMobile
-}: OverviewSlideProps) => {
+const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
+    const {
+        game,
+        gamePlayers,
+        // showAddPlayer, // Not used directly in JSX except setShow
+        setShowAddPlayer,
+        showManualTransfer,
+        setShowManualTransfer,
+        newTransferFrom,
+        setNewTransferFrom,
+        newTransferTo,
+        setNewTransferTo,
+        newTransferAmount,
+        setNewTransferAmount,
+    } = useDashboardStore();
+
+    const { addManualTransfer, handleDeleteManualTransfer } = useGameDashboardActions();
+
+    const manualSettlements = game?.settlements || [];
+    const buyInAmount = game?.buy_in_amount || 0;
+
+    const optimizedSettlements = useMemo(() => {
+        if (!gamePlayers.length) return [];
+
+        const balances: PlayerBalance[] = gamePlayers.map(gp => ({
+            name: gp.player.name,
+            amount: gp.net_amount || 0,
+            paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
+        }));
+
+        return calculateOptimizedSettlements(balances, manualSettlements);
+    }, [gamePlayers, manualSettlements]);
+
     return (
         <div className="px-4 pt-1 space-y-4 pb-24">
             <div className="flex justify-between items-center mb-4">
