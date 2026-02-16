@@ -343,7 +343,6 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
         <CardHeader className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 py-3">
           <CardTitle className="flex justify-between items-center">
             <span className="flex items-center gap-2"><Trophy className="h-5 w-5 text-amber-500" /> Showdown</span>
-            {winnerResult && <Badge className="bg-state-success">Winner Detected!</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">

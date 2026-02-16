@@ -417,8 +417,20 @@ export const usePokerEngine = (
         if (updates.currentBet !== undefined) setCurrentBet(updates.currentBet);
         if (updates.lastAggressorIndex !== undefined) setLastAggressorIndex(updates.lastAggressorIndex);
 
-        const updatedPlayersInHand = updates.playersInHand || playersInHand;
-        if (actionType === 'Fold' && updates.playersInHand) setPlayersInHand(updates.playersInHand);
+        // Fallback: Explicitly calculate updated playersInHand if action is Fold
+        // This ensures that even if processAction returns undefined for playersInHand, we correctly filter the player out
+        let updatedPlayersInHand = updates.playersInHand || playersInHand;
+        if (actionType === 'Fold') {
+            const calculatedPlayersInHand = playersInHand.filter(pid => pid !== currentPlayer.player_id);
+            if (updatedPlayersInHand.length !== calculatedPlayersInHand.length) {
+                updatedPlayersInHand = calculatedPlayersInHand;
+                setPlayersInHand(updatedPlayersInHand);
+            } else if (updates.playersInHand) {
+                setPlayersInHand(updates.playersInHand);
+            }
+        } else if (updates.playersInHand) {
+            setPlayersInHand(updates.playersInHand);
+        }
 
         const endCheck = shouldEndHandEarly(activePlayers, updatedPlayersInHand);
         if (endCheck.shouldEnd && endCheck.winnerId) {
