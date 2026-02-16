@@ -155,15 +155,15 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
       <div className="min-h-screen bg-background pb-safe">
         {/* Simplified Header */}
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-2">
-            <UsersIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-luxury uppercase tracking-widest text-foreground">
-              {gamePlayers.length} Players
+          <div className="flex flex-col items-start">
+            <span className="text-label text-muted-foreground">Players</span>
+            <span className="text-sm font-bold font-numbers text-foreground flex items-center gap-1">
+              {gamePlayers.length}
             </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Pot</span>
+              <span className="text-label text-muted-foreground">Pot</span>
               <span className="text-sm font-bold font-numbers text-foreground">{formatCurrency(totalBuyIns)}</span>
             </div>
           </div>
@@ -417,11 +417,10 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
           ) : (
             <Button
               onClick={() => setShowManualTransfer(true)}
-              variant="outline"
-              className="w-full gap-2 text-xs h-9 uppercase tracking-wider"
+              className="w-full h-12 font-bold text-lg tracking-[0.2em] uppercase rounded-xl bg-gradient-to-r from-primary via-accent to-primary animate-shimmer text-primary-foreground shadow-lg hover:shadow-primary/30 transition-all"
             >
-              <Plus className="h-3.5 w-3.5" />
-              Add Adjustment
+              <Plus className="h-5 w-5 mr-2" />
+              Add Manual Adjustment
             </Button>
           )}
 
