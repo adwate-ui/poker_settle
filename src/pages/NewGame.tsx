@@ -14,7 +14,8 @@ import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Play, Info } from "lucide-react";
 import GameDashboard from "@/components/game/GameDashboard";
-import PlayerSelector from "@/components/player/PlayerSelector";
+import { UniversalPlayerManager } from "@/components/player/UniversalPlayerManager";
+import LuxurySelectionCard from "@/components/ui-primitives/LuxurySelectionCard";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { parseIndianNumber } from "@/lib/utils";
 import { CurrencyConfig } from "@/config/localization";
@@ -297,14 +298,36 @@ const NewGame = () => {
           {/* Add Players Section */}
           <div className="space-y-4 pt-4 border-t border-border">
             <h3 className="text-label text-primary">Add Players</h3>
-            <PlayerSelector
+            <h3 className="text-label text-primary">Add Players</h3>
+
+            {/* Selected Players List - Kept from NewGame/PlayerSelector logic but now explicit here since UniversalPlayerManager handles selection */}
+            {gamePlayers.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Selected Players ({gamePlayers.length})
+                </h4>
+                <div className="grid gap-2">
+                  {gamePlayers.map((player) => (
+                    <LuxurySelectionCard
+                      key={player.id}
+                      player={player}
+                      onClick={() => removePlayerFromGame(player.id)}
+                      size="md"
+                      className="bg-accent/5 border-primary/20 hover:bg-destructive/10 hover:border-destructive/50"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <UniversalPlayerManager
               allPlayers={players}
               selectedPlayers={gamePlayers}
-              onAddPlayer={addPlayerToGame}
-              onRemovePlayer={removePlayerFromGame}
-              onCreateNewPlayer={addNewPlayer}
-              onCreateNewPlayerWithDetails={addNewPlayerWithDetails}
-              disabled={hasActiveGame}
+              onSelectPlayer={addPlayerToGame}
+              onCreatePlayer={async (name) => { await addNewPlayer(name); }}
+              mode="dialog"
+              triggerButtonText="Add Players"
+              className="w-full"
             />
           </div>
         </div>

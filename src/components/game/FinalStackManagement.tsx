@@ -104,14 +104,14 @@ export const FinalStackManagement = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-1/3">
+            <TableHead className="w-[40%]">
               Player
             </TableHead>
-            <TableHead className="w-1/4">
-              Final Stack
+            <TableHead className="w-[30%]">
+              Stack
             </TableHead>
-            <TableHead className="w-1/6" />
-            <TableHead className="w-1/6" />
+            <TableHead className="w-[15%]" />
+            <TableHead className="w-[15%]" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -133,10 +133,10 @@ export const FinalStackManagement = ({
                   aria-label={`Edit final stack for ${gamePlayer.player.name}`}
                   className={cn(
                     "bg-transparent border-border/50 hover:border-gold-500/50",
-                    "text-muted-foreground hover:text-foreground transition-opacity"
+                    "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
                   )}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3.5 w-3.5" />
                 </Button>
               </TableCell>
               <TableCell>
@@ -146,7 +146,7 @@ export const FinalStackManagement = ({
                     size: "icon",
                     className: cn(
                       "bg-transparent",
-                      "text-muted-foreground hover:text-foreground transition-opacity"
+                      "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
                     )
                   }}
                 />

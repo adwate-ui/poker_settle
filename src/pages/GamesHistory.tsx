@@ -326,7 +326,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[22%]"
             >
               <div className="flex items-center gap-1">
                 Date
@@ -335,7 +335,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[22%]"
             >
               <div className="flex items-center gap-1">
                 Buy-in
@@ -344,24 +344,25 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("players")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[12%]"
             >
               <div className="flex items-center gap-1">
-                Players
+                <span className="sr-only sm:not-sr-only">Players</span>
+                <span className="sm:hidden">Pl...</span>
                 <ArrowUpDown className="h-3 w-3 opacity-50" />
               </div>
             </TableHead>
             <TableHead
               onClick={() => handleSort("chips")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[22%]"
             >
               <div className="flex items-center gap-1">
-                Total Pot
+                <span className="sm:inline hidden">Total Pot</span><span className="sm:hidden inline">Pot</span>
                 <ArrowUpDown className="h-3 w-3 opacity-50" />
               </div>
             </TableHead>
-            <TableHead>
-              {selectedPlayer !== "all" ? "Player P&L" : "P&L"}
+            <TableHead className="w-[22%]">
+              {selectedPlayer !== "all" ? "P&L" : "Act"}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -375,37 +376,37 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 onClick={() => handleNavigate(game.id)}
                 onMouseEnter={() => prefetch(game.id)}
               >
-                <TableCell className="font-medium whitespace-nowrap">
+                <TableCell className="font-medium whitespace-nowrap text-xs">
                   {format(new Date(game.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell isNumeric className="text-muted-foreground">
+                <TableCell isNumeric className="text-muted-foreground text-xs">
                   <ResponsiveCurrency amount={game.buy_in_amount} />
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
+                  <Badge variant="secondary" className="font-numbers px-1 h-5 min-w-[20px] text-[10px] justify-center">
                     {game.player_count}
                   </Badge>
                 </TableCell>
-                <TableCell isNumeric className="font-semibold text-muted-foreground">
+                <TableCell isNumeric className="font-semibold text-muted-foreground text-xs">
                   <ResponsiveCurrency amount={game.total_pot} />
                 </TableCell>
                 <TableCell>
                   {selectedPlayer !== "all" && playerData ? (
-                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1.5">
+                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-[10px]">
                       <ResponsiveCurrency amount={playerData.net_amount} />
                     </Badge>
                   ) : (
                     !readOnly && (
                       <Button
                         variant="ghost"
-                        size={isMobile ? "icon" : "icon-sm"}
-                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-11 w-11 sm:h-8 sm:w-8"
+                        size="icon"
+                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-7 w-7"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteGameId(game.id);
                         }}
                       >
-                        <Trash2 className="h-5 w-5 sm:h-4 sm:w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     )
                   )}

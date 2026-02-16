@@ -115,13 +115,25 @@ const StackSlide = () => {
 
                 <Button
                     onClick={() => {
-                        // We need to import `calculateOptimizedSettlements` etc.
-                        // For now, I'll defer this implementation detail or imports.
-                        // Actually, I should update the action to handle this.
-                        // I will call `handleCompleteGame` with [] for now and rely on me fixing the action in the text step?
-                        // No, I'll fix the action in the next step to not require arguments.
-                        // I'll pass nothing here and update the action signature.
-                        // (Note: TypeScript might complain if I don't update action first, but I can update action right after).
+                        // We need to import setShowManualTransfer from store.
+                        // Ideally we should use the action, but the store setter is available in the store hook.
+                        // I will update the destructuring at the top of the file to include setShowManualTransfer.
+                        // However, I cannot update the top of the file in this same replace_block if it's far away.
+                        // I will assume I can access it or I will add a separate replace_block for the import/destructuring.
+                        // Actually, I can just use the store hook here if I am inside the component.
+                        useDashboardStore.getState().setShowManualTransfer(true);
+                    }}
+                    variant="outline"
+                    className="w-full h-12 text-muted-foreground border-dashed border-border hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all text-xs uppercase tracking-widest mb-3"
+                >
+                    <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Add Manual Adjustment</span>
+                    </div>
+                </Button>
+
+                <Button
+                    onClick={() => {
                         handleCompleteGame([]);
                     }}
                     disabled={!canCompleteGame || isCompletingGame}

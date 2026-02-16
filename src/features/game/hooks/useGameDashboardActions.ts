@@ -8,6 +8,8 @@ import { GamePlayer, Settlement, SeatPosition } from '@/types/poker';
 import { useNavigate } from 'react-router-dom';
 import { calculateOptimizedSettlements, PlayerBalance } from '@/features/finance/utils/settlementUtils';
 import { PaymentMethodConfig } from '@/config/localization';
+import { sendSessionSummaryNotification } from '@/services/whatsappNotifications';
+import { useSharedLink } from '@/hooks/useSharedLink';
 
 export const useGameDashboardActions = () => {
     const {
@@ -37,6 +39,7 @@ export const useGameDashboardActions = () => {
     } = useDashboardStore();
 
     const { updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition } = useGameData();
+    const { createOrGetSharedLink } = useSharedLink();
     const navigate = useNavigate();
 
     const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
@@ -200,15 +203,33 @@ export const useGameDashboardActions = () => {
         toast.info("Adjustment removed");
     }, [game, setGame]);
 
-    const handleCompleteGame = useCallback(async (settlements: Settlement[]) => {
+    const handleCompleteGame = useCallback(async (settlementsInput: Settlement[] = []) => {
         if (!game || isCompletingGame) return;
 
         setIsCompletingGame(true);
         const loadingToastId = toast.loading("Saving game..."); // Track toast ID
 
         try {
+            // 0. Determine Settlements
+            // If settlementsInput is empty (e.g. called from StackSlide or directly), calculate them here.
+            // This ensures uniqueness of logic and prevents empty settlements from being saved if intended otherwise.
+            let finalSettlements = settlementsInput;
+
+            if (!finalSettlements || finalSettlements.length === 0) {
+                const balances: PlayerBalance[] = gamePlayers.map(gp => ({
+                    name: gp.player.name,
+                    amount: gp.net_amount,
+                    paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
+                }));
+
+                // Get existing manual settlements from game state
+                const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
+
+                finalSettlements = calculateOptimizedSettlements(balances, manualSettlements);
+            }
+
             // 1. Complete the game in the database
-            await completeGame(game.id, settlements);
+            await completeGame(game.id, finalSettlements);
 
             // 2. Verify completion before navigating to prevent 404s or missing data
             let attempts = 0;
@@ -251,14 +272,45 @@ export const useGameDashboardActions = () => {
                 }
             } else {
                 toast.dismiss(loadingToastId); // Ensure initial toast is dismissed if success
-                toast.success("Game finalized! Redirecting...");
+
+                // Send Session Summary Notification
+                try {
+                    const loadingNotifyToast = toast.loading("Sending notifications...");
+
+                    // Get Access Token for Share Link
+                    const linkData = await createOrGetSharedLink('game', game.id);
+                    const gameToken = linkData?.accessToken || '';
+
+                    if (gameToken) {
+                        const players = gamePlayers.map(gp => gp.player);
+                        await sendSessionSummaryNotification(
+                            game.id,
+                            game.date,
+                            gameToken,
+                            players,
+                            gamePlayers.map(gp => ({
+                                player_id: gp.player_id,
+                                net_amount: gp.net_amount
+                            })),
+                            finalSettlements
+                        );
+                        toast.success("Game finalized & notifications sent!");
+                    } else {
+                        console.warn("Could not generate share token for notifications");
+                        toast.success("Game finalized! (Notifications skipped)");
+                    }
+                    toast.dismiss(loadingNotifyToast);
+                } catch (notifyError) {
+                    console.error("Failed to send notifications:", notifyError);
+                    toast.error("Game finalized, but failed to send notifications");
+                }
             }
 
             // 3. Navigation
             navigate(`/games/${game.id}`, {
                 state: {
                     justCompleted: true,
-                    settlements: settlements,
+                    settlements: finalSettlements,
                     gamePlayers: gamePlayers
                 }
             });

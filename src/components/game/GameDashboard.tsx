@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { Card } from "@/components/ui/card";
 import { Loader2, Trophy, Clock, Search, UserPlus, Users as UsersIcon, ChevronDown, CheckCircle2, History as HistoryIcon, ShieldCheck, Plus, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/utils/currencyUtils";
-import AddPlayerDialog from '@/components/player/AddPlayerDialog';
+import { UniversalPlayerManager } from '@/components/player/UniversalPlayerManager';
 import SeatingSlide from '@/components/game/dashboard-slides/SeatingSlide';
 import BuyInSlide from '@/components/game/dashboard-slides/BuyInSlide';
 import StackSlide from '@/components/game/dashboard-slides/StackSlide';
@@ -206,17 +206,19 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
           </Carousel>
         </div>
 
-        <AddPlayerDialog
+        <UniversalPlayerManager
+          allPlayers={availablePlayers}
+          selectedPlayers={gamePlayers.map(gp => gp.player)}
+          onSelectPlayer={addExistingPlayer}
+          onCreatePlayer={async (name) => {
+            setNewPlayerName(name);
+            await addNewPlayer();
+          }}
+          mode="dialog"
           open={showAddPlayer}
           onOpenChange={setShowAddPlayer}
-          availablePlayers={availablePlayers}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          newPlayerName={newPlayerName}
-          onNewPlayerNameChange={setNewPlayerName}
-          onAddExisting={addExistingPlayer}
-          onAddNew={addNewPlayer}
-          isCreating={isCreatingPlayer}
+          triggerButtonText="Add Player"
+          className="hidden"
         />
       </div>
     );
@@ -471,17 +473,19 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
         </div>
       </div>
 
-      <AddPlayerDialog
+      <UniversalPlayerManager
+        allPlayers={allPlayers || []}
+        selectedPlayers={gamePlayers.map(gp => gp.player)} // Filter out players already in game
+        onSelectPlayer={addExistingPlayer}
+        onCreatePlayer={async (name) => {
+          setNewPlayerName(name);
+          await addNewPlayer();
+        }}
+        mode="dialog"
         open={showAddPlayer}
         onOpenChange={setShowAddPlayer}
-        availablePlayers={availablePlayers}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        newPlayerName={newPlayerName}
-        onNewPlayerNameChange={setNewPlayerName}
-        onAddExisting={addExistingPlayer}
-        onAddNew={addNewPlayer}
-        isCreating={isCreatingPlayer}
+        triggerButtonText="Add Player"
+        className="hidden"
       />
     </div>
   );

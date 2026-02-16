@@ -219,7 +219,7 @@ const PlayersHistory = () => {
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("name")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[40%]"
             >
               <div className="flex items-center gap-1">
                 Player
@@ -228,7 +228,7 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_games")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[20%]"
             >
               <div className="flex items-center gap-1">
                 Games
@@ -237,14 +237,14 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_profit")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[25%]"
             >
               <div className="flex items-center gap-1">
-                Total Net
+                Net
                 <ArrowUpDown className="h-3 w-3" />
               </div>
             </TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-[15%]">Act</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -260,13 +260,13 @@ const PlayersHistory = () => {
                   <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
                     <OptimizedAvatar
                       name={player.name}
-                      size="sm"
+                      size="xs" // Changed from sm to xs as per requirement
                     />
-                    <ResponsiveName name={player.name} className="font-medium" />
+                    <ResponsiveName name={player.name} className="font-medium truncate" />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
+                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px] justify-center">
                     {player.total_games || 0}
                     <span className="sm:inline hidden"> Sessions</span>
                   </Badge>
@@ -274,7 +274,7 @@ const PlayersHistory = () => {
                 <TableCell>
                   <Badge
                     variant={profit >= 0 ? "profit" : "loss"}
-                    className="font-medium whitespace-nowrap font-numbers px-1.5"
+                    className="font-medium whitespace-nowrap font-numbers px-1.5 text-[10px]"
                   >
                     <ResponsiveCurrency amount={profit} />
                   </Badge>
@@ -282,14 +282,14 @@ const PlayersHistory = () => {
                 <TableCell>
                   <Button
                     variant="ghost"
-                    size={isMobile ? "icon" : "icon-sm"}
-                    className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                    size="icon"
+                    className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-7 w-7"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletePlayerId(player.id);
                     }}
                   >
-                    <Trash2 className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>

@@ -10,7 +10,7 @@ const Table = React.forwardRef<
   }
 >(({ className, tableClassName, layout: _layout = "fixed", variant = "default", ...props }, ref) => (
   <div className={cn(
-    "relative w-full overflow-y-auto overflow-x-hidden rounded-xl border border-border/50",
+    "relative w-full overflow-x-hidden rounded-xl border border-border/50",
     variant === "default" && "bg-card/30 backdrop-blur-sm shadow-2xl",
     variant === "ghost" && "border-none bg-transparent shadow-none",
     className
@@ -88,7 +88,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-2 sm:px-4 truncate whitespace-nowrap text-left align-middle font-semibold font-luxury text-foreground uppercase tracking-widest text-xs [&:has([role=checkbox])]:pr-0",
+      "h-10 px-1 sm:px-4 truncate whitespace-nowrap text-left align-middle font-semibold font-luxury text-foreground uppercase tracking-widest text-xs [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}
@@ -105,7 +105,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "p-2 sm:p-4 truncate whitespace-nowrap align-middle font-medium font-body text-xs [&:has([role=checkbox])]:pr-0 text-left",
+      "p-1 sm:p-4 truncate whitespace-nowrap align-middle font-medium font-body text-xs [&:has([role=checkbox])]:pr-0 text-left",
       isNumeric && "font-numbers",
       className
     )}

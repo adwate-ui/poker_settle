@@ -18,6 +18,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import OptimizedAvatar from "@/components/player/OptimizedAvatar";
+import { UniversalPlayerManager } from "@/components/player/UniversalPlayerManager";
 
 interface GameSetupProps {
   onGameStart: (game: Game) => void;
@@ -28,7 +29,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const [newPlayerName, setNewPlayerName] = useState<string>('');
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [canCreateGame, setCanCreateGame] = useState<boolean>(true);
-  const [playerSearchQuery, setPlayerSearchQuery] = useState('');
+  /* const [playerSearchQuery, setPlayerSearchQuery] = useState(''); - Moved to internal component state */
   const [gameSearchQuery, setGameSearchQuery] = useState('');
   const [isPreviousPlayersOpen, setIsPreviousPlayersOpen] = useState(false);
   const [isGameHistoryOpen, setIsGameHistoryOpen] = useState(false);
@@ -65,7 +66,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const filteredPlayers = players
     .filter(player =>
       !selectedPlayers.find(sp => sp.id === player.id) &&
-      player.name.toLowerCase().includes(playerSearchQuery.toLowerCase())
+      !selectedPlayers.find(sp => sp.id === player.id) // && player.name.toLowerCase().includes(playerSearchQuery.toLowerCase()) - Search handled by UniversalPlayerManager
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -330,47 +331,22 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                          <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            </div>
-                            <Input
-                              placeholder="Filter Registry..."
-                              value={playerSearchQuery}
-                              onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
-                            />
-                          </div>
-
-                          <ScrollArea className="h-[400px] pr-4">
-                            <div className="space-y-2">
-                              {filteredPlayers.map(player => (
-                                <div
-                                  key={player.id}
-                                  className="p-4 bg-accent/2 border border-border rounded-xl hover:bg-accent/5 hover:border-primary/20 transition-all cursor-pointer group flex items-center gap-4"
-                                  onClick={() => selectExistingPlayer(player)}
-                                >
-                                  <OptimizedAvatar name={player.name} size="sm" />
-                                  <div className="min-w-0 flex-1">
-                                    <p className="font-luxury text-xs text-foreground uppercase tracking-widest truncate">{player.name}</p>
-                                    <p className="font-numbers text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
-                                  </div>
-                                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Badge className={cn("px-2 py-0.5 font-numbers text-[9px] border-0", player.total_profit > 0 ? "bg-state-success/10 text-state-success" : "bg-state-error/10 text-state-error")}>
-                                      {formatProfitLoss(player.total_profit)}
-                                    </Badge>
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player.id); }}
-                                      className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500/20 hover:text-red-500 transition-all"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
+                        <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+                          <UniversalPlayerManager
+                            allPlayers={players}
+                            selectedPlayers={selectedPlayers}
+                            onSelectPlayer={selectExistingPlayer}
+                            onCreatePlayer={async (name) => {
+                              // GameSetup's addNewPlayer uses newPlayerName state, but UniversalPlayerManager passes name directly.
+                              // We should adapt or use the store's createOrFindPlayer directly.
+                              const player = await createOrFindPlayer(name);
+                              if (!selectedPlayers.find(p => p.id === player.id)) {
+                                setSelectedPlayers([...selectedPlayers, player]);
+                              }
+                            }}
+                            mode="embedded"
+                            className="w-full"
+                          />
                         </div>
                       </CollapsibleContent>
                     </Collapsible>

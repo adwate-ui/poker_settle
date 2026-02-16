@@ -165,46 +165,44 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         >
           <TableHeader>
             <TableRow>
-              <TableHead>Player</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Time</TableHead>
+              <TableHead className="w-[35%]">Player</TableHead>
+              <TableHead className="w-[20%]">Amt</TableHead>
+              <TableHead className="w-[15%] text-center">Total</TableHead>
+              <TableHead className="w-[30%] text-right pr-4">Time</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredHistory.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2 sm:gap-3 max-w-[150px] sm:max-w-none">
+                <TableCell className="font-medium truncate max-w-[100px]">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <Link
                       to={entry.player_id ? `/players/${entry.player_id}` : '#'}
-                      className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
+                      className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate text-foreground"
                     >
                       {entry.player_name}
                     </Link>
                   </div>
                 </TableCell>
-                <TableCell className="font-numbers">
+                <TableCell>
                   <Badge
                     variant={entry.buy_ins_added > 0 ? "profit" : "loss"}
-                    className="px-1.5"
+                    className="px-1 h-5 text-[10px] font-numbers"
                   >
                     {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                   </Badge>
                 </TableCell>
-                <TableCell className="font-numbers text-muted-foreground whitespace-nowrap">
+                <TableCell className="text-center font-numbers text-muted-foreground">
                   {entry.total_buy_ins_after}
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground font-numbers whitespace-nowrap">
-                    {format(new Date(entry.timestamp), "MMM d, h:mm a")}
-                  </div>
+                <TableCell className="text-right pr-4 text-muted-foreground text-[10px] uppercase tracking-wider">
+                  {format(new Date(entry.timestamp), "h:mm a")}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
-    </div>
+    </div >
   );
 };
