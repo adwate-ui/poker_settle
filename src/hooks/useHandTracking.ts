@@ -257,14 +257,24 @@ export const useHandTracking = () => {
 
       // 1. Bulk UPSERT actions (sanitize payload first)
       if (actions.length > 0) {
-        // Explicitly map optional fields to null if undefined to satisfy Postgres/Supabase
-        const sanitizedActions = actions.map(a => ({
-          ...a,
-          hand_id: handId,
-          position: a.position ?? null,
-          hole_cards: a.hole_cards ?? null,
-          is_hero: !!a.is_hero // Ensure boolean
-        }));
+        // Explicitly destructure and map fields to ensure strict typing and exclusion of 'id'/'created_at'
+        const sanitizedActions = actions.map(a => {
+          // Destructure unused fields to exclude them from the spread if they exist in 'a'
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { action_sequence, ...rest } = a;
+
+          return {
+            hand_id: handId,
+            player_id: a.player_id,
+            street_type: a.street_type,
+            action_type: a.action_type,
+            bet_size: a.bet_size ?? 0,
+            action_sequence: a.action_sequence,
+            is_hero: !!a.is_hero,
+            position: a.position || null,
+            hole_cards: a.hole_cards || null
+          };
+        });
 
         const { error: actionsError } = await supabase
           .from('player_actions')

@@ -276,65 +276,78 @@ export const usePokerEngine = (
 
     const finishHand = useCallback(async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
         if (!currentHand) return;
-        persistence.clearHandState();
 
-        const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
-        let finalStageValue: string;
-        if (finalStageOverride === 'showdown') finalStageValue = 'Showdown';
-        else if (finalStageOverride) finalStageValue = finalStageOverride.charAt(0).toUpperCase() + finalStageOverride.slice(1);
-        else finalStageValue = stage === 'showdown' ? 'Showdown' : stage.charAt(0).toUpperCase() + stage.slice(1);
+        try {
+            const isHeroWin = winnerIds.includes(heroPlayer?.player_id || '');
+            let finalStageValue: string;
+            if (finalStageOverride === 'showdown') finalStageValue = 'Showdown';
+            else if (finalStageOverride) finalStageValue = finalStageOverride.charAt(0).toUpperCase() + finalStageOverride.slice(1);
+            else finalStageValue = stage === 'showdown' ? 'Showdown' : stage.charAt(0).toUpperCase() + stage.slice(1);
 
-        const actionsToSave = lastAction ? [...allHandActions, lastAction] : allHandActions;
-        const heroPos = heroPlayer?.player_id ? getPositionForPlayer(activePlayers, currentHand.button_player_id, heroPlayer.player_id, seatPositions) : 'UTG';
-        const positionsData = activePlayers.map(gp => ({ seat: seatPositions[gp.player_id] ?? 0, player_id: gp.player_id, player_name: gp.player.name }));
+            const actionsToSave = lastAction ? [...allHandActions, lastAction] : allHandActions;
+            const heroPos = heroPlayer?.player_id ? getPositionForPlayer(activePlayers, currentHand.button_player_id, heroPlayer.player_id, seatPositions) : 'UTG';
+            const positionsData = activePlayers.map(gp => ({ seat: seatPositions[gp.player_id] ?? 0, player_id: gp.player_id, player_name: gp.player.name }));
 
-        const savedHand = await createNewHand(game.id, currentHand.button_player_id, currentHand.hand_number, heroPos, positionsData as unknown as []);
-        if (!savedHand) {
-            toast({ title: 'Error', description: 'Failed to save hand', variant: 'destructive' });
-            return;
+            const savedHand = await createNewHand(game.id, currentHand.button_player_id, currentHand.hand_number, heroPos, positionsData as unknown as []);
+            if (!savedHand) {
+                throw new Error('Failed to create new hand record');
+            }
+
+            const finalActions = actionsToSave.map(action => {
+                const playerActions = actionsToSave.filter(a => a.player_id === action.player_id);
+                const isLastAction = playerActions[playerActions.length - 1].action_sequence === action.action_sequence;
+                return {
+                    player_id: action.player_id,
+                    street_type: action.street_type,
+                    action_type: action.action_type,
+                    bet_size: action.bet_size,
+                    action_sequence: action.action_sequence,
+                    is_hero: action.is_hero,
+                    position: action.position,
+                    hole_cards: isLastAction ? (playerHoleCards[action.player_id] || null) : null
+                };
+            });
+
+            const streetCardsData = [];
+            if (flopCards) streetCardsData.push({ street_type: 'Flop', cards_notation: flopCards });
+            if (turnCard) streetCardsData.push({ street_type: 'Turn', cards_notation: turnCard });
+            if (riverCard) streetCardsData.push({ street_type: 'River', cards_notation: riverCard });
+
+            // This will throw if it fails, caught by catch block below
+            await saveCompleteHandData(savedHand.id, finalActions, streetCardsData, winnerIds, potSize, isHeroWin, finalStageValue);
+
+            // ONLY reset if everything succeeded
+            persistence.clearHandState();
+
+            // Reset state
+            setCurrentHand(null);
+            setStage('setup');
+            setButtonPlayerId('');
+            setDealtOutPlayers([]);
+            setActivePlayers([]);
+            setActionSequence(0);
+            setPotSize(0);
+            setFlopCards('');
+            setTurnCard('');
+            setRiverCard('');
+            setStreetActions([]);
+            setAllHandActions([]);
+            setPlayersInHand([]);
+            setPlayerHoleCards({});
+            setPlayerBets({});
+            setStreetPlayerBets({});
+            setLastAggressorIndex(null);
+            setActionHistory([]);
+
+        } catch (error) {
+            console.error('Failed to save hand:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to save hand. Please try again.',
+                variant: 'destructive'
+            });
+            // Do NOT reset state, allowing user to retry
         }
-
-        const finalActions = actionsToSave.map(action => {
-            const playerActions = actionsToSave.filter(a => a.player_id === action.player_id);
-            const isLastAction = playerActions[playerActions.length - 1].action_sequence === action.action_sequence;
-            return {
-                player_id: action.player_id,
-                street_type: action.street_type,
-                action_type: action.action_type,
-                bet_size: action.bet_size,
-                action_sequence: action.action_sequence,
-                is_hero: action.is_hero,
-                position: action.position,
-                hole_cards: isLastAction ? (playerHoleCards[action.player_id] || null) : null
-            };
-        });
-
-        const streetCardsData = [];
-        if (flopCards) streetCardsData.push({ street_type: 'Flop', cards_notation: flopCards });
-        if (turnCard) streetCardsData.push({ street_type: 'Turn', cards_notation: turnCard });
-        if (riverCard) streetCardsData.push({ street_type: 'River', cards_notation: riverCard });
-
-        await saveCompleteHandData(savedHand.id, finalActions, streetCardsData, winnerIds, potSize, isHeroWin, finalStageValue);
-
-        // Reset state
-        setCurrentHand(null);
-        setStage('setup');
-        setButtonPlayerId('');
-        setDealtOutPlayers([]);
-        setActivePlayers([]);
-        setActionSequence(0);
-        setPotSize(0);
-        setFlopCards('');
-        setTurnCard('');
-        setRiverCard('');
-        setStreetActions([]);
-        setAllHandActions([]);
-        setPlayersInHand([]);
-        setPlayerHoleCards({});
-        setPlayerBets({});
-        setStreetPlayerBets({});
-        setLastAggressorIndex(null);
-        setActionHistory([]);
     }, [currentHand, persistence, activePlayers, heroPlayer, seatPositions, game.id, allHandActions, createNewHand, playerHoleCards, flopCards, turnCard, riverCard, potSize, saveCompleteHandData, stage, toast]);
 
     const moveToNextStreet = useCallback(() => {
