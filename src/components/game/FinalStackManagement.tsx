@@ -136,7 +136,7 @@ export const FinalStackManagement = ({
                     "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
                   )}
                 >
-                  <Edit className="h-3.5 w-3.5" />
+                  <Edit className="h-4 w-4" />
                 </Button>
               </TableCell>
               <TableCell>
