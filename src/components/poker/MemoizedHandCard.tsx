@@ -83,11 +83,11 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
                 <div className="flex items-center gap-2.5">
                   <span className="text-foreground font-bold tracking-widest text-[11px] uppercase">Sequence #{hand.hand_number}</span>
                   <div className="flex gap-1.5">
-                    <Badge variant="stats" className="h-5 px-1.5">{hand.hero_position}</Badge>
-                    <Badge variant="stats" className="h-5 px-1.5">{hand.final_stage}</Badge>
+                    <Badge variant="stats" className="h-5 px-1.5 text-tiny">{hand.hero_position}</Badge>
+                    <Badge variant="stats" className="h-5 px-1.5 text-tiny">{hand.final_stage}</Badge>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
+                <div className="flex items-center gap-3 text-tiny uppercase tracking-[0.2em] text-muted-foreground/60">
                   <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {formatDate(hand.game_date)}</span>
                   <span className="h-1 w-1 bg-border/50 rounded-full" />
                   <span>BTN: {hand.button_player_name}</span>
@@ -97,7 +97,7 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
               <div className="flex flex-col items-end gap-2">
                 <Badge
                   variant={resultStatus === 'win' ? 'profit' : resultStatus === 'loss' ? 'loss' : resultStatus === 'split' ? 'info' : 'neutral'}
-                  className="px-3 py-1 text-[10px] tracking-widest uppercase"
+                  className="px-3 py-1 text-tiny tracking-widest uppercase"
                 >
                   {resultStatus === 'win' && <Trophy className="h-3 w-3 mr-1.5" />}
                   {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'PROTOCOL'}
@@ -150,10 +150,10 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
           {/* Secondary Metadata */}
           <div className="p-5 lg:p-6 lg:w-72 bg-muted/30 flex flex-col justify-between gap-6">
             <div className="space-y-3">
-              <p className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground/60 ml-0.5">Participating Identities</p>
+              <p className="text-tiny uppercase tracking-[0.3em] text-muted-foreground/60 ml-0.5">Participating Identities</p>
               <div className="flex flex-wrap gap-1.5">
                 {playersInHand.map((player, idx) => (
-                  <Badge key={idx} variant="outline" className="bg-background/20 text-muted-foreground text-[9px] tracking-widest px-2 h-5 border border-border group-hover:border-primary/20 transition-colors">
+                  <Badge key={idx} variant="outline" className="bg-background/20 text-muted-foreground text-tiny tracking-widest px-2 h-5 border border-border group-hover:border-primary/20 transition-colors">
                     {player.name}
                   </Badge>
                 ))}

@@ -131,18 +131,18 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
                 className="hover:bg-muted/30 transition-colors"
                 onClick={() => navigate(`/shared/${token}/game/${h.game_id}`)}
               >
-                <TableCell className="font-medium">
+                <TableCell className="font-medium text-tiny">
                   {format(new Date(h.games.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="font-numbers">
+                <TableCell className="text-tiny">
+                  <Badge variant="secondary" className="font-numbers text-tiny">
                     {h.buy_ins}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right text-tiny">
                   <Badge
                     variant={h.net_amount >= 0 ? "profit" : "loss"}
-                    className="font-numbers font-medium whitespace-nowrap"
+                    className="font-numbers font-medium whitespace-nowrap text-tiny"
                   >
                     <ResponsiveCurrency amount={h.net_amount} />
                   </Badge>

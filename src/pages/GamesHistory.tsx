@@ -376,23 +376,23 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 onClick={() => handleNavigate(game.id)}
                 onMouseEnter={() => prefetch(game.id)}
               >
-                <TableCell className="font-medium whitespace-nowrap text-xs">
+                <TableCell className="font-medium whitespace-nowrap text-tiny">
                   {format(new Date(game.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell isNumeric className="text-muted-foreground text-xs">
+                <TableCell isNumeric className="text-muted-foreground text-tiny">
                   <ResponsiveCurrency amount={game.buy_in_amount} />
                 </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="font-numbers px-1 h-5 min-w-[20px] text-[10px] justify-center">
+                <TableCell className="text-tiny">
+                  <Badge variant="secondary" className="font-numbers px-1 h-5 min-w-[20px] text-tiny justify-center">
                     {game.player_count}
                   </Badge>
                 </TableCell>
-                <TableCell isNumeric className="font-semibold text-muted-foreground text-xs">
+                <TableCell isNumeric className="font-semibold text-muted-foreground text-tiny">
                   <ResponsiveCurrency amount={game.total_pot} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-tiny">
                   {selectedPlayer !== "all" && playerData ? (
-                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-[10px]">
+                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-tiny">
                       <ResponsiveCurrency amount={playerData.net_amount} />
                     </Badge>
                   ) : (

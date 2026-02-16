@@ -319,16 +319,16 @@ const HandDetail = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 flex-wrap">
             <span>Hand #{hand.hand_number}</span>
-            <Badge variant="stats">{hand.hero_position}</Badge>
-            <Badge variant="stats">{hand.final_stage}</Badge>
+            <Badge variant="stats" className="text-tiny">{hand.hero_position}</Badge>
+            <Badge variant="stats" className="text-tiny">{hand.final_stage}</Badge>
             {hand.is_hero_win === true && (
-              <Badge variant="profit">
+              <Badge variant="profit" className="text-tiny">
                 <Trophy className="h-3 w-3 mr-1" />
                 Won
               </Badge>
             )}
             {hand.is_hero_win === false && (
-              <Badge variant="loss">Lost</Badge>
+              <Badge variant="loss" className="text-tiny">Lost</Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -343,7 +343,7 @@ const HandDetail = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Hero Position:</span>
-                <Badge variant="stats" className="text-[9px]">{hand.hero_position}</Badge>
+                <Badge variant="stats" className="text-tiny">{hand.hero_position}</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Button:</span>
@@ -351,7 +351,7 @@ const HandDetail = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stage:</span>
-                <Badge variant="stats" className="text-[9px]">{hand.final_stage}</Badge>
+                <Badge variant="stats" className="text-tiny">{hand.final_stage}</Badge>
               </div>
               <div className="flex justify-between items-center bg-accent/10 p-2 rounded-lg">
                 <span className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold">Pot Size:</span>
@@ -385,7 +385,7 @@ const HandDetail = () => {
                 playerNames={hand.player_names}
                 buttonPlayerId={hand.button_player_id}
                 seatPositions={seatPositions}
-                initialPot={hand.big_blind + (hand.big_blind / 2)}
+                _initialPot={hand.big_blind + (hand.big_blind / 2)}
                 winnerPlayerId={hand.winner_player_id || undefined}
                 winnerPlayerName={hand.winner_player_name || undefined}
               />
@@ -476,7 +476,7 @@ const HandDetail = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{player.playerName}</span>
                         {player.isHero && (
-                          <Badge variant="secondary" className="text-xs">Hero</Badge>
+                          <Badge variant="secondary" className="text-tiny">Hero</Badge>
                         )}
                       </div>
 
@@ -538,7 +538,7 @@ const HandDetail = () => {
                               <div key={idx} className="text-sm flex justify-between items-center py-1">
                                 <div className="flex items-center gap-2">
                                   {action.is_hero && (
-                                    <Badge variant="stats" className="text-xs">
+                                    <Badge variant="stats" className="text-tiny">
                                       Hero
                                     </Badge>
                                   )}

@@ -256,7 +256,7 @@ const PlayersHistory = () => {
                 className="cursor-pointer"
                 onClick={() => navigate(`/players/${player.id}`)}
               >
-                <TableCell>
+                <TableCell className="text-tiny">
                   <div className="flex items-center gap-1.5 sm:gap-4 overflow-hidden">
                     <OptimizedAvatar
                       name={player.name}
@@ -265,16 +265,16 @@ const PlayersHistory = () => {
                     <ResponsiveName name={player.name} className="font-medium truncate" />
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px] justify-center">
+                <TableCell className="text-tiny">
+                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px] justify-center text-tiny">
                     {player.total_games || 0}
                     <span className="sm:inline hidden"> Sessions</span>
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-tiny">
                   <Badge
                     variant={profit >= 0 ? "profit" : "loss"}
-                    className="font-medium whitespace-nowrap font-numbers px-1.5 text-[10px]"
+                    className="font-medium whitespace-nowrap font-numbers px-1.5 text-tiny"
                   >
                     <ResponsiveCurrency amount={profit} />
                   </Badge>

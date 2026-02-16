@@ -391,21 +391,21 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 className="cursor-pointer transition-colors"
                 onClick={() => handleNavigateGame(game.game_id)}
               >
-                <TableCell className="font-medium text-xs">
+                <TableCell className="font-medium text-tiny">
                   {format(new Date(game.games.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell className="font-numbers text-center text-muted-foreground text-xs">
+                <TableCell className="font-numbers text-center text-muted-foreground text-tiny">
                   {game.buy_ins}
                 </TableCell>
-                <TableCell className="text-xs">
+                <TableCell className="text-tiny">
                   <Badge
                     variant={isWin ? "profit" : "loss"}
-                    className="font-numbers px-1 h-5 min-w-[20px] text-[10px] justify-center"
+                    className="font-numbers px-1 h-5 min-w-[20px] text-tiny justify-center"
                   >
                     <ResponsiveCurrency amount={game.net_amount} />
                   </Badge>
                 </TableCell>
-                <TableCell className="font-numbers text-muted-foreground text-xs">
+                <TableCell className="font-numbers text-muted-foreground text-tiny">
                   <ResponsiveCurrency amount={game.final_stack} />
                 </TableCell>
                 <TableCell>

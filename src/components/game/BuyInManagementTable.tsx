@@ -123,13 +123,13 @@ export const BuyInManagementTable = ({
               key={gamePlayer.id}
               className="h-11 sm:h-auto sm:group"
             >
-              <TableCell className="font-medium truncate text-foreground p-1 sm:p-4">
+              <TableCell className="font-medium truncate text-foreground p-1 sm:p-4 text-tiny">
                 <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-center p-1 sm:p-4">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-center p-1 sm:p-4 text-tiny">
                 {gamePlayer.buy_ins}
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-right tracking-tighter p-1 sm:p-4">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-right tracking-tighter p-1 sm:p-4 text-tiny">
                 {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
               </TableCell>
               <TableCell className="text-center p-1 sm:p-4">

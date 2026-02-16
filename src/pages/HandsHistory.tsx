@@ -137,7 +137,7 @@ const HandsHistory = () => {
               <Filter className="h-5 w-5" />
               Filters
               {hasActiveFilters && (
-                <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-[9px]">{Object.keys(filters).length} active</Badge>
+                <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-tiny">{Object.keys(filters).length} active</Badge>
               )}
             </CardTitle>
             {hasActiveFilters && (
@@ -367,7 +367,7 @@ const HandsHistory = () => {
           <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
             <TrendingUp className="h-5 w-5" />
             Hands History
-            <Badge variant="outline" className="ml-auto font-numbers">
+            <Badge variant="outline" className="ml-auto font-numbers text-tiny">
               {hands.length}
             </Badge>
           </CardTitle>

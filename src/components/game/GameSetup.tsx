@@ -257,7 +257,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
                           <p className="text-label tracking-widest text-muted-foreground">Added Players</p>
-                          <Badge variant="outline" className="font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
+                          <Badge variant="outline" className="font-numbers px-4 py-1 text-tiny">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {[...selectedPlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (

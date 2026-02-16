@@ -590,7 +590,7 @@ export const GameDetailView = ({
 
                     return (
                       <TableRow key={gamePlayer.id}>
-                        <TableCell>
+                        <TableCell className="text-tiny">
                           <Link
                             to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
                             className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
@@ -598,23 +598,23 @@ export const GameDetailView = ({
                             {playerName}
                           </Link>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="font-numbers min-w-[20px]">
+                        <TableCell className="text-tiny">
+                          <Badge variant="secondary" className="font-numbers min-w-[20px] text-tiny">
                             {gamePlayer.buy_ins}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-tiny">
                           <div>
                             <Badge
                               variant={isWin ? "profit" : "loss"}
-                              className="font-numbers"
+                              className="font-numbers text-tiny"
                             >
                               {formatProfitLoss(netAmount)}
                             </Badge>
                           </div>
                         </TableCell>
                         {!isMobile && (
-                          <TableCell isNumeric className="text-muted-foreground whitespace-nowrap">
+                          <TableCell isNumeric className="text-muted-foreground whitespace-nowrap text-tiny">
                             {formatCurrency(finalStack)}
                           </TableCell>
                         )}
@@ -697,7 +697,7 @@ export const GameDetailView = ({
 
                     return (
                       <TableRow key={`settlement-${index}`}>
-                        <TableCell>
+                        <TableCell className="text-tiny">
                           <Link
                             to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
                             className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
@@ -705,7 +705,7 @@ export const GameDetailView = ({
                             {settlement.from}
                           </Link>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-tiny">
                           <Link
                             to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
                             className="text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
@@ -713,18 +713,18 @@ export const GameDetailView = ({
                             {settlement.to}
                           </Link>
                         </TableCell>
-                        <TableCell isNumeric className="whitespace-nowrap">
+                        <TableCell isNumeric className="whitespace-nowrap text-tiny">
                           {formatCurrency(settlement.amount)}
                         </TableCell>
 
                         {hasManual && (
-                          <TableCell>
+                          <TableCell className="text-tiny">
                             {settlement.isManual ? (
-                              <Badge variant="outline" className="font-luxury uppercase tracking-tighter">
+                              <Badge variant="outline" className="font-luxury uppercase tracking-tighter text-tiny">
                                 {isMobile ? "M" : "Manual"}
                               </Badge>
                             ) : (
-                              <span className="text-3xs text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
+                              <span className="text-tiny text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
                             )}
                           </TableCell>
                         )}
@@ -750,7 +750,7 @@ export const GameDetailView = ({
                                 {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                               </Button>
                             ) : (
-                              <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers">
+                              <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers text-tiny">
                                 {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
                               </Badge>
                             )}

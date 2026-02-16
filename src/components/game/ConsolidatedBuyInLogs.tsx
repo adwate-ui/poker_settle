@@ -192,7 +192,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                     {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-center font-numbers text-muted-foreground text-xs">
+                <TableCell className="text-center font-numbers text-muted-foreground text-tiny">
                   {entry.total_buy_ins_after}
                 </TableCell>
                 <TableCell className="text-right pr-4 text-muted-foreground text-[10px] uppercase tracking-wider">

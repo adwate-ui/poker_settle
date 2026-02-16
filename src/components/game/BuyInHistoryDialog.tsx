@@ -161,7 +161,7 @@ export const BuyInHistoryDialog = ({
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="bg-muted text-[9px] uppercase tracking-widest text-muted-foreground">Original</Badge>
+                      <Badge variant="outline" className="bg-muted text-tiny uppercase tracking-widest text-muted-foreground">Original</Badge>
                     </TableCell>
                     <TableCell className="text-right pr-8">
                       <div className="flex items-center justify-end gap-2.5">

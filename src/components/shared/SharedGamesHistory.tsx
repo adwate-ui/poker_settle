@@ -226,21 +226,21 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                       isMobile ? "h-10" : ""
                     )}
                   >
-                    <TableCell className={cn("font-medium whitespace-nowrap", isMobile ? "px-1" : "")}>
+                    <TableCell className={cn("font-medium whitespace-nowrap text-tiny", isMobile ? "px-1" : "")}>
                       <div className="flex items-center gap-1 sm:gap-2">
                         {!isMobile && <Calendar className="h-4 w-4 opacity-50" />}
                         {format(new Date(game.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers", isMobile ? "px-1" : "")}>
+                    <TableCell className={cn("text-right font-numbers text-tiny", isMobile ? "px-1" : "")}>
                       {isMobile ? `Rs.${Math.round(game.buy_in_amount).toLocaleString('en-IN')}` : formatCurrency(game.buy_in_amount)}
                     </TableCell>
-                    <TableCell className={cn("text-center", isMobile ? "px-1" : "")}>
-                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-[9px] min-w-[20px]" : "text-xs")}>
+                    <TableCell className={cn("text-center text-tiny", isMobile ? "px-1" : "")}>
+                      <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-tiny min-w-[20px]" : "text-xs")}>
                         {game.player_count}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers font-bold text-primary", isMobile ? "px-1" : "")}>
+                    <TableCell className={cn("text-right font-numbers font-bold text-primary text-tiny", isMobile ? "px-1" : "")}>
                       {isMobile ? `Rs.${Math.round(game.total_pot).toLocaleString('en-IN')}` : formatCurrency(game.total_pot)}
                     </TableCell>
                   </TableRow>
