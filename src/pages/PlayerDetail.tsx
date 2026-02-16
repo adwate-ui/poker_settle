@@ -383,10 +383,10 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 className="cursor-pointer transition-colors"
                 onClick={() => handleNavigateGame(game.game_id)}
               >
-                <TableCell className="font-medium text-sm">
+                <TableCell className="font-medium">
                   {format(new Date(game.games.date), "MMM d, yyyy")}
                 </TableCell>
-                <TableCell className="font-numbers text-center text-sm text-muted-foreground">
+                <TableCell className="font-numbers text-center text-muted-foreground">
                   {game.buy_ins}
                 </TableCell>
                 <TableCell>
@@ -397,7 +397,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                     <ResponsiveCurrency amount={game.net_amount} />
                   </Badge>
                 </TableCell>
-                <TableCell className="font-numbers text-sm text-muted-foreground">
+                <TableCell className="font-numbers text-muted-foreground">
                   <ResponsiveCurrency amount={game.final_stack} />
                 </TableCell>
                 <TableCell>
