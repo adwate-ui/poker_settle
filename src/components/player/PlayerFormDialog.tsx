@@ -221,7 +221,7 @@ export const PlayerFormDialog = ({
               <User className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold uppercase tracking-widest">{title}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
               <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5 mt-1">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 {description}
@@ -245,7 +245,7 @@ export const PlayerFormDialog = ({
                   onBlur={() => handleBlur('name')}
                   disabled={isSubmitting}
                   className={cn(
-                    "h-14 bg-accent/5 pr-10",
+                    "h-12 pr-10",
                     errors.name && touched.name && "border-destructive focus-visible:ring-destructive",
                     isFieldValid('name') && "border-green-500 focus-visible:ring-green-500"
                   )}
@@ -289,7 +289,7 @@ export const PlayerFormDialog = ({
                     onBlur={() => handleBlur('phoneNumber')}
                     disabled={isSubmitting}
                     className={cn(
-                      "h-14 bg-accent/5 pr-10",
+                      "h-12 pr-10",
                       errors.phoneNumber && touched.phoneNumber && "border-destructive focus-visible:ring-destructive",
                       isFieldValid('phoneNumber') && "border-green-500 focus-visible:ring-green-500"
                     )}
@@ -330,7 +330,7 @@ export const PlayerFormDialog = ({
                     onBlur={() => handleBlur('upiId')}
                     disabled={isSubmitting}
                     className={cn(
-                      "h-14 bg-accent/5 pr-10",
+                      "h-12 pr-10",
                       errors.upiId && touched.upiId && "border-destructive focus-visible:ring-destructive",
                       isFieldValid('upiId') && "border-green-500 focus-visible:ring-green-500"
                     )}
@@ -351,15 +351,15 @@ export const PlayerFormDialog = ({
             <div className="space-y-3">
               <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Payment Method</Label>
               <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value)}>
-                <SelectTrigger className="h-12 bg-white/5 border-0 border-b border-white/10 rounded-none focus:ring-0 focus:border-primary transition-all tracking-wider text-[11px] uppercase">
+                <SelectTrigger className="h-12 transition-all">
                   <div className="flex items-center gap-3">
                     <Coins className="h-4 w-4 text-muted-foreground/40" />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={PaymentMethodConfig.digital.key} className="uppercase text-[10px] tracking-widest">Digital Payment ({PaymentMethodConfig.digital.label})</SelectItem>
-                  <SelectItem value={PaymentMethodConfig.cash.key} className="uppercase text-[10px] tracking-widest">{PaymentMethodConfig.cash.label}</SelectItem>
+                  <SelectItem value={PaymentMethodConfig.digital.key}>Digital Payment ({PaymentMethodConfig.digital.label})</SelectItem>
+                  <SelectItem value={PaymentMethodConfig.cash.key}>{PaymentMethodConfig.cash.label}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

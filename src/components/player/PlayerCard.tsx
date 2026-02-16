@@ -111,7 +111,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 value={addBuyInsAmount}
                 onChange={(e) => setAddBuyInsAmount(e.target.value)}
                 placeholder="0"
-                className="flex-1 bg-muted/30 border-0 border-b border-border rounded-none h-full text-center font-numbers text-sm text-foreground focus-visible:ring-0 focus-visible:border-primary transition-all"
+                className="flex-1 bg-muted/30 border-0 border-b border-border h-full text-center font-numbers text-sm text-foreground focus-visible:ring-0 focus-visible:border-primary transition-all"
               />
               {addBuyInsAmount && Number(addBuyInsAmount) > 0 && (
                 <Button
@@ -135,7 +135,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
                 value={formatInputDisplay(localFinalStack)}
                 onChange={(e) => handleFinalStackChange(parseIndianNumber(e.target.value))}
                 placeholder="0"
-                className="flex-1 bg-muted/30 border-0 border-b border-border rounded-none h-full text-center font-numbers text-sm text-foreground focus-visible:ring-0 focus-visible:border-primary transition-all"
+                className="flex-1 bg-muted/30 border-0 border-b border-border h-full text-center font-numbers text-sm text-foreground focus-visible:ring-0 focus-visible:border-primary transition-all"
               />
               {hasFinalStackChanges && (
                 <Button

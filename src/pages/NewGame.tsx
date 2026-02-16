@@ -205,7 +205,7 @@ const NewGame = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
-              <Button onClick={continueGame} className="w-full h-12 text-base font-luxury tracking-widest uppercase hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10" variant="default">
+              <Button onClick={continueGame} className="w-full h-12 text-base font-luxury shadow-lg shadow-primary/10" variant="default">
                 Resume Active Game
               </Button>
             </CardContent>
@@ -214,7 +214,7 @@ const NewGame = () => {
       )}
 
       <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-luxury text-foreground uppercase tracking-widest">
+        <CardTitle className="text-3xl font-luxury text-foreground">
           Start New Game
         </CardTitle>
         <CardDescription className="text-muted-foreground">
@@ -243,7 +243,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
               />
               <div className="absolute right-0 bottom-3 text-muted-foreground group-focus-within:text-primary transition-colors">
                 <Info className="h-4 w-4" />
@@ -270,7 +270,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -290,7 +290,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
               />
             </div>
           </div>
@@ -336,7 +336,7 @@ const NewGame = () => {
         <Button
           onClick={startGame}
           disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
-          className="w-full h-14 text-lg font-luxury tracking-[0.2em] uppercase shadow-lg group relative overflow-hidden active:scale-95 transition-all duration-300"
+          className="w-full h-12 text-base font-luxury shadow-lg group relative overflow-hidden active:scale-95 transition-all duration-300"
           variant="default"
         >
           {loading ? (

@@ -1,7 +1,16 @@
-import { DollarSign, ShieldCheck, Trophy, Loader2 } from "lucide-react";
+import { DollarSign, ShieldCheck, Trophy, Loader2, Trash2, Plus } from "lucide-react";
 import { FinalStackManagement } from "@/components/game/FinalStackManagement";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { useDashboardStore } from "@/features/game/stores/dashboardStore";
@@ -9,8 +18,22 @@ import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardA
 import { useGameStats } from "@/features/game/hooks/useGameStats";
 
 const StackSlide = () => {
-    const { gamePlayers, game, isCompletingGame } = useDashboardStore();
-    const { handleUpdateFinalStack, handleCompleteGame } = useGameDashboardActions();
+    const {
+        gamePlayers,
+        game,
+        isCompletingGame,
+        showManualTransfer,
+        setShowManualTransfer,
+        newTransferFrom,
+        setNewTransferFrom,
+        newTransferTo,
+        setNewTransferTo,
+        newTransferAmount,
+        setNewTransferAmount
+    } = useDashboardStore();
+    const { handleUpdateFinalStack, handleCompleteGame, addManualTransfer, handleDeleteManualTransfer } = useGameDashboardActions();
+
+    const manualSettlements = game?.settlements || [];
 
     // Get stats using the hook
     const {
@@ -88,6 +111,91 @@ const StackSlide = () => {
                 smallBlind={smallBlind}
             />
 
+            {/* Manual Adjustments Section */}
+            <div className="space-y-4 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-luxury uppercase tracking-widest text-foreground">Adjustments</h3>
+                    {!showManualTransfer && (
+                        <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(true)} className="h-8 px-3 text-xs uppercase font-bold tracking-wider">
+                            <Plus className="w-3.5 h-3.5 mr-1.5" /> Add
+                        </Button>
+                    )}
+                </div>
+
+                {/* List of Manual Settlements */}
+                <div className="space-y-2">
+                    {manualSettlements.map((transfer, index) => (
+                        <Card key={index} className="p-3 flex justify-between items-center bg-accent/5 border-border/50">
+                            <span className="text-xs font-luxury text-foreground uppercase tracking-wide">
+                                <span className="text-primary">{transfer.from}</span> pays <span className="text-primary">{transfer.to}</span>
+                            </span>
+                            <div className="flex items-center gap-3">
+                                <span className="font-numbers text-sm text-foreground">{formatCurrency(transfer.amount)}</span>
+                                <Button
+                                    aria-label="Delete manual transfer"
+                                    onClick={() => handleDeleteManualTransfer(index)}
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-full"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Add Manual Transfer Form */}
+                {showManualTransfer && (
+                    <Card className="p-4 space-y-4 animate-in slide-in-from-top-2 duration-300 bg-accent/5 border-border">
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">From</Label>
+                                    <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
+                                        <SelectTrigger className="h-12 text-sm bg-background/50 border-border/50">
+                                            <SelectValue placeholder="Select..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {gamePlayers.map(gp => (
+                                                <SelectItem key={`from-${gp.id}`} value={gp.player.name}>{gp.player.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">To</Label>
+                                    <Select value={newTransferTo} onValueChange={setNewTransferTo}>
+                                        <SelectTrigger className="h-12 text-sm bg-background/50 border-border/50">
+                                            <SelectValue placeholder="Select..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {gamePlayers.map(gp => (
+                                                <SelectItem key={`to-${gp.id}`} value={gp.player.name}>{gp.player.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Amount</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={newTransferAmount}
+                                    onChange={(e) => setNewTransferAmount(e.target.value)}
+                                    className="h-12 text-sm bg-background/50 border-border/50"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Button variant="ghost" onClick={() => setShowManualTransfer(false)} className="flex-1 h-12 text-sm font-luxury uppercase tracking-wider">Cancel</Button>
+                            <Button onClick={addManualTransfer} className="flex-1 h-12 text-sm font-luxury uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90">Save</Button>
+                        </div>
+                    </Card>
+                )}
+            </div>
+
             {/* End Game Logic & Discrepancies */}
             <div className="space-y-5 pt-4">
                 {hasDiscrepancies && (
@@ -113,24 +221,7 @@ const StackSlide = () => {
                     </Card>
                 )}
 
-                <Button
-                    onClick={() => {
-                        // We need to import setShowManualTransfer from store.
-                        // Ideally we should use the action, but the store setter is available in the store hook.
-                        // I will update the destructuring at the top of the file to include setShowManualTransfer.
-                        // However, I cannot update the top of the file in this same replace_block if it's far away.
-                        // I will assume I can access it or I will add a separate replace_block for the import/destructuring.
-                        // Actually, I can just use the store hook here if I am inside the component.
-                        useDashboardStore.getState().setShowManualTransfer(true);
-                    }}
-                    variant="outline"
-                    className="w-full h-12 text-muted-foreground border-dashed border-border hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all text-xs uppercase tracking-widest mb-3"
-                >
-                    <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Add Manual Adjustment</span>
-                    </div>
-                </Button>
+
 
                 <Button
                     onClick={() => {
@@ -138,16 +229,16 @@ const StackSlide = () => {
                     }}
                     disabled={!canCompleteGame || isCompletingGame}
                     className={cn(
-                        "w-full h-20 text-primary-foreground font-black text-xl tracking-tighter rounded-2xl transition-all relative overflow-hidden group",
+                        "w-full h-14 text-black font-bold text-lg tracking-[0.2em] rounded-2xl transition-all relative overflow-hidden group",
                         canCompleteGame && !isCompletingGame
                             ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-glow active:scale-95'
                             : 'bg-muted text-muted-foreground opacity-50'
                     )}
                 >
-                    {isCompletingGame ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
-                        <div className="flex items-center justify-center gap-4">
-                            <Trophy className="w-7 h-7 fill-current" />
-                            <span className="font-luxury uppercase tracking-[0.2em] text-lg">End Game</span>
+                    {isCompletingGame ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : (
+                        <div className="flex items-center justify-center gap-3">
+                            <Trophy className="w-5 h-5 fill-current" />
+                            <span className="font-luxury uppercase text-lg">End Game</span>
                         </div>
                     )}
                 </Button>

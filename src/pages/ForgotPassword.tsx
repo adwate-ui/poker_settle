@@ -109,7 +109,7 @@ const ForgotPassword = () => {
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-12"
                     disabled={isLoading}
                     autoComplete="email"
                     autoFocus

@@ -220,7 +220,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={isSigningIn}
-                  className="w-full h-11"
+                  className="w-full h-12"
                 >
                   {isSigningIn ? (
                     <>
@@ -315,7 +315,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={isSigningIn}
-                  className="w-full h-11"
+                  className="w-full h-12"
                 >
                   {isSigningIn ? (
                     <>
@@ -343,7 +343,7 @@ const Auth = () => {
             variant="outline"
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            className="w-full h-11 gap-3"
+            className="w-full h-12 gap-3"
           >
             {isSigningIn ? (
               <Loader2 className="h-4 w-4 animate-spin" />

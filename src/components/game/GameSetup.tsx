@@ -191,8 +191,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
+<<<<<<< HEAD
                 <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-foreground mb-1">Session Initiation</h1>
                 <p className="text-muted-foreground font-luxury text-xs tracking-widest uppercase">Executive Game Configuration</p>
+=======
+                <h1 className="text-2xl md:text-3xl font-luxury luxury-text tracking-tight text-foreground mb-1">Session Initiation</h1>
+                <p className="text-muted-foreground font-luxury text-xs tracking-wider">Executive game configuration</p>
+>>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
               </div>
               <div className="flex items-center gap-4">
                 <UserProfile />
@@ -221,7 +226,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                             type="text"
                             value={formatInputDisplay(buyInAmount)}
                             onChange={e => setBuyInAmount(parseIndianNumber(e.target.value))}
-                            className="h-14 pl-8 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-numbers text-xl text-foreground placeholder:text-muted-foreground"
+                            className="h-12 pl-8 bg-accent/5 font-numbers text-base text-foreground placeholder:text-muted-foreground transition-all"
                             placeholder="0.00"
                           />
                         </div>
@@ -238,14 +243,18 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               value={newPlayerName}
                               onChange={e => setNewPlayerName(e.target.value)}
                               placeholder="Enter Name"
+<<<<<<< HEAD
                               className="h-14 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-wider text-xs uppercase text-foreground placeholder:text-muted-foreground"
+=======
+                              className="h-12 pl-12 bg-accent/5 font-luxury tracking-wider text-sm text-foreground placeholder:text-muted-foreground transition-all"
+>>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                               onKeyDown={e => e.key === 'Enter' && addNewPlayer()}
                             />
                           </div>
                           <Button
                             onClick={addNewPlayer}
                             disabled={!newPlayerName.trim()}
-                            className="h-14 w-14 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all"
+                            className="h-12 w-12 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all"
                           >
                             <Plus className="w-5 h-5" />
                           </Button>
@@ -293,7 +302,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   {!canCreateGame && (
+<<<<<<< HEAD
                     <Button onClick={continueGame} className="flex-1 h-14 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury uppercase tracking-widest text-xs transition-all duration-500 rounded-xl">
+=======
+                    <Button onClick={continueGame} className="flex-1 h-12 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury text-sm transition-all duration-500 rounded-xl">
+>>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                       <Play className="w-4 h-4 mr-3 text-primary fill-current" />
                       Resume Active Sequence
                     </Button>
@@ -302,8 +315,13 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     onClick={startGame}
                     disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame}
                     className={cn(
+<<<<<<< HEAD
                       "h-14 font-luxury uppercase tracking-widest text-xs transition-all duration-500 rounded-xl",
                       !canCreateGame ? 'flex-1 border border-border bg-accent/5 text-muted-foreground' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-lg shadow-gold-900/20'
+=======
+                      "h-12 font-luxury text-sm transition-all duration-500 rounded-xl",
+                      !canCreateGame ? 'flex-1 border border-border bg-accent/2 text-muted-foreground' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-lg shadow-gold-900/20'
+>>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                     )}
                   >
                     <Play className="w-4 h-4 mr-3 fill-current" />
@@ -331,6 +349,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                         </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
+<<<<<<< HEAD
                         <div className="p-6 animate-in slide-in-from-top-2 duration-300">
                           <UniversalPlayerManager
                             allPlayers={players}
@@ -347,6 +366,49 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                             mode="embedded"
                             className="w-full"
                           />
+=======
+                        <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            </div>
+                            <Input
+                              placeholder="Filter Registry..."
+                              value={playerSearchQuery}
+                              onChange={(e) => setPlayerSearchQuery(e.target.value)}
+                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
+                            />
+                          </div>
+
+                          <ScrollArea className="h-[400px] pr-4">
+                            <div className="space-y-2">
+                              {filteredPlayers.map(player => (
+                                <div
+                                  key={player.id}
+                                  className="p-4 bg-accent/2 border border-border rounded-xl hover:bg-accent/5 hover:border-primary/20 transition-all cursor-pointer group flex items-center gap-4"
+                                  onClick={() => selectExistingPlayer(player)}
+                                >
+                                  <OptimizedAvatar name={player.name} size="sm" />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-luxury text-xs text-foreground uppercase tracking-widest truncate">{player.name}</p>
+                                    <p className="font-numbers text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">{player.total_games} Sessions Ident.</p>
+                                  </div>
+                                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Badge className={cn("px-2 py-0.5 font-numbers text-[9px] border-0", player.total_profit > 0 ? "bg-state-success/10 text-state-success" : "bg-state-error/10 text-state-error")}>
+                                      {formatProfitLoss(player.total_profit)}
+                                    </Badge>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player.id); }}
+                                      className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500/20 hover:text-red-500 transition-all"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+>>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
@@ -376,7 +438,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               placeholder="Search players..."
                               value={gameSearchQuery}
                               onChange={(e) => setGameSearchQuery(e.target.value)}
-                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
+                              className="h-10 pl-9 bg-accent/5 border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary transition-all text-label text-foreground/60 placeholder:text-muted-foreground"
                             />
                           </div>
 

@@ -167,7 +167,7 @@ const ResetPassword = () => {
                     placeholder="Enter new password"
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
-                    className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                    className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`}
                     disabled={isLoading}
                     autoComplete="new-password"
                     autoFocus
@@ -214,7 +214,7 @@ const ResetPassword = () => {
                     placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => handleConfirmPasswordChange(e.target.value)}
-                    className={`pl-10 pr-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                    className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-destructive" : ""}`}
                     disabled={isLoading}
                     autoComplete="new-password"
                   />

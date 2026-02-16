@@ -383,11 +383,11 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 className="cursor-pointer transition-colors"
                 onClick={() => handleNavigateGame(game.game_id)}
               >
-                <TableCell className="font-medium">
+                <TableCell className="font-medium text-sm">
                   {format(new Date(game.games.date), "MMM d, yyyy")}
                 </TableCell>
-                <TableCell className="font-numbers text-muted-foreground">
-                  {game.buy_ins} <span className="text-[10px] opacity-50 uppercase font-luxury tracking-tighter">Stacks</span>
+                <TableCell className="font-numbers text-center text-sm text-muted-foreground">
+                  {game.buy_ins}
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -397,18 +397,18 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                     <ResponsiveCurrency amount={game.net_amount} />
                   </Badge>
                 </TableCell>
-                <TableCell className="font-numbers text-muted-foreground">
+                <TableCell className="font-numbers text-sm text-muted-foreground">
                   <ResponsiveCurrency amount={game.final_stack} />
                 </TableCell>
                 <TableCell>
                   <Button
                     variant="outline"
-                    size={isMobile ? "icon" : "sm"}
+                    size={isMobile ? "icon-sm" : "sm"}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleNavigateGame(game.game_id);
                     }}
-                    className="font-luxury uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
+                    className="hover:bg-primary/10 hover:text-primary transition-all"
                   >
                     {isMobile ? <ArrowRight className="h-4 w-4" /> : "Examine"}
                   </Button>

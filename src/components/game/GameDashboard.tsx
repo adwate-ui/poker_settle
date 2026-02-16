@@ -10,7 +10,7 @@ import { UniversalPlayerManager } from '@/components/player/UniversalPlayerManag
 import SeatingSlide from '@/components/game/dashboard-slides/SeatingSlide';
 import BuyInSlide from '@/components/game/dashboard-slides/BuyInSlide';
 import StackSlide from '@/components/game/dashboard-slides/StackSlide';
-import OverviewSlide from '@/components/game/dashboard-slides/OverviewSlide';
+
 import {
   Carousel,
   CarouselContent,
@@ -156,12 +156,9 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
         {/* Simplified Header */}
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold font-numbers tracking-tight">
-              <span className="text-primary">{CurrencyConfig.symbol}</span>
-              {formatCurrency(game.buy_in_amount).replace(CurrencyConfig.symbol, '')}
-            </span>
-            <span className="text-[10px] items-center flex gap-1 uppercase tracking-widest text-muted-foreground font-medium bg-secondary/30 px-2 py-0.5 rounded-full border border-border/50">
-              <Clock className="w-3 h-3" /> Live
+            <UsersIcon className="h-4 w-4 text-primary" />
+            <span className="text-xs font-luxury uppercase tracking-widest text-foreground">
+              {gamePlayers.length} Players
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -190,17 +187,12 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
               <CarouselItem>
                 <StackSlide />
               </CarouselItem>
-
-              {/* Slide 4: Players & Settlements */}
-              <CarouselItem>
-                <OverviewSlide isMobile={true} />
-              </CarouselItem>
             </CarouselContent>
 
             {/* Carousel Indicators */}
             <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20 pointer-events-none">
               <div className="bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-border pointer-events-auto shadow-lg">
-                <CarouselDots count={4} />
+                <CarouselDots count={3} />
               </div>
             </div>
           </Carousel>
@@ -456,7 +448,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
               onClick={() => handleCompleteGame(finalSettlements)}
               disabled={!canCompleteGame || isCompletingGame}
               className={cn(
-                "w-full h-14 text-black font-black text-lg tracking-tighter rounded-xl transition-all relative overflow-hidden group",
+                "w-full h-12 text-black font-bold text-lg tracking-[0.2em] rounded-xl transition-all relative overflow-hidden group",
                 canCompleteGame && !isCompletingGame
                   ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-lg hover:shadow-primary/30 active:scale-95'
                   : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
@@ -465,7 +457,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
               {isCompletingGame ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 fill-current" />
-                  <span>END GAME</span>
+                  <span className="font-luxury uppercase text-lg">END GAME</span>
                 </div>
               )}
             </Button>

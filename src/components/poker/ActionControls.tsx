@@ -42,7 +42,7 @@ const ActionControls = ({
                     <Button
                         variant="luxury"
                         size="lg"
-                        className="w-full h-14 font-luxury uppercase tracking-widest text-lg animate-pulse"
+                        className="w-full h-12 font-luxury uppercase tracking-widest text-lg animate-pulse"
                         onClick={onOpenCardSelector}
                     >
                         Set {stage} Cards
@@ -73,7 +73,7 @@ const ActionControls = ({
                                 value={betAmount}
                                 onChange={e => setBetAmount(e.target.value)}
                                 placeholder="Amount"
-                                className="h-12 text-lg"
+                                className="h-12 text-base"
                             />
                             <Button
                                 variant="warning"

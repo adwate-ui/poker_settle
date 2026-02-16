@@ -129,7 +129,7 @@ export const FinalStackManagement = ({
                 <Button
                   onClick={() => handleStartEdit(gamePlayer)}
                   variant="outline"
-                  size="icon"
+                  size="icon-sm"
                   aria-label={`Edit final stack for ${gamePlayer.player.name}`}
                   className={cn(
                     "bg-transparent border-border/50 hover:border-primary/50",
@@ -143,7 +143,7 @@ export const FinalStackManagement = ({
                 <ChipScanner
                   onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
                   triggerProps={{
-                    size: "icon",
+                    size: "icon-sm",
                     className: cn(
                       "bg-transparent",
                       "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
