@@ -168,7 +168,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
                 <h1 className="text-3xl font-luxury text-foreground uppercase tracking-widest mb-1">Setup Table</h1>
-                <p className="text-label tracking-[0.3em] text-muted-foreground">Assigning initial seat identifiers</p>
+                <p className="text-label tracking-widest text-muted-foreground">Assigning initial seat identifiers</p>
               </div>
               <Button
                 variant="ghost"
@@ -192,7 +192,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div>
                 <h1 className="text-4xl sm:text-5xl font-luxury luxury-text tracking-tight text-foreground mb-1">Session Initiation</h1>
-                <p className="text-muted-foreground font-luxury text-xs tracking-[0.3em] uppercase">Executive Game Configuration</p>
+                <p className="text-muted-foreground font-luxury text-xs tracking-widest uppercase">Executive Game Configuration</p>
               </div>
               <div className="flex items-center gap-4">
                 <UserProfile />
@@ -203,7 +203,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
               <div className="lg:col-span-8 space-y-8">
                 {/* Configuration Card */}
                 <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-                  <CardHeader className="p-6 border-b border-border bg-accent/2">
+                  <CardHeader className="p-6 border-b border-border bg-accent/5">
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="h-5 w-5 text-muted-foreground" />
                       <CardTitle className="text-lg font-luxury text-foreground uppercase tracking-widest">Game Settings</CardTitle>
@@ -212,10 +212,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <CardContent className="p-8 space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Buy-in Amount (Rs.)</Label>
+                        <Label className="text-label tracking-widest text-muted-foreground ml-1">Buy-in Amount (Rs.)</Label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none">
-                            <span className="text-primary font-luxury text-[8px] opacity-70">{CurrencyConfig.symbol}</span>
+                            <span className="text-primary font-luxury text-tiny opacity-70">{CurrencyConfig.symbol}</span>
                           </div>
                           <Input
                             type="text"
@@ -228,7 +228,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       </div>
 
                       <div className="space-y-3">
-                        <Label className="text-label tracking-[0.2em] text-muted-foreground ml-1">Add New Player</Label>
+                        <Label className="text-label tracking-widest text-muted-foreground ml-1">Add New Player</Label>
                         <div className="relative group flex gap-3">
                           <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -238,7 +238,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               value={newPlayerName}
                               onChange={e => setNewPlayerName(e.target.value)}
                               placeholder="Enter Name"
-                              className="h-14 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-wider text-[12px] uppercase text-foreground placeholder:text-muted-foreground"
+                              className="h-14 pl-12 bg-accent/5 border-0 border-b border-border rounded-none focus-visible:ring-0 focus-visible:border-primary transition-all font-luxury tracking-wider text-xs uppercase text-foreground placeholder:text-muted-foreground"
                               onKeyDown={e => e.key === 'Enter' && addNewPlayer()}
                             />
                           </div>
@@ -256,14 +256,14 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     {selectedPlayers.length > 0 && (
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-label tracking-[0.2em] text-muted-foreground">Added Players</p>
+                          <p className="text-label tracking-widest text-muted-foreground">Added Players</p>
                           <Badge variant="outline" className="font-numbers px-4 py-1">{selectedPlayers.length} Units</Badge>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {[...selectedPlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (
                             <div key={player.id} className="inline-flex items-center gap-3 px-3 py-1.5 bg-accent/5 border border-border rounded-full group hover:border-primary/30 transition-all">
                               <OptimizedAvatar name={player.name} size="xs" />
-                              <span className="font-luxury text-[11px] uppercase tracking-widest text-foreground/80">{player.name}</span>
+                              <span className="font-luxury text-2xs uppercase tracking-widest text-foreground/80">{player.name}</span>
                               <Button onClick={() => removeSelectedPlayer(player.id)} variant="ghost" size="icon-sm" className="h-5 w-5 text-muted-foreground hover:text-destructive ml-1">
                                 <X className="h-3 w-3" />
                               </Button>
@@ -293,7 +293,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   {!canCreateGame && (
-                    <Button onClick={continueGame} className="flex-1 h-14 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury uppercase tracking-[.2em] text-xs transition-all duration-500 rounded-xl">
+                    <Button onClick={continueGame} className="flex-1 h-14 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury uppercase tracking-widest text-xs transition-all duration-500 rounded-xl">
                       <Play className="w-4 h-4 mr-3 text-primary fill-current" />
                       Resume Active Sequence
                     </Button>
@@ -302,8 +302,8 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                     onClick={startGame}
                     disabled={selectedPlayers.length < 2 || buyInAmount <= 0 || !canCreateGame}
                     className={cn(
-                      "h-14 font-luxury uppercase tracking-[.2em] text-xs transition-all duration-500 rounded-xl",
-                      !canCreateGame ? 'flex-1 border border-border bg-accent/2 text-muted-foreground' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-lg shadow-gold-900/20'
+                      "h-14 font-luxury uppercase tracking-widest text-xs transition-all duration-500 rounded-xl",
+                      !canCreateGame ? 'flex-1 border border-border bg-accent/5 text-muted-foreground' : 'w-full bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black shadow-lg shadow-gold-900/20'
                     )}
                   >
                     <Play className="w-4 h-4 mr-3 fill-current" />
@@ -322,10 +322,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
                     <Collapsible open={isPreviousPlayersOpen} onOpenChange={setIsPreviousPlayersOpen}>
                       <CollapsibleTrigger asChild>
-                        <div className="p-6 border-b border-border bg-accent/2 cursor-pointer flex items-center justify-between group">
+                        <div className="p-6 border-b border-border bg-accent/5 cursor-pointer flex items-center justify-between group">
                           <div className="flex items-center gap-3">
                             <Users className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-[0.2em]">Saved Players</h3>
+                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-widest">Saved Players</h3>
                           </div>
                           <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", isPreviousPlayersOpen && "rotate-180")} />
                         </div>
@@ -358,10 +358,10 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                   <Card className="border-border bg-background/40 backdrop-blur-xl shadow-2xl overflow-hidden">
                     <Collapsible open={isGameHistoryOpen} onOpenChange={setIsGameHistoryOpen}>
                       <CollapsibleTrigger asChild>
-                        <div className="p-6 border-b border-border bg-accent/2 cursor-pointer flex items-center justify-between group">
+                        <div className="p-6 border-b border-border bg-accent/5 cursor-pointer flex items-center justify-between group">
                           <div className="flex items-center gap-3">
                             <History className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-[0.2em]">Session Ledger</h3>
+                            <h3 className="text-sm font-luxury text-foreground/80 uppercase tracking-widest">Session Ledger</h3>
                           </div>
                           <ChevronDown className={cn("h-4 w-4 text-white/20 transition-transform duration-300", isGameHistoryOpen && "rotate-180")} />
                         </div>
@@ -386,11 +386,11 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                 const totalBuyIns = game.game_players.reduce((sum, gp) => sum + (gp.buy_ins * game.buy_in_amount), 0);
                                 const totalWins = game.game_players.reduce((sum, gp) => sum + Math.max(0, gp.net_amount), 0);
                                 return (
-                                  <div key={game.id} className="p-5 bg-accent/2 border border-border rounded-2xl space-y-4 hover:border-primary/20 transition-all group">
+                                  <div key={game.id} className="p-5 bg-accent/5 border border-border rounded-2xl space-y-4 hover:border-primary/20 transition-all group">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-1">
-                                        <p className="font-luxury text-[11px] text-foreground/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                        <p className="font-numbers text-[9px] text-muted-foreground uppercase tracking-tighter">Stake: {formatCurrency(game.buy_in_amount)}</p>
+                                        <p className="font-luxury text-2xs text-foreground/80 uppercase tracking-widest leading-none">{new Date(game.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                        <p className="font-numbers text-tiny text-muted-foreground uppercase tracking-tighter">Stake: {formatCurrency(game.buy_in_amount)}</p>
                                       </div>
                                       <Button onClick={() => handleDeleteGame(game.id)} variant="ghost" size="icon-sm" className="p-2 hover:bg-destructive/10 rounded-xl text-destructive/20 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all">
                                         <Trash2 className="h-3.5 w-3.5" />
@@ -398,12 +398,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
-                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Asset Flow</p>
-                                        <p className="text-[11px] font-luxury text-foreground">{formatCurrency(totalBuyIns)}</p>
+                                        <p className="text-tiny font-luxury uppercase tracking-widest text-muted-foreground mb-1">Asset Flow</p>
+                                        <p className="text-2xs font-luxury text-foreground">{formatCurrency(totalBuyIns)}</p>
                                       </div>
                                       <div className="p-2 bg-background/40 rounded-lg text-center">
-                                        <p className="text-[8px] font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
-                                        <p className="text-[11px] font-luxury text-state-success">{formatCurrency(totalWins)}</p>
+                                        <p className="text-tiny font-luxury uppercase tracking-widest text-muted-foreground mb-1">Gains</p>
+                                        <p className="text-2xs font-luxury text-state-success">{formatCurrency(totalWins)}</p>
                                       </div>
                                     </div>
                                   </div>

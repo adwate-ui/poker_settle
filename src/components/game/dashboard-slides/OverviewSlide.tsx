@@ -157,7 +157,7 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
                             </span>
                             <div className="flex items-center gap-3">
                                 <span className="font-numbers text-xs text-foreground">{formatCurrency(transfer.amount)}</span>
-                                <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-7 w-7 text-red-500/50 hover:text-red-500">
+                                <Button aria-label="Delete manual transfer" onClick={() => handleDeleteManualTransfer(index)} variant="ghost" size="icon" className="h-7 w-7 text-destructive/50 hover:text-destructive">
                                     <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                             </div>

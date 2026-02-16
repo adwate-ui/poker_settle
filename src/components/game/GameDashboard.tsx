@@ -251,7 +251,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
         {/* Status Indicator */}
         <Card className="col-span-2 p-4 bg-gradient-to-br from-background via-accent/5 to-accent/10 border-border/50 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <div className="h-2 w-2 rounded-full bg-state-success animate-pulse shadow-lg shadow-state-success/50" />
             <div className="flex flex-col">
               <span className="text-sm font-bold uppercase tracking-widest text-foreground">Live Game</span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{gamePlayers.length} Active Players</span>
@@ -360,7 +360,8 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                                 {formatCurrency(transfer.amount)}
                                 <button
                                   onClick={() => handleDeleteManualTransfer(index)}
-                                  className="p-1 hover:bg-red-500/10 rounded text-red-500/50 hover:text-red-500 transition-colors"
+                                  className="p-1 hover:bg-destructive/10 rounded text-destructive/50 hover:text-destructive transition-colors"
+                                  aria-label="Delete transfer"
                                 >
                                   <Trash2 className="w-3 h-3" />
                                 </button>
@@ -457,7 +458,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
               className={cn(
                 "w-full h-14 text-black font-black text-lg tracking-tighter rounded-xl transition-all relative overflow-hidden group",
                 canCompleteGame && !isCompletingGame
-                  ? 'bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 bg-[length:200%_100%] animate-shimmer hover:shadow-[0_0_50px_rgba(212,184,60,0.3)] active:scale-95'
+                  ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-lg hover:shadow-primary/30 active:scale-95'
                   : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
               )}
             >

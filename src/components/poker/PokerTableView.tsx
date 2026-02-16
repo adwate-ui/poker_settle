@@ -177,7 +177,7 @@ const PokerSeat = memo(({
               />
             </div>
             {isButton && (
-              <div className="absolute -top-1 -right-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-black shadow-lg z-player-badge">
+              <div className="absolute -top-1 -right-1 bg-foreground text-background rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-background shadow-lg z-player-badge">
                 D
               </div>
             )}
@@ -244,7 +244,7 @@ const PokerSeat = memo(({
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 px-4 py-2 rounded-full border-2 border-gold-300/50 shadow-[0_0_20px_rgba(212,184,60,0.4)]"
+                className="flex items-center gap-2 bg-gradient-to-r from-primary via-accent to-primary px-4 py-2 rounded-full border-2 border-primary/50 shadow-glow-gold"
               >
                 <span className="text-xl font-luxury font-bold text-white drop-shadow-lg tracking-widest whitespace-nowrap">🏆 CHAMPION</span>
               </motion.div>
@@ -585,8 +585,8 @@ const PokerTableView = memo(({
                     exit={{ scale: 1.5, opacity: 0 }}
                     className="absolute -top-24 flex flex-col items-center gap-0"
                   >
-                    <span className="text-gold-200 font-luxury tracking-widest text-xs uppercase mb-1">Total Win</span>
-                    <span className="text-4xl sm:text-6xl font-luxury text-gold-500 drop-shadow-[0_0_30px_rgba(212,184,60,0.8)] glow-text whitespace-nowrap">
+                    <span className="text-primary/90 font-luxury tracking-widest text-xs uppercase mb-1">Total Win</span>
+                    <span className="text-4xl sm:text-6xl font-luxury text-primary drop-shadow-glow-gold glow-text whitespace-nowrap">
                       {formatCurrency(potSize)}
                     </span>
                   </motion.div>
@@ -615,7 +615,7 @@ const PokerTableView = memo(({
                   )}>
                     <div className="flex flex-col">
                       <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest text-center">Current Pot</span>
-                      <span className="text-lg sm:text-2xl font-numbers text-gold-400 font-bold whitespace-nowrap tabular-nums">
+                      <span className="text-lg sm:text-2xl font-numbers text-accent-foreground font-bold whitespace-nowrap tabular-nums">
                         {formatCurrency(potSize)}
                       </span>
                     </div>

@@ -47,7 +47,7 @@ const AddPlayerDialog = memo(({
 }: AddPlayerDialogProps) => {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[95vw] sm:max-w-lg p-4 sm:p-6 bg-background/80 backdrop-blur-xl border-border/50">
+            <DialogContent className="w-full sm:max-w-lg glass-panel p-4 sm:p-6">
                 <DialogHeader className="p-0 mb-4 text-left">
                     <DialogTitle className="font-luxury uppercase tracking-widest text-lg">Add Player</DialogTitle>
                     <DialogDescription>
@@ -85,7 +85,7 @@ const AddPlayerDialog = memo(({
                             />
                         </div>
 
-                        <ScrollArea className="h-[300px] sm:h-[350px]">
+                        <ScrollArea className="h-72 sm:h-96">
                             <div className="space-y-2">
                                 {availablePlayers.length > 0 ? (
                                     availablePlayers.map((player) => (

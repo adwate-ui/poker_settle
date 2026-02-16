@@ -132,7 +132,7 @@ export const FinalStackManagement = ({
                   size="icon"
                   aria-label={`Edit final stack for ${gamePlayer.player.name}`}
                   className={cn(
-                    "bg-transparent border-border/50 hover:border-gold-500/50",
+                    "bg-transparent border-border/50 hover:border-primary/50",
                     "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
                   )}
                 >

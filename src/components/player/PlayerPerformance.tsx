@@ -138,7 +138,7 @@ const PlayerPerformance = ({ players, games }: PlayerPerformanceProps) => {
                       {playerGames.map((game) => (
                         <Card
                           key={game.gameId}
-                          className="border-border/50 bg-white/2 hover:bg-white/10 dark:hover:bg-black/40 hover:border-primary/40 cursor-pointer transition-all group overflow-hidden"
+                          className="border-border/50 bg-card/40 hover:bg-card/60 hover:border-primary/40 cursor-pointer transition-all group overflow-hidden"
                           onClick={() => navigate(`/games/${game.gameId}`)}
                         >
                           <div className="p-6">

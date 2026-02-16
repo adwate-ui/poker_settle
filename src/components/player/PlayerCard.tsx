@@ -64,7 +64,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation glass-panel group overflow-hidden relative border-0">
+    <Card className="p-4 transition-all duration-300 hover:scale-105 touch-manipulation glass-panel group overflow-hidden relative border-0">
       {/* Status accent */}
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",
@@ -104,7 +104,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
           {/* Add Buy-ins Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Add Buy-in</Label>
+            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Add Buy-in</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="number"
@@ -128,7 +128,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
 
           {/* Final Stack Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40 ml-0.5">Final Stack</Label>
+            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Final Stack</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="text"

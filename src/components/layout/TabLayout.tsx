@@ -35,7 +35,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         {children}
 
         {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gold-900/10 dark:border-gold-500/20 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden glass-panel border-t border-primary/20 pb-safe">
           <div className="flex justify-around items-center h-16">
             <button
               onClick={() => handleTabChange("new-game")}
@@ -48,7 +48,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Play className={cn("h-5 w-5", currentTab === "new-game" && "drop-shadow-glow")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">New</span>
+              <span className="text-3xs font-luxury uppercase tracking-widest">New</span>
             </button>
             <button
               onClick={() => handleTabChange("games-history")}
@@ -61,7 +61,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <History className={cn("h-5 w-5", currentTab === "games-history" && "drop-shadow-glow")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Games</span>
+              <span className="text-3xs font-luxury uppercase tracking-widest">Games</span>
             </button>
             <button
               onClick={() => handleTabChange("players-history")}
@@ -74,7 +74,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Users className={cn("h-5 w-5", currentTab === "players-history" && "drop-shadow-glow")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Players</span>
+              <span className="text-3xs font-luxury uppercase tracking-widest">Players</span>
             </button>
             <button
               onClick={() => handleTabChange("hands-history")}
@@ -87,7 +87,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Hand className={cn("h-5 w-5", currentTab === "hands-history" && "drop-shadow-glow")} />
-              <span className="text-[10px] font-luxury uppercase tracking-widest">Hands</span>
+              <span className="text-3xs font-luxury uppercase tracking-widest">Hands</span>
             </button>
           </div>
         </div>
@@ -130,7 +130,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
         </Tabs>
 
         {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gold-900/10 dark:border-gold-500/20 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden glass-panel border-t border-primary/20 pb-safe">
           <div className="flex justify-around items-center h-16">
             <button
               onClick={() => handleTabChange("new-game")}
@@ -143,7 +143,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Play className={cn("h-4 w-4", currentTab === "new-game" && "drop-shadow-glow")} />
-              <span className="text-[8px] font-luxury uppercase tracking-wider">New</span>
+              <span className="text-tiny font-luxury uppercase tracking-wider">New</span>
             </button>
             <button
               onClick={() => handleTabChange("games-history")}
@@ -156,7 +156,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <History className={cn("h-4 w-4", currentTab === "games-history" && "drop-shadow-glow")} />
-              <span className="text-[8px] font-luxury uppercase tracking-wider">Games</span>
+              <span className="text-tiny font-luxury uppercase tracking-wider">Games</span>
             </button>
             <button
               onClick={() => handleTabChange("players-history")}
@@ -169,7 +169,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Users className={cn("h-4 w-4", currentTab === "players-history" && "drop-shadow-glow")} />
-              <span className="text-[8px] font-luxury uppercase tracking-wider">Players</span>
+              <span className="text-tiny font-luxury uppercase tracking-wider">Players</span>
             </button>
             <button
               onClick={() => handleTabChange("hands-history")}
@@ -182,7 +182,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
                 <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
               )}
               <Hand className={cn("h-4 w-4", currentTab === "hands-history" && "drop-shadow-glow")} />
-              <span className="text-[8px] font-luxury uppercase tracking-wider">Hands</span>
+              <span className="text-tiny font-luxury uppercase tracking-wider">Hands</span>
             </button>
           </div>
         </div>

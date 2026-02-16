@@ -41,7 +41,7 @@ const SeatingSlide = () => {
                 />
             ) : (
                 <div className="space-y-4">
-                    <div className="relative aspect-[4/3] bg-white/40 dark:bg-black/40 overflow-hidden shadow-inner border-y border-border">
+                    <div className="relative aspect-[4/3] bg-card/40 overflow-hidden shadow-inner border-y border-border">
                         {currentTablePosition && currentTablePosition.positions.length > 0 ? (
                             <PokerTableView
                                 positions={currentTablePosition.positions}
@@ -50,7 +50,7 @@ const SeatingSlide = () => {
                             <div className="absolute inset-0 flex items-center justify-center p-8">
                                 <Button
                                     onClick={() => setShowPositionEditor(true)}
-                                    className="h-14 px-10 bg-accent/5 dark:bg-white/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
+                                    className="h-14 px-10 bg-accent/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
                                 >
                                     Setup Seating
                                 </Button>
@@ -69,7 +69,7 @@ const SeatingSlide = () => {
                             </Button>
                             <Button
                                 onClick={handleStartHandTracking}
-                                className="flex-1 h-12 bg-gold-600 text-black text-label rounded-xl"
+                                className="flex-1 h-12 bg-primary text-primary-foreground text-label rounded-xl"
                             >
                                 {hasSavedHandState ? 'Resume' : 'Record Hand'}
                             </Button>

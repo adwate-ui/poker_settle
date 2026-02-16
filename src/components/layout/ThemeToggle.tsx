@@ -26,7 +26,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="fixed bottom-4 right-4 z-50 rounded-full bg-background/80 backdrop-blur-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300 shadow-xl"
+      className="fixed bottom-4 left-4 z-50 rounded-full glass-panel text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300"
       aria-label="Toggle theme"
     >
       {theme === "light" ? (

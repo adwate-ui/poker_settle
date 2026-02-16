@@ -50,10 +50,10 @@ const CardSelector = ({
 
   const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
   const suits = [
-    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-red-600 dark:text-red-500' },
-    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-red-600 dark:text-red-500' },
-    { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-gray-900 dark:text-gray-100' },
-    { code: 's', name: 'Spades', symbol: '♠', color: 'text-gray-900 dark:text-gray-100' },
+    { code: 'h', name: 'Hearts', symbol: '♥', color: 'text-destructive' },
+    { code: 'd', name: 'Diamonds', symbol: '♦', color: 'text-destructive' },
+    { code: 'c', name: 'Clubs', symbol: '♣', color: 'text-foreground' },
+    { code: 's', name: 'Spades', symbol: '♠', color: 'text-foreground' },
   ];
 
   const allCards = ranks.flatMap(rank =>
@@ -156,21 +156,21 @@ const CardSelector = ({
                       className={cn(
                         "relative aspect-[5/7] transition-all duration-200 rounded touch-manipulation",
                         (isUsed || isKnownHole) && "opacity-30 cursor-not-allowed grayscale",
-                        isSelected && "ring-2 ring-poker-gold ring-offset-1 ring-offset-background scale-105 z-10 shadow-[0_0_15px_rgba(212,184,0,0.4)]",
+                        isSelected && "ring-2 ring-poker-gold ring-offset-1 ring-offset-background scale-105 z-10 shadow-glow-gold",
                         !isUsed && !isKnownHole && !isSelected && "hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
                       )}
                     >
                       <PokerCard card={card} size="xs" className="pointer-events-none" />
                       {isUsed && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
-                          <div className="bg-red-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                          <div className="bg-state-error text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             USED
                           </div>
                         </div>
                       )}
                       {isKnownHole && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded pointer-events-none">
-                          <div className="bg-blue-600 text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
+                          <div className="bg-state-info text-white text-[8px] px-1 py-0.5 rounded font-bold shadow-md">
                             HOLE
                           </div>
                         </div>

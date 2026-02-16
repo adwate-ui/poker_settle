@@ -25,7 +25,7 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame: _isLive
   const profitLossStatus = netAmount > 0 ? 'profit' : netAmount < 0 ? 'loss' : 'neutral';
 
   return (
-    <Card className="p-4 transition-all duration-300 hover:scale-[1.01] touch-manipulation border-border/50 bg-card/60 group overflow-hidden relative">
+    <Card className="p-4 transition-all duration-300 touch-manipulation border-border/50 bg-card/60 group overflow-hidden relative">
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30",
         profitLossStatus === 'profit' ? 'bg-state-success' : profitLossStatus === 'loss' ? 'bg-state-error' : 'bg-primary/20'

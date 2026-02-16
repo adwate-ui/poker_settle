@@ -40,7 +40,7 @@ const ActionButtons = memo(({
           size="game-action"
           onClick={() => onAction('Call')}
           disabled={disabled}
-          className="flex-[1.5]"
+          className="flex-1"
         >
           {isCheck ? <ShieldCheck className="h-5 w-5 mr-2" /> : <Check className="h-5 w-5 mr-2" />}
           {isCheck ? "Check" : "Call"}

@@ -130,7 +130,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
       {!loading && history.length > 0 && (
         <div className="max-w-[200px] mb-4">
           <Select value={filterName} onValueChange={setFilterName}>
-            <SelectTrigger className="w-full h-9 bg-muted/50 border-input/50">
+            <SelectTrigger className="w-full h-9">
               <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
               <SelectValue placeholder="All Players" />
             </SelectTrigger>
@@ -152,7 +152,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         </div>
       ) : history.length === 0 ? (
         <div className="py-16 text-center border border-dashed rounded-xl bg-muted/20">
-          <History className="h-10 w-10 mx-auto mb-4 text-muted-foreground/20" />
+          <History className="h-10 w-10 mx-auto mb-4 text-muted-foreground opacity-20" />
           <p className="text-sm text-muted-foreground">No buy-in changes recorded.</p>
         </div>
       ) : filteredHistory.length === 0 ? (

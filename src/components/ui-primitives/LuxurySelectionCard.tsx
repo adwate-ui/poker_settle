@@ -33,7 +33,7 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                 <div className="flex items-center gap-2">
                     <span className={cn(
                         "font-luxury uppercase tracking-widest truncate",
-                        isSm ? "text-[10px]" : "text-xs"
+                        isSm ? "text-3xs" : "text-xs"
                     )}>
                         {player.name}
                     </span>
@@ -42,13 +42,13 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                     )}
                 </div>
                 <div className={cn("flex gap-2.5 mt-1.5", isSm && "mt-1 gap-2")}>
-                    <Badge variant="stats" className={isSm ? "text-[8px] h-4 px-1" : ""}>
+                    <Badge variant="stats" className={isSm ? "text-tiny h-4 px-1" : ""}>
                         {player.total_games || 0} SESSIONS
                     </Badge>
                     {player.total_profit !== undefined && (
                         <Badge
                             variant={player.total_profit >= 0 ? "profit" : "loss"}
-                            className={isSm ? "text-[8px] h-4 px-1" : ""}
+                            className={isSm ? "text-tiny h-4 px-1" : ""}
                         >
                             {formatProfitLoss(player.total_profit)}
                         </Badge>

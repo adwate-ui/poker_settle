@@ -20,10 +20,10 @@ const buttonVariants = cva(
         luxury: "bg-primary/10 border-2 border-primary/20 text-primary hover:bg-primary/20 hover:border-primary/30 font-luxury uppercase tracking-widest shadow-lg shadow-primary/10",
 
         // Success variant for confirmations
-        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20",
+        success: "bg-state-success text-state-success-foreground hover:bg-state-success/90 shadow-lg shadow-state-success/20",
 
         // Warning variant for important actions
-        warning: "bg-orange-600 text-white hover:bg-orange-700 shadow-lg shadow-orange-600/20",
+        warning: "bg-state-warning text-state-warning-foreground hover:bg-state-warning/90 shadow-lg shadow-state-warning/20",
 
         // Game-Specific Actions
         "game-fold": "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 font-luxury uppercase tracking-widest",

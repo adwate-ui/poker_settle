@@ -138,10 +138,10 @@ const StackSlide = () => {
                     }}
                     disabled={!canCompleteGame || isCompletingGame}
                     className={cn(
-                        "w-full h-20 text-black font-black text-xl tracking-tighter rounded-2xl transition-all relative overflow-hidden group",
+                        "w-full h-20 text-primary-foreground font-black text-xl tracking-tighter rounded-2xl transition-all relative overflow-hidden group",
                         canCompleteGame && !isCompletingGame
-                            ? 'bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 bg-[length:200%_100%] animate-shimmer hover:shadow-[0_0_50px_rgba(212,184,60,0.3)] active:scale-95'
-                            : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
+                            ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-glow active:scale-95'
+                            : 'bg-muted text-muted-foreground opacity-50'
                     )}
                 >
                     {isCompletingGame ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (

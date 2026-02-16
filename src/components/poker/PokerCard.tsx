@@ -27,8 +27,8 @@ const SuitIcon = ({ suit, className = "", fourColor = true }: { suit: string, cl
     switch (suit) {
       case 'h': return "text-state-error";
       case 's': return "text-foreground";
-      case 'd': return "text-blue-600"; // Royal Blue equivalent
-      case 'c': return "text-green-700"; // Emerald Green equivalent
+      case 'd': return "text-chip-blue"; // Royal Blue equivalent
+      case 'c': return "text-poker-green"; // Emerald Green equivalent
       default: return "";
     }
   };
@@ -86,8 +86,8 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
   };
 
   const rankSizes = {
-    xxs: 'text-[10px]',
-    xs: 'text-[12px]',
+    xxs: 'text-2xs',
+    xs: 'text-xs',
     sm: 'text-[16px]',
     md: 'text-[24px]',
     lg: 'text-[28px]',
@@ -118,8 +118,8 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
     switch (s) {
       case 'h': return "text-state-error";
       case 's': return "text-foreground";
-      case 'd': return "text-blue-600";
-      case 'c': return "text-green-700";
+      case 'd': return "text-chip-blue";
+      case 'c': return "text-poker-green";
       default: return "text-foreground";
     }
   };
@@ -133,8 +133,8 @@ const PokerCard = memo(({ card, size = 'md', className = '', fourColor = true }:
       "relative select-none overflow-hidden",
       "bg-gradient-to-br from-white to-stone-100", // Subtle Ivory Gradient
       "border border-stone-200/60",
-      "shadow-[0_2px_8px_-2px_rgba(0,0,0,0.15)]", // Soft Luxury Shadow
-      "group hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] transition-shadow duration-300"
+      "shadow-sm", // Soft Luxury Shadow
+      "group hover:shadow-md transition-shadow duration-300"
     )}>
 
       {/* Texture: Linen Filter (Preserved from original) */}

@@ -458,15 +458,15 @@ export const GameDetailView = ({
         <CardContent className="pt-8">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Buy-in</p>
+              <p className="text-3xs uppercase tracking-widest text-muted-foreground">Buy-in</p>
               <p className="text-2xl font-bold font-numbers">{formatCurrency(game.buy_in_amount)}</p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground"># Players</p>
+              <p className="text-3xs uppercase tracking-widest text-muted-foreground"># Players</p>
               <p className="text-2xl font-bold font-numbers">{gamePlayers.length}</p>
             </div>
             <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Chips in Play</p>
+              <p className="text-3xs uppercase tracking-widest text-muted-foreground">Chips in Play</p>
               <p className="text-2xl font-bold text-primary font-numbers">
                 {formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
@@ -511,7 +511,7 @@ export const GameDetailView = ({
             <div className={cn("section-content", isMobile && "p-0")}>
               <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full border">
+                  <span className="text-3xs uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full border">
                     Snapshot: {tablePositions.length > 0 ? format(toZonedTime(new Date(currentTablePosition!.snapshot_timestamp), "Asia/Kolkata"), "HH:mm") : "--:--"} IST
                   </span>
                 </div>
@@ -527,7 +527,7 @@ export const GameDetailView = ({
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-[10px] font-medium px-2 min-w-[40px] text-center">
+                    <span className="text-3xs font-medium px-2 min-w-[40px] text-center">
                       {currentPositionIndex + 1} / {tablePositions.length}
                     </span>
                     <Button
@@ -657,7 +657,7 @@ export const GameDetailView = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setTransferDialogOpen(true)}
-                      className="h-8 rounded-full border text-[10px] tracking-widest uppercase"
+                      className="h-8 rounded-full border text-3xs tracking-widest uppercase"
                     >
                       <Plus className="h-3 w-3 mr-1" /> Add Manual
                     </Button>
@@ -724,7 +724,7 @@ export const GameDetailView = ({
                                 {isMobile ? "M" : "Manual"}
                               </Badge>
                             ) : (
-                              <span className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
+                              <span className="text-3xs text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
                             )}
                           </TableCell>
                         )}
