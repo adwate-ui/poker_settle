@@ -747,7 +747,7 @@ export const GameDetailView = ({
                                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                                 )}
                               >
-                                {confirmation.confirmed ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+                                {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                               </Button>
                             ) : (
                               <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers">
@@ -766,7 +766,7 @@ export const GameDetailView = ({
                                 onClick={() => handleDeleteManualTransfer(index)}
                                 className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
                               >
-                                <Trash2 className={isMobile ? "h-5 w-5" : "h-3.5 w-3.5"} />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
                           </TableCell>
