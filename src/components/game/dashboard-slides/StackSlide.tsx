@@ -116,8 +116,11 @@ const StackSlide = () => {
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-luxury uppercase tracking-widest text-foreground">Adjustments</h3>
                     {!showManualTransfer && (
-                        <Button variant="ghost" size="sm" onClick={() => setShowManualTransfer(true)} className="h-8 px-3 text-xs uppercase font-bold tracking-wider">
-                            <Plus className="w-3.5 h-3.5 mr-1.5" /> Add
+                        <Button
+                            onClick={() => setShowManualTransfer(true)}
+                            className="w-full h-14 font-bold text-lg tracking-[0.2em] rounded-2xl relative overflow-hidden group bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-glow active:scale-95 transition-all text-black uppercase font-luxury"
+                        >
+                            <Plus className="w-5 h-5 mr-2" /> Add Adjustment
                         </Button>
                     )}
                 </div>
