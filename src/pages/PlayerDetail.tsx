@@ -341,37 +341,45 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
           <TableRow>
             <TableHead
               onClick={() => handleSort("date")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[25%] sm:w-[18%]"
             >
               <div className="flex items-center gap-1">
-                Session Day {getSortIcon("date")}
+                <span className="hidden sm:inline">Session Day</span>
+                <span className="sm:hidden">Date</span>
+                {getSortIcon("date")}
               </div>
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_ins")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[15%] sm:w-[15%]"
             >
               <div className="flex items-center gap-1">
-                Buy-ins {getSortIcon("buy_ins")}
+                <span className="hidden sm:inline">Buy-ins</span>
+                <span className="sm:hidden">Buy</span>
+                {getSortIcon("buy_ins")}
               </div>
             </TableHead>
             <TableHead
               onClick={() => handleSort("net_amount")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[25%] sm:w-[20%]"
             >
               <div className="flex items-center gap-1">
-                Net P&L {getSortIcon("net_amount")}
+                <span className="hidden sm:inline">Net P&L</span>
+                <span className="sm:hidden">P&L</span>
+                {getSortIcon("net_amount")}
               </div>
             </TableHead>
             <TableHead
               onClick={() => handleSort("final_stack")}
-              className="cursor-pointer"
+              className="cursor-pointer w-[25%] sm:w-[20%]"
             >
               <div className="flex items-center gap-1">
-                Final Stack {getSortIcon("final_stack")}
+                <span className="hidden sm:inline">Final Stack</span>
+                <span className="sm:hidden">Stack</span>
+                {getSortIcon("final_stack")}
               </div>
             </TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-auto">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -383,21 +391,21 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 className="cursor-pointer transition-colors"
                 onClick={() => handleNavigateGame(game.game_id)}
               >
-                <TableCell className="font-medium">
-                  {format(new Date(game.games.date), "MMM d, yyyy")}
+                <TableCell className="font-medium text-xs">
+                  {format(new Date(game.games.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell className="font-numbers text-center text-muted-foreground">
+                <TableCell className="font-numbers text-center text-muted-foreground text-xs">
                   {game.buy_ins}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-xs">
                   <Badge
                     variant={isWin ? "profit" : "loss"}
-                    className="font-numbers px-2"
+                    className="font-numbers px-1 h-5 min-w-[20px] text-[10px] justify-center"
                   >
                     <ResponsiveCurrency amount={game.net_amount} />
                   </Badge>
                 </TableCell>
-                <TableCell className="font-numbers text-muted-foreground">
+                <TableCell className="font-numbers text-muted-foreground text-xs">
                   <ResponsiveCurrency amount={game.final_stack} />
                 </TableCell>
                 <TableCell>
