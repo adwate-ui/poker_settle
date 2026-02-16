@@ -20,7 +20,7 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
             onClick={onClick}
             className={cn(
                 "w-full text-left p-4 rounded-lg border border-border/40 bg-card/20 hover:bg-primary/5 hover:border-primary/50 transition-all group flex items-center gap-4",
-                isSm && "p-3 gap-3",
+                isSm && "p-2 gap-2",
                 className
             )}
         >
@@ -33,7 +33,7 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                 <div className="flex items-center gap-2">
                     <span className={cn(
                         "font-luxury uppercase tracking-widest truncate",
-                        isSm ? "text-3xs" : "text-xs"
+                        isSm ? "text-2xs" : "text-sm",
                     )}>
                         {player.name}
                     </span>
@@ -41,14 +41,14 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                         <Star className={cn("text-primary fill-current", isSm ? "h-2.5 w-2.5" : "h-3 w-3")} />
                     )}
                 </div>
-                <div className={cn("flex gap-2.5 mt-1.5", isSm && "mt-1 gap-2")}>
-                    <Badge variant="stats" className={isSm ? "text-tiny h-4 px-1" : ""}>
+                <div className={cn("flex gap-2.5 mt-1.5 overflow-hidden", isSm && "mt-1 gap-1 flex-nowrap")}>
+                    <Badge variant="stats" className={isSm ? "text-3xs h-4 px-1" : ""}>
                         {player.total_games || 0} SESSIONS
                     </Badge>
                     {player.total_profit !== undefined && (
                         <Badge
                             variant={player.total_profit >= 0 ? "profit" : "loss"}
-                            className={isSm ? "text-tiny h-4 px-1" : ""}
+                            className={isSm ? "text-3xs h-4 px-1" : ""}
                         >
                             {formatProfitLoss(player.total_profit)}
                         </Badge>

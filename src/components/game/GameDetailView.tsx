@@ -365,7 +365,7 @@ export const GameDetailView = ({
       )}
 
       <Card className="overflow-hidden">
-        <CardHeader className="p-3 sm:p-6 pb-4 sm:pb-8 border-b border-border bg-accent/5">
+        <CardHeader className="p-4 md:p-6 pb-4 md:pb-8 border-b border-border bg-accent/5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
@@ -479,7 +479,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={buyInLogsOpen} onOpenChange={setBuyInLogsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Buy-in Logs</h3>
@@ -499,7 +499,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={tablePositionsOpen} onOpenChange={setTablePositionsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Seat Draw</h3>
@@ -559,7 +559,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={playerResultsOpen} onOpenChange={setPlayerResultsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Session P&L</h3>
@@ -573,9 +573,9 @@ export const GameDetailView = ({
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Player</TableHead>
-                    <TableHead className={isMobile ? "px-1" : ""}>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                    <TableHead className={isMobile ? "px-1" : ""}>P&L</TableHead>
-                    {!isMobile && <TableHead>Cashout</TableHead>}
+                    <TableHead className="w-[15%] sm:w-[12%]">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                    <TableHead className="w-[20%] sm:w-[15%]">P&L</TableHead>
+                    {!isMobile && <TableHead className="w-[20%] sm:w-[15%]">Cashout</TableHead>}
                     {showOwnerControls && fetchBuyInHistory && (
                       <TableHead>{isMobile ? "Hist" : "Audit"}</TableHead>
                     )}
@@ -598,16 +598,16 @@ export const GameDetailView = ({
                             {playerName}
                           </Link>
                         </TableCell>
-                        <TableCell className={isMobile ? "px-1" : ""}>
-                          <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px]">
+                        <TableCell>
+                          <Badge variant="secondary" className="font-numbers min-w-[20px]">
                             {gamePlayer.buy_ins}
                           </Badge>
                         </TableCell>
-                        <TableCell className={isMobile ? "px-1" : ""}>
+                        <TableCell>
                           <div>
                             <Badge
                               variant={isWin ? "profit" : "loss"}
-                              className="font-numbers px-1.5"
+                              className="font-numbers"
                             >
                               {formatProfitLoss(netAmount)}
                             </Badge>
@@ -645,7 +645,7 @@ export const GameDetailView = ({
       <Card className="overflow-hidden">
         <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
           <CollapsibleTrigger asChild>
-            <div className="p-3 sm:p-6 border-b cursor-pointer flex items-center justify-between group">
+            <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <Coins className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <h3 className="text-lg font-medium">Settlement</h3>
@@ -750,7 +750,7 @@ export const GameDetailView = ({
                                 {confirmation.confirmed ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
                               </Button>
                             ) : (
-                              <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 px-1.5 font-numbers">
+                              <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers">
                                 {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
                               </Badge>
                             )}

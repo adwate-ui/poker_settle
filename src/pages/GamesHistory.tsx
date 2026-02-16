@@ -326,7 +326,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className="cursor-pointer w-[22%]"
+              className="cursor-pointer w-[25%] sm:w-[18%]"
             >
               <div className="flex items-center gap-1">
                 Date
@@ -335,7 +335,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className="cursor-pointer w-[22%]"
+              className="cursor-pointer w-[20%] sm:w-[15%]"
             >
               <div className="flex items-center gap-1">
                 Buy-in
@@ -344,7 +344,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("players")}
-              className="cursor-pointer w-[12%]"
+              className="cursor-pointer w-[15%] sm:w-[10%]"
             >
               <div className="flex items-center gap-1">
                 <span className="sr-only sm:not-sr-only">Players</span>
@@ -354,14 +354,14 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("chips")}
-              className="cursor-pointer w-[22%]"
+              className="cursor-pointer w-[25%] sm:w-[20%]"
             >
               <div className="flex items-center gap-1">
                 <span className="sm:inline hidden">Total Pot</span><span className="sm:hidden inline">Pot</span>
                 <ArrowUpDown className="h-3 w-3 opacity-50" />
               </div>
             </TableHead>
-            <TableHead className="w-[22%]">
+            <TableHead>
               {selectedPlayer !== "all" ? "P&L" : "Act"}
             </TableHead>
           </TableRow>

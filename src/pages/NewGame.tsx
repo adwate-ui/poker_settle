@@ -243,7 +243,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
               <div className="absolute right-0 bottom-3 text-muted-foreground group-focus-within:text-primary transition-colors">
                 <Info className="h-4 w-4" />
@@ -270,7 +270,7 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
             </div>
             <div className="space-y-3">
@@ -290,14 +290,13 @@ const NewGame = () => {
                   }
                 }}
                 disabled={hasActiveGame}
-                className="h-14 sm:h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-xl font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
+                className="h-12 bg-accent/5 border-0 border-b border-border px-4 rounded-none text-lg font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-accent/10 transition-all duration-300 ease-out"
               />
             </div>
           </div>
 
           {/* Add Players Section */}
           <div className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-label text-primary">Add Players</h3>
             <h3 className="text-label text-primary">Add Players</h3>
 
             {/* Selected Players List - Kept from NewGame/PlayerSelector logic but now explicit here since UniversalPlayerManager handles selection */}
@@ -312,7 +311,7 @@ const NewGame = () => {
                       key={player.id}
                       player={player}
                       onClick={() => removePlayerFromGame(player.id)}
-                      size="md"
+                      size="sm"
                       className="bg-accent/5 border-primary/20 hover:bg-destructive/10 hover:border-destructive/50"
                     />
                   ))}

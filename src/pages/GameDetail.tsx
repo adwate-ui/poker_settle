@@ -116,18 +116,16 @@ const GameDetail = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 py-2 sm:py-8">
-      <GameErrorBoundary>
-        <GameDetailView
-          gameId={gameId}
-          client={supabase}
-          showOwnerControls={true}
-          onBack={() => navigate("/games")}
-          backLabel="Back to Games History"
-          fetchBuyInHistory={fetchBuyInHistory}
-        />
-      </GameErrorBoundary>
-    </div>
+    <GameErrorBoundary>
+      <GameDetailView
+        gameId={gameId}
+        client={supabase}
+        showOwnerControls={true}
+        onBack={() => navigate("/games")}
+        backLabel="Back to Games History"
+        fetchBuyInHistory={fetchBuyInHistory}
+      />
+    </GameErrorBoundary>
   );
 };
 

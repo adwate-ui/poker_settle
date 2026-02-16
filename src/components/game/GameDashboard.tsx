@@ -345,9 +345,9 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[35%]">From</TableHead>
-                          <TableHead className="w-[35%]">To</TableHead>
-                          <TableHead className="w-[30%] text-right">Amt</TableHead>
+                          <TableHead>From</TableHead>
+                          <TableHead>To</TableHead>
+                          <TableHead className="text-right">Amt</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
