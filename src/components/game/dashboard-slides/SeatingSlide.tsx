@@ -50,11 +50,7 @@ const SeatingSlide = () => {
                             <div className="absolute inset-0 flex items-center justify-center p-8">
                                 <Button
                                     onClick={() => setShowPositionEditor(true)}
-<<<<<<< HEAD
-                                    className="h-14 px-10 bg-accent/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
-=======
                                     className="h-12 px-10 bg-accent/5 dark:bg-white/5 border border-border text-muted-foreground font-luxury uppercase tracking-widest text-xs"
->>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                                 >
                                     Setup Seating
                                 </Button>

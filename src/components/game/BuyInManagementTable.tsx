@@ -140,11 +140,7 @@ export const BuyInManagementTable = ({
                     setOpened(true);
                   }}
                   variant="ghost"
-<<<<<<< HEAD
-                  size="icon"
-=======
                   size="icon-sm"
->>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                   aria-label={`Add buy-in for ${gamePlayer.player.name}`}
                   className="bg-transparent text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
                 >
@@ -158,13 +154,8 @@ export const BuyInManagementTable = ({
                     playerName={gamePlayer.player.name}
                     fetchHistory={fetchBuyInHistory}
                     triggerProps={{
-<<<<<<< HEAD
-                      size: "icon",
-                      className: "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
-=======
                       size: "icon-sm",
                       className: "text-muted-foreground hover:text-foreground transition-opacity"
->>>>>>> 09bf3fc (feat: create LuxuryLayout component for consistent page styling and structure)
                     }}
                   />
                 )}
