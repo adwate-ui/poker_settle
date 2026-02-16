@@ -273,7 +273,14 @@ export async function sendSessionSummaryNotification(
   const gameLink = generateGameShareLink(gameId, gameToken);
   const playersMap = new Map(players.map(p => [p.id, p]));
 
+  const processedPlayerIds = new Set<string>();
+
   for (const gamePlayer of gamePlayers) {
+    // Deduplicate recipients
+    if (processedPlayerIds.has(gamePlayer.player_id)) {
+      continue;
+    }
+    processedPlayerIds.add(gamePlayer.player_id);
     const player = playersMap.get(gamePlayer.player_id);
     if (!player) continue;
 
