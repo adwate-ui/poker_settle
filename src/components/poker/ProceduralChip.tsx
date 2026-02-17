@@ -17,9 +17,9 @@ export const ProceduralChip = ({
     depth = 1
 }: ProceduralChipProps) => {
     const sizeClasses = {
-        sm: 'w-8 h-8 text-[8px]',
-        md: 'w-10 h-10 text-[10px]',
-        lg: 'w-12 h-12 text-[12px]'
+        sm: 'w-8 h-8 text-chip-sm',
+        md: 'w-10 h-10 text-chip-md',
+        lg: 'w-12 h-12 text-chip-lg'
     };
 
     // Extract base color to handle light/dark variations

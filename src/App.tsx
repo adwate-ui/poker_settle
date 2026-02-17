@@ -52,7 +52,7 @@ const AppContent = () => {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-[0_0_15px_rgba(212,184,60,0.5)]" />
+          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-glow-gold-sm" />
           <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Starting up...</p>
         </div>
       </div>
@@ -64,7 +64,7 @@ const AppContent = () => {
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-[0_0_15px_rgba(212,184,60,0.5)]" />
+            <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-glow-gold-sm" />
             <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Loading...</p>
           </div>
         </div>

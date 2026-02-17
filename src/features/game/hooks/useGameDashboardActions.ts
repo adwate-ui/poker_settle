@@ -207,12 +207,10 @@ export const useGameDashboardActions = () => {
         if (!game || isCompletingGame) return;
 
         setIsCompletingGame(true);
-        const loadingToastId = toast.loading("Saving game..."); // Track toast ID
+        const loadingToastId = toast.loading("Saving game...");
 
         try {
-            // 0. Determine Settlements
-            // If settlementsInput is empty (e.g. called from StackSlide or directly), calculate them here.
-            // This ensures uniqueness of logic and prevents empty settlements from being saved if intended otherwise.
+            // 1. Calculate settlements if not provided
             let finalSettlements = settlementsInput;
 
             if (!finalSettlements || finalSettlements.length === 0) {
@@ -222,106 +220,54 @@ export const useGameDashboardActions = () => {
                     paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
                 }));
 
-                // Get existing manual settlements from game state
                 const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
-
                 finalSettlements = calculateOptimizedSettlements(balances, manualSettlements);
             }
 
-            // 1. Complete the game in the database
+            // 2. Complete the game in the database (enforces zero-sum check)
             await completeGame(game.id, finalSettlements);
+            toast.dismiss(loadingToastId);
 
-            // 2. Verify completion before navigating to prevent 404s or missing data
-            let attempts = 0;
-            let verified = false;
-            const maxAttempts = 15;
+            // 3. Send notifications
+            try {
+                const loadingNotifyToast = toast.loading("Sending notifications...");
+                const linkData = await createOrGetSharedLink('game', game.id);
+                const gameToken = linkData?.accessToken || '';
 
-            const loadingToast = toast.loading("Verifying game records...");
-
-            while (attempts < maxAttempts && !verified) {
-                attempts++;
-                try {
-                    const { data: gameStatus, error: statusError } = await supabase
-                        .from('games')
-                        .select('is_complete')
-                        .eq('id', game.id)
-                        .single();
-
-                    if (!statusError && gameStatus?.is_complete === true) {
-                        verified = true;
-                        break;
-                    }
-                } catch (err) {
-                    console.warn(`Verification attempt ${attempts} failed:`, err);
+                if (gameToken) {
+                    const players = gamePlayers.map(gp => gp.player);
+                    await sendSessionSummaryNotification(
+                        game.id,
+                        game.date,
+                        gameToken,
+                        players,
+                        gamePlayers.map(gp => ({
+                            player_id: gp.player_id,
+                            net_amount: gp.net_amount
+                        })),
+                        finalSettlements
+                    );
+                    toast.success("Game finalized & notifications sent!");
+                } else {
+                    toast.success("Game finalized!");
                 }
-
-                // Wait 1s before next attempt
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                toast.dismiss(loadingNotifyToast);
+            } catch (notifyError) {
+                console.error("Failed to send notifications:", notifyError);
+                toast.error("Game finalized, but failed to send notifications");
             }
 
-            toast.dismiss(loadingToast);
-
-            if (!verified) {
-                console.warn("Game verification timed out. Forcing completion status...");
-                toast.warning("Finalizing game records...");
-                // Fail-safe: Force update
-                try {
-                    await supabase.from('games').update({ is_complete: true }).eq('id', game.id);
-                } catch (e) {
-                    console.error("Force update failed", e);
-                }
-            } else {
-                toast.dismiss(loadingToastId); // Ensure initial toast is dismissed if success
-
-                // Send Session Summary Notification
-                try {
-                    const loadingNotifyToast = toast.loading("Sending notifications...");
-
-                    // Get Access Token for Share Link
-                    const linkData = await createOrGetSharedLink('game', game.id);
-                    const gameToken = linkData?.accessToken || '';
-
-                    if (gameToken) {
-                        const players = gamePlayers.map(gp => gp.player);
-                        await sendSessionSummaryNotification(
-                            game.id,
-                            game.date,
-                            gameToken,
-                            players,
-                            gamePlayers.map(gp => ({
-                                player_id: gp.player_id,
-                                net_amount: gp.net_amount
-                            })),
-                            finalSettlements
-                        );
-                        toast.success("Game finalized & notifications sent!");
-                    } else {
-                        console.warn("Could not generate share token for notifications");
-                        toast.success("Game finalized! (Notifications skipped)");
-                    }
-                    toast.dismiss(loadingNotifyToast);
-                } catch (notifyError) {
-                    console.error("Failed to send notifications:", notifyError);
-                    toast.error("Game finalized, but failed to send notifications");
-                }
-            }
-
-            // 3. Navigation
-            navigate(`/games/${game.id}`, {
-                state: {
-                    justCompleted: true,
-                    settlements: finalSettlements,
-                    gamePlayers: gamePlayers
-                }
-            });
+            // 4. Reset state and navigate
+            setIsCompletingGame(false);
+            navigate(`/games/${game.id}`);
 
         } catch (err) {
             toast.dismiss(loadingToastId);
             console.error("Error completing game:", err);
-            toast.error(ErrorMessages.game.complete(err)); // Assuming ErrorMessages handles extraction
+            toast.error(ErrorMessages.game.complete(err));
             setIsCompletingGame(false);
         }
-    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame]);
+    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink]);
 
     const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
         if (!game) return;

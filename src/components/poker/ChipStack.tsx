@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ProceduralChip } from './ProceduralChip';
 import { formatCurrency } from '@/utils/currencyUtils';
 
-const COLOR_MAP: Record<string, string> = {
-  blue: '#1d4ed8',   // blue-700
-  yellow: '#a16207', // yellow-700
-  green: '#15803d',  // green-700
-  black: '#18181b',  // zinc-900
-  red: '#b91c1c',    // red-700
-  white: '#d4d4d8',  // zinc-300
+const VALID_CHIP_COLORS = ['red', 'blue', 'green', 'black', 'white', 'yellow'] as const;
+type ChipColor = typeof VALID_CHIP_COLORS[number];
+
+const getChipColor = (color: string): string => {
+  return VALID_CHIP_COLORS.includes(color as ChipColor)
+    ? `hsl(var(--chip-${color}))`
+    : 'hsl(var(--chip-black))';
 };
 
 interface ChipStackProps {
@@ -25,8 +25,8 @@ export const ChipStack = memo(({ amount, size = 'md', showAmount = true }: ChipS
   const { chips: CHIP_DENOMINATIONS } = useChips();
 
   const stackConfig = {
-    sm: { chipHeight: 2.5, width: 28, fontSize: 'text-[9px]', maxPerColumn: 5 },
-    md: { chipHeight: 3, width: 34, fontSize: 'text-[10px]', maxPerColumn: 6 },
+    sm: { chipHeight: 2.5, width: 28, fontSize: 'text-tiny', maxPerColumn: 5 },
+    md: { chipHeight: 3, width: 34, fontSize: 'text-2xs', maxPerColumn: 6 },
     lg: { chipHeight: 3.5, width: 42, fontSize: 'text-xs', maxPerColumn: 8 }
   };
 
@@ -83,7 +83,7 @@ export const ChipStack = memo(({ amount, size = 'md', showAmount = true }: ChipS
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className="flex flex-row items-end justify-center gap-[2px]">
+      <div className="flex flex-row items-end justify-center gap-0.5">
         <AnimatePresence mode="popLayout">
           {columns.map((col, colIdx) => (
             <div
@@ -111,7 +111,7 @@ export const ChipStack = memo(({ amount, size = 'md', showAmount = true }: ChipS
                 >
                   <ProceduralChip
                     value={chip.label}
-                    color={COLOR_MAP[chip.color] || '#333'}
+                    color={getChipColor(chip.color)}
                     size={size}
                   />
                 </motion.div>

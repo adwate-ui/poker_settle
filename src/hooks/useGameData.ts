@@ -193,8 +193,6 @@ export const useGameData = () => {
         createConfirmations
       );
 
-      toast.success('Game completed successfully!');
-
       // Refresh games list
       await fetchGames();
     } catch (error) {

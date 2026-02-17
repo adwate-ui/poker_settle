@@ -24,6 +24,9 @@ export default {
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
         '3xs': ['0.5rem', { lineHeight: '0.65rem' }],
         'table-base': ['0.75rem', { lineHeight: '1rem' }],
+        'chip-sm': ['0.5rem', { lineHeight: '0.625rem' }],
+        'chip-md': ['0.625rem', { lineHeight: '0.75rem' }],
+        'chip-lg': ['0.75rem', { lineHeight: '0.875rem' }],
       },
       colors: {
         suit: {
@@ -84,6 +87,10 @@ export default {
         chip: {
           red: "hsl(var(--chip-red))",
           blue: "hsl(var(--chip-blue))",
+          green: "hsl(var(--chip-green))",
+          black: "hsl(var(--chip-black))",
+          white: "hsl(var(--chip-white))",
+          yellow: "hsl(var(--chip-yellow))",
         },
         money: {
           green: "hsl(var(--money-green))",
@@ -139,6 +146,9 @@ export default {
       },
       boxShadow: {
         'glow-gold': '0 0 20px rgba(212, 184, 60, 0.4)',
+        'glow-gold-sm': '0 0 15px rgba(212, 184, 60, 0.5)',
+        'glow-gold-hover': '0 0 15px rgba(212, 184, 60, 0.2)',
+        'glow-gold-subtle': '0 0 50px rgba(212, 184, 60, 0.1)',
         'chip-depth': '0 6px 0 rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.3)',
       },
       fontFamily: {

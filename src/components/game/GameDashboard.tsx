@@ -321,7 +321,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
           {/* Manual Transfers Logic (Desktop) */}
 
           {(game.settlements && game.settlements.length > 0) && (
-            <Card className="p-0 overflow-hidden border-gold-500/40 shadow-[0_0_40px_rgba(212,184,60,0.1)]">
+            <Card className="p-0 overflow-hidden border-gold-500/40 shadow-glow-gold-subtle">
               <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
                 <CollapsibleTrigger asChild>
                   <div className="p-6 border-b border-border/50 bg-accent/5 cursor-pointer flex items-center justify-between group">

@@ -342,7 +342,7 @@ const PlayerListItem = ({ player, onSelect }: PlayerListItemProps) => {
     <button
       onClick={() => onSelect(player)}
       className={cn(
-        "w-full text-left p-0 px-3 h-14 flex items-center rounded-2xl glass-panel hover:bg-primary/10 hover:shadow-[0_0_15px_rgba(212,184,60,0.2)] transition-all group border-0",
+        "w-full text-left p-0 px-3 h-14 flex items-center rounded-2xl glass-panel hover:bg-primary/10 hover:shadow-glow-gold-hover transition-all group border-0",
         "focus:outline-none focus:ring-2 focus:ring-primary/50"
       )}
     >

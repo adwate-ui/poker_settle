@@ -44,7 +44,7 @@
   }
 
   .text-label {
-    @apply font-luxury uppercase tracking-widest text-[10px] leading-none;
+    @apply font-luxury uppercase tracking-widest text-2xs leading-none;
   }
 
   .text-value {
@@ -105,6 +105,10 @@
     --poker-black: 220 10% 15%;
     --chip-red: 0 84% 60%;
     --chip-blue: 220 85% 55%;
+    --chip-green: 142 76% 29%;
+    --chip-black: 240 6% 11%;
+    --chip-white: 0 0% 85%;
+    --chip-yellow: 48 96% 48%;
     --money-green: 142 71% 35%;
     --money-red: 0 70% 45%;
 
@@ -174,6 +178,10 @@
     --poker-black: 160 30% 5%;
     --chip-red: 0 62% 40%;
     --chip-blue: 220 85% 60%;
+    --chip-green: 142 76% 36%;
+    --chip-black: 240 6% 15%;
+    --chip-white: 0 0% 90%;
+    --chip-yellow: 48 96% 53%;
     --money-green: 142 71% 55%;
     --money-red: 0 70% 60%;
 
@@ -292,11 +300,10 @@
 
   /* Mobile Utility Classes */
   .text-mobile-compact {
-    @apply text-tiny;
-    letter-spacing: 0.05em !important;
+    @apply text-tiny tracking-wider;
   }
 
   .table-cell-mobile {
-    padding: 2px 4px !important;
+    @apply py-0.5 px-1;
   }
 }
