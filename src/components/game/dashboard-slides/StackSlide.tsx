@@ -12,7 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/currencyUtils";
+import { formatCurrency, formatIndianNumber } from "@/utils/currencyUtils";
 import { useDashboardStore } from "@/features/game/stores/dashboardStore";
 import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardActions";
 import { useGameStats } from "@/features/game/hooks/useGameStats";
@@ -111,19 +111,17 @@ const StackSlide = () => {
                 smallBlind={smallBlind}
             />
 
-            {/* Manual Adjustments Section */}
-            <div className="space-y-4 pt-4 border-t border-border/50">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-luxury uppercase tracking-widest text-foreground">Adjustments</h3>
+            {/* Manual Adjustments Section - Only show when End Game is available */}
+            {canCompleteGame && !hasDiscrepancies && (
+                <div className="space-y-4 pt-4 border-t border-border/50">
                     {!showManualTransfer && (
                         <Button
                             onClick={() => setShowManualTransfer(true)}
-                            className="w-full h-14 font-bold text-lg tracking-[0.2em] rounded-2xl relative overflow-hidden group bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-glow active:scale-95 transition-all text-black uppercase font-luxury"
+                            className="w-full h-14 font-bold text-lg tracking-[0.2em] rounded-2xl relative overflow-hidden group bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] hover:shadow-glow active:scale-95 transition-all text-black uppercase font-luxury"
                         >
                             <Plus className="w-5 h-5 mr-2" /> Add Adjustment
                         </Button>
                     )}
-                </div>
 
                 {/* List of Manual Settlements */}
                 <div className="space-y-2">
@@ -183,10 +181,16 @@ const StackSlide = () => {
                             <div className="space-y-1.5">
                                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Amount</Label>
                                 <Input
-                                    type="number"
-                                    placeholder="0.00"
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="0"
                                     value={newTransferAmount}
-                                    onChange={(e) => setNewTransferAmount(e.target.value)}
+                                    onChange={(e) => {
+                                        const raw = e.target.value.replace(/,/g, '');
+                                        if (raw === '' || !isNaN(Number(raw))) {
+                                            setNewTransferAmount(raw === '' ? '' : formatIndianNumber(Number(raw)));
+                                        }
+                                    }}
                                     className="h-12 text-sm bg-background/50 border-border/50"
                                 />
                             </div>
@@ -197,7 +201,8 @@ const StackSlide = () => {
                         </div>
                     </Card>
                 )}
-            </div>
+                </div>
+            )}
 
             {/* End Game Logic & Discrepancies */}
             <div className="space-y-5 pt-4">
@@ -234,7 +239,7 @@ const StackSlide = () => {
                     className={cn(
                         "w-full h-14 text-black font-bold text-lg tracking-[0.2em] rounded-2xl transition-all relative overflow-hidden group",
                         canCompleteGame && !isCompletingGame
-                            ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-glow active:scale-95'
+                            ? 'bg-gradient-to-r from-primary via-accent to-primary hover:shadow-glow active:scale-95'
                             : 'bg-muted text-muted-foreground opacity-50'
                     )}
                 >

@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(del \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailService.ts\")",
+      "Bash(del \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailNotifications.ts\")",
+      "Bash(Remove-Item \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailService.ts\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailNotifications.ts\" -Force)"
     ]
   }
 }

@@ -414,15 +414,15 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                 <Button size="sm" onClick={addManualTransfer} className="flex-1 h-8 text-xs">Save</Button>
               </div>
             </Card>
-          ) : (
+          ) : canCompleteGame && !hasDiscrepancies ? (
             <Button
               onClick={() => setShowManualTransfer(true)}
-              className="w-full h-12 font-bold text-lg tracking-[0.2em] uppercase rounded-xl bg-gradient-to-r from-primary via-accent to-primary animate-shimmer text-primary-foreground shadow-lg hover:shadow-primary/30 transition-all"
+              className="w-full h-12 font-bold text-lg tracking-[0.2em] uppercase rounded-xl bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground shadow-lg hover:shadow-primary/30 transition-all"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add Manual Adjustment
             </Button>
-          )}
+          ) : null}
 
           {/* Validation & Completion */}
           {hasDiscrepancies ? (
@@ -449,7 +449,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
               className={cn(
                 "w-full h-12 text-black font-bold text-lg tracking-[0.2em] rounded-xl transition-all relative overflow-hidden group",
                 canCompleteGame && !isCompletingGame
-                  ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-shimmer hover:shadow-lg hover:shadow-primary/30 active:scale-95'
+                  ? 'bg-gradient-to-r from-primary via-accent to-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95'
                   : 'bg-black/5 dark:bg-white/5 text-black/10 dark:text-white/10 opacity-50'
               )}
             >

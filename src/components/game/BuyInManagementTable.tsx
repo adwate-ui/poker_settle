@@ -109,10 +109,10 @@ export const BuyInManagementTable = ({
             <TableHead className="w-[24%] text-right">
               <span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span>
             </TableHead>
-            <TableHead className="w-[17%] text-center">
+            <TableHead className="w-12 text-center">
               Add
             </TableHead>
-            <TableHead className="w-[17%] text-center">
+            <TableHead className="w-12 text-center">
               Hist
             </TableHead>
           </TableRow>
@@ -142,7 +142,7 @@ export const BuyInManagementTable = ({
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Add buy-in for ${gamePlayer.player.name}`}
-                  className="bg-transparent text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
+                  className="bg-transparent text-muted-foreground hover:text-foreground transition-opacity"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>

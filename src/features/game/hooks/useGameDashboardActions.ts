@@ -7,6 +7,7 @@ import { ErrorMessages } from '@/lib/errorUtils';
 import { GamePlayer, Settlement, SeatPosition } from '@/types/poker';
 import { useNavigate } from 'react-router-dom';
 import { calculateOptimizedSettlements, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { parseIndianNumber } from '@/lib/utils';
 import { PaymentMethodConfig } from '@/config/localization';
 import { sendSessionSummaryNotification } from '@/services/whatsappNotifications';
 import { useSharedLink } from '@/hooks/useSharedLink';
@@ -148,7 +149,8 @@ export const useGameDashboardActions = () => {
     const addManualTransfer = useCallback(async () => {
         if (!game) return;
 
-        if (!newTransferFrom || !newTransferTo || !newTransferAmount || parseFloat(newTransferAmount) <= 0) {
+        const parsedAmount = parseIndianNumber(newTransferAmount);
+        if (!newTransferFrom || !newTransferTo || !newTransferAmount || parsedAmount <= 0) {
             toast.error("Please fill in sender, recipient, and a valid amount for the transfer.");
             return;
         }
@@ -161,7 +163,7 @@ export const useGameDashboardActions = () => {
         const newTransfer: Settlement = {
             from: newTransferFrom,
             to: newTransferTo,
-            amount: parseFloat(newTransferAmount)
+            amount: parsedAmount
         };
 
         const updatedSettlements = [...(game.settlements || []), newTransfer];

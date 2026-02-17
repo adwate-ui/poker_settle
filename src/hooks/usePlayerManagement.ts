@@ -9,45 +9,6 @@ import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { PlayerFormData } from "@/components/player/PlayerFormDialog";
-import { sendPlayerWelcomeNotification } from "@/services/emailNotifications";
-import { generatePlayerShareLink } from "@/services/messageTemplates";
-import { generateShortCode } from "@/lib/shareUtils";
-
-/**
- * Helper function to create or get a shared link for a player
- */
-async function getOrCreatePlayerShareToken(
-  userId: string,
-  playerId: string
-): Promise<string> {
-  // Check for existing shared link
-  const { data: existingLink } = await supabase
-    .from('shared_links')
-    .select('access_token')
-    .eq('user_id', userId)
-    .eq('resource_type', 'player')
-    .eq('resource_id', playerId)
-    .maybeSingle();
-
-  if (existingLink) {
-    return existingLink.access_token;
-  }
-
-  // Create new shared link with short code
-  const shortCode = generateShortCode();
-  const { data: newLink } = await supabase
-    .from('shared_links')
-    .insert({
-      user_id: userId,
-      resource_type: 'player',
-      resource_id: playerId,
-      short_code: shortCode,
-    })
-    .select('access_token')
-    .single();
-
-  return newLink?.access_token || '';
-}
 
 export const usePlayerManagement = () => {
   const { user } = useAuth();
@@ -76,22 +37,7 @@ export const usePlayerManagement = () => {
 
         if (error) throw error;
 
-        // Send welcome notification if email is provided
-        if (data.email) {
-          // Create or get shared link for player
-          const playerToken = await getOrCreatePlayerShareToken(user.id, data.id);
-          const playerLink = generatePlayerShareLink(data.id, playerToken);
-          const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
-
-          if (notificationResult.success) {
-            toast.success(`${data.name} added! Welcome email sent.`);
-          } else {
-            toast.success(`${data.name} added! (Email notification failed: ${notificationResult.error})`);
-          }
-        } else {
-          toast.success(`${data.name} added!`);
-        }
-
+        toast.success(`${data.name} added!`);
         return data;
       } catch (error) {
         console.error("Error creating player:", error);
@@ -113,22 +59,6 @@ export const usePlayerManagement = () => {
 
       setLoading(true);
       try {
-        // Check if email is being added (before making the update)
-        // Only fetch if email is being updated to avoid unnecessary query
-        let isAddingEmail = false;
-        if (playerData.email !== undefined) {
-          const { data: currentPlayer, error: fetchError } = await supabase
-            .from("players")
-            .select("email")
-            .eq("id", playerId)
-            .eq("user_id", user.id)
-            .single();
-
-          if (fetchError) throw fetchError;
-
-          isAddingEmail = !currentPlayer.email && !!playerData.email;
-        }
-
         // Build update object, treating empty strings as null to clear fields
         const updateData: {
           name?: string;
@@ -172,22 +102,7 @@ export const usePlayerManagement = () => {
 
         if (error) throw error;
 
-        // If email was just added, treat this as onboarding and send welcome notification
-        if (isAddingEmail && data.email) {
-          // Create or get shared link for player
-          const playerToken = await getOrCreatePlayerShareToken(user.id, data.id);
-          const playerLink = generatePlayerShareLink(data.id, playerToken);
-          const notificationResult = await sendPlayerWelcomeNotification(data, playerLink);
-
-          if (notificationResult.success) {
-            toast.success(`${data.name} updated! Welcome email sent.`);
-          } else {
-            toast.success(`${data.name} updated! (Email notification failed: ${notificationResult.error})`);
-          }
-        } else {
-          toast.success(`${data.name} updated!`);
-        }
-
+        toast.success(`${data.name} updated!`);
         return data;
       } catch (error) {
         console.error("Error updating player:", error);

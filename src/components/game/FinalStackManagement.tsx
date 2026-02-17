@@ -5,7 +5,8 @@ import { Edit, Loader2 } from 'lucide-react';
 import { toast } from '@/lib/notifications';
 import { ErrorMessages } from '@/lib/errorUtils';
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/utils/currencyUtils';
+import { formatCurrency, formatIndianNumber } from '@/utils/currencyUtils';
+import { parseIndianNumber } from '@/lib/utils';
 import { CurrencyConfig } from '@/config/localization';
 import { GamePlayer } from "@/types/poker";
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -34,17 +35,17 @@ export const FinalStackManagement = ({
 }: FinalStackManagementProps) => {
   const [opened, setOpened] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [editValue, setEditValue] = useState<number | string>('');
+  const [editValue, setEditValue] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStartEdit = (gamePlayer: GamePlayer) => {
     setSelectedPlayerId(gamePlayer.id);
-    setEditValue(gamePlayer.final_stack || '');
+    setEditValue(gamePlayer.final_stack ? formatIndianNumber(gamePlayer.final_stack) : '');
     setOpened(true);
   };
 
   const handleSaveEdit = async () => {
-    const value = typeof editValue === 'string' ? parseFloat(editValue) : editValue;
+    const value = parseIndianNumber(editValue);
     if (isNaN(value) || value < 0) {
       toast.error('Please enter a valid stack amount');
       return;
@@ -110,8 +111,8 @@ export const FinalStackManagement = ({
             <TableHead className="w-[30%]">
               Stack
             </TableHead>
-            <TableHead className="w-[15%]" />
-            <TableHead className="w-[15%]" />
+            <TableHead className="w-12" />
+            <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -131,10 +132,7 @@ export const FinalStackManagement = ({
                   variant="outline"
                   size="icon-sm"
                   aria-label={`Edit final stack for ${gamePlayer.player.name}`}
-                  className={cn(
-                    "bg-transparent border-border/50 hover:border-primary/50",
-                    "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
-                  )}
+                  className="bg-transparent border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-opacity"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -144,10 +142,7 @@ export const FinalStackManagement = ({
                   onScanComplete={(value) => onUpdateFinalStack(gamePlayer.id, value)}
                   triggerProps={{
                     size: "icon-sm",
-                    className: cn(
-                      "bg-transparent",
-                      "text-muted-foreground hover:text-foreground transition-opacity h-7 w-7"
-                    )
+                    className: "bg-transparent text-muted-foreground hover:text-foreground transition-opacity"
                   }}
                 />
               </TableCell>
@@ -165,9 +160,15 @@ export const FinalStackManagement = ({
           <div className="py-4">
             <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stack ({CurrencyConfig.code})</Label>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/,/g, '');
+                if (raw === '' || !isNaN(Number(raw))) {
+                  setEditValue(raw === '' ? '' : formatIndianNumber(Number(raw)));
+                }
+              }}
               className="mt-2"
             />
           </div>

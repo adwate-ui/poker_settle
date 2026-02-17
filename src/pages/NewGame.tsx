@@ -145,24 +145,18 @@ const NewGame = () => {
 
       if (playersError) throw playersError;
 
-      const placeholderGame: Game = transformGameData({
-        ...game,
-        game_players: gamePlayers.map(player => ({
-          game_id: game.id,
-          player_id: player.id,
-          buy_ins: 1,
-          final_stack: 0,
-          net_amount: -parsedAmount,
-          id: `temp-${player.id}`,
-          created_at: new Date().toISOString(),
-          player: player
-        }))
-      });
+      // Invalidate cache to ensure fresh data is fetched when GameDashboard loads
+      await queryClient.invalidateQueries({ queryKey: gameKeys.detail(game.id) });
 
-      queryClient.setQueryData(gameKeys.detail(game.id), placeholderGame);
+      // Create a minimal game object for navigation - GameDashboard will fetch full data
+      const newGame: Game = {
+        ...game,
+        game_players: [],
+        settlements: []
+      };
 
       toast.success("Game started!");
-      setActiveGame(placeholderGame);
+      setActiveGame(newGame);
       setShowActiveGame(true);
     } catch (error) {
       toast.error(ErrorMessages.game.create(error));

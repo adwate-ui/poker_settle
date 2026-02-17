@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Player, Game, GamePlayer, SeatPosition, TablePosition, BuyInHistory, Settlement, Json, TablePositionInsert } from "@/types/poker";
 import { toast } from "@/lib/notifications";
@@ -8,6 +9,7 @@ import { z } from "zod";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { createOrFindPlayer as apiCreateOrFindPlayer } from "@/features/players/api/playerApi";
 import { createGame as apiCreateGame, completeGameApi, transformGameData } from "@/features/game/api/gameApi";
+import { gameKeys } from "@/features/game/api/queryKeys";
 import { useGames } from "@/features/game/hooks/useGames";
 import { usePlayers } from "@/features/players/hooks/usePlayers";
 import { useUpdateGamePlayer } from "@/features/game/hooks/useGameMutations";
@@ -23,6 +25,7 @@ const buyInsSchema = z.number().int().min(1, "Buy-ins must be at least 1").max(1
 export const useGameData = () => {
   const { user } = useAuth();
   const { createConfirmations } = useSettlementConfirmations();
+  const queryClient = useQueryClient();
 
   // React Query hooks
   const { data: games = [], isLoading: gamesLoading, refetch: fetchGames } = useGames(user?.id);
@@ -192,6 +195,9 @@ export const useGameData = () => {
         settlements,
         createConfirmations
       );
+
+      // Invalidate game detail cache so P&L shows correctly after navigation
+      await queryClient.invalidateQueries({ queryKey: gameKeys.detail(gameId) });
 
       // Refresh games list
       await fetchGames();
