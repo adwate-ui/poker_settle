@@ -100,19 +100,19 @@ export const BuyInManagementTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[30%]">
+            <TableHead className="w-[30%] md:w-auto">
               <span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span>
             </TableHead>
-            <TableHead className="w-[12%] text-center">
+            <TableHead className="w-[12%] text-center md:w-auto">
               <span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span>
             </TableHead>
-            <TableHead className="w-[24%] text-right">
+            <TableHead className="w-[24%] text-right md:w-auto">
               <span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span>
             </TableHead>
-            <TableHead className="w-12 text-center">
+            <TableHead className="w-12 text-center md:w-auto">
               Add
             </TableHead>
-            <TableHead className="w-12 text-center">
+            <TableHead className="w-12 text-center md:w-auto">
               Hist
             </TableHead>
           </TableRow>

@@ -573,11 +573,11 @@ export const GameDetailView = ({
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Player</TableHead>
-                    <TableHead className="w-[15%] sm:w-[12%]">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                    <TableHead className="w-[20%] sm:w-[15%]">P&L</TableHead>
-                    {!isMobile && <TableHead className="w-[20%] sm:w-[15%]">Cashout</TableHead>}
+                    <TableHead className="w-[15%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                    <TableHead className="w-[25%] md:w-auto">P&L</TableHead>
+                    {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
                     {showOwnerControls && fetchBuyInHistory && (
-                      <TableHead>{isMobile ? "Hist" : "Audit"}</TableHead>
+                      <TableHead className="w-[15%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>

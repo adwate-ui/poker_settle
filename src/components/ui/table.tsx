@@ -18,7 +18,7 @@ const Table = React.forwardRef<
     <table
       ref={ref}
       className={cn(
-        "w-full caption-bottom text-sm select-none table-fixed",
+        "w-full caption-bottom text-sm select-none table-fixed md:table-auto",
         tableClassName
       )}
       {...props}

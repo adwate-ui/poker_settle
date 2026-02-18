@@ -105,14 +105,14 @@ export const FinalStackManagement = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%]">
+            <TableHead className="w-[40%] md:w-auto">
               Player
             </TableHead>
-            <TableHead className="w-[30%]">
+            <TableHead className="w-[30%] md:w-auto">
               Stack
             </TableHead>
-            <TableHead className="w-12" />
-            <TableHead className="w-12" />
+            <TableHead className="w-12 md:w-auto" />
+            <TableHead className="w-12 md:w-auto" />
           </TableRow>
         </TableHeader>
         <TableBody>

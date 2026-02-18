@@ -165,10 +165,10 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         >
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[35%]">Player</TableHead>
-              <TableHead className="w-[20%]">Amt</TableHead>
-              <TableHead className="w-[15%] text-center">Total</TableHead>
-              <TableHead className="w-[30%] text-right pr-4">Time</TableHead>
+              <TableHead className="w-[35%] md:w-auto">Player</TableHead>
+              <TableHead className="w-[20%] md:w-auto">Amt</TableHead>
+              <TableHead className="w-[15%] text-center md:w-auto">Total</TableHead>
+              <TableHead className="w-[30%] text-right pr-4 md:w-auto">Time</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
