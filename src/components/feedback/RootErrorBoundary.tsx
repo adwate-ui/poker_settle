@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Component, ErrorInfo, ReactNode } from "react";
+import * as Sentry from "@sentry/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,9 +29,17 @@ class RootErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("[RootErrorBoundary] Application error caught:", error, errorInfo);
+    // Report to Sentry in production
+    Sentry.withScope((scope) => {
+      scope.setExtra("componentStack", errorInfo.componentStack);
+      Sentry.captureException(error);
+    });
 
-    // Log error details for debugging
+    // Log error details for debugging (only in development)
+    if (import.meta.env.DEV) {
+      console.error("[RootErrorBoundary] Application error caught:", error, errorInfo);
+    }
+
     this.setState({ errorInfo });
   }
 

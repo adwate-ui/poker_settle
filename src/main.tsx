@@ -1,7 +1,27 @@
 import { createRoot } from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import "./index.css";
 import { registerSW } from 'virtual:pwa-register';
+
+// Initialize Sentry for error tracking in production
+if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.MODE,
+    // Only send 10% of transactions for performance monitoring
+    tracesSampleRate: 0.1,
+    // Don't send PII
+    beforeSend(event) {
+      // Remove sensitive data from events
+      if (event.request?.headers) {
+        delete event.request.headers['Authorization'];
+        delete event.request.headers['Cookie'];
+      }
+      return event;
+    },
+  });
+}
 
 // Add network status monitoring
 window.addEventListener('online', () => {
@@ -28,8 +48,8 @@ const updateSW = registerSW({
       setInterval(() => {
         // Only check for updates when online
         if (navigator.onLine) {
-          r.update().catch(err => {
-            console.log('SW update check failed:', err);
+          r.update().catch(() => {
+            // Silent fail - SW update checks are non-critical
           });
         }
       }, 3 * 60 * 1000);

@@ -63,39 +63,46 @@ serve(async (req) => {
       : "Standard Casino Colors (Red, Blue, Green, Black, White)";
 
     const prompt = `
-      You are a Veteran Casino Pit Boss. Your eyes are trained to count chips instantly by recognizing patterns.
+You are a Veteran Casino Pit Boss. Your eyes are trained to count chips instantly by recognizing patterns.
 
-      **Goal:** Count the poker chips in the image.
+**Goal:** Count the poker chips in the image with maximum accuracy.
 
-      **CONSTRAINT:**
-      You can ONLY identify chips from this specific list provided by the user: 
-      ${chipsContext}
-      Do not guess colors outside this list. If a chip looks like a variant (e.g. "dark red" vs "red"), snap it to the closest valid color from the list.
+**CHIP COLORS AVAILABLE:**
+You can ONLY identify chips from this specific list:
+${chipsContext}
+Do not guess colors outside this list. If a chip looks like a variant (e.g. "dark red" vs "red"), snap it to the closest valid color from the list.
 
-      **METHODOLOGY (The "Ridge Count" Technique):**
-      1.  **Identify Stacks:** Locate vertical columns of chips.
-      2.  **Count Ridges:** Look at the *side profile* of the stack. Count the distinct horizontal lines (ridges) that separate each chip.
-          -   *Visual Tip:* 5 chips look like a small block. 20 chips usually form a standard "barrel".
-      3.  **Context Check (The Barrel Heuristic):** If a stack is roughly the same height as a known stack of 20, assign it a count of 20. Do not output "19" or "21" unless the height difference is obvious.
-      4.  **Ignore:** Loose chips lying flat on the felt (unless explicitly asked).
+**COUNTING METHODOLOGY:**
+1. **Identify Stacks:** Locate all vertical columns of chips in the image.
+2. **Count Ridges:** Look at the side profile of each stack. Count the distinct horizontal lines (ridges) that separate each chip.
+   - Each visible ridge = 1 chip boundary
+   - Total chips = number of ridges + 1
+3. **Report Exact Counts:** Report the EXACT count you observe. Do NOT round to "standard" amounts like 5 or 20. If you count 19 chips, report 19. If you count 21 chips, report 21.
+4. **Loose Chips:** Single chips lying flat on the felt should be counted as count: 1.
+5. **Overlapping Stacks:** If stacks are touching or partially hidden:
+   - Try to separate them visually and count each distinct column
+   - For partially obscured stacks, estimate the visible portion and mark with lower confidence (0.5-0.7)
 
-      **OUTPUT:** 
-      Return strictly valid JSON containing a "stacks" array.
-      FORMAT:
-      {
-        "thinking_process": "Observations about stacks, ridges seen, and barrel estimations...",
-        "stacks": [
-          { 
-            "color": "exact_match_from_list", 
-            "count": number,
-            "confidence": 0.95,
-            "box_2d": [ymin, xmin, ymax, xmax] 
-          }
-        ],
-        "analysis_notes": "Short summary of what was found."
-      }
+**CONFIDENCE SCORING:**
+- 0.90-1.00: Clear view, ridges easily countable
+- 0.70-0.89: Mostly clear, some ridges hard to distinguish
+- 0.50-0.69: Partially obscured or blurry, estimate only
+- Below 0.50: Do not report (too uncertain)
 
-      Do not include markdown formatting. Just the raw JSON string.
+**OUTPUT FORMAT:**
+Return strictly valid JSON (no markdown):
+{
+  "thinking_process": "Describe what you see: stack locations, ridge counts, any uncertainties...",
+  "stacks": [
+    {
+      "color": "exact_color_from_list",
+      "count": number,
+      "confidence": 0.0 to 1.0,
+      "box_2d": [ymin, xmin, ymax, xmax]
+    }
+  ],
+  "analysis_notes": "Brief summary of findings and any issues encountered."
+}
     `;
 
     // Clean base64 if needed (remove data:image/... prefix)

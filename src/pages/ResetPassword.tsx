@@ -24,9 +24,7 @@ const ResetPassword = () => {
     // Give Supabase time to process the recovery token from URL hash
     const timer = setTimeout(() => {
       // If no user after processing, they may need to request a new link
-      if (!user) {
-        console.log("No authenticated user found for password reset");
-      }
+      // No action needed - UI will show appropriate state
     }, 2000);
 
     return () => clearTimeout(timer);

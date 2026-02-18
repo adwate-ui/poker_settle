@@ -113,8 +113,6 @@ export async function processIncomingMessage(
       };
     }
 
-    console.log(`✅ Auto-confirmed ${confirmations.length} settlements for ${player.name}`);
-
     return {
       confirmed: true,
       settlementsUpdated: confirmations.length,
