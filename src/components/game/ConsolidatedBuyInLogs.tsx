@@ -192,10 +192,10 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                     {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-center font-numbers text-muted-foreground text-tiny">
+                <TableCell className="text-center font-numbers text-muted-foreground text-tiny sm:text-sm">
                   {entry.total_buy_ins_after}
                 </TableCell>
-                <TableCell className="text-right pr-4 text-muted-foreground text-[10px] uppercase tracking-wider">
+                <TableCell className="text-right pr-4 text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider">
                   {format(new Date(entry.timestamp), "h:mm a")}
                 </TableCell>
               </TableRow>

@@ -36,7 +36,7 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3 text-xs",
         lg: "h-14 rounded-xl px-8 text-base",
         icon: "h-12 w-12",
-        "icon-sm": "h-8 w-8 text-xs", // Small icon buttons
+        "icon-sm": "h-10 w-10 text-xs", // Small icon buttons - 40px for touch accessibility
         "game-action": "h-14 w-full text-lg", // Standard size for game buttons
         // Responsive sizes - smaller on desktop, touch-friendly on mobile
         "responsive": "h-12 md:h-10 px-6 md:px-4 py-2",

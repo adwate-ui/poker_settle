@@ -282,8 +282,8 @@ const PlayersHistory = () => {
                 <TableCell>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-7 w-7"
+                    size="icon-sm"
+                    className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletePlayerId(player.id);

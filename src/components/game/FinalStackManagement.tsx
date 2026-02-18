@@ -120,10 +120,10 @@ export const FinalStackManagement = ({
             <TableRow
               key={gamePlayer.id}
             >
-              <TableCell className="font-medium truncate text-foreground text-tiny">
+              <TableCell className="font-medium truncate text-foreground text-tiny sm:text-sm">
                 {getDisplayName(gamePlayer.player.name, isMobile)}
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-tiny">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-tiny sm:text-sm">
                 {formatCurrency(gamePlayer.final_stack || 0)}
               </TableCell>
               <TableCell>

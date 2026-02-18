@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Undo2 } from 'lucide-react';
+import { formatIndianNumber } from '@/utils/currencyUtils';
+import { parseIndianNumber } from '@/lib/utils';
 
 interface ActionControlsProps {
     currentPlayerId?: string;
@@ -69,16 +71,22 @@ const ActionControls = ({
                         </div>
                         <div className="flex gap-2">
                             <Input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 value={betAmount}
-                                onChange={e => setBetAmount(e.target.value)}
+                                onChange={(e) => {
+                                    const raw = e.target.value.replace(/,/g, '');
+                                    if (raw === '' || !isNaN(Number(raw))) {
+                                        setBetAmount(raw === '' ? '' : formatIndianNumber(Number(raw)));
+                                    }
+                                }}
                                 placeholder="Amount"
                                 className="h-12 text-base"
                             />
                             <Button
                                 variant="warning"
                                 className="h-12 px-8 font-bold"
-                                onClick={() => onAction('Raise', parseFloat(betAmount))}
+                                onClick={() => onAction('Raise', parseIndianNumber(betAmount))}
                                 disabled={!betAmount}
                             >
                                 Raise
