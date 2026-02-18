@@ -31,3 +31,9 @@ lint_*.json
 errors_*.txt
 *_diff.txt
 _*.txt
+
+# Test coverage
+coverage/
+
+# Misc
+nul
