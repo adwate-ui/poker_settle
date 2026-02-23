@@ -8,6 +8,7 @@ interface ActionControlsProps {
     currentPlayerId?: string;
     playersInHand: string[];
     currentBet: number;
+    playerStreetBet: number; // Amount player has already bet this street
     betAmount: string;
     setBetAmount: (amount: string) => void;
     onAction: (type: string, amount?: number) => void;
@@ -24,6 +25,7 @@ const ActionControls = ({
     currentPlayerId,
     playersInHand,
     currentBet,
+    playerStreetBet,
     betAmount,
     setBetAmount,
     onAction,
@@ -36,6 +38,8 @@ const ActionControls = ({
     onOpenCardSelector
 }: ActionControlsProps) => {
     const isPlayerActive = currentPlayerId && playersInHand.includes(currentPlayerId);
+    // Calculate the actual amount needed to call (current bet minus what player already has in)
+    const callAmount = Math.max(0, currentBet - playerStreetBet);
 
     return (
         <div className="space-y-3">
@@ -56,9 +60,9 @@ const ActionControls = ({
                                 variant="outline"
                                 size="lg"
                                 className="h-12 font-bold"
-                                onClick={() => onAction(currentBet === 0 ? 'Check' : 'Call', currentBet)}
+                                onClick={() => onAction(callAmount === 0 ? 'Check' : 'Call', currentBet)}
                             >
-                                {currentBet === 0 ? 'Check' : `Call ${currentBet}`}
+                                {callAmount === 0 ? 'Check' : `Call ${formatIndianNumber(callAmount)}`}
                             </Button>
                             <Button
                                 variant="destructive"

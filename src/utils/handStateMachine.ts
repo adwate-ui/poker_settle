@@ -72,7 +72,14 @@ export const getStartingPlayerIndex = (
 
     if (activePlayers.length === 2) {
       // HEADS UP Preflop: Button starts (Button acts small blind)
-      return buttonIndex;
+      // Verify button player is in hand, otherwise return the other player
+      const buttonPlayer = activePlayers[buttonIndex];
+      if (buttonPlayer && playersInHand.includes(buttonPlayer.player_id)) {
+        return buttonIndex;
+      }
+      // Button not in hand, return the other player
+      const otherIndex = (buttonIndex + 1) % 2;
+      return otherIndex;
     }
 
     const theoreticalUtgIndex = (buttonIndex + 3) % activePlayers.length;
@@ -88,7 +95,9 @@ export const getStartingPlayerIndex = (
       currentIndex = (currentIndex + 1) % activePlayers.length;
       attempts++;
     }
-    return theoreticalUtgIndex; // Fallback
+    // Fallback: return first player still in hand
+    const fallbackIndex = activePlayers.findIndex(p => playersInHand.includes(p.player_id));
+    return fallbackIndex >= 0 ? fallbackIndex : 0;
   } else {
     // Postflop: First active player immediately left of button who is still in hand
     let currentIndex = (buttonIndex + 1) % activePlayers.length;
@@ -103,7 +112,9 @@ export const getStartingPlayerIndex = (
       attempts++;
     }
 
-    return (buttonIndex + 1) % activePlayers.length; // Fallback
+    // Fallback: return first player still in hand
+    const fallbackIndex = activePlayers.findIndex(p => playersInHand.includes(p.player_id));
+    return fallbackIndex >= 0 ? fallbackIndex : 0;
   }
 };
 

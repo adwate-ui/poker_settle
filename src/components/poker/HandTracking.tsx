@@ -237,6 +237,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     currentPlayerId: engine.currentPlayer?.player_id,
     playersInHand: engine.playersInHand,
     currentBet: engine.currentBet,
+    playerStreetBet: engine.currentPlayer?.player_id ? (engine.streetPlayerBets[engine.currentPlayer.player_id] || 0) : 0,
     betAmount,
     setBetAmount,
     onAction: handleAction,

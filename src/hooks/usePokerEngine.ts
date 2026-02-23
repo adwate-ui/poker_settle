@@ -350,13 +350,16 @@ export const usePokerEngine = (
         }
     }, [currentHand, persistence, activePlayers, heroPlayer, seatPositions, game.id, allHandActions, createNewHand, playerHoleCards, flopCards, turnCard, riverCard, potSize, saveCompleteHandData, stage, toast]);
 
-    const moveToNextStreet = useCallback(() => {
+    const moveToNextStreet = useCallback((currentPlayersInHand?: string[]) => {
         if (!currentHand) return;
         saveStateToHistory();
 
+        // Use passed playersInHand to avoid stale closure issues with setTimeout
+        const effectivePlayersInHand = currentPlayersInHand ?? playersInHand;
+
         const buttonIndex = activePlayers.findIndex(gp => gp.player_id === currentHand.button_player_id);
         const updates = resetForNewStreet({
-            stage, activePlayers, currentPlayerIndex, playersInHand, dealtOutPlayers,
+            stage, activePlayers, currentPlayerIndex, playersInHand: effectivePlayersInHand, dealtOutPlayers,
             buttonPlayerIndex: buttonIndex, currentBet, potSize, streetPlayerBets,
             totalPlayerBets: playerBets, streetActions, actionSequence, lastAggressorIndex
         }, currentHand.button_player_id);
@@ -366,14 +369,14 @@ export const usePokerEngine = (
         let finalStartingIndex = updates.currentPlayerIndex;
         if (updates.currentPlayerIndex !== undefined) {
             const startingPlayer = activePlayers[updates.currentPlayerIndex];
-            if (startingPlayer && !playersInHand.includes(startingPlayer.player_id)) {
+            if (startingPlayer && !effectivePlayersInHand.includes(startingPlayer.player_id)) {
                 console.warn(`[PokerEngine] Starting player ${startingPlayer.player?.name} is not in hand. Finding next valid player.`);
                 finalStartingIndex = getNextPlayerIndex(
                     (updates.currentPlayerIndex - 1 + activePlayers.length) % activePlayers.length,
                     updates.stage || stage,
                     activePlayers,
                     buttonIndex,
-                    playersInHand
+                    effectivePlayersInHand
                 );
             }
             setCurrentPlayerIndex(finalStartingIndex);
@@ -458,7 +461,8 @@ export const usePokerEngine = (
         );
 
         if (isComplete) {
-            setTimeout(() => moveToNextStreet(), 300);
+            // Pass updatedPlayersInHand to avoid stale closure issues
+            setTimeout(() => moveToNextStreet(updatedPlayersInHand), 300);
         } else {
             setCurrentPlayerIndex(getNextPlayerIndex(currentPlayerIndex, stage, activePlayers, buttonIndex, updatedPlayersInHand));
         }
