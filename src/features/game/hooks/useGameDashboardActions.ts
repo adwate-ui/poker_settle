@@ -163,7 +163,8 @@ export const useGameDashboardActions = () => {
         const newTransfer: Settlement = {
             from: newTransferFrom,
             to: newTransferTo,
-            amount: parsedAmount
+            amount: parsedAmount,
+            isManual: true
         };
 
         const updatedSettlements = [...(game.settlements || []), newTransfer];
@@ -223,7 +224,8 @@ export const useGameDashboardActions = () => {
                 }));
 
                 const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
-                finalSettlements = calculateOptimizedSettlements(balances, manualSettlements);
+                const autoSettlements = calculateOptimizedSettlements(balances, manualSettlements);
+                finalSettlements = [...manualSettlements, ...autoSettlements];
             }
 
             // 2. Complete the game in the database (enforces zero-sum check)

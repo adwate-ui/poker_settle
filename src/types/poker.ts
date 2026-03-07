@@ -35,6 +35,7 @@ export interface Settlement {
   from: string;
   to: string;
   amount: number;
+  isManual?: boolean;
 }
 
 export interface SettlementConfirmation {
