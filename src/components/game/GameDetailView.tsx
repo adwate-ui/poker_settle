@@ -97,6 +97,7 @@ interface GameDetailViewProps {
   onBack?: () => void;
   backLabel?: string;
   fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
+  hasActivePlayerFilter?: boolean;
 }
 
 export const GameDetailView = ({
@@ -107,6 +108,7 @@ export const GameDetailView = ({
   onBack,
   backLabel = "Back",
   fetchBuyInHistory,
+  hasActivePlayerFilter = false,
 }: GameDetailViewProps) => {
   const { createOrGetSharedLink } = useSharedLink();
   const { confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
@@ -567,83 +569,85 @@ export const GameDetailView = ({
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", playerResultsOpen && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className={cn("section-content", isMobile && "p-0")}>
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>Player</TableHead>
-                    <TableHead className="w-[15%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                    <TableHead className="w-[25%] md:w-auto">P&L</TableHead>
-                    {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
-                    {showOwnerControls && fetchBuyInHistory && (
-                      <TableHead className="w-[15%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedGamePlayers.map((gamePlayer) => {
-                    const playerName = gamePlayer.player?.name ?? gamePlayer.players?.name ?? "--";
-                    const netAmount = gamePlayer.net_amount ?? 0;
-                    const finalStack = gamePlayer.final_stack ?? 0;
-                    const isWin = netAmount > 0;
+          {!showOwnerControls && hasActivePlayerFilter ? null : (
+            <CollapsibleContent>
+              <div className={cn("section-content", isMobile && "p-0")}>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead>Player</TableHead>
+                      <TableHead className="w-[15%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                      <TableHead className="w-[25%] md:w-auto">P&L</TableHead>
+                      {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
+                      {showOwnerControls && fetchBuyInHistory && (
+                        <TableHead className="w-[15%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedGamePlayers.map((gamePlayer) => {
+                      const playerName = gamePlayer.player?.name ?? gamePlayer.players?.name ?? "--";
+                      const netAmount = gamePlayer.net_amount ?? 0;
+                      const finalStack = gamePlayer.final_stack ?? 0;
+                      const isWin = netAmount > 0;
 
-                    return (
-                      <TableRow key={gamePlayer.id}>
-                        <TableCell className="text-tiny">
-                          {showOwnerControls ? (
-                            <Link
-                              to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
-                              className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                            >
-                              {playerName}
-                            </Link>
-                          ) : (
-                            <span className="font-medium block truncate">
-                              {playerName}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-tiny">
-                          <Badge variant="secondary" className="font-numbers min-w-[20px] text-tiny">
-                            {gamePlayer.buy_ins}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-tiny">
-                          <div>
-                            <Badge
-                              variant={isWin ? "profit" : "loss"}
-                              className="font-numbers text-tiny"
-                            >
-                              {formatProfitLoss(netAmount)}
+                      return (
+                        <TableRow key={gamePlayer.id}>
+                          <TableCell className="text-tiny">
+                            {showOwnerControls ? (
+                              <Link
+                                to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
+                                className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                              >
+                                {playerName}
+                              </Link>
+                            ) : (
+                              <span className="font-medium block truncate">
+                                {playerName}
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-tiny">
+                            <Badge variant="secondary" className="font-numbers min-w-[20px] text-tiny">
+                              {gamePlayer.buy_ins}
                             </Badge>
-                          </div>
-                        </TableCell>
-                        {!isMobile && (
-                          <TableCell isNumeric className="text-muted-foreground whitespace-nowrap text-tiny">
-                            {formatCurrency(finalStack)}
                           </TableCell>
-                        )}
-                        {showOwnerControls && fetchBuyInHistory && (
-                          <TableCell>
-                            <BuyInHistoryDialog
-                              gamePlayerId={gamePlayer.id}
-                              playerName={playerName}
-                              fetchHistory={fetchBuyInHistory}
-                              triggerProps={{
-                                size: isMobile ? "icon" : "icon-sm",
-                                className: "opacity-70 hover:opacity-100 transition-opacity"
-                              }}
-                            />
+                          <TableCell className="text-tiny">
+                            <div>
+                              <Badge
+                                variant={isWin ? "profit" : "loss"}
+                                className="font-numbers text-tiny"
+                              >
+                                {formatProfitLoss(netAmount)}
+                              </Badge>
+                            </div>
                           </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </CollapsibleContent>
+                          {!isMobile && (
+                            <TableCell isNumeric className="text-muted-foreground whitespace-nowrap text-tiny">
+                              {formatCurrency(finalStack)}
+                            </TableCell>
+                          )}
+                          {showOwnerControls && fetchBuyInHistory && (
+                            <TableCell>
+                              <BuyInHistoryDialog
+                                gamePlayerId={gamePlayer.id}
+                                playerName={playerName}
+                                fetchHistory={fetchBuyInHistory}
+                                triggerProps={{
+                                  size: isMobile ? "icon" : "icon-sm",
+                                  className: "opacity-70 hover:opacity-100 transition-opacity"
+                                }}
+                              />
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CollapsibleContent>
+          )}
         </Collapsible>
       </Card>
 

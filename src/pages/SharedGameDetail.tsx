@@ -5,7 +5,7 @@ import { GameDetailView } from '@/components/game/GameDetailView';
 import { useAuth } from '@/hooks/useAuth';
 import GameDashboard from '@/components/game/GameDashboard';
 import { Game } from '@/types/poker';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { SharedProvider, useSharedContext } from '@/contexts/SharedContext';
 
 const SharedGameDetailContent = () => {
@@ -15,6 +15,7 @@ const SharedGameDetailContent = () => {
   const { sharedClient, isValid, isLoading } = useSharedContext();
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [checkingOwner, setCheckingOwner] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if current user is the owner of this game and it's active
   useEffect(() => {
@@ -75,7 +76,22 @@ const SharedGameDetailContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
+    <div className="min-h-screen bg-background p-4 sm:p-8 space-y-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-2">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Filter by player name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-accent/5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            />
+          </div>
+        </div>
+      </div>
+
       <GameDetailView
         gameId={gameId}
         client={sharedClient}
@@ -83,6 +99,7 @@ const SharedGameDetailContent = () => {
         showOwnerControls={false}
         onBack={() => navigate(`/shared/${encodeURIComponent(token)}`)}
         backLabel="Back to Games History"
+        hasActivePlayerFilter={searchQuery.trim().length > 0}
       />
     </div>
   );
