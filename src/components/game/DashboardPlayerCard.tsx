@@ -12,9 +12,10 @@ interface DashboardPlayerCardProps {
   gamePlayer: GamePlayer;
   buyInAmount: number;
   isLiveGame?: boolean;
+  disableLinks?: boolean;
 }
 
-const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame: _isLiveGame = false }: DashboardPlayerCardProps) => {
+const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame: _isLiveGame = false, disableLinks = false }: DashboardPlayerCardProps) => {
   const netAmount = useMemo(() =>
     (gamePlayer.final_stack || 0) - (gamePlayer.buy_ins * buyInAmount),
     [gamePlayer.final_stack, gamePlayer.buy_ins, buyInAmount]
@@ -41,13 +42,19 @@ const DashboardPlayerCard = memo(({ gamePlayer, buyInAmount, isLiveGame: _isLive
               className="flex-shrink-0 border border-border"
             />
             <div className="min-w-0">
-              <Link
-                to={gamePlayer.player.id ? `/players/${gamePlayer.player.id}` : '#'}
-                onClick={(e) => e.stopPropagation()}
-                className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate block"
-              >
-                {gamePlayer.player.name}
-              </Link>
+              {!disableLinks && gamePlayer.player.id ? (
+                <Link
+                  to={`/players/${gamePlayer.player.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate block"
+                >
+                  {gamePlayer.player.name}
+                </Link>
+              ) : (
+                <span className="font-luxury text-sm font-bold text-foreground uppercase tracking-widest truncate block">
+                  {gamePlayer.player.name}
+                </span>
+              )}
               <p className="text-3xs font-luxury text-muted-foreground uppercase tracking-widest">Player Details</p>
             </div>
           </div>

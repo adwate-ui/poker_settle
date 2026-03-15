@@ -591,12 +591,18 @@ export const GameDetailView = ({
                     return (
                       <TableRow key={gamePlayer.id}>
                         <TableCell className="text-tiny">
-                          <Link
-                            to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
-                            className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                          >
-                            {playerName}
-                          </Link>
+                          {showOwnerControls ? (
+                            <Link
+                              to={gamePlayer.player_id ? `/players/${gamePlayer.player_id}` : '#'}
+                              className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                            >
+                              {playerName}
+                            </Link>
+                          ) : (
+                            <span className="font-medium block truncate">
+                              {playerName}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-tiny">
                           <Badge variant="secondary" className="font-numbers min-w-[20px] text-tiny">
@@ -698,20 +704,32 @@ export const GameDetailView = ({
                     return (
                       <TableRow key={`settlement-${index}`}>
                         <TableCell className="text-tiny">
-                          <Link
-                            to={nameToIdMap[settlement.from] ? `/players/${nameToIdMap[settlement.from]}` : '#'}
-                            className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                          >
-                            {settlement.from}
-                          </Link>
+                          {showOwnerControls && nameToIdMap[settlement.from] ? (
+                            <Link
+                              to={`/players/${nameToIdMap[settlement.from]}`}
+                              className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                            >
+                              {settlement.from}
+                            </Link>
+                          ) : (
+                            <span className="font-medium block truncate">
+                              {settlement.from}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-tiny">
-                          <Link
-                            to={nameToIdMap[settlement.to] ? `/players/${nameToIdMap[settlement.to]}` : '#'}
-                            className="text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                          >
-                            {settlement.to}
-                          </Link>
+                          {showOwnerControls && nameToIdMap[settlement.to] ? (
+                            <Link
+                              to={`/players/${nameToIdMap[settlement.to]}`}
+                              className="text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
+                            >
+                              {settlement.to}
+                            </Link>
+                          ) : (
+                            <span className="text-muted-foreground block truncate">
+                              {settlement.to}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell isNumeric className="whitespace-nowrap text-tiny">
                           {formatCurrency(settlement.amount)}
