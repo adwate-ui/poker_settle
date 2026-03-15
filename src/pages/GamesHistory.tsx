@@ -361,9 +361,11 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 <ArrowUpDown className="h-3 w-3 opacity-50" />
               </div>
             </TableHead>
-            <TableHead className="md:w-auto">
-              {selectedPlayer !== "all" ? "P&L" : "Act"}
-            </TableHead>
+            {!readOnly && (
+              <TableHead className="md:w-auto">
+                {selectedPlayer !== "all" ? "P&L" : "Act"}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -390,13 +392,13 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 <TableCell isNumeric className="font-semibold text-muted-foreground text-tiny">
                   <ResponsiveCurrency amount={game.total_pot} />
                 </TableCell>
-                <TableCell className="text-tiny">
-                  {selectedPlayer !== "all" && playerData ? (
-                    <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-tiny">
-                      <ResponsiveCurrency amount={playerData.net_amount} />
-                    </Badge>
-                  ) : (
-                    !readOnly && (
+                {!readOnly && (
+                  <TableCell className="text-tiny">
+                    {selectedPlayer !== "all" && playerData ? (
+                      <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-tiny">
+                        <ResponsiveCurrency amount={playerData.net_amount} />
+                      </Badge>
+                    ) : (
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -408,9 +410,9 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    )
-                  )}
-                </TableCell>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             );
           })}
