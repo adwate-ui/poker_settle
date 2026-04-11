@@ -19,6 +19,10 @@ export type BreakpointKey = keyof typeof BREAKPOINTS;
  * Custom hook to detect if the current viewport is mobile-sized
  * Default breakpoint is 768px (md) - below this is considered mobile
  * Uses debounced resize listener for performance
+ *
+ * Note: This hook is defensive against mobile browser address bar animations
+ * which can trigger frequent resize events. It only updates state when the
+ * boolean value actually changes to prevent unnecessary re-renders.
  */
 export const useIsMobile = (breakpoint: number = BREAKPOINTS.md): boolean => {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
@@ -28,7 +32,13 @@ export const useIsMobile = (breakpoint: number = BREAKPOINTS.md): boolean => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint);
+      const newIsMobile = window.innerWidth < breakpoint;
+      // Only update state if the value actually changed
+      // This prevents unnecessary re-renders when resize events fire
+      // but the mobile/desktop state hasn't changed (common on mobile browsers)
+      setIsMobile((prevIsMobile) => {
+        return prevIsMobile === newIsMobile ? prevIsMobile : newIsMobile;
+      });
     };
 
     // Debounced resize handler for performance

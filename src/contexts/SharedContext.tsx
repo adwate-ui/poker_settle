@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { useParams } from 'react-router-dom';
@@ -23,7 +23,6 @@ const SharedContext = createContext<SharedContextType | undefined>(undefined);
 
 export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
     const [scope, setScope] = useState<SharedScope | null>(null);
-    const [sharedClient, setSharedClient] = useState<SupabaseClient>(supabase);
     const [isLoading, setIsLoading] = useState(true);
     const [isValid, setIsValid] = useState(false);
     const { token } = useParams<{ token: string }>();
@@ -83,10 +82,6 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
                 setScope(newScope);
                 setIsValid(true);
 
-                // 3. Create scoped client with custom header
-                const customClient = createSharedClient(token);
-                setSharedClient(customClient);
-
             } catch (err) {
                 console.error('Token validation failed:', err);
                 setIsValid(false);
@@ -98,19 +93,25 @@ export const SharedProvider = ({ children }: { children: React.ReactNode }) => {
         validateToken();
     }, [token, user]);
 
-    // Helper to create client with specific headers
-    const createSharedClient = (accessToken: string) => {
+    // Memoize sharedClient to prevent recreation on every render
+    // Only recreate when token actually changes, not when user object reference changes
+    // This prevents infinite re-render loops in mobile browsers where auth state may update frequently
+    const sharedClient = useMemo(() => {
+        if (!token) {
+            return supabase;
+        }
+
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
         return new SupabaseClient(supabaseUrl, supabaseAnonKey, {
             global: {
                 headers: {
-                    'x-share-token': accessToken
+                    'x-share-token': token
                 }
             }
         });
-    };
+    }, [token]);
 
     return (
         <SharedContext.Provider value={{

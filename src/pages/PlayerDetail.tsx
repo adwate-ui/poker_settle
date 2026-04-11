@@ -97,7 +97,11 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
     } finally {
       setLoading(false);
     }
-  }, [playerId, client]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerId]);
+  // Note: 'client' is intentionally omitted from dependencies to prevent infinite re-render loops
+  // on mobile browsers where the client reference may change frequently. The client is stable
+  // enough that when it changes meaningfully, playerId also changes, triggering a refetch.
 
   useEffect(() => {
     if (playerId) {

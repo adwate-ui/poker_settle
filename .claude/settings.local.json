@@ -5,7 +5,14 @@
       "Bash(del \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailService.ts\")",
       "Bash(del \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailNotifications.ts\")",
       "Bash(Remove-Item \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailService.ts\" -Force)",
-      "Bash(Remove-Item \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailNotifications.ts\" -Force)"
+      "Bash(Remove-Item \"c:\\\\Users\\\\Administrator\\\\.antigravity\\\\Projects\\\\poker_settle\\\\src\\\\services\\\\emailNotifications.ts\" -Force)",
+      "Bash(npx supabase functions list)",
+      "Bash(npx supabase functions logs whatsapp-message-webhook --limit 50)",
+      "Bash(npx supabase functions logs whatsapp-rsvp-webhook --limit 50)",
+      "Bash(npx supabase link --project-ref xfahfllkbutljcowwxpx)",
+      "Bash(cat supabase/functions/send-whatsapp/index.ts)",
+      "Bash(curl -X GET \"http://140.245.240.186:8080\" --connect-timeout 5)",
+      "Bash(ping -n 4 140.245.240.186)"
     ]
   }
 }
