@@ -10,4 +10,5 @@ export const playerKeys = {
     all: ['players'] as const,
     lists: () => [...playerKeys.all, 'list'] as const,
     detail: (id: string) => [...playerKeys.all, 'detail', id] as const,
+    dashboard: (id: string) => [...playerKeys.all, 'dashboard', id] as const,
 };

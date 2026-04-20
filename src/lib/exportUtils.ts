@@ -58,8 +58,9 @@ function downloadFile(content: string, filename: string, mimeType: string = 'tex
 }
 
 import { format } from 'date-fns';
-import { Game, Player, Settlement } from '@/types/poker';
+import { Game, Player, Settlement, SessionStats, DashboardGameHistory } from '@/types/poker';
 import { formatCurrency } from '@/utils/currencyUtils';
+import { computeMonthlyStats, computeCumulativePnL } from '@/features/players/utils/playerStats';
 
 /**
  * Export games history to CSV
@@ -624,3 +625,266 @@ export function printPlayersReport(players: Player[]): void {
 export const printGamesReport = (_games: Game[]) => {
   window.print();
 };
+
+// Player Stats Export Utilities
+// ==============================
+
+/**
+ * Export a player's full session history and stats to CSV / Excel
+ */
+export function exportPlayerStatsToCSV(
+  playerName: string,
+  history: DashboardGameHistory[],
+  stats: SessionStats,
+): void {
+  if (history.length === 0) return;
+
+  // Build summary block
+  const summaryLines = [
+    `"Player Stats Export — ${escapeHtml(playerName)}"`,
+    `"Generated: ${format(new Date(), 'PPP p')}"`,
+    '',
+    '"SUMMARY"',
+    `"Total Sessions","${stats.totalGames}"`,
+    `"Total Profit/Loss","${formatCurrency(stats.totalProfit)}"`,
+    `"Total Invested","${formatCurrency(stats.totalInvested)}"`,
+    `"ROI","${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%"`,
+    `"Win Rate","${stats.winRate.toFixed(1)}%"`,
+    `"Avg Profit / Session","${formatCurrency(stats.avgProfitPerSession)}"`,
+    `"Avg Buy-ins / Session","${stats.avgBuyinsPerSession.toFixed(1)}"`,
+    `"Best Session","${formatCurrency(stats.biggestWin)}"`,
+    `"Worst Session","${formatCurrency(stats.biggestLoss)}"`,
+    '',
+    '"SESSION HISTORY"',
+  ].join('\n');
+
+  // Session rows
+  const sorted = [...history].sort(
+    (a, b) => new Date(a.games.date).getTime() - new Date(b.games.date).getTime(),
+  );
+  let running = 0;
+  const sessionData = sorted.map((g) => {
+    running += g.net_amount;
+    return {
+      date: format(new Date(g.games.date), 'yyyy-MM-dd'),
+      buyIns: g.buy_ins,
+      totalInvested: g.buy_ins * g.games.buy_in_amount,
+      finalStack: g.final_stack,
+      netAmount: g.net_amount,
+      runningTotal: running,
+    };
+  });
+
+  const sessionHeaders = [
+    { key: 'date', label: 'Date' },
+    { key: 'buyIns', label: 'Buy-ins' },
+    { key: 'totalInvested', label: 'Total Invested' },
+    { key: 'finalStack', label: 'Final Stack' },
+    { key: 'netAmount', label: 'Net P&L' },
+    { key: 'runningTotal', label: 'Cumulative P&L' },
+  ];
+
+  const sessionCSV = arrayToCSV(sessionData as unknown as Record<string, unknown>[], sessionHeaders);
+
+  // Monthly summary
+  const monthly = computeMonthlyStats(history);
+  const monthlyHeaders = [
+    { key: 'month', label: 'Month' },
+    { key: 'sessions', label: 'Sessions' },
+    { key: 'profit', label: 'Net P&L' },
+    { key: 'winRate', label: 'Win Rate %' },
+  ];
+  const monthlyFormatted = monthly.map((m) => ({
+    month: m.month,
+    sessions: m.sessions,
+    profit: m.profit,
+    winRate: `${m.winRate.toFixed(1)}%`,
+  }));
+  const monthlyCSV = arrayToCSV(monthlyFormatted as unknown as Record<string, unknown>[], monthlyHeaders);
+
+  const fullCSV = summaryLines + '\n' + sessionCSV + '\n\n"MONTHLY BREAKDOWN"\n' + monthlyCSV;
+  const safeName = playerName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  downloadFile(fullCSV, `poker-player-${safeName}-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+}
+
+/**
+ * Generate print-friendly HTML for a player's stats (PDF via browser print)
+ */
+export function generatePlayerStatsPrintHTML(
+  player: Player,
+  history: DashboardGameHistory[],
+  stats: SessionStats,
+): string {
+  const monthly = computeMonthlyStats(history);
+  const cumulative = computeCumulativePnL(history);
+
+  const isProfit = stats.totalProfit >= 0;
+  const profitClass = isProfit ? 'profit' : 'loss';
+  const profitSign = isProfit ? '+' : '';
+
+  const sessionRows = cumulative.map((point, idx) => {
+    const isWin = point.sessionPnl > 0;
+    return `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(point.date)}</td>
+        <td class="number ${isWin ? 'profit' : 'loss'}">${isWin ? '+' : ''}${formatCurrency(point.sessionPnl)}</td>
+        <td class="number ${point.cumulative >= 0 ? 'profit' : 'loss'}">${point.cumulative >= 0 ? '+' : ''}${formatCurrency(point.cumulative)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const monthlyRows = monthly.map((m) => {
+    const isMonthProfit = m.profit >= 0;
+    return `
+      <tr>
+        <td>${escapeHtml(m.month)}</td>
+        <td class="number">${m.sessions}</td>
+        <td class="number ${isMonthProfit ? 'profit' : 'loss'}">${isMonthProfit ? '+' : ''}${formatCurrency(m.profit)}</td>
+        <td class="number">${m.winRate.toFixed(0)}%</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Player Stats — ${escapeHtml(player.name)}</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          padding: 40px;
+          color: #1a1a1a;
+          line-height: 1.5;
+          background: #faf8f3;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #d4af37;
+        }
+        .header h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 4px; }
+        .header .subtitle { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          margin-bottom: 30px;
+        }
+        .stat {
+          text-align: center;
+          padding: 14px 12px;
+          background: #fff;
+          border-radius: 8px;
+          border: 1px solid #e8e0cc;
+        }
+        .stat-label { font-size: 10px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-value { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+        .profit { color: #059669; font-weight: 600; }
+        .loss { color: #dc2626; font-weight: 600; }
+        h3 { font-size: 16px; margin: 24px 0 12px; color: #1a1a1a; border-bottom: 1px solid #e8e0cc; padding-bottom: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid #f0ebe0; }
+        th { background: #f5f0e4; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+        .number { text-align: right; font-variant-numeric: tabular-nums; }
+        .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e8e0cc; text-align: center; font-size: 11px; color: #aaa; }
+        @media print { body { padding: 20px; background: white; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${escapeHtml(player.name)}</h1>
+        <div class="subtitle">Poker Player Statistics — Generated ${escapeHtml(format(new Date(), 'PPP'))}</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Total P&L</div>
+          <div class="stat-value ${profitClass}">${profitSign}${formatCurrency(stats.totalProfit)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">ROI</div>
+          <div class="stat-value ${stats.roi >= 0 ? 'profit' : 'loss'}">${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value">${stats.winRate.toFixed(1)}%</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Sessions</div>
+          <div class="stat-value">${stats.totalGames}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total Invested</div>
+          <div class="stat-value">${formatCurrency(stats.totalInvested)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Avg / Session</div>
+          <div class="stat-value ${stats.avgProfitPerSession >= 0 ? 'profit' : 'loss'}">${stats.avgProfitPerSession >= 0 ? '+' : ''}${formatCurrency(stats.avgProfitPerSession)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Best Session</div>
+          <div class="stat-value profit">${stats.biggestWin > 0 ? '+' + formatCurrency(stats.biggestWin) : '—'}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Worst Session</div>
+          <div class="stat-value loss">${stats.biggestLoss < 0 ? formatCurrency(stats.biggestLoss) : '—'}</div>
+        </div>
+      </div>
+
+      <h3>Monthly Breakdown</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th class="number">Sessions</th>
+            <th class="number">Net P&L</th>
+            <th class="number">Win Rate</th>
+          </tr>
+        </thead>
+        <tbody>${monthlyRows}</tbody>
+      </table>
+
+      <h3>Session History</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th class="number">Session P&L</th>
+            <th class="number">Cumulative P&L</th>
+          </tr>
+        </thead>
+        <tbody>${sessionRows}</tbody>
+      </table>
+
+      <div class="footer">
+        Generated by Poker Settle on ${escapeHtml(format(new Date(), 'PPP p'))}
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * Opens the browser print dialog for a player's stats report (Save as PDF)
+ */
+export function printPlayerStatsReport(
+  player: Player,
+  history: DashboardGameHistory[],
+  stats: SessionStats,
+): void {
+  const html = generatePlayerStatsPrintHTML(player, history, stats);
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  }
+}

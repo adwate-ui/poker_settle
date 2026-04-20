@@ -833,8 +833,8 @@ export const GameDetailView = ({
                     <SelectValue placeholder="Select Origin" />
                   </SelectTrigger>
                   <SelectContent>
-                    {gamePlayers.map(gp => (
-                      <SelectItem key={gp.players?.name} value={gp.players?.name || ''}>{gp.players?.name}</SelectItem>
+                    {gamePlayers.filter(gp => gp.players?.name).map(gp => (
+                      <SelectItem key={gp.players!.name} value={gp.players!.name}>{gp.players!.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -847,8 +847,8 @@ export const GameDetailView = ({
                     <SelectValue placeholder="Select Destination" />
                   </SelectTrigger>
                   <SelectContent>
-                    {gamePlayers.map(gp => (
-                      <SelectItem key={gp.players?.name} value={gp.players?.name || ''}>{gp.players?.name}</SelectItem>
+                    {gamePlayers.filter(gp => gp.players?.name).map(gp => (
+                      <SelectItem key={gp.players!.name} value={gp.players!.name}>{gp.players!.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -122,6 +122,66 @@ export interface BuyInHistory {
   created_at: string;
 }
 
+// ─── Player Dashboard Types ────────────────────────────────────────────────
+
+export interface SessionStats {
+  totalGames: number;
+  totalProfit: number;
+  totalInvested: number;
+  roi: number;                    // percentage, e.g. 42.5
+  winRate: number;                // percentage, e.g. 60.0
+  avgProfitPerSession: number;
+  avgBuyinsPerSession: number;
+  biggestWin: number;
+  biggestLoss: number;
+  currentStreak: number;          // positive = wins, negative = losses, e.g. 3 or -2
+  bestWinStreak: number;
+}
+
+export interface MonthlyStats {
+  month: string;                  // display label, e.g. "Jan 2026"
+  monthKey: string;               // sortable key, e.g. "2026-01"
+  profit: number;
+  sessions: number;
+  winRate: number;                // percentage
+}
+
+export interface CumulativePnLPoint {
+  date: string;                   // formatted display label, e.g. "Jan 5"
+  rawDate: string;                // ISO string for sorting
+  sessionPnl: number;
+  cumulative: number;
+}
+
+export interface DistributionBucket {
+  label: string;                  // e.g. "0 to 1k"
+  count: number;
+  isProfit: boolean;
+}
+
+export interface DashboardFilters {
+  timePeriod: 'all' | '3m' | '6m' | 'ytd' | 'lastyear';
+  month: 'all' | string;          // 'all' or 'MMM yyyy', e.g. "Jan 2026"
+  stakes: 'all' | number;         // 'all' or specific buy_in_amount
+  result: 'all' | 'wins' | 'losses';
+}
+
+// Dashboard-augmented GameHistory (includes buy_in_amount for ROI calc)
+export interface DashboardGameHistory {
+  id: string;
+  game_id: string;
+  buy_ins: number;
+  final_stack: number;
+  net_amount: number;
+  games: {
+    id: string;
+    date: string;
+    buy_in_amount: number;
+    small_blind?: number;
+    big_blind?: number;
+  };
+}
+
 // Database record types (for any unknown fields from DB)
 export type DatabaseRecord = Record<string, unknown>;
 
