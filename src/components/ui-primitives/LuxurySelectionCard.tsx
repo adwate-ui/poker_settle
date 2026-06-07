@@ -37,12 +37,12 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                     )}>
                         {player.name}
                     </span>
-                    {player.total_games && player.total_games > 10 && (
+                    {(player.total_games ?? 0) > 10 && (
                         <Star className={cn("text-primary fill-current", isSm ? "h-2.5 w-2.5" : "h-3 w-3")} />
                     )}
                 </div>
                 <div className={cn("flex gap-2.5 mt-1.5 overflow-hidden", isSm && "mt-1 gap-1 flex-nowrap")}>
-                    {player.total_games && player.total_games > 0 && (
+                    {(player.total_games ?? 0) > 0 && (
                         <Badge variant="stats" className={isSm ? "text-tiny h-4 px-1" : ""}>
                             {player.total_games} SESSIONS
                         </Badge>

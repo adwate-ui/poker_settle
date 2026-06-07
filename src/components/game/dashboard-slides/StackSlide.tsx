@@ -214,16 +214,23 @@ const StackSlide = () => {
                         </div>
                         <div className="space-y-3">
                             {!isStackBalanced && (
-                                <p className="text-xs text-state-error/80 leading-relaxed font-medium">
-                                    <span className="font-bold uppercase tracking-wider block mb-1 opacity-80">Chip Mismatch</span>
-                                    The final chips on the table ({formatCurrency(totalFinalStack)}) do not match the total buy-ins ({formatCurrency(totalBuyIns)}).
-                                </p>
-                            )}
-                            {!isBalanced && (
-                                <p className="text-xs text-state-error/80 leading-relaxed font-medium">
-                                    <span className="font-bold uppercase tracking-wider block mb-1 opacity-80">Accounting Mismatch</span>
-                                    The total winnings do not equal the total losses. The numbers don't add up to zero.
-                                </p>
+                                <div className="space-y-2">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-state-error/80 block">Chip Mismatch</span>
+                                    <div className="space-y-1.5">
+                                        <div className="flex justify-between text-xs text-state-error/80 font-medium">
+                                            <span>Final Chips</span>
+                                            <span className="font-numbers">{formatCurrency(totalFinalStack)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-state-error/80 font-medium">
+                                            <span>Total Buy-ins</span>
+                                            <span className="font-numbers">{formatCurrency(totalBuyIns)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-state-error font-bold border-t border-state-error/20 pt-1.5">
+                                            <span>Difference</span>
+                                            <span className="font-numbers">{formatCurrency(Math.abs(totalFinalStack - totalBuyIns))}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </Card>
