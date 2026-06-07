@@ -41,9 +41,9 @@ export const useGameData = () => {
     return player;
   };
 
-  const createGame = async (buyInAmount: number, selectedPlayers: Player[]): Promise<Game> => {
+  const createGame = async (buyInAmount: number, selectedPlayers: Player[], rake?: number, hostPlayerId?: string): Promise<Game> => {
     if (!user) throw new Error("User not authenticated");
-    const newGame = await apiCreateGame(user.id, buyInAmount, selectedPlayers);
+    const newGame = await apiCreateGame(user.id, buyInAmount, selectedPlayers, rake, hostPlayerId);
     await fetchGames();
     return newGame;
   };

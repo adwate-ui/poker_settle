@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Game, GamePlayer, Settlement } from '@/types/poker';
-import { calculateOptimizedSettlements, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { calculateOptimizedSettlements, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
 import { PaymentMethodConfig } from '@/config/localization';
 
 export const useGameStats = (game: Game | null, gamePlayers: GamePlayer[]) => {
@@ -50,14 +50,21 @@ export const useGameStats = (game: Game | null, gamePlayers: GamePlayer[]) => {
     const optimizedSettlements = useMemo(() => {
         if (!gamePlayers.length) return [];
 
-        const balances: PlayerBalance[] = gamePlayers.map(gp => ({
+        let balances: PlayerBalance[] = gamePlayers.map(gp => ({
             name: gp.player.name,
             amount: gp.net_amount || 0,
             paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
         }));
 
+        const rake = game?.rake ?? 0;
+        const hostPlayer = gamePlayers.find(gp => gp.is_host);
+        if (rake > 0 && hostPlayer) {
+            const finalStacks = new Map(gamePlayers.map(gp => [gp.player.name, gp.final_stack]));
+            balances = applyRake(balances, finalStacks, rake, hostPlayer.player.name);
+        }
+
         return calculateOptimizedSettlements(balances, manualSettlements);
-    }, [gamePlayers, manualSettlements]);
+    }, [gamePlayers, manualSettlements, game?.rake]);
 
     const finalSettlements = useMemo(() =>
         [...manualSettlements, ...optimizedSettlements],

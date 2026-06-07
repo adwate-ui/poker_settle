@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,13 +14,22 @@ import { toast } from "@/lib/notifications";
 import {
   ArrowLeft, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Share2,
   ChevronDown, Edit, User, Phone, CreditCard, Layers, ArrowRight,
-  Download, FileSpreadsheet, FileText,
+  Download, FileSpreadsheet, FileText, Heart, X as XIcon, Plus, UserX,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { cn } from "@/lib/utils";
 import { Player } from "@/types/poker";
+import { useAuth } from "@/hooks/useAuth";
+import { fetchPlayers } from "@/features/players/api/playerApi";
+import {
+  fetchRelationships,
+  addRelationship,
+  removeRelationship,
+  PlayerRelationship,
+  RelationshipType,
+} from "@/features/players/api/playerRelationshipsApi";
 import { ShareDialog } from "@/components/shared/ShareDialog";
 import OptimizedAvatar from "@/components/player/OptimizedAvatar";
 import { PlayerFormDialog, PlayerFormData } from "@/components/player/PlayerFormDialog";
@@ -49,12 +58,64 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const playerId = propPlayerId || params.playerId;
+  const { user } = useAuth();
 
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isProfileOpen, setIsProfileOpen] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  // Relationship state
+  const [relationships, setRelationships] = useState<PlayerRelationship[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [pickerType, setPickerType] = useState<RelationshipType | null>(null);
+
+  const preferredPartners = relationships.filter(r => r.relationship_type === 'preferred');
+  const avoidPartners = relationships.filter(r => r.relationship_type === 'avoid');
+  const relatedIds = new Set(relationships.map(r => r.related_player_id));
+
+  const loadRelationships = useCallback(async () => {
+    if (!user || !playerId || readOnly) return;
+    try {
+      const [rels, players] = await Promise.all([
+        fetchRelationships(user.id, playerId),
+        fetchPlayers(user.id),
+      ]);
+      setRelationships(rels);
+      setAllPlayers(players.filter(p => p.id !== playerId));
+    } catch {
+      // silently fail — relationships are non-critical
+    }
+  }, [user, playerId, readOnly]);
+
+  useEffect(() => {
+    loadRelationships();
+  }, [loadRelationships]);
+
+  const handleAddRelationship = async (relatedPlayerId: string, type: RelationshipType) => {
+    if (!user || !playerId) return;
+    try {
+      await addRelationship(user.id, playerId, relatedPlayerId, type);
+      await loadRelationships();
+      setPickerType(null);
+      toast.success("Partner added");
+    } catch {
+      toast.error("Failed to add partner");
+    }
+  };
+
+  const handleRemoveRelationship = async (relatedPlayerId: string, type: RelationshipType) => {
+    if (!user || !playerId) return;
+    try {
+      await removeRelationship(user.id, playerId, relatedPlayerId, type);
+      await loadRelationships();
+      toast.success("Partner removed");
+    } catch {
+      toast.error("Failed to remove partner");
+    }
+  };
+
   const { updatePlayer } = usePlayerManagement();
 
   const {
@@ -456,6 +517,88 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
           </TableBody>
         </Table>
       </div>
+
+      {/* ── 6. Settlement Partner Preferences (private, owner only) ─ */}
+      {!readOnly && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {(["preferred", "avoid"] as RelationshipType[]).map((type) => {
+            const partners = type === "preferred" ? preferredPartners : avoidPartners;
+            const isPreferred = type === "preferred";
+            const Icon = isPreferred ? Heart : UserX;
+            const label = isPreferred ? "Preferred Settlement Partners" : "Avoid Settlement Partners";
+            const pickerOptions = allPlayers.filter(p => !relatedIds.has(p.id) || !relationships.find(r => r.related_player_id === p.id && r.relationship_type === type));
+            const isPickerOpen = pickerType === type;
+
+            return (
+              <Card key={type} className="border-border bg-background/60 backdrop-blur-xl shadow-md overflow-hidden">
+                <CardHeader className="p-4 border-b border-border bg-accent/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Icon className={cn("h-4 w-4", isPreferred ? "text-state-success" : "text-state-error")} />
+                      <CardTitle className="text-xs font-luxury uppercase tracking-widest">{label}</CardTitle>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setPickerType(isPickerOpen ? null : type)}
+                      className="h-7 w-7 text-muted-foreground hover:text-primary"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-2">
+                  {isPickerOpen && (
+                    <div className="space-y-1.5 pb-2 border-b border-border">
+                      <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Select a player to add</p>
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                        {pickerOptions.length === 0 ? (
+                          <p className="text-3xs text-muted-foreground font-luxury">No more players to add</p>
+                        ) : (
+                          pickerOptions.map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => handleAddRelationship(p.id, type)}
+                              className="text-2xs px-2.5 py-1 rounded-full border border-border bg-accent/5 hover:border-primary/40 hover:bg-primary/5 font-luxury uppercase tracking-wider transition-all"
+                            >
+                              {p.name}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {partners.length === 0 ? (
+                    <p className="text-3xs text-muted-foreground font-luxury uppercase tracking-widest py-2">None added</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {partners.map(r => (
+                        <div
+                          key={r.id}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-2xs font-luxury uppercase tracking-wider",
+                            isPreferred
+                              ? "bg-state-success/10 border-state-success/30 text-state-success"
+                              : "bg-state-error/10 border-state-error/30 text-state-error"
+                          )}
+                        >
+                          {r.related_player_name}
+                          <button
+                            onClick={() => handleRemoveRelationship(r.related_player_id, type)}
+                            className="hover:opacity-70 transition-opacity"
+                          >
+                            <XIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       <ShareDialog
         open={shareDialogOpen}

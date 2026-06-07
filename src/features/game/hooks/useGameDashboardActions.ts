@@ -6,7 +6,9 @@ import { toast } from '@/lib/notifications';
 import { ErrorMessages } from '@/lib/errorUtils';
 import { GamePlayer, Settlement, SeatPosition } from '@/types/poker';
 import { useNavigate } from 'react-router-dom';
-import { calculateOptimizedSettlements, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { calculateOptimizedSettlements, calculateSettlementsWithPreferences, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { fetchAllRelationships } from '@/features/players/api/playerRelationshipsApi';
+import { useAuth } from '@/hooks/useAuth';
 import { parseIndianNumber } from '@/lib/utils';
 import { PaymentMethodConfig } from '@/config/localization';
 import { sendSessionSummaryNotification } from '@/services/whatsappNotifications';
@@ -40,6 +42,7 @@ export const useGameDashboardActions = () => {
     } = useDashboardStore();
 
     const { updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition } = useGameData();
+    const { user } = useAuth();
     const { createOrGetSharedLink } = useSharedLink();
     const navigate = useNavigate();
 
@@ -217,14 +220,40 @@ export const useGameDashboardActions = () => {
             let finalSettlements = settlementsInput;
 
             if (!finalSettlements || finalSettlements.length === 0) {
-                const balances: PlayerBalance[] = gamePlayers.map(gp => ({
+                let balances: PlayerBalance[] = gamePlayers.map(gp => ({
                     name: gp.player.name,
                     amount: gp.net_amount,
                     paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
                 }));
 
+                const rake = game.rake ?? 0;
+                const hostPlayer = gamePlayers.find(gp => gp.is_host);
+                if (rake > 0 && hostPlayer) {
+                    const finalStacks = new Map(gamePlayers.map(gp => [gp.player.name, gp.final_stack]));
+                    balances = applyRake(balances, finalStacks, rake, hostPlayer.player.name);
+                }
+
                 const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
-                const autoSettlements = calculateOptimizedSettlements(balances, manualSettlements);
+
+                // Fetch player relationship preferences for settlement ordering
+                let preferredPairs = new Set<string>();
+                let avoidPairs = new Set<string>();
+                if (user) {
+                    try {
+                        const prefs = await fetchAllRelationships(user.id);
+                        preferredPairs = prefs.preferredPairs;
+                        avoidPairs = prefs.avoidPairs;
+                    } catch {
+                        // fall back to unordered settlement
+                    }
+                }
+
+                const autoSettlements = calculateSettlementsWithPreferences(
+                    balances,
+                    manualSettlements,
+                    preferredPairs,
+                    avoidPairs
+                );
                 finalSettlements = [...manualSettlements, ...autoSettlements];
             }
 
@@ -271,7 +300,7 @@ export const useGameDashboardActions = () => {
             toast.error(ErrorMessages.game.complete(err));
             setIsCompletingGame(false);
         }
-    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink]);
+    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink, user]);
 
     const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
         if (!game) return;

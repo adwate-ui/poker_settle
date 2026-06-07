@@ -19,6 +19,7 @@ interface RawGamePlayer {
     buy_ins: number;
     final_stack: number;
     net_amount: number;
+    is_host?: boolean;
     player?: {
         id: string;
         name: string;
@@ -37,6 +38,7 @@ interface RawGameResponse {
     is_complete: boolean;
     small_blind?: number | null;
     big_blind?: number | null;
+    rake?: number | null;
     settlements?: Json | null;
     user_id?: string;
     game_players?: RawGamePlayer[] | null;
@@ -56,6 +58,7 @@ export const transformGameData = (rawGame: RawGameResponse): Game => {
         is_complete: Boolean(rawGame.is_complete),
         small_blind: rawGame.small_blind ? Number(rawGame.small_blind) : undefined,
         big_blind: rawGame.big_blind ? Number(rawGame.big_blind) : undefined,
+        rake: rawGame.rake ? Number(rawGame.rake) : undefined,
         settlements: (rawGame.settlements as unknown as Settlement[]) || [],
         game_players: gamePlayers.map((gp) => ({
             id: gp.id,
@@ -64,6 +67,7 @@ export const transformGameData = (rawGame: RawGameResponse): Game => {
             buy_ins: Number(gp.buy_ins || 0),
             final_stack: Number(gp.final_stack || 0),
             net_amount: Number(gp.net_amount || 0),
+            is_host: Boolean(gp.is_host),
             player: {
                 id: gp.player?.id,
                 name: gp.player?.name || 'Unknown',
@@ -102,7 +106,13 @@ export const fetchGames = async (userId: string, client?: SupabaseClient): Promi
     }
 };
 
-export const createGame = async (userId: string, buyInAmount: number, selectedPlayers: Player[]): Promise<Game> => {
+export const createGame = async (
+    userId: string,
+    buyInAmount: number,
+    selectedPlayers: Player[],
+    rake?: number,
+    hostPlayerId?: string
+): Promise<Game> => {
     // Validate buy-in amount
     try {
         buyInAmountSchema.parse(buyInAmount);
@@ -121,7 +131,8 @@ export const createGame = async (userId: string, buyInAmount: number, selectedPl
                 buy_in_amount: buyInAmount,
                 date: new Date().toISOString(),
                 is_complete: false,
-                user_id: userId
+                user_id: userId,
+                ...(rake && rake > 0 ? { rake } : {})
             }])
             .select()
             .single();
@@ -134,7 +145,8 @@ export const createGame = async (userId: string, buyInAmount: number, selectedPl
             player_id: player.id,
             buy_ins: 1,
             final_stack: 0,
-            net_amount: -buyInAmount
+            net_amount: -buyInAmount,
+            is_host: hostPlayerId ? player.id === hostPlayerId : false
         }));
 
         const { error: gamePlayersError } = await supabase
@@ -273,6 +285,7 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string) =>
         buy_ins: Number(gp.buy_ins || 0),
         final_stack: Number(gp.final_stack || 0),
         net_amount: Number(gp.net_amount || 0),
+        is_host: Boolean(gp.is_host),
         player: {
             id: gp.player?.id,
             name: gp.player?.name || 'Unknown',

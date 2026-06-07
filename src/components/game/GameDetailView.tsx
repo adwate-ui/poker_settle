@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, Check, X, User, Coins, TrendingUp, History, ShieldCheck, Loader2, Download, FileText, Printer, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, ArrowLeft, RefreshCw, Plus, Trash2, ChevronDown, Check, X, User, Coins, TrendingUp, History, ShieldCheck, Loader2, Download, FileText, Printer, Search, Crown } from "lucide-react";
 import { exportGameDetailsToCSV, printGameReport } from "@/lib/exportUtils";
 import { Game as GameType } from "@/types/poker";
 import {
@@ -44,7 +44,7 @@ import { BuyInHistoryDialog } from "@/components/game/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { ShareDialog } from "@/components/shared/ShareDialog";
 import { useMetaTags } from "@/hooks/useMetaTags";
-import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
+import { calculateOptimizedSettlements, applyRake, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
 import { buildShortUrl } from "@/lib/shareUtils";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -58,6 +58,7 @@ interface GamePlayer {
   buy_ins: number;
   final_stack: number | null;
   net_amount: number | null;
+  is_host?: boolean;
   players?: {
     name: string | null;
     payment_preference?: string;
@@ -74,6 +75,7 @@ interface Game {
   id: string;
   date: string;
   buy_in_amount: number;
+  rake?: number;
   settlements: Settlement[];
 }
 
@@ -179,6 +181,18 @@ export const GameDetailView = ({
     }));
   }, [sortedGamePlayers]);
 
+  const rakeAdjustedBalances = useMemo((): PlayerBalance[] => {
+    const rake = game?.rake ?? 0;
+    const hostGp = sortedGamePlayers.find((gp: any) => gp.is_host);
+    if (!rake || !hostGp) return playerBalances;
+    const hostName = hostGp.player?.name ?? hostGp.players?.name ?? "";
+    const finalStacks = new Map(sortedGamePlayers.map((gp: any) => [
+      gp.player?.name ?? gp.players?.name ?? "",
+      gp.final_stack ?? 0
+    ]));
+    return applyRake(playerBalances, finalStacks, rake, hostName);
+  }, [playerBalances, sortedGamePlayers, game?.rake]);
+
 
   const addManualTransfer = async () => {
     if (!newTransferFrom || !newTransferTo || !newTransferAmount) {
@@ -211,7 +225,7 @@ export const GameDetailView = ({
     const allManuals = [...existingManuals, newManualTransfer];
 
     // 4. Calculate new auto-settlements with all manual transfers
-    const newAutoSettlements = calculateOptimizedSettlements(playerBalances, allManuals);
+    const newAutoSettlements = calculateOptimizedSettlements(rakeAdjustedBalances, allManuals);
     const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
       from,
       to,
@@ -287,12 +301,12 @@ export const GameDetailView = ({
     }
 
     // Fallback: Calculate optimized settlements on the fly if none are saved
-    const calculated = calculateOptimizedSettlements(playerBalances, []);
+    const calculated = calculateOptimizedSettlements(rakeAdjustedBalances, []);
     return calculated.map(s => ({
       ...s,
       isManual: false
     }));
-  }, [savedSettlements, playerBalances]);
+  }, [savedSettlements, rakeAdjustedBalances]);
 
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -473,6 +487,24 @@ export const GameDetailView = ({
                 {formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
               </p>
             </div>
+            {game.rake && game.rake > 0 && (
+              <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
+                <p className="text-3xs uppercase tracking-widest text-muted-foreground">Rake</p>
+                <p className="text-2xl font-bold font-numbers">{formatCurrency(game.rake)}</p>
+              </div>
+            )}
+            {(() => {
+              const hostGp = sortedGamePlayers.find((gp: any) => gp.is_host);
+              const hostName = hostGp ? (hostGp.player?.name ?? hostGp.players?.name ?? null) : null;
+              return hostName ? (
+                <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
+                  <p className="text-3xs uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+                    <Crown className="h-2.5 w-2.5" /> Host
+                  </p>
+                  <p className="text-xl font-bold font-luxury tracking-wide">{hostName}</p>
+                </div>
+              ) : null;
+            })()}
           </div>
         </CardContent>
       </Card>
@@ -688,7 +720,7 @@ export const GameDetailView = ({
                       <TableHead>To</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Sts</TableHead>
+                      {!isMobile && <TableHead>Sts</TableHead>}
                       <TableHead>Act</TableHead>
                     </TableRow>
                   ) : (
@@ -696,7 +728,7 @@ export const GameDetailView = ({
                       <TableHead>From</TableHead>
                       <TableHead>To</TableHead>
                       <TableHead>{isMobile ? "Amt" : "Amount"}</TableHead>
-                      <TableHead>{isMobile ? "Sts" : "Status"}</TableHead>
+                      {!isMobile && <TableHead>Status</TableHead>}
                     </TableRow>
                   )}
                 </TableHeader>
@@ -751,33 +783,35 @@ export const GameDetailView = ({
                           </TableCell>
                         )}
 
-                        <TableCell>
-                          <div className="flex items-center">
-                            {showOwnerControls && confirmation ? (
-                              <Button
-                                variant="ghost"
-                                size={isMobile ? "icon" : "icon-sm"}
-                                onClick={async () => {
-                                  if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
-                                  else await confirmSettlement(confirmation.id);
-                                  await refetchGameDetail();
-                                }}
-                                className={cn(
-                                  "rounded-md transition-all",
-                                  confirmation.confirmed
-                                    ? "bg-state-success/10 text-state-success hover:bg-state-success/20"
-                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                )}
-                              >
-                                {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                              </Button>
-                            ) : (
-                              <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers text-tiny">
-                                {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
+                        {!isMobile && (
+                          <TableCell>
+                            <div className="flex items-center">
+                              {showOwnerControls && confirmation ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={async () => {
+                                    if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
+                                    else await confirmSettlement(confirmation.id);
+                                    await refetchGameDetail();
+                                  }}
+                                  className={cn(
+                                    "rounded-md transition-all",
+                                    confirmation.confirmed
+                                      ? "bg-state-success/10 text-state-success hover:bg-state-success/20"
+                                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                  )}
+                                >
+                                  {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                                </Button>
+                              ) : (
+                                <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers text-tiny">
+                                  {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                        )}
 
                         {hasManual && (
                           <TableCell>

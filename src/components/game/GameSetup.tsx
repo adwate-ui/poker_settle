@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Users, Search, Trash2, Play, X, Plus, History, ShieldCheck, UserPlus, Info } from "lucide-react";
+import { ChevronDown, Users, Search, Trash2, Play, X, Plus, History, ShieldCheck, UserPlus, Info, Crown } from "lucide-react";
 import { Player, Game, SeatPosition } from "@/types/poker";
 import { useGameData } from "@/hooks/useGameData";
 import { toast } from "@/lib/notifications";
@@ -26,6 +26,8 @@ interface GameSetupProps {
 
 const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const [buyInAmount, setBuyInAmount] = useState<number>(2000);
+  const [rakeAmount, setRakeAmount] = useState<number>(200);
+  const [hostPlayerId, setHostPlayerId] = useState<string>('');
   const [newPlayerName, setNewPlayerName] = useState<string>('');
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [canCreateGame, setCanCreateGame] = useState<boolean>(true);
@@ -96,6 +98,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
   const removeSelectedPlayer = (playerId: string) => {
     setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
+    if (hostPlayerId === playerId) setHostPlayerId('');
   };
 
   const handleDeletePlayer = async (playerId: string) => {
@@ -120,7 +123,12 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
   const startGame = async () => {
     if (selectedPlayers.length >= 2 && buyInAmount > 0 && canCreateGame) {
       try {
-        const game = await createGame(buyInAmount, selectedPlayers);
+        const game = await createGame(
+          buyInAmount,
+          selectedPlayers,
+          rakeAmount > 0 ? rakeAmount : undefined,
+          hostPlayerId || undefined
+        );
         setPendingGame(game);
         setShowPositionSetup(true);
       } catch (_error) {
@@ -228,6 +236,22 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                       </div>
 
                       <div className="space-y-3">
+                        <Label className="text-label tracking-widest text-muted-foreground ml-1">Rake Amount (Rs.)</Label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none">
+                            <span className="text-primary font-luxury text-tiny opacity-70">{CurrencyConfig.symbol}</span>
+                          </div>
+                          <Input
+                            type="text"
+                            value={formatInputDisplay(rakeAmount)}
+                            onChange={e => setRakeAmount(parseIndianNumber(e.target.value))}
+                            className="h-12 pl-8 bg-accent/5 font-numbers text-base text-foreground placeholder:text-muted-foreground transition-all"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
                         <Label className="text-label tracking-widest text-muted-foreground ml-1">Add New Player</Label>
                         <div className="relative group flex gap-3">
                           <div className="relative flex-1">
@@ -269,6 +293,36 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
                               </Button>
                             </div>
                           ))}
+                        </div>
+
+                        <div className="space-y-3 pt-2 border-t border-border">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-4 w-4 text-primary/70" />
+                            <Label className="text-label tracking-widest text-muted-foreground">Designate Host (optional)</Label>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {[...selectedPlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (
+                              <button
+                                key={player.id}
+                                type="button"
+                                onClick={() => setHostPlayerId(hostPlayerId === player.id ? '' : player.id)}
+                                className={cn(
+                                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-2xs font-luxury uppercase tracking-widest transition-all",
+                                  hostPlayerId === player.id
+                                    ? "bg-primary/10 border-primary/40 text-primary"
+                                    : "bg-accent/5 border-border text-muted-foreground hover:border-primary/30"
+                                )}
+                              >
+                                {hostPlayerId === player.id && <Crown className="h-3 w-3 text-primary" />}
+                                {player.name}
+                              </button>
+                            ))}
+                          </div>
+                          {hostPlayerId && (
+                            <p className="text-2xs text-muted-foreground font-luxury">
+                              Host collects rake from all players whose final stack exceeds the rake amount.
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

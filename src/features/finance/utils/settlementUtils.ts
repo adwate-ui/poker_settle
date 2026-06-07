@@ -197,6 +197,169 @@ export function calculateStandardSettlements(
 }
 
 /**
+ * Build a canonical pair key (sorted names joined by |) for use in preferred/avoid Sets.
+ */
+export function pairKey(a: string, b: string): string {
+    return [a, b].sort().join('|');
+}
+
+/**
+ * Settlement algorithm that honours preferred and avoid pair preferences.
+ *
+ * Step 1 — Preferred pairs settle first (always, even if it increases total transactions).
+ * Step 2 — Remaining balances settle via an avoid-aware greedy algorithm: skip avoid pairs
+ *           when an alternative exists, fall back to an avoid pair only if there is no choice.
+ *
+ * Payment-method phases (cash/digital/cross) are preserved within each step.
+ */
+export function calculateSettlementsWithPreferences(
+    playerBalances: PlayerBalance[],
+    manualTransfers: Settlement[] = [],
+    preferredPairs: Set<string> = new Set(),
+    avoidPairs: Set<string> = new Set()
+): EnhancedSettlement[] {
+    if (preferredPairs.size === 0 && avoidPairs.size === 0) {
+        return calculateOptimizedSettlements(playerBalances, manualTransfers);
+    }
+
+    // Apply manual transfers first (same as calculateOptimizedSettlements)
+    const adjustedAmounts: Map<string, PlayerBalance> = new Map();
+    playerBalances.forEach(pb => adjustedAmounts.set(pb.name, { ...pb }));
+    manualTransfers.forEach(transfer => {
+        const from = adjustedAmounts.get(transfer.from);
+        const to = adjustedAmounts.get(transfer.to);
+        if (from) from.amount += transfer.amount;
+        if (to) to.amount -= transfer.amount;
+    });
+
+    const balances = Array.from(adjustedAmounts.values());
+    const settlements: EnhancedSettlement[] = [];
+
+    // Helper: is this pair in the given set?
+    const inSet = (set: Set<string>, a: string, b: string) => set.has(pairKey(a, b));
+
+    // ── Step 1: Settle preferred pairs first ──────────────────────────────────
+    const winners = balances.filter(b => b.amount > 0.01).map(b => ({ ...b }));
+    const losers = balances.filter(b => b.amount < -0.01).map(b => ({ ...b, amount: Math.abs(b.amount) }));
+
+    let settled = true;
+    while (settled) {
+        settled = false;
+        for (const winner of winners) {
+            if (winner.amount <= 0.01) continue;
+            for (const loser of losers) {
+                if (loser.amount <= 0.01) continue;
+                if (!inSet(preferredPairs, winner.name, loser.name)) continue;
+
+                const amount = Math.min(winner.amount, loser.amount);
+                if (amount > 0.01) {
+                    settlements.push({
+                        from: loser.name,
+                        to: winner.name,
+                        amount: Math.round(amount),
+                        involvesCashPlayer: false,
+                    });
+                    winner.amount -= amount;
+                    loser.amount -= amount;
+                    settled = true;
+                }
+            }
+        }
+    }
+
+    // ── Step 2: Settle remaining with avoid-awareness ─────────────────────────
+    const remainingWinners = winners.filter(w => w.amount > 0.01);
+    const remainingLosers = losers.filter(l => l.amount > 0.01);
+
+    settleGroupWithAvoid(remainingWinners, remainingLosers, settlements, false, avoidPairs);
+
+    return settlements;
+}
+
+function settleGroupWithAvoid(
+    winners: PlayerBalance[],
+    losers: PlayerBalance[],
+    settlements: EnhancedSettlement[],
+    involvesCash: boolean,
+    avoidPairs: Set<string>
+): void {
+    winners.sort((a, b) => b.amount - a.amount);
+    losers.sort((a, b) => b.amount - a.amount);
+
+    let loserIndex = 0;
+    while (loserIndex < losers.length) {
+        const loser = losers[loserIndex];
+        if (loser.amount <= 0.01) { loserIndex++; continue; }
+
+        // Find the best winner: prefer non-avoid, largest amount first
+        let winnerIndex = -1;
+        for (let i = 0; i < winners.length; i++) {
+            if (winners[i].amount <= 0.01) continue;
+            if (!avoidPairs.has(pairKey(winners[i].name, loser.name))) {
+                winnerIndex = i;
+                break;
+            }
+        }
+        // Fall back to any remaining winner (including avoid pairs)
+        if (winnerIndex === -1) {
+            for (let i = 0; i < winners.length; i++) {
+                if (winners[i].amount > 0.01) { winnerIndex = i; break; }
+            }
+        }
+        if (winnerIndex === -1) break;
+
+        const winner = winners[winnerIndex];
+        const amount = Math.min(winner.amount, loser.amount);
+        if (amount > 0.01) {
+            settlements.push({
+                from: loser.name,
+                to: winner.name,
+                amount: Math.round(amount),
+                involvesCashPlayer: involvesCash,
+            });
+            winner.amount -= amount;
+            loser.amount -= amount;
+        }
+
+        if (loser.amount <= 0.01) loserIndex++;
+        winners.sort((a, b) => b.amount - a.amount);
+    }
+}
+
+/**
+ * Apply rake to player balances before settlement calculation.
+ * Any non-host player whose final chip stack exceeds the rake amount pays the rake.
+ * The host collects all rake and is exempt from paying it.
+ */
+export function applyRake(
+    playerBalances: PlayerBalance[],
+    finalStacks: Map<string, number>,
+    rake: number,
+    hostName: string | null
+): PlayerBalance[] {
+    if (!rake || rake <= 0 || !hostName) return playerBalances;
+
+    const result = playerBalances.map(b => ({ ...b }));
+    let totalRakeCollected = 0;
+
+    for (const player of result) {
+        if (player.name === hostName) continue;
+        const finalStack = finalStacks.get(player.name) ?? 0;
+        if (finalStack > rake) {
+            player.amount -= rake;
+            totalRakeCollected += rake;
+        }
+    }
+
+    const host = result.find(p => p.name === hostName);
+    if (host && totalRakeCollected > 0) {
+        host.amount += totalRakeCollected;
+    }
+
+    return result;
+}
+
+/**
  * Get settlement statistics
  */
 export function getSettlementStats(settlements: EnhancedSettlement[]) {

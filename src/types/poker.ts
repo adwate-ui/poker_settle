@@ -18,6 +18,7 @@ export interface GamePlayer {
   buy_ins: number; // Strict number
   final_stack: number; // Strict number
   net_amount: number; // Strict number
+  is_host?: boolean;
 }
 
 export interface Game {
@@ -27,6 +28,7 @@ export interface Game {
   is_complete: boolean;
   small_blind?: number;
   big_blind?: number;
+  rake?: number;
   game_players: GamePlayer[];
   settlements?: Settlement[];
 }
