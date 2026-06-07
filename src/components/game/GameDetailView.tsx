@@ -815,17 +815,15 @@ export const GameDetailView = ({
 
                         {hasManual && (
                           <TableCell>
-                            {settlement.isManual && showOwnerControls ? (
+                            {settlement.isManual && showOwnerControls && (
                               <Button
                                 variant="ghost"
-                                size={isMobile ? "icon" : "icon-sm"}
+                                size="icon-sm"
                                 onClick={() => handleDeleteManualTransfer(index)}
                                 className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
-                            ) : (
-                              <div className={cn(isMobile ? "h-12 w-12" : "h-10 w-10")} aria-hidden="true" />
                             )}
                           </TableCell>
                         )}

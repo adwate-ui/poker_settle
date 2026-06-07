@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
@@ -17,7 +18,7 @@ import GameDashboard from "@/components/game/GameDashboard";
 import { UniversalPlayerManager } from "@/components/player/UniversalPlayerManager";
 import LuxurySelectionCard from "@/components/ui-primitives/LuxurySelectionCard";
 import { formatCurrency } from "@/utils/currencyUtils";
-import { parseIndianNumber, cn } from "@/lib/utils";
+import { parseIndianNumber } from "@/lib/utils";
 import { CurrencyConfig } from "@/config/localization";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 const NewGame = () => {
@@ -95,7 +96,10 @@ const NewGame = () => {
   };
 
   const addPlayerToGame = (player: Player) => {
-    setGamePlayers([...gamePlayers, player]);
+    setGamePlayers(prev => {
+      if (!hostPlayerId && prev.length === 0) setHostPlayerId(player.id);
+      return [...prev, player];
+    });
   };
 
   const removePlayerFromGame = (playerId: string) => {
@@ -112,6 +116,11 @@ const NewGame = () => {
 
     if (gamePlayers.length < 2) {
       toast.error("Please add at least 2 players");
+      return;
+    }
+
+    if (!hostPlayerId) {
+      toast.error("Please designate a host");
       return;
     }
 
@@ -142,7 +151,7 @@ const NewGame = () => {
         buy_ins: 1,
         final_stack: 0,
         net_amount: -parsedAmount,
-        is_host: hostPlayerId ? player.id === hostPlayerId : false,
+        is_host: player.id === hostPlayerId,
       }));
 
       const { error: playersError } = await supabase
@@ -340,31 +349,20 @@ const NewGame = () => {
                 <div className="space-y-2 pt-2 border-t border-border">
                   <div className="flex items-center gap-2">
                     <Crown className="h-4 w-4 text-primary/70" />
-                    <Label className="text-label text-muted-foreground">Designate Host (optional)</Label>
+                    <Label className="text-label text-muted-foreground">Designate Host</Label>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (
-                      <button
-                        key={player.id}
-                        type="button"
-                        onClick={() => setHostPlayerId(hostPlayerId === player.id ? "" : player.id)}
-                        className={cn(
-                          "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
-                          hostPlayerId === player.id
-                            ? "bg-primary/10 border-primary/40 text-primary"
-                            : "bg-accent/5 border-border text-muted-foreground hover:border-primary/30"
-                        )}
-                      >
-                        {hostPlayerId === player.id && <Crown className="h-3 w-3 text-primary" />}
-                        {player.name}
-                      </button>
-                    ))}
-                  </div>
-                  {hostPlayerId && (
-                    <p className="text-xs text-muted-foreground">
-                      Host collects rake from all players whose final stack exceeds the rake amount.
-                    </p>
-                  )}
+                  <Select value={hostPlayerId} onValueChange={setHostPlayerId} disabled={hasActiveGame}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select host" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (
+                        <SelectItem key={player.id} value={player.id}>
+                          {player.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
@@ -385,7 +383,7 @@ const NewGame = () => {
       <CardFooter className="pt-4 pb-8 px-8 border-t border-border bg-accent/5">
         <Button
           onClick={startGame}
-          disabled={loading || gamePlayers.length < 2 || !buyInAmount || hasActiveGame}
+          disabled={loading || gamePlayers.length < 2 || !buyInAmount || !hostPlayerId || hasActiveGame}
           className="w-full h-12 text-base font-luxury shadow-lg group relative overflow-hidden active:scale-95 transition-all duration-300"
           variant="default"
         >

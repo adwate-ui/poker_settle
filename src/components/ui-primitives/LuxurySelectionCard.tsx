@@ -47,7 +47,7 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                             {player.total_games} SESSIONS
                         </Badge>
                     )}
-                    {player.total_profit !== undefined && player.total_profit !== 0 && (
+                    {!!player.total_profit && (
                         <Badge
                             variant={player.total_profit >= 0 ? "profit" : "loss"}
                             className={isSm ? "text-tiny h-4 px-1" : ""}

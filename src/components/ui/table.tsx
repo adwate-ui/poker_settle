@@ -105,7 +105,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "py-1 px-2 sm:p-4 truncate align-middle font-medium font-body text-tiny sm:text-table-base [&:has([role=checkbox])]:pr-0 text-left",
+      "h-12 md:h-auto py-1 px-2 sm:p-4 truncate align-middle font-medium font-body text-tiny sm:text-table-base [&:has([role=checkbox])]:pr-0 text-left",
       isNumeric && "font-numbers",
       className
     )}
