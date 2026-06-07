@@ -738,7 +738,7 @@ export const GameDetailView = ({
                     const hasManual = settlementsWithType.some(s => s.isManual);
 
                     return (
-                      <TableRow key={`settlement-${index}`} className="h-8">
+                      <TableRow key={`settlement-${index}`}>
                         <TableCell className="text-tiny">
                           {showOwnerControls && nameToIdMap[settlement.from] ? (
                             <Link
@@ -815,7 +815,7 @@ export const GameDetailView = ({
 
                         {hasManual && (
                           <TableCell>
-                            {settlement.isManual && showOwnerControls && (
+                            {settlement.isManual && showOwnerControls ? (
                               <Button
                                 variant="ghost"
                                 size={isMobile ? "icon" : "icon-sm"}
@@ -824,6 +824,8 @@ export const GameDetailView = ({
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
+                            ) : (
+                              <div className={cn(isMobile ? "h-12 w-12" : "h-10 w-10")} aria-hidden="true" />
                             )}
                           </TableCell>
                         )}
