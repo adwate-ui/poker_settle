@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameData } from '@/hooks/useGameData';
 import { useGameRealtime } from '@/features/game/hooks/useGameRealtime';
 import { useGameDetail } from '@/features/game/hooks/useGameDetail';
@@ -54,6 +54,8 @@ import { supabase } from '@/integrations/supabase/client';
 interface GameDashboardProps {
   gameId: string;
 }
+
+const CAROUSEL_OPTS = { loop: false } as const;
 
 const GameDashboard = ({ gameId }: GameDashboardProps) => {
   const isMobile = useIsMobile();
@@ -137,6 +139,11 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
   // Filter available players for searching
   const availablePlayers = (allPlayers || []).filter(p => !gamePlayers.some(gp => gp.player_id === p.id));
 
+  const sortedGamePlayers = useMemo(
+    () => [...gamePlayers].sort((a, b) => a.player.name.localeCompare(b.player.name)),
+    [gamePlayers]
+  );
+
   // Local state for UI sections (Desktop only mostly)
   const [playersOpen, setPlayersOpen] = useState(true);
   const [settlementsOpen, setSettlementsOpen] = useState(true);
@@ -154,7 +161,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
     return (
       <div className="min-h-screen bg-background pb-safe">
         {/* Simplified Header */}
-        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between shadow-sm">
+        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-4 h-14 flex items-center justify-between shadow-sm">
           <div className="flex flex-col items-start">
             <span className="text-label text-muted-foreground">Players</span>
             <span className="text-sm font-bold font-numbers text-foreground flex items-center gap-1">
@@ -171,7 +178,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
 
         {/* Carousel Content */}
         <div className="pt-2">
-          <Carousel className="w-full" opts={{ loop: false }}>
+          <Carousel className="w-full" opts={CAROUSEL_OPTS}>
             <CarouselContent>
               {/* Slide 1: Seating/Table */}
               <CarouselItem>
@@ -191,7 +198,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
 
             {/* Carousel Indicators */}
             <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20 pointer-events-none">
-              <div className="bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-border pointer-events-auto shadow-lg">
+              <div className="bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border pointer-events-auto shadow-lg">
                 <CarouselDots count={3} />
               </div>
             </div>
@@ -304,7 +311,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                   </Button>
 
                   <div className="space-y-4">
-                    {[...gamePlayers].sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
+                    {sortedGamePlayers.map((gamePlayer) => (
                       <DashboardPlayerCard
                         key={gamePlayer.id}
                         gamePlayer={gamePlayer}

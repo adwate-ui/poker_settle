@@ -64,6 +64,11 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
         return calculateOptimizedSettlements(balances, manualSettlements);
     }, [gamePlayers, manualSettlements]);
 
+    const sortedGamePlayers = useMemo(
+        () => [...gamePlayers].sort((a, b) => a.player.name.localeCompare(b.player.name)),
+        [gamePlayers]
+    );
+
     return (
         <div className="px-4 pt-1 space-y-4 pb-24">
             <div className="flex justify-between items-center mb-4">
@@ -78,7 +83,7 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
             </div>
 
             <div className="space-y-3">
-                {[...gamePlayers].sort((a, b) => a.player.name.localeCompare(b.player.name)).map((gamePlayer) => (
+                {sortedGamePlayers.map((gamePlayer) => (
                     <DashboardPlayerCard
                         key={gamePlayer.id}
                         gamePlayer={gamePlayer}

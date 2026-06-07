@@ -35,7 +35,11 @@ const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
 const HandsList = lazy(() => import("./pages/HandsHistory"));
 const HandDetail = lazy(() => import("./pages/HandDetail"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 5 * 60 * 1000, retry: 1 },
+  },
+});
 
 import { Outlet, Navigate } from "react-router-dom";
 import TabLayout from "@/components/layout/TabLayout";

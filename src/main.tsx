@@ -52,7 +52,7 @@ const updateSW = registerSW({
             // Silent fail - SW update checks are non-critical
           });
         }
-      }, 3 * 60 * 1000);
+      }, 60 * 60 * 1000);
     }
   },
   onRegisterError(error) {

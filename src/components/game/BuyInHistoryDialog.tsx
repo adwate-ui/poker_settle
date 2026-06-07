@@ -103,7 +103,7 @@ export const BuyInHistoryDialog = ({
           ) : (
             <ScrollArea className="h-full">
               <Table>
-                <TableHeader className="sticky top-0 z-10 bg-background/90 backdrop-blur-md">
+                <TableHeader className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm">
                   <TableRow className="hover:bg-transparent border-b border-border h-12">
                     <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground pl-8">Time</TableHead>
                     <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground text-center">Change</TableHead>

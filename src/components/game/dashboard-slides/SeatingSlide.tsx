@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import TablePositionEditor from "@/components/poker/TablePositionEditor";
 import HandTracking from "@/components/poker/HandTracking";
@@ -19,6 +20,8 @@ const SeatingSlide = () => {
 
     const { handleSaveTablePosition, handleHandComplete, handleStartHandTracking } = useGameDashboardActions();
 
+    const playerList = useMemo(() => gamePlayers.map(gp => gp.player), [gamePlayers]);
+
     if (!game) return null;
 
     return (
@@ -26,7 +29,7 @@ const SeatingSlide = () => {
             {showPositionEditor ? (
                 <div className="p-4">
                     <TablePositionEditor
-                        players={gamePlayers.map(gp => gp.player)}
+                        players={playerList}
                         currentPositions={currentTablePosition?.positions || []}
                         onSave={handleSaveTablePosition}
                         onCancel={() => setShowPositionEditor(false)}
