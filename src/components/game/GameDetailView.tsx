@@ -738,7 +738,7 @@ export const GameDetailView = ({
                     const hasManual = settlementsWithType.some(s => s.isManual);
 
                     return (
-                      <TableRow key={`settlement-${index}`}>
+                      <TableRow key={`settlement-${index}`} className="h-8">
                         <TableCell className="text-tiny">
                           {showOwnerControls && nameToIdMap[settlement.from] ? (
                             <Link
