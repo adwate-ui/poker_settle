@@ -12,12 +12,12 @@ import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
 import { Game, Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Play, Info } from "lucide-react";
+import { Loader2, Play, Info, Crown } from "lucide-react";
 import GameDashboard from "@/components/game/GameDashboard";
 import { UniversalPlayerManager } from "@/components/player/UniversalPlayerManager";
 import LuxurySelectionCard from "@/components/ui-primitives/LuxurySelectionCard";
 import { formatCurrency } from "@/utils/currencyUtils";
-import { parseIndianNumber } from "@/lib/utils";
+import { parseIndianNumber, cn } from "@/lib/utils";
 import { CurrencyConfig } from "@/config/localization";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 const NewGame = () => {
@@ -27,6 +27,8 @@ const NewGame = () => {
   const [buyInAmount, setBuyInAmount] = useState("2,000");
   const [smallBlind, setSmallBlind] = useState("20");
   const [bigBlind, setBigBlind] = useState("40");
+  const [rake, setRake] = useState("200");
+  const [hostPlayerId, setHostPlayerId] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [gamePlayers, setGamePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,6 +100,7 @@ const NewGame = () => {
 
   const removePlayerFromGame = (playerId: string) => {
     setGamePlayers(gamePlayers.filter(p => p.id !== playerId));
+    if (hostPlayerId === playerId) setHostPlayerId("");
   };
 
   const startGame = async () => {
@@ -116,6 +119,7 @@ const NewGame = () => {
     try {
       const smallBlindVal = parseIndianNumber(smallBlind);
       const bigBlindVal = parseIndianNumber(bigBlind);
+      const rakeVal = parseIndianNumber(rake);
 
       const { data: game, error: gameError } = await supabase
         .from("games")
@@ -123,6 +127,7 @@ const NewGame = () => {
           buy_in_amount: parsedAmount,
           small_blind: smallBlindVal,
           big_blind: bigBlindVal,
+          ...(rakeVal > 0 ? { rake: rakeVal } : {}),
           user_id: user?.id,
           is_complete: false,
         })
@@ -137,6 +142,7 @@ const NewGame = () => {
         buy_ins: 1,
         final_stack: 0,
         net_amount: -parsedAmount,
+        is_host: hostPlayerId ? player.id === hostPlayerId : false,
       }));
 
       const { error: playersError } = await supabase
@@ -245,7 +251,7 @@ const NewGame = () => {
             </div>
           </div>
 
-          {/* Blinds Section */}
+          {/* Blinds + Rake Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-3">
               <Label htmlFor="smallblind" className="text-label text-muted-foreground ml-1">
@@ -287,6 +293,26 @@ const NewGame = () => {
                 className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
               />
             </div>
+            <div className="space-y-3">
+              <Label htmlFor="rake" className="text-label text-muted-foreground ml-1">
+                Rake ({CurrencyConfig.symbol})
+              </Label>
+              <Input
+                id="rake"
+                type="text"
+                placeholder="0"
+                value={rake}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/,/g, '');
+                  if (value === '' || !isNaN(Number(value))) {
+                    const formatted = value === '' ? '' : formatCurrency(Number(value), false);
+                    setRake(formatted);
+                  }
+                }}
+                disabled={hasActiveGame}
+                className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
+              />
+            </div>
           </div>
 
           {/* Add Players Section */}
@@ -295,7 +321,7 @@ const NewGame = () => {
 
             {/* Selected Players List - Kept from NewGame/PlayerSelector logic but now explicit here since UniversalPlayerManager handles selection */}
             {gamePlayers.length > 0 && (
-              <div className="space-y-2 mb-4">
+              <div className="space-y-4 mb-4">
                 <h4 className="text-sm font-medium text-muted-foreground">
                   Selected Players ({gamePlayers.length})
                 </h4>
@@ -309,6 +335,36 @@ const NewGame = () => {
                       className="bg-accent/5 border-primary/20 hover:bg-destructive/10 hover:border-destructive/50"
                     />
                   ))}
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-primary/70" />
+                    <Label className="text-label text-muted-foreground">Designate Host (optional)</Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[...gamePlayers].sort((a, b) => a.name.localeCompare(b.name)).map(player => (
+                      <button
+                        key={player.id}
+                        type="button"
+                        onClick={() => setHostPlayerId(hostPlayerId === player.id ? "" : player.id)}
+                        className={cn(
+                          "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
+                          hostPlayerId === player.id
+                            ? "bg-primary/10 border-primary/40 text-primary"
+                            : "bg-accent/5 border-border text-muted-foreground hover:border-primary/30"
+                        )}
+                      >
+                        {hostPlayerId === player.id && <Crown className="h-3 w-3 text-primary" />}
+                        {player.name}
+                      </button>
+                    ))}
+                  </div>
+                  {hostPlayerId && (
+                    <p className="text-xs text-muted-foreground">
+                      Host collects rake from all players whose final stack exceeds the rake amount.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
