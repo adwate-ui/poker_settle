@@ -210,6 +210,14 @@
     --state-neutral-foreground: 0 0% 100%;
   }
 
+  /* Global: always white text on solid red/destructive backgrounds */
+  .bg-destructive {
+    color: hsl(var(--destructive-foreground));
+  }
+  .bg-state-error {
+    color: hsl(var(--state-error-foreground));
+  }
+
   * {
     @apply border-border;
   }

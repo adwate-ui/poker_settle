@@ -10,7 +10,7 @@ export const toast = {
   },
   error: (message: string, options?: ExternalToast) => {
     sonnerToast.error(message, {
-      className: "border-destructive bg-popover text-destructive",
+      className: "border-destructive bg-destructive text-destructive-foreground",
       ...options,
     });
   },

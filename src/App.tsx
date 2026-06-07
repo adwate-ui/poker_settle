@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/feedback/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/feedback/PWAInstallPrompt";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "sonner";
 import { Loader2 } from "lucide-react";
 import LuxuryLayout from "@/components/layout/LuxuryLayout";
 import { GlobalCardDefs } from "@/components/poker/PokerAssets/GlobalCardDefs";
@@ -135,6 +136,7 @@ const App = () => {
               <OfflineIndicator />
               <PWAInstallPrompt />
               <Toaster />
+              <SonnerToaster position="top-right" />
               <AppContent />
             </ChipProvider>
           </RootErrorBoundary>
