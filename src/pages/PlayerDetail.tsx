@@ -526,7 +526,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
             const isPreferred = type === "preferred";
             const Icon = isPreferred ? Heart : UserX;
             const label = isPreferred ? "Preferred Settlement Partners" : "Avoid Settlement Partners";
-            const pickerOptions = allPlayers.filter(p => !relatedIds.has(p.id) || !relationships.find(r => r.related_player_id === p.id && r.relationship_type === type));
+            const pickerOptions = allPlayers.filter(p => !relatedIds.has(p.id));
             const isPickerOpen = pickerType === type;
 
             return (

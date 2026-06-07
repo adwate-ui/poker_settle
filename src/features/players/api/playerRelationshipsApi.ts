@@ -44,6 +44,19 @@ export const addRelationship = async (
     relatedPlayerId: string,
     type: RelationshipType
 ): Promise<void> => {
+    const oppositeType: RelationshipType = type === 'preferred' ? 'avoid' : 'preferred';
+
+    // Remove any opposite-type entry for this pair (both directions) before inserting
+    const { error: deleteError } = await supabase
+        .from("player_relationships")
+        .delete()
+        .eq("user_id", userId)
+        .in("player_id", [playerId, relatedPlayerId])
+        .in("related_player_id", [playerId, relatedPlayerId])
+        .eq("relationship_type", oppositeType);
+
+    if (deleteError) throw deleteError;
+
     // Insert both directions for reciprocity (ignore conflicts if they already exist)
     const { error } = await supabase
         .from("player_relationships")
