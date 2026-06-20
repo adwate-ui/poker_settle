@@ -1,0 +1,59 @@
+{
+  "cli_version": "dev",
+  "checkpoint_id": "74730acf7faa",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "index.html",
+    "src/components/profile/GameDefaultsTab.tsx",
+    "src/features/game/hooks/useGameDefaults.ts",
+    "src\\App.tsx",
+    "src\\components\\game\\BuyInHistoryDialog.tsx",
+    "src\\components\\game\\GameDashboard.tsx",
+    "src\\components\\game\\GameDetailView.tsx",
+    "src\\components\\game\\GameSetup.tsx",
+    "src\\components\\game\\dashboard-slides\\OverviewSlide.tsx",
+    "src\\components\\game\\dashboard-slides\\SeatingSlide.tsx",
+    "src\\components\\game\\dashboard-slides\\StackSlide.tsx",
+    "src\\components\\profile\\GameDefaultsTab.tsx",
+    "src\\components\\ui-primitives\\LuxurySelectionCard.tsx",
+    "src\\components\\ui\\alert.tsx",
+    "src\\components\\ui\\table.tsx",
+    "src\\components\\ui\\toast.tsx",
+    "src\\features\\finance\\utils\\settlementUtils.ts",
+    "src\\features\\game\\api\\gameApi.ts",
+    "src\\features\\game\\hooks\\useGameDashboardActions.ts",
+    "src\\features\\game\\hooks\\useGameDefaults.ts",
+    "src\\features\\game\\hooks\\useGameStats.ts",
+    "src\\features\\players\\api\\playerRelationshipsApi.ts",
+    "src\\hooks\\useGameData.ts",
+    "src\\index.css",
+    "src\\lib\\notifications.ts",
+    "src\\main.tsx",
+    "src\\pages\\NewGame.tsx",
+    "src\\pages\\PlayerDetail.tsx",
+    "src\\pages\\Profile.tsx",
+    "src\\types\\poker.ts",
+    "supabase/migrations/20260620000001_user_game_defaults.sql",
+    "supabase\\migrations\\20260607000001_rake_host_player_relationships.sql",
+    "supabase\\migrations\\20260620000001_user_game_defaults.sql",
+    "vite.config.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/74/730acf7faa/0/metadata.json",
+      "transcript": "/74/730acf7faa/0/full.jsonl",
+      "context": "/74/730acf7faa/0/context.md",
+      "content_hash": "/74/730acf7faa/0/content_hash.txt",
+      "prompt": "/74/730acf7faa/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4655,
+    "cache_creation_tokens": 989838,
+    "cache_read_tokens": 37128762,
+    "output_tokens": 261729,
+    "api_call_count": 375
+  }
+}
