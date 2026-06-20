@@ -21,14 +21,17 @@ import { formatCurrency } from "@/utils/currencyUtils";
 import { parseIndianNumber } from "@/lib/utils";
 import { CurrencyConfig } from "@/config/localization";
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
+import { useGameDefaults } from "@/features/game/hooks/useGameDefaults";
 const NewGame = () => {
   const { user } = useAuth();
   const { createPlayer, createOrFindPlayerByName } = usePlayerManagement();
   const queryClient = useQueryClient();
+  const { data: gameDefaults } = useGameDefaults(user?.id);
   const [buyInAmount, setBuyInAmount] = useState("2,000");
   const [smallBlind, setSmallBlind] = useState("20");
   const [bigBlind, setBigBlind] = useState("40");
   const [rake, setRake] = useState("200");
+  const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [hostPlayerId, setHostPlayerId] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [gamePlayers, setGamePlayers] = useState<Player[]>([]);
@@ -79,6 +82,20 @@ const NewGame = () => {
       checkActiveGame();
     }
   }, [user, fetchPlayers, checkActiveGame]);
+
+  useEffect(() => {
+    if (gameDefaults && !defaultsApplied) {
+      if (gameDefaults.defaultBuyIn != null)
+        setBuyInAmount(formatCurrency(gameDefaults.defaultBuyIn, false));
+      if (gameDefaults.defaultSmallBlind != null)
+        setSmallBlind(formatCurrency(gameDefaults.defaultSmallBlind, false));
+      if (gameDefaults.defaultBigBlind != null)
+        setBigBlind(formatCurrency(gameDefaults.defaultBigBlind, false));
+      if (gameDefaults.defaultRake != null)
+        setRake(formatCurrency(gameDefaults.defaultRake, false));
+      setDefaultsApplied(true);
+    }
+  }, [gameDefaults, defaultsApplied]);
 
   const addNewPlayer = async (name: string): Promise<Player> => {
     const player = await createOrFindPlayerByName(name);

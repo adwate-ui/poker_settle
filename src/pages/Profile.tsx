@@ -19,6 +19,7 @@ import { CurrencyConfig } from "@/config/localization";
 import { ProceduralChip } from '@/components/poker/ProceduralChip';
 import { loadDemoData, clearDemoData, hasDemoData } from '@/lib/demoData';
 import { useQueryClient } from '@tanstack/react-query';
+import GameDefaultsTab from '@/components/profile/GameDefaultsTab';
 
 const COLOR_MAP: Record<string, string> = {
   black: '#18181b',
@@ -354,9 +355,10 @@ const Profile = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto justify-start md:grid md:grid-cols-6 h-auto p-1 bg-muted/20">
+        <TabsList className="flex w-full overflow-x-auto justify-start md:grid md:grid-cols-7 h-auto p-1 bg-muted/20">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="game-settings">Chips</TabsTrigger>
+          <TabsTrigger value="game">Game</TabsTrigger>
           <TabsTrigger value="ai">AI</TabsTrigger>
           <TabsTrigger value="demo">Demo</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
@@ -376,6 +378,7 @@ const Profile = () => {
           </Card>
         </TabsContent>
         <TabsContent value="game-settings"><GameSettingsTab /></TabsContent>
+        <TabsContent value="game"><GameDefaultsTab /></TabsContent>
         <TabsContent value="ai"><AISettingsTab /></TabsContent>
         <TabsContent value="demo"><DemoDataTab /></TabsContent>
         <TabsContent value="storage"><CacheManager /></TabsContent>
