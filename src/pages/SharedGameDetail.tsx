@@ -84,6 +84,7 @@ const SharedGameDetailContent = () => {
         onBack={() => navigate(`/shared/${encodeURIComponent(token)}`)}
         backLabel="Back to Games History"
         hasActivePlayerFilter={false}
+        publicOnly={true}
       />
     </div>
   );

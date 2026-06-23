@@ -100,6 +100,7 @@ interface GameDetailViewProps {
   backLabel?: string;
   fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
   hasActivePlayerFilter?: boolean;
+  publicOnly?: boolean;
 }
 
 export const GameDetailView = ({
@@ -111,12 +112,13 @@ export const GameDetailView = ({
   backLabel = "Back",
   fetchBuyInHistory,
   hasActivePlayerFilter = false,
+  publicOnly = false,
 }: GameDetailViewProps) => {
   const { createOrGetSharedLink } = useSharedLink();
   const { confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
 
   // Use TanStack Query hook
-  const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId);
+  const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId, publicOnly);
   const isMobile = useIsMobile();
   useGameRealtime(gameId);
 

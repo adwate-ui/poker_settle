@@ -245,23 +245,16 @@ export const updateGamePlayerApi = async (playerGameId: string, updates: Partial
 };
 
 
-export const fetchGameDetail = async (client: SupabaseClient, gameId: string) => {
+export const fetchGameDetail = async (client: SupabaseClient, gameId: string, publicOnly = false) => {
+    const playerFields = publicOnly
+        ? 'id, name, payment_preference, upi_id'
+        : 'id, name, payment_preference, upi_id, total_games, total_profit, phone_number';
+
     const [gameResult, playersResult, positionsResult, confirmationsResult] = await Promise.all([
         client.from("games").select("*").eq("id", gameId).maybeSingle(),
         client
             .from("game_players")
-            .select(`
-            *,
-            player:players (
-              id,
-              name,
-              payment_preference,
-              upi_id,
-              total_games,
-              total_profit,
-              phone_number
-            )
-          `)
+            .select(`*, player:players (${playerFields})`)
             .eq("game_id", gameId),
         client
             .from("table_positions")

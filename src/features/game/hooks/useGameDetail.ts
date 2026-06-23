@@ -7,10 +7,10 @@ import { gameKeys } from "../api/queryKeys";
  * Hook to fetch detailed game data including players, positions, and confirmations.
  * Uses TanStack Query for caching and automatic re-fetching.
  */
-export const useGameDetail = (client: SupabaseClient, gameId: string) => {
+export const useGameDetail = (client: SupabaseClient, gameId: string, publicOnly = false) => {
     return useQuery({
         queryKey: gameKeys.detail(gameId),
-        queryFn: () => fetchGameDetail(client, gameId),
+        queryFn: () => fetchGameDetail(client, gameId, publicOnly),
         enabled: !!gameId,
         staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
     });
