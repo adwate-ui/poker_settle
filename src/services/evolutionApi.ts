@@ -51,11 +51,15 @@ class EvolutionApiService {
       });
 
       if (error) {
-        console.error('Supabase function error:', error);
-        return {
-          success: false,
-          error: error.message || 'Error invoking WhatsApp function',
-        };
+        let detail = error.message || 'Error invoking WhatsApp function';
+        try {
+          if ('context' in error && error.context) {
+            const body = await (error.context as Response).json();
+            if (body?.error) detail = body.error;
+          }
+        } catch { /* ignore parse failures */ }
+        console.error('WhatsApp send failed:', detail);
+        return { success: false, error: detail };
       }
 
       return {
