@@ -300,44 +300,45 @@ ${data.gameLink}
 
 /**
  * Generate a unified WhatsApp session summary message
- * strictly following the requested mobile-first format
+ * "The Concierge" template — warm, professional, one signature mark
  */
 export function generateWhatsAppSessionSummary(data: WhatsAppSessionSummaryData): string {
-  const netFormatted = (data.netAmount >= 0 ? '+' : '-') + formatCurrency(Math.abs(data.netAmount));
-  const dateObj = new Date(data.gameDate);
-  const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  const absAmount = formatCurrency(Math.abs(data.netAmount));
+  const dateFormatted = new Date(data.gameDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
 
-  let message = `♣️ *Poker Session: ${dateFormatted}*\n`;
-  message += `💰 *Net: ${netFormatted}*\n\n`;
+  let message = `🎴 *Poker Settle*\n\n`;
+  message += `Hi ${data.playerName}, here's your wrap-up for *${dateFormatted}*.\n\n`;
 
-  message += `📊 *Game Link:* ${data.gameLink}\n\n`;
-
-  if (data.settlements.length > 0) {
-    message += `🤝 *Settlements:*\n`;
-
+  if (data.settlements.length === 0) {
+    message += data.netAmount === 0
+      ? `You broke even this session.\n\n`
+      : `${data.isWinner ? `You're up *${absAmount}* this session.` : `This one closed *${absAmount}* down.`}\n\n`;
+  } else if (data.isWinner) {
+    message += `You're up *${absAmount}* this session.\n\n`;
+    message += `*Owed to you:*\n`;
     data.settlements.forEach((s) => {
-      if (data.isWinner) {
-        // Player is a winner, they receive money
-        message += `• Receive ${formatCurrency(s.amount)} from ${s.from}\n`;
-      } else {
-        // Player is a loser, they pay money
-        message += `• Pay ${s.to} ${formatCurrency(s.amount)}`;
-
-        if (s.toUpiId) {
-          const upiLink = generateUpiPaymentLink(
-            s.toUpiId,
-            s.to,
-            s.amount,
-            `Poker ${dateFormatted}`
-          );
-          message += `: ${upiLink}`;
-        }
-        message += `\n`;
-      }
+      message += `• ${s.from} — ${formatCurrency(s.amount)}\n`;
     });
+    message += `\n`;
   } else {
-    message += `✅ No pending settlements.`;
+    message += `This one closed *${absAmount}* down.\n\n`;
+    message += `*You owe:*\n`;
+    data.settlements.forEach((s) => {
+      message += `• ${s.to} — ${formatCurrency(s.amount)}`;
+      if (s.toUpiId) {
+        const upiLink = generateUpiPaymentLink(s.toUpiId, s.to, s.amount, `Poker ${dateFormatted}`);
+        message += `\n   Pay now: ${upiLink}\n   UPI ID: ${s.toUpiId}`;
+      }
+      message += `\n`;
+    });
+    message += `\n`;
   }
+
+  message += `Full breakdown:\n${data.gameLink}\n\n`;
+
+  message += (!data.isWinner && data.settlements.length > 0)
+    ? `Once paid, reply *PAID* to confirm. Thanks!`
+    : `Nicely played — see you at the next session.`;
 
   return message;
 }
