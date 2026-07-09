@@ -243,14 +243,14 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_profit")}
-              className="cursor-pointer w-[40%] md:w-auto"
+              className="cursor-pointer w-[38%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Net
                 {getSortIcon("total_profit")}
               </div>
             </TableHead>
-            <TableHead className="w-[13%] md:w-auto">Act</TableHead>
+            <TableHead className="w-[15%] md:w-auto px-1 sm:px-4">Act</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
