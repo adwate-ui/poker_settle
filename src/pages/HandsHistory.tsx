@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
-import { TrendingUp, Target, Filter, X } from 'lucide-react';
+import { TrendingUp, Target, Filter, X, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import MemoizedHandCard from '@/components/poker/MemoizedHandCard';
 import { GameCardSkeletonList } from '@/components/skeletons';
 import { EmptyState } from '@/components/feedback/EmptyState';
@@ -34,6 +36,7 @@ const HandsHistory = () => {
   } = useHandsHistory();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const handsPerPage = 20;
 
   // Get memoized values from hook
@@ -80,16 +83,16 @@ const HandsHistory = () => {
   }
 
   const filterFieldsGrid = (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Hero Name</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Hero Name</label>
         <Select
           value={filters.heroName || 'all'}
           onValueChange={(value) =>
             updateFilters({ heroName: value === 'all' ? undefined : value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="Global View" />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +104,7 @@ const HandsHistory = () => {
         </Select>
       </div>
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Hero Position</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Hero Position</label>
         <Select
           value={filters.heroPosition || 'all'}
           onValueChange={(value) =>
@@ -109,7 +112,7 @@ const HandsHistory = () => {
           }
           disabled={uniquePositions.length === 0}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder={uniquePositions.length === 0 ? "No Positions" : "All Positions"} />
           </SelectTrigger>
           <SelectContent>
@@ -122,14 +125,14 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Game</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Game</label>
         <Select
           value={filters.gameId || 'all'}
           onValueChange={(value) =>
             updateFilters({ gameId: value === 'all' ? undefined : value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="All Games" />
           </SelectTrigger>
           <SelectContent>
@@ -144,14 +147,14 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Result</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Result</label>
         <Select
           value={filters.result || 'all'}
           onValueChange={(value) =>
             updateFilters({ result: value as 'win' | 'loss' | 'split' | 'all' })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="All Results" />
           </SelectTrigger>
           <SelectContent>
@@ -164,14 +167,14 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Showdown</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Showdown</label>
         <Select
           value={filters.showdown || 'all'}
           onValueChange={(value) =>
             updateFilters({ showdown: value as 'yes' | 'no' | 'all' })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent>
@@ -183,14 +186,14 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Final Stage</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Final Stage</label>
         <Select
           value={filters.finalStage || 'all'}
           onValueChange={(value) =>
             updateFilters({ finalStage: value === 'all' ? undefined : value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="All Stages" />
           </SelectTrigger>
           <SelectContent>
@@ -205,14 +208,14 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Villain Name</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Villain Name</label>
         <Select
           value={filters.villainName || 'all'}
           onValueChange={(value) =>
             updateFilters({ villainName: value === 'all' ? undefined : value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder="All Villains" />
           </SelectTrigger>
           <SelectContent>
@@ -225,7 +228,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Villain Position</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Villain Position</label>
         <Select
           value={filters.villainPosition || 'all'}
           onValueChange={(value) =>
@@ -233,7 +236,7 @@ const HandsHistory = () => {
           }
           disabled={!filters.villainName}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Positions"} />
           </SelectTrigger>
           <SelectContent>
@@ -246,7 +249,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Hero's Hole Cards</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Hero's Hole Cards</label>
         <Select
           value={filters.heroHoleCards || 'all'}
           onValueChange={(value) =>
@@ -254,7 +257,7 @@ const HandsHistory = () => {
           }
           disabled={!filters.heroName}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder={!filters.heroName ? "Select Hero First" : "All Cards"} />
           </SelectTrigger>
           <SelectContent>
@@ -268,7 +271,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-label text-muted-foreground mb-2 block">Villain's Hole Cards</label>
+        <label className="text-label text-muted-foreground mb-1.5 block">Villain's Hole Cards</label>
         <Select
           value={filters.villainHoleCards || 'all'}
           onValueChange={(value) =>
@@ -276,7 +279,7 @@ const HandsHistory = () => {
           }
           disabled={!filters.villainName}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
             <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Cards"} />
           </SelectTrigger>
           <SelectContent>
@@ -310,36 +313,41 @@ const HandsHistory = () => {
         />
       </div>
 
-      {/* Filters Section — desktop, inline */}
-      <Card className="hidden lg:block">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Filter className="h-5 w-5 text-primary" />
+      {/* Filters Section — desktop, inline, compact and collapsed by default */}
+      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="hidden lg:block">
+        <div className="rounded-xl border border-border bg-accent/5">
+          <CollapsibleTrigger asChild>
+            <div className="p-4 sm:p-5 cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-label text-muted-foreground group-hover:text-foreground transition-colors">Filter Hands</span>
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="h-4 px-1.5 text-3xs font-numbers text-primary border-primary/40">{Object.keys(filters).length} active</Badge>
+                )}
               </div>
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  Filters
-                  {hasActiveFilters && (
-                    <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-tiny">{Object.keys(filters).length} active</Badge>
-                  )}
-                </CardTitle>
-                <CardDescription>Narrow down your hand history</CardDescription>
+              <div className="flex items-center gap-2">
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); clearFilters(); }}
+                    className="h-6 px-2 text-label text-muted-foreground hover:text-foreground gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Clear All
+                  </Button>
+                )}
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", filtersOpen && "rotate-180")} />
               </div>
             </div>
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <X className="h-4 w-4 mr-2" />
-                Clear All
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {filterFieldsGrid}
-        </CardContent>
-      </Card>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+              {filterFieldsGrid}
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
 
       {/* Filters Section — mobile/tablet, on-demand sheet */}
       <div className="lg:hidden">

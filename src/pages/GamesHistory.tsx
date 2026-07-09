@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -252,82 +251,74 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Filter className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle>Filters</CardTitle>
-                <CardDescription>Filter game history</CardDescription>
-              </div>
-            </div>
-            {!readOnly && games.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2" aria-label="Export games">
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">Export</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => exportGamesToCSV(gamesData as Game[])}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Export as CSV
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+      <div className="p-4 sm:p-5 rounded-xl border border-border bg-accent/5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-label text-muted-foreground">Filter Games</span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <label className="text-label text-muted-foreground ml-1">Date</label>
-              <Select value={selectedDate} onValueChange={setSelectedDate}>
-                <SelectTrigger>
-                  <Calendar className="mr-2 h-4 w-4 opacity-50" />
-                  <SelectValue placeholder="All Dates" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Dates</SelectItem>
-                  {uniqueDates.map((date) => <SelectItem key={date} value={date}>{date}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          {!readOnly && games.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 px-2 gap-1.5 text-label text-muted-foreground hover:text-foreground" aria-label="Export games">
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportGamesToCSV(gamesData as Game[])}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
 
-            <div className="space-y-2">
-              <label className="text-label text-muted-foreground ml-1">Month</label>
-              <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-                <SelectTrigger>
-                  <CalendarDays className="mr-2 h-4 w-4 opacity-50" />
-                  <SelectValue placeholder="All Months" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
-                  {uniqueMonthYears.map((my) => <SelectItem key={my} value={my}>{my}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-label text-muted-foreground ml-1">Player</label>
-              <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-                <SelectTrigger>
-                  <UserIcon className="mr-2 h-4 w-4 opacity-50" />
-                  <SelectValue placeholder="All Players" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Players</SelectItem>
-                  {uniquePlayers.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+          <div className="space-y-1.5">
+            <p className="text-label text-muted-foreground px-0.5">Date</p>
+            <Select value={selectedDate} onValueChange={setSelectedDate}>
+              <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
+                <Calendar className="mr-2 h-3.5 w-3.5 opacity-50" />
+                <SelectValue placeholder="All Dates" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Dates</SelectItem>
+                {uniqueDates.map((date) => <SelectItem key={date} value={date}>{date}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-1.5">
+            <p className="text-label text-muted-foreground px-0.5">Month</p>
+            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+              <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
+                <CalendarDays className="mr-2 h-3.5 w-3.5 opacity-50" />
+                <SelectValue placeholder="All Months" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months</SelectItem>
+                {uniqueMonthYears.map((my) => <SelectItem key={my} value={my}>{my}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-label text-muted-foreground px-0.5">Player</p>
+            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
+              <SelectTrigger className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors">
+                <UserIcon className="mr-2 h-3.5 w-3.5 opacity-50" />
+                <SelectValue placeholder="All Players" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Players</SelectItem>
+                {uniquePlayers.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
       {/* Responsive Table Layout */}
       <Table>
