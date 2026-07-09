@@ -541,7 +541,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon className={cn("h-4 w-4", isPreferred ? "text-state-success" : "text-state-error")} />
-                      <CardTitle className="text-xs font-luxury uppercase tracking-widest">{label}</CardTitle>
+                      <CardTitle className="text-lg font-luxury uppercase tracking-widest">{label}</CardTitle>
                     </div>
                     <Button
                       variant="ghost"

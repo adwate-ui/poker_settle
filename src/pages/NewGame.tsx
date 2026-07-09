@@ -210,7 +210,7 @@ const NewGame = () => {
       )}
 
       <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-luxury text-foreground">
+        <CardTitle className="font-luxury text-foreground">
           Start New Game
         </CardTitle>
         <CardDescription className="text-muted-foreground">

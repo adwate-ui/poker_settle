@@ -390,7 +390,7 @@ export const GameDetailView = ({
                 <ShieldCheck className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-3xl">
+                <CardTitle>
                   Session Ledger — {format(new Date(game.date), "MMMM d, yyyy")}
                 </CardTitle>
                 <CardDescription>Game Record</CardDescription>
@@ -509,7 +509,7 @@ export const GameDetailView = ({
             <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Buy-in Logs</h3>
+                <h3 className="text-lg font-luxury uppercase tracking-widest">Buy-in Logs</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", buyInLogsOpen && "rotate-180")} />
             </div>
@@ -529,7 +529,7 @@ export const GameDetailView = ({
             <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Seat Draw</h3>
+                <h3 className="text-lg font-luxury uppercase tracking-widest">Seat Draw</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", tablePositionsOpen && "rotate-180")} />
             </div>
@@ -589,7 +589,7 @@ export const GameDetailView = ({
             <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Session P&L</h3>
+                <h3 className="text-lg font-luxury uppercase tracking-widest">Session P&L</h3>
               </div>
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", playerResultsOpen && "rotate-180")} />
             </div>
@@ -683,7 +683,7 @@ export const GameDetailView = ({
             <div className="p-4 md:p-6 border-b cursor-pointer flex items-center justify-between group">
               <div className="flex items-center gap-3">
                 <Coins className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <h3 className="text-lg font-medium">Settlement</h3>
+                <h3 className="text-lg font-luxury uppercase tracking-widest">Settlement</h3>
               </div>
               <div className="flex items-center gap-4">
                 {showOwnerControls && settlementsOpen && (

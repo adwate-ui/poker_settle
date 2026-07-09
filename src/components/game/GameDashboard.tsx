@@ -295,7 +295,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                 <div className="p-6 border-b border-border/50 cursor-pointer flex items-center justify-between group">
                   <div className="flex items-center gap-3">
                     <UsersIcon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <h3 className="text-sm font-luxury text-foreground uppercase tracking-widest">Players ({gamePlayers.length})</h3>
+                    <h3 className="text-lg font-luxury text-foreground uppercase tracking-widest">Players ({gamePlayers.length})</h3>
                   </div>
                   <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", playersOpen && "rotate-180")} />
                 </div>

@@ -265,7 +265,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
       <>
         <Card className="mt-6 border-2 border-primary/20 shadow-lg">
           <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <div className="p-2 bg-primary/20 rounded-lg"><Play className="h-5 w-5 sm:h-6 sm:w-6" /></div>
               Start New Hand
             </CardTitle>
