@@ -347,7 +347,7 @@ const GameSetup = ({ onGameStart }: GameSetupProps) => {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   {!canCreateGame && (
-                    <Button onClick={continueGame} className="flex-1 h-12 bg-accent/5 border border-border hover:bg-gold-500/10 text-primary font-luxury text-sm transition-all duration-500 rounded-xl">
+                    <Button onClick={continueGame} className="flex-1 h-12 bg-accent/5 border border-border hover:bg-poker-gold/10 text-primary font-luxury text-sm transition-all duration-500 rounded-xl">
                       <Play className="w-4 h-4 mr-3 text-primary fill-current" />
                       Resume Active Sequence
                     </Button>

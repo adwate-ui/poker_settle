@@ -1,5 +1,32 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Design system reference — check new work against this before inventing a new size/radius/gap.
+ *
+ * Typography roles:
+ *   Eyebrow/caption (muted all-caps label above a value) -> .text-label (index.css)
+ *   Stat/KPI number (big number with a caption)           -> text-2xl font-bold font-numbers
+ *   Dense table/list body text                             -> text-tiny
+ *   Body copy                                               -> text-sm
+ *   Card title, page-level                                  -> CardTitle default (text-2xl)
+ *   Card title, compact/dashboard-tile                      -> text-lg (the only allowed override)
+ *   Section header (collapsible/sub-section titles)         -> text-lg font-luxury uppercase tracking-widest
+ *
+ * Radius hierarchy:
+ *   rounded-lg    small interactive controls (inputs, selects, buttons, small info tiles)
+ *   rounded-xl    surfaces (cards, tables, tabs, dropdown content, larger stat tiles)
+ *   rounded-2xl   floating/modal surfaces only (dialogs)
+ *   rounded-full  pills, avatars, icon chips
+ *
+ * Spacing rhythm:
+ *   Outer page container -> space-y-6
+ *   Info tile padding     -> p-4 sm:p-6
+ *   Major card/stat grids -> gap-6; denser field grids -> gap-4
+ *
+ * Color: use the CSS-variable-driven poker.gold / poker.felt tokens (theme-aware), not the
+ * hardcoded gold and felt hex tokens below (those don't respond to dark mode — reserved for
+ * deliberately fixed-tone gradients where a single theme-aware token can't do the job).
+ */
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
@@ -23,7 +50,6 @@ export default {
         'tiny': ['0.75rem', { lineHeight: '1rem' }],
         '2xs': ['0.8125rem', { lineHeight: '1.05rem' }],
         '3xs': ['0.6875rem', { lineHeight: '0.9rem' }],
-        'table-base': ['0.75rem', { lineHeight: '1rem' }],
         'chip-sm': ['0.5rem', { lineHeight: '0.625rem' }],
         'chip-md': ['0.625rem', { lineHeight: '0.75rem' }],
         'chip-lg': ['0.75rem', { lineHeight: '0.875rem' }],

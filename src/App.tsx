@@ -57,7 +57,7 @@ const AppContent = () => {
       <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-glow-gold-sm" />
-          <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Starting up...</p>
+          <p className="text-sm sm:text-base text-poker-gold/60 font-medium tracking-widest uppercase">Starting up...</p>
         </div>
       </div>
     );
@@ -69,7 +69,7 @@ const AppContent = () => {
         <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-primary shadow-glow-gold-sm" />
-            <p className="text-sm sm:text-base text-gold-200/60 font-medium tracking-widest uppercase">Loading...</p>
+            <p className="text-sm sm:text-base text-poker-gold/60 font-medium tracking-widest uppercase">Loading...</p>
           </div>
         </div>
       }>

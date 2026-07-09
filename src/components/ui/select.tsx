@@ -14,7 +14,7 @@ const selectTriggerVariants = cva(
     variants: {
       variant: {
         default: "h-12 rounded-lg bg-input/20 border border-input px-4 py-2 text-base font-body text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent",
-        luxury: "h-12 bg-accent/5 border-0 border-b border-border rounded-none px-0 focus:ring-0 focus:border-primary font-luxury tracking-wider text-[11px] uppercase placeholder:text-muted-foreground/30",
+        luxury: "h-12 bg-accent/5 border-0 border-b border-border rounded-none px-0 focus:ring-0 focus:border-primary font-luxury tracking-wider text-3xs uppercase placeholder:text-muted-foreground/30",
       },
     },
     defaultVariants: {

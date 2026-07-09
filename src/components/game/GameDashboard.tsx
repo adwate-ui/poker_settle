@@ -306,7 +306,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
                     onClick={() => setShowAddPlayer(true)}
                     className="w-full h-12 bg-accent/5 border border-border hover:bg-primary/10 text-foreground text-label rounded-xl transition-all"
                   >
-                    <UserPlus className="w-3.5 h-3.5 mr-2.5 text-gold-500" />
+                    <UserPlus className="w-3.5 h-3.5 mr-2.5 text-poker-gold" />
                     Add Player
                   </Button>
 
@@ -328,7 +328,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
           {/* Manual Transfers Logic (Desktop) */}
 
           {(game.settlements && game.settlements.length > 0) && (
-            <Card className="p-0 overflow-hidden border-gold-500/40 shadow-glow-gold-subtle">
+            <Card className="p-0 overflow-hidden border-poker-gold/40 shadow-glow-gold-subtle">
               <Collapsible open={settlementsOpen} onOpenChange={setSettlementsOpen}>
                 <CollapsibleTrigger asChild>
                   <div className="p-6 border-b border-border/50 bg-accent/5 cursor-pointer flex items-center justify-between group">

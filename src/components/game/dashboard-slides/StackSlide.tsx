@@ -66,7 +66,7 @@ const StackSlide = () => {
                     {!showManualTransfer && (
                         <Button
                             onClick={() => setShowManualTransfer(true)}
-                            className="w-full h-14 font-bold text-lg tracking-[0.2em] rounded-2xl relative overflow-hidden group bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] hover:shadow-glow active:scale-95 transition-all text-black uppercase font-luxury"
+                            className="w-full h-14 font-bold text-lg tracking-[0.2em] relative overflow-hidden group bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] hover:shadow-glow active:scale-95 transition-all text-black uppercase font-luxury"
                         >
                             <Plus className="w-5 h-5 mr-2" /> Add Adjustment
                         </Button>
@@ -193,7 +193,7 @@ const StackSlide = () => {
                     }}
                     disabled={!canCompleteGame || isCompletingGame}
                     className={cn(
-                        "w-full h-14 text-black font-bold text-lg tracking-[0.2em] rounded-2xl transition-all relative overflow-hidden group",
+                        "w-full h-14 text-black font-bold text-lg tracking-[0.2em] transition-all relative overflow-hidden group",
                         canCompleteGame && !isCompletingGame
                             ? 'bg-gradient-to-r from-primary via-accent to-primary hover:shadow-glow active:scale-95'
                             : 'bg-muted text-muted-foreground opacity-50'
