@@ -2,16 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { gameKeys } from "@/features/game/api/queryKeys";
-import { transformGameData } from "@/features/game/api/gameApi";
+import { useActiveGame } from "@/hooks/useActiveGame";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { Game, Player } from "@/types/poker";
+import { Player } from "@/types/poker";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Play, Info, Crown } from "lucide-react";
 import GameDashboard from "@/components/game/GameDashboard";
@@ -36,7 +37,7 @@ const NewGame = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [gamePlayers, setGamePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const { activeGame, refetchActiveGame } = useActiveGame(user?.id);
   const [showActiveGame, setShowActiveGame] = useState(false);
 
   const fetchPlayers = useCallback(async () => {
@@ -53,35 +54,11 @@ const NewGame = () => {
     setPlayers(data || []);
   }, [user]);
 
-  const checkActiveGame = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("games")
-      .select(`
-        *,
-        game_players (
-          *,
-          player:players (*)
-        )
-      `)
-      .eq("user_id", user?.id)
-      .eq("is_complete", false)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!error && data) {
-      setActiveGame(transformGameData(data));
-    } else {
-      setActiveGame(null);
-    }
-  }, [user]);
-
   useEffect(() => {
     if (user) {
       fetchPlayers();
-      checkActiveGame();
     }
-  }, [user, fetchPlayers, checkActiveGame]);
+  }, [user, fetchPlayers]);
 
   useEffect(() => {
     if (gameDefaults && !defaultsApplied) {
@@ -180,15 +157,8 @@ const NewGame = () => {
       // Invalidate cache to ensure fresh data is fetched when GameDashboard loads
       await queryClient.invalidateQueries({ queryKey: gameKeys.detail(game.id) });
 
-      // Create a minimal game object for navigation - GameDashboard will fetch full data
-      const newGame: Game = {
-        ...game,
-        game_players: [],
-        settlements: []
-      };
-
       toast.success("Game started!");
-      setActiveGame(newGame);
+      await refetchActiveGame();
       setShowActiveGame(true);
     } catch (error) {
       toast.error(ErrorMessages.game.create(error));
@@ -199,7 +169,7 @@ const NewGame = () => {
 
   const handleBackFromGame = () => {
     setShowActiveGame(false);
-    checkActiveGame();
+    refetchActiveGame();
   };
 
   const continueGame = () => {
@@ -271,14 +241,25 @@ const NewGame = () => {
                 disabled={hasActiveGame}
                 className="h-12 bg-background border border-input rounded-md text-base font-numbers text-foreground placeholder:text-muted-foreground focus:border-primary transition-all duration-300 ease-out"
               />
-              <div className="absolute right-0 bottom-3 text-muted-foreground group-focus-within:text-primary transition-colors">
-                <Info className="h-4 w-4" />
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="What is the buy-in used for?"
+                    className="absolute right-0 bottom-3 text-muted-foreground hover:text-primary group-focus-within:text-primary transition-colors"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="text-sm text-muted-foreground max-w-xs">
+                  The amount each player pays to join the table. It sets each player's starting stack and is used to calculate buy-ins, cash-outs, and the final settlement.
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
           {/* Blinds + Rake Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             <div className="space-y-3">
               <Label htmlFor="smallblind" className="text-label text-muted-foreground ml-1">
                 Small Blind ({CurrencyConfig.symbol})
@@ -358,6 +339,7 @@ const NewGame = () => {
                       player={player}
                       onClick={() => removePlayerFromGame(player.id)}
                       size="sm"
+                      variant="remove"
                       className="bg-accent/5 border-primary/20 hover:bg-destructive/10 hover:border-destructive/50"
                     />
                   ))}

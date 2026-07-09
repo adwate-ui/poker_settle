@@ -3,21 +3,24 @@ import { Player } from "@/types/poker";
 import { formatProfitLoss, cn } from "@/lib/utils";
 import OptimizedAvatar from "@/components/player/OptimizedAvatar";
 import { Badge } from "@/components/ui/badge";
-import { Star, Check } from "lucide-react";
+import { Star, Check, X } from "lucide-react";
 
 interface LuxurySelectionCardProps {
     player: Player;
     onClick: () => void;
     className?: string;
     size?: "sm" | "md";
+    variant?: "add" | "remove";
 }
 
-const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: LuxurySelectionCardProps) => {
+const LuxurySelectionCard = memo(({ player, onClick, className, size = "md", variant = "add" }: LuxurySelectionCardProps) => {
     const isSm = size === "sm";
+    const isRemove = variant === "remove";
 
     return (
         <button
             onClick={onClick}
+            aria-label={isRemove ? `Remove ${player.name}` : `Add ${player.name}`}
             className={cn(
                 "w-full text-left p-4 rounded-lg border border-border/40 bg-card/20 hover:bg-primary/5 hover:border-primary/50 transition-all group flex items-center gap-4",
                 isSm && "p-2 gap-2",
@@ -57,7 +60,11 @@ const LuxurySelectionCard = memo(({ player, onClick, className, size = "md" }: L
                     )}
                 </div>
             </div>
-            <Check className={cn("text-primary opacity-0 group-hover:opacity-100 transition-opacity", isSm ? "h-3 w-3" : "h-4 w-4")} />
+            {isRemove ? (
+                <X className={cn("text-destructive shrink-0", isSm ? "h-3 w-3" : "h-4 w-4")} />
+            ) : (
+                <Check className={cn("text-primary opacity-0 group-hover:opacity-100 transition-opacity", isSm ? "h-3 w-3" : "h-4 w-4")} />
+            )}
         </button>
     );
 });
