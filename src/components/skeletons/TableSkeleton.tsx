@@ -2,7 +2,7 @@ export const TableSkeleton = () => {
   return (
     <div className="w-full border border-border/50 rounded-lg overflow-hidden relative">
       {/* Shimmer effect */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+      <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
       {/* Header */}
       <div className="bg-muted/20 border-b border-border/30">
@@ -40,7 +40,7 @@ export const CompactTableSkeleton = ({ rows = 3 }: { rows?: number }) => {
           className="flex items-center gap-4 p-3 bg-muted/10 rounded-lg border border-border/20 relative overflow-hidden"
         >
           {/* Shimmer */}
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+          <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
           <div className="h-8 w-8 rounded bg-muted/30 animate-pulse" />
           <div className="flex-1 space-y-2">

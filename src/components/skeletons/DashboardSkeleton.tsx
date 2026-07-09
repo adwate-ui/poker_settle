@@ -19,7 +19,7 @@ export const DashboardSkeleton = () => {
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="relative overflow-hidden border-border/50 bg-background/40">
             {/* Shimmer effect */}
-            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+            <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
             <CardHeader className="pb-3">
               <div className="h-3 w-20 bg-muted/20 rounded animate-pulse" />
@@ -34,7 +34,7 @@ export const DashboardSkeleton = () => {
       {/* Main content area */}
       <Card className="relative overflow-hidden border-border/50 bg-background/40">
         {/* Shimmer effect */}
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
         <CardHeader className="border-b border-border/30">
           <div className="space-y-2">
@@ -59,7 +59,7 @@ export const DashboardSkeleton = () => {
 
       {/* Table poker view skeleton */}
       <Card className="relative overflow-hidden border-border/50 bg-background/40">
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
         <CardContent className="p-8">
           {/* Oval table */}

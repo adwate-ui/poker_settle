@@ -204,6 +204,7 @@ const Auth = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -276,6 +277,7 @@ const Auth = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -356,12 +358,12 @@ const Auth = () => {
           <div className="pt-2 flex items-center justify-center gap-6 opacity-40 hover:opacity-100 transition-all duration-500 cursor-default">
             <div className="flex items-center gap-2 group/icon">
               <Gamepad2 className="h-4 w-4 group-hover/icon:text-primary transition-colors" />
-              <span className="text-label hidden sm:inline">Fair Play</span>
+              <span className="text-label">Fair Play</span>
             </div>
             <div className="w-px h-3 bg-muted" />
             <div className="flex items-center gap-2 group/icon">
               <ShieldCheck className="h-4 w-4 group-hover/icon:text-primary transition-colors" />
-              <span className="text-label hidden sm:inline">Secure</span>
+              <span className="text-label">Secure</span>
             </div>
           </div>
         </CardContent>

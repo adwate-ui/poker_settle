@@ -4,7 +4,7 @@ export const GameCardSkeleton = () => {
   return (
     <Card className="p-6 border-border/50 bg-background/40 backdrop-blur-sm overflow-hidden relative">
       {/* Shimmer effect */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+      <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
       <div className="space-y-4">
         {/* Header section */}
