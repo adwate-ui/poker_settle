@@ -250,11 +250,17 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string, pu
         ? 'id, name, payment_preference, upi_id'
         : 'id, name, payment_preference, upi_id, total_games, total_profit, phone_number';
 
+    // net_amount is the player's actual profit/loss for the session — never fetch it on a
+    // public (unauthenticated) game link, only the fields the seating/buy-in views need.
+    const gamePlayerFields = publicOnly
+        ? 'id, game_id, player_id, buy_ins, final_stack, is_host'
+        : '*';
+
     const [gameResult, playersResult, positionsResult, confirmationsResult] = await Promise.all([
         client.from("games").select("*").eq("id", gameId).maybeSingle(),
         client
             .from("game_players")
-            .select(`*, player:players (${playerFields})`)
+            .select(`${gamePlayerFields}, player:players (${playerFields})`)
             .eq("game_id", gameId),
         client
             .from("table_positions")

@@ -34,10 +34,11 @@ import {
 import { toast } from "@/lib/notifications";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { formatProfitLoss, cn } from "@/lib/utils";
+import { formatProfitLoss, cn, parseIndianNumber } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { CurrencyConfig } from "@/config/localization";
 import PokerTableView from "@/components/poker/PokerTableView";
+import OptimizedAvatar from "@/components/player/OptimizedAvatar";
 import { SeatPosition, BuyInHistory } from "@/types/poker";
 import { ConsolidatedBuyInLogs } from "@/components/game/ConsolidatedBuyInLogs";
 import { BuyInHistoryDialog } from "@/components/game/BuyInHistoryDialog";
@@ -99,7 +100,6 @@ interface GameDetailViewProps {
   onBack?: () => void;
   backLabel?: string;
   fetchBuyInHistory?: (gamePlayerId: string) => Promise<BuyInHistory[]>;
-  hasActivePlayerFilter?: boolean;
   publicOnly?: boolean;
 }
 
@@ -111,7 +111,6 @@ export const GameDetailView = ({
   onBack,
   backLabel = "Back",
   fetchBuyInHistory,
-  hasActivePlayerFilter = false,
   publicOnly = false,
 }: GameDetailViewProps) => {
   const { createOrGetSharedLink } = useSharedLink();
@@ -205,7 +204,7 @@ export const GameDetailView = ({
       toast.error("From and To must be different players");
       return;
     }
-    const amount = parseFloat(newTransferAmount);
+    const amount = parseIndianNumber(newTransferAmount);
     if (isNaN(amount) || amount <= 0) {
       toast.error("Amount must be a positive number");
       return;
@@ -603,7 +602,7 @@ export const GameDetailView = ({
               <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", playerResultsOpen && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
-          {!showOwnerControls && hasActivePlayerFilter ? null : (
+          {!showOwnerControls ? null : (
             <CollapsibleContent>
               <div className={cn("section-content", isMobile && "p-0")}>
                 <Table>
@@ -714,126 +713,107 @@ export const GameDetailView = ({
           <CollapsibleContent>
             <div className={cn("section-content", isMobile && "p-0")}>
 
-              <Table className="max-h-[600px]">
-                <TableHeader>
-                  {settlementsWithType.some(s => s.isManual) ? (
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Type</TableHead>
-                      {!isMobile && <TableHead>Sts</TableHead>}
-                      <TableHead>Act</TableHead>
-                    </TableRow>
-                  ) : (
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>{isMobile ? "Amt" : "Amount"}</TableHead>
-                      {!isMobile && <TableHead>Status</TableHead>}
-                    </TableRow>
-                  )}
-                </TableHeader>
-                <TableBody>
-                  {settlementsWithType.map((settlement, index) => {
-                    const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
-                    const hasManual = settlementsWithType.some(s => s.isManual);
+              <div className="space-y-2.5">
+                {settlementsWithType.map((settlement, index) => {
+                  const confirmation = getConfirmationStatus(confirmations, settlement.from, settlement.to);
+                  const hasManual = settlementsWithType.some(s => s.isManual);
 
-                    return (
-                      <TableRow key={`settlement-${index}`}>
-                        <TableCell className="text-tiny">
-                          {showOwnerControls && nameToIdMap[settlement.from] ? (
-                            <Link
-                              to={`/players/${nameToIdMap[settlement.from]}`}
-                              className="font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                            >
-                              {settlement.from}
-                            </Link>
-                          ) : (
-                            <span className="font-medium block truncate">
-                              {settlement.from}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-tiny">
-                          {showOwnerControls && nameToIdMap[settlement.to] ? (
-                            <Link
-                              to={`/players/${nameToIdMap[settlement.to]}`}
-                              className="text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all block truncate"
-                            >
-                              {settlement.to}
-                            </Link>
-                          ) : (
-                            <span className="text-muted-foreground block truncate">
-                              {settlement.to}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell isNumeric className="whitespace-nowrap text-tiny">
+                  return (
+                    <div
+                      key={`settlement-${index}`}
+                      className="flex items-center gap-2 sm:gap-4 rounded-xl border border-border bg-card/40 p-3 sm:p-4"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <OptimizedAvatar name={settlement.from} size="xs" className="shrink-0" />
+                        {showOwnerControls && nameToIdMap[settlement.from] ? (
+                          <Link
+                            to={`/players/${nameToIdMap[settlement.from]}`}
+                            className="text-tiny font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
+                          >
+                            {settlement.from}
+                          </Link>
+                        ) : (
+                          <span className="text-tiny font-medium truncate">
+                            {settlement.from}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="relative flex items-center justify-center flex-1 min-w-[64px] h-5">
+                        <span className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-primary/50 via-primary/30 to-transparent" />
+                        <span className="relative bg-background border border-border rounded-full px-2 py-0.5 text-tiny font-numbers whitespace-nowrap">
                           {formatCurrency(settlement.amount)}
-                        </TableCell>
+                        </span>
+                      </div>
 
+                      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end text-right">
+                        {showOwnerControls && nameToIdMap[settlement.to] ? (
+                          <Link
+                            to={`/players/${nameToIdMap[settlement.to]}`}
+                            className="text-tiny text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
+                          >
+                            {settlement.to}
+                          </Link>
+                        ) : (
+                          <span className="text-tiny text-muted-foreground truncate">
+                            {settlement.to}
+                          </span>
+                        )}
+                        <OptimizedAvatar name={settlement.to} size="xs" className="shrink-0" />
+                      </div>
+
+                      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                         {hasManual && (
-                          <TableCell className="text-tiny">
-                            {settlement.isManual ? (
-                              <Badge variant="outline" className="font-luxury uppercase tracking-tighter text-tiny">
-                                {isMobile ? "M" : "Manual"}
-                              </Badge>
-                            ) : (
-                              <span className="text-tiny text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
-                            )}
-                          </TableCell>
+                          settlement.isManual ? (
+                            <Badge variant="outline" className="font-luxury uppercase tracking-tighter text-tiny">
+                              {isMobile ? "M" : "Manual"}
+                            </Badge>
+                          ) : (
+                            <span className="hidden sm:inline text-tiny text-muted-foreground/50 uppercase tracking-widest font-luxury">Auto</span>
+                          )
                         )}
 
                         {!isMobile && (
-                          <TableCell>
-                            <div className="flex items-center">
-                              {showOwnerControls && confirmation ? (
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  onClick={async () => {
-                                    if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
-                                    else await confirmSettlement(confirmation.id);
-                                    await refetchGameDetail();
-                                  }}
-                                  className={cn(
-                                    "rounded-md transition-all",
-                                    confirmation.confirmed
-                                      ? "bg-state-success/10 text-state-success hover:bg-state-success/20"
-                                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                  )}
-                                >
-                                  {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                                </Button>
-                              ) : (
-                                <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers text-tiny">
-                                  {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
-                                </Badge>
+                          showOwnerControls && confirmation ? (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={async () => {
+                                if (confirmation.confirmed) await unconfirmSettlement(confirmation.id);
+                                else await confirmSettlement(confirmation.id);
+                                await refetchGameDetail();
+                              }}
+                              className={cn(
+                                "rounded-full border transition-all",
+                                confirmation.confirmed
+                                  ? "bg-state-success/10 text-state-success border-state-success/30 hover:bg-state-success/20"
+                                  : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
                               )}
-                            </div>
-                          </TableCell>
+                            >
+                              {confirmation.confirmed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                            </Button>
+                          ) : (
+                            <Badge variant={confirmation?.confirmed ? "profit" : "secondary"} className="h-6 font-numbers text-tiny">
+                              {confirmation?.confirmed ? <Check className="h-3 w-3" /> : <History className="h-3 w-3" />}
+                            </Badge>
+                          )
                         )}
 
-                        {hasManual && (
-                          <TableCell>
-                            {settlement.isManual && showOwnerControls && (
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => handleDeleteManualTransfer(index)}
-                                className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </TableCell>
+                        {hasManual && settlement.isManual && showOwnerControls && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleDeleteManualTransfer(index)}
+                            className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -893,10 +873,15 @@ export const GameDetailView = ({
               <div>
                 <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Amount ({CurrencyConfig.code})</Label>
                 <Input
-                  type="number"
-                  placeholder="0.00"
+                  type="text"
+                  placeholder="0"
                   value={newTransferAmount}
-                  onChange={(e) => setNewTransferAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/,/g, '');
+                    if (value === '' || !isNaN(Number(value))) {
+                      setNewTransferAmount(value === '' ? '' : formatCurrency(Number(value), false));
+                    }
+                  }}
                   className="text-lg"
                 />
               </div>

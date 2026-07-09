@@ -4,7 +4,7 @@ import { SharedProvider, useSharedContext } from '@/contexts/SharedContext';
 import PlayerDetail from './PlayerDetail';
 import { Loader2, Shield } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button'; // Assuming Button is available
+import { Button } from '@/components/ui/button';
 
 const SharedPlayerDetailContent = () => {
   const { token } = useParams<{ token: string }>();
@@ -33,26 +33,34 @@ const SharedPlayerDetailContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
-      {/* Ensure we can go back to the main shared view (Games List) */}
-      {/* Actually SharedLayout has tabs. If we are here, we might be separate. 
-           But if we want to mimic the tabs behavior or navigation, we can add a back button.
-       */}
-      <div className="max-w-6xl mx-auto mb-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(`/shared/${encodeURIComponent(token!)}`)}
-        >
-          Back to Overview
-        </Button>
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-card">
+        <div className="max-w-6xl mx-auto p-4 sm:p-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold font-luxury">Poker Stats</h1>
+          <div className="flex items-center gap-2 text-label text-muted-foreground bg-primary/10 px-3 py-1 rounded-full">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-primary font-bold">Shared View</span>
+          </div>
+        </div>
       </div>
 
-      <PlayerDetail
-        playerId={scope.resourceId}
-        userId={scope.ownerId}
-        client={sharedClient}
-        readOnly={true}
-      />
+      <div className="p-4 sm:p-8">
+        <div className="max-w-6xl mx-auto mb-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(`/shared/${encodeURIComponent(token!)}`)}
+          >
+            Back to Overview
+          </Button>
+        </div>
+
+        <PlayerDetail
+          playerId={scope.resourceId}
+          userId={scope.ownerId}
+          client={sharedClient}
+          readOnly={true}
+        />
+      </div>
     </div>
   );
 };

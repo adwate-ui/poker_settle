@@ -5,7 +5,8 @@ import { GameDetailView } from '@/components/game/GameDetailView';
 import { useAuth } from '@/hooks/useAuth';
 import GameDashboard from '@/components/game/GameDashboard';
 import { Game } from '@/types/poker';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SharedProvider, useSharedContext } from '@/contexts/SharedContext';
 
 const SharedGameDetailContent = () => {
@@ -61,10 +62,13 @@ const SharedGameDetailContent = () => {
 
   if (!token || !gameId || !isValid) {
     return (
-      <div className="min-h-screen bg-background p-4 sm:p-8">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-center text-muted-foreground">Invalid share link</p>
-        </div>
+      <div className="min-h-screen bg-background p-4 sm:p-8 flex items-center justify-center">
+        <Alert variant="destructive" className="max-w-md">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Invalid or expired share link. Please contact the owner for a valid link.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -75,17 +79,27 @@ const SharedGameDetailContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8 space-y-6">
-      <GameDetailView
-        gameId={gameId}
-        client={sharedClient}
-        token={token}
-        showOwnerControls={false}
-        onBack={() => navigate(`/shared/${encodeURIComponent(token)}`)}
-        backLabel="Back to Games History"
-        hasActivePlayerFilter={false}
-        publicOnly={true}
-      />
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-card">
+        <div className="max-w-6xl mx-auto p-4 sm:p-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold font-luxury">Poker Stats</h1>
+          <div className="flex items-center gap-2 text-label text-muted-foreground bg-primary/10 px-3 py-1 rounded-full">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-primary font-bold">Shared View</span>
+          </div>
+        </div>
+      </div>
+      <div className="p-4 sm:p-8 space-y-6">
+        <GameDetailView
+          gameId={gameId}
+          client={sharedClient}
+          token={token}
+          showOwnerControls={false}
+          onBack={() => navigate(`/shared/${encodeURIComponent(token)}`)}
+          backLabel="Back to Games History"
+          publicOnly={true}
+        />
+      </div>
     </div>
   );
 };
