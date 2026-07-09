@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -36,6 +36,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePrefetchGame } from "@/hooks/usePrefetch";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useGames } from "@/features/game/hooks/useGames";
 import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -74,8 +75,6 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const gamesPerPage = 20;
   const { prefetch } = usePrefetchGame();
 
   const effectiveUserId = propUserId || user?.id;
@@ -147,7 +146,6 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       setSortField(field);
       setSortOrder("asc");
     }
-    setCurrentPage(1);
   };
 
   const getSortIcon = (field: SortField) => {
@@ -195,15 +193,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
     return filtered;
   }, [games, selectedDate, selectedMonthYear, selectedPlayer, sortField, sortOrder]);
 
-  const totalPages = Math.ceil(filteredAndSortedGames.length / gamesPerPage);
-  const paginatedGames = useMemo(() => {
-    const start = (currentPage - 1) * gamesPerPage;
-    return filteredAndSortedGames.slice(start, start + gamesPerPage);
-  }, [filteredAndSortedGames, currentPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedDate, selectedMonthYear, selectedPlayer]);
+  const { visibleItems: visibleGames, sentinelRef, hasMore } = useInfiniteList(filteredAndSortedGames, 20);
 
   const handleNavigate = (gameId: string) => {
     // If shared mode (client present), we might need to handle navigation differently
@@ -344,7 +334,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className="cursor-pointer w-[25%] md:w-auto"
+              className="cursor-pointer w-[22%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Date
@@ -353,7 +343,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className="cursor-pointer w-[20%] md:w-auto"
+              className="cursor-pointer w-[17%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Buy-in
@@ -362,7 +352,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("players")}
-              className="cursor-pointer w-[15%] md:w-auto"
+              className="cursor-pointer w-[10%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 <span className="sr-only sm:not-sr-only">Players</span>
@@ -372,7 +362,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("chips")}
-              className="cursor-pointer w-[25%] md:w-auto"
+              className="cursor-pointer w-[24%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 <span className="sm:inline hidden">Total Pot</span><span className="sm:hidden inline">Pot</span>
@@ -380,14 +370,14 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
               </div>
             </TableHead>
             {!readOnly && (
-              <TableHead className="md:w-auto">
+              <TableHead className="w-[27%] md:w-auto">
                 {selectedPlayer !== "all" ? "P&L" : "Act"}
               </TableHead>
             )}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedGames.map((game) => {
+          {visibleGames.map((game) => {
             const playerData = game.game_players.find((gp) => gp.player_name === selectedPlayer);
             return (
               <TableRow
@@ -413,7 +403,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 {!readOnly && (
                   <TableCell className="text-tiny">
                     {selectedPlayer !== "all" && playerData ? (
-                      <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-tiny">
+                      <Badge variant={playerData.net_amount >= 0 ? 'profit' : 'loss'} className="px-1 h-5 text-tiny whitespace-nowrap">
                         <ResponsiveCurrency amount={playerData.net_amount} />
                       </Badge>
                     ) : (
@@ -438,25 +428,9 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
         </TableBody>
       </Table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-4">
+          <span className="text-2xs uppercase tracking-widest text-muted-foreground">Loading more…</span>
         </div>
       )}
 

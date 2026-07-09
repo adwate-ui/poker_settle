@@ -608,12 +608,12 @@ export const GameDetailView = ({
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead>Player</TableHead>
-                      <TableHead className="w-[15%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                      <TableHead className="w-[25%] md:w-auto">P&L</TableHead>
+                      <TableHead className="w-[30%] md:w-auto">Player</TableHead>
+                      <TableHead className="w-[12%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                      <TableHead className="w-[35%] md:w-auto">P&L</TableHead>
                       {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
                       {showOwnerControls && fetchBuyInHistory && (
-                        <TableHead className="w-[15%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
+                        <TableHead className="w-[13%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
@@ -649,7 +649,7 @@ export const GameDetailView = ({
                             <div>
                               <Badge
                                 variant={isWin ? "profit" : "loss"}
-                                className="font-numbers text-tiny"
+                                className="font-numbers text-tiny whitespace-nowrap"
                               >
                                 {formatProfitLoss(netAmount)}
                               </Badge>
@@ -750,12 +750,12 @@ export const GameDetailView = ({
                         {showOwnerControls && nameToIdMap[settlement.to] ? (
                           <Link
                             to={`/players/${nameToIdMap[settlement.to]}`}
-                            className="text-tiny text-muted-foreground hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
+                            className="text-tiny font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/50 transition-all truncate"
                           >
                             {settlement.to}
                           </Link>
                         ) : (
-                          <span className="text-tiny text-muted-foreground truncate">
+                          <span className="text-tiny font-medium truncate">
                             {settlement.to}
                           </span>
                         )}

@@ -26,7 +26,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full glass-panel text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+      className="h-10 w-10 rounded-full glass-panel text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300"
       aria-label="Toggle theme"
     >
       {theme === "light" ? (

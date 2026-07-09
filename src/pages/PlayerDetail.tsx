@@ -438,28 +438,28 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => handleSort("date")} className="cursor-pointer w-[25%] sm:w-[20%]">
+              <TableHead onClick={() => handleSort("date")} className="cursor-pointer w-[18%] sm:w-[16%]">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Session Day</span>
                   <span className="sm:hidden">Date</span>
                   {getSortIcon("date")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("buy_ins")} className="cursor-pointer w-[15%]">
+              <TableHead onClick={() => handleSort("buy_ins")} className="cursor-pointer w-[10%]">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Buy-ins</span>
                   <span className="sm:hidden">Buy</span>
                   {getSortIcon("buy_ins")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("net_amount")} className="cursor-pointer w-[25%] sm:w-[20%]">
+              <TableHead onClick={() => handleSort("net_amount")} className="cursor-pointer w-[34%] sm:w-[30%]">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Net P&L</span>
                   <span className="sm:hidden">P&L</span>
                   {getSortIcon("net_amount")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("final_stack")} className="cursor-pointer w-[25%] sm:w-[20%]">
+              <TableHead onClick={() => handleSort("final_stack")} className="cursor-pointer w-[18%]">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Final Stack</span>
                   <span className="sm:hidden">Stack</span>

@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { ResponsiveName } from "@/components/ui-primitives/ResponsiveName";
 import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 type SortField = "name" | "total_games" | "total_profit";
 type SortOrder = "asc" | "desc" | null;
@@ -45,8 +46,6 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const playersPerPage = 20;
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -102,7 +101,6 @@ const PlayersHistory = () => {
       setSortField(field);
       setSortOrder("asc");
     }
-    setCurrentPage(1);
   }, [sortField, sortOrder]);
 
   const getSortIcon = useCallback((field: SortField) => {
@@ -134,11 +132,7 @@ const PlayersHistory = () => {
     });
   }, [players, sortField, sortOrder]);
 
-  const totalPages = Math.ceil(sortedPlayers.length / playersPerPage);
-  const paginatedPlayers = useMemo(() => {
-    const start = (currentPage - 1) * playersPerPage;
-    return sortedPlayers.slice(start, start + playersPerPage);
-  }, [sortedPlayers, currentPage]);
+  const { visibleItems: visiblePlayers, sentinelRef, hasMore } = useInfiniteList(sortedPlayers, 20);
 
   if (loading) {
     return (
@@ -233,7 +227,7 @@ const PlayersHistory = () => {
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("name")}
-              className="cursor-pointer w-[40%] md:w-auto"
+              className="cursor-pointer w-[30%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Player
@@ -242,7 +236,7 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_games")}
-              className="cursor-pointer w-[20%] md:w-auto"
+              className="cursor-pointer w-[15%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Games
@@ -251,7 +245,7 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_profit")}
-              className="cursor-pointer w-[25%] md:w-auto"
+              className="cursor-pointer w-[40%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Net
@@ -262,7 +256,7 @@ const PlayersHistory = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedPlayers.map((player) => {
+          {visiblePlayers.map((player) => {
             const profit = player.total_profit || 0;
             return (
               <TableRow
@@ -313,25 +307,9 @@ const PlayersHistory = () => {
         </TableBody>
       </Table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-4">
+          <span className="text-2xs uppercase tracking-widest text-muted-foreground">Loading more…</span>
         </div>
       )}
 
