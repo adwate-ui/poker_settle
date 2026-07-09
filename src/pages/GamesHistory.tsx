@@ -345,7 +345,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[19%]" : "w-[14%]")}
+              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[19%]" : "w-[27%]")}
             >
               <div className="flex items-center gap-1">
                 Date
@@ -381,7 +381,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
               </div>
             </TableHead>
             {!readOnly && (
-              <TableHead className="w-[26%] md:w-auto">
+              <TableHead className="w-[13%] md:w-auto">
                 {selectedPlayer !== "all" ? "P&L" : "Act"}
               </TableHead>
             )}
