@@ -1,13 +1,19 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
-import { TrendingUp, Target, Filter, X, ChevronDown } from 'lucide-react';
+import { Target, Filter, X, ChevronDown, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MemoizedHandCard from '@/components/poker/MemoizedHandCard';
 import { GameCardSkeletonList } from '@/components/skeletons';
@@ -15,6 +21,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { StatTile } from '@/components/ui-primitives/StatTile';
+import { exportHandsToCSV } from '@/lib/exportUtils';
 
 const HandsHistory = () => {
   const _navigate = useNavigate();
@@ -337,6 +344,28 @@ const HandsHistory = () => {
                     Clear All
                   </Button>
                 )}
+                {hands.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-6 px-2 text-label text-muted-foreground hover:text-foreground gap-1"
+                        aria-label="Export hands"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Export</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuItem onClick={() => exportHandsToCSV(hands)}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Export as CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
                 <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", filtersOpen && "rotate-180")} />
               </div>
             </div>
@@ -350,10 +379,10 @@ const HandsHistory = () => {
       </Collapsible>
 
       {/* Filters Section — mobile/tablet, on-demand sheet */}
-      <div className="lg:hidden">
+      <div className="lg:hidden flex items-center gap-2">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full justify-center gap-2">
+            <Button variant="outline" className="flex-1 justify-center gap-2">
               <Filter className="h-4 w-4" />
               Filters
               {hasActiveFilters && (
@@ -378,27 +407,26 @@ const HandsHistory = () => {
             </div>
           </SheetContent>
         </Sheet>
+        {hands.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Export hands">
+                <Download className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportHandsToCSV(hands)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Hands List */}
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle>Hands History</CardTitle>
-                <CardDescription>Every hand you've tracked</CardDescription>
-              </div>
-            </div>
-            <Badge variant="outline" className="font-numbers text-tiny">
-              {hands.length}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {currentHands.length === 0 ? (
             <EmptyState
               icon={Target}

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { GameCardSkeletonList } from "@/components/skeletons";
+import { StatTile } from "@/components/ui-primitives/StatTile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { Play, ArrowRight, Gamepad2 } from "lucide-react";
 
@@ -16,6 +18,18 @@ export const OverviewDashboard = () => {
   const { activeGame } = useActiveGame(user?.id);
   const { data: games, isLoading } = useGames(user?.id);
   const recentGames = (games ?? []).slice(0, 3);
+
+  const lifetimeStats = useMemo(() => {
+    const allGames = games ?? [];
+    const totalGames = allGames.length;
+    const totalPot = allGames.reduce((sum, game) => {
+      const buyIns = game.game_players?.reduce((s, gp) => s + (gp.buy_ins || 0), 0) || 0;
+      return sum + buyIns * game.buy_in_amount;
+    }, 0);
+    const playerIds = new Set<string>();
+    allGames.forEach((game) => game.game_players?.forEach((gp) => gp.player_id && playerIds.add(gp.player_id)));
+    return { totalGames, totalPot, playersTracked: playerIds.size };
+  }, [games]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -38,9 +52,17 @@ export const OverviewDashboard = () => {
         </Card>
       )}
 
+      {!isLoading && lifetimeStats.totalGames > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <StatTile label="Total Games" value={lifetimeStats.totalGames} />
+          <StatTile label="Total Pot" value={formatCurrency(lifetimeStats.totalPot)} valueClassName="text-primary" />
+          <StatTile label="Players Tracked" value={lifetimeStats.playersTracked} />
+        </div>
+      )}
+
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
+          <div className="space-y-1">
             <CardTitle className="font-luxury">Ready for a session?</CardTitle>
             <CardDescription>Set buy-ins, add players, and start tracking.</CardDescription>
           </div>

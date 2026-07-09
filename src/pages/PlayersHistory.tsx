@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { Trash2, ArrowUpDown, ArrowUp, ArrowDown, Trophy, UserPlus, Download, FileText, Printer } from "lucide-react";
+import { Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Download, FileText, Printer, Search } from "lucide-react";
 import { exportPlayersToCSV, printPlayersReport } from "@/lib/exportUtils";
 import {
   DropdownMenu,
@@ -47,6 +47,7 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -111,8 +112,14 @@ const PlayersHistory = () => {
       : <ArrowDown className="h-3 w-3 text-primary" />;
   }, [sortField, sortOrder]);
 
+  const filteredPlayers = useMemo(() => {
+    if (!searchQuery.trim()) return players;
+    const query = searchQuery.trim().toLowerCase();
+    return players.filter((p) => p.name.toLowerCase().includes(query));
+  }, [players, searchQuery]);
+
   const sortedPlayers = useMemo(() => {
-    return [...players].sort((a, b) => {
+    return [...filteredPlayers].sort((a, b) => {
       let aVal: number | string = 0;
       let bVal: number | string = 0;
       switch (sortField) {
@@ -131,7 +138,7 @@ const PlayersHistory = () => {
       }
       return sortOrder === "asc" ? (aVal > bVal ? 1 : -1) : (bVal > aVal ? 1 : -1);
     });
-  }, [players, sortField, sortOrder]);
+  }, [filteredPlayers, sortField, sortOrder]);
 
   const { visibleItems: visiblePlayers, sentinelRef, hasMore } = useInfiniteList(sortedPlayers, 20);
 
@@ -163,57 +170,59 @@ const PlayersHistory = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Trophy className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle>Player Statistics</CardTitle>
-                <CardDescription>Overall player performance</CardDescription>
-              </div>
-            </div>
-            {players.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2" aria-label="Export players">
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">Export</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => exportPlayersToCSV(players)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Export as CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => printPlayersReport(players)}>
-                    <Printer className="h-4 w-4 mr-2" />
-                    Print Report
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <StatTile label="Total Players" value={players.length} valueClassName="text-primary" />
+        <StatTile
+          label="Profitable Players"
+          valueClassName="text-state-success"
+          value={
+            <>
+              {players.filter(p => (p.total_profit || 0) >= 0).length}
+              <span className="text-base text-muted-foreground">/{players.length}</span>
+            </>
+          }
+        />
+        <StatTile label="Total Games" value={totalUniqueGames} valueClassName="text-primary" />
+      </div>
+
+      <div className="p-4 sm:p-5 rounded-xl border border-border bg-accent/5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-label text-muted-foreground">Filter Players</span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <StatTile label="Total Players" value={players.length} valueClassName="text-primary" />
-            <StatTile
-              label="Profitable Players"
-              valueClassName="text-state-success"
-              value={
-                <>
-                  {players.filter(p => (p.total_profit || 0) >= 0).length}
-                  <span className="text-base text-muted-foreground">/{players.length}</span>
-                </>
-              }
-            />
-            <StatTile label="Total Games" value={totalUniqueGames} valueClassName="text-primary" />
-          </div>
-        </CardContent>
-      </Card>
+          {players.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 px-2 gap-1.5 text-label text-muted-foreground hover:text-foreground" aria-label="Export players">
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportPlayersToCSV(players)}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => printPlayersReport(players)}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <p className="text-label text-muted-foreground px-0.5">Search</p>
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name..."
+            className="h-9 text-xs font-body bg-background/60 border-border hover:border-primary/30 transition-colors"
+          />
+        </div>
+      </div>
 
       {/* Responsive Table Layout */}
       <Table>

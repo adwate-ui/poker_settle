@@ -22,6 +22,17 @@ import type { Config } from "tailwindcss";
  *   Outer page container -> space-y-6
  *   Info tile padding     -> p-4 sm:p-6
  *   Major card/stat grids -> gap-6; denser field grids -> gap-4
+ *   CardTitle + CardDescription pair -> always wrap in a div with space-y-1, whether or
+ *     not it's preceded by an icon badge. Never let them sit in an unstyled wrapper div
+ *     (defaults to a 0px gap) or rely on CardHeader's own space-y-1.5 reaching them.
+ *
+ * Page shape (the 3 list pages — Games History, Players List, Hands Tracking — plus
+ * Overview and New Game as adapted variants):
+ *   1. Stats: bare StatTile grid, no wrapping Card/title (nav tab already names the page).
+ *      Skip entirely rather than fabricate meaningless tiles (e.g. New Game pre-creation).
+ *   2. Primary action or filters: the compact filter-bar style, or an equivalent single
+ *      action/description in the same structural slot.
+ *   3. Content: table, list, or form.
  *
  * Color: use the CSS-variable-driven poker.gold / poker.felt tokens (theme-aware), not the
  * hardcoded gold and felt hex tokens below (those don't respond to dark mode — reserved for

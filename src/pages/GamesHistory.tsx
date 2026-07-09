@@ -39,6 +39,8 @@ import { usePrefetchGame } from "@/hooks/usePrefetch";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useGames } from "@/features/game/hooks/useGames";
 import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
+import { StatTile } from "@/components/ui-primitives/StatTile";
+import { formatCurrency } from "@/utils/currencyUtils";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -137,6 +139,15 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const uniquePlayers = useMemo(() => {
     const players = games.flatMap((game) => game.player_names);
     return Array.from(new Set(players)).sort();
+  }, [games]);
+
+  const summaryStats = useMemo(() => {
+    const totalGames = games.length;
+    const totalPot = games.reduce((sum, game) => sum + game.total_pot, 0);
+    const avgPlayers = totalGames > 0
+      ? games.reduce((sum, game) => sum + game.player_count, 0) / totalGames
+      : 0;
+    return { totalGames, totalPot, avgPlayers };
   }, [games]);
 
   const handleSort = (field: SortField) => {
@@ -251,6 +262,14 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {games.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatTile label="Total Games" value={summaryStats.totalGames} />
+          <StatTile label="Total Pot" value={formatCurrency(summaryStats.totalPot)} valueClassName="text-primary" />
+          <StatTile label="Avg Players / Game" value={summaryStats.avgPlayers.toFixed(1)} />
+        </div>
+      )}
+
       <div className="p-4 sm:p-5 rounded-xl border border-border bg-accent/5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

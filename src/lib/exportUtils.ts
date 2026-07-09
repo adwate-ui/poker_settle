@@ -59,6 +59,7 @@ function downloadFile(content: string, filename: string, mimeType: string = 'tex
 
 import { format } from 'date-fns';
 import { Game, Player, Settlement, SessionStats, DashboardGameHistory } from '@/types/poker';
+import { HandWithDetails } from '@/hooks/useHandsHistory';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { computeMonthlyStats, computeCumulativePnL } from '@/features/players/utils/playerStats';
 
@@ -130,6 +131,37 @@ export function exportPlayersToCSV(players: Player[]): void {
 
   const csv = arrayToCSV(data, headers);
   const filename = `poker-players-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+  downloadFile(csv, filename);
+}
+
+/**
+ * Export hands history to CSV
+ */
+export function exportHandsToCSV(hands: HandWithDetails[]): void {
+  const data = hands.map(hand => ({
+    date: hand.game_date ? format(new Date(hand.game_date), 'yyyy-MM-dd') : '',
+    handNumber: hand.hand_number,
+    buttonPlayer: hand.button_player_name,
+    winners: hand.winner_player_names.join(', '),
+    potSize: hand.pot_size,
+    heroPosition: hand.hero_position || '',
+    finalStage: hand.final_stage || '',
+    result: hand.is_split ? 'Split' : hand.is_hero_win === true ? 'Win' : hand.is_hero_win === false ? 'Loss' : '',
+  }));
+
+  const headers = [
+    { key: 'date', label: 'Date' },
+    { key: 'handNumber', label: 'Hand #' },
+    { key: 'buttonPlayer', label: 'Button' },
+    { key: 'winners', label: 'Winner(s)' },
+    { key: 'potSize', label: 'Pot Size' },
+    { key: 'heroPosition', label: 'Hero Position' },
+    { key: 'finalStage', label: 'Final Stage' },
+    { key: 'result', label: 'Result' },
+  ];
+
+  const csv = arrayToCSV(data, headers);
+  const filename = `poker-hands-${format(new Date(), 'yyyy-MM-dd')}.csv`;
   downloadFile(csv, filename);
 }
 

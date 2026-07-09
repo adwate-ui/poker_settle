@@ -188,17 +188,19 @@ const NewGame = () => {
         <div className="absolute inset-0 bg-background/60 backdrop-blur-md z-20 flex items-center justify-center p-4">
           <Card className="w-full max-w-md border-border shadow-2xl animate-in fade-in zoom-in duration-300">
             <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-start gap-3">
                 <div className="p-2 rounded-full bg-primary/10 border border-primary/20">
                   <Play className="h-5 w-5 text-primary" />
                 </div>
-                <CardTitle className="text-2xl font-luxury text-foreground">
-                  Active Game
-                </CardTitle>
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-luxury text-foreground">
+                    Active Game
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    You have a game in progress. Please complete the current game before starting a new one.
+                  </CardDescription>
+                </div>
               </div>
-              <CardDescription className="text-muted-foreground">
-                You have a game in progress. Please complete the current game before starting a new one.
-              </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
               <Button onClick={continueGame} className="w-full h-12 text-base font-luxury shadow-lg shadow-primary/10" variant="default">
@@ -209,10 +211,7 @@ const NewGame = () => {
         </div>
       )}
 
-      <CardHeader className="space-y-1">
-        <CardTitle className="font-luxury text-foreground">
-          Start New Game
-        </CardTitle>
+      <CardHeader>
         <CardDescription className="text-muted-foreground">
           Configure game settings and add players.
         </CardDescription>
@@ -221,7 +220,7 @@ const NewGame = () => {
       <CardContent className="space-y-10">
         <div className="space-y-8">
           {/* Buy-in Section */}
-          <div className="space-y-3">
+          <div className="space-y-3 max-w-sm">
             <Label htmlFor="buyin" className="text-label text-muted-foreground ml-1">
               Initial Buy-in ({CurrencyConfig.symbol})
             </Label>
