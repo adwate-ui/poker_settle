@@ -361,7 +361,8 @@ export const ChipScanner = ({ onScanComplete, triggerProps }: ChipScannerProps) 
                 variant="ghost"
                 size="icon"
                 onClick={() => setOpened(true)}
-                aria-label="Open AI chip scanner"
+                aria-label="Scan chips with camera"
+                title="Scan chips with camera"
                 {...triggerProps}
                 className={cn(
                     "text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full h-9 w-9",

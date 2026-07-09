@@ -47,57 +47,6 @@ const StackSlide = () => {
 
     const smallBlind = game?.small_blind;
 
-    // Calculate settlements for completion (needed for handleCompleteGame)
-    // Actually, handleCompleteGame in the hook takes settlements.
-    // We need to calculate settlements here to pass them?
-    // GameDashboard passed `allSettlements` to `completeGame`.
-    // The hook `handleCompleteGame` accepts `settlements`.
-    // We should probably calculate settlements inside `handleCompleteGame` hook if possible, 
-    // OR passed from here.
-    // In `GameDashboard`, `settlements` was a memo.
-    // I should probably calculate settlements here to pass it.
-    // Or better, let `handleCompleteGame` calculate it itself since it has access to store.
-
-    // Let's look at `useGameDashboardActions.ts` again.
-    // It accepts `settlements` as arg.
-    // I should update `useGameDashboardActions` to calculate settlements internally if not passed?
-    // No, `useGameDashboardActions` has `game` and `gamePlayers`. It can import `calculateOptimizedSettlements`.
-    // But `StackSlide` calls it.
-    // Let's check `StackSlide` logic. It calls `handleCompleteGame`.
-    // In `GameDashboard`, `handleCompleteGame` used `settlements`.
-
-    // I will use `useMemo` here to calculate settlements or use a helper,
-    // BUT `handleCompleteGame` in `useGameDashboardActions.ts` expects `settlements`.
-    // I'll import `calculateOptimizedSettlements` here and pass it.
-
-    // Wait, `calculateOptimizedSettlements` needs balances.
-    // I'll allow `handleCompleteGame` to accept NO args and calculate internally in the hook?
-    // The previous implementation passed `allSettlements` which included `currentGame.settlements` + optimized ones.
-
-    // I will update `useGameDashboardActions` later to be smarter if needed, but for now I will calculate it here to pass it, 
-    // OR create a helper hook for settlements.
-    // `OverviewSlide` creates settlements too.
-    // I should have a shared `useSettlements` hook.
-
-    // For now, I'll duplicate the settlement calculation or use `useGameSettlements` if I created one? I didn't.
-    // I'll add the calculation here. It's safe.
-
-    const onComplete = async () => {
-        // We need to calculate settlements to pass to the action
-        // Ideally this logic should be in the action itself to avoid duplication
-        // The action has access to game and gamePlayers.
-        // I'll update the action to calculate it if not passed, or just calculate it here.
-        // Let's assume I'll update the action to be parameter-less for simplicity on UI side.
-        // BUT for now I can't update the action file in this tool call.
-        // I will calculate it here.
-
-        // Actually, `useGameDashboardActions` was defined to take `settlements: Settlement[]`.
-        // I'll import the utils.
-
-        // WAIT. I can just re-read the action file in my head... yes it takes `settlements`.
-        // I'll update `StackSlide` to calculate it.
-    };
-
     return (
         <div className="px-4 pt-1 space-y-4 pb-20">
             <div className="flex items-center gap-3 border-b border-border/50 pb-4">
