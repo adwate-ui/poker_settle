@@ -100,7 +100,7 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
                   className="px-3 py-1 text-tiny tracking-widest uppercase"
                 >
                   {resultStatus === 'win' && <Trophy className="h-3 w-3 mr-1.5" />}
-                  {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'PROTOCOL'}
+                  {resultStatus === 'win' ? 'VICTORY' : resultStatus === 'loss' ? 'DEFEAT' : resultStatus === 'split' ? 'SPLIT' : 'UNRESOLVED'}
                 </Badge>
                 {onDelete && (
                   <AlertDialog>

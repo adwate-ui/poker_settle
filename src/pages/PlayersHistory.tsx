@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { Trash2, ArrowUpDown, Trophy, UserPlus, Download, FileText, Printer } from "lucide-react";
+import { Trash2, ArrowUpDown, ArrowUp, ArrowDown, Trophy, UserPlus, Download, FileText, Printer } from "lucide-react";
 import { exportPlayersToCSV, printPlayersReport } from "@/lib/exportUtils";
 import {
   DropdownMenu,
@@ -45,6 +45,8 @@ const PlayersHistory = () => {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [totalUniqueGames, setTotalUniqueGames] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const playersPerPage = 20;
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -100,6 +102,14 @@ const PlayersHistory = () => {
       setSortField(field);
       setSortOrder("asc");
     }
+    setCurrentPage(1);
+  }, [sortField, sortOrder]);
+
+  const getSortIcon = useCallback((field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 opacity-30 text-muted-foreground" />;
+    return sortOrder === "asc"
+      ? <ArrowUp className="h-3 w-3 text-primary" />
+      : <ArrowDown className="h-3 w-3 text-primary" />;
   }, [sortField, sortOrder]);
 
   const sortedPlayers = useMemo(() => {
@@ -124,6 +134,12 @@ const PlayersHistory = () => {
     });
   }, [players, sortField, sortOrder]);
 
+  const totalPages = Math.ceil(sortedPlayers.length / playersPerPage);
+  const paginatedPlayers = useMemo(() => {
+    const start = (currentPage - 1) * playersPerPage;
+    return sortedPlayers.slice(start, start + playersPerPage);
+  }, [sortedPlayers, currentPage]);
+
   if (loading) {
     return (
       <div className="space-y-4 p-4">
@@ -140,7 +156,7 @@ const PlayersHistory = () => {
         description="You haven't registered any players yet. Players are automatically created when you start your first game, or you can add them manually to get a head start!"
         action={{
           label: "Create First Game",
-          onClick: () => navigate("/"),
+          onClick: () => navigate("/new"),
         }}
         secondaryAction={{
           label: "View Games",
@@ -167,7 +183,7 @@ const PlayersHistory = () => {
             {players.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2" aria-label="Export players">
                     <Download className="h-4 w-4" />
                     <span className="hidden sm:inline">Export</span>
                   </Button>
@@ -187,7 +203,7 @@ const PlayersHistory = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
               <p className="text-label text-muted-foreground">Total Players</p>
               <p className="text-3xl font-numbers text-primary">{players.length}</p>
@@ -201,7 +217,7 @@ const PlayersHistory = () => {
                 <p className="text-label text-muted-foreground">Profitable Players</p>
               </div>
             </div>
-            <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2 hidden lg:block">
+            <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
               <p className="text-label text-muted-foreground">Total Games</p>
               <p className="text-3xl font-numbers text-primary">
                 {totalUniqueGames}
@@ -212,9 +228,7 @@ const PlayersHistory = () => {
       </Card>
 
       {/* Responsive Table Layout */}
-      <Table
-        className="max-h-[600px]"
-      >
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead
@@ -223,7 +237,7 @@ const PlayersHistory = () => {
             >
               <div className="flex items-center gap-1">
                 Player
-                <ArrowUpDown className="h-3 w-3" />
+                {getSortIcon("name")}
               </div>
             </TableHead>
             <TableHead
@@ -232,7 +246,7 @@ const PlayersHistory = () => {
             >
               <div className="flex items-center gap-1">
                 Games
-                <ArrowUpDown className="h-3 w-3" />
+                {getSortIcon("total_games")}
               </div>
             </TableHead>
             <TableHead
@@ -241,14 +255,14 @@ const PlayersHistory = () => {
             >
               <div className="flex items-center gap-1">
                 Net
-                <ArrowUpDown className="h-3 w-3" />
+                {getSortIcon("total_profit")}
               </div>
             </TableHead>
             <TableHead className="w-[15%] md:w-auto">Act</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedPlayers.map((player) => {
+          {paginatedPlayers.map((player) => {
             const profit = player.total_profit || 0;
             return (
               <TableRow
@@ -283,6 +297,7 @@ const PlayersHistory = () => {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    aria-label="Delete player"
                     className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -298,6 +313,27 @@ const PlayersHistory = () => {
         </TableBody>
       </Table>
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       <Dialog open={!!deletePlayerId} onOpenChange={(open) => !open && setDeletePlayerId(null)}>
         <DialogContent>

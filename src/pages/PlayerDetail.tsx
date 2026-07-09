@@ -246,7 +246,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
             <div className="flex items-center gap-3 xs:gap-5 min-w-0">
               <div className="relative shrink-0">
                 <OptimizedAvatar name={player.name} size="lg" className="border-primary/30 group-hover:border-primary transition-colors" />
-                <div className="absolute inset-0 rounded-full shadow-lg shadow-primary/20 animate-pulse" />
+                <div className="absolute inset-0 rounded-full shadow-lg shadow-primary/20 motion-safe:animate-pulse" />
               </div>
               <div className="min-w-0">
                 <CardTitle className="text-2xl xs:text-3xl font-luxury text-foreground truncate">{player.name}</CardTitle>
@@ -287,7 +287,14 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Success Ratio</p>
                 <div className="space-y-2">
                   <p className="text-3xl font-numbers text-primary">{winRate.toFixed(1)}%</p>
-                  <div className="w-full h-1.5 bg-primary/20 rounded-full overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label="Success ratio"
+                    aria-valuenow={Math.round(winRate)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    className="w-full h-1.5 bg-primary/20 rounded-full overflow-hidden"
+                  >
                     <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${winRate}%` }} />
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { ArrowUpDown, Trash2, Filter, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Trash2, Filter, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
 import { exportGamesToCSV } from "@/lib/exportUtils";
 import { Game } from "@/types/poker";
 import {
@@ -74,6 +74,8 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const gamesPerPage = 20;
   const { prefetch } = usePrefetchGame();
 
   const effectiveUserId = propUserId || user?.id;
@@ -145,6 +147,14 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       setSortField(field);
       setSortOrder("asc");
     }
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 opacity-30 text-muted-foreground" />;
+    return sortOrder === "asc"
+      ? <ArrowUp className="h-3 w-3 text-primary" />
+      : <ArrowDown className="h-3 w-3 text-primary" />;
   };
 
   const filteredAndSortedGames = useMemo(() => {
@@ -185,6 +195,16 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
     return filtered;
   }, [games, selectedDate, selectedMonthYear, selectedPlayer, sortField, sortOrder]);
 
+  const totalPages = Math.ceil(filteredAndSortedGames.length / gamesPerPage);
+  const paginatedGames = useMemo(() => {
+    const start = (currentPage - 1) * gamesPerPage;
+    return filteredAndSortedGames.slice(start, start + gamesPerPage);
+  }, [filteredAndSortedGames, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedDate, selectedMonthYear, selectedPlayer]);
+
   const handleNavigate = (gameId: string) => {
     // If shared mode (client present), we might need to handle navigation differently
     // The current shared route is /shared/:token/game/:gameId
@@ -223,7 +243,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           !readOnly
             ? {
               label: "Create First Game",
-              onClick: () => navigate("/"),
+              onClick: () => navigate("/new"),
             }
             : undefined
         }
@@ -256,7 +276,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             {!readOnly && games.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2" aria-label="Export games">
                     <Download className="h-4 w-4" />
                     <span className="hidden sm:inline">Export</span>
                   </Button>
@@ -319,9 +339,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
       </Card>
 
       {/* Responsive Table Layout */}
-      <Table
-        className="max-h-[600px]"
-      >
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead
@@ -330,7 +348,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             >
               <div className="flex items-center gap-1">
                 Date
-                <ArrowUpDown className="h-3 w-3 opacity-50" />
+                {getSortIcon("date")}
               </div>
             </TableHead>
             <TableHead
@@ -339,7 +357,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             >
               <div className="flex items-center gap-1">
                 Buy-in
-                <ArrowUpDown className="h-3 w-3 opacity-50" />
+                {getSortIcon("buy_in")}
               </div>
             </TableHead>
             <TableHead
@@ -349,7 +367,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
               <div className="flex items-center gap-1">
                 <span className="sr-only sm:not-sr-only">Players</span>
                 <span className="sm:hidden">Pl...</span>
-                <ArrowUpDown className="h-3 w-3 opacity-50" />
+                {getSortIcon("players")}
               </div>
             </TableHead>
             <TableHead
@@ -358,7 +376,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             >
               <div className="flex items-center gap-1">
                 <span className="sm:inline hidden">Total Pot</span><span className="sm:hidden inline">Pot</span>
-                <ArrowUpDown className="h-3 w-3 opacity-50" />
+                {getSortIcon("chips")}
               </div>
             </TableHead>
             {!readOnly && (
@@ -369,7 +387,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAndSortedGames.map((game) => {
+          {paginatedGames.map((game) => {
             const playerData = game.game_players.find((gp) => gp.player_name === selectedPlayer);
             return (
               <TableRow
@@ -402,6 +420,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        aria-label="Delete game"
                         className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -419,6 +438,27 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
         </TableBody>
       </Table>
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       {!readOnly && (
         <Dialog open={!!deleteGameId} onOpenChange={(open) => !open && setDeleteGameId(null)}>

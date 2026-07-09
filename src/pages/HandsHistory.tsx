@@ -4,9 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useHandsHistory } from '@/hooks/useHandsHistory';
-import { Loader2, TrendingUp, Target, Filter, X } from 'lucide-react';
+import { TrendingUp, Target, Filter, X } from 'lucide-react';
 import MemoizedHandCard from '@/components/poker/MemoizedHandCard';
+import { GameCardSkeletonList } from '@/components/skeletons';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
 import { formatCurrency } from '@/utils/currencyUtils';
 
@@ -64,11 +67,228 @@ const HandsHistory = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 rounded-lg bg-muted/20 animate-pulse" />
+          ))}
+        </div>
+        <GameCardSkeletonList count={4} />
       </div>
     );
   }
+
+  const filterFieldsGrid = (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Name</label>
+        <Select
+          value={filters.heroName || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ heroName: value === 'all' ? undefined : value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Global View" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Heros</SelectItem>
+            {uniqueHeroNames.map(name => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Position</label>
+        <Select
+          value={filters.heroPosition || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ heroPosition: value === 'all' ? undefined : value })
+          }
+          disabled={uniquePositions.length === 0}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={uniquePositions.length === 0 ? "No Positions" : "All Positions"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Positions</SelectItem>
+            {uniquePositions.map(pos => (
+              <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Game</label>
+        <Select
+          value={filters.gameId || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ gameId: value === 'all' ? undefined : value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All Games" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Games</SelectItem>
+            {uniqueGames.map(game => (
+              <SelectItem key={game.id} value={game.id}>
+                {formatDate(game.date)} - {formatCurrency(game.buy_in)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Result</label>
+        <Select
+          value={filters.result || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ result: value as 'win' | 'loss' | 'split' | 'all' })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All Results" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Results</SelectItem>
+            <SelectItem value="win">Wins</SelectItem>
+            <SelectItem value="loss">Losses</SelectItem>
+            <SelectItem value="split">Split Pots</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Showdown</label>
+        <Select
+          value={filters.showdown || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ showdown: value as 'yes' | 'no' | 'all' })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="yes">Yes</SelectItem>
+            <SelectItem value="no">No</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Final Stage</label>
+        <Select
+          value={filters.finalStage || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ finalStage: value === 'all' ? undefined : value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All Stages" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stages</SelectItem>
+            <SelectItem value="Preflop">Preflop</SelectItem>
+            <SelectItem value="Flop">Flop</SelectItem>
+            <SelectItem value="Turn">Turn</SelectItem>
+            <SelectItem value="River">River</SelectItem>
+            <SelectItem value="Showdown">Showdown</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Name</label>
+        <Select
+          value={filters.villainName || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ villainName: value === 'all' ? undefined : value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All Villains" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Villains</SelectItem>
+            {uniqueVillainNames.map(name => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Position</label>
+        <Select
+          value={filters.villainPosition || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ villainPosition: value === 'all' ? undefined : value })
+          }
+          disabled={!filters.villainName}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Positions"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Positions</SelectItem>
+            {uniqueVillainPositions.map(pos => (
+              <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero's Hole Cards</label>
+        <Select
+          value={filters.heroHoleCards || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ heroHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
+          }
+          disabled={!filters.heroName}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={!filters.heroName ? "Select Hero First" : "All Cards"} />
+          </SelectTrigger>
+          <SelectContent>
+            {HOLE_CARD_FILTER_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain's Hole Cards</label>
+        <Select
+          value={filters.villainHoleCards || 'all'}
+          onValueChange={(value) =>
+            updateFilters({ villainHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
+          }
+          disabled={!filters.villainName}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Cards"} />
+          </SelectTrigger>
+          <SelectContent>
+            {HOLE_CARD_FILTER_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 p-4">
@@ -129,8 +349,8 @@ const HandsHistory = () => {
         </Card>
       </div>
 
-      {/* Filters Section */}
-      <Card>
+      {/* Filters Section — desktop, inline */}
+      <Card className="hidden lg:block">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
@@ -149,217 +369,40 @@ const HandsHistory = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Name</label>
-              <Select
-                value={filters.heroName || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ heroName: value === 'all' ? undefined : value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Global View" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Heros</SelectItem>
-                  {uniqueHeroNames.map(name => (
-                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Position</label>
-              <Select
-                value={filters.heroPosition || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ heroPosition: value === 'all' ? undefined : value })
-                }
-                disabled={uniquePositions.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={uniquePositions.length === 0 ? "No Positions" : "All Positions"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Positions</SelectItem>
-                  {uniquePositions.map(pos => (
-                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Game</label>
-              <Select
-                value={filters.gameId || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ gameId: value === 'all' ? undefined : value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Games" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Games</SelectItem>
-                  {uniqueGames.map(game => (
-                    <SelectItem key={game.id} value={game.id}>
-                      {formatDate(game.date)} - {formatCurrency(game.buy_in)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Result</label>
-              <Select
-                value={filters.result || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ result: value as 'win' | 'loss' | 'split' | 'all' })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Results" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Results</SelectItem>
-                  <SelectItem value="win">Wins</SelectItem>
-                  <SelectItem value="loss">Losses</SelectItem>
-                  <SelectItem value="split">Split Pots</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Showdown</label>
-              <Select
-                value={filters.showdown || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ showdown: value as 'yes' | 'no' | 'all' })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="yes">Yes</SelectItem>
-                  <SelectItem value="no">No</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Final Stage</label>
-              <Select
-                value={filters.finalStage || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ finalStage: value === 'all' ? undefined : value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Stages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Stages</SelectItem>
-                  <SelectItem value="Preflop">Preflop</SelectItem>
-                  <SelectItem value="Flop">Flop</SelectItem>
-                  <SelectItem value="Turn">Turn</SelectItem>
-                  <SelectItem value="River">River</SelectItem>
-                  <SelectItem value="Showdown">Showdown</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Name</label>
-              <Select
-                value={filters.villainName || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ villainName: value === 'all' ? undefined : value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Villains" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Villains</SelectItem>
-                  {uniqueVillainNames.map(name => (
-                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Position</label>
-              <Select
-                value={filters.villainPosition || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ villainPosition: value === 'all' ? undefined : value })
-                }
-                disabled={!filters.villainName}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Positions"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Positions</SelectItem>
-                  {uniqueVillainPositions.map(pos => (
-                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero's Hole Cards</label>
-              <Select
-                value={filters.heroHoleCards || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ heroHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
-                }
-                disabled={!filters.heroName}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!filters.heroName ? "Select Hero First" : "All Cards"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {HOLE_CARD_FILTER_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain's Hole Cards</label>
-              <Select
-                value={filters.villainHoleCards || 'all'}
-                onValueChange={(value) =>
-                  updateFilters({ villainHoleCards: value === 'all' ? undefined : value as HoleCardFilterType })
-                }
-                disabled={!filters.villainName}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!filters.villainName ? "Select Villain First" : "All Cards"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {HOLE_CARD_FILTER_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {filterFieldsGrid}
         </CardContent>
       </Card>
+
+      {/* Filters Section — mobile/tablet, on-demand sheet */}
+      <div className="lg:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="w-full justify-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-tiny">{Object.keys(filters).length} active</Badge>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+            <SheetHeader>
+              <div className="flex items-center justify-between">
+                <SheetTitle className="font-luxury tracking-wider uppercase">Filters</SheetTitle>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="h-4 w-4 mr-2" />
+                    Clear All
+                  </Button>
+                )}
+              </div>
+            </SheetHeader>
+            <div className="py-4">
+              {filterFieldsGrid}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Hands List */}
       <Card>
@@ -374,10 +417,20 @@ const HandsHistory = () => {
         </CardHeader>
         <CardContent>
           {currentHands.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No hands found matching your filters</p>
-            </div>
+            <EmptyState
+              icon={Target}
+              title="No Hands Found"
+              description={
+                hasActiveFilters
+                  ? "No hands match your current filters. Try adjusting or clearing them."
+                  : "No hands have been recorded yet. Track a hand during a live game to see it here."
+              }
+              action={
+                hasActiveFilters
+                  ? { label: "Clear Filters", onClick: clearFilters }
+                  : undefined
+              }
+            />
           ) : (
             <div className="space-y-3">
               {currentHands.map((hand) => (
