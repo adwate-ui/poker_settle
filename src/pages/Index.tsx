@@ -1,16 +1,16 @@
 import { TabsContent } from "@/components/ui/tabs";
 import TabLayout from "@/components/layout/TabLayout";
-import NewGame from "./NewGame";
+import { OverviewDashboard } from "@/components/game/OverviewDashboard";
 import { OnboardingWizard } from "@/components/feedback/OnboardingWizard";
 
 const Index = () => {
   return (
-    <TabLayout defaultTab="new-game">
+    <TabLayout defaultTab="overview">
       {/* Onboarding wizard for new users */}
       <OnboardingWizard />
 
-      <TabsContent value="new-game" className="mt-0">
-        <NewGame />
+      <TabsContent value="overview" className="mt-0">
+        <OverviewDashboard />
       </TabsContent>
     </TabLayout>
   );

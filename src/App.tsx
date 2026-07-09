@@ -3,12 +3,10 @@ import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/layout/AuthProvider";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ChipProvider } from "@/contexts/ChipContext";
 import { useAuth } from "@/hooks/useAuth";
 import { OfflineIndicator } from "@/components/feedback/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/feedback/PWAInstallPrompt";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { Loader2 } from "lucide-react";
 import LuxuryLayout from "@/components/layout/LuxuryLayout";
@@ -16,7 +14,8 @@ import { GlobalCardDefs } from "@/components/poker/PokerAssets/GlobalCardDefs";
 import RootErrorBoundary from "@/components/feedback/RootErrorBoundary";
 
 const Index = lazy(() => import("./pages/Index"));
-// NewGame moved to Index.tsx
+const Landing = lazy(() => import("./pages/Landing"));
+const NewGame = lazy(() => import("./pages/NewGame"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SharedLayout = lazy(() => import("./pages/SharedLayout"));
@@ -79,9 +78,16 @@ const AppContent = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
+          {/* Home: overview dashboard when signed in, marketing landing page when not */}
+          <Route path="/" element={user ? <LuxuryLayout><Index /></LuxuryLayout> : <Landing />} />
+
           {/* Protected Routes wrapped in Layout */}
           <Route element={user ? <AppLayout /> : <Navigate to="/auth" />}>
-            <Route path="/" element={<Index />} />
+            <Route path="/new" element={
+              <TabLayout defaultTab="new-game">
+                <NewGame />
+              </TabLayout>
+            } />
 
             <Route path="/games" element={
               <TabLayout defaultTab="games-history">
@@ -133,18 +139,15 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
-          <RootErrorBoundary>
-            <GlobalCardDefs />
-            <ChipProvider>
-              <OfflineIndicator />
-              <PWAInstallPrompt />
-              <Toaster />
-              <SonnerToaster position="top-right" />
-              <AppContent />
-            </ChipProvider>
-          </RootErrorBoundary>
-        </ThemeProvider>
+        <RootErrorBoundary>
+          <GlobalCardDefs />
+          <ChipProvider>
+            <OfflineIndicator />
+            <PWAInstallPrompt />
+            <SonnerToaster position="top-right" />
+            <AppContent />
+          </ChipProvider>
+        </RootErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>
   );
