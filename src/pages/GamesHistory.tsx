@@ -345,7 +345,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[19%]" : "w-[27%]")}
+              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[19%]" : "w-[22%]")}
             >
               <div className="flex items-center gap-1">
                 Date
@@ -354,7 +354,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[35%]" : "w-[26%]")}
+              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[35%]" : "w-[24%]")}
             >
               <div className="flex items-center gap-1">
                 Buy-in
@@ -363,7 +363,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("players")}
-              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[14%]" : "w-[10%]")}
+              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[14%]" : "w-[11%]")}
             >
               <div className="flex items-center gap-1">
                 <span className="sr-only sm:not-sr-only">Players</span>
@@ -373,7 +373,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("chips")}
-              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[32%]" : "w-[24%]")}
+              className={cn("cursor-pointer md:w-auto", readOnly ? "w-[32%]" : "w-[30%]")}
             >
               <div className="flex items-center gap-1">
                 <span className="sm:inline hidden">Total Pot</span><span className="sm:hidden inline">Pot</span>
@@ -418,18 +418,20 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                         <ResponsiveCurrency amount={playerData.net_amount} />
                       </Badge>
                     ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Delete game"
-                        className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteGameId(game.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex justify-start md:contents">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Delete game"
+                          className="text-destructive/50 hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteGameId(game.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )}
                   </TableCell>
                 )}
