@@ -482,7 +482,7 @@ export const GameDetailView = ({
               valueClassName="text-primary"
               value={formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
             />
-            {game.rake && game.rake > 0 && (
+            {game.rake > 0 && (
               <StatTile label="Rake" value={formatCurrency(game.rake)} />
             )}
             {(() => {
