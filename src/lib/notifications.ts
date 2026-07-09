@@ -16,13 +16,13 @@ export const toast = {
   },
   info: (message: string, options?: ExternalToast) => {
     sonnerToast.info(message, {
-      className: "border-blue-500/20 bg-popover text-blue-500",
+      className: "border-state-info/20 bg-popover text-state-info",
       ...options,
     });
   },
   warning: (message: string, options?: ExternalToast) => {
     sonnerToast.warning(message, {
-      className: "border-yellow-500/20 bg-popover text-yellow-600 dark:text-yellow-400",
+      className: "border-state-warning/20 bg-popover text-state-warning",
       ...options,
     });
   },

@@ -9,7 +9,7 @@ import { useHandTracking } from '@/hooks/useHandTracking';
 import { Game, GamePlayer } from '@/types/poker';
 import { HandStage, ActionType } from '@/utils/handStateMachine';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/notifications';
 import { Play, TrendingUp, Trophy, X } from 'lucide-react';
 import CardSelector from './CardSelector';
 import PokerCard from './PokerCard';
@@ -36,7 +36,6 @@ const MOBILE_BREAKPOINT_PX = 640;
 
 const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, initialSeatPositions = [] }: HandTrackingProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const handTracking = useHandTracking();
   const persistence = useHandPersistence(game.id);
 
@@ -112,7 +111,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
     if (savedState && savedState.stage !== 'setup') {
       engine.restoreState(savedState);
       setShowMobileHandTracking(true);
-      toast({ title: 'Hand Restored', description: `Continuing Hand #${savedState.currentHand.hand_number}` });
+      toast.success('Hand Restored', { description: `Continuing Hand #${savedState.currentHand.hand_number}` });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -190,7 +189,7 @@ const HandTracking = ({ game, positionsJustChanged = false, onHandComplete, init
   const handleHoleCardSubmit = (cards: string) => {
     const used = getUsedCards(parseCardNotationString(engine.playerHoleCards[selectedPlayerForHole] || ''));
     if (parseCardNotationString(cards).some(c => used.includes(c))) {
-      toast({ title: 'Duplicate Card', description: 'This card is already used.', variant: 'destructive' });
+      toast.error('Duplicate Card', { description: 'This card is already used.' });
       return;
     }
     engine.setPlayerHoleCards(prev => ({ ...prev, [selectedPlayerForHole]: cards }));

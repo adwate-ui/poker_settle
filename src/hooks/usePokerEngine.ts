@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/notifications';
 import { Game, GamePlayer, PokerHand, PlayerAction } from '@/types/poker';
 import {
     getNextPlayerIndex,
@@ -49,7 +49,6 @@ export const usePokerEngine = (
     handTracking: ReturnType<typeof useHandTracking>,
     persistence: ReturnType<typeof useHandPersistence>
 ) => {
-    const { toast } = useToast();
     const {
         createNewHand,
         getNextHandNumber,
@@ -185,7 +184,7 @@ export const usePokerEngine = (
     const startNewHand = useCallback(async (buttonId: string, dealtOutIds: string[]) => {
         if (!buttonId) return;
         if (Object.keys(seatPositions).length === 0) {
-            toast({ title: 'Error', description: 'Table positions not loaded.', variant: 'destructive' });
+            toast.error('Error', { description: 'Table positions not loaded.' });
             return;
         }
 
@@ -195,7 +194,7 @@ export const usePokerEngine = (
             .sort((a, b) => (seatPositions[a.player_id] ?? 999) - (seatPositions[b.player_id] ?? 999));
 
         if (active.length < 2) {
-            toast({ title: 'Error', description: 'At least 2 players required.', variant: 'destructive' });
+            toast.error('Error', { description: 'At least 2 players required.' });
             return;
         }
 
@@ -272,7 +271,7 @@ export const usePokerEngine = (
         setPotSize(sbAmount + bbAmount);
         setActionSequence(2);
         setLastAggressorIndex(active.findIndex(p => p.player_id === bbPlayer.player_id));
-    }, [game.big_blind, game.id, game.small_blind, game.game_players, getNextHandNumber, seatPositions, heroPlayer, toast]);
+    }, [game.big_blind, game.id, game.small_blind, game.game_players, getNextHandNumber, seatPositions, heroPlayer]);
 
     const finishHand = useCallback(async (winnerIds: string[], finalStageOverride?: HandStage, lastAction?: PlayerAction) => {
         if (!currentHand) return;
@@ -341,14 +340,10 @@ export const usePokerEngine = (
 
         } catch (error) {
             console.error('Failed to save hand:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to save hand. Please try again.',
-                variant: 'destructive'
-            });
+            toast.error('Error', { description: 'Failed to save hand. Please try again.' });
             // Do NOT reset state, allowing user to retry
         }
-    }, [currentHand, persistence, activePlayers, heroPlayer, seatPositions, game.id, allHandActions, createNewHand, playerHoleCards, flopCards, turnCard, riverCard, potSize, saveCompleteHandData, stage, toast]);
+    }, [currentHand, persistence, activePlayers, heroPlayer, seatPositions, game.id, allHandActions, createNewHand, playerHoleCards, flopCards, turnCard, riverCard, potSize, saveCompleteHandData, stage]);
 
     const moveToNextStreet = useCallback((currentPlayersInHand?: string[]) => {
         if (!currentHand) return;

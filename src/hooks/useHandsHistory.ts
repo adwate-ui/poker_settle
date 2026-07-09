@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PokerHand, PlayerAction, StreetCard } from '@/types/poker';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/notifications';
 import { HoleCardFilterType, matchesHoleCardFilter } from '@/utils/holeCardFilter';
 import { debounce } from '@/utils/performance';
 
@@ -45,7 +45,6 @@ export const useHandsHistory = () => {
   const [filters, setFilters] = useState<HandFilters>({});
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const { toast } = useToast();
 
   // Fetch hands with pagination
   const fetchHands = useCallback(async (pageNum: number = 1, shouldAppend: boolean = false, signal?: AbortSignal) => {
@@ -134,16 +133,12 @@ export const useHandsHistory = () => {
       const err = error as Error;
       // Don't show error if request was aborted (component unmounted)
       if (err.name !== 'AbortError') {
-        toast({
-          title: 'Error Loading Hands',
-          description: err.message,
-          variant: 'destructive',
-        });
+        toast.error('Error Loading Hands', { description: err.message });
       }
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   // Load more hands
   const loadMore = useCallback(() => {
@@ -378,19 +373,12 @@ export const useHandsHistory = () => {
       // Update local state by filtering out the deleted hand
       setHands(prev => prev.filter(h => h.id !== handId));
 
-      toast({
-        title: 'Hand Deleted',
-        description: 'The hand has been successfully removed.',
-      });
+      toast.success('Hand Deleted', { description: 'The hand has been successfully removed.' });
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Deleting Hand',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Deleting Hand', { description: err.message });
     }
-  }, [toast]);
+  }, []);
 
   return {
     hands: filteredHands,

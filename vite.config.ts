@@ -83,22 +83,22 @@ export default defineConfig(({ mode: _mode }) => ({
         name: 'Poker Game Tracker',
         short_name: 'Poker Tracker',
         description: 'Track buy-ins, stacks, settlements and record hands for your home poker games',
-        theme_color: '#16a34a',
+        theme_color: '#D4AF37',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
         icons: [
           {
-            src: '/placeholder.svg',
+            src: '/favicon.ico',
             sizes: '192x192',
-            type: 'image/svg+xml',
+            type: 'image/x-icon',
             purpose: 'any maskable'
           },
           {
-            src: '/placeholder.svg',
+            src: '/favicon.ico',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/x-icon',
             purpose: 'any maskable'
           }
         ],

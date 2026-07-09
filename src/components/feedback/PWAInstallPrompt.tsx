@@ -34,7 +34,7 @@ export const PWAInstallPrompt = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-sm animate-in slide-in-from-bottom duration-500">
+    <div className="fixed bottom-20 sm:bottom-6 right-6 z-50 max-w-sm animate-in slide-in-from-bottom duration-500">
       <Card className="border-gold-500/30 bg-black/60 backdrop-blur-2xl shadow-2xl shadow-gold-900/10 overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-600 via-gold-400 to-transparent" />
         <CardContent className="p-6 space-y-5">

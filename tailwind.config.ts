@@ -20,9 +20,9 @@ export default {
         '13': 'repeat(13, minmax(0, 1fr))',
       },
       fontSize: {
-        'tiny': ['0.5625rem', { lineHeight: '0.65rem' }],
-        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
-        '3xs': ['0.5rem', { lineHeight: '0.65rem' }],
+        'tiny': ['0.75rem', { lineHeight: '1rem' }],
+        '2xs': ['0.8125rem', { lineHeight: '1.05rem' }],
+        '3xs': ['0.6875rem', { lineHeight: '0.9rem' }],
         'table-base': ['0.75rem', { lineHeight: '1rem' }],
         'chip-sm': ['0.5rem', { lineHeight: '0.625rem' }],
         'chip-md': ['0.625rem', { lineHeight: '0.75rem' }],

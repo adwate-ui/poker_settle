@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PokerHand, PlayerAction, StreetCard, SeatPosition, Json } from '@/types/poker';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/notifications';
 
 export interface ActionToSave {
   player_id: string;
@@ -21,7 +21,6 @@ export interface CardToSave {
 
 export const useHandTracking = () => {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const createNewHand = async (
     gameId: string,
@@ -48,19 +47,12 @@ export const useHandTracking = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'Hand Created',
-        description: `Hand #${handNumber} started`,
-      });
+      toast.success('Hand Created', { description: `Hand #${handNumber} started` });
 
       return data as unknown as PokerHand;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: err.message });
       return null;
     } finally {
       setLoading(false);
@@ -120,11 +112,7 @@ export const useHandTracking = () => {
       return data as PlayerAction;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Recording Action',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Recording Action', { description: err.message });
       return null;
     }
   };
@@ -149,11 +137,7 @@ export const useHandTracking = () => {
       return data as StreetCard;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Recording Cards',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Recording Cards', { description: err.message });
       return null;
     }
   };
@@ -168,11 +152,7 @@ export const useHandTracking = () => {
       if (error) throw error;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Updating Pot',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Updating Pot', { description: err.message });
     }
   };
 
@@ -189,11 +169,7 @@ export const useHandTracking = () => {
       if (error) throw error;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Updating Stage',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Updating Stage', { description: err.message });
     }
   };
 
@@ -227,19 +203,14 @@ export const useHandTracking = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'Hand Complete',
+      toast.success('Hand Complete', {
         description: winnerPlayerIds.length > 1
           ? `Chopped pot between ${winnerPlayerIds.length} players`
           : 'Hand has been recorded successfully',
       });
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error Completing Hand',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error Completing Hand', { description: err.message });
     }
   };
 
@@ -322,21 +293,14 @@ export const useHandTracking = () => {
         throw completeError;
       }
 
-      toast({
-        title: 'Hand Saved',
-        description: 'All actions and cards recorded successfully',
-      });
+      toast.success('Hand Saved', { description: 'All actions and cards recorded successfully' });
 
       return true;
     } catch (error) {
       const err = error as Error;
       console.error("CRITICAL: Hand Save Failed", err);
 
-      toast({
-        title: 'Error Saving Hand Data',
-        description: `${err.message} - Click Save again to retry.`, // Inform user they can retry
-        variant: 'destructive',
-      });
+      toast.error('Error Saving Hand Data', { description: `${err.message} - Click Save again to retry.` });
       // CRITICAL: Re-throw error so the UI knows NOT to clear local state
       throw error;
     } finally {
@@ -371,19 +335,12 @@ export const useHandTracking = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'Hole Cards Updated',
-        description: 'Player hole cards have been saved',
-      });
+      toast.success('Hole Cards Updated', { description: 'Player hole cards have been saved' });
 
       return true;
     } catch (error) {
       const err = error as Error;
-      toast({
-        title: 'Error',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: err.message });
       return false;
     }
   };

@@ -35,7 +35,7 @@ export const OfflineIndicator = () => {
   if (isOnline) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 animate-in slide-in-from-bottom duration-500">
+    <div className="fixed bottom-20 sm:bottom-6 left-6 z-50 animate-in slide-in-from-bottom duration-500">
       <Badge
         className="bg-red-500/10 border-red-500/30 text-red-500 shadow-xl shadow-red-900/10 px-4 py-2 h-auto flex items-center gap-3 backdrop-blur-xl rounded-full"
       >
