@@ -192,7 +192,7 @@ export const BuyInManagementTable = ({
                   variant="outline"
                   size="lg"
                   onClick={decrement}
-                  className="rounded-2xl group transition-all"
+                  className="group transition-all"
                 >
                   <Minus className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
@@ -204,7 +204,7 @@ export const BuyInManagementTable = ({
                   )}>
                     {buyInCount > 0 ? `+${buyInCount}` : buyInCount}
                   </span>
-                  <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-2">
+                  <span className="text-label text-muted-foreground mt-2">
                     {Math.abs(buyInCount) === 1 ? 'Buy-in' : 'Buy-ins'}
                   </span>
                 </div>
@@ -213,7 +213,7 @@ export const BuyInManagementTable = ({
                   variant="outline"
                   size="lg"
                   onClick={increment}
-                  className="rounded-2xl group transition-all"
+                  className="group transition-all"
                 >
                   <Plus className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 </Button>
@@ -226,7 +226,7 @@ export const BuyInManagementTable = ({
                   buyInCount > 0 ? 'bg-primary/10 border-primary/30' : 'bg-destructive/10 border-destructive/30'
                 )}
               >
-                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2">Cost Impact</p>
+                <p className="text-label text-muted-foreground mb-2">Cost Impact</p>
                 <p className={cn(
                   "text-3xl font-bold",
                   buyInCount > 0 ? 'text-primary' : 'text-destructive'

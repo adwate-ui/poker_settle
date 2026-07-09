@@ -28,7 +28,7 @@ export function PlayerDashboardFilters({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
+          <span className="text-label text-muted-foreground">
             Filter Sessions
           </span>
           {count > 0 && (
@@ -42,7 +42,7 @@ export function PlayerDashboardFilters({
             variant="ghost"
             size="sm"
             onClick={resetFilters}
-            className="h-6 px-2 text-3xs font-luxury uppercase tracking-widest text-muted-foreground hover:text-foreground gap-1"
+            className="h-6 px-2 text-label text-muted-foreground hover:text-foreground gap-1"
           >
             <X className="h-3 w-3" />
             Clear All
@@ -53,7 +53,7 @@ export function PlayerDashboardFilters({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         {/* Time Period */}
         <div className="space-y-1.5">
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground px-0.5">Period</p>
+          <p className="text-label text-muted-foreground px-0.5">Period</p>
           <Select
             value={filters.timePeriod}
             onValueChange={(v) => setFilter('timePeriod', v as DashboardFilters['timePeriod'])}
@@ -73,7 +73,7 @@ export function PlayerDashboardFilters({
 
         {/* Month */}
         <div className="space-y-1.5">
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground px-0.5">Month</p>
+          <p className="text-label text-muted-foreground px-0.5">Month</p>
           <Select
             value={filters.month}
             onValueChange={(v) => setFilter('month', v)}
@@ -94,7 +94,7 @@ export function PlayerDashboardFilters({
 
         {/* Stakes */}
         <div className="space-y-1.5">
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground px-0.5">Stakes</p>
+          <p className="text-label text-muted-foreground px-0.5">Stakes</p>
           <Select
             value={String(filters.stakes)}
             onValueChange={(v) => setFilter('stakes', v === 'all' ? 'all' : Number(v))}
@@ -115,7 +115,7 @@ export function PlayerDashboardFilters({
 
         {/* Result */}
         <div className="space-y-1.5">
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground px-0.5">Result</p>
+          <p className="text-label text-muted-foreground px-0.5">Result</p>
           <Select
             value={filters.result}
             onValueChange={(v) => setFilter('result', v as DashboardFilters['result'])}

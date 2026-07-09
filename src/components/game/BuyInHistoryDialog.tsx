@@ -81,7 +81,7 @@ export const BuyInHistoryDialog = ({
             </div>
             <div>
               <DialogTitle className="text-xl font-bold uppercase tracking-widest">Buy-In History</DialogTitle>
-              <DialogDescription className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5">
+              <DialogDescription className="text-label text-muted-foreground flex items-center gap-1.5">
                 <User className="h-3 w-3" />
                 Player: {playerName}
               </DialogDescription>
@@ -93,12 +93,12 @@ export const BuyInHistoryDialog = ({
           {loading ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-muted-foreground gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-[10px] uppercase tracking-[0.3em] animate-pulse">Accessing Archive...</p>
+              <p className="text-label animate-pulse">Accessing Archive...</p>
             </div>
           ) : history.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-24 text-muted-foreground/40 gap-4">
               <ShieldCheck className="w-8 h-8 opacity-20" />
-              <p className="text-[10px] uppercase tracking-[0.2em]">No changes found in history.</p>
+              <p className="text-label">No changes found in history.</p>
             </div>
           ) : (
             <ScrollArea className="h-full">
@@ -157,7 +157,7 @@ export const BuyInHistoryDialog = ({
                   <TableRow className="bg-white/2 border-0 h-16 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all">
                     <TableCell className="pl-8">
                       <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">Initial Buy-in</span>
+                        <span className="text-label text-muted-foreground/60">Initial Buy-in</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">

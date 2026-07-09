@@ -59,13 +59,13 @@ const AddPlayerDialog = memo(({
                     <TabsList className="grid grid-cols-2">
                         <TabsTrigger
                             value="existing"
-                            className="font-luxury text-3xs uppercase tracking-widest"
+                            className="text-label"
                         >
                             Search
                         </TabsTrigger>
                         <TabsTrigger
                             value="new"
-                            className="font-luxury text-3xs uppercase tracking-widest"
+                            className="text-label"
                         >
                             New
                         </TabsTrigger>

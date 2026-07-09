@@ -104,7 +104,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
           {/* Add Buy-ins Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Add Buy-in</Label>
+            <Label className="text-label text-muted-foreground/40">Add Buy-in</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="number"
@@ -128,7 +128,7 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
 
           {/* Final Stack Area */}
           <div className="space-y-2">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Final Stack</Label>
+            <Label className="text-label text-muted-foreground/40">Final Stack</Label>
             <div className="flex gap-1.5 h-9">
               <Input
                 type="text"
@@ -154,11 +154,11 @@ const PlayerCard = memo(({ gamePlayer, buyInAmount, onUpdatePlayer, fetchBuyInHi
         {/* Profit/Loss Summary */}
         <div className="pt-3 border-t border-border flex flex-col gap-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Total Buy-ins</span>
+            <span className="text-label text-muted-foreground/40">Total Buy-ins</span>
             <span className="font-numbers text-2xs text-muted-foreground">{formatCurrency(gamePlayer.buy_ins * buyInAmount)}</span>
           </div>
           <div className="flex justify-between items-center px-1">
-            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">Net Profit/Loss</span>
+            <span className="text-label text-muted-foreground/40">Net Profit/Loss</span>
             <Badge
               variant={profitLossStatus === 'profit' ? 'profit' : profitLossStatus === 'loss' ? 'loss' : 'default'}
             >

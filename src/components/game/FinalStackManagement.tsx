@@ -158,7 +158,7 @@ export const FinalStackManagement = ({
             <DialogDescription>Player: {selectedPlayer?.player.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stack ({CurrencyConfig.code})</Label>
+            <Label className="text-label text-muted-foreground">Final Stack ({CurrencyConfig.code})</Label>
             <Input
               type="text"
               inputMode="numeric"

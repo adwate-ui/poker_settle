@@ -82,7 +82,7 @@ const HandsHistory = () => {
   const filterFieldsGrid = (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Name</label>
+        <label className="text-label text-muted-foreground mb-2 block">Hero Name</label>
         <Select
           value={filters.heroName || 'all'}
           onValueChange={(value) =>
@@ -101,7 +101,7 @@ const HandsHistory = () => {
         </Select>
       </div>
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero Position</label>
+        <label className="text-label text-muted-foreground mb-2 block">Hero Position</label>
         <Select
           value={filters.heroPosition || 'all'}
           onValueChange={(value) =>
@@ -122,7 +122,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Game</label>
+        <label className="text-label text-muted-foreground mb-2 block">Game</label>
         <Select
           value={filters.gameId || 'all'}
           onValueChange={(value) =>
@@ -144,7 +144,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Result</label>
+        <label className="text-label text-muted-foreground mb-2 block">Result</label>
         <Select
           value={filters.result || 'all'}
           onValueChange={(value) =>
@@ -164,7 +164,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Showdown</label>
+        <label className="text-label text-muted-foreground mb-2 block">Showdown</label>
         <Select
           value={filters.showdown || 'all'}
           onValueChange={(value) =>
@@ -183,7 +183,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Final Stage</label>
+        <label className="text-label text-muted-foreground mb-2 block">Final Stage</label>
         <Select
           value={filters.finalStage || 'all'}
           onValueChange={(value) =>
@@ -205,7 +205,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Name</label>
+        <label className="text-label text-muted-foreground mb-2 block">Villain Name</label>
         <Select
           value={filters.villainName || 'all'}
           onValueChange={(value) =>
@@ -225,7 +225,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain Position</label>
+        <label className="text-label text-muted-foreground mb-2 block">Villain Position</label>
         <Select
           value={filters.villainPosition || 'all'}
           onValueChange={(value) =>
@@ -246,7 +246,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Hero's Hole Cards</label>
+        <label className="text-label text-muted-foreground mb-2 block">Hero's Hole Cards</label>
         <Select
           value={filters.heroHoleCards || 'all'}
           onValueChange={(value) =>
@@ -268,7 +268,7 @@ const HandsHistory = () => {
       </div>
 
       <div>
-        <label className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2 block">Villain's Hole Cards</label>
+        <label className="text-label text-muted-foreground mb-2 block">Villain's Hole Cards</label>
         <Select
           value={filters.villainHoleCards || 'all'}
           onValueChange={(value) =>

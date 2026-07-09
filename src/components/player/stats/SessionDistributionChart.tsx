@@ -25,7 +25,7 @@ function CustomTooltip({ active, payload }: {
 
   return (
     <div className="rounded-lg border border-border/50 bg-background px-3 py-2.5 shadow-xl space-y-2">
-      <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">{d.label}</p>
+      <p className="text-label text-muted-foreground">{d.label}</p>
       <div className="flex justify-between gap-6">
         <span className="text-3xs uppercase font-luxury tracking-wider text-muted-foreground">Sessions</span>
         <span className={cn('text-xs font-numbers font-semibold tabular-nums', d.isProfit ? 'text-state-success' : 'text-state-error')}>
@@ -43,7 +43,7 @@ export function SessionDistributionChart({ data }: SessionDistributionChartProps
   if (total === 0) {
     return (
       <div className="flex items-center justify-center h-[180px]">
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">No session data</p>
+        <p className="text-label text-muted-foreground/40">No session data</p>
       </div>
     );
   }

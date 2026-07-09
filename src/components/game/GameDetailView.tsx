@@ -835,7 +835,7 @@ export const GameDetailView = ({
           <div className="py-6 space-y-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Payer (From)</Label>
+                <Label className="text-label text-muted-foreground ml-1 mb-2 block text-left">Payer (From)</Label>
                 <Select value={newTransferFrom} onValueChange={setNewTransferFrom}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Origin" />
@@ -849,7 +849,7 @@ export const GameDetailView = ({
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Recipient (To)</Label>
+                <Label className="text-label text-muted-foreground ml-1 mb-2 block text-left">Recipient (To)</Label>
                 <Select value={newTransferTo} onValueChange={setNewTransferTo}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Destination" />
@@ -863,7 +863,7 @@ export const GameDetailView = ({
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1 mb-2 block text-left">Amount ({CurrencyConfig.code})</Label>
+                <Label className="text-label text-muted-foreground ml-1 mb-2 block text-left">Amount ({CurrencyConfig.code})</Label>
                 <Input
                   type="text"
                   placeholder="0"

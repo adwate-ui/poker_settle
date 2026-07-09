@@ -15,7 +15,7 @@ function StatCard({ label, value, subValue, icon, valueClassName }: StatCardProp
   return (
     <div className="p-5 rounded-xl border border-border bg-accent/5 space-y-3 group hover:bg-accent/10 hover:border-primary/20 transition-all duration-200">
       <div className="flex items-center justify-between">
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground leading-none">
+        <p className="text-label text-muted-foreground">
           {label}
         </p>
         <div className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors">
@@ -58,7 +58,7 @@ export function PlayerStatsGrid({ stats }: PlayerStatsGridProps) {
     <div className="space-y-4">
       {/* Row 1 — Investment Performance */}
       <div>
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/50 mb-2 px-0.5">Investment</p>
+        <p className="text-label text-muted-foreground/50 mb-2 px-0.5">Investment</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <StatCard
             label="ROI"
@@ -86,7 +86,7 @@ export function PlayerStatsGrid({ stats }: PlayerStatsGridProps) {
 
       {/* Row 2 — Session Range */}
       <div>
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/50 mb-2 px-0.5">Session Range</p>
+        <p className="text-label text-muted-foreground/50 mb-2 px-0.5">Session Range</p>
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             label="Best Session"
@@ -107,7 +107,7 @@ export function PlayerStatsGrid({ stats }: PlayerStatsGridProps) {
 
       {/* Row 3 — Momentum & Habit */}
       <div>
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/50 mb-2 px-0.5">Momentum</p>
+        <p className="text-label text-muted-foreground/50 mb-2 px-0.5">Momentum</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <StatCard
             label="Current Streak"

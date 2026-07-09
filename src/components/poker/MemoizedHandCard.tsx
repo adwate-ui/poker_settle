@@ -162,7 +162,7 @@ const MemoizedHandCard = memo(({ hand, formatDate, onDelete }: MemoizedHandCardP
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <p className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold font-numbers">Pot</p>
+                <p className="text-label text-primary font-bold font-numbers">Pot</p>
                 <p className="text-xl text-foreground font-numbers">{formatCurrency(hand.pot_size || 0)}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-accent border border-border group-hover:scale-110 transition-transform">

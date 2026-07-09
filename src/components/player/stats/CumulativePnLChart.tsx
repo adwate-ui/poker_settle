@@ -28,7 +28,7 @@ function CustomTooltip({ active, payload }: {
 
   return (
     <div className="rounded-lg border border-border/50 bg-background px-3 py-2.5 shadow-xl space-y-2 min-w-[148px]">
-      <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">{point.date}</p>
+      <p className="text-label text-muted-foreground">{point.date}</p>
       <div className="space-y-1.5">
         <div className="flex justify-between gap-6">
           <span className="text-3xs uppercase font-luxury tracking-wider text-muted-foreground">Session</span>
@@ -53,7 +53,7 @@ export function CumulativePnLChart({ data }: CumulativePnLChartProps) {
   if (data.length < 2) {
     return (
       <div className="flex items-center justify-center h-[180px]">
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">
+        <p className="text-label text-muted-foreground/40">
           Play more sessions to see your trend
         </p>
       </div>

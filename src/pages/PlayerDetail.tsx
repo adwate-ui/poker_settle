@@ -204,7 +204,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
     return (
       <div className="flex flex-col justify-center items-center py-20 gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground animate-pulse">
+        <p className="text-label text-muted-foreground animate-pulse">
           Loading Player Profile...
         </p>
       </div>
@@ -214,7 +214,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
   if (!player) {
     return (
       <Card className="max-w-4xl mx-auto border-border bg-background/60 backdrop-blur-xl p-6 text-center">
-        <p className="text-muted-foreground font-luxury tracking-widest uppercase text-3xs">Player not found.</p>
+        <p className="text-muted-foreground text-label">Player not found.</p>
       </Card>
     );
   }
@@ -253,7 +253,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 <CardTitle className="text-2xl xs:text-3xl font-luxury text-foreground truncate">{player.name}</CardTitle>
                 <div className="flex items-center gap-2 mt-1">
                   <User className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Player Profile</span>
+                  <span className="text-label text-muted-foreground">Player Profile</span>
                 </div>
               </div>
             </div>
@@ -305,7 +305,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
               <div className="flex items-center justify-between flex-wrap gap-3 pt-2">
                 <div>
                   <h3 className="text-base font-luxury font-semibold text-foreground">Player Details</h3>
-                  <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-0.5">Contact and payment info</p>
+                  <p className="text-label text-muted-foreground mt-0.5">Contact and payment info</p>
                 </div>
                 {!readOnly && (
                   <div className="flex gap-2 flex-wrap">
@@ -314,7 +314,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-9 px-4 bg-accent/5 border-border hover:bg-accent/10 text-foreground font-luxury uppercase tracking-widest text-3xs rounded-full"
+                          className="h-9 px-4 bg-accent/5 border-border hover:bg-accent/10 text-foreground text-label rounded-full"
                         >
                           <Download className="h-3.5 w-3.5 mr-1.5 text-primary" />
                           Export
@@ -342,7 +342,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                       variant="ghost"
                       size="sm"
                       onClick={() => setShareDialogOpen(true)}
-                      className="h-9 px-4 hover:bg-accent/10 text-primary font-luxury uppercase tracking-widest text-3xs rounded-full border border-primary/20"
+                      className="h-9 px-4 hover:bg-accent/10 text-primary text-label rounded-full border border-primary/20"
                     >
                       <Share2 className="h-3.5 w-3.5 mr-1.5" />
                       Share
@@ -351,7 +351,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                       variant="outline"
                       size="sm"
                       onClick={() => setShowEditDialog(true)}
-                      className="h-9 px-4 bg-accent/5 border-border hover:bg-accent/10 text-foreground font-luxury uppercase tracking-widest text-3xs rounded-full"
+                      className="h-9 px-4 bg-accent/5 border-border hover:bg-accent/10 text-foreground text-label rounded-full"
                     >
                       <Edit className="h-3.5 w-3.5 mr-1.5 text-primary" />
                       Edit
@@ -363,19 +363,19 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
               {(player.phone_number || player.upi_id || player.payment_preference) ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
-                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0" />WhatsApp
                     </div>
                     <p className="text-sm font-medium text-foreground truncate">{player.phone_number || "Not Linked"}</p>
                   </div>
                   <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
-                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <CreditCard className="h-3 w-3 shrink-0" />Digital ID
                     </div>
                     <p className="text-sm font-medium text-foreground truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
                   <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
-                    <div className="flex items-center gap-2 text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Layers className="h-3 w-3 shrink-0" />Preference
                     </div>
                     <p className="text-sm font-medium text-foreground capitalize">
@@ -387,7 +387,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 </div>
               ) : (
                 <div className="p-6 rounded-xl border border-dashed border-border bg-accent/5 text-center">
-                  <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/30">
+                  <p className="text-label text-muted-foreground/30">
                     No contact data for this player.
                   </p>
                 </div>
@@ -410,7 +410,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
       <div className="space-y-3">
         <div>
           <h3 className="text-base font-luxury font-semibold text-foreground">Advanced Stats</h3>
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-0.5">
+          <p className="text-label text-muted-foreground mt-0.5">
             {filteredHistory.length} session{filteredHistory.length !== 1 ? 's' : ''} · computed from filtered data
           </p>
         </div>
@@ -429,7 +429,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
       <div className="space-y-3">
         <div>
           <h3 className="text-base font-luxury font-semibold text-foreground">Session History</h3>
-          <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mt-0.5">
+          <p className="text-label text-muted-foreground mt-0.5">
             {sortedGameHistory.length} session{sortedGameHistory.length !== 1 ? 's' : ''} shown
           </p>
         </div>
@@ -472,7 +472,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
             {sortedGameHistory.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10">
-                  <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">
+                  <p className="text-label text-muted-foreground/40">
                     No sessions match the current filters
                   </p>
                 </TableCell>
@@ -556,7 +556,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 <CardContent className="p-4 space-y-2">
                   {isPickerOpen && (
                     <div className="space-y-1.5 pb-2 border-b border-border">
-                      <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Select a player to add</p>
+                      <p className="text-label text-muted-foreground">Select a player to add</p>
                       <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
                         {pickerOptions.length === 0 ? (
                           <p className="text-3xs text-muted-foreground font-luxury">No more players to add</p>
@@ -575,7 +575,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                     </div>
                   )}
                   {partners.length === 0 ? (
-                    <p className="text-3xs text-muted-foreground font-luxury uppercase tracking-widest py-2">None added</p>
+                    <p className="text-label text-muted-foreground py-2">None added</p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
                       {partners.map(r => (

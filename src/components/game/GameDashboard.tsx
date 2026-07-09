@@ -253,7 +253,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
             <div className="h-2 w-2 rounded-full bg-state-success animate-pulse shadow-lg shadow-state-success/50" />
             <div className="flex flex-col">
               <span className="text-sm font-bold uppercase tracking-widest text-foreground">Live Game</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{gamePlayers.length} Active Players</span>
+              <span className="text-label text-muted-foreground">{gamePlayers.length} Active Players</span>
             </div>
           </div>
           <div className="flex items-center gap-2">

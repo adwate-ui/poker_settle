@@ -105,10 +105,10 @@ export const UniversalPlayerManager = ({
     const Content = (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 w-full">
             <TabsList className="grid grid-cols-2">
-                <TabsTrigger value="existing" className="font-luxury text-3xs uppercase tracking-widest">
+                <TabsTrigger value="existing" className="text-label">
                     Search
                 </TabsTrigger>
-                <TabsTrigger value="new" className="font-luxury text-3xs uppercase tracking-widest">
+                <TabsTrigger value="new" className="text-label">
                     New
                 </TabsTrigger>
             </TabsList>

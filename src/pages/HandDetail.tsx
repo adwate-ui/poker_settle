@@ -338,29 +338,29 @@ const HandDetail = () => {
             <h3 className="text-lg font-luxury tracking-wider uppercase mb-3 text-primary">Hand Information</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Game Date:</span>
+                <span className="text-label text-muted-foreground">Game Date:</span>
                 <span className="font-numbers">{formatDate(hand.game_date)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Hero Position:</span>
+                <span className="text-label text-muted-foreground">Hero Position:</span>
                 <Badge variant="stats" className="text-tiny">{hand.hero_position}</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Button:</span>
+                <span className="text-label text-muted-foreground">Button:</span>
                 <span className="font-luxury uppercase tracking-wider text-xs">{hand.button_player_name}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Final Stage:</span>
+                <span className="text-label text-muted-foreground">Final Stage:</span>
                 <Badge variant="stats" className="text-tiny">{hand.final_stage}</Badge>
               </div>
               <div className="flex justify-between items-center bg-accent/10 p-2 rounded-lg">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-primary font-bold">Pot Size:</span>
+                <span className="text-label text-primary font-bold">Pot Size:</span>
                 <span className="font-bold text-primary font-numbers">
                   {formatCurrency(hand.pot_size || 0)} ({(hand.pot_size / hand.big_blind).toFixed(1)} BB)
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Winner:</span>
+                <span className="text-label text-muted-foreground">Winner:</span>
                 <span className="font-luxury font-bold flex items-center gap-2 text-xs uppercase tracking-wider text-primary">
                   <Trophy className="h-4 w-4 text-primary" />
                   {hand.winner_player_name}
@@ -403,7 +403,7 @@ const HandDetail = () => {
                         const flopCard = hand.street_cards.find(sc => sc.street_type === 'Flop');
                         return flopCard && (
                           <div className="flex flex-col gap-1 sm:gap-2">
-                            <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">FLOP</span>
+                            <span className="text-label text-muted-foreground/80">FLOP</span>
                             <div className="flex gap-0.5">
                               {flopCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                 <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -423,7 +423,7 @@ const HandDetail = () => {
                           <>
                             <Separator orientation="vertical" className="h-10 sm:h-12 md:h-16 bg-border/50" />
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">TURN</span>
+                              <span className="text-label text-muted-foreground/80">TURN</span>
                               <div className="flex gap-0.5">
                                 {turnCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -444,7 +444,7 @@ const HandDetail = () => {
                           <>
                             <Separator orientation="vertical" className="h-10 sm:h-12 md:h-16 bg-border/50" />
                             <div className="flex flex-col gap-1 sm:gap-2">
-                              <span className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/80">RIVER</span>
+                              <span className="text-label text-muted-foreground/80">RIVER</span>
                               <div className="flex gap-0.5">
                                 {riverCard.cards_notation.match(/.{1,2}/g)?.map((card, idx) => (
                                   <PokerCard key={idx} card={card} size="sm" className="sm:hidden" />
@@ -527,7 +527,7 @@ const HandDetail = () => {
 
                     return (
                       <div key={street}>
-                        <div className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground mb-2">
+                        <div className="text-label text-muted-foreground mb-2">
                           {street}:
                         </div>
                         <div className="space-y-2 pl-4 relative">
@@ -552,7 +552,7 @@ const HandDetail = () => {
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground font-luxury uppercase tracking-widest text-3xs">
+                                  <span className="text-muted-foreground text-label">
                                     {action.action_type}
                                   </span>
                                   {action.bet_size > 0 && (

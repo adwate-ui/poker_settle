@@ -28,7 +28,7 @@ function CustomTooltip({ active, payload }: {
 
   return (
     <div className="rounded-lg border border-border/50 bg-background px-3 py-2.5 shadow-xl space-y-2 min-w-[148px]">
-      <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">{d.month}</p>
+      <p className="text-label text-muted-foreground">{d.month}</p>
       <div className="space-y-1.5">
         <div className="flex justify-between gap-6">
           <span className="text-3xs uppercase font-luxury tracking-wider text-muted-foreground">P&L</span>
@@ -55,7 +55,7 @@ export function MonthlyPnLChart({ data }: MonthlyPnLChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[180px]">
-        <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground/40">No monthly data available</p>
+        <p className="text-label text-muted-foreground/40">No monthly data available</p>
       </div>
     );
   }
