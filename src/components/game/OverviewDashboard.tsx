@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useActiveGame } from "@/hooks/useActiveGame";
 import { useGames } from "@/features/game/hooks/useGames";
+import { usePlayers } from "@/features/players/hooks/usePlayers";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -17,6 +18,7 @@ export const OverviewDashboard = () => {
   const { user } = useAuth();
   const { activeGame } = useActiveGame(user?.id);
   const { data: games, isLoading } = useGames(user?.id);
+  const { data: players } = usePlayers(user?.id);
   const recentGames = (games ?? []).slice(0, 3);
 
   const lifetimeStats = useMemo(() => {
@@ -26,10 +28,8 @@ export const OverviewDashboard = () => {
       const buyIns = game.game_players?.reduce((s, gp) => s + (gp.buy_ins || 0), 0) || 0;
       return sum + buyIns * game.buy_in_amount;
     }, 0);
-    const playerIds = new Set<string>();
-    allGames.forEach((game) => game.game_players?.forEach((gp) => gp.player_id && playerIds.add(gp.player_id)));
-    return { totalGames, totalPot, playersTracked: playerIds.size };
-  }, [games]);
+    return { totalGames, totalPot, playersTracked: (players ?? []).length };
+  }, [games, players]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
