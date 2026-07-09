@@ -250,10 +250,9 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string, pu
         ? 'id, name, payment_preference, upi_id'
         : 'id, name, payment_preference, upi_id, total_games, total_profit, phone_number';
 
-    // net_amount is the player's actual profit/loss for the session — never fetch it on a
-    // public (unauthenticated) game link, only the fields the seating/buy-in views need.
+    // Session P&L (net_amount) is public on shared game links, same as settlement amounts.
     const gamePlayerFields = publicOnly
-        ? 'id, game_id, player_id, buy_ins, final_stack, is_host'
+        ? 'id, game_id, player_id, buy_ins, final_stack, net_amount, is_host'
         : '*';
 
     const [gameResult, playersResult, positionsResult, confirmationsResult] = await Promise.all([
