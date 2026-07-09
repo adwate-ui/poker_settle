@@ -465,7 +465,10 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                   {getSortIcon("final_stack")}
                 </div>
               </TableHead>
-              <TableHead className="w-[20%] md:w-auto">Actions</TableHead>
+              <TableHead className="w-[20%] md:w-auto">
+                <span className="hidden sm:inline">Actions</span>
+                <span className="sm:hidden">Act</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -601,9 +601,9 @@ export const GameDetailView = ({
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[34%]" : "w-[39%]")}>Player</TableHead>
-                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[13%]" : "w-[16%]")}>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[39%]" : "w-[45%]")}>P&L</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[28%]" : "w-[32%]")}>Player</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[22%]" : "w-[26%]")}>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[36%]" : "w-[42%]")}>P&L</TableHead>
                       {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
                       {hasAudit && (
                         <TableHead className="w-[14%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
