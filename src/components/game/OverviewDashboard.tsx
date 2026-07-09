@@ -80,7 +80,10 @@ export const OverviewDashboard = () => {
                     <p className="font-medium text-sm truncate">{format(new Date(game.date), "MMM d, yyyy")}</p>
                     <p className="text-xs text-muted-foreground">{game.game_players?.length ?? 0} players</p>
                   </div>
-                  <p className="font-numbers text-sm text-muted-foreground shrink-0 ml-3">{formatCurrency(game.buy_in_amount)}</p>
+                  <div className="text-right shrink-0 ml-3">
+                    <p className="font-numbers text-sm text-foreground">{formatCurrency(game.buy_in_amount)}</p>
+                    <p className="text-xs text-muted-foreground">Buy-in</p>
+                  </div>
                 </button>
               ))}
               <Button variant="ghost" className="w-full" onClick={() => navigate("/games")}>

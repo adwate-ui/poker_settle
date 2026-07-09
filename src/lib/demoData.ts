@@ -1,73 +1,4 @@
-import { Player, Game, GamePlayer } from "@/types/poker";
 import { supabase } from "@/integrations/supabase/client";
-
-// This file provides realistic demo data for various game states
-// It uses fixed UUIDs to maintain consistency during testing
-
-export const DEMO_USER_ID = "00000000-0000-0000-0000-000000000000";
-
-export const DEMO_PLAYERS: Player[] = [
-  {
-    id: "p1",
-    name: "Alex",
-    user_id: DEMO_USER_ID,
-    total_games: 15,
-    total_profit: 2500,
-    phone_number: "+919999999991",
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "p2",
-    name: "Sam",
-    user_id: DEMO_USER_ID,
-    total_games: 12,
-    total_profit: -1200,
-    phone_number: "+919999999992",
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "p3",
-    name: "Jordan",
-    user_id: DEMO_USER_ID,
-    total_games: 8,
-    total_profit: 450,
-    upi_id: "jordan@upi",
-    created_at: new Date().toISOString()
-  }
-];
-
-export const DEMO_GAME: Game = {
-  id: "g1",
-  user_id: DEMO_USER_ID,
-  date: new Date().toISOString(),
-  buy_in_amount: 500,
-  small_blind: 5,
-  big_blind: 10,
-  status: "completed",
-  created_at: new Date().toISOString(),
-  share_token: "demo-token"
-};
-
-export const DEMO_GAME_PLAYERS: GamePlayer[] = [
-  {
-    id: "gp1",
-    game_id: "g1",
-    player_id: "p1",
-    buy_ins: 2,
-    final_stack: 2500,
-    net_amount: 1500,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "gp2",
-    game_id: "g1",
-    player_id: "p2",
-    buy_ins: 3,
-    final_stack: 0,
-    net_amount: -1500,
-    created_at: new Date().toISOString()
-  }
-];
 
 // Demo Data Management functions for Profile Page
 
@@ -121,7 +52,7 @@ export const loadDemoData = async (userId: string): Promise<{ success: boolean; 
       buy_in_amount: i % 2 === 0 ? 500 : 1000,
       small_blind: i % 2 === 0 ? 5 : 10,
       big_blind: i % 2 === 0 ? 10 : 20,
-      status: 'completed',
+      is_complete: true,
     }));
 
     const { data: games, error: gError } = await supabase
@@ -194,42 +125,5 @@ export const clearDemoData = async (userId: string): Promise<{ success: boolean;
   } catch (err) {
     console.error('Error clearing demo data:', err);
     return { success: false, message: 'Purge failed. Manual intervention may be required.' };
-  }
-};
-
-// Legacy seed function
-export const seedDemoData = async () => {
-  try {
-    // Check if demo players exist
-    const { data: existingPlayers } = await supabase
-      .from("players")
-      .select("id")
-      .eq("user_id", DEMO_USER_ID);
-
-    if (!existingPlayers || existingPlayers.length === 0) {
-      // Seed players
-      await supabase.from("players").insert(DEMO_PLAYERS);
-
-      // Seed game
-      await supabase.from("games").insert([DEMO_GAME]);
-
-      // Seed game players
-      await supabase.from("game_players").insert(DEMO_GAME_PLAYERS);
-
-      // Seed some buy-in history
-      const demoBuyInHistory = [
-        {
-          game_id: "g1",
-          player_id: "p1",
-          amount: 500,
-          created_at: new Date().toISOString()
-        }
-      ];
-      await supabase.from("buy_in_history").insert(demoBuyInHistory);
-    }
-    return true;
-  } catch (error) {
-    console.error("Error seeding demo data:", error);
-    return false;
   }
 };

@@ -232,7 +232,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
           className="hover:bg-accent/10 text-primary hover:text-primary/80 font-luxury uppercase tracking-widest text-xs"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Matrix
+          Back to Players
         </Button>
       )}
 

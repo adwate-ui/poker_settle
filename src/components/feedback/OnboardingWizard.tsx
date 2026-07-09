@@ -7,7 +7,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
   Sparkles,
@@ -111,14 +110,13 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
   };
 
   const step = ONBOARDING_STEPS[currentStep];
-  const progress = ((currentStep + 1) / ONBOARDING_STEPS.length) * 100;
   const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-primary/20">
+      <DialogContent hideCloseButton className="sm:max-w-lg p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-primary/20">
         {/* Header with gradient */}
-        <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8 pb-12">
+        <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-t-2xl p-8 pb-10">
           <div className="absolute top-4 right-4">
             <Button
               variant="ghost"
@@ -142,7 +140,7 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
         </div>
 
         {/* Content */}
-        <div className="p-6 pt-0 -mt-4">
+        <div className="p-6 pt-4">
           <Card className="bg-card/50 border-border/50">
             <CardContent className="p-4 space-y-3">
               {step.features.map((feature, index) => (
@@ -151,7 +149,7 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
                   className="flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="p-1 rounded-full bg-state-success/20 text-state-success mt-0.5">
+                  <div className="p-1 rounded-full bg-primary/15 text-primary mt-0.5">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <span className="text-sm text-foreground/90">{feature}</span>
@@ -162,26 +160,25 @@ export const OnboardingWizard = ({ forceShow = false, onComplete }: OnboardingWi
         </div>
 
         {/* Footer */}
-        <div className="p-6 pt-0 space-y-4">
+        <div className="p-6 pt-0 space-y-5">
           {/* Progress indicator */}
-          <div className="space-y-2">
-            <Progress value={progress} className="h-1" />
-            <div className="flex justify-center gap-2">
-              {ONBOARDING_STEPS.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentStep(index)}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all",
-                    index === currentStep
-                      ? "bg-primary w-4"
-                      : index < currentStep
-                        ? "bg-primary/50"
-                        : "bg-muted-foreground/30"
-                  )}
-                />
-              ))}
-            </div>
+          <div className="flex justify-center gap-2">
+            {ONBOARDING_STEPS.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentStep(index)}
+                aria-label={`Go to step ${index + 1} of ${ONBOARDING_STEPS.length}`}
+                aria-current={index === currentStep}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  index === currentStep
+                    ? "bg-primary w-6"
+                    : index < currentStep
+                      ? "bg-primary/50 w-2"
+                      : "bg-muted-foreground/30 w-2"
+                )}
+              />
+            ))}
           </div>
 
           <Button onClick={handleNext} className="w-full gap-2" size="lg">

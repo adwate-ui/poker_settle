@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -351,15 +351,22 @@ const HandsHistory = () => {
 
       {/* Filters Section — desktop, inline */}
       <Card className="hidden lg:block">
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
-              <Filter className="h-5 w-5" />
-              Filters
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-tiny">{Object.keys(filters).length} active</Badge>
-              )}
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Filter className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  Filters
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="font-luxury uppercase tracking-widest text-tiny">{Object.keys(filters).length} active</Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>Narrow down your hand history</CardDescription>
+              </div>
+            </div>
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 <X className="h-4 w-4 mr-2" />
@@ -406,14 +413,21 @@ const HandsHistory = () => {
 
       {/* Hands List */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-luxury tracking-wider uppercase">
-            <TrendingUp className="h-5 w-5" />
-            Hands History
-            <Badge variant="outline" className="ml-auto font-numbers text-tiny">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Hands History</CardTitle>
+                <CardDescription>Every hand you've tracked</CardDescription>
+              </div>
+            </div>
+            <Badge variant="outline" className="font-numbers text-tiny">
               {hands.length}
             </Badge>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {currentHands.length === 0 ? (

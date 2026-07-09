@@ -203,13 +203,11 @@ const PlayersHistory = () => {
               <p className="text-3xl font-numbers text-primary">{players.length}</p>
             </div>
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-label text-muted-foreground">Win Rate</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-numbers text-state-success">
-                  {players.filter(p => (p.total_profit || 0) >= 0).length}
-                </p>
-                <p className="text-label text-muted-foreground">Profitable Players</p>
-              </div>
+              <p className="text-label text-muted-foreground">Profitable Players</p>
+              <p className="text-3xl font-numbers text-state-success">
+                {players.filter(p => (p.total_profit || 0) >= 0).length}
+                <span className="text-lg text-muted-foreground">/{players.length}</span>
+              </p>
             </div>
             <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
               <p className="text-label text-muted-foreground">Total Games</p>
@@ -227,7 +225,7 @@ const PlayersHistory = () => {
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("name")}
-              className="cursor-pointer w-[30%] md:w-auto"
+              className="cursor-pointer w-[28%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Player
@@ -236,7 +234,7 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_games")}
-              className="cursor-pointer w-[15%] md:w-auto"
+              className="cursor-pointer w-[20%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Games
@@ -245,14 +243,14 @@ const PlayersHistory = () => {
             </TableHead>
             <TableHead
               onClick={() => handleSort("total_profit")}
-              className="cursor-pointer w-[40%] md:w-auto"
+              className="cursor-pointer w-[42%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Net
                 {getSortIcon("total_profit")}
               </div>
             </TableHead>
-            <TableHead className="w-[15%] md:w-auto">Act</TableHead>
+            <TableHead className="w-[10%] md:w-auto">Act</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -274,9 +272,9 @@ const PlayersHistory = () => {
                   </div>
                 </TableCell>
                 <TableCell className="text-tiny">
-                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px] justify-center text-tiny">
-                    {player.total_games || 0}
-                    <span className="sm:inline hidden"> Sessions</span>
+                  <Badge variant="secondary" className="font-numbers px-1.5 min-w-[20px] justify-center text-tiny gap-1">
+                    <span>{player.total_games || 0}</span>
+                    <span className="sm:inline hidden">{(player.total_games || 0) === 1 ? "Session" : "Sessions"}</span>
                   </Badge>
                 </TableCell>
                 <TableCell className="text-tiny">

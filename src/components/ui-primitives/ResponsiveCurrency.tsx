@@ -20,7 +20,7 @@ export const ResponsiveCurrency = ({ amount, className, mobileCompact = true }: 
     }
 
     // Compact mobile format: Symbol + Rounded Number (e.g. Rs.1,000 instead of Rs. 1,000.00)
-    const compactMobile = `${CurrencyConfig.symbol}${Math.round(amount).toLocaleString('en-IN')}`;
+    const compactMobile = `${amount < 0 ? "-" : ""}${CurrencyConfig.symbol}${Math.round(Math.abs(amount)).toLocaleString('en-IN')}`;
 
     return (
         <span className={cn("inline-flex", className)}>

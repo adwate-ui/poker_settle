@@ -34,7 +34,10 @@ export const formatCurrency = (amount: number, includeSymbol = true): string => 
     // Intl.NumberFormat might use a different symbol than requested in the prompt
     // The prompt specifically asked to replace literall "Rs." with the config symbol.
     // We'll use the config symbol explicitly to match the user's specific requirement.
-    const formattedNumber = formatIndianNumber(amount);
+    // Sign is placed before the symbol (e.g. "-Rs. 600") rather than between symbol and
+    // number, matching standard negative-currency convention.
+    const sign = amount < 0 ? "-" : "";
+    const formattedNumber = formatIndianNumber(Math.abs(amount));
 
-    return `${CurrencyConfig.symbol} ${formattedNumber}`;
+    return `${sign}${CurrencyConfig.symbol} ${formattedNumber}`;
 };

@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/notifications";
 import { ErrorMessages } from "@/lib/errorUtils";
-import { ArrowUpDown, ArrowUp, ArrowDown, Trash2, Filter, Calendar, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Trash2, Filter, Calendar, CalendarDays, User as UserIcon, Gamepad2, Download, FileText } from "lucide-react";
 import { exportGamesToCSV } from "@/lib/exportUtils";
 import { Game } from "@/types/poker";
 import {
@@ -301,7 +301,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
               <label className="text-label text-muted-foreground ml-1">Month</label>
               <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
                 <SelectTrigger>
-                  <Filter className="mr-2 h-4 w-4 opacity-50" />
+                  <CalendarDays className="mr-2 h-4 w-4 opacity-50" />
                   <SelectValue placeholder="All Months" />
                 </SelectTrigger>
                 <SelectContent>
@@ -334,7 +334,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
           <TableRow className="hover:bg-transparent">
             <TableHead
               onClick={() => handleSort("date")}
-              className="cursor-pointer w-[22%] md:w-auto"
+              className="cursor-pointer w-[14%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Date
@@ -343,7 +343,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             </TableHead>
             <TableHead
               onClick={() => handleSort("buy_in")}
-              className="cursor-pointer w-[17%] md:w-auto"
+              className="cursor-pointer w-[26%] md:w-auto"
             >
               <div className="flex items-center gap-1">
                 Buy-in
@@ -370,7 +370,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
               </div>
             </TableHead>
             {!readOnly && (
-              <TableHead className="w-[27%] md:w-auto">
+              <TableHead className="w-[26%] md:w-auto">
                 {selectedPlayer !== "all" ? "P&L" : "Act"}
               </TableHead>
             )}
@@ -389,7 +389,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                 <TableCell className="font-medium whitespace-nowrap text-tiny">
                   {format(new Date(game.date), isMobile ? 'd/M/yy' : 'MMM d, yyyy')}
                 </TableCell>
-                <TableCell isNumeric className="text-muted-foreground text-tiny">
+                <TableCell isNumeric className="text-muted-foreground text-tiny overflow-hidden whitespace-nowrap text-ellipsis">
                   <ResponsiveCurrency amount={game.buy_in_amount} />
                 </TableCell>
                 <TableCell className="text-tiny">
@@ -397,7 +397,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                     {game.player_count}
                   </Badge>
                 </TableCell>
-                <TableCell isNumeric className="font-semibold text-muted-foreground text-tiny">
+                <TableCell isNumeric className="font-semibold text-muted-foreground text-tiny overflow-hidden whitespace-nowrap text-ellipsis">
                   <ResponsiveCurrency amount={game.total_pot} />
                 </TableCell>
                 {!readOnly && (

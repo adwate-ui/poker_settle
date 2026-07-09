@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, RefreshCw, HelpCircle, Sparkles, Info, Database, Trash2, Loader2, AlertTriangle } from 'lucide-react';
@@ -184,6 +186,10 @@ const AISettingsTab = () => {
       <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
         <div className="space-y-2">
           <label className="text-sm font-medium">Gemini API Key</label>
+          <p className="text-sm text-muted-foreground">
+            Used to read chip stacks from a photo during a game. Your key is stored privately and only sent to Google when you scan chips —{" "}
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">get a free key from Google AI Studio</a>.
+          </p>
           <div className="flex gap-2">
             <Input type="password" value={isSaved ? "••••••••" : apiKey} onChange={(e) => setApiKey(e.target.value)} disabled={isSaved || loading} className="flex-1 h-12 md:h-10" />
             {isSaved ? <Button variant="outline" onClick={() => { setApiKey(''); setIsSaved(false); }} className="h-12 md:h-10">Change</Button> :
@@ -341,10 +347,24 @@ const DemoDataTab = () => {
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const tabsListRef = useRef<HTMLDivElement>(null);
+  const [scrollEdges, setScrollEdges] = useState({ atStart: true, atEnd: true });
+
+  const updateScrollEdges = useCallback(() => {
+    const el = tabsListRef.current;
+    if (!el) return;
+    setScrollEdges({
+      atStart: el.scrollLeft <= 4,
+      atEnd: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4,
+    });
+  }, []);
 
   useEffect(() => { if (!loading && !user) navigate('/auth'); }, [user, loading, navigate]);
+  useEffect(() => { updateScrollEdges(); }, [updateScrollEdges]);
 
   if (loading || !user) return <div className="p-8 space-y-6"><Skeleton className="h-12 w-48" /><Skeleton className="h-64 w-full" /></div>;
+
+  const profileDisplayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
     <div className="container max-w-4xl py-6 px-4 md:py-8 md:px-0 space-y-8">
@@ -355,24 +375,48 @@ const Profile = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto justify-start md:grid md:grid-cols-7 h-auto p-1 bg-muted/20">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="game-settings">Chips</TabsTrigger>
-          <TabsTrigger value="game">Game</TabsTrigger>
-          <TabsTrigger value="ai">AI</TabsTrigger>
-          <TabsTrigger value="demo">Demo</TabsTrigger>
-          <TabsTrigger value="storage">Storage</TabsTrigger>
-          <TabsTrigger value="help">Help</TabsTrigger>
-        </TabsList>
+        <div className="relative">
+          <TabsList
+            ref={tabsListRef}
+            onScroll={updateScrollEdges}
+            className="flex w-full overflow-x-auto justify-start md:grid md:grid-cols-7 h-auto p-1 bg-muted/20"
+          >
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="game-settings">Chips</TabsTrigger>
+            <TabsTrigger value="game">Game</TabsTrigger>
+            <TabsTrigger value="ai">AI</TabsTrigger>
+            <TabsTrigger value="demo">Demo</TabsTrigger>
+            <TabsTrigger value="storage">Storage</TabsTrigger>
+            <TabsTrigger value="help">Help</TabsTrigger>
+          </TabsList>
+          <div className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 w-8 rounded-l-md bg-gradient-to-r from-muted/60 to-transparent transition-opacity duration-200 md:hidden",
+            scrollEdges.atStart ? "opacity-0" : "opacity-100"
+          )} />
+          <div className={cn(
+            "pointer-events-none absolute inset-y-0 right-0 w-8 rounded-r-md bg-gradient-to-l from-muted/60 to-transparent transition-opacity duration-200 md:hidden",
+            scrollEdges.atEnd ? "opacity-0" : "opacity-100"
+          )} />
+        </div>
 
         <TabsContent value="profile">
           <Card>
             <CardHeader className="p-4 md:p-6">
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>Your account information</CardDescription>
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 border border-border">
+                  <AvatarImage src={user.user_metadata?.avatar_url} alt={profileDisplayName} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-luxury">
+                    {profileDisplayName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle>{profileDisplayName}</CardTitle>
+                  <CardDescription>{user.email}</CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
-              <div><label className="text-sm font-medium text-muted-foreground">Email</label><p className="text-lg">{user.email}</p></div>
+              <div className="pt-4 border-t border-border"><label className="text-sm font-medium text-muted-foreground">Member Since</label><p className="text-sm text-foreground">{new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
               <div><label className="text-sm font-medium text-muted-foreground">User ID</label><p className="text-sm font-mono text-muted-foreground">{user.id}</p></div>
             </CardContent>
           </Card>

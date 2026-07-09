@@ -33,7 +33,7 @@ const MobileBottomNav = ({ currentTab, onTabChange }: { currentTab: string; onTa
             )}
           >
             {isActive && (
-              <div className="absolute top-0 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
+              <div className="absolute top-1 w-6 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
             )}
             <Icon className={cn("h-4 w-4", isActive && "drop-shadow-glow")} />
             <span className="text-tiny font-luxury uppercase tracking-wider">{label}</span>

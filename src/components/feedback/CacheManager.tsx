@@ -82,11 +82,11 @@ export const CacheManager = () => {
             <Database className="h-5 w-5" />
             Offline Storage
           </CardTitle>
-          <CardDescription>Service worker not active</CardDescription>
+          <CardDescription>Offline mode isn't set up on this device yet</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            The app needs to be installed or the service worker activated to enable offline features.
+            Install the app or reload the page to enable access to your games without an internet connection.
           </p>
         </CardContent>
       </Card>
