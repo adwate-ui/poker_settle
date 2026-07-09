@@ -100,19 +100,19 @@ export const BuyInManagementTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[30%] md:w-auto">
+            <TableHead className="w-[32%] md:w-auto">
               <span className="sm:inline hidden">Player</span><span className="sm:hidden inline">Plyr</span>
             </TableHead>
-            <TableHead className="w-[12%] text-center md:w-auto">
+            <TableHead className="w-[14%] text-center md:w-auto">
               <span className="sm:inline hidden">Buy-ins</span><span className="sm:hidden inline">Buys</span>
             </TableHead>
-            <TableHead className="w-[24%] text-right md:w-auto">
+            <TableHead className="w-[30%] text-right md:w-auto">
               <span className="sm:inline hidden">Amount</span><span className="sm:hidden inline">Amt</span>
             </TableHead>
-            <TableHead className="w-12 text-center md:w-auto">
+            <TableHead className="w-[12%] text-center md:w-auto">
               Add
             </TableHead>
-            <TableHead className="w-12 text-center md:w-auto">
+            <TableHead className="w-[12%] text-center md:w-auto">
               Hist
             </TableHead>
           </TableRow>
@@ -121,18 +121,18 @@ export const BuyInManagementTable = ({
           {sortedPlayers.map((gamePlayer) => (
             <TableRow
               key={gamePlayer.id}
-              className="h-11 sm:h-auto sm:group"
+              className="h-11 md:h-auto md:group"
             >
-              <TableCell className="font-medium truncate text-foreground p-1 sm:p-4 text-tiny sm:text-sm">
+              <TableCell className="font-medium truncate text-foreground p-1 md:p-4 text-tiny md:text-sm">
                 <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-center p-1 sm:p-4 text-tiny sm:text-sm">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-center p-1 md:p-4 text-tiny md:text-sm">
                 {gamePlayer.buy_ins}
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-right tracking-tighter p-1 sm:p-4 text-tiny sm:text-sm">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-right tracking-tighter p-1 md:p-4 text-tiny md:text-sm">
                 {formatCurrency(gamePlayer.buy_ins * buyInAmount)}
               </TableCell>
-              <TableCell className="text-center p-1 sm:p-4">
+              <TableCell className="text-center p-1 md:p-4">
                 <Button
                   onClick={() => {
                     setSelectedPlayerId(gamePlayer.id);
@@ -147,7 +147,7 @@ export const BuyInManagementTable = ({
                   <Plus className="h-4 w-4" />
                 </Button>
               </TableCell>
-              <TableCell className="text-center p-1 sm:p-4">
+              <TableCell className="text-center p-1 md:p-4">
                 {fetchBuyInHistory && (
                   <BuyInHistoryDialog
                     gamePlayerId={gamePlayer.id}

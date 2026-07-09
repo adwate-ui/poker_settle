@@ -177,9 +177,9 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
                         <Table>
                             <TableHeader>
                                 <TableRow className={cn(isMobile ? "h-8" : "")}>
-                                    <TableHead className={cn("px-4", isMobile ? "h-8 px-2" : "h-9")}>From</TableHead>
-                                    <TableHead className={cn("px-4", isMobile ? "h-8 px-2" : "h-9")}>To</TableHead>
-                                    <TableHead className={cn("px-4", isMobile ? "h-8 px-2" : "h-9")}>Amount</TableHead>
+                                    <TableHead className={cn("px-4 w-[32%] md:w-auto", isMobile ? "h-8 px-2" : "h-9")}>From</TableHead>
+                                    <TableHead className={cn("px-4 w-[32%] md:w-auto", isMobile ? "h-8 px-2" : "h-9")}>To</TableHead>
+                                    <TableHead className={cn("px-4 w-[36%] md:w-auto", isMobile ? "h-8 px-2" : "h-9")}>Amount</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>

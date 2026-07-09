@@ -105,23 +105,23 @@ export const BuyInHistoryDialog = ({
               <Table>
                 <TableHeader className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm">
                   <TableRow className="hover:bg-transparent border-b border-border h-12">
-                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground pl-8">Time</TableHead>
-                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground text-center">Change</TableHead>
-                    <TableHead className="uppercase tracking-[0.2em] text-[9px] text-muted-foreground text-right pr-8">Total Buy-ins</TableHead>
+                    <TableHead className="w-[34%] md:w-auto pl-3 md:pl-8">Time</TableHead>
+                    <TableHead className="w-[30%] md:w-auto text-center">Change</TableHead>
+                    <TableHead className="w-[36%] md:w-auto text-right pr-3 md:pr-8">Total Buy-ins</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-border">
                   {history.map((entry) => (
                     <TableRow
                       key={entry.id}
-                      className="h-16 hover:bg-accent/5 border-0 transition-colors"
+                      className="h-14 md:h-16 hover:bg-accent/5 border-0 transition-colors"
                     >
-                      <TableCell className="pl-8">
+                      <TableCell className="pl-3 md:pl-8">
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-numbers text-sm text-foreground">
+                          <span className="font-numbers text-tiny md:text-sm text-foreground">
                             {format(new Date(entry.timestamp), "h:mm a")}
                           </span>
-                          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/60">
+                          <span className="text-label text-muted-foreground/60">
                             {format(new Date(entry.timestamp), "MMM d, yyyy")}
                           </span>
                         </div>
@@ -143,9 +143,9 @@ export const BuyInHistoryDialog = ({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right pr-8">
+                      <TableCell className="text-right pr-3 md:pr-8">
                         <div className="flex items-center justify-end gap-2.5">
-                          <span className="font-numbers text-base text-foreground/80">
+                          <span className="font-numbers text-tiny md:text-base text-foreground/80">
                             {entry.total_buy_ins_after}
                           </span>
                           <Wallet className="w-4 h-4 text-muted-foreground/30" />
@@ -154,8 +154,8 @@ export const BuyInHistoryDialog = ({
                     </TableRow>
                   ))}
                   {/* Genesis state */}
-                  <TableRow className="bg-white/2 border-0 h-16 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all">
-                    <TableCell className="pl-8">
+                  <TableRow className="bg-white/2 border-0 h-14 md:h-16 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all">
+                    <TableCell className="pl-3 md:pl-8">
                       <div className="flex flex-col">
                         <span className="text-label text-muted-foreground/60">Initial Buy-in</span>
                       </div>
@@ -163,7 +163,7 @@ export const BuyInHistoryDialog = ({
                     <TableCell className="text-center">
                       <Badge variant="outline" className="bg-muted text-tiny uppercase tracking-widest text-muted-foreground">Original</Badge>
                     </TableCell>
-                    <TableCell className="text-right pr-8">
+                    <TableCell className="text-right pr-3 md:pr-8">
                       <div className="flex items-center justify-end gap-2.5">
                         <span className="font-numbers text-sm">1</span>
                         <ShieldCheck className="w-4 h-4 text-white/20" />

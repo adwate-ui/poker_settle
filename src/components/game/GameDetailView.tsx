@@ -121,6 +121,7 @@ export const GameDetailView = ({
   const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId, publicOnly);
   const isMobile = useIsMobile();
   useGameRealtime(gameId);
+  const hasAudit = showOwnerControls && !!fetchBuyInHistory;
 
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [shareUrl, setShareUrl] = useState<string | undefined>(undefined);
@@ -600,12 +601,12 @@ export const GameDetailView = ({
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[30%] md:w-auto">Player</TableHead>
-                      <TableHead className="w-[12%] md:w-auto">{isMobile ? "Buys" : "Buy-ins"}</TableHead>
-                      <TableHead className="w-[35%] md:w-auto">P&L</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[34%]" : "w-[39%]")}>Player</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[13%]" : "w-[16%]")}>{isMobile ? "Buys" : "Buy-ins"}</TableHead>
+                      <TableHead className={cn("md:w-auto", hasAudit ? "w-[39%]" : "w-[45%]")}>P&L</TableHead>
                       {!isMobile && <TableHead className="w-[20%] md:w-auto">Cashout</TableHead>}
-                      {showOwnerControls && fetchBuyInHistory && (
-                        <TableHead className="w-[13%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
+                      {hasAudit && (
+                        <TableHead className="w-[14%] md:w-auto text-center">{isMobile ? "Hist" : "Audit"}</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
@@ -652,7 +653,7 @@ export const GameDetailView = ({
                               {formatCurrency(finalStack)}
                             </TableCell>
                           )}
-                          {showOwnerControls && fetchBuyInHistory && (
+                          {hasAudit && (
                             <TableCell>
                               <BuyInHistoryDialog
                                 gamePlayerId={gamePlayer.id}

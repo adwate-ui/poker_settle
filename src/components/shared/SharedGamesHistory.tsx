@@ -6,9 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, ArrowUpDown, Calendar } from 'lucide-react';
 import { createSharedClient } from '@/integrations/supabase/client-shared';
 import { format } from 'date-fns';
-import { formatCurrency } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { ResponsiveCurrency } from '@/components/ui-primitives/ResponsiveCurrency';
 import {
   Select,
   SelectContent,
@@ -160,15 +160,12 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto w-full">
-          <Table tableClassName={!isMobile ? "table-auto" : undefined}>
+          <Table>
             <TableHeader>
-              <TableRow className={cn(isMobile ? "h-10" : "")}>
+              <TableRow className="h-10 md:h-auto">
                 <TableHead
                   onClick={() => handleSort('date')}
-                  className={cn(
-                    "cursor-pointer hover:text-primary transition-colors",
-                    isMobile ? "w-[30%] px-1" : ""
-                  )}
+                  className="cursor-pointer hover:text-primary transition-colors w-[30%] px-1 md:w-auto md:px-4"
                 >
                   <span className="flex items-center gap-0.5">
                     Date
@@ -177,10 +174,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort('buy_in')}
-                  className={cn(
-                    "text-right cursor-pointer hover:text-primary transition-colors",
-                    isMobile ? "w-[25%] px-1" : ""
-                  )}
+                  className="text-right cursor-pointer hover:text-primary transition-colors w-[25%] px-1 md:w-auto md:px-4"
                 >
                   <span className="flex items-center justify-end gap-0.5">
                     {isMobile ? "Buy" : "Buy-in"}
@@ -189,10 +183,7 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort('players')}
-                  className={cn(
-                    "text-center cursor-pointer hover:text-primary transition-colors",
-                    isMobile ? "w-[15%] px-1" : ""
-                  )}
+                  className="text-center cursor-pointer hover:text-primary transition-colors w-[15%] px-1 md:w-auto md:px-4"
                 >
                   <span className="flex items-center justify-center gap-0.5">
                     {isMobile ? "Plyr" : "Players"}
@@ -201,13 +192,10 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                 </TableHead>
                 <TableHead
                   onClick={() => handleSort('chips')}
-                  className={cn(
-                    "text-right cursor-pointer hover:text-primary transition-colors",
-                    isMobile ? "w-[30%] px-1" : ""
-                  )}
+                  className="text-right cursor-pointer hover:text-primary transition-colors w-[30%] px-1 md:w-auto md:px-4"
                 >
                   <span className="flex items-center justify-end gap-0.5">
-                    {isMobile ? "Pot" : "Pot"}
+                    Pot
                     <ArrowUpDown className={cn(isMobile ? "h-2 w-2 opacity-50" : "h-3 w-3")} />
                   </span>
                 </TableHead>
@@ -221,27 +209,24 @@ const SharedGamesHistory: React.FC<SharedGamesHistoryProps> = ({ token }) => {
                   <TableRow
                     key={game.id}
                     onClick={() => navigate(`/shared/${encodeURIComponent(token)}/game/${game.id}`)}
-                    className={cn(
-                      "cursor-pointer",
-                      isMobile ? "h-10" : ""
-                    )}
+                    className="cursor-pointer h-10 md:h-auto"
                   >
-                    <TableCell className={cn("font-medium whitespace-nowrap text-tiny", isMobile ? "px-1" : "")}>
+                    <TableCell className="font-medium whitespace-nowrap text-tiny px-1 md:px-4">
                       <div className="flex items-center gap-1 sm:gap-2">
                         {!isMobile && <Calendar className="h-4 w-4 opacity-50" />}
                         {format(new Date(game.date), isMobile ? 'MMM d' : 'MMM d, yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers text-tiny", isMobile ? "px-1" : "")}>
-                      {isMobile ? `Rs.${Math.round(game.buy_in_amount).toLocaleString('en-IN')}` : formatCurrency(game.buy_in_amount)}
+                    <TableCell className="text-right font-numbers text-tiny px-1 md:px-4">
+                      <ResponsiveCurrency amount={game.buy_in_amount} />
                     </TableCell>
-                    <TableCell className={cn("text-center text-tiny", isMobile ? "px-1" : "")}>
+                    <TableCell className="text-center text-tiny px-1 md:px-4">
                       <Badge variant="secondary" className={cn(isMobile ? "h-5 px-1.5 text-tiny min-w-[20px]" : "text-xs")}>
                         {game.player_count}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn("text-right font-numbers font-bold text-primary text-tiny", isMobile ? "px-1" : "")}>
-                      {isMobile ? `Rs.${Math.round(game.total_pot).toLocaleString('en-IN')}` : formatCurrency(game.total_pot)}
+                    <TableCell className="text-right font-numbers font-bold text-primary text-tiny px-1 md:px-4">
+                      <ResponsiveCurrency amount={game.total_pot} />
                     </TableCell>
                   </TableRow>
                 ))

@@ -161,7 +161,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
         </div>
       ) : (
         <Table
-          className="max-h-[400px]"
+          className="max-h-[400px] overflow-y-auto"
         >
           <TableHeader>
             <TableRow>
@@ -174,7 +174,7 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
           <TableBody>
             {filteredHistory.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell className="font-medium truncate max-w-[100px]">
+                <TableCell className="font-medium truncate">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <Link
                       to={entry.player_id ? `/players/${entry.player_id}` : '#'}
@@ -192,10 +192,10 @@ export const ConsolidatedBuyInLogs = ({ gameId, token }: ConsolidatedBuyInLogsPr
                     {entry.buy_ins_added > 0 ? '+' : ''}{entry.buy_ins_added}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-center font-numbers text-muted-foreground text-tiny sm:text-sm">
+                <TableCell className="text-center font-numbers text-muted-foreground text-tiny md:text-sm">
                   {entry.total_buy_ins_after}
                 </TableCell>
-                <TableCell className="text-right pr-4 text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider">
+                <TableCell className="text-right pr-4 text-muted-foreground text-[10px] md:text-xs uppercase tracking-wider">
                   {format(new Date(entry.timestamp), "h:mm a")}
                 </TableCell>
               </TableRow>

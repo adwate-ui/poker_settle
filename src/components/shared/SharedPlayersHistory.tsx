@@ -98,28 +98,28 @@ const SharedPlayersHistory: React.FC<SharedPlayersHistoryProps> = ({ token, play
             <TableRow>
               <TableHead
                 onClick={() => { setSortField('date'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
-                className="cursor-pointer"
+                className="cursor-pointer w-[28%] md:w-auto"
               >
                 <div className="flex items-center gap-1">
                   Date
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
-              <TableHead>
+              <TableHead className="w-[20%] md:w-auto">
                 <div className="flex items-center gap-1">
                   {isMobile ? "Buys" : "Buy-ins"}
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => { setSortField('net'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}
-                className="text-right cursor-pointer"
+                className="text-right cursor-pointer w-[32%] md:w-auto"
               >
                 <div className="flex items-center justify-end gap-1">
                   Net
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
-              <TableHead className="text-right">
+              <TableHead className="text-right w-[20%] md:w-auto">
                 {!isMobile && "Action"}
               </TableHead>
             </TableRow>

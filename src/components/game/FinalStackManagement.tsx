@@ -9,8 +9,8 @@ import { formatCurrency, formatIndianNumber } from '@/utils/currencyUtils';
 import { parseIndianNumber } from '@/lib/utils';
 import { CurrencyConfig } from '@/config/localization';
 import { GamePlayer } from "@/types/poker";
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { ChipScanner } from '@/components/poker/ChipScanner';
+import { ResponsiveName } from '@/components/ui-primitives/ResponsiveName';
 import {
   Dialog,
   DialogContent,
@@ -75,28 +75,6 @@ export const FinalStackManagement = ({
     a.player.name.localeCompare(b.player.name)
   );
 
-  const isMobile = useIsMobile();
-
-  // Helper function to abbreviate names for mobile
-  const getDisplayName = (name: string, isMobile: boolean) => {
-    if (!name) return '';
-    if (!isMobile) return name;
-
-    // If name is already short, keep it
-    if (name.length <= 10) return name;
-
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) {
-      return name.substring(0, 10);
-    }
-
-    // Format: First Name + Last Initial (e.g., "John D.")
-    const firstName = parts[0];
-    const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
-    const formatted = `${firstName} ${lastInitial}.`;
-
-    return formatted.length > 10 ? formatted.substring(0, 7) + "..." : formatted;
-  };
 
   const selectedPlayer = sortedPlayers.find(gp => gp.id === selectedPlayerId);
 
@@ -105,14 +83,14 @@ export const FinalStackManagement = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%] md:w-auto">
+            <TableHead className="w-[38%] md:w-auto">
               Player
             </TableHead>
-            <TableHead className="w-[30%] md:w-auto">
+            <TableHead className="w-[26%] md:w-auto">
               Stack
             </TableHead>
-            <TableHead className="w-12 md:w-auto" />
-            <TableHead className="w-12 md:w-auto" />
+            <TableHead className="w-[18%] md:w-auto" />
+            <TableHead className="w-[18%] md:w-auto" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -120,10 +98,10 @@ export const FinalStackManagement = ({
             <TableRow
               key={gamePlayer.id}
             >
-              <TableCell className="font-medium truncate text-foreground text-tiny sm:text-sm">
-                {getDisplayName(gamePlayer.player.name, isMobile)}
+              <TableCell className="font-medium truncate text-foreground text-tiny md:text-sm">
+                <ResponsiveName name={gamePlayer.player.name} />
               </TableCell>
-              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-tiny sm:text-sm">
+              <TableCell className="font-numbers whitespace-nowrap text-muted-foreground text-tiny md:text-sm">
                 {formatCurrency(gamePlayer.final_stack || 0)}
               </TableCell>
               <TableCell>
