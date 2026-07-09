@@ -12,6 +12,7 @@ import { GameCardSkeletonList } from '@/components/skeletons';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { HOLE_CARD_FILTER_OPTIONS, HoleCardFilterType } from '@/utils/holeCardFilter';
 import { formatCurrency } from '@/utils/currencyUtils';
+import { StatTile } from '@/components/ui-primitives/StatTile';
 
 const HandsHistory = () => {
   const _navigate = useNavigate();
@@ -294,59 +295,19 @@ const HandsHistory = () => {
     <div className="space-y-6 p-4">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
-              Total Hands
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-numbers">{stats.totalHands}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
-              Win Rate
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-state-success font-numbers">
-              {stats.winRate}%
-            </div>
-            <p className="text-xs text-muted-foreground font-numbers">
-              {stats.handsWon}W / {stats.handsLost}L
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
-              Total Won
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary font-numbers">
-              {formatCurrency(stats.totalPotWon)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">
-              Showdown Rate
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-numbers">{stats.showdownRate}%</div>
-            <p className="text-xs text-muted-foreground font-numbers">
-              {stats.showdownHands} hands
-            </p>
-          </CardContent>
-        </Card>
+        <StatTile label="Total Hands" value={stats.totalHands} />
+        <StatTile
+          label="Win Rate"
+          value={`${stats.winRate}%`}
+          valueClassName="text-state-success"
+          caption={`${stats.handsWon}W / ${stats.handsLost}L`}
+        />
+        <StatTile label="Total Won" value={formatCurrency(stats.totalPotWon)} valueClassName="text-primary" />
+        <StatTile
+          label="Showdown Rate"
+          value={`${stats.showdownRate}%`}
+          caption={`${stats.showdownHands} hands`}
+        />
       </div>
 
       {/* Filters Section — desktop, inline */}

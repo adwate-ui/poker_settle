@@ -230,7 +230,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4 bg-gradient-to-br from-background via-accent/5 to-accent/10 border-border/50 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex flex-col">
-            <span className="text-xs font-luxury text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Total Buy-ins</span>
+            <span className="text-label text-muted-foreground mb-1 group-hover:text-primary transition-colors">Total Buy-ins</span>
             <span className="text-2xl font-bold font-numbers text-foreground">{formatCurrency(totalBuyIns)}</span>
           </div>
           <Trophy className="absolute right-4 top-4 h-8 w-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
@@ -238,7 +238,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
 
         <Card className="p-4 bg-gradient-to-br from-background via-accent/5 to-accent/10 border-border/50 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex flex-col">
-            <span className="text-xs font-luxury text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Stakes</span>
+            <span className="text-label text-muted-foreground mb-1 group-hover:text-primary transition-colors">Stakes</span>
             <span className="text-2xl font-bold font-numbers text-foreground">
               {formatCurrency(game.buy_in_amount)}
               {game.small_blind && <span className="text-sm font-normal text-muted-foreground ml-1">({game.small_blind}/{game.big_blind})</span>}

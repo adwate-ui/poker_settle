@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { ResponsiveName } from "@/components/ui-primitives/ResponsiveName";
 import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
+import { StatTile } from "@/components/ui-primitives/StatTile";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 type SortField = "name" | "total_games" | "total_profit";
@@ -198,23 +199,18 @@ const PlayersHistory = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-label text-muted-foreground">Total Players</p>
-              <p className="text-3xl font-numbers text-primary">{players.length}</p>
-            </div>
-            <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-label text-muted-foreground">Profitable Players</p>
-              <p className="text-3xl font-numbers text-state-success">
-                {players.filter(p => (p.total_profit || 0) >= 0).length}
-                <span className="text-lg text-muted-foreground">/{players.length}</span>
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-card border border-border/50 shadow-sm space-y-2">
-              <p className="text-label text-muted-foreground">Total Games</p>
-              <p className="text-3xl font-numbers text-primary">
-                {totalUniqueGames}
-              </p>
-            </div>
+            <StatTile label="Total Players" value={players.length} valueClassName="text-primary" />
+            <StatTile
+              label="Profitable Players"
+              valueClassName="text-state-success"
+              value={
+                <>
+                  {players.filter(p => (p.total_profit || 0) >= 0).length}
+                  <span className="text-base text-muted-foreground">/{players.length}</span>
+                </>
+              }
+            />
+            <StatTile label="Total Games" value={totalUniqueGames} valueClassName="text-primary" />
           </div>
         </CardContent>
       </Card>

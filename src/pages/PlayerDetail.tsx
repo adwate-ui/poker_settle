@@ -36,6 +36,7 @@ import { PlayerFormDialog, PlayerFormData } from "@/components/player/PlayerForm
 import { usePlayerManagement } from "@/hooks/usePlayerManagement";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ResponsiveCurrency } from "@/components/ui-primitives/ResponsiveCurrency";
+import { StatTile } from "@/components/ui-primitives/StatTile";
 
 import { usePlayerDashboard } from "@/features/players/hooks/usePlayerDashboard";
 import { PlayerDashboardFilters } from "@/components/player/filters/PlayerDashboardFilters";
@@ -264,29 +265,27 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
         </CardHeader>
 
         {isProfileOpen && (
-          <CardContent className="p-4 sm:p-6 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+          <CardContent className="p-4 sm:p-6 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
 
             {/* Core KPI row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <div className="p-5 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Total Games</p>
-                <p className="text-3xl font-numbers text-foreground">{player.total_games || 0}</p>
-              </div>
-              <div className="p-5 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Total Profit / Loss</p>
-                <div className="flex items-center">
+              <StatTile label="Total Games" value={player.total_games || 0} />
+              <StatTile
+                label="Total Profit / Loss"
+                value={
                   <Badge
                     variant={isProfit ? "profit" : "loss"}
                     className="text-lg xs:text-xl sm:text-2xl font-numbers py-1 px-3 h-auto"
                   >
                     {isProfit ? "+" : ""}{formatCurrency(Math.abs(player.total_profit || 0))}
                   </Badge>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                <p className="text-3xs uppercase font-luxury tracking-widest text-muted-foreground">Success Ratio</p>
-                <div className="space-y-2">
-                  <p className="text-3xl font-numbers text-primary">{winRate.toFixed(1)}%</p>
+                }
+              />
+              <StatTile
+                label="Success Ratio"
+                valueClassName="text-primary"
+                value={`${winRate.toFixed(1)}%`}
+                caption={
                   <div
                     role="progressbar"
                     aria-label="Success ratio"
@@ -297,8 +296,8 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                   >
                     <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${winRate}%` }} />
                   </div>
-                </div>
-              </div>
+                }
+              />
             </div>
 
             {/* Contact / Payment details */}

@@ -52,6 +52,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useGameDetail } from "@/features/game/hooks/useGameDetail";
 import { useGameRealtime } from "@/features/game/hooks/useGameRealtime";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { StatTile } from "@/components/ui-primitives/StatTile";
 
 interface GamePlayer {
   id: string;
@@ -474,36 +475,27 @@ export const GameDetailView = ({
         </CardHeader>
         <CardContent className="pt-8">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-3xs uppercase tracking-widest text-muted-foreground">Buy-in</p>
-              <p className="text-2xl font-bold font-numbers">{formatCurrency(game.buy_in_amount)}</p>
-            </div>
-            <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-3xs uppercase tracking-widest text-muted-foreground"># Players</p>
-              <p className="text-2xl font-bold font-numbers">{gamePlayers.length}</p>
-            </div>
-            <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-              <p className="text-3xs uppercase tracking-widest text-muted-foreground">Chips in Play</p>
-              <p className="text-2xl font-bold text-primary font-numbers">
-                {formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
-              </p>
-            </div>
+            <StatTile label="Buy-in" value={formatCurrency(game.buy_in_amount)} />
+            <StatTile label="# Players" value={gamePlayers.length} />
+            <StatTile
+              label="Chips in Play"
+              valueClassName="text-primary"
+              value={formatCurrency(gamePlayers.reduce((sum, gp) => sum + gp.buy_ins, 0) * game.buy_in_amount)}
+            />
             {game.rake && game.rake > 0 && (
-              <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-                <p className="text-3xs uppercase tracking-widest text-muted-foreground">Rake</p>
-                <p className="text-2xl font-bold font-numbers">{formatCurrency(game.rake)}</p>
-              </div>
+              <StatTile label="Rake" value={formatCurrency(game.rake)} />
             )}
             {(() => {
               const hostGp = sortedGamePlayers.find((gp: any) => gp.is_host);
               const hostName = hostGp ? (hostGp.player?.name ?? hostGp.players?.name ?? null) : null;
               return hostName ? (
-                <div className="p-6 rounded-xl border bg-accent/5 space-y-2">
-                  <p className="text-3xs uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                    <Crown className="h-2.5 w-2.5" /> Host
-                  </p>
-                  <p className="text-xl font-bold font-luxury tracking-wide">{hostName}</p>
-                </div>
+                <StatTile
+                  label="Host"
+                  labelIcon={<Crown className="h-2.5 w-2.5" />}
+                  value={hostName}
+                  numeric={false}
+                  valueClassName="text-xl font-luxury tracking-wide"
+                />
               ) : null;
             })()}
           </div>
