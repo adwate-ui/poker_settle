@@ -371,7 +371,7 @@ export const GameDetailView = ({
     }));
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in duration-700">
       {onBack && (
         <Button
           variant="ghost"
@@ -475,7 +475,7 @@ export const GameDetailView = ({
           </div>
         </CardHeader>
         <CardContent className="pt-8">
-          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatTile label="Buy-in" value={formatCurrency(game.buy_in_amount)} />
             <StatTile label="# Players" value={gamePlayers.length} />
             <StatTile

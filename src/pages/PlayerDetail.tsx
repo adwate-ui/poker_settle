@@ -225,7 +225,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
     : 0;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {!readOnly && (
         <Button
           variant="ghost"
@@ -268,7 +268,7 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
           <CardContent className="p-4 sm:p-6 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
 
             {/* Core KPI row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <StatTile label="Total Games" value={player.total_games || 0} />
               <StatTile
                 label="Total Profit / Loss"
@@ -362,19 +362,19 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
 
               {(player.phone_number || player.upi_id || player.payment_preference) ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
+                  <div className="p-4 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0" />WhatsApp
                     </div>
                     <p className="text-sm font-medium text-foreground truncate">{player.phone_number || "Not Linked"}</p>
                   </div>
-                  <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
+                  <div className="p-4 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <CreditCard className="h-3 w-3 shrink-0" />Digital ID
                     </div>
                     <p className="text-sm font-medium text-foreground truncate">{player.upi_id || "Not Linked"}</p>
                   </div>
-                  <div className="p-4 sm:p-5 rounded-lg border border-border bg-accent/5 space-y-2">
+                  <div className="p-4 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Layers className="h-3 w-3 shrink-0" />Preference
                     </div>

@@ -367,7 +367,7 @@ const Profile = () => {
   const profileDisplayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
-    <div className="container max-w-4xl py-6 px-4 md:py-8 md:px-0 space-y-8">
+    <div className="container max-w-4xl py-6 px-4 md:py-8 md:px-0 space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/')} className="ml-0 md:-ml-4 text-muted-foreground hover:text-foreground h-12 md:h-10">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
