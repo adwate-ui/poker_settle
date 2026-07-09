@@ -1,5 +1,5 @@
 /**
- * WhatsApp Message Templates for Poker Settle
+ * WhatsApp Message Templates for PokerSettle
  * Standardized message templates for various notifications
  */
 
@@ -60,7 +60,7 @@ export interface WhatsAppSessionSummaryData {
  * Generate welcome message for newly added player
  */
 export function generatePlayerWelcomeMessage(data: PlayerWelcomeMessageData): string {
-  const appName = data.appName || "Poker Settle";
+  const appName = data.appName || "PokerSettle";
 
   return `🎮 *Welcome to ${appName}!*
 
@@ -306,7 +306,7 @@ export function generateWhatsAppSessionSummary(data: WhatsAppSessionSummaryData)
   const absAmount = formatCurrency(Math.abs(data.netAmount));
   const dateFormatted = new Date(data.gameDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
 
-  let message = `🎴 *Poker Settle*\n\n`;
+  let message = `🎴 *PokerSettle*\n\n`;
   message += `Hi ${data.playerName}, here's your wrap-up for *${dateFormatted}*.\n\n`;
 
   if (data.settlements.length === 0) {

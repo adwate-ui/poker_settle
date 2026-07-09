@@ -33,7 +33,7 @@ const Landing = () => {
           </div>
           <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl font-luxury tracking-tight text-foreground">
-              Poker Settle
+              PokerSettle
             </h1>
             <p className="text-label tracking-[0.3em] text-muted-foreground">
               Game Management &amp; Settlements

@@ -88,7 +88,7 @@ export const ShareDialog = ({
             try {
                 await navigator.share({
                     title: title,
-                    text: description || `Check out this ${resourceType} on Poker Settle!`,
+                    text: description || `Check out this ${resourceType} on PokerSettle!`,
                     url: shortUrl,
                 });
                 toast.success("Opened share options");

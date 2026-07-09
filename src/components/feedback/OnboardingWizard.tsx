@@ -28,7 +28,7 @@ interface OnboardingStep {
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "welcome",
-    title: "Welcome to Poker Settle",
+    title: "Welcome to PokerSettle",
     description: "Your premium poker game management companion. Track buy-ins, calculate settlements, and keep everyone honest.",
     icon: Sparkles,
     features: [

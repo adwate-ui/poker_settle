@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from "@/utils/currencyUtils";
 import { CurrencyConfig } from "@/config/localization";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 import { ProceduralChip } from '@/components/poker/ProceduralChip';
 import { loadDemoData, clearDemoData, hasDemoData } from '@/lib/demoData';
@@ -105,7 +106,7 @@ const HelpTab = () => {
       <Card>
         <CardHeader className="p-4 md:p-6">
           <CardTitle>Help & Support</CardTitle>
-          <CardDescription>Get help with using Poker Settle</CardDescription>
+          <CardDescription>Get help with using PokerSettle</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
           <div className="space-y-4">
@@ -116,7 +117,7 @@ const HelpTab = () => {
               <div className="flex-1">
                 <h3 className="font-medium mb-1">App Tutorial</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  New to Poker Settle? Replay the onboarding tutorial to learn about all the features.
+                  New to PokerSettle? Replay the onboarding tutorial to learn about all the features.
                 </p>
                 <Button variant="outline" size="sm" onClick={handleReplayOnboarding} className="h-12 md:h-10">
                   <HelpCircle className="mr-2 h-4 w-4" />
@@ -130,7 +131,7 @@ const HelpTab = () => {
                 <Info className="h-5 w-5 text-state-info" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium mb-1">About Poker Settle</h3>
+                <h3 className="font-medium mb-1">About PokerSettle</h3>
                 <p className="text-sm text-muted-foreground">
                   Version 1.0.0 - Your premium poker game management companion.
                 </p>
@@ -347,6 +348,7 @@ const DemoDataTab = () => {
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  useMetaTags({ title: "Profile — PokerSettle" });
   const tabsListRef = useRef<HTMLDivElement>(null);
   const [scrollEdges, setScrollEdges] = useState({ atStart: true, atEnd: true });
 

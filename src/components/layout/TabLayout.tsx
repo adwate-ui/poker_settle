@@ -4,6 +4,7 @@ import { UserProfile } from "./UserProfile";
 import { cn } from "@/lib/utils";
 import { Home, Play, History, Users, Hand, LucideIcon } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 interface TabLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,14 @@ const NAV_ITEMS: { value: string; label: string; icon: LucideIcon }[] = [
   { value: "players-history", label: "Players", icon: Users },
   { value: "hands-history", label: "Hands", icon: Hand },
 ];
+
+const TAB_TITLES: Record<string, string> = {
+  overview: "Overview",
+  "new-game": "New Game",
+  "games-history": "Games History",
+  "players-history": "Players List",
+  "hands-history": "Hands Tracking",
+};
 
 const MobileBottomNav = ({ currentTab, onTabChange }: { currentTab: string; onTabChange: (value: string) => void }) => (
   <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden glass-panel border-t border-primary/20 pb-safe">
@@ -57,6 +66,8 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
           : location.pathname.startsWith("/hands") ? "hands-history"
             : defaultTab;
 
+  useMetaTags({ title: `${TAB_TITLES[currentTab] ?? "PokerSettle"} — PokerSettle` });
+
   const handleTabChange = (value: string) => {
     if (value === "overview") navigate("/");
     else if (value === "new-game") navigate("/new");
@@ -86,7 +97,7 @@ const TabLayout = ({ children, defaultTab = "new-game" }: TabLayoutProps) => {
       <div className="container mx-auto px-4 pt-2 pb-8 md:py-8 max-w-7xl">
         <div className="flex justify-between items-center mb-4 md:mb-10">
           <h1 className="text-xl md:text-3xl font-luxury font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary/80 to-primary drop-shadow-sm">
-            Poker Tracker
+            PokerSettle
           </h1>
           <div className="flex items-center gap-2 md:gap-4">
             <ThemeToggle />

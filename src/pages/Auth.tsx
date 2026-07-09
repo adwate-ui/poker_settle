@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShieldCheck, Gamepad2, Coins, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 const Auth = () => {
+  useMetaTags({ title: "Sign In — PokerSettle" });
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
@@ -139,7 +141,7 @@ const Auth = () => {
 
           <div className="space-y-1">
             <CardTitle className="text-3xl font-luxury tracking-tight text-foreground">
-              Poker Settle
+              PokerSettle
             </CardTitle>
             <CardDescription className="text-label tracking-[0.3em] text-muted-foreground">
               Game Management & Settlements
