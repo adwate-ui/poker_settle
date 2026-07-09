@@ -437,35 +437,35 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => handleSort("date")} className="cursor-pointer w-[16%] md:w-auto">
+              <TableHead onClick={() => handleSort("date")} className="cursor-pointer w-[14%] md:w-auto">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Session Day</span>
                   <span className="sm:hidden">Date</span>
                   {getSortIcon("date")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("buy_ins")} className="cursor-pointer w-[12%] md:w-auto">
+              <TableHead onClick={() => handleSort("buy_ins")} className="cursor-pointer w-[10%] md:w-auto">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Buy-ins</span>
                   <span className="sm:hidden">Buy</span>
                   {getSortIcon("buy_ins")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("net_amount")} className="cursor-pointer w-[32%] md:w-auto">
+              <TableHead onClick={() => handleSort("net_amount")} className="cursor-pointer w-[28%] md:w-auto">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Net P&L</span>
                   <span className="sm:hidden">P&L</span>
                   {getSortIcon("net_amount")}
                 </div>
               </TableHead>
-              <TableHead onClick={() => handleSort("final_stack")} className="cursor-pointer w-[20%] md:w-auto">
+              <TableHead onClick={() => handleSort("final_stack")} className="cursor-pointer w-[26%] md:w-auto">
                 <div className="flex items-center gap-1">
                   <span className="hidden sm:inline">Final Stack</span>
                   <span className="sm:hidden">Stack</span>
                   {getSortIcon("final_stack")}
                 </div>
               </TableHead>
-              <TableHead className="w-[20%] md:w-auto">
+              <TableHead className="w-[22%] md:w-auto">
                 <span className="hidden sm:inline">Actions</span>
                 <span className="sm:hidden">Act</span>
               </TableHead>
