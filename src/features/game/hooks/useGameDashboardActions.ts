@@ -43,7 +43,7 @@ export const useGameDashboardActions = () => {
 
     const { updateGamePlayer, createOrFindPlayer, addPlayerToGame, completeGame, saveTablePosition } = useGameData();
     const { user } = useAuth();
-    const { createOrGetSharedLink } = useSharedLink();
+    const { createOrGetSharedLink, getShortUrl } = useSharedLink();
     const navigate = useNavigate();
 
     const handlePlayerUpdate = useCallback(async (gamePlayerId: string, updates: Partial<GamePlayer>, logBuyIn: boolean = false) => {
@@ -265,14 +265,13 @@ export const useGameDashboardActions = () => {
             try {
                 const loadingNotifyToast = toast.loading("Sending notifications...");
                 const linkData = await createOrGetSharedLink('game', game.id);
-                const gameToken = linkData?.accessToken || '';
+                const gameLink = linkData?.shortCode ? getShortUrl(linkData.shortCode) : '';
 
-                if (gameToken) {
+                if (gameLink) {
                     const players = gamePlayers.map(gp => gp.player);
                     await sendSessionSummaryNotification(
-                        game.id,
                         game.date,
-                        gameToken,
+                        gameLink,
                         players,
                         gamePlayers.map(gp => ({
                             player_id: gp.player_id,
@@ -300,7 +299,7 @@ export const useGameDashboardActions = () => {
             toast.error(ErrorMessages.game.complete(err));
             setIsCompletingGame(false);
         }
-    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink, user]);
+    }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink, getShortUrl, user]);
 
     const handleSaveTablePosition = useCallback(async (positions: SeatPosition[]) => {
         if (!game) return;

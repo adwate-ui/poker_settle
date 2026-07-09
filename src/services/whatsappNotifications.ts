@@ -243,9 +243,8 @@ export async function sendSettlementNotifications(
  * Includes game summary, share link, and individual settlements
  */
 export async function sendSessionSummaryNotification(
-  gameId: string,
   gameDate: string,
-  gameToken: string,
+  gameLink: string,
   players: Player[],
   gamePlayers: Array<{
     player_id: string;
@@ -270,7 +269,6 @@ export async function sendSessionSummaryNotification(
     errors: [],
   };
 
-  const gameLink = generateGameShareLink(gameId, gameToken);
   const playersMap = new Map(players.map(p => [p.id, p]));
 
   const processedPlayerIds = new Set<string>();
