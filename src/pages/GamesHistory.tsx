@@ -393,7 +393,7 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
             return (
               <TableRow
                 key={game.id}
-                className="cursor-pointer"
+                className={cn("cursor-pointer", game.player_count === 0 && "opacity-50")}
                 onClick={() => handleNavigate(game.id)}
                 onMouseEnter={() => prefetch(game.id)}
               >
@@ -404,9 +404,15 @@ const GamesHistory = ({ userId: propUserId, client, readOnly = false, disablePla
                   <ResponsiveCurrency amount={game.buy_in_amount} />
                 </TableCell>
                 <TableCell className="text-tiny">
-                  <Badge variant="secondary" className="font-numbers px-1 h-5 min-w-[20px] text-tiny justify-center">
-                    {game.player_count}
-                  </Badge>
+                  {game.player_count === 0 ? (
+                    <Badge variant="outline" className="font-numbers px-1.5 h-5 text-tiny justify-center border-dashed">
+                      Draft
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="font-numbers px-1 h-5 min-w-[20px] text-tiny justify-center">
+                      {game.player_count}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell isNumeric className="font-semibold text-muted-foreground text-tiny overflow-hidden whitespace-nowrap text-ellipsis">
                   <ResponsiveCurrency amount={game.total_pot} />

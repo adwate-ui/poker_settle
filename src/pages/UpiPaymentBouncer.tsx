@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { isValidUpiId } from '@/utils/upiPaymentLinks';
 
 /**
@@ -85,33 +86,69 @@ const UpiPaymentBouncer = () => {
 
   if (showError) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 max-w-md text-center">
-          <AlertCircle className="h-12 w-12 text-amber-500" />
-          <h1 className="text-xl font-bold">Unable to Open Payment App</h1>
-          <p className="text-base text-muted-foreground">
-            Please make sure you have a UPI app installed (Google Pay, PhonePe, Paytm, etc.)
-          </p>
-          <div className="flex gap-3 mt-4">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              Go Back
-            </Button>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
-        </div>
+      <div className="min-h-screen bg-background relative flex items-center justify-center p-4 overflow-hidden">
+        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full" />
+        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full" />
+
+        <Card className="w-full max-w-md glass-panel relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+          <CardHeader className="pt-10 pb-4 text-center space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shadow-2xl">
+              <Coins className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-luxury tracking-tight text-foreground">
+                PokerSettle
+              </CardTitle>
+              <CardDescription className="text-label tracking-[0.3em] text-muted-foreground">
+                Payment Handoff
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="px-8 pb-10 space-y-6 text-center">
+            <div className="flex flex-col items-center gap-3">
+              <AlertCircle className="h-10 w-10 text-amber-500" />
+              <h2 className="text-lg font-semibold text-foreground">Unable to Open Payment App</h2>
+              <p className="text-sm text-muted-foreground">
+                Please make sure you have a UPI app installed (Google Pay, PhonePe, Paytm, etc.)
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => navigate('/')}>
+                Go Back
+              </Button>
+              <Button className="flex-1" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-base text-muted-foreground">Opening payment app...</p>
-        <p className="text-sm text-muted-foreground">Please wait a moment</p>
-      </div>
+    <div className="min-h-screen bg-background relative flex items-center justify-center p-4 overflow-hidden">
+      <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full" />
+      <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full" />
+
+      <Card className="w-full max-w-md glass-panel relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <CardContent className="pt-10 pb-10 flex flex-col items-center gap-4 text-center">
+          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shadow-2xl">
+            <Coins className="h-8 w-8 text-primary" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-2xl font-luxury tracking-tight text-foreground">PokerSettle</p>
+          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mt-2" />
+          <p className="text-sm text-muted-foreground">Opening your payment app…</p>
+          <p className="text-xs text-muted-foreground">Please wait a moment</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

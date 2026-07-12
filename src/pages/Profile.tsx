@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, RefreshCw, HelpCircle, Sparkles, Info, Database, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, HelpCircle, Sparkles, Info, Database, Trash2, Loader2, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useOnboarding, OnboardingWizard } from '@/components/feedback/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CacheManager } from '@/components/feedback/CacheManager';
@@ -189,7 +189,7 @@ const AISettingsTab = () => {
           <label className="text-sm font-medium">Gemini API Key</label>
           <p className="text-sm text-muted-foreground">
             Used to read chip stacks from a photo during a game. Your key is stored privately and only sent to Google when you scan chips —{" "}
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">get a free key from Google AI Studio</a>.
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:text-primary">get a free key from Google AI Studio</a>.
           </p>
           <div className="flex gap-2">
             <Input type="password" value={isSaved ? "••••••••" : apiKey} onChange={(e) => setApiKey(e.target.value)} disabled={isSaved || loading} className="flex-1 h-12 md:h-10" />
@@ -369,7 +369,7 @@ const Profile = () => {
   const profileDisplayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
-    <div className="container max-w-4xl py-6 px-4 md:py-8 md:px-0 space-y-6">
+    <div className="container max-w-2xl py-6 px-4 md:py-12 md:px-0 space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/')} className="ml-0 md:-ml-4 text-muted-foreground hover:text-foreground h-12 md:h-10">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
@@ -392,13 +392,17 @@ const Profile = () => {
             <TabsTrigger value="help">Help</TabsTrigger>
           </TabsList>
           <div className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 w-8 rounded-l-md bg-gradient-to-r from-muted/60 to-transparent transition-opacity duration-200 md:hidden",
+            "pointer-events-none absolute inset-y-0 left-0 w-10 flex items-center rounded-l-md bg-gradient-to-r from-background via-background/80 to-transparent transition-opacity duration-200 md:hidden",
             scrollEdges.atStart ? "opacity-0" : "opacity-100"
-          )} />
+          )}>
+            <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
           <div className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 w-8 rounded-r-md bg-gradient-to-l from-muted/60 to-transparent transition-opacity duration-200 md:hidden",
+            "pointer-events-none absolute inset-y-0 right-0 w-10 flex items-center justify-end rounded-r-md bg-gradient-to-l from-background via-background/80 to-transparent transition-opacity duration-200 md:hidden",
             scrollEdges.atEnd ? "opacity-0" : "opacity-100"
-          )} />
+          )}>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
         </div>
 
         <TabsContent value="profile">
@@ -419,7 +423,6 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
               <div className="pt-4 border-t border-border"><label className="text-sm font-medium text-muted-foreground">Member Since</label><p className="text-sm text-foreground">{new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
-              <div><label className="text-sm font-medium text-muted-foreground">User ID</label><p className="text-sm font-mono text-muted-foreground">{user.id}</p></div>
             </CardContent>
           </Card>
         </TabsContent>

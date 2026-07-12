@@ -12,6 +12,7 @@ import { GameCardSkeletonList } from "@/components/skeletons";
 import { StatTile } from "@/components/ui-primitives/StatTile";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { Play, ArrowRight, Gamepad2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const OverviewDashboard = () => {
   const navigate = useNavigate();
@@ -96,11 +97,16 @@ export const OverviewDashboard = () => {
                 <button
                   key={game.id}
                   onClick={() => navigate(`/games/${game.id}`)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-accent/5 transition-colors text-left"
+                  className={cn(
+                    "w-full flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-accent/5 transition-colors text-left",
+                    (game.game_players?.length ?? 0) === 0 && "opacity-50"
+                  )}
                 >
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{format(new Date(game.date), "MMM d, yyyy")}</p>
-                    <p className="text-xs text-muted-foreground">{game.game_players?.length ?? 0} players</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(game.game_players?.length ?? 0) === 0 ? "Draft — no players added" : `${game.game_players?.length} players`}
+                    </p>
                   </div>
                   <div className="text-right shrink-0 ml-3">
                     <p className="font-numbers text-sm text-foreground">{formatCurrency(game.buy_in_amount)}</p>

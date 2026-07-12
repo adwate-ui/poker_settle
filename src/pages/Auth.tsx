@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ShieldCheck, Gamepad2, Coins, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Loader2, Coins, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { useMetaTags } from "@/hooks/useMetaTags";
@@ -43,7 +43,12 @@ const Auth = () => {
 
   const validatePassword = (value: string, isSignUp: boolean): string | undefined => {
     if (!value) return "Password is required";
-    if (isSignUp && value.length < 8) return "Password must be at least 8 characters";
+    if (isSignUp) {
+      if (value.length < 8) return "Password must be at least 8 characters";
+      if (!/[A-Z]/.test(value)) return "Password must contain at least one uppercase letter";
+      if (!/[a-z]/.test(value)) return "Password must contain at least one lowercase letter";
+      if (!/[0-9]/.test(value)) return "Password must contain at least one number";
+    }
     return undefined;
   };
 
@@ -186,7 +191,7 @@ const Auth = () => {
                     <Label htmlFor="signin-password">Password</Label>
                     <Link
                       to="/forgot-password"
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-foreground underline-offset-4 hover:text-primary hover:underline"
                     >
                       Forgot password?
                     </Link>
@@ -291,6 +296,14 @@ const Auth = () => {
                       {errors.password}
                     </p>
                   )}
+                  {password && (
+                    <ul className="text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
+                      <li className={password.length >= 8 ? "text-state-success" : ""}>At least 8 characters</li>
+                      <li className={/[A-Z]/.test(password) ? "text-state-success" : ""}>One uppercase letter</li>
+                      <li className={/[a-z]/.test(password) ? "text-state-success" : ""}>One lowercase letter</li>
+                      <li className={/[0-9]/.test(password) ? "text-state-success" : ""}>One number</li>
+                    </ul>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -357,17 +370,6 @@ const Auth = () => {
             Sign in with Google
           </Button>
 
-          <div className="pt-2 flex items-center justify-center gap-6 opacity-40 hover:opacity-100 transition-all duration-500 cursor-default">
-            <div className="flex items-center gap-2 group/icon">
-              <Gamepad2 className="h-4 w-4 group-hover/icon:text-primary transition-colors" />
-              <span className="text-label">Fair Play</span>
-            </div>
-            <div className="w-px h-3 bg-muted" />
-            <div className="flex items-center gap-2 group/icon">
-              <ShieldCheck className="h-4 w-4 group-hover/icon:text-primary transition-colors" />
-              <span className="text-label">Secure</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
 

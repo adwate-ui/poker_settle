@@ -28,7 +28,7 @@ const TAB_TITLES: Record<string, string> = {
 };
 
 const MobileBottomNav = ({ currentTab, onTabChange }: { currentTab: string; onTabChange: (value: string) => void }) => (
-  <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden glass-panel border-t border-primary/20 pb-safe">
+  <div className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden bg-background/95 backdrop-blur-xl border-t border-primary/20 shadow-xl pb-safe">
     <div className="flex justify-around items-center h-16">
       {NAV_ITEMS.map(({ value, label, icon: Icon }) => {
         const isActive = currentTab === value;
