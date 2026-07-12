@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Game, GamePlayer, Settlement } from '@/types/poker';
-import { calculateOptimizedSettlements, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
-import { PaymentMethodConfig } from '@/config/localization';
+import { Game, GamePlayer } from '@/types/poker';
+import { calculateSettlementsWithPreferences, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { useSettlementPreferences } from '@/features/players/hooks/useSettlementPreferences';
 
 export const useGameStats = (game: Game | null, gamePlayers: GamePlayer[]) => {
     const buyInAmount = game?.buy_in_amount || 0;
     const manualSettlements = game?.settlements || [];
+    const { preferredPairs, avoidPairs } = useSettlementPreferences();
 
     const totalBuyIns = useMemo(() =>
         gamePlayers.reduce((sum, gp) => sum + (gp.buy_ins * buyInAmount), 0),
@@ -53,7 +54,6 @@ export const useGameStats = (game: Game | null, gamePlayers: GamePlayer[]) => {
         let balances: PlayerBalance[] = gamePlayers.map(gp => ({
             name: gp.player.name,
             amount: gp.net_amount || 0,
-            paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
         }));
 
         const rake = game?.rake ?? 0;
@@ -63,8 +63,8 @@ export const useGameStats = (game: Game | null, gamePlayers: GamePlayer[]) => {
             balances = applyRake(balances, finalStacks, rake, hostPlayer.player.name);
         }
 
-        return calculateOptimizedSettlements(balances, manualSettlements);
-    }, [gamePlayers, manualSettlements, game?.rake]);
+        return calculateSettlementsWithPreferences(balances, manualSettlements, preferredPairs, avoidPairs);
+    }, [gamePlayers, manualSettlements, game?.rake, preferredPairs, avoidPairs]);
 
     const finalSettlements = useMemo(() =>
         [...manualSettlements, ...optimizedSettlements],

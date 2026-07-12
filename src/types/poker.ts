@@ -7,7 +7,6 @@ export interface Player {
   email?: string;
   phone_number?: string;
   upi_id?: string;
-  payment_preference?: string;
 }
 
 export interface GamePlayer {

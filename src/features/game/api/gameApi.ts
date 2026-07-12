@@ -27,7 +27,6 @@ interface RawGamePlayer {
         total_profit?: number;
         phone_number?: string | null;
         upi_id?: string | null;
-        payment_preference?: string | null;
     } | null;
 }
 
@@ -75,7 +74,6 @@ export const transformGameData = (rawGame: RawGameResponse): Game => {
                 total_profit: Number(gp.player?.total_profit || 0),
                 phone_number: gp.player?.phone_number || undefined,
                 upi_id: gp.player?.upi_id || undefined,
-                payment_preference: gp.player?.payment_preference || undefined
             }
         }))
     };
@@ -247,8 +245,8 @@ export const updateGamePlayerApi = async (playerGameId: string, updates: Partial
 
 export const fetchGameDetail = async (client: SupabaseClient, gameId: string, publicOnly = false) => {
     const playerFields = publicOnly
-        ? 'id, name, payment_preference, upi_id'
-        : 'id, name, payment_preference, upi_id, total_games, total_profit, phone_number';
+        ? 'id, name, upi_id'
+        : 'id, name, upi_id, total_games, total_profit, phone_number';
 
     // Session P&L (net_amount) is public on shared game links, same as settlement amounts.
     const gamePlayerFields = publicOnly
@@ -291,7 +289,6 @@ export const fetchGameDetail = async (client: SupabaseClient, gameId: string, pu
             total_profit: Number(gp.player?.total_profit || 0),
             phone_number: gp.player?.phone_number || undefined,
             upi_id: gp.player?.upi_id || undefined,
-            payment_preference: gp.player?.payment_preference || undefined
         }
     })).sort((a, b) => {
         const nameA = (a.player.name ?? '').toLowerCase();

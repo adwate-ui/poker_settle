@@ -3,8 +3,7 @@ import { Player } from "@/types/poker";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/notifications";
 import { validateUpiId } from "@/utils/playerUtils";
-import { Loader2, User, ShieldCheck, Coins, Check } from "lucide-react";
-import { PaymentMethodConfig } from "@/config/localization";
+import { Loader2, User, ShieldCheck, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface PlayerFormDialogProps {
@@ -38,7 +30,6 @@ export interface PlayerFormData {
   phone_number?: string;
   email?: string;
   upi_id?: string;
-  payment_preference?: string;
 }
 
 export const PlayerFormDialog = ({
@@ -52,9 +43,6 @@ export const PlayerFormDialog = ({
   const [name, setName] = useState(initialData?.name || "");
   const [phoneNumber, setPhoneNumber] = useState(initialData?.phone_number || "");
   const [upiId, setUpiId] = useState(initialData?.upi_id || "");
-  const [paymentPreference, setPaymentPreference] = useState<string>(
-    initialData?.payment_preference || PaymentMethodConfig.digital.key
-  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Field-level validation state
@@ -76,13 +64,11 @@ export const PlayerFormDialog = ({
       setName(initialData.name || "");
       setPhoneNumber(initialData.phone_number || "");
       setUpiId(initialData.upi_id || "");
-      setPaymentPreference(initialData.payment_preference || PaymentMethodConfig.digital.key);
     } else if (open && !initialData) {
       // Reset for new player
       setName("");
       setPhoneNumber("");
       setUpiId("");
-      setPaymentPreference(PaymentMethodConfig.digital.key);
     }
     // Reset errors and touched state when dialog opens
     setErrors({});
@@ -180,7 +166,6 @@ export const PlayerFormDialog = ({
         phone_number: phoneNumber.trim() || '',
         email: initialData?.email || '', // Keep existing email if any
         upi_id: upiId.trim() || '',
-        payment_preference: paymentPreference,
       };
 
       await onSave(playerData);
@@ -189,7 +174,6 @@ export const PlayerFormDialog = ({
       setName("");
       setPhoneNumber("");
       setUpiId("");
-      setPaymentPreference(PaymentMethodConfig.digital.key);
       onOpenChange(false);
       toast.success(initialData ? "Player updated" : "New player added");
     } catch (error) {
@@ -208,7 +192,6 @@ export const PlayerFormDialog = ({
     setName(initialData?.name || "");
     setPhoneNumber(initialData?.phone_number || "");
     setUpiId(initialData?.upi_id || "");
-    setPaymentPreference(initialData?.payment_preference || PaymentMethodConfig.digital.key);
     onOpenChange(false);
   };
 
@@ -346,22 +329,6 @@ export const PlayerFormDialog = ({
                   </p>
                 )}
               </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Payment Method</Label>
-              <Select value={paymentPreference} onValueChange={(value) => setPaymentPreference(value)}>
-                <SelectTrigger className="h-12 transition-all">
-                  <div className="flex items-center gap-3">
-                    <Coins className="h-4 w-4 text-muted-foreground/40" />
-                    <SelectValue />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={PaymentMethodConfig.digital.key}>Digital Payment ({PaymentMethodConfig.digital.label})</SelectItem>
-                  <SelectItem value={PaymentMethodConfig.cash.key}>{PaymentMethodConfig.cash.label}</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

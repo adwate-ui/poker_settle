@@ -133,7 +133,6 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
     isStackBalanced,
     canCompleteGame,
     hasDiscrepancies,
-    finalSettlements
   } = useGameStats(game, gamePlayers);
 
   // Filter available players for searching
@@ -451,7 +450,7 @@ const GameDashboard = ({ gameId }: GameDashboardProps) => {
             </Card>
           ) : (
             <Button
-              onClick={() => handleCompleteGame(finalSettlements)}
+              onClick={() => handleCompleteGame()}
               disabled={!canCompleteGame || isCompletingGame}
               className={cn(
                 "w-full h-12 text-black font-bold text-lg tracking-[0.2em] rounded-xl transition-all relative overflow-hidden group",

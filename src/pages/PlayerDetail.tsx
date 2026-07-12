@@ -13,7 +13,7 @@ import {
 import { toast } from "@/lib/notifications";
 import {
   ArrowLeft, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Share2,
-  ChevronDown, Edit, User, Phone, CreditCard, Layers, ArrowRight,
+  ChevronDown, Edit, User, Phone, CreditCard, ArrowRight,
   Download, FileSpreadsheet, FileText, Heart, X as XIcon, Plus, UserX,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -360,8 +360,8 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                 )}
               </div>
 
-              {(player.phone_number || player.upi_id || player.payment_preference) ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(player.phone_number || player.upi_id) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="p-4 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
                     <div className="flex items-center gap-2 text-label text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0" />WhatsApp
@@ -373,16 +373,6 @@ const PlayerDetail = ({ playerId: propPlayerId, userId: _userId, client, readOnl
                       <CreditCard className="h-3 w-3 shrink-0" />Digital ID
                     </div>
                     <p className="text-sm font-medium text-foreground truncate">{player.upi_id || "Not Linked"}</p>
-                  </div>
-                  <div className="p-4 sm:p-6 rounded-xl border border-border bg-accent/5 space-y-2">
-                    <div className="flex items-center gap-2 text-label text-muted-foreground">
-                      <Layers className="h-3 w-3 shrink-0" />Preference
-                    </div>
-                    <p className="text-sm font-medium text-foreground capitalize">
-                      {player.payment_preference
-                        ? (player.payment_preference === "digital" ? "Digital" : "Cash")
-                        : "Unspecified"}
-                    </p>
                   </div>
                 </div>
               ) : (

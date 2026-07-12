@@ -6,11 +6,10 @@ import { toast } from '@/lib/notifications';
 import { ErrorMessages } from '@/lib/errorUtils';
 import { GamePlayer, Settlement, SeatPosition } from '@/types/poker';
 import { useNavigate } from 'react-router-dom';
-import { calculateOptimizedSettlements, calculateSettlementsWithPreferences, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
+import { calculateSettlementsWithPreferences, applyRake, PlayerBalance } from '@/features/finance/utils/settlementUtils';
 import { fetchAllRelationships } from '@/features/players/api/playerRelationshipsApi';
 import { useAuth } from '@/hooks/useAuth';
 import { parseIndianNumber } from '@/lib/utils';
-import { PaymentMethodConfig } from '@/config/localization';
 import { sendSessionSummaryNotification } from '@/services/whatsappNotifications';
 import { useSharedLink } from '@/hooks/useSharedLink';
 
@@ -209,53 +208,50 @@ export const useGameDashboardActions = () => {
         toast.info("Adjustment removed");
     }, [game, setGame]);
 
-    const handleCompleteGame = useCallback(async (settlementsInput: Settlement[] = []) => {
+    const handleCompleteGame = useCallback(async () => {
         if (!game || isCompletingGame) return;
 
         setIsCompletingGame(true);
         const loadingToastId = toast.loading("Saving game...");
 
         try {
-            // 1. Calculate settlements if not provided
-            let finalSettlements = settlementsInput;
+            // 1. Always recompute settlements here so preferred/avoid partner
+            // preferences are guaranteed to apply, regardless of caller.
+            let balances: PlayerBalance[] = gamePlayers.map(gp => ({
+                name: gp.player.name,
+                amount: gp.net_amount,
+            }));
 
-            if (!finalSettlements || finalSettlements.length === 0) {
-                let balances: PlayerBalance[] = gamePlayers.map(gp => ({
-                    name: gp.player.name,
-                    amount: gp.net_amount,
-                    paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
-                }));
-
-                const rake = game.rake ?? 0;
-                const hostPlayer = gamePlayers.find(gp => gp.is_host);
-                if (rake > 0 && hostPlayer) {
-                    const finalStacks = new Map(gamePlayers.map(gp => [gp.player.name, gp.final_stack]));
-                    balances = applyRake(balances, finalStacks, rake, hostPlayer.player.name);
-                }
-
-                const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
-
-                // Fetch player relationship preferences for settlement ordering
-                let preferredPairs = new Set<string>();
-                let avoidPairs = new Set<string>();
-                if (user) {
-                    try {
-                        const prefs = await fetchAllRelationships(user.id);
-                        preferredPairs = prefs.preferredPairs;
-                        avoidPairs = prefs.avoidPairs;
-                    } catch {
-                        // fall back to unordered settlement
-                    }
-                }
-
-                const autoSettlements = calculateSettlementsWithPreferences(
-                    balances,
-                    manualSettlements,
-                    preferredPairs,
-                    avoidPairs
-                );
-                finalSettlements = [...manualSettlements, ...autoSettlements];
+            const rake = game.rake ?? 0;
+            const hostPlayer = gamePlayers.find(gp => gp.is_host);
+            if (rake > 0 && hostPlayer) {
+                const finalStacks = new Map(gamePlayers.map(gp => [gp.player.name, gp.final_stack]));
+                balances = applyRake(balances, finalStacks, rake, hostPlayer.player.name);
             }
+
+            const manualSettlements = (game.settlements || []).filter((s: any) => s.isManual) as Settlement[];
+
+            // Fetch player relationship preferences for settlement ordering
+            let preferredPairs = new Set<string>();
+            let avoidPairs = new Set<string>();
+            if (user) {
+                try {
+                    const prefs = await fetchAllRelationships(user.id);
+                    preferredPairs = prefs.preferredPairs;
+                    avoidPairs = prefs.avoidPairs;
+                } catch (prefsError) {
+                    console.error("Failed to load settlement preferences:", prefsError);
+                    toast.warning("Couldn't load your settlement preferences — used default settlement order");
+                }
+            }
+
+            const autoSettlements = calculateSettlementsWithPreferences(
+                balances,
+                manualSettlements,
+                preferredPairs,
+                avoidPairs
+            );
+            const finalSettlements = [...manualSettlements, ...autoSettlements];
 
             // 2. Complete the game in the database (enforces zero-sum check)
             await completeGame(game.id, finalSettlements);

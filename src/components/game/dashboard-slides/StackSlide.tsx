@@ -189,7 +189,7 @@ const StackSlide = () => {
 
                 <Button
                     onClick={() => {
-                        handleCompleteGame([]);
+                        handleCompleteGame();
                     }}
                     disabled={!canCompleteGame || isCompletingGame}
                     className={cn(

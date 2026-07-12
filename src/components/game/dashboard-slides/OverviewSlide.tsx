@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { useDashboardStore } from "@/features/game/stores/dashboardStore";
 import { useGameDashboardActions } from "@/features/game/hooks/useGameDashboardActions";
-import { calculateOptimizedSettlements, PlayerBalance } from "@/features/finance/utils/settlementUtils";
-import { PaymentMethodConfig } from "@/config/localization";
+import { calculateSettlementsWithPreferences, PlayerBalance } from "@/features/finance/utils/settlementUtils";
+import { useSettlementPreferences } from "@/features/players/hooks/useSettlementPreferences";
 
 interface OverviewSlideProps {
     isMobile?: boolean;
@@ -48,6 +48,7 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
     } = useDashboardStore();
 
     const { addManualTransfer, handleDeleteManualTransfer } = useGameDashboardActions();
+    const { preferredPairs, avoidPairs } = useSettlementPreferences();
 
     const manualSettlements = game?.settlements || [];
     const buyInAmount = game?.buy_in_amount || 0;
@@ -58,11 +59,10 @@ const OverviewSlide = ({ isMobile }: OverviewSlideProps) => {
         const balances: PlayerBalance[] = gamePlayers.map(gp => ({
             name: gp.player.name,
             amount: gp.net_amount || 0,
-            paymentPreference: gp.player.payment_preference || PaymentMethodConfig.digital.key
         }));
 
-        return calculateOptimizedSettlements(balances, manualSettlements);
-    }, [gamePlayers, manualSettlements]);
+        return calculateSettlementsWithPreferences(balances, manualSettlements, preferredPairs, avoidPairs);
+    }, [gamePlayers, manualSettlements, preferredPairs, avoidPairs]);
 
     const sortedGamePlayers = useMemo(
         () => [...gamePlayers].sort((a, b) => a.player.name.localeCompare(b.player.name)),

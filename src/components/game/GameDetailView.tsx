@@ -45,8 +45,9 @@ import { BuyInHistoryDialog } from "@/components/game/BuyInHistoryDialog";
 import { useSharedLink } from "@/hooks/useSharedLink";
 import { ShareDialog } from "@/components/shared/ShareDialog";
 import { useMetaTags } from "@/hooks/useMetaTags";
-import { calculateOptimizedSettlements, applyRake, PlayerBalance } from "@/features/finance/utils/settlementUtils";
+import { calculateSettlementsWithPreferences, applyRake, PlayerBalance } from "@/features/finance/utils/settlementUtils";
 import { useSettlementConfirmations } from "@/hooks/useSettlementConfirmations";
+import { useSettlementPreferences } from "@/features/players/hooks/useSettlementPreferences";
 import { buildShortUrl } from "@/lib/shareUtils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useGameDetail } from "@/features/game/hooks/useGameDetail";
@@ -63,12 +64,10 @@ interface GamePlayer {
   is_host?: boolean;
   players?: {
     name: string | null;
-    payment_preference?: string;
     upi_id?: string;
   } | null;
   player?: {
     name: string | null;
-    payment_preference?: string;
     upi_id?: string;
   } | null;
 }
@@ -116,6 +115,7 @@ export const GameDetailView = ({
 }: GameDetailViewProps) => {
   const { createOrGetSharedLink } = useSharedLink();
   const { confirmSettlement, unconfirmSettlement, getConfirmationStatus } = useSettlementConfirmations();
+  const { preferredPairs, avoidPairs } = useSettlementPreferences();
 
   // Use TanStack Query hook
   const { data: gameDetail, isLoading: queryLoading, refetch: refetchGameDetail } = useGameDetail(client, gameId, publicOnly);
@@ -180,7 +180,6 @@ export const GameDetailView = ({
     return sortedGamePlayers.map(gp => ({
       name: gp.player?.name ?? gp.players?.name ?? "",
       amount: gp.net_amount ?? 0,
-      paymentPreference: (gp.player?.payment_preference ?? gp.players?.payment_preference) || 'upi',
     }));
   }, [sortedGamePlayers]);
 
@@ -228,7 +227,7 @@ export const GameDetailView = ({
     const allManuals = [...existingManuals, newManualTransfer];
 
     // 4. Calculate new auto-settlements with all manual transfers
-    const newAutoSettlements = calculateOptimizedSettlements(rakeAdjustedBalances, allManuals);
+    const newAutoSettlements = calculateSettlementsWithPreferences(rakeAdjustedBalances, allManuals, preferredPairs, avoidPairs);
     const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
       from,
       to,
@@ -266,7 +265,7 @@ export const GameDetailView = ({
     const remainingManuals = manualTransfers.filter((_, i) => i !== index);
 
     // 3. Recalculate auto-settlements with remaining manual transfers
-    const newAutoSettlements = calculateOptimizedSettlements(playerBalances, remainingManuals);
+    const newAutoSettlements = calculateSettlementsWithPreferences(rakeAdjustedBalances, remainingManuals, preferredPairs, avoidPairs);
     const autoSettlementsWithFlag = newAutoSettlements.map(({ from, to, amount }) => ({
       from,
       to,
@@ -304,12 +303,12 @@ export const GameDetailView = ({
     }
 
     // Fallback: Calculate optimized settlements on the fly if none are saved
-    const calculated = calculateOptimizedSettlements(rakeAdjustedBalances, []);
+    const calculated = calculateSettlementsWithPreferences(rakeAdjustedBalances, [], preferredPairs, avoidPairs);
     return calculated.map(s => ({
       ...s,
       isManual: false
     }));
-  }, [savedSettlements, rakeAdjustedBalances]);
+  }, [savedSettlements, rakeAdjustedBalances, preferredPairs, avoidPairs]);
 
   const nameToIdMap = useMemo(() => {
     const map: Record<string, string> = {};

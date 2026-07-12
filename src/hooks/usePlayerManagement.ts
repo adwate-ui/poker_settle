@@ -29,7 +29,6 @@ export const usePlayerManagement = () => {
             name: playerData.name,
             email: playerData.email || null,
             upi_id: playerData.upi_id || null,
-            payment_preference: playerData.payment_preference || "upi",
             user_id: user.id,
           })
           .select()
@@ -65,7 +64,6 @@ export const usePlayerManagement = () => {
           email?: string | null;
           phone_number?: string | null;
           upi_id?: string | null;
-          payment_preference?: string;
         } = {};
 
         if (playerData.name) {
@@ -85,11 +83,6 @@ export const usePlayerManagement = () => {
         // Allow clearing upi_id by passing empty string -> convert to null
         if (playerData.upi_id !== undefined) {
           updateData.upi_id = playerData.upi_id || null;
-        }
-
-        // Allow updating payment_preference
-        if (playerData.payment_preference !== undefined) {
-          updateData.payment_preference = playerData.payment_preference;
         }
 
         const { data, error } = await supabase
