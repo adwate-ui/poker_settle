@@ -37,3 +37,6 @@ coverage/
 
 # Misc
 nul
+
+# Supabase CLI local link cache
+supabase/.temp/

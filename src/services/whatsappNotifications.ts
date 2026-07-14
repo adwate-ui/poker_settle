@@ -160,8 +160,13 @@ export async function sendSessionSummaryNotification(
   };
 
   const playersMap = new Map(players.map(p => [p.id, p]));
-
   const processedPlayerIds = new Set<string>();
+
+  // Build every message up front (fast, synchronous) rather than sending
+  // as we go. Sending is then a single server-side batch call so delivery
+  // isn't tied to the browser tab staying open for the ~1 min+ it can take
+  // to work through a full player list against the upstream WhatsApp bridge.
+  const toSend: Array<{ playerName: string; phoneNumber: string; text: string }> = [];
 
   for (const gamePlayer of gamePlayers) {
     // Deduplicate recipients
@@ -179,35 +184,45 @@ export async function sendSessionSummaryNotification(
       continue;
     }
 
-    // Filter relevant settlements for this player
-    const playerSettlements = settlements.filter(s => s.from === player.name || s.to === player.name);
+    try {
+      // Filter relevant settlements for this player
+      const playerSettlements = settlements.filter(s => s.from === player.name || s.to === player.name);
 
-    const isWinner = gamePlayer.net_amount >= 0;
+      const isWinner = gamePlayer.net_amount >= 0;
 
-    const message = generateWhatsAppSessionSummary({
-      playerName: player.name,
-      gameDate,
-      netAmount: gamePlayer.net_amount,
-      gameLink,
-      settlements: playerSettlements,
-      isWinner,
-    });
+      const message = generateWhatsAppSessionSummary({
+        playerName: player.name,
+        gameDate,
+        netAmount: gamePlayer.net_amount,
+        gameLink,
+        settlements: playerSettlements,
+        isWinner,
+      });
 
-    const result = await evolutionApiService.sendMessage({
-      number: player.phone_number,
-      text: message,
-    });
-
-    if (result.success) {
-      results.sent++;
-    } else {
+      toSend.push({ playerName: player.name, phoneNumber: player.phone_number, text: message });
+    } catch (error) {
+      console.error(`Failed to build session summary for ${player.name}:`, error);
       results.failed++;
-      results.errors.push(`${player.name}: ${result.error || "Unknown error"}`);
+      results.errors.push(`${player.name}: Exception - ${error instanceof Error ? error.message : String(error)}`);
       results.success = false;
     }
+  }
 
-    // Small delay between messages
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  if (toSend.length > 0) {
+    const sendResults = await evolutionApiService.sendBatch(
+      toSend.map(({ phoneNumber, text }) => ({ number: phoneNumber, text }))
+    );
+
+    sendResults.forEach((result, i) => {
+      const { playerName } = toSend[i];
+      if (result.success) {
+        results.sent++;
+      } else {
+        results.failed++;
+        results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
+        results.success = false;
+      }
+    });
   }
 
   return results;

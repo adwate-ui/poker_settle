@@ -1,4 +1,9 @@
 project_id = "xfahfllkbutljcowwxpx"
+[functions.send-whatsapp-batch]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/send-whatsapp-batch/index.ts"
+
 [functions.analyze-chips]
 enabled = true
 verify_jwt = true

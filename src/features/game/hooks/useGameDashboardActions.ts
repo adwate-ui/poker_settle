@@ -265,7 +265,7 @@ export const useGameDashboardActions = () => {
 
                 if (gameLink) {
                     const players = gamePlayers.map(gp => gp.player);
-                    await sendSessionSummaryNotification(
+                    const notifyResult = await sendSessionSummaryNotification(
                         game.date,
                         gameLink,
                         players,
@@ -275,7 +275,15 @@ export const useGameDashboardActions = () => {
                         })),
                         finalSettlements
                     );
-                    toast.success("Game finalized & notifications sent!");
+
+                    if (notifyResult.failed > 0) {
+                        console.error("WhatsApp notification failures:", notifyResult.errors);
+                        toast.warning(
+                            `Game finalized. ${notifyResult.sent}/${notifyResult.sent + notifyResult.failed} notifications sent — failed for: ${notifyResult.errors.join(", ")}`
+                        );
+                    } else {
+                        toast.success("Game finalized & notifications sent!");
+                    }
                 } else {
                     toast.success("Game finalized!");
                 }
