@@ -1,24 +1,19 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-queue-secret',
 };
 
 const FETCH_MS = 40_000;
 const POLL_MS = 5_000;
-const WAIT_MS = 90_000;   // max time to wait for WhatsApp to reconnect after server restart
+const WAIT_MS = 90_000;
 
-interface BatchMessage {
-    number: string;
-    text: string;
-}
-
-interface BatchResult {
-    number: string;
-    success: boolean;
-    messageId?: string;
-    error?: string;
+interface QueueRow {
+    id: string;
+    phone_number: string;
+    message_text: string;
 }
 
 async function timedFetch(url: string, opts: RequestInit = {}): Promise<Response> {
@@ -38,16 +33,14 @@ async function sendOne(
     base: string,
     headers: Record<string, string>,
     instanceName: string,
-    message: BatchMessage
-): Promise<BatchResult> {
-    let cleanNumber = message.number.replace(/[^\d]/g, '');
+    row: QueueRow
+): Promise<{ success: boolean; error?: string }> {
+    let cleanNumber = row.phone_number.replace(/[^\d]/g, '');
     if (cleanNumber.length === 10) cleanNumber = '91' + cleanNumber;
 
     const stateUrl = `${base}/instance/connectionState/${instanceName}`;
     const sendUrl = `${base}/message/sendText/${instanceName}`;
 
-    // Poll until instance state is "open" — handles the window after Evolution API
-    // server restart where Baileys is re-establishing the WhatsApp WebSocket.
     const deadline = Date.now() + WAIT_MS;
     let state = 'unknown';
 
@@ -65,7 +58,6 @@ async function sendOne(
 
     if (state !== 'open') {
         return {
-            number: cleanNumber,
             success: false,
             error: 'WhatsApp is not connected. Please restart your Evolution API server, then check the instance status at your Evolution API dashboard.',
         };
@@ -75,31 +67,26 @@ async function sendOne(
         const r = await timedFetch(sendUrl, {
             method: 'POST',
             headers: { ...headers, 'Connection': 'close' },
-            body: JSON.stringify({ number: cleanNumber, text: message.text, delay: 100, linkPreview: false }),
+            body: JSON.stringify({ number: cleanNumber, text: row.message_text, delay: 100, linkPreview: false }),
         });
 
         const body = await r.text();
 
         if (r.ok) {
-            let messageId: string | undefined;
-            try {
-                messageId = JSON.parse(body)?.key?.id;
-            } catch { /* non-JSON success body, ignore */ }
-            return { number: cleanNumber, success: true, messageId };
+            return { success: true };
         }
 
         const connClosed = body.includes('Connection Closed');
-        console.error(`[Batch] send failed for ${cleanNumber}: ${r.status} — ${body.slice(0, 300)}`);
+        console.error(`[Queue] send failed for ${cleanNumber}: ${r.status} — ${body.slice(0, 300)}`);
         return {
-            number: cleanNumber,
             success: false,
             error: connClosed
                 ? 'WhatsApp connection is broken. Please restart your Evolution API server to force reconnection.'
                 : `Send failed (${r.status}). Check your Evolution API instance.`,
         };
     } catch (err) {
-        console.error(`[Batch] error for ${cleanNumber}:`, err instanceof Error ? err.message : String(err));
-        return { number: cleanNumber, success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+        console.error(`[Queue] error for ${cleanNumber}:`, err instanceof Error ? err.message : String(err));
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     }
 }
 
@@ -107,38 +94,55 @@ Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
     try {
-        const { messages } = await req.json() as { messages: BatchMessage[] };
-
-        if (!Array.isArray(messages) || messages.length === 0) {
-            throw new Error('messages must be a non-empty array');
+        const queueSecret = Deno.env.get('QUEUE_TRIGGER_SECRET');
+        if (!queueSecret || req.headers.get('x-queue-secret') !== queueSecret) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
         }
 
         const apiUrl = Deno.env.get('EVOLUTION_API_URL');
         const apiKey = Deno.env.get('EVOLUTION_API_KEY');
         const instanceName = Deno.env.get('EVOLUTION_INSTANCE_NAME');
-        if (!apiUrl || !apiKey || !instanceName) throw new Error('Missing Config');
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        if (!apiUrl || !apiKey || !instanceName) throw new Error('Missing Evolution API config');
+        if (!supabaseUrl || !serviceRoleKey) throw new Error('Missing Supabase service config');
 
+        const supabase = createClient(supabaseUrl, serviceRoleKey);
         const base = apiUrl.replace(/\/$/, '');
         const headers = { 'apikey': apiKey, 'Content-Type': 'application/json' };
-        const results: BatchResult[] = [];
 
-        // Sequential with a small delay between sends, to avoid tripping the
-        // upstream WhatsApp bridge's anti-spam / rate limiting. Runs entirely
-        // server-side in one invocation so delivery survives the calling
-        // browser tab being closed or backgrounded partway through.
-        for (const message of messages) {
-            console.log(`[Batch] sending to ${message.number}`);
-            const result = await sendOne(base, headers, instanceName, message);
-            results.push(result);
+        const { data: rows, error: claimError } = await supabase
+            .rpc('claim_pending_whatsapp_notifications', { batch_size: 50 });
+
+        if (claimError) throw claimError;
+
+        const claimed = (rows ?? []) as QueueRow[];
+        let sent = 0;
+        let failed = 0;
+
+        for (const row of claimed) {
+            const result = await sendOne(base, headers, instanceName, row);
+
+            await supabase
+                .from('whatsapp_notification_queue')
+                .update({
+                    status: result.success ? 'sent' : 'failed',
+                    error: result.error ?? null,
+                    sent_at: result.success ? new Date().toISOString() : null,
+                })
+                .eq('id', row.id);
+
+            if (result.success) sent++; else failed++;
+
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
-        return new Response(JSON.stringify({ results }), {
+        return new Response(JSON.stringify({ processed: claimed.length, sent, failed }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
     } catch (error) {
-        console.error('[Batch] Error:', error instanceof Error ? error.message : String(error));
+        console.error('[Queue] Error:', error instanceof Error ? error.message : String(error));
         return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
             status: 500,
             headers: corsHeaders,

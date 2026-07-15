@@ -4,6 +4,7 @@
  */
 
 import { evolutionApiService } from "./evolutionApi";
+import { supabase } from "@/integrations/supabase/client";
 import {
   generatePlayerWelcomeMessage,
   generateGameCompletionMessage,
@@ -16,6 +17,13 @@ import { Player, Settlement } from "@/types/poker";
 export interface NotificationResult {
   success: boolean;
   sent: number;
+  failed: number;
+  errors: string[];
+}
+
+export interface NotificationQueueResult {
+  success: boolean;
+  queued: number;
   failed: number;
   errors: string[];
 }
@@ -129,10 +137,19 @@ export async function sendGameCompletionNotifications(
 }
 
 /**
- * Send a unified session summary notification to each player
- * Includes game summary, share link, and individual settlements
+ * Queue a unified session summary notification for each player.
+ * Includes game summary, share link, and individual settlements.
+ *
+ * Messages are queued in the database rather than sent directly from the
+ * client. A DB trigger picks the queue up immediately and a server-side
+ * process sends everything, so delivery no longer depends on the browser
+ * tab staying open — a real risk here, since the upstream WhatsApp bridge
+ * can take several seconds per message and a full player list can take
+ * over a minute even in the successful case. Only the (fast, synchronous)
+ * queue insert needs to complete on the client.
  */
 export async function sendSessionSummaryNotification(
+  gameId: string,
   gameDate: string,
   gameLink: string,
   players: Player[],
@@ -141,20 +158,10 @@ export async function sendSessionSummaryNotification(
     net_amount: number;
   }>,
   settlements: Settlement[]
-): Promise<NotificationResult> {
-  if (!evolutionApiService.isConfigured()) {
-    console.warn("Evolution API not configured. Notifications not sent.");
-    return {
-      success: false,
-      sent: 0,
-      failed: players.length,
-      errors: ["WhatsApp service not configured"],
-    };
-  }
-
-  const results: NotificationResult = {
+): Promise<NotificationQueueResult> {
+  const results: NotificationQueueResult = {
     success: true,
-    sent: 0,
+    queued: 0,
     failed: 0,
     errors: [],
   };
@@ -162,11 +169,7 @@ export async function sendSessionSummaryNotification(
   const playersMap = new Map(players.map(p => [p.id, p]));
   const processedPlayerIds = new Set<string>();
 
-  // Build every message up front (fast, synchronous) rather than sending
-  // as we go. Sending is then a single server-side batch call so delivery
-  // isn't tied to the browser tab staying open for the ~1 min+ it can take
-  // to work through a full player list against the upstream WhatsApp bridge.
-  const toSend: Array<{ playerName: string; phoneNumber: string; text: string }> = [];
+  const toQueue: Array<{ game_id: string; player_id: string; phone_number: string; message_text: string }> = [];
 
   for (const gamePlayer of gamePlayers) {
     // Deduplicate recipients
@@ -181,6 +184,13 @@ export async function sendSessionSummaryNotification(
       console.error(`WhatsApp Error: No phone number for player ${player.name}`);
       results.failed++;
       results.errors.push(`${player.name}: No phone number`);
+      continue;
+    }
+
+    const cleanNumber = evolutionApiService.formatPhoneNumber(player.phone_number);
+    if (!cleanNumber) {
+      results.failed++;
+      results.errors.push(`${player.name}: Invalid phone number format`);
       continue;
     }
 
@@ -199,7 +209,7 @@ export async function sendSessionSummaryNotification(
         isWinner,
       });
 
-      toSend.push({ playerName: player.name, phoneNumber: player.phone_number, text: message });
+      toQueue.push({ game_id: gameId, player_id: player.id, phone_number: cleanNumber, message_text: message });
     } catch (error) {
       console.error(`Failed to build session summary for ${player.name}:`, error);
       results.failed++;
@@ -208,21 +218,17 @@ export async function sendSessionSummaryNotification(
     }
   }
 
-  if (toSend.length > 0) {
-    const sendResults = await evolutionApiService.sendBatch(
-      toSend.map(({ phoneNumber, text }) => ({ number: phoneNumber, text }))
-    );
+  if (toQueue.length > 0) {
+    const { error } = await supabase.from('whatsapp_notification_queue').insert(toQueue);
 
-    sendResults.forEach((result, i) => {
-      const { playerName } = toSend[i];
-      if (result.success) {
-        results.sent++;
-      } else {
-        results.failed++;
-        results.errors.push(`${playerName}: ${result.error || "Unknown error"}`);
-        results.success = false;
-      }
-    });
+    if (error) {
+      console.error('Failed to queue WhatsApp notifications:', error);
+      results.failed += toQueue.length;
+      results.errors.push(`Failed to queue ${toQueue.length} notification(s): ${error.message}`);
+      results.success = false;
+    } else {
+      results.queued += toQueue.length;
+    }
   }
 
   return results;

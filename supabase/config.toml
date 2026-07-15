@@ -1,8 +1,8 @@
 project_id = "xfahfllkbutljcowwxpx"
-[functions.send-whatsapp-batch]
+[functions.process-whatsapp-queue]
 enabled = true
-verify_jwt = true
-entrypoint = "./functions/send-whatsapp-batch/index.ts"
+verify_jwt = false
+entrypoint = "./functions/process-whatsapp-queue/index.ts"
 
 [functions.analyze-chips]
 enabled = true

@@ -257,15 +257,16 @@ export const useGameDashboardActions = () => {
             await completeGame(game.id, finalSettlements);
             toast.dismiss(loadingToastId);
 
-            // 3. Send notifications
+            // 3. Queue notifications (sent server-side, independent of this tab staying open)
             try {
-                const loadingNotifyToast = toast.loading("Sending notifications...");
+                const loadingNotifyToast = toast.loading("Queuing notifications...");
                 const linkData = await createOrGetSharedLink('game', game.id);
                 const gameLink = linkData?.shortCode ? getShortUrl(linkData.shortCode) : '';
 
                 if (gameLink) {
                     const players = gamePlayers.map(gp => gp.player);
                     const notifyResult = await sendSessionSummaryNotification(
+                        game.id,
                         game.date,
                         gameLink,
                         players,
@@ -277,20 +278,20 @@ export const useGameDashboardActions = () => {
                     );
 
                     if (notifyResult.failed > 0) {
-                        console.error("WhatsApp notification failures:", notifyResult.errors);
+                        console.error("WhatsApp notification queueing failures:", notifyResult.errors);
                         toast.warning(
-                            `Game finalized. ${notifyResult.sent}/${notifyResult.sent + notifyResult.failed} notifications sent — failed for: ${notifyResult.errors.join(", ")}`
+                            `Game finalized. ${notifyResult.queued}/${notifyResult.queued + notifyResult.failed} notifications queued — failed for: ${notifyResult.errors.join(", ")}`
                         );
                     } else {
-                        toast.success("Game finalized & notifications sent!");
+                        toast.success("Game finalized & notifications queued!");
                     }
                 } else {
                     toast.success("Game finalized!");
                 }
                 toast.dismiss(loadingNotifyToast);
             } catch (notifyError) {
-                console.error("Failed to send notifications:", notifyError);
-                toast.error("Game finalized, but failed to send notifications");
+                console.error("Failed to queue notifications:", notifyError);
+                toast.error("Game finalized, but failed to queue notifications");
             }
 
             // 4. Reset state and navigate
