@@ -13,6 +13,15 @@ import { parseIndianNumber } from '@/lib/utils';
 import { sendSessionSummaryNotification } from '@/services/whatsappNotifications';
 import { useSharedLink } from '@/hooks/useSharedLink';
 
+// Module-level (not component-level) lock: guards against completing the
+// same game twice in quick succession — e.g. a fast double-tap on the
+// "Complete Game" button, or the same action wired up in two components
+// (GameDashboard and StackSlide) that each hold their own stale
+// `isCompletingGame` closure until React re-renders. A plain module
+// variable updates synchronously, unlike React state, closing that race
+// window entirely.
+let completingGameLock = false;
+
 export const useGameDashboardActions = () => {
     const {
         game,
@@ -209,7 +218,8 @@ export const useGameDashboardActions = () => {
     }, [game, setGame]);
 
     const handleCompleteGame = useCallback(async () => {
-        if (!game || isCompletingGame) return;
+        if (!game || isCompletingGame || completingGameLock) return;
+        completingGameLock = true;
 
         setIsCompletingGame(true);
         const loadingToastId = toast.loading("Saving game...");
@@ -295,6 +305,7 @@ export const useGameDashboardActions = () => {
             }
 
             // 4. Reset state and navigate
+            completingGameLock = false;
             setIsCompletingGame(false);
             navigate(`/games/${game.id}`);
 
@@ -302,6 +313,7 @@ export const useGameDashboardActions = () => {
             toast.dismiss(loadingToastId);
             console.error("Error completing game:", err);
             toast.error(ErrorMessages.game.complete(err));
+            completingGameLock = false;
             setIsCompletingGame(false);
         }
     }, [game, completeGame, navigate, isCompletingGame, gamePlayers, setIsCompletingGame, createOrGetSharedLink, getShortUrl, user]);

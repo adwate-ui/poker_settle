@@ -219,7 +219,14 @@ export async function sendSessionSummaryNotification(
   }
 
   if (toQueue.length > 0) {
-    const { error } = await supabase.from('whatsapp_notification_queue').insert(toQueue);
+    // Upsert with ignoreDuplicates rather than insert: the (game_id,
+    // player_id) unique constraint means a second call for the same game
+    // (double-tap, two tabs completing the same game, a retry) silently
+    // no-ops instead of throwing and instead of ever queueing a duplicate
+    // send for anyone.
+    const { error } = await supabase
+      .from('whatsapp_notification_queue')
+      .upsert(toQueue, { onConflict: 'game_id,player_id', ignoreDuplicates: true });
 
     if (error) {
       console.error('Failed to queue WhatsApp notifications:', error);
